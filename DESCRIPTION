@@ -13,6 +13,6 @@ during a `test phase' following category-labeled inputs during the `exposure pha
 for the stan program that implements the multivariate Bayesian belief-updating, (2) to summarize and visualize the prior and posterior 
 beliefs represented by the resulting fit, and (3) to generate behavioral test data under a known ground truth (e.g., in order to test the
 functions for (1) and (2), or simply in order to simulate the consequences of incremental Bayesian belief-updating.
-License: MIT + file LICENSE
+License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true
