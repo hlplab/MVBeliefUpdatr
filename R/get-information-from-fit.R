@@ -10,11 +10,11 @@ NULL
 #'
 #' DESCRIBE HERE
 #' @param fit mv-ibbu-stanfit object.
-#' @param recover_types_from Optional data.frame with type information used to recover variable values for categories, groups, and cues. See \code{\link[tidybayes]{recover_types}}.
 #' @param which Should parameters for the prior, posterior, or both be added? (default: posterior)
 #' @param draws Vector with specific draw(s) to be returned, or NULL if all draws are to be returned. (default: NULL)
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: FALSE)
 #' @param spread Should all parameters be returned in one row? (default: FALSE)
+#' @param recover_types_from Optional data.frame with type information used to recover variable values for categories, groups, and cues. See \code{\link[tidybayes]{recover_types}}.
 #'
 #' @return tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model (kappa, nu, mu, sigma, lapse_rate)
 #'
@@ -26,14 +26,18 @@ NULL
 #'
 add_ibbu_draws = function(
   fit,
-  recover_types_from = NULL,
   which = c("prior", "posterior", "both")[2],
   draws = NULL,
   summarize = FALSE,
-  spread = FALSE
+  spread = FALSE,
+  recover_types_from = NULL
 ) {
   assert_that(is.mv_ibbu_stanfit(fit))
   assert_that(which %in% c("prior", "posterior", "both"))
+  assert_that(is.null(draws) | is.numeric(draws))
+  assert_that(is.flag(summarize))
+  assert_that(is.flag(spread))
+  assert_that(any(is.null(recover_types_from), is.data.frame(recover_types_from), is.tibble(recover_types_from)))
 
   if (which == "both") {
     d.pars =

@@ -7,6 +7,7 @@ setClass(class_name,
         contains = "stanfit")
 
 is.mv_ibbu_stanfit = function(x) {
-  if (class(x) == class_name)
+  if (class(x) == "stanfit") warning("Accepting stanfit as valid class. This might change in the future.")
+  if (class(x) %in% c(class_name, "stanfit"))
     return(TRUE) else return(FALSE)
 }
