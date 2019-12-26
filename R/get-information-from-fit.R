@@ -2,7 +2,7 @@
 #' @importFrom tidybayes spread_draws recover_types
 #' @importFrom dplyr %>% mutate summarise
 #' @importFrom tidyr spread gather unite
-#' @importFrom tibble tibble
+#' @importFrom tibble tibble is.tibble
 #' @importFrom rlang !! !!! sym syms expr
 NULL
 
