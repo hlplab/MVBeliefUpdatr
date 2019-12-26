@@ -1,4 +1,5 @@
-#' @import assertthat magrittr purrr
+#' @import assertthat purrr
+#' @importFrom magrittr %<>%
 #' @importFrom tidybayes spread_draws recover_types
 #' @importFrom dplyr %>% mutate summarise
 #' @importFrom tidyr spread gather unite
@@ -37,9 +38,9 @@ add_ibbu_draws = function(
   assert_that(is.null(draws) | is.numeric(draws))
   assert_that(is.flag(summarize))
   assert_that(is.flag(spread))
-  assert_that(any(is.null(recover_types_from), is.data.frame(recover_types_from), tibble::is_tibble(recover_types_from)))
+  assert_that(any(is.null(recover_types_from), is.data.frame(recover_types_from), is_tibble(recover_types_from)))
 
-  if (!is.null(recover_types_from)) fit %<>% recover_types(recover_types_from)
+  if (!is.null(recover_types_from)) fit %<>% tidybayes::recover_types(recover_types_from)
   if (which == "both") {
     d.pars =
       rbind(

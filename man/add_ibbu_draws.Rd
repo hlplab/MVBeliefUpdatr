@@ -6,17 +6,15 @@
 \usage{
 add_ibbu_draws(
   fit,
-  recover_types_from = NULL,
   which = c("prior", "posterior", "both")[2],
   draws = NULL,
   summarize = FALSE,
-  spread = FALSE
+  spread = FALSE,
+  recover_types_from = NULL
 )
 }
 \arguments{
 \item{fit}{mv-ibbu-stanfit object.}
-
-\item{recover_types_from}{Optional data.frame with type information used to recover variable values for categories, groups, and cues. See \code{\link[tidybayes]{recover_types}}.}
 
 \item{which}{Should parameters for the prior, posterior, or both be added? (default: posterior)}
 
@@ -25,6 +23,8 @@ add_ibbu_draws(
 \item{summarize}{Should the mean of the draws be returned instead of all of the draws? (default: FALSE)}
 
 \item{spread}{Should all parameters be returned in one row? (default: FALSE)}
+
+\item{recover_types_from}{Optional data.frame with type information used to recover variable values for categories, groups, and cues. See \code{\link[tidybayes]{recover_types}}.}
 }
 \value{
 tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model (kappa, nu, mu, sigma, lapse_rate)
