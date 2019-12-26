@@ -1,7 +1,8 @@
 #' @import assertthat
-#' @importFrom tidybayes spread_draws
+#' @importFrom tidybayes spread_draws recover_types
 #' @importFrom dplyr %>% mutate summarise
 #' @importFrom tidyr spread gather unite
+#' @importFrom tibble tibble
 #' @importFrom rlang !! !!! sym syms expr
 NULL
 
@@ -9,6 +10,7 @@ NULL
 #'
 #' DESCRIBE HERE
 #' @param fit mv-ibbu-stanfit object.
+#' @param recover_types_from Optional data.frame with type information used to recover variable values for categories, groups, and cues. See \code{\link[tidybayes]{recover_types}}.
 #' @param which Should parameters for the prior, posterior, or both be added? (default: posterior)
 #' @param draws Vector with specific draw(s) to be returned, or NULL if all draws are to be returned. (default: NULL)
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: FALSE)
@@ -24,10 +26,11 @@ NULL
 #'
 add_ibbu_draws = function(
   fit,
+  recover_types_from = NULL,
   which = c("prior", "posterior", "both")[2],
   draws = NULL,
   summarize = FALSE,
-  spread = TRUE
+  spread = FALSE
 ) {
   assert_that(is.mv_ibbu_stanfit(fit))
   assert_that(which %in% c("prior", "posterior", "both"))

@@ -6,14 +6,17 @@
 \usage{
 add_ibbu_draws(
   fit,
+  recover_types_from = NULL,
   which = c("prior", "posterior", "both")[2],
   draws = NULL,
   summarize = FALSE,
-  spread = TRUE
+  spread = FALSE
 )
 }
 \arguments{
 \item{fit}{mv-ibbu-stanfit object.}
+
+\item{recover_types_from}{Optional data.frame with type information used to recover variable values for categories, groups, and cues. See \code{\link[tidybayes]{recover_types}}.}
 
 \item{which}{Should parameters for the prior, posterior, or both be added? (default: posterior)}
 
