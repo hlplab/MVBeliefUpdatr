@@ -7,17 +7,23 @@
 #' @importFrom rlang !! !!! sym syms expr
 NULL
 
-#' Add MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) to a data.frame.
+#' Add MCMC draws of IBBU parameters to a tibble.
 #'
-#' DESCRIBE HERE
+#' Add MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) to a tibble. Both wide
+#' (wide=TRUE) or long format (wide=FALSE) can be chosen as output. By default all post-warmup draws are
+#' returned, but if summarize=TRUE then just the mean of each parameter is returned instead. Users can
+#' optionally provide a data frame with the unique values of the group, category, and cue variables (cue, cue2;
+#' for example through \code{\link[tidyr]{crossing}}). If provided, this information will be used to recover
+#' the types in the stanfit object, adding it to the resulting tibble with MCMC draws.
+#'
 #' @param fit mv-ibbu-stanfit object.
 #' @param which Should parameters for the prior, posterior, or both be added? (default: posterior)
 #' @param draws Vector with specific draw(s) to be returned, or NULL if all draws are to be returned. (default: NULL)
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: FALSE)
-#' @param spread Should all parameters be returned in one row? (default: FALSE)
-#' @param recover_types_from Optional data.frame with type information used to recover variable values for categories, groups, and cues. See \code{\link[tidybayes]{recover_types}}.
+#' @param wide Should all parameters be returned in one row? (default: FALSE)
 #'
-#' @return tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model (kappa, nu, mu, sigma, lapse_rate)
+#' @return tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
+#' (kappa, nu, mu, sigma, lapse_rate).
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -30,26 +36,23 @@ add_ibbu_draws = function(
   which = c("prior", "posterior", "both")[2],
   draws = NULL,
   summarize = FALSE,
-  spread = FALSE,
-  recover_types_from = NULL
+  wide = FALSE
 ) {
   assert_that(is.mv_ibbu_stanfit(fit))
   assert_that(which %in% c("prior", "posterior", "both"))
   assert_that(is.null(draws) | is.numeric(draws))
   assert_that(is.flag(summarize))
-  assert_that(is.flag(spread))
-  assert_that(any(is.null(recover_types_from), is.data.frame(recover_types_from), is_tibble(recover_types_from)))
+  assert_that(is.flag(wide))
 
-  if (!is.null(recover_types_from)) fit %<>% tidybayes::recover_types(recover_types_from)
   if (which == "both") {
     d.pars =
       rbind(
         add_ibbu_draws(fit = fit, which = "prior",
                           draws = if(!is.null(draws)) draws else NULL,
-                          summarize = summarize, spread = spread),
+                          summarize = summarize, wide = wide),
         add_ibbu_draws(fit = fit, which = "posterior",
                           draws = if(!is.null(draws)) draws else NULL,
-                          summarize = summarize, spread = spread)
+                          summarize = summarize, wide = wide)
       )
     return(d.pars)
   } else {
@@ -153,7 +156,7 @@ add_ibbu_draws = function(
     if (which == "prior") d.pars %<>% mutate(subject = 0)
     d.pars %<>% select(.chain, .iteration, .draw, !! rlang::sym(group), category, kappa, nu, mu, sigma, lapse_rate)
 
-    if (spread) {
+    if (wide) {
       if (which == "prior")
         d.pars %<>% gather(variable, value, c(mu, sigma))
       else
@@ -167,3 +170,9 @@ add_ibbu_draws = function(
     return(d.pars)
   }
 }
+
+
+
+
+
+
