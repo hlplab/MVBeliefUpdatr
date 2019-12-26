@@ -1,6 +1,6 @@
 #' @import assertthat
+#' @import magrittr
 #' @importFrom tidybayes spread_draws recover_types
-#' @importFrom magrittr %<>%
 #' @importFrom dplyr %>% mutate summarise
 #' @importFrom tidyr spread gather unite
 #' @importFrom tibble tibble is_tibble
