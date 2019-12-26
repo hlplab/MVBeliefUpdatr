@@ -89,7 +89,7 @@ add_ibbu_draws = function(
       { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
       { if (summarize)
         dplyr::summarise(.,
-                         .chain = 0, .iteration = 0, .draw = 0,
+                         .chain = "all", .iteration = "all", .draw = "all",
                          lapse_rate = mean(lapse_rate)
         ) else . } %>%
       left_join(kappa_nu %>%
@@ -100,7 +100,7 @@ add_ibbu_draws = function(
         ) %>%
         { if (summarize)
           dplyr::summarise(.,
-                           .chain = 0, .iteration = 0, .draw = 0,
+                           .chain = "all", .iteration = "all", .draw = "all",
                            kappa = mean(kappa),
                            nu = mean(nu)
           ) else . } %>%
@@ -117,7 +117,7 @@ add_ibbu_draws = function(
               dplyr::summarise(., !! rlang::sym(mu) := mean(!! rlang::sym(mu))
               ) %>%
               mutate(.,
-                     .chain = 0, .iteration = 0, .draw = 0
+                     .chain = "all", .iteration = "all", .draw = "all"
               ) else . } %>%
           group_by(.chain, .iteration, .draw, !!! rlang::syms(pars.index)) %>%
           summarise(mu = list(c((!! rlang::sym(mu)))))
@@ -133,10 +133,15 @@ add_ibbu_draws = function(
               dplyr::summarise(., !! rlang::sym(sigma) := mean(!! rlang::sym(sigma))
               ) %>%
               mutate(.,
-                     .chain = 0, .iteration = 0, .draw = 0
+                     .chain = "all", .iteration = "all", .draw = "all"
               ) else . } %>%
           group_by(.chain, .iteration, .draw, !!! rlang::syms(pars.index)) %>%
-          summarise(sigma = list(matrix((!! rlang::sym(sigma)), byrow = T, nrow = sqrt(length((!! rlang::sym(sigma)))))))
+          summarise(sigma =
+                      list(
+                        matrix((!! rlang::sym(sigma)),
+                               dimnames = list(unique(cue), unique(cue2)),
+                               byrow = T,
+                               nrow = sqrt(length((!! rlang::sym(sigma)))))))
       )
 
     # Make sure order of variables is identical for prior or posterior
