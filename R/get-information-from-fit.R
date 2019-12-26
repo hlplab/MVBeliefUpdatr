@@ -120,7 +120,11 @@ add_ibbu_draws = function(
                      .chain = "all", .iteration = "all", .draw = "all"
               ) else . } %>%
           group_by(.chain, .iteration, .draw, !!! rlang::syms(pars.index)) %>%
-          summarise(mu = list(c((!! rlang::sym(mu)))))
+          summarise(mu = list(
+            matrix((!! rlang::sym(mu)),
+                   dimnames = list(unique(cue), NULL),
+                   byrow = T,
+                   nrow = length((!! rlang::sym(mu))))))
       ) %>%
       # Join in sigma
       left_join(
