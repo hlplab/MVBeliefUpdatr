@@ -166,16 +166,20 @@ add_ibbu_draws = function(
                                nrow = sqrt(length((!! rlang::sym(sigma)))))))
       )
 
-    # Make sure order of variables is identical for prior or posterior
-    # (facilitates processing of the output of this function)
-    if (which == "prior") d.pars %<>% mutate(subject = 0)
-    d.pars %<>% select(.chain, .iteration, .draw, !! rlang::sym(group), category, kappa, nu, M, S, lapse_rate)
+    # Make sure order of variables is identical for prior or posterior (facilitates processing of the
+    # output of this function). For this we first add the group variable as a column if we're dealing
+    # with the prior (which has no group variable since it's the same across groups). Then we sort the
+    # columns.
+    if (which == "prior") d.pars %<>% mutate((!! rlang::sym(group)) := 0)
+    d.pars %<>% select(.chain, .iteration, .draw,
+                       !! rlang::sym(group), !! rlang::sym(category),
+                       kappa, nu, M, S, lapse_rate)
 
     if (wide) {
       if (which == "prior")
-        d.pars %<>% gather(variable, value, c(mu, sigma))
+        d.pars %<>% gather(variable, value, c(M, S))
       else
-        d.pars %<>% gather(variable, value, c(kappa, nu, mu, sigma))
+        d.pars %<>% gather(variable, value, c(kappa, nu, M, S))
 
       d.pars %<>%
         unite(temp, !!! rlang::syms(pars.index), variable) %>%
