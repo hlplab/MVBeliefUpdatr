@@ -48,8 +48,8 @@ plot_ibbu_test_categorization = function(
   assert_that(is.mv_ibbu_stanfit(fit))
   assert_that(is.flag(summarize))
   assert_that(is.null(n.draws) | is.count(n.draws))
-  assert_that(is.null(confidence.intervals) |
-                all(is.numeric(confidence.intervals),
+  assert_that(is.null(confidence.interval) |
+                all(is.numeric(confidence.interval),
                     length(confidence.interval) == 4,
                     all(between(confidence.interval, 0, 1))),
               msg = "Confidence intervals must be NULL (if not CIs are desired) or a vector of four probabilities.")
