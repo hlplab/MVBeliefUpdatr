@@ -43,9 +43,10 @@ plot_ibbu_test_categorization = function(
   n.draws = NULL,
   confidence.interval = c(.025, .25, .75, .975),
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
-  sort.by = 0
+  sort.by = "prior"
 ) {
   assert_that(is.mv_ibbu_stanfit(fit))
+  assert_that(!is.null(fit.input))
   assert_that(is.flag(summarize))
   assert_that(is.null(n.draws) | is.count(n.draws))
   assert_that(is.null(confidence.interval) |
@@ -53,7 +54,6 @@ plot_ibbu_test_categorization = function(
                     length(confidence.interval) == 4,
                     all(between(confidence.interval, 0, 1))),
               msg = "Confidence intervals must be NULL (if not CIs are desired) or a vector of four probabilities.")
-  assert_that(is.null(group.ids) | is.numeric(group.ids))
   assert_that(is.null(group.labels) | is.character(group.labels))
   assert_that(is.null(group.linetypes) | is.numeric(group.linetypes))
   assert_that(is.null(sort.by) | length(sort.by) == 1)
@@ -72,7 +72,7 @@ plot_ibbu_test_categorization = function(
 
   # If group.ids are NULL set them to the levels of groups found in the extraction
   # of posteriors from fit
-  if (is.null(group.ids))  group.ids = unique(d.pars$group)
+  if (is.null(group.ids))  group.ids = levels(d.pars$group)
   assert_that(all(group.ids %in% unique(d.pars$group)),
               msg = "Some group.ids were not found in the stanfit object.")
   assert_that(sort.by %in% group.ids,
@@ -113,7 +113,7 @@ plot_ibbu_test_categorization = function(
   d.pars %<>%
     # Write a categorization function for each draw
     group_by(group, .draw) %>%
-    do(f = get_categorization_function( #  get_categorization_function_from_ibbu_draws(., logit = T))
+    do(f = get_categorization_function(
       Ms = .$M,
       Ss = .$S,
       kappas = .$kappa,
@@ -178,7 +178,7 @@ plot_ibbu_test_categorization = function(
 
   p = d.pars %>%
     ungroup() %>%
-    mutate(group = factor(group)) %>%
+    mutate(group = factor(group, levels = group.ids)) %>%
     ggplot(aes(x = token, y = probability_cat1, color = group, linetype = group)) +
     scale_x_discrete("Test token") +
     scale_y_continuous(
@@ -279,7 +279,7 @@ get_categorization_function_from_ibbu_draws = function(fit, ...) {
 #'
 get_categorization_function = function(
   Ms, Ss, kappas, nus, lapse_rate,
-  priors = 1 / n.cat,
+  priors = rep(1 / n.cat, n.cat),
   n.cat = length(Ms),
   logit = FALSE
 ) {
@@ -292,7 +292,7 @@ get_categorization_function = function(
 
   # Get dimensions of multivariate category
   K = length(Ms[[1]])
-  assert_that(nus[[1]] < K,
+  assert_that(nus[[1]] >= K,
     msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
 
   f <- function(x) {

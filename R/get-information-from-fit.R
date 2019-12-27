@@ -59,16 +59,22 @@ add_ibbu_draws = function(
   assert_that(is.flag(summarize))
   assert_that(is.flag(wide))
 
+  category = "category"
+  group = "group"
+
   if (which == "both") {
-    d.pars =
-      rbind(
-        add_ibbu_draws(fit = fit, which = "prior",
-                          draws = if(!is.null(draws)) draws else NULL,
-                          summarize = summarize, wide = wide),
-        add_ibbu_draws(fit = fit, which = "posterior",
-                          draws = if(!is.null(draws)) draws else NULL,
-                          summarize = summarize, wide = wide)
-      )
+    d.prior = add_ibbu_draws(fit = fit, which = "prior",
+                             draws = if(!is.null(draws)) draws else NULL,
+                             summarize = summarize, wide = wide)
+    d.posterior = add_ibbu_draws(fit = fit, which = "posterior",
+                   draws = if(!is.null(draws)) draws else NULL,
+                   summarize = summarize, wide = wide)
+    d.pars = rbind(d.prior, d.posterior) %>%
+      mutate(!! rlang::sym(group) :=
+               factor(!! rlang::sym(group),
+                      levels = c(with(d.prior, levels(!! rlang::sym(group))),
+                                 with(d.posterior, levels(!! rlang::sym(group))))))
+
     return(d.pars)
   } else {
     # Parameters' names depend on whether prior or posterior is to be extracted.
@@ -79,8 +85,6 @@ add_ibbu_draws = function(
     sigma = paste0("sigma", postfix)
 
     # Variables by which parameters are indexed
-    category = "category"
-    group = "group"
     pars.index = if (which == "prior") category else c(category, group)
 
     # Get kappa and nu
@@ -170,7 +174,7 @@ add_ibbu_draws = function(
     # output of this function). For this we first add the group variable as a column if we're dealing
     # with the prior (which has no group variable since it's the same across groups). Then we sort the
     # columns.
-    if (which == "prior") d.pars %<>% mutate((!! rlang::sym(group)) := 0)
+    if (which == "prior") d.pars %<>% mutate((!! rlang::sym(group)) := factor("prior"))
     d.pars %<>% select(.chain, .iteration, .draw,
                        !! rlang::sym(group), !! rlang::sym(category),
                        kappa, nu, M, S, lapse_rate)
