@@ -1,7 +1,7 @@
 #' @import assertthat purrr
 #' @importFrom magrittr %<>%
 #' @importFrom tidybayes spread_draws recover_types
-#' @importFrom dplyr %>% mutate summarise
+#' @importFrom dplyr %>% select filter mutate summarise left_join rename group_by ungroup
 #' @importFrom tidyr spread gather unite
 #' @importFrom tibble tibble is_tibble
 #' @importFrom rlang !! !!! sym syms expr
@@ -72,7 +72,6 @@ get_group_levels = function(fit, indices = NULL) {
 }
 
 
-
 #' Add MCMC draws of IBBU parameters to a tibble.
 #'
 #' Add MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) to a tibble. Both wide
@@ -82,11 +81,16 @@ get_group_levels = function(fit, indices = NULL) {
 #' for example through \code{\link[tidyr]{crossing}}). If provided, this information will be used to recover
 #' the types in the stanfit object, adding it to the resulting tibble with MCMC draws.
 #'
+#' By default, the category means and scatter matrices are nested, rather than each of their elements being
+#' stored separately (\code{nest=TRUE}).
+#'
 #' @param fit mv-ibbu-stanfit object.
 #' @param which Should parameters for the prior, posterior, or both be added? (default: posterior)
 #' @param draws Vector with specific draw(s) to be returned, or NULL if all draws are to be returned. (default: NULL)
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: FALSE)
 #' @param wide Should all parameters be returned in one row? (default: FALSE)
+#' @param nest Should the category mean vectors and scatter matrices be nested into one cell each, or should each element
+#' be stored in a separate cell? (defaul: TRUE)
 #'
 #' @return tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
 #' (\code{kappa, nu, M, S, lapse_rate}). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
@@ -110,13 +114,16 @@ add_ibbu_draws = function(
   which = c("prior", "posterior", "both")[2],
   draws = NULL,
   summarize = FALSE,
-  wide = FALSE
+  wide = FALSE,
+  nest = TRUE
 ) {
   assert_that(is.mv_ibbu_stanfit(fit))
   assert_that(which %in% c("prior", "posterior", "both"))
-  assert_that(is.null(draws) | is.numeric(draws))
+  assert_that(any(is.null(draws), all(draws > 0)))
   assert_that(is.flag(summarize))
   assert_that(is.flag(wide))
+  assert_that(!all(wide, !nest),
+              msg = "Wide format is currently not implemented without nesting.")
 
   category = "category"
   group = "group"
@@ -146,88 +153,102 @@ add_ibbu_draws = function(
     # Variables by which parameters are indexed
     pars.index = if (which == "prior") category else c(category, group)
 
-    # Get kappa and nu
-    if (which == "prior") {
-      kappa_nu =
-        fit %>%
-        tidybayes::spread_draws(
-          !! rlang::sym(kappa),
-          !! rlang::sym(nu)
-        )
+    # Should M and S be nested?
+    if (!nest) {
+      d.pars = fit %>%
+        spread_draws(
+          { if (which == "prior") !! rlang::sym(kappa) else !! rlang::sym(kappa)[!!! rlang::syms(pars.index)]},
+          { if (which == "prior") !! rlang::sym(nu) else !! rlang::sym(nu)[!!! rlang::syms(pars.index)]},
+          !! rlang::sym(mu)[(!!! rlang::syms(pars.index)), cue],
+          !! rlang::sym(sigma)[(!!! rlang::syms(pars.index)), cue, cue2],
+          lapse_rate
+        ) %>%
+        rename_at(vars(starts_with("mu")), funs(gsub("^mu_(0|n)", "M", ., perl = T))) %>%
+        rename_at(vars(starts_with("sigma")), funs(gsub("^mu_(0|n)", "S", ., perl = T)))
     } else {
-      kappa_nu =
-        fit %>%
-        tidybayes::spread_draws(
-          (!! rlang::sym(kappa))[!!! rlang::syms(pars.index)],
-          (!! rlang::sym(nu))[!!! rlang::syms(pars.index)]
-        ) %>%
-        group_by(!!! rlang::syms(pars.index))
-    }
+      # Get kappa and nu
+      if (which == "prior") {
+        kappa_nu =
+          fit %>%
+          tidybayes::spread_draws(
+            !! rlang::sym(kappa),
+            !! rlang::sym(nu)
+          )
+      } else {
+        kappa_nu =
+          fit %>%
+          tidybayes::spread_draws(
+            (!! rlang::sym(kappa))[!!! rlang::syms(pars.index)],
+            (!! rlang::sym(nu))[!!! rlang::syms(pars.index)]
+          ) %>%
+          group_by(!!! rlang::syms(pars.index))
+      }
 
-    # Get lapse rate and join it with kappa and nu.
-    d.pars = fit %>%
-      tidybayes::spread_draws(lapse_rate) %>%
-      { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
-      { if (summarize)
-        dplyr::summarise(.,
-                         .chain = "all", .iteration = "all", .draw = "all",
-                         lapse_rate = mean(lapse_rate)
-        ) else . } %>%
-      left_join(kappa_nu %>%
-      { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
-        rename(
-          kappa = !! rlang::sym(kappa),
-          nu = !! rlang::sym(nu)
-        ) %>%
+      # Get lapse rate and join it with kappa and nu.
+      d.pars = fit %>%
+        tidybayes::spread_draws(lapse_rate) %>%
+        { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
         { if (summarize)
           dplyr::summarise(.,
                            .chain = "all", .iteration = "all", .draw = "all",
-                           kappa = mean(kappa),
-                           nu = mean(nu)
+                           lapse_rate = mean(lapse_rate)
           ) else . } %>%
-        ungroup()
-      ) %>%
-      # Join in mu
-      left_join(
-        fit %>%
-          tidybayes::spread_draws((!! rlang::sym(mu))[!!! rlang::syms(pars.index), cue]) %>%
-          { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
+        left_join(kappa_nu %>%
+        { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
+          rename(
+            kappa = !! rlang::sym(kappa),
+            nu = !! rlang::sym(nu)
+          ) %>%
           { if (summarize)
-            group_by(., !!! rlang::syms(pars.index), cue) %>%
-              # Obtain expected mean M_0 or M_N (this is not mu, although we use that name here)
-              dplyr::summarise(., !! rlang::sym(mu) := mean(!! rlang::sym(mu))
-              ) %>%
-              mutate(.,
-                     .chain = "all", .iteration = "all", .draw = "all"
-              ) else . } %>%
-          group_by(.chain, .iteration, .draw, !!! rlang::syms(pars.index)) %>%
-          summarise(M = list(
-            matrix((!! rlang::sym(mu)),
-                   dimnames = list(unique(cue), NULL),
-                   byrow = T,
-                   nrow = length((!! rlang::sym(mu))))))
-      ) %>%
-      # Join in sigma
-      left_join(
-        fit %>%
-          tidybayes::spread_draws((!! rlang::sym(sigma))[!!! rlang::syms(pars.index), cue, cue2]) %>%
-          { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
-          { if (summarize)
-            group_by(., !!! rlang::syms(pars.index), cue, cue2) %>%
-              # Obtain expected co-variance matrix S_0 or S_N (this is not sigma, although we use that name here)
-              dplyr::summarise(., !! rlang::sym(sigma) := mean(!! rlang::sym(sigma))
-              ) %>%
-              mutate(.,
-                     .chain = "all", .iteration = "all", .draw = "all"
-              ) else . } %>%
-          group_by(.chain, .iteration, .draw, !!! rlang::syms(pars.index)) %>%
-          summarise(S =
-                      list(
-                        matrix((!! rlang::sym(sigma)),
-                               dimnames = list(unique(cue), unique(cue2)),
-                               byrow = T,
-                               nrow = sqrt(length((!! rlang::sym(sigma)))))))
-      )
+            dplyr::summarise(.,
+                             .chain = "all", .iteration = "all", .draw = "all",
+                             kappa = mean(kappa),
+                             nu = mean(nu)
+            ) else . } %>%
+          ungroup()
+        ) %>%
+        # Join in mu
+        left_join(
+          fit %>%
+            tidybayes::spread_draws((!! rlang::sym(mu))[!!! rlang::syms(pars.index), cue]) %>%
+            { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
+            { if (summarize)
+              group_by(., !!! rlang::syms(pars.index), cue) %>%
+                # Obtain expected mean M_0 or M_N (this is not mu, although we use that name here)
+                dplyr::summarise(., !! rlang::sym(mu) := mean(!! rlang::sym(mu))
+                ) %>%
+                mutate(.,
+                       .chain = "all", .iteration = "all", .draw = "all"
+                ) else . } %>%
+            group_by(.chain, .iteration, .draw, !!! rlang::syms(pars.index)) %>%
+            summarise(M = list(
+              matrix((!! rlang::sym(mu)),
+                     dimnames = list(unique(cue), NULL),
+                     byrow = T,
+                     nrow = length((!! rlang::sym(mu))))))
+        ) %>%
+        # Join in sigma
+        left_join(
+          fit %>%
+            tidybayes::spread_draws((!! rlang::sym(sigma))[!!! rlang::syms(pars.index), cue, cue2]) %>%
+            { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
+            { if (summarize)
+              group_by(., !!! rlang::syms(pars.index), cue, cue2) %>%
+                # Obtain expected co-variance matrix S_0 or S_N (this is not sigma, although we use that name here)
+                dplyr::summarise(., !! rlang::sym(sigma) := mean(!! rlang::sym(sigma))
+                ) %>%
+                mutate(.,
+                       .chain = "all", .iteration = "all", .draw = "all"
+                ) else . } %>%
+            group_by(.chain, .iteration, .draw, !!! rlang::syms(pars.index)) %>%
+            summarise(S =
+                        list(
+                          matrix((!! rlang::sym(sigma)),
+                                 dimnames = list(unique(cue), unique(cue2)),
+                                 byrow = T,
+                                 nrow = sqrt(length((!! rlang::sym(sigma)))))))
+        )
+    }
 
     # Make sure order of variables is identical for prior or posterior (facilitates processing of the
     # output of this function). For this we first add the group variable as a column if we're dealing
