@@ -15,33 +15,52 @@ get_number_of_draws = function(fit) {
   return(length(fit@sim$samples[[1]][[1]]))
 }
 
-#' Get the original levels of the multivariate categories.
+#' Get or restore the original group or category levels.
 #'
 #' Checks if information is available about the original values and order of the factor levels
-#' for the categories (for which beliefs about means and covariances are inferred). If available,
-#' that information is returned.
+#' for the category variable (for which beliefs about means and covariances are inferred) or
+#' group variable (e.g., subject or exposure group), respectively. If available,
+#' that information is returned. \code{get_category_levels()} and \code{get_group_levels()} are
+#' convenience functions, calling \code{get_original_levels()}.
 #'
 #' @param fit mv-ibbu-stanfit object.
-#' @param category.indeces A vector of category indices that should be turned into the original
+#' @param variable Either \code{"category"} or \code{"group"}.
+#' @param indeces A vector of category or group indices that should be turned into the original
 #' category levels, or NULL if only the unique levels in their original order (as vector of characters)
 #' should be returned. (default: NULL)
 #'
-#' @return If no category indices are provided, the levels of the category are returned (in the
-#' original order). Otherwise a vector of the same length as \code{category.indices}
+#' @return If no category or group indices are provided, the levels of the category/group are returned (in the
+#' original order). Otherwise a vector of the same length as \code{indices}
 #'
-#' @seealso \code{\link{get_group_levels()}}
+#' @seealso
 #' @keywords TBD
 #' @examples
 #' TBD
+#' @rdname get_original_levels
 #' @export
-get_category_levels = function(fit, category.indices = NULL) {
-  if (is.null(attr(fit, "constructors")$category)) {
-    warning(paste0(class_name, " object does not contain type information about categories.
-                   Consider applying recover_types() from the tidybayes package first."))
+get_original_levels = function(fit, variable = c("category", "group"), indices = NULL) {
+  if (is.null(attr(fit, "constructors")[[!! rlang::sym(variable)]])) {
+    warning(paste0(class_name, " object does not contain type information about the ", variable,
+                   " variable. Consider applying recover_types() from the tidybayes package first."))
     return(NULL)
-  } else if (is.null(category.indices))
-      return(levels(attr(fit, "constructors")$category(c())))
-  else return(attr(fit, "constructors")$category(category.indices))
+  }
+
+  f = attr(fit, "constructors")[[!! rlang::sym(variable)]]
+
+  if (is.null(indices)) return(levels(g(c()))) else return(f(indices))
+}
+
+
+#' @rdname get_original_levels
+#' @export
+get_category_levels = function(fit, indices = NULL) {
+  return(get_original_levels(fit, "category", indices))
+}
+
+#' @rdname get_original_levels
+#' @export
+get_group_levels = function(fit, indices = NULL) {
+  return(get_original_levels(fit, "group", indices))
 }
 
 
@@ -62,7 +81,7 @@ get_category_levels = function(fit, category.indices = NULL) {
 #' @param wide Should all parameters be returned in one row? (default: FALSE)
 #'
 #' @return tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
-#' (kappa, nu, M, S, lapse_rate). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
+#' (\code{kappa, nu, M, S, lapse_rate}). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
 #' into the mean and covariance matrix, respectively. \code{M} is the mean of the multivariate normal distribution over category
 #' means mu. \code{S} is the scatter matrix that determines both the covariance of the category means mu, and the
 #' Inverse Wishart distribution over category covariance matrices Sigma.

@@ -25,7 +25,7 @@ add_ibbu_draws(
 }
 \value{
 tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
-(kappa, nu, M, S, lapse_rate). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
+(\code{kappa, nu, M, S, lapse_rate}). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
 into the mean and covariance matrix, respectively. \code{M} is the mean of the multivariate normal distribution over category
 means mu. \code{S} is the scatter matrix that determines both the covariance of the category means mu, and the
 Inverse Wishart distribution over category covariance matrices Sigma.

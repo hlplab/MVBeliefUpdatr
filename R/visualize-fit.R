@@ -113,14 +113,7 @@ plot_ibbu_test_categorization = function(
   d.pars %<>%
     # Write a categorization function for each draw
     group_by(group, .draw) %>%
-    do(f = get_categorization_function(
-      Ms = .$M,
-      Ss = .$S,
-      kappas = .$kappa,
-      nus = .$nu,
-      lapse_rate = unique(unlist(.$lapse_rate)),
-      logit = T
-    )) %>%
+    do(f = get_categorization_function_from_grouped_ibbu_draws(., logit = T)) %>%
     ungroup() %>%
     # Make as many copies of the data as there are test token (types) and label
     # each row for the test token (so that each data point can be categorized).
@@ -236,8 +229,10 @@ plot_ibbu_test_categorization = function(
 }
 
 
-
-get_categorization_function_from_ibbu_draws = function(fit, ...) {
+#' Get categorization function from grouped IBBU draws
+#'
+#' Convenience function intended for internal use.
+get_categorization_function_from_grouped_ibbu_draws = function(fit, ...) {
   get_categorization_function(
     Ms = fit$M,
     Ss = fit$S,
