@@ -39,27 +39,35 @@ get_number_of_draws = function(fit) {
 #' @rdname get_original_levels
 #' @export
 get_original_levels = function(fit, variable = c("category", "group"), indices = NULL) {
-  if (is.null(attr(fit, "constructors")[[!! rlang::sym(variable)]])) {
+  assert_that(variable %in% c("category", "group"))
+
+  if (is.null(attr(fit, "constructors")[[rlang::sym(variable)]])) {
     warning(paste0(class_name, " object does not contain type information about the ", variable,
                    " variable. Consider applying recover_types() from the tidybayes package first."))
     return(NULL)
   }
 
-  f = attr(fit, "constructors")[[!! rlang::sym(variable)]]
+  f = attr(fit, "constructors")[[rlang::sym(variable)]]
 
-  if (is.null(indices)) return(levels(g(c()))) else return(f(indices))
+  if (is.null(indices)) return(levels(f(c()))) else return(f(indices))
 }
 
 
 #' @rdname get_original_levels
 #' @export
 get_category_levels = function(fit, indices = NULL) {
+  assert_that(is.mv_ibbu_stanfit(fit))
+  assert_that(is.null(indices) | all(indices > 0))
+
   return(get_original_levels(fit, "category", indices))
 }
 
 #' @rdname get_original_levels
 #' @export
 get_group_levels = function(fit, indices = NULL) {
+  assert_that(is.mv_ibbu_stanfit(fit))
+  assert_that(is.null(indices) | all(indices > 0))
+
   return(get_original_levels(fit, "group", indices))
 }
 
