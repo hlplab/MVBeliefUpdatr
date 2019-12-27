@@ -1,4 +1,5 @@
+# use_test("compose-input-for-stan.R")
+# use_test("get-information-from-stanfit.R")
 document()
-use_test("/R/")
 devtools::test()
 

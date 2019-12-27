@@ -5,6 +5,142 @@
 #' @importFrom rlang !! !!! sym syms expr
 NULL
 
+
+#' Plot distribution of IBBU parameters.
+#'
+#' Plot distribution of post-warmup MCMC samples for all parameters representing the
+#' prior and/or posterior beliefs.
+#' XXXX ADJUST BELOW
+#' XXXX
+#' XXXX think about distribution of means and distribution of samples.
+#' XXXX
+#' If \code{summarize=TRUE}, the function marginalizes over all posterior samples. The number of samples
+#' is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
+#' samples will be used. If \code{summarize=FALSE}, separate categorization plots for all n.draws
+#' individual samples will be plotted in separate panels.
+#'
+#' @param fit mv-ibbu-stanfit object.
+#' @param fit.input Input to the mv-ibbu-stanfit object.
+#' @param n.draws Number of draws to plot (or use to calculate the CIs), or NULL if all draws are to be returned. (default: NULL)
+#' @param summarize Should one categorization function (optionally with CIs) be plotted (TRUE) or should separate
+#' unique categorization function be plotted for each MCMC draw (FALSE)? (default: FALSE)
+#' @param group.ids Vector of group IDs to be plotted or leave NULL to plot all groups. (default: NULL) It is possible
+#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
+#' @param group.labels Vector of group labels of same length as group.ids or NULL to use defaults. (default: NULL)
+#' The defaultlabels each categorization function based on whether it is showing prior or posterior categorization,
+#' and by its group ID.
+#'
+#' @return ggplot object.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+#'
+plot_ibbu_parameters = function(
+  fit,
+  which = c("prior", "posterior", "both")[3],
+  n.draws = NULL,
+  confidence.interval = c(.025, .25, .75, .975),
+  group.ids = NULL, group.labels = NULL
+) {
+  if (is.null)
+
+  fit %>%
+    add_ibbu_draws(nest = F, which = which, draws = draws) %>%
+    ggplot(aes(y = fct_rev(condition), x = condition_mean, fill = stat(abs(x) < .8))) +
+    stat_halfeyeh() +
+    geom_vline(xintercept = c(-.8, .8), linetype = "dashed") +
+    scale_fill_manual(values = c("gray80", "skyblue"))
+}
+
+#' Get categorization function
+#'
+#' Returns a categorization function for the first category, based on a set of parameters for the Normal-inverse-wishart (NIW)
+#' distribtuion. Ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
+#' element of Ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
+#'
+#' @param Ms List of IBBU-inferred means describing the multivariate normal distribution over category means.
+#' @param Ss List of IBBU-inferred scatter matrices describing the inverse Wishart distribution over category
+#' covariance matrices.
+#' @param kappas List of IBBU-inferred kappas describing the strength of the beliefs into the distribution over catgory means.
+#' @param nus List of IBBU-inferred nus describing the strength of the beliefs into the distribution over catgory covariance matrices.
+#' @param lapse_rate An IBBU-inferred lapse rate for the categorization responses.
+#' @param priors Vector of categories' prior probabilities. (default: uniform prior over categories)
+#' @param n.cat Number of categories. Is inferred from the input, but can be set manually.
+#' @param logit Should the function that is returned return log-odds (TRUE) or probabilities (FALSE)? (default: TRUE)
+#'
+#' @return A function that takes as input cue values and returns posterior probabilities of the first category,
+#' based on the posterior predictive of the cues given the (IBBU-derived parameters for the) categories' M, S,
+#' kappa, nu, and prior, as well as the lapse rate.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+#'
+get_categorization_function = function(
+  Ms, Ss, kappas, nus, lapse_rate,
+  priors = rep(1 / n.cat, n.cat),
+  n.cat = length(Ms),
+  logit = FALSE
+) {
+  assert_that(are_equal(length(Ms), length(Ss)),
+              are_equal(length(Ms), length(priors)),
+              are_equal(length(Ms), length(kappas)),
+              are_equal(length(Ms), length(nus)),
+              msg = "The number of Ms, Ss, kappas, nus, and priors must be identical.")
+  assert_that(between(lapse_rate, 0, 1))
+
+  # Get dimensions of multivariate category
+  K = length(Ms[[1]])
+  assert_that(nus[[1]] >= K,
+    msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
+
+  f <- function(x) {
+    log_p = array()
+    for (cat in 1:n.cat) {
+      log_p[cat] = mvtnorm::dmvt(x,
+                                 delta = Ms[[cat]],
+                                 sigma = Ss[[cat]] * (kappas[[cat]] + 1) / (kappas[[cat]] * (nus[[cat]] - K + 1)),
+                                 df = nus[[cat]] - K + 1,
+                                 log = TRUE)
+    }
+
+    log_p1 = exp(
+      log_p[1] + log(priors[1]) -
+        log(sum(exp(log_p) * priors
+        ))) * (1 - lapse_rate) + lapse_rate / n.cat
+
+    if (logit)
+      return(qlogis(log_p1))
+    else
+      return(log_p1)
+  }
+
+  return(f)
+}
+
+
+
+#' Get categorization function from grouped IBBU draws
+#'
+#' Convenience function intended for internal use.
+get_categorization_function_from_grouped_ibbu_draws = function(fit, ...) {
+  get_categorization_function(
+    Ms = fit$M,
+    Ss = fit$S,
+    kappas = fit$kappa,
+    nus = fit$nu,
+    lapse_rate = unique(unlist(fit$lapse_rate)),
+    ...
+  )
+}
+
+
+
 #' Plot prior and posterior categorization of test tokens.
 #'
 #' Plot both prior and posterior categorization functions, as well as their confidence intervals.
@@ -28,7 +164,7 @@ NULL
 #' @param sort_by Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
 #' from left to right). Set to 0 for sorting by prior (default). Set to NULL if no sorting is desired.
 #'
-#' @return ggplot.
+#' @return ggplot object.
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -59,8 +195,11 @@ plot_ibbu_test_categorization = function(
   assert_that(is.null(sort.by) | length(sort.by) == 1)
 
   # If n.draws is specified, get the IDs of the specific (randomly drawn n.draws) samples
-  if (!is.null(n.draws))
-    draws = sample(1:nrow(as.data.frame(fit, pars = "lapse_rate")), size = n.draws)
+  if (!is.null(n.draws)) {
+    n.all.draws = get_number_of_draws(fit)
+    assert_that(n.draws <= n.all.draws)
+    draws = sample(1:n.all.draws, size = n.draws)
+  }
 
   # Get prior and posterior parameters
   d.pars =
@@ -103,8 +242,7 @@ plot_ibbu_test_categorization = function(
   # THOUGH THERE MIGHT BE MORE ELEGANT SOLUTIONS TO THOSE LINES (SEE BELOW).
   # If you remove this line, make sure all dependencies are dealt with.
   n.tokens = nrow(test_data)
-  n.samples = if (is.null(n.draws)) get_number_of_draws(fit) else n.draws
-  # intentionally NOT named n.draws, as this is meant to also capture the case when all posterior samples are used.
+  n.draws = if (is.null(n.draws)) get_number_of_draws(fit) else n.draws
 
   if (n.samples > 500)
     cat(paste("You are marginalizing over", n.samples, "samples. This might take some time.\n"))
@@ -229,39 +367,36 @@ plot_ibbu_test_categorization = function(
 }
 
 
-#' Get categorization function from grouped IBBU draws
-#'
-#' Convenience function intended for internal use.
-get_categorization_function_from_grouped_ibbu_draws = function(fit, ...) {
-  get_categorization_function(
-    Ms = fit$M,
-    Ss = fit$S,
-    kappas = fit$kappa,
-    nus = fit$nu,
-    lapse_rate = unique(unlist(fit$lapse_rate)),
-    ...
-  )
-}
 
-#' Get categorization function
+
+#' Plot prior and/or posterior category means.
 #'
-#' Returns a categorization function for the first category, based on a set of parameters for the Normal-inverse-wishart (NIW)
-#' distribtuion. Ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
-#' element of Ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
+#' Plot prior and/or posterior category means.
+#' XXXX ADJUST BELOW
+#' XXXX
+#' XXXX think about distribution of means and distribution of samples.
+#' XXXX
+#' If \code{summarize=TRUE}, the function marginalizes over all posterior samples. The number of samples
+#' is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
+#' samples will be used. If \code{summarize=FALSE}, separate categorization plots for all n.draws
+#' individual samples will be plotted in separate panels.
 #'
-#' @param Ms List of IBBU-inferred means describing the multivariate normal distribution over category means.
-#' @param Ss List of IBBU-inferred scatter matrices describing the inverse Wishart distribution over category
-#' covariance matrices.
-#' @param kappas List of IBBU-inferred kappas describing the strength of the beliefs into the distribution over catgory means.
-#' @param nus List of IBBU-inferred nus describing the strength of the beliefs into the distribution over catgory covariance matrices.
-#' @param lapse_rate An IBBU-inferred lapse rate for the categorization responses.
-#' @param priors Vector of categories' prior probabilities. (default: uniform prior over categories)
-#' @param n.cat Number of categories. Is inferred from the input, but can be set manually.
-#' @param logit Should the function that is returned return log-odds (TRUE) or probabilities (FALSE)? (default: TRUE)
+#' @param fit mv-ibbu-stanfit object.
+#' @param fit.input Input to the mv-ibbu-stanfit object.
+#' @param n.draws Number of draws to plot (or use to calculate the CIs), or NULL if all draws are to be returned. (default: NULL)
+#' @param summarize Should one categorization function (optionally with CIs) be plotted (TRUE) or should separate
+#' unique categorization function be plotted for each MCMC draw (FALSE)? (default: FALSE)
+#' @param group.ids Vector of group IDs to be plotted or leave NULL to plot all groups. (default: NULL) It is possible
+#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
+#' @param group.labels Vector of group labels of same length as group.ids or NULL to use defaults. (default: NULL)
+#' The defaultlabels each categorization function based on whether it is showing prior or posterior categorization,
+#' and by its group ID.
+#' @param group.colors Vector of colors of same length as group.ids or NULL to use defaults. (default: NULL)
+#' @param group.linetypes Vector of linetypes of same length as group.ids or NULL to use defaults. (default: NULL)
+#' @param sort_by Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
+#' from left to right). Set to 0 for sorting by prior (default). Set to NULL if no sorting is desired.
 #'
-#' @return A function that takes as input cue values and returns posterior probabilities of the first category,
-#' based on the posterior predictive of the cues given the (IBBU-derived parameters for the) categories' M, S,
-#' kappa, nu, and prior, as well as the lapse rate.
+#' @return ggplot object.
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -269,45 +404,3 @@ get_categorization_function_from_grouped_ibbu_draws = function(fit, ...) {
 #' TBD
 #' @export
 #'
-get_categorization_function = function(
-  Ms, Ss, kappas, nus, lapse_rate,
-  priors = rep(1 / n.cat, n.cat),
-  n.cat = length(Ms),
-  logit = FALSE
-) {
-  assert_that(are_equal(length(Ms), length(Ss)),
-              are_equal(length(Ms), length(priors)),
-              are_equal(length(Ms), length(kappas)),
-              are_equal(length(Ms), length(nus)),
-              msg = "The number of Ms, Ss, kappas, nus, and priors must be identical.")
-  assert_that(between(lapse_rate, 0, 1))
-
-  # Get dimensions of multivariate category
-  K = length(Ms[[1]])
-  assert_that(nus[[1]] >= K,
-    msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
-
-  f <- function(x) {
-    log_p = array()
-    for (cat in 1:n.cat) {
-      log_p[cat] = mvtnorm::dmvt(x,
-                                 delta = Ms[[cat]],
-                                 sigma = Ss[[cat]] * (kappas[[cat]] + 1) / (kappas[[cat]] * (nus[[cat]] - K + 1)),
-                                 df = nus[[cat]] - K + 1,
-                                 log = TRUE)
-    }
-
-    log_p1 = exp(
-      log_p[1] + log(priors[1]) -
-        log(sum(exp(log_p) * priors
-        ))) * (1 - lapse_rate) + lapse_rate / n.cat
-
-    if (logit)
-      return(qlogis(log_p1))
-    else
-      return(log_p1)
-  }
-
-  return(f)
-}
-
