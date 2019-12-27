@@ -7,6 +7,14 @@
 #' @importFrom rlang !! !!! sym syms expr
 NULL
 
+get_params = function(fit) {
+  return(fit@model_pars)
+}
+
+get_number_of_draws = function(fit) {
+  return(length(fit@sim$samples[[1]][[1]]))
+}
+
 #' Add MCMC draws of IBBU parameters to a tibble.
 #'
 #' Add MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) to a tibble. Both wide
@@ -23,7 +31,14 @@ NULL
 #' @param wide Should all parameters be returned in one row? (default: FALSE)
 #'
 #' @return tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
-#' (kappa, nu, mu, sigma, lapse_rate).
+#' (kappa, nu, M, S, lapse_rate). Kappa and nu are the pseudocounts that determine the strength of the beliefs
+#' into the mean and covariance matrix, respectively. M is the mean of the multivariate normal distribution over category
+#' means mu. S is the scatter matrix that determines both the covariance of the category means mu, and the
+#' Inverse Wishart distribution over category covariance matrices Sigma.
+#'
+#' The expected value of the category mean mu is M. The expected value of the category covariance matrix Sigma
+#' is S / (nu - D - 1), where D is the dimension of the multivariate Gaussian category. For details, see
+#' Murphy (2012, p. 134).
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -123,7 +138,7 @@ add_ibbu_draws = function(
                      .chain = "all", .iteration = "all", .draw = "all"
               ) else . } %>%
           group_by(.chain, .iteration, .draw, !!! rlang::syms(pars.index)) %>%
-          summarise(mu = list(
+          summarise(M = list(
             matrix((!! rlang::sym(mu)),
                    dimnames = list(unique(cue), NULL),
                    byrow = T,
@@ -143,7 +158,7 @@ add_ibbu_draws = function(
                      .chain = "all", .iteration = "all", .draw = "all"
               ) else . } %>%
           group_by(.chain, .iteration, .draw, !!! rlang::syms(pars.index)) %>%
-          summarise(sigma =
+          summarise(S =
                       list(
                         matrix((!! rlang::sym(sigma)),
                                dimnames = list(unique(cue), unique(cue2)),
@@ -154,7 +169,7 @@ add_ibbu_draws = function(
     # Make sure order of variables is identical for prior or posterior
     # (facilitates processing of the output of this function)
     if (which == "prior") d.pars %<>% mutate(subject = 0)
-    d.pars %<>% select(.chain, .iteration, .draw, !! rlang::sym(group), category, kappa, nu, mu, sigma, lapse_rate)
+    d.pars %<>% select(.chain, .iteration, .draw, !! rlang::sym(group), category, kappa, nu, M, S, lapse_rate)
 
     if (wide) {
       if (which == "prior")
