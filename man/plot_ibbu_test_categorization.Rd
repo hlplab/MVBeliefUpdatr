@@ -14,7 +14,7 @@ plot_ibbu_test_categorization(
   group.labels = NULL,
   group.colors = NULL,
   group.linetypes = NULL,
-  sort.by = 0
+  sort.by = "prior"
 )
 }
 \arguments{
@@ -46,9 +46,9 @@ ggplot.
 }
 \description{
 Plot both prior and posterior categorization functions, as well as their confidence intervals.
-If summarize=TRUE, the function marginalizes over all posterior samples. The number of samples
+If \code{summarize=TRUE}, the function marginalizes over all posterior samples. The number of samples
 is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
-samples will be used. If summarize=FALSE, separate categorization plots for all n.draws
+samples will be used. If \code{summarize=FALSE}, separate categorization plots for all n.draws
 individual samples will be plotted in separate panels.
 }
 \examples{

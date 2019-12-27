@@ -8,9 +8,9 @@ NULL
 #' Plot prior and posterior categorization of test tokens.
 #'
 #' Plot both prior and posterior categorization functions, as well as their confidence intervals.
-#' If summarize=TRUE, the function marginalizes over all posterior samples. The number of samples
+#' If \code{summarize=TRUE}, the function marginalizes over all posterior samples. The number of samples
 #' is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
-#' samples will be used. If summarize=FALSE, separate categorization plots for all n.draws
+#' samples will be used. If \code{summarize=FALSE}, separate categorization plots for all n.draws
 #' individual samples will be plotted in separate panels.
 #'
 #' @param fit mv-ibbu-stanfit object.
@@ -170,11 +170,8 @@ plot_ibbu_test_categorization = function(
       mutate(token = factor(token, levels = token.levels))
   }
 
-  if (is.null(attr(fit, "constructors")$category(1))) {
-    category1 = "category 1"
-    warning(paste0(class_name, " object does not contain type information about the categories.
-                   Consider applying recover_types() from the tidybayes package first."))
-  } else category1 = attr(fit, "constructors")$category(1)
+  if (is.null(get_category_levels(fit)))
+    category1 = "category 1" else category1 = get_category_levels(fit, 1)
 
   p = d.pars %>%
     ungroup() %>%

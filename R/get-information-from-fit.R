@@ -15,11 +15,42 @@ get_number_of_draws = function(fit) {
   return(length(fit@sim$samples[[1]][[1]]))
 }
 
+#' Get the original levels of the multivariate categories.
+#'
+#' Checks if information is available about the original values and order of the factor levels
+#' for the categories (for which beliefs about means and covariances are inferred). If available,
+#' that information is returned.
+#'
+#' @param fit mv-ibbu-stanfit object.
+#' @param category.indeces A vector of category indices that should be turned into the original
+#' category levels, or NULL if only the unique levels in their original order (as vector of characters)
+#' should be returned. (default: NULL)
+#'
+#' @return If no category indices are provided, the levels of the category are returned (in the
+#' original order). Otherwise a vector of the same length as \code{category.indices}
+#'
+#' @seealso \code{\link{get_group_levels()}}
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+get_category_levels = function(fit, category.indices = NULL) {
+  if (is.null(attr(fit, "constructors")$category)) {
+    warning(paste0(class_name, " object does not contain type information about categories.
+                   Consider applying recover_types() from the tidybayes package first."))
+    return(NULL)
+  } else if (is.null(category.indices))
+      return(levels(attr(fit, "constructors")$category(c())))
+  else return(attr(fit, "constructors")$category(category.indices))
+}
+
+
+
 #' Add MCMC draws of IBBU parameters to a tibble.
 #'
 #' Add MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) to a tibble. Both wide
-#' (wide=TRUE) or long format (wide=FALSE) can be chosen as output. By default all post-warmup draws are
-#' returned, but if summarize=TRUE then just the mean of each parameter is returned instead. Users can
+#' (\code{wide=TRUE}) or long format (\code{wide=FALSE}) can be chosen as output. By default all post-warmup draws are
+#' returned, but if \code{summarize=TRUE} then just the mean of each parameter is returned instead. Users can
 #' optionally provide a data frame with the unique values of the group, category, and cue variables (cue, cue2;
 #' for example through \code{\link[tidyr]{crossing}}). If provided, this information will be used to recover
 #' the types in the stanfit object, adding it to the resulting tibble with MCMC draws.
@@ -31,17 +62,18 @@ get_number_of_draws = function(fit) {
 #' @param wide Should all parameters be returned in one row? (default: FALSE)
 #'
 #' @return tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
-#' (kappa, nu, M, S, lapse_rate). Kappa and nu are the pseudocounts that determine the strength of the beliefs
-#' into the mean and covariance matrix, respectively. M is the mean of the multivariate normal distribution over category
-#' means mu. S is the scatter matrix that determines both the covariance of the category means mu, and the
+#' (kappa, nu, M, S, lapse_rate). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
+#' into the mean and covariance matrix, respectively. \code{M} is the mean of the multivariate normal distribution over category
+#' means mu. \code{S} is the scatter matrix that determines both the covariance of the category means mu, and the
 #' Inverse Wishart distribution over category covariance matrices Sigma.
 #'
-#' The expected value of the category mean mu is M. The expected value of the category covariance matrix Sigma
-#' is S / (nu - D - 1), where D is the dimension of the multivariate Gaussian category. For details, see
+#' The expected value of the category mean mu is \code{M}. The expected value of the category covariance matrix Sigma
+#' is \code{S / (nu - D - 1)}, where \code{D} is the dimension of the multivariate Gaussian category. For details, see
 #' Murphy (2012, p. 134).
 #'
 #' @seealso TBD
 #' @keywords TBD
+#' @references Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
 #' @examples
 #' TBD
 #' @export

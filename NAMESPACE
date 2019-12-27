@@ -2,6 +2,7 @@
 
 export(add_ibbu_draws)
 export(get_categorization_function)
+export(get_category_levels)
 export(plot_ibbu_test_categorization)
 import(assertthat)
 import(ggplot2)

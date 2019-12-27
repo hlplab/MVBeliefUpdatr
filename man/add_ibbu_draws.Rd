@@ -25,25 +25,28 @@ add_ibbu_draws(
 }
 \value{
 tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
-(kappa, nu, M, S, lapse_rate). Kappa and nu are the pseudocounts that determine the strength of the beliefs
-into the mean and covariance matrix, respectively. M is the mean of the multivariate normal distribution over category
-means mu. S is the scatter matrix that determines both the covariance of the category means mu, and the
+(kappa, nu, M, S, lapse_rate). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
+into the mean and covariance matrix, respectively. \code{M} is the mean of the multivariate normal distribution over category
+means mu. \code{S} is the scatter matrix that determines both the covariance of the category means mu, and the
 Inverse Wishart distribution over category covariance matrices Sigma.
 
-The expected value of the category mean mu is M. The expected value of the category covariance matrix Sigma
-is S / (nu - D - 1), where D is the dimension of the multivariate Gaussian category. For details, see
+The expected value of the category mean mu is \code{M}. The expected value of the category covariance matrix Sigma
+is \code{S / (nu - D - 1)}, where \code{D} is the dimension of the multivariate Gaussian category. For details, see
 Murphy (2012, p. 134).
 }
 \description{
 Add MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) to a tibble. Both wide
-(wide=TRUE) or long format (wide=FALSE) can be chosen as output. By default all post-warmup draws are
-returned, but if summarize=TRUE then just the mean of each parameter is returned instead. Users can
+(\code{wide=TRUE}) or long format (\code{wide=FALSE}) can be chosen as output. By default all post-warmup draws are
+returned, but if \code{summarize=TRUE} then just the mean of each parameter is returned instead. Users can
 optionally provide a data frame with the unique values of the group, category, and cue variables (cue, cue2;
 for example through \code{\link[tidyr]{crossing}}). If provided, this information will be used to recover
 the types in the stanfit object, adding it to the resulting tibble with MCMC draws.
 }
 \examples{
 TBD
+}
+\references{
+Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
 }
 \seealso{
 TBD
