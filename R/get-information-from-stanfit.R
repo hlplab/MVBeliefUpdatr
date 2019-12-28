@@ -1,7 +1,7 @@
 #' @import assertthat purrr
 #' @importFrom magrittr %<>%
 #' @importFrom tidybayes spread_draws recover_types
-#' @importFrom dplyr %>% select filter mutate summarise left_join rename group_by ungroup
+#' @importFrom dplyr %>% select filter mutate summarise left_join rename rename_at group_by ungroup
 #' @importFrom tidyr spread gather unite
 #' @importFrom tibble tibble is_tibble
 #' @importFrom rlang !! !!! sym syms expr
@@ -14,6 +14,16 @@ get_params = function(fit) {
 get_number_of_draws = function(fit) {
   return(length(fit@sim$samples[[1]][[1]]))
 }
+
+get_random_draw_indices = function(fit, n.draws)
+{
+  n.all.draws = get_number_of_draws(fit)
+  assert_that(n.draws <= n.all.draws)
+
+  draws = sample(1:n.all.draws, size = n.draws)
+  return(draws)
+}
+
 
 #' Get or restore the original group or category levels.
 #'
@@ -131,10 +141,10 @@ add_ibbu_draws = function(
   if (which == "both") {
     d.prior = add_ibbu_draws(fit = fit, which = "prior",
                              draws = if(!is.null(draws)) draws else NULL,
-                             summarize = summarize, wide = wide)
+                             summarize = summarize, wide = wide, nest = nest)
     d.posterior = add_ibbu_draws(fit = fit, which = "posterior",
                    draws = if(!is.null(draws)) draws else NULL,
-                   summarize = summarize, wide = wide)
+                   summarize = summarize, wide = wide, nest = nest)
     d.pars = rbind(d.prior, d.posterior) %>%
       mutate(!! rlang::sym(group) :=
                factor(!! rlang::sym(group),
@@ -155,16 +165,28 @@ add_ibbu_draws = function(
 
     # Should M and S be nested?
     if (!nest) {
-      d.pars = fit %>%
-        spread_draws(
-          { if (which == "prior") !! rlang::sym(kappa) else !! rlang::sym(kappa)[!!! rlang::syms(pars.index)]},
-          { if (which == "prior") !! rlang::sym(nu) else !! rlang::sym(nu)[!!! rlang::syms(pars.index)]},
-          !! rlang::sym(mu)[(!!! rlang::syms(pars.index)), cue],
-          !! rlang::sym(sigma)[(!!! rlang::syms(pars.index)), cue, cue2],
-          lapse_rate
-        ) %>%
-        rename_at(vars(starts_with("mu")), funs(gsub("^mu_(0|n)", "M", ., perl = T))) %>%
-        rename_at(vars(starts_with("sigma")), funs(gsub("^mu_(0|n)", "S", ., perl = T)))
+      if (which == "prior")
+        d.pars = fit %>%
+          spread_draws(
+            !! rlang::sym(kappa),
+            !! rlang::sym(nu),
+            (!! rlang::sym(mu))[!!! rlang::syms(pars.index), cue],
+            (!! rlang::sym(sigma))[!!! rlang::syms(pars.index), cue, cue2],
+            lapse_rate
+          )
+      else
+        d.pars = fit %>%
+          spread_draws(
+            (!! rlang::sym(kappa))[!!! rlang::syms(pars.index)],
+            (!! rlang::sym(nu))[!!! rlang::syms(pars.index)],
+            (!! rlang::sym(mu))[!!! rlang::syms(pars.index), cue],
+            (!! rlang::sym(sigma))[!!! rlang::syms(pars.index), cue, cue2],
+            lapse_rate
+          )
+      d.pars %<>%
+        rename_at(vars(ends_with(postfix)), funs(sub(postfix, "", .))) %>%
+        rename(M = mu, S = sigma)
+    # If nesting is the goal:
     } else {
       # Get kappa and nu
       if (which == "prior") {
@@ -257,7 +279,8 @@ add_ibbu_draws = function(
     if (which == "prior") d.pars %<>% mutate((!! rlang::sym(group)) := factor("prior"))
     d.pars %<>% select(.chain, .iteration, .draw,
                        !! rlang::sym(group), !! rlang::sym(category),
-                       kappa, nu, M, S, lapse_rate)
+                       # Using starts_with in order to capture case in which variables are *not* nested
+                       starts_with("kappa"), starts_with("nu"), starts_with("M"), starts_with("S"), lapse_rate)
 
     if (wide) {
       if (which == "prior")

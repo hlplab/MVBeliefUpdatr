@@ -8,13 +8,15 @@ plot_ibbu_parameters(
   fit,
   which = c("prior", "posterior", "both")[3],
   n.draws = NULL,
-  confidence.interval = c(0.025, 0.25, 0.75, 0.975),
   group.ids = NULL,
-  group.labels = NULL
+  group.labels = NULL,
+  group.colors = NULL
 )
 }
 \arguments{
 \item{fit}{mv-ibbu-stanfit object.}
+
+\item{which}{Should parameters for the prior, posterior, or both be added? (default: posterior)}
 
 \item{n.draws}{Number of draws to plot (or use to calculate the CIs), or NULL if all draws are to be returned. (default: NULL)}
 
@@ -22,13 +24,10 @@ plot_ibbu_parameters(
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}
 
 \item{group.labels}{Vector of group labels of same length as group.ids or NULL to use defaults. (default: NULL)
-The defaultlabels each categorization function based on whether it is showing prior or posterior categorization,
+The default labels each categorization function based on whether it is showing prior or posterior categorization,
 and by its group ID.}
 
-\item{fit.input}{Input to the mv-ibbu-stanfit object.}
-
-\item{summarize}{Should one categorization function (optionally with CIs) be plotted (TRUE) or should separate
-unique categorization function be plotted for each MCMC draw (FALSE)? (default: FALSE)}
+\item{group.colors}{Vector of fill colors of same length as group.ids or NULL to use defaults. (default: NULL)}
 }
 \value{
 ggplot object.
@@ -36,14 +35,6 @@ ggplot object.
 \description{
 Plot distribution of post-warmup MCMC samples for all parameters representing the
 prior and/or posterior beliefs.
-XXXX ADJUST BELOW
-XXXX
-XXXX think about distribution of means and distribution of samples.
-XXXX
-If \code{summarize=TRUE}, the function marginalizes over all posterior samples. The number of samples
-is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
-samples will be used. If \code{summarize=FALSE}, separate categorization plots for all n.draws
-individual samples will be plotted in separate panels.
 }
 \examples{
 TBD

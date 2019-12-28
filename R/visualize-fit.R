@@ -1,8 +1,10 @@
-#' @import assertthat purrr ggplot2
+#' @import assertthat purrr ggplot2 cowplot
 #' @importFrom mvtnorm dmvt
 #' @importFrom magrittr %<>%
 #' @importFrom dplyr %>% mutate summarise
 #' @importFrom rlang !! !!! sym syms expr
+#' @importFrom ggridges geom_density_ridges
+#' @importFrom forcats fct_rev
 NULL
 
 
@@ -10,25 +12,16 @@ NULL
 #'
 #' Plot distribution of post-warmup MCMC samples for all parameters representing the
 #' prior and/or posterior beliefs.
-#' XXXX ADJUST BELOW
-#' XXXX
-#' XXXX think about distribution of means and distribution of samples.
-#' XXXX
-#' If \code{summarize=TRUE}, the function marginalizes over all posterior samples. The number of samples
-#' is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
-#' samples will be used. If \code{summarize=FALSE}, separate categorization plots for all n.draws
-#' individual samples will be plotted in separate panels.
 #'
 #' @param fit mv-ibbu-stanfit object.
-#' @param fit.input Input to the mv-ibbu-stanfit object.
+#' @param which Should parameters for the prior, posterior, or both be added? (default: posterior)
 #' @param n.draws Number of draws to plot (or use to calculate the CIs), or NULL if all draws are to be returned. (default: NULL)
-#' @param summarize Should one categorization function (optionally with CIs) be plotted (TRUE) or should separate
-#' unique categorization function be plotted for each MCMC draw (FALSE)? (default: FALSE)
 #' @param group.ids Vector of group IDs to be plotted or leave NULL to plot all groups. (default: NULL) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param group.labels Vector of group labels of same length as group.ids or NULL to use defaults. (default: NULL)
-#' The defaultlabels each categorization function based on whether it is showing prior or posterior categorization,
+#' The default labels each categorization function based on whether it is showing prior or posterior categorization,
 #' and by its group ID.
+#' @param group.colors Vector of fill colors of same length as group.ids or NULL to use defaults. (default: NULL)
 #'
 #' @return ggplot object.
 #'
@@ -42,17 +35,76 @@ plot_ibbu_parameters = function(
   fit,
   which = c("prior", "posterior", "both")[3],
   n.draws = NULL,
-  confidence.interval = c(.025, .25, .75, .975),
-  group.ids = NULL, group.labels = NULL
+  group.ids = NULL, group.labels = NULL, group.colors = NULL
 ) {
-  if (is.null)
+  # If n.draws is specified, get the IDs of the specific (randomly drawn n.draws) samples
+  if (!is.null(n.draws)) draws = get_random_draw_indices(fit, n.draws)
 
-  fit %>%
-    add_ibbu_draws(nest = F, which = which, draws = draws) %>%
-    ggplot(aes(y = fct_rev(condition), x = condition_mean, fill = stat(abs(x) < .8))) +
-    stat_halfeyeh() +
-    geom_vline(xintercept = c(-.8, .8), linetype = "dashed") +
-    scale_fill_manual(values = c("gray80", "skyblue"))
+  d.pars = fit %>%
+    add_ibbu_draws(which = which, draws = draws, nest = F)
+
+  if (is.null(group.ids))  group.ids = levels(d.pars$group)
+  # Setting aes defaults
+  if(is.null(group.labels)) group.labels = paste0("posterior (", group.ids[-1], ")")
+  if(is.null(group.colors)) group.colors = rep("black", length(group.ids) - 1)
+  # If no specific color for prior was specified
+  if(length(group.labels) < length(group.ids)) group.labels = c("prior", group.labels)
+  if(length(group.colors) < length(group.ids)) group.colors = c("darkgray", group.colors)
+
+  p.M = d.pars %>%
+    ggplot(aes(y = fct_rev(category), x = M, fill = group)) +
+    ggridges::geom_density_ridges(alpha = .5, color = NA,
+                                  panel_scaling = F, scale = .95,
+                                  stat = "density", aes(height = ..density..)) +
+    scale_x_continuous("Mean of category means") +
+    scale_y_discrete("Category") +
+    scale_fill_manual(
+      "Group",
+      breaks = group.ids,
+      labels = group.labels,
+      values = group.colors
+    ) +
+    facet_grid(~ cue) +
+    theme_bw() + theme(legend.position = "top")
+  legend = cowplot::get_legend(p.M)
+  p.M = p.M + theme(legend.position = "none")
+
+  p.S = p.M + aes(x = S) +
+    scale_x_continuous("Scatter matrix") +
+    facet_grid(cue2 ~ cue)
+
+  p.KN = p.M %+% (d.pars %>%
+                    ungroup() %>%
+                    select(group, category, kappa, nu) %>%
+                    gather(key = "key", value = "value", -c(group, category))) +
+    aes(x = value) +
+    scale_x_continuous("Pseudocounts") +
+    scale_y_discrete("") +
+    coord_trans(x = "log10") +
+    facet_grid(~ key)
+
+  p.LR =
+    d.pars %>%
+    ggplot(aes(x = lapse_rate)) +
+    geom_density(color = NA, fill = "darkgray", alpha = .5,
+                           stat = "density") +
+    scale_x_continuous("Lapse rate")  +
+    scale_y_discrete("") +
+    scale_fill_manual(
+      "Group",
+      breaks = group.ids,
+      labels = group.labels,
+      values = group.colors
+    ) + theme_bw() + theme(legend.position = "none")
+
+  return(
+    cowplot::plot_grid(
+      plotlist = list(
+        legend,
+        cowplot::plot_grid(plotlist = list(p.M, p.KN), nrow = 1),
+        cowplot::plot_grid(plotlist = list(p.S, p.LR), nrow = 1, rel_widths = c(2,1))),
+      rel_heights = c(.05, .35, .6), nrow = 3, axis = "lrtb")
+  )
 }
 
 #' Get categorization function
@@ -157,7 +209,7 @@ get_categorization_function_from_grouped_ibbu_draws = function(fit, ...) {
 #' @param group.ids Vector of group IDs to be plotted or leave NULL to plot all groups. (default: NULL) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param group.labels Vector of group labels of same length as group.ids or NULL to use defaults. (default: NULL)
-#' The defaultlabels each categorization function based on whether it is showing prior or posterior categorization,
+#' The default labels each categorization function based on whether it is showing prior or posterior categorization,
 #' and by its group ID.
 #' @param group.colors Vector of colors of same length as group.ids or NULL to use defaults. (default: NULL)
 #' @param group.linetypes Vector of linetypes of same length as group.ids or NULL to use defaults. (default: NULL)
@@ -195,11 +247,7 @@ plot_ibbu_test_categorization = function(
   assert_that(is.null(sort.by) | length(sort.by) == 1)
 
   # If n.draws is specified, get the IDs of the specific (randomly drawn n.draws) samples
-  if (!is.null(n.draws)) {
-    n.all.draws = get_number_of_draws(fit)
-    assert_that(n.draws <= n.all.draws)
-    draws = sample(1:n.all.draws, size = n.draws)
-  }
+  if (!is.null(n.draws)) draws = get_random_draw_indices(fit, n.draws)
 
   # Get prior and posterior parameters
   d.pars =
@@ -208,6 +256,11 @@ plot_ibbu_test_categorization = function(
                    summarize = F,
                    wide = F,
                    draws = if (!is.null(n.draws)) draws else NULL)
+
+  # Now set n.draws to the number of MCMC samples
+  n.draws = if (is.null(n.draws)) get_number_of_draws(fit) else n.draws
+  if (n.draws > 500)
+    message(paste("Marginalizing over", n.draws, "MCMC samples. This might take some time.\n"))
 
   # If group.ids are NULL set them to the levels of groups found in the extraction
   # of posteriors from fit
@@ -242,10 +295,6 @@ plot_ibbu_test_categorization = function(
   # THOUGH THERE MIGHT BE MORE ELEGANT SOLUTIONS TO THOSE LINES (SEE BELOW).
   # If you remove this line, make sure all dependencies are dealt with.
   n.tokens = nrow(test_data)
-  n.draws = if (is.null(n.draws)) get_number_of_draws(fit) else n.draws
-
-  if (n.samples > 500)
-    cat(paste("You are marginalizing over", n.samples, "samples. This might take some time.\n"))
 
   # THIS PART (RATHER THAN THE SUMMARY BELOW) SEEMS TO BE THE SLOW PART.
   d.pars %<>%
