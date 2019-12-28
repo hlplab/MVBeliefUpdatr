@@ -127,7 +127,6 @@ add_ibbu_draws = function(
   wide = FALSE,
   nest = TRUE
 ) {
-  assert_that(is.mv_ibbu_stanfit(fit))
   assert_that(which %in% c("prior", "posterior", "both"))
   assert_that(any(is.null(draws), all(draws > 0)))
   assert_that(is.flag(summarize))
@@ -153,6 +152,8 @@ add_ibbu_draws = function(
 
     return(d.pars)
   } else {
+    assert_that(is.mv_ibbu_stanfit(fit))
+
     # Parameters' names depend on whether prior or posterior is to be extracted.
     postfix = if (which == "prior") "_0" else "_n"
     kappa = paste0("kappa", postfix)
@@ -280,7 +281,8 @@ add_ibbu_draws = function(
     d.pars %<>% select(.chain, .iteration, .draw,
                        !! rlang::sym(group), !! rlang::sym(category),
                        # Using starts_with in order to capture case in which variables are *not* nested
-                       starts_with("kappa"), starts_with("nu"), starts_with("M"), starts_with("S"), lapse_rate)
+                       starts_with("kappa"), starts_with("nu"), starts_with("M"), starts_with("S"),
+                       lapse_rate)
 
     if (wide) {
       if (which == "prior")
@@ -293,7 +295,8 @@ add_ibbu_draws = function(
         spread(temp, value)
     }
 
-    return(d.pars)
+    return(d.pars %>%
+             ungroup())
   }
 }
 

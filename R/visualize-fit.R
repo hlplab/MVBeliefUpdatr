@@ -1,11 +1,34 @@
 #' @import assertthat purrr ggplot2 cowplot
 #' @importFrom mvtnorm dmvt
-#' @importFrom magrittr %<>%
+#' @importFrom magrittr %<>% %T>%
 #' @importFrom dplyr %>% mutate summarise
 #' @importFrom rlang !! !!! sym syms expr
+#' @importFrom tidybayes mean_hdi
 #' @importFrom ggridges geom_density_ridges
 #' @importFrom forcats fct_rev
+#' @importFrom scales trans_new
 NULL
+
+
+signed_log = function(x) sign(x)*log10(abs(x))
+signed_log_trans <- function(){
+  scales::trans_new("signed_log",
+                    transform=function(x) sign(x)*log10(abs(x)),
+                    inverse=function(x) sign(x)*10^(abs(x)))
+}
+
+
+#' Get suitable limits for coordinate system.
+#'
+#' Useful for, for example, plotting of distribution.
+get_limits = function(data, measure, hdi.prob = .99) {
+  data %>%
+    mean_hdi((!! rlang::sym(measure)), .width = hdi.prob) %>%
+    ungroup() %>%
+    summarise(.lower = min(.lower),
+              .upper = max(.upper)) %>%
+    as.numeric()
+}
 
 
 #' Plot distribution of IBBU parameters.
@@ -43,15 +66,18 @@ plot_ibbu_parameters = function(
   d.pars = fit %>%
     add_ibbu_draws(which = which, draws = draws, nest = F)
 
-  if (is.null(group.ids))  group.ids = levels(d.pars$group)
+  if (missing(group.ids)) group.ids = levels(d.pars$group)
   # Setting aes defaults
-  if(is.null(group.labels)) group.labels = paste0("posterior (", group.ids[-1], ")")
-  if(is.null(group.colors)) group.colors = rep("black", length(group.ids) - 1)
+  if(missing(group.labels)) group.labels = paste0("posterior (", group.ids[-1], ")")
+  if(missing(group.colors)) group.colors = rep("black", length(group.ids) - 1)
   # If no specific color for prior was specified
   if(length(group.labels) < length(group.ids)) group.labels = c("prior", group.labels)
   if(length(group.colors) < length(group.ids)) group.colors = c("darkgray", group.colors)
 
   p.M = d.pars %>%
+    select(.draw, group, category, cue, M) %>%
+    distinct() %T>%
+    { get_limits(., "M") ->> x.limits } %>%
     ggplot(aes(y = fct_rev(category), x = M, fill = group)) +
     ggridges::geom_density_ridges(alpha = .5, color = NA,
                                   panel_scaling = F, scale = .95,
@@ -64,27 +90,49 @@ plot_ibbu_parameters = function(
       labels = group.labels,
       values = group.colors
     ) +
+    coord_cartesian(xlim = x.limits) +
     facet_grid(~ cue) +
-    theme_bw() + theme(legend.position = "top")
+    theme_bw() + theme(legend.position = "right")
   legend = cowplot::get_legend(p.M)
-  p.M = p.M + theme(legend.position = "none")
 
-  p.S = p.M + aes(x = S) +
-    scale_x_continuous("Scatter matrix") +
+  p.M = p.M + theme(legend.position = "none")
+  p.S = p.M %+%
+    (d.pars %>%
+       select(.draw, group, category, cue, cue2, S) %>%
+       distinct() %T>%
+       { get_limits(., "S") ->> x.limits }) +
+    aes(x = S) +
+    scale_x_continuous("Scatter matrix",
+                       breaks = 10^(
+                         seq(
+                           ceiling(signed_log(min(x.limits))),
+                           floor(signed_log(max(x.limits)))
+                         ))) +
+    coord_trans(x = "signed_log", limx = x.limits) +
     facet_grid(cue2 ~ cue)
 
-  p.KN = p.M %+% (d.pars %>%
-                    ungroup() %>%
-                    select(group, category, kappa, nu) %>%
-                    gather(key = "key", value = "value", -c(group, category))) +
+  p.KN = p.M %+%
+    (d.pars %>%
+       select(.draw, group, category, kappa, nu) %>%
+       distinct() %>%
+       gather(key = "key", value = "value", -c(.draw, group, category)) %T>%
+       { get_limits(., "value") ->> x.limits } ) +
     aes(x = value) +
-    scale_x_continuous("Pseudocounts") +
+    scale_x_continuous("Pseudocounts",
+                       breaks = 10^(
+                         seq(
+                           ceiling(log10(min(x.limits))),
+                           floor(log10(max(x.limits)))
+                         ))) +
     scale_y_discrete("") +
-    coord_trans(x = "log10") +
+    coord_trans(x = "log10", limx = x.limits) +
     facet_grid(~ key)
 
   p.LR =
     d.pars %>%
+    select(.draw, lapse_rate) %>%
+    distinct() %T>%
+    { get_limits(., "lapse_rate") ->> x.limits } %>%
     ggplot(aes(x = lapse_rate)) +
     geom_density(color = NA, fill = "darkgray", alpha = .5,
                            stat = "density") +
@@ -95,15 +143,20 @@ plot_ibbu_parameters = function(
       breaks = group.ids,
       labels = group.labels,
       values = group.colors
-    ) + theme_bw() + theme(legend.position = "none")
+    ) +
+    coord_cartesian(xlim = x.limits) +
+    theme_bw() + theme(legend.position = "none")
 
+  K = length(unique(d.pars$cue))
   return(
     cowplot::plot_grid(
-      plotlist = list(
-        legend,
-        cowplot::plot_grid(plotlist = list(p.M, p.KN), nrow = 1),
-        cowplot::plot_grid(plotlist = list(p.S, p.LR), nrow = 1, rel_widths = c(2,1))),
-      rel_heights = c(.05, .35, .6), nrow = 3, axis = "lrtb")
+        cowplot::plot_grid(plotlist = list(p.M, p.KN), nrow = 1, rel_widths = c(K,2)),
+        cowplot::plot_grid(plotlist = list(
+          p.S,
+          cowplot::plot_grid(plotlist = list(legend, p.LR),
+                             nrow = 2, rel_heights = c(.45, .55))),
+          nrow = 1, rel_widths = c(K,1)),
+      rel_heights = c(1, K), nrow = 2, axis = "lrtb")
   )
 }
 

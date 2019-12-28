@@ -14,7 +14,8 @@ fit = readRDS(file = "./tests/test models/IBBU_mv_fit_2 exposure groups_2 catego
 
 # class(fit) = "mv_ibbu_stanfit"
 categories = c("s", "sh")
-groups = c("SH-BIAS", "SS-BIAS", "Control")
+groups = c("SH-BIAS", "SS-BIAS")
+# groups = c("SH-BIAS", "SS-BIAS", "Control")
 cues = c("PC1", "PC2")
 d = tidyr::crossing(
   category = factor(categories, levels = categories),
@@ -30,5 +31,4 @@ fit %>%
 
 plot_ibbu_parameters(fit, which = "prior", n.draws = 5)
 plot_ibbu_parameters(fit, which = "both", n.draws = 5,
-                     group.colors = c("darkgray", "blue", "red", "black"))
-
+                     group.colors = c("darkgray", "red", "blue"))
