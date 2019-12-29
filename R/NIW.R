@@ -37,7 +37,7 @@ get_expected_category_statistics = function(x, statistic = c("mu", "Sigma"), cat
   assert_that(is.character(group) | is.numeric(group))
 
   x %<>%
-    filter(group == group, category == category)
+    filter(group %in% group, category %in% category)
 
   if (statistic == "mean") {
     x %<>%
