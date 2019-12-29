@@ -6,6 +6,7 @@ devtools::test()
 
 
 source("./R/class.R")
+source("./R/NIW.R")
 source("./R/get-information-from-stanfit.R")
 source("./R/visualize-fit.R")
 

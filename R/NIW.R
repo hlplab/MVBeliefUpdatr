@@ -26,36 +26,43 @@ NULL
 #' TBD
 #' @rdname get_expected_category_statistics
 #' @export
-get_expected_mu = function(x, category, group) {
+get_expected_category_statistics = function(x, statistic = c("mu", "Sigma"), category, group) {
   assert_that(is.mv_ibbu_stanfit(x) | is.mv_ibbu_MCMC(x, nested = T, long = T))
-  assert_that(is.character(category) | is.numeric(category))
-  assert_that(is.character(group) | is.numeric(group))
-
   if (is.mv_ibbu_stanfit(x))
     x = add_ibbu_draws(x, which = "both", wide = F, nest = T)
 
-  x %<>%
-    filter(group == group, category == category) %>%
-    summarise(mu.mean = list(M %>% purrr::reduce(`+`) / length(M)))
+  if (is.null(category)) category = unique(x$category)
+  if (is.null(group)) group = unique(x$group)
+  assert_that(is.character(category) | is.numeric(category))
+  assert_that(is.character(group) | is.numeric(group))
 
-  return(x$mu.mean[[1]])
+  x %<>%
+    filter(group == group, category == category)
+
+  if (statistic == "mean") {
+    x %<>%
+    summarise(mu.mean = list(M %>% purrr::reduce(`+`) / length(M)))
+  } else {
+    D = dim(x$S[[1]])[1]
+    x %<>%
+      mutate(Sigma = map2(S, nu, ~ .x / (.y - D - 1))) %>%
+      summarise(Sigma.mean = list(Sigma %>% purrr::reduce(`+`) / length(Sigma)))
+  }
+
+  # If just one category and group was requested, just return that object, rather
+  # than the tibble
+  if (nrow(x) == 1) x = x[1,1][[1]][[1]]
+  return(x)
+}
+
+#' @rdname get_expected_category_statistics
+#' @export
+get_expected_mu = function(x, category, group) {
+  return(get_expected_category_statistics(x, "mean", category, group))
 }
 
 #' @rdname get_expected_category_statistics
 #' @export
 get_expected_sigma = function(x, category, group) {
-  assert_that(is.mv_ibbu_stanfit(x) | is.mv_ibbu_MCMC(x, nested = T, long = T))
-  assert_that(is.character(category) | is.numeric(category))
-  assert_that(is.character(group) | is.numeric(group))
-
-  if (is.mv_ibbu_stanfit(x))
-    x = add_ibbu_draws(x, which = "both", wide = F, nest = T)
-
-  D = dim(g$S[[1]])[1]
-  x %<>%
-    filter(group == group, category == category) %>%
-    mutate(Sigma = map2(S, nu, ~ .x / (.y - D - 1))) %>%
-    summarise(Sigma.mean = list(Sigma %>% purrr::reduce(`+`) / length(Sigma)))
-
-  return(x$Sigma.mean[[1]])
+  return(get_expected_category_statistics(x, "Sigma", category, group))
 }

@@ -1,4 +1,5 @@
 #' @import assertthat purrr ggplot2 cowplot
+#' @importFrom ellipse ellipse
 #' @importFrom mvtnorm dmvt
 #' @importFrom magrittr %<>% %T>%
 #' @importFrom dplyr %>% mutate summarise
@@ -10,7 +11,19 @@
 NULL
 
 
+#' Signed log transform and function.
+#'
+#' Makes it possible to use log-stepped scales or coordinate systems even when negative values
+#' are included in the data. E.g., in `coord_trans(x = "signed_log")`.
+#'
+#' @examples
+#' TBD
+#' @rdname signed_log
+#' @export
 signed_log = function(x) sign(x)*log10(abs(x))
+
+#' @rdname signed_log
+#' @export
 signed_log_trans <- function(){
   scales::trans_new("signed_log",
                     transform=function(x) sign(x)*log10(abs(x)),
@@ -21,6 +34,7 @@ signed_log_trans <- function(){
 #' Get suitable limits for coordinate system.
 #'
 #' Useful for, for example, plotting of distribution.
+#' @noRd
 get_limits = function(data, measure, hdi.prob = .99) {
   data %>%
     mean_hdi((!! rlang::sym(measure)), .width = hdi.prob) %>%
@@ -185,7 +199,6 @@ plot_ibbu_parameters = function(
 #' @examples
 #' TBD
 #' @export
-#'
 get_categorization_function = function(
   Ms, Ss, kappas, nus, lapse_rate,
   priors = rep(1 / n.cat, n.cat),
@@ -233,6 +246,7 @@ get_categorization_function = function(
 #' Get categorization function from grouped IBBU draws
 #'
 #' Convenience function intended for internal use.
+#' @noRd
 get_categorization_function_from_grouped_ibbu_draws = function(fit, ...) {
   get_categorization_function(
     Ms = fit$M,
@@ -260,6 +274,8 @@ get_categorization_function_from_grouped_ibbu_draws = function(fit, ...) {
 #' @param summarize Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
 #' unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `FALSE`)
 #' @param n.draws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
+#' @param confidence.intervals The two confidence intervals that should be plotted (using `geom_ribbon`) around the mean.
+#' (default: `c(.66, .95)`)
 #' @param group.ids Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param group.labels Vector of group labels of same length as `group.ids` or `NULL` to use defaults. (default: `NULL`)
@@ -284,7 +300,7 @@ plot_ibbu_test_categorization = function(
   which = c("prior", "posterior", "both")[3],
   summarize = T,
   n.draws = NULL,
-  confidence.interval = c(.025, .25, .75, .975),
+  confidence.intervals = c(.66, .95),
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
   sort.by = "prior"
 ) {
@@ -292,14 +308,21 @@ plot_ibbu_test_categorization = function(
   assert_that(!is.null(fit.input))
   assert_that(is.flag(summarize))
   assert_that(is.null(n.draws) | is.count(n.draws))
-  assert_that(is.null(confidence.interval) |
-                all(is.numeric(confidence.interval),
-                    length(confidence.interval) == 4,
-                    all(between(confidence.interval, 0, 1))),
-              msg = "Confidence intervals must be NULL (if not CIs are desired) or a vector of four probabilities.")
+  assert_that(is.null(confidence.intervals) |
+                all(is.numeric(confidence.intervals),
+                    length(confidence.intervals) == 2,
+                    all(between(confidence.intervals, 0, 1))),
+              msg = "Confidence intervals must be NULL (if not CIs are desired) or a vector of two probabilities.")
   assert_that(is.null(group.labels) | is.character(group.labels))
   assert_that(is.null(group.linetypes) | is.numeric(group.linetypes))
   assert_that(is.null(sort.by) | length(sort.by) == 1)
+
+  # Set confidence intervals
+  if (!is.null(confidence.intervals)) {
+    ci.offset = (1 - confidence.intervals) / 2
+    confidence.intervals = c(ci.offset, 1-ci.offset)
+  }
+  confidence.intervals = sort(confidence.intervals)
 
   # If n.draws is specified, get the IDs of the specific (randomly drawn n.draws) samples
   if (!is.null(n.draws)) draws = get_random_draw_indices(fit, n.draws)
@@ -384,10 +407,10 @@ plot_ibbu_test_categorization = function(
       group_by(group, token, token.cues) %>%
       summarise_all(.funs = list(
         # na.rm = T excludes cases that might result from estimated probabilities of 0 and 1 (infinities in log-odds)
-        y.outer.min = function(x) plogis(quantile(x, confidence.interval[1], na.rm = T)),
-        y.outer.max = function(x) plogis(quantile(x, confidence.interval[4], na.rm = T)),
-        y.inner.min = function(x) plogis(quantile(x, confidence.interval[2], na.rm = T)),
-        y.inner.max = function(x) plogis(quantile(x, confidence.interval[3], na.rm = T)),
+        y.outer.min = function(x) plogis(quantile(x, confidence.intervals[1], na.rm = T)),
+        y.outer.max = function(x) plogis(quantile(x, confidence.intervals[4], na.rm = T)),
+        y.inner.min = function(x) plogis(quantile(x, confidence.intervals[2], na.rm = T)),
+        y.inner.max = function(x) plogis(quantile(x, confidence.intervals[3], na.rm = T)),
         probability_cat1 = function(x) plogis(mean(x, na.rm = T)))
       )
   } else {
@@ -430,7 +453,7 @@ plot_ibbu_test_categorization = function(
       values = group.linetypes
     )
 
-  if (summarize & !is.null(confidence.interval)) {
+  if (summarize & !is.null(confidence.intervals)) {
     p = p +
       geom_ribbon(
         aes(x = as.numeric(token), ymin = y.outer.min, ymax = y.outer.max, fill = group),
@@ -452,9 +475,9 @@ plot_ibbu_test_categorization = function(
       annotate(geom = "text",
                x = mean(as.numeric(as.character(d.pars$token)), na.rm = T),
                y = 1,
-               label = paste0((confidence.interval[4]-confidence.interval[1]) * 100,
+               label = paste0((confidence.intervals[4]-confidence.intervals[1]) * 100,
                               "% and ",
-                              (confidence.interval[3]-confidence.interval[2]) * 100,
+                              (confidence.intervals[3]-confidence.intervals[2]) * 100,
                               "% CIs based on ",
                               n.draws,
                               " posterior samples.")
@@ -494,15 +517,44 @@ plot_ibbu_test_categorization = function(
 
 
 
-
-plot_ibbu_categories_2D = function(
+#' Either use ellipse or contour
+plot_expected_ibbu_categories_2D = function(
   fit,
   fit.input,
   which = c("prior", "posterior", "both")[3],
   summarize = T,
   n.draws = NULL,
-  confidence.interval = c(.025, .25, .75, .975),
+  confidence.levels = c(.05, .5, .95),
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL
 ) {
+
+
+  # ellipse approach
+  m <- c(.5, -.5)
+  sigma <- matrix(c(1,.5,.5,1), nrow=2)
+  names(confidence.levels) <- confidence.levels
+  contour_data <- ldply(confidence.levels,
+                        ellipse,
+                        x = sigma,
+                        scale = c(1, 1),  ## needed for positional matching
+                        centre = m)
+  # alternative to above: lapply and rbind instead of ldply
+  library(ggplot2)
+  ggplot(contour_data,
+         aes(x, y,
+             fill = category, color = category,
+             group= .id)) +
+    geom_path() +
+    facet_wrap(~ group)
+
+
+  # # Contour approach
+  # m <- c(.5, -.5)
+  # sigma <- matrix(c(1,.5,.5,1), nrow=2)
+  # data.grid <- expand.grid(s.1 = seq(-3, 3, length.out=200), s.2 = seq(-3, 3, length.out=200))
+  # q.samp <- cbind(data.grid, prob = mvtnorm::dmvnorm(data.grid, mean = m, sigma = sigma))
+  # ggplot(q.samp, aes(x=s.1, y=s.2, z=prob)) +
+  #   geom_contour() +
+  #   coord_fixed(xlim = c(-3, 3), ylim = c(-3, 3), ratio = 1)
 
 }

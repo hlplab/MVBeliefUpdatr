@@ -8,14 +8,32 @@
 NULL
 
 
+#' Get parameter names
+#'
+#' Get the names for all parameters in `fit`.
+#' @export
 get_params = function(fit) {
   return(fit@model_pars)
 }
 
+#' Get number of post-warmup MCMC samples
+#'
+#' Get the total number of post-warmup MCMC samples in `fit`.
+#' @export
 get_number_of_draws = function(fit) {
   return(length(fit@sim$samples[[1]][[1]]))
 }
 
+#' Get indices for random MCMC draws
+#'
+#' Returns `n.draws` indices for random post-warmup MCMC draws (without replacement) from
+#' `fit`.
+#'
+#' @param fit mv-ibbu-stanfit object.
+#' @param n.draws Number of indices to be returned. Can't be larger than total number of
+#' post-warmup samples across all MCMC chains in `fit`.
+#'
+#' @return A numeric vector.
 get_random_draw_indices = function(fit, n.draws)
 {
   n.all.draws = get_number_of_draws(fit)

@@ -10,7 +10,7 @@ plot_ibbu_test_categorization(
   which = c("prior", "posterior", "both")[3],
   summarize = T,
   n.draws = NULL,
-  confidence.interval = c(0.025, 0.25, 0.75, 0.975),
+  confidence.intervals = c(0.66, 0.95),
   group.ids = NULL,
   group.labels = NULL,
   group.colors = NULL,
@@ -29,6 +29,9 @@ plot_ibbu_test_categorization(
 unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `FALSE`)}
 
 \item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
+
+\item{confidence.intervals}{The two confidence intervals that should be plotted (using `geom_ribbon`) around the mean.
+(default: `c(.66, .95)`)}
 
 \item{group.ids}{Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}
