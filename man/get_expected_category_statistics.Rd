@@ -17,7 +17,7 @@ category covariance matrix Sigma, marginalized over all MCMC samples.
 Each MCMC samples' expected value \code{E[mu] = M_n}
 (i.e, the posterior/updated mean of the mulativariate Normal over category means \code{mu}).
 Marginalizing across all MCMC samples (representing uncertainty in the true value of
-\code{M_n}), we get \deq{E\[E\[mu\]\] = mean(M_n)}.
+\code{M_n}), we get \code{E\[E\[mu\]\] = mean(M_n)}.
 
 Each MCMC samples' expected value
 \code{E[Sigma] = S_n / (nu_n - D - 1)}, where \code{S_n} is the posterior/updated scatter matrix,
