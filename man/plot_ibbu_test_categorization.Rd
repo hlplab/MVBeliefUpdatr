@@ -7,6 +7,7 @@
 plot_ibbu_test_categorization(
   fit,
   fit.input,
+  which = c("prior", "posterior", "both")[3],
   summarize = T,
   n.draws = NULL,
   confidence.interval = c(0.025, 0.25, 0.75, 0.975),
@@ -22,33 +23,35 @@ plot_ibbu_test_categorization(
 
 \item{fit.input}{Input to the mv-ibbu-stanfit object.}
 
-\item{summarize}{Should one categorization function (optionally with CIs) be plotted (TRUE) or should separate
-unique categorization function be plotted for each MCMC draw (FALSE)? (default: FALSE)}
+\item{which}{Should categorization for the prior, posterior, or both be plotted? (default: `"both"`)}
 
-\item{n.draws}{Number of draws to plot (or use to calculate the CIs), or NULL if all draws are to be returned. (default: NULL)}
+\item{summarize}{Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
+unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `FALSE`)}
 
-\item{group.ids}{Vector of group IDs to be plotted or leave NULL to plot all groups. (default: NULL) It is possible
+\item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
+
+\item{group.ids}{Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}
 
-\item{group.labels}{Vector of group labels of same length as group.ids or NULL to use defaults. (default: NULL)
+\item{group.labels}{Vector of group labels of same length as `group.ids` or `NULL` to use defaults. (default: `NULL`)
 The default labels each categorization function based on whether it is showing prior or posterior categorization,
 and by its group ID.}
 
-\item{group.colors}{Vector of colors of same length as group.ids or NULL to use defaults. (default: NULL)}
+\item{group.colors}{Vector of colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)}
 
-\item{group.linetypes}{Vector of linetypes of same length as group.ids or NULL to use defaults. (default: NULL)}
+\item{group.linetypes}{Vector of linetypes of same length as group.ids or `NULL` to use defaults. (default: `NULL`)}
 
 \item{sort_by}{Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
-from left to right). Set to 0 for sorting by prior (default). Set to NULL if no sorting is desired.}
+from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired.}
 }
 \value{
 ggplot object.
 }
 \description{
 Plot both prior and posterior categorization functions, as well as their confidence intervals.
-If \code{summarize=TRUE}, the function marginalizes over all posterior samples. The number of samples
+If `summarize=TRUE`, the function marginalizes over all posterior samples. The number of samples
 is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
-samples will be used. If \code{summarize=FALSE}, separate categorization plots for all n.draws
+samples will be used. If `summarize=FALSE`, separate categorization plots for all n.draws
 individual samples will be plotted in separate panels.
 }
 \examples{

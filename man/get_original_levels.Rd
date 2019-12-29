@@ -15,11 +15,11 @@ get_group_levels(fit, indices = NULL)
 \arguments{
 \item{fit}{mv-ibbu-stanfit object.}
 
-\item{variable}{Either \code{"category"} or \code{"group"}.}
+\item{variable}{Either "category" or "group".}
 
 \item{indeces}{A vector of category or group indices that should be turned into the original
-category levels, or NULL if only the unique levels in their original order (as vector of characters)
-should be returned. (default: NULL)}
+category levels, or `NULL` if only the unique levels in their original order (as vector of characters)
+should be returned. (default: `NULL`)}
 }
 \value{
 If no category or group indices are provided, the levels of the category/group are returned (in the
@@ -29,8 +29,8 @@ original order). Otherwise a vector of the same length as \code{indices}
 Checks if information is available about the original values and order of the factor levels
 for the category variable (for which beliefs about means and covariances are inferred) or
 group variable (e.g., subject or exposure group), respectively. If available,
-that information is returned. \code{get_category_levels()} and \code{get_group_levels()} are
-convenience functions, calling \code{get_original_levels()}.
+that information is returned. `get_category_levels()` and `get_group_levels()` are
+convenience functions, calling `get_original_levels()`.
 }
 \examples{
 TBD

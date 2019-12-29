@@ -16,16 +16,16 @@ add_ibbu_draws(
 \arguments{
 \item{fit}{mv-ibbu-stanfit object.}
 
-\item{which}{Should parameters for the prior, posterior, or both be added? (default: posterior)}
+\item{which}{Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)}
 
-\item{draws}{Vector with specific draw(s) to be returned, or NULL if all draws are to be returned. (default: NULL)}
+\item{draws}{Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)}
 
-\item{summarize}{Should the mean of the draws be returned instead of all of the draws? (default: FALSE)}
+\item{summarize}{Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)}
 
-\item{wide}{Should all parameters be returned in one row? (default: FALSE)}
+\item{wide}{Should all parameters be returned in one row? (default: `FALSE`)}
 
 \item{nest}{Should the category mean vectors and scatter matrices be nested into one cell each, or should each element
-be stored in a separate cell? (defaul: TRUE)}
+be stored in a separate cell? (defaul: `TRUE`)}
 }
 \value{
 tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
@@ -40,15 +40,15 @@ Murphy (2012, p. 134).
 }
 \description{
 Add MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) to a tibble. Both wide
-(\code{wide=TRUE}) or long format (\code{wide=FALSE}) can be chosen as output. By default all post-warmup draws are
-returned, but if \code{summarize=TRUE} then just the mean of each parameter is returned instead. Users can
-optionally provide a data frame with the unique values of the group, category, and cue variables (cue, cue2;
+(`wide=TRUE`) or long format (`wide=FALSE`) can be chosen as output. By default all post-warmup draws are
+returned, but if `summarize=TRUE` then just the mean of each parameter is returned instead. Users can
+optionally provide a data frame with the unique values of the `group`, `category`, and cue variables (`cue`, `cue2`;
 for example through \code{\link[tidyr]{crossing}}). If provided, this information will be used to recover
 the types in the stanfit object, adding it to the resulting tibble with MCMC draws.
 }
 \details{
 By default, the category means and scatter matrices are nested, rather than each of their elements being
-stored separately (\code{nest=TRUE}).
+stored separately (`nest=TRUE`).
 }
 \examples{
 TBD

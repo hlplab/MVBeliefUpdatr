@@ -7,6 +7,7 @@
 #' @importFrom rlang !! !!! sym syms expr
 NULL
 
+
 get_params = function(fit) {
   return(fit@model_pars)
 }
@@ -30,14 +31,14 @@ get_random_draw_indices = function(fit, n.draws)
 #' Checks if information is available about the original values and order of the factor levels
 #' for the category variable (for which beliefs about means and covariances are inferred) or
 #' group variable (e.g., subject or exposure group), respectively. If available,
-#' that information is returned. \code{get_category_levels()} and \code{get_group_levels()} are
-#' convenience functions, calling \code{get_original_levels()}.
+#' that information is returned. `get_category_levels()` and `get_group_levels()` are
+#' convenience functions, calling `get_original_levels()`.
 #'
 #' @param fit mv-ibbu-stanfit object.
-#' @param variable Either \code{"category"} or \code{"group"}.
+#' @param variable Either "category" or "group".
 #' @param indeces A vector of category or group indices that should be turned into the original
-#' category levels, or NULL if only the unique levels in their original order (as vector of characters)
-#' should be returned. (default: NULL)
+#' category levels, or `NULL` if only the unique levels in their original order (as vector of characters)
+#' should be returned. (default: `NULL`)
 #'
 #' @return If no category or group indices are provided, the levels of the category/group are returned (in the
 #' original order). Otherwise a vector of the same length as \code{indices}
@@ -85,22 +86,22 @@ get_group_levels = function(fit, indices = NULL) {
 #' Add MCMC draws of IBBU parameters to a tibble.
 #'
 #' Add MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) to a tibble. Both wide
-#' (\code{wide=TRUE}) or long format (\code{wide=FALSE}) can be chosen as output. By default all post-warmup draws are
-#' returned, but if \code{summarize=TRUE} then just the mean of each parameter is returned instead. Users can
-#' optionally provide a data frame with the unique values of the group, category, and cue variables (cue, cue2;
+#' (`wide=TRUE`) or long format (`wide=FALSE`) can be chosen as output. By default all post-warmup draws are
+#' returned, but if `summarize=TRUE` then just the mean of each parameter is returned instead. Users can
+#' optionally provide a data frame with the unique values of the `group`, `category`, and cue variables (`cue`, `cue2`;
 #' for example through \code{\link[tidyr]{crossing}}). If provided, this information will be used to recover
 #' the types in the stanfit object, adding it to the resulting tibble with MCMC draws.
 #'
 #' By default, the category means and scatter matrices are nested, rather than each of their elements being
-#' stored separately (\code{nest=TRUE}).
+#' stored separately (`nest=TRUE`).
 #'
 #' @param fit mv-ibbu-stanfit object.
-#' @param which Should parameters for the prior, posterior, or both be added? (default: posterior)
-#' @param draws Vector with specific draw(s) to be returned, or NULL if all draws are to be returned. (default: NULL)
-#' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: FALSE)
-#' @param wide Should all parameters be returned in one row? (default: FALSE)
+#' @param which Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)
+#' @param draws Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)
+#' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)
+#' @param wide Should all parameters be returned in one row? (default: `FALSE`)
 #' @param nest Should the category mean vectors and scatter matrices be nested into one cell each, or should each element
-#' be stored in a separate cell? (defaul: TRUE)
+#' be stored in a separate cell? (defaul: `TRUE`)
 #'
 #' @return tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
 #' (\code{kappa, nu, M, S, lapse_rate}). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs

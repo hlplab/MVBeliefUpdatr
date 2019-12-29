@@ -16,18 +16,18 @@ plot_ibbu_parameters(
 \arguments{
 \item{fit}{mv-ibbu-stanfit object.}
 
-\item{which}{Should parameters for the prior, posterior, or both be added? (default: posterior)}
+\item{which}{Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)}
 
-\item{n.draws}{Number of draws to plot (or use to calculate the CIs), or NULL if all draws are to be returned. (default: NULL)}
+\item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
 
-\item{group.ids}{Vector of group IDs to be plotted or leave NULL to plot all groups. (default: NULL) It is possible
+\item{group.ids}{Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}
 
-\item{group.labels}{Vector of group labels of same length as group.ids or NULL to use defaults. (default: NULL)
+\item{group.labels}{Vector of group labels of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
 The default labels each categorization function based on whether it is showing prior or posterior categorization,
 and by its group ID.}
 
-\item{group.colors}{Vector of fill colors of same length as group.ids or NULL to use defaults. (default: NULL)}
+\item{group.colors}{Vector of fill colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)}
 }
 \value{
 ggplot object.

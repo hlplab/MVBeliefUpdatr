@@ -37,14 +37,14 @@ get_limits = function(data, measure, hdi.prob = .99) {
 #' prior and/or posterior beliefs.
 #'
 #' @param fit mv-ibbu-stanfit object.
-#' @param which Should parameters for the prior, posterior, or both be added? (default: posterior)
-#' @param n.draws Number of draws to plot (or use to calculate the CIs), or NULL if all draws are to be returned. (default: NULL)
-#' @param group.ids Vector of group IDs to be plotted or leave NULL to plot all groups. (default: NULL) It is possible
+#' @param which Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)
+#' @param n.draws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
+#' @param group.ids Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
-#' @param group.labels Vector of group labels of same length as group.ids or NULL to use defaults. (default: NULL)
+#' @param group.labels Vector of group labels of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
 #' The default labels each categorization function based on whether it is showing prior or posterior categorization,
 #' and by its group ID.
-#' @param group.colors Vector of fill colors of same length as group.ids or NULL to use defaults. (default: NULL)
+#' @param group.colors Vector of fill colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
 #'
 #' @return ggplot object.
 #'
@@ -249,25 +249,26 @@ get_categorization_function_from_grouped_ibbu_draws = function(fit, ...) {
 #' Plot prior and posterior categorization of test tokens.
 #'
 #' Plot both prior and posterior categorization functions, as well as their confidence intervals.
-#' If \code{summarize=TRUE}, the function marginalizes over all posterior samples. The number of samples
+#' If `summarize=TRUE`, the function marginalizes over all posterior samples. The number of samples
 #' is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
-#' samples will be used. If \code{summarize=FALSE}, separate categorization plots for all n.draws
+#' samples will be used. If `summarize=FALSE`, separate categorization plots for all n.draws
 #' individual samples will be plotted in separate panels.
 #'
 #' @param fit mv-ibbu-stanfit object.
 #' @param fit.input Input to the mv-ibbu-stanfit object.
-#' @param n.draws Number of draws to plot (or use to calculate the CIs), or NULL if all draws are to be returned. (default: NULL)
-#' @param summarize Should one categorization function (optionally with CIs) be plotted (TRUE) or should separate
-#' unique categorization function be plotted for each MCMC draw (FALSE)? (default: FALSE)
-#' @param group.ids Vector of group IDs to be plotted or leave NULL to plot all groups. (default: NULL) It is possible
+#' @param which Should categorization for the prior, posterior, or both be plotted? (default: `"both"`)
+#' @param summarize Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
+#' unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `FALSE`)
+#' @param n.draws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
+#' @param group.ids Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
-#' @param group.labels Vector of group labels of same length as group.ids or NULL to use defaults. (default: NULL)
+#' @param group.labels Vector of group labels of same length as `group.ids` or `NULL` to use defaults. (default: `NULL`)
 #' The default labels each categorization function based on whether it is showing prior or posterior categorization,
 #' and by its group ID.
-#' @param group.colors Vector of colors of same length as group.ids or NULL to use defaults. (default: NULL)
-#' @param group.linetypes Vector of linetypes of same length as group.ids or NULL to use defaults. (default: NULL)
+#' @param group.colors Vector of colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
+#' @param group.linetypes Vector of linetypes of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
 #' @param sort_by Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
-#' from left to right). Set to 0 for sorting by prior (default). Set to NULL if no sorting is desired.
+#' from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired.
 #'
 #' @return ggplot object.
 #'
@@ -280,6 +281,7 @@ get_categorization_function_from_grouped_ibbu_draws = function(fit, ...) {
 plot_ibbu_test_categorization = function(
   fit,
   fit.input,
+  which = c("prior", "posterior", "both")[3],
   summarize = T,
   n.draws = NULL,
   confidence.interval = c(.025, .25, .75, .975),
@@ -305,7 +307,7 @@ plot_ibbu_test_categorization = function(
   # Get prior and posterior parameters
   d.pars =
     add_ibbu_draws(fit,
-                   which = c("both"),
+                   which = which,
                    summarize = F,
                    wide = F,
                    draws = if (!is.null(n.draws)) draws else NULL)
@@ -454,14 +456,15 @@ plot_ibbu_test_categorization = function(
                               "% and ",
                               (confidence.interval[3]-confidence.interval[2]) * 100,
                               "% CIs based on ",
-                              n.samples,
+                              n.draws,
                               " posterior samples.")
       )
   }
 
   p = p +
     geom_point(alpha = .9) +
-    geom_line(size = 1, alpha = .9, aes(x = as.numeric(token)))
+    geom_line(size = 1, alpha = .9, aes(x = as.numeric(token))) +
+    theme_bw()
 
   if (!summarize) p = p + facet_wrap(~ .draw)
 
@@ -478,25 +481,7 @@ plot_ibbu_test_categorization = function(
 #' XXXX
 #' XXXX think about distribution of means and distribution of samples.
 #' XXXX
-#' If \code{summarize=TRUE}, the function marginalizes over all posterior samples. The number of samples
-#' is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
-#' samples will be used. If \code{summarize=FALSE}, separate categorization plots for all n.draws
-#' individual samples will be plotted in separate panels.
 #'
-#' @param fit mv-ibbu-stanfit object.
-#' @param fit.input Input to the mv-ibbu-stanfit object.
-#' @param n.draws Number of draws to plot (or use to calculate the CIs), or NULL if all draws are to be returned. (default: NULL)
-#' @param summarize Should one categorization function (optionally with CIs) be plotted (TRUE) or should separate
-#' unique categorization function be plotted for each MCMC draw (FALSE)? (default: FALSE)
-#' @param group.ids Vector of group IDs to be plotted or leave NULL to plot all groups. (default: NULL) It is possible
-#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
-#' @param group.labels Vector of group labels of same length as group.ids or NULL to use defaults. (default: NULL)
-#' The defaultlabels each categorization function based on whether it is showing prior or posterior categorization,
-#' and by its group ID.
-#' @param group.colors Vector of colors of same length as group.ids or NULL to use defaults. (default: NULL)
-#' @param group.linetypes Vector of linetypes of same length as group.ids or NULL to use defaults. (default: NULL)
-#' @param sort_by Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
-#' from left to right). Set to 0 for sorting by prior (default). Set to NULL if no sorting is desired.
 #'
 #' @return ggplot object.
 #'
@@ -506,3 +491,18 @@ plot_ibbu_test_categorization = function(
 #' TBD
 #' @export
 #'
+
+
+
+
+plot_ibbu_categories_2D = function(
+  fit,
+  fit.input,
+  which = c("prior", "posterior", "both")[3],
+  summarize = T,
+  n.draws = NULL,
+  confidence.interval = c(.025, .25, .75, .975),
+  group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL
+) {
+
+}
