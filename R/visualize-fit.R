@@ -1,8 +1,8 @@
-#' @import assertthat purrr ggplot2 cowplot
+#' @import assertthat dplyr purrr ggplot2 cowplot
 #' @importFrom ellipse ellipse
 #' @importFrom mvtnorm dmvt
 #' @importFrom magrittr %<>% %T>%
-#' @importFrom dplyr %>% mutate summarise
+#' @importFrom tidyr crossing nest unnest
 #' @importFrom rlang !! !!! sym syms expr
 #' @importFrom tidybayes mean_hdi
 #' @importFrom ggridges geom_density_ridges
@@ -213,18 +213,14 @@ get_categorization_function = function(
   assert_that(between(lapse_rate, 0, 1))
 
   # Get dimensions of multivariate category
-  K = length(Ms[[1]])
-  assert_that(nus[[1]] >= K,
+  D = length(Ms[[1]])
+  assert_that(nus[[1]] >= D,
     msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
 
   f <- function(x) {
     log_p = array()
     for (cat in 1:n.cat) {
-      log_p[cat] = mvtnorm::dmvt(x,
-                                 delta = Ms[[cat]],
-                                 sigma = Ss[[cat]] * (kappas[[cat]] + 1) / (kappas[[cat]] * (nus[[cat]] - K + 1)),
-                                 df = nus[[cat]] - K + 1,
-                                 log = TRUE)
+      log_p[cat] = get_posterior_predictive(x, Ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T)
     }
 
     log_p1 = exp(
@@ -497,14 +493,25 @@ plot_ibbu_test_categorization = function(
 
 
 
-#' Plot prior and/or posterior category means.
+#' Plot expected bivariate (2D) categories.
 #'
-#' Plot prior and/or posterior category means.
-#' XXXX ADJUST BELOW
-#' XXXX
-#' XXXX think about distribution of means and distribution of samples.
-#' XXXX
+#' Plot bivariate Gaussian categories expected given the parameters inferred by incremental Bayesian belief-
+#' updating (IBBU). Specifically, the categories are derived by marginalizing over the uncertainty represented
+#' by the (post-warmup) MCMC samples.
 #'
+#' @param fit mv-ibbu-stanfit object.
+#' @param fit.input Optionally, the input to the mv-ibbu-stanfit object, in which case the test tokens will also be plotted,
+#' using `geom_point()`.
+#' @param which Should expected categories for the prior, posterior, or both be plotted? (default: `"both"`)
+#' @param summarize Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
+#' expected categories be plotted for each MCMC draw (`FALSE`)? (default: `FALSE`)
+#' @param n.draws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
+#' @param levels The cumulative probability levels that should be plotted (using `geom_polygon()`) around the mean. By default
+#' the most transparent ellipse still drawn corresponds to .95.
+#' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
+#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
+#' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
+#' @param category.colors Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 #'
 #' @return ggplot object.
 #'
@@ -513,48 +520,123 @@ plot_ibbu_test_categorization = function(
 #' @examples
 #' TBD
 #' @export
-#'
-
-
-
-#' Either use ellipse or contour
 plot_expected_ibbu_categories_2D = function(
   fit,
-  fit.input,
+  fit.input = NULL,
   which = c("prior", "posterior", "both")[3],
   summarize = T,
   n.draws = NULL,
-  confidence.levels = c(.05, .5, .95),
-  group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL
+  levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
+  category.ids = NULL, category.labels = NULL, category.colors = NULL
 ) {
+  assert_that(is.mv_ibbu_stanfit(fit) | is.mv_ibbu_MCMC(fit))
+  message("category.ids, .labels, .colors, which, summarize, and n.draws are currently being ignored.")
 
+  ellipse.pmap = function(x, centre, level, ...)
+    ellipse(x = x, centre = centre, level = level)
 
-  # ellipse approach
-  m <- c(.5, -.5)
-  sigma <- matrix(c(1,.5,.5,1), nrow=2)
-  names(confidence.levels) <- confidence.levels
-  contour_data <- ldply(confidence.levels,
-                        ellipse,
-                        x = sigma,
-                        scale = c(1, 1),  ## needed for positional matching
-                        centre = m)
-  # alternative to above: lapply and rbind instead of ldply
-  library(ggplot2)
-  ggplot(contour_data,
-         aes(x, y,
-             fill = category, color = category,
-             group= .id)) +
-    geom_path() +
-    facet_wrap(~ group)
+  d.contour = get_expected_category_statistic(fit) %>%
+    rename(x = Sigma.mean, centre = mu.mean) %>%
+    crossing(level = levels) %>%
+    mutate(ellipse = pmap(., ellipse.pmap)) %>%
+    # This step is necessary since unnest() can't yet unnest lists of matrices
+    # (bug was reported and added as milestone, 11/2019)
+    mutate(ellipse = map(ellipse, as_tibble)) %>%
+    unnest(ellipse)
 
+  cue.names = setdiff(names(d.contour), c("group", "category", "centre", "x", "level"))
+  d.contour %<>%
+    rename_at(cue.names,
+              function(x) paste0("cue", which(x == cue.names)))
 
-  # # Contour approach
-  # m <- c(.5, -.5)
-  # sigma <- matrix(c(1,.5,.5,1), nrow=2)
-  # data.grid <- expand.grid(s.1 = seq(-3, 3, length.out=200), s.2 = seq(-3, 3, length.out=200))
-  # q.samp <- cbind(data.grid, prob = mvtnorm::dmvnorm(data.grid, mean = m, sigma = sigma))
-  # ggplot(q.samp, aes(x=s.1, y=s.2, z=prob)) +
-  #   geom_contour() +
-  #   coord_fixed(xlim = c(-3, 3), ylim = c(-3, 3), ratio = 1)
-
+  ggplot(d.contour,
+         aes(x = cue1, y = cue2,
+             fill = category,
+             alpha = 1-level,
+             group = paste(category, level))) +
+    geom_polygon() +
+    # Optionally plot test data
+    { if (!is.null(fit.input))
+      geom_point(
+        data = fit.input$x_test %>%
+          rename_at(cue.names,
+                    function(x) paste0("cue", which(x == cue.names))),
+        mapping = aes(cue1, cue2),
+        inherit.aes = F,
+        color = "black", size = 1
+      )} +
+    scale_x_continuous(cue.names[1]) +
+    scale_y_continuous(cue.names[2]) +
+    scale_fill_discrete("Category") +
+    scale_alpha("",
+                range = c(0.1,.9)) +
+    facet_wrap(~ group) +
+    theme_bw()
 }
+
+
+
+
+
+
+plot_expected_ibbu_categories_density2D = function(
+  fit,
+  fit.input = NULL,
+  which = c("prior", "posterior", "both")[3],
+  summarize = T,
+  n.draws = NULL,
+  levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
+  category.ids = NULL, category.labels = NULL, category.colors = NULL,
+  xlim = NULL, ylim = NULL, resolution = 10
+) {
+  assert_that(is.mv_ibbu_stanfit(fit) | is.mv_ibbu_MCMC(fit))
+  message("category.ids, .labels, .colors, which, summarize, and n.draws are currently being ignored.")
+
+  if (is.mv_ibbu_stanfit(fit))
+    fit = add_ibbu_draws(fit, which = "both", wide = F, nest = T)
+
+  # This is where reasonable defaults for x and ylim should be calculated later
+  xlim = c(-10,10)
+  ylim = c(-10,10)
+
+  get_posterior_predictive.pmap = function(x, M, S, kappa, nu, ...) {
+    get_posterior_predictive(x, M, S, kappa, nu, log = F)
+  }
+
+  cue.names = row.names(fit$M[[1]])
+  fit %<>%
+    crossing(
+      cue1 = seq(min(xlim), max(xlim), length.out = resolution),
+      cue2 = seq(min(ylim), max(ylim), length.out = resolution)) %>%
+    mutate(x = map2(cue1, cue2, ~ c(.x, .y))) %>%
+    mutate(
+      density = pmap(., get_posterior_predictive.pmap),
+      density = unlist(density)
+    ) %>%
+    # Marginalize over MCMC draws
+    group_by(group, category, cue1, cue2) %>%
+    summarise(density = mean(density))
+
+  ggplot(fit,
+         aes(x = cue1, y = cue2,
+             color = category, fill = category,
+             z = density)) +
+    geom_contour() +
+    # Optionally plot test data
+    { if (!is.null(fit.input))
+      geom_point(
+        data = fit.input$x_test %>%
+          rename_at(cue.names,
+                    function(x) paste0("cue", which(x == cue.names))),
+        mapping = aes(cue1, cue2),
+        inherit.aes = F,
+        color = "black", size = 1
+      )} +
+    scale_x_continuous(cue.names[1]) +
+    scale_y_continuous(cue.names[2]) +
+    scale_fill_discrete("Category") +
+    coord_fixed(xlim = xlim, ylim = ylim, ratio = 1) +
+    facet_wrap(~ group) +
+    theme_bw()
+}
+

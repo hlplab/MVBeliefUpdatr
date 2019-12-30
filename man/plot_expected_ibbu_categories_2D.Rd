@@ -2,30 +2,50 @@
 % Please edit documentation in R/visualize-fit.R
 \name{plot_expected_ibbu_categories_2D}
 \alias{plot_expected_ibbu_categories_2D}
-\title{Plot prior and/or posterior category means.}
+\title{Plot expected bivariate (2D) categories.}
 \usage{
 plot_expected_ibbu_categories_2D(
   fit,
-  fit.input,
+  fit.input = NULL,
   which = c("prior", "posterior", "both")[3],
   summarize = T,
   n.draws = NULL,
-  confidence.levels = c(0.05, 0.5, 0.95),
-  group.ids = NULL,
-  group.labels = NULL,
-  group.colors = NULL,
-  group.linetypes = NULL
+  levels = plogis(seq(-15, qlogis(0.95), length.out = 20)),
+  category.ids = NULL,
+  category.labels = NULL,
+  category.colors = NULL
 )
+}
+\arguments{
+\item{fit}{mv-ibbu-stanfit object.}
+
+\item{fit.input}{Optionally, the input to the mv-ibbu-stanfit object, in which case the test tokens will also be plotted,
+using `geom_point()`.}
+
+\item{which}{Should expected categories for the prior, posterior, or both be plotted? (default: `"both"`)}
+
+\item{summarize}{Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
+expected categories be plotted for each MCMC draw (`FALSE`)? (default: `FALSE`)}
+
+\item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
+
+\item{levels}{The cumulative probability levels that should be plotted (using `geom_polygon()`) around the mean. By default
+the most transparent ellipse still drawn corresponds to .95.}
+
+\item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
+to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}
+
+\item{category.labels}{Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)}
+
+\item{category.colors}{Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)}
 }
 \value{
 ggplot object.
 }
 \description{
-Plot prior and/or posterior category means.
-XXXX ADJUST BELOW
-XXXX
-XXXX think about distribution of means and distribution of samples.
-XXXX
+Plot bivariate Gaussian categories expected given the parameters inferred by incremental Bayesian belief-
+updating (IBBU). Specifically, the categories are derived by marginalizing over the uncertainty represented
+by the (post-warmup) MCMC samples.
 }
 \examples{
 TBD

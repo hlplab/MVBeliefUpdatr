@@ -2,6 +2,7 @@
 #' @importFrom magrittr %<>%
 #' @importFrom tidybayes spread_draws recover_types
 #' @importFrom dplyr %>% select filter mutate summarise left_join rename rename_at group_by ungroup
+#' @importFrom tidyselect starts_with
 #' @importFrom tidyr spread gather unite
 #' @importFrom tibble tibble is_tibble
 #' @importFrom rlang !! !!! sym syms expr

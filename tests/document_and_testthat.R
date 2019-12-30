@@ -1,4 +1,3 @@
-plot_ibbu_parameters(fit, which = "prior", n.draws = 5)
 # use_test("compose-input-for-stan.R")
 # use_test("get-information-from-stanfit.R")
 document()
@@ -33,13 +32,30 @@ fit %>%
 fit %>%
   add_ibbu_draws(wide = F, which = "both", draws = c(10, 5), nest = T) -> g
 
+
+
+source("./R/NIW.R")
+get_expected_mu(g, "sh", "prior")
+get_expected_sigma(g, "sh", "prior")
+get_expected_sigma(g, c("s","sh"), c("prior", "control"))
+get_expected_sigma(g, c("s","sh"), c("prior", "Control"))
+get_expected_category_statistic(g, c("s","sh"), c("prior", "Control"), c("mu", "Sigma"))
+
+source("./R/visualize-fit.R")
 group.colors = c("darkgray", "blue", "red", "black")
 plot_ibbu_parameters(fit, which = "both", n.draws = 5,
                      group.colors = group.colors)
 plot_ibbu_test_categorization(fit, fit.input,
                               which = "both", summarize = T, n.draws = 10,
-                     group.colors = group.colors)
+                              group.colors = group.colors)
+# should throw error: 
+# fit %>%
+#   add_ibbu_draws(wide = F, which = "both", draws = c(10, 5), nest = F) -> f
+# plot_expected_ibbu_categories_2D(f) 
+fit %>%
+  add_ibbu_draws(wide = F, which = "both", draws = c(10, 5), nest = T) -> g
+plot_expected_ibbu_categories_2D(g)
+plot_expected_ibbu_categories_2D(g, fit.input)
 
-get_expected_mu(g, "sh", "prior")
-get_expected_sigma(g, "sh", "prior")
+plot_expected_ibbu_categories_density2D(g, fit.input)
 
