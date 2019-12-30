@@ -6,7 +6,7 @@
 \usage{
 plot_ibbu_parameters(
   fit,
-  which = c("prior", "posterior", "both")[3],
+  which = "both",
   n.draws = NULL,
   group.ids = NULL,
   group.labels = NULL,

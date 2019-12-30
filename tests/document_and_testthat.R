@@ -43,6 +43,7 @@ get_expected_category_statistic(g, c("s","sh"), c("prior", "Control"), c("mu", "
 
 source("./R/visualize-fit.R")
 group.colors = c("darkgray", "blue", "red", "black")
+plot_ibbu_parameters(fit, which = "both", n.draws = 2)
 plot_ibbu_parameters(fit, which = "both", n.draws = 5,
                      group.colors = group.colors)
 plot_ibbu_test_categorization(fit, fit.input,
@@ -54,8 +55,21 @@ plot_ibbu_test_categorization(fit, fit.input,
 # plot_expected_ibbu_categories_2D(f) 
 fit %>%
   add_ibbu_draws(wide = F, which = "both", draws = c(10, 5), nest = T) -> g
-plot_expected_ibbu_categories_2D(g)
+get_expected_category_statistic(g)
+plot_expected_ibbu_categories_2D(g, type = "contour")
+plot_expected_ibbu_categories_contour2D(g, fit.input)
+plot_expected_ibbu_categories_2D(g, fit.input, type = "density", resolution = 5)
+
+
+
+
+
+
+
+
+
+# Not for test (slow! (at least the 2D density one))
+fit %>%
+  add_ibbu_draws(wide = F, which = "both", nest = T) -> g
 plot_expected_ibbu_categories_2D(g, fit.input)
-
-plot_expected_ibbu_categories_density2D(g, fit.input)
-
+plot_expected_ibbu_categories_density2D(g, fit.input, resolution = 100)

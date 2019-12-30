@@ -24,12 +24,32 @@ signed_log = function(x) sign(x)*log10(abs(x))
 
 #' @rdname signed_log
 #' @export
-signed_log_trans <- function(){
+signed_log_trans = function(){
   scales::trans_new("signed_log",
                     transform=function(x) sign(x)*log10(abs(x)),
                     inverse=function(x) sign(x)*10^(abs(x)))
 }
 
+
+#' Get default colors
+#'
+#' @param var Variable for which default color is requested. Can be either `"category"` or
+#' `"group"`.
+#'
+#' @examples
+#' TBD
+#' @export
+get_default_colors = function(var, n) {
+  assert_that(all(var %in% c("category", "group")))
+  assert_that(is.count(n))
+
+  if (var == "category")
+    c = scales::hue_pal()(n)
+  else
+    c = scales::brewer_pal(palette = "Set1")(n)
+
+  return(c)
+}
 
 #' Get suitable limits for coordinate system.
 #'
@@ -70,7 +90,7 @@ get_limits = function(data, measure, hdi.prob = .99) {
 #'
 plot_ibbu_parameters = function(
   fit,
-  which = c("prior", "posterior", "both")[3],
+  which = "both",
   n.draws = NULL,
   group.ids = NULL, group.labels = NULL, group.colors = NULL
 ) {
@@ -83,7 +103,8 @@ plot_ibbu_parameters = function(
   if (missing(group.ids)) group.ids = levels(d.pars$group)
   # Setting aes defaults
   if(missing(group.labels)) group.labels = paste0("posterior (", group.ids[-1], ")")
-  if(missing(group.colors)) group.colors = rep("black", length(group.ids) - 1)
+  if(missing(group.colors)) group.colors = get_default_colors("group",
+                                                              length(group.ids) - 1)
   # If no specific color for prior was specified
   if(length(group.labels) < length(group.ids)) group.labels = c("prior", group.labels)
   if(length(group.colors) < length(group.ids)) group.colors = c("darkgray", group.colors)
@@ -268,8 +289,9 @@ get_categorization_function_from_grouped_ibbu_draws = function(fit, ...) {
 #' @param fit.input Input to the mv-ibbu-stanfit object.
 #' @param which Should categorization for the prior, posterior, or both be plotted? (default: `"both"`)
 #' @param summarize Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
-#' unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `FALSE`)
-#' @param n.draws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
+#' unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)
+#' @param n.draws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
+#' (default: `NULL`)
 #' @param confidence.intervals The two confidence intervals that should be plotted (using `geom_ribbon`) around the mean.
 #' (default: `c(.66, .95)`)
 #' @param group.ids Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
@@ -293,7 +315,7 @@ get_categorization_function_from_grouped_ibbu_draws = function(fit, ...) {
 plot_ibbu_test_categorization = function(
   fit,
   fit.input,
-  which = c("prior", "posterior", "both")[3],
+  which = "both",
   summarize = T,
   n.draws = NULL,
   confidence.intervals = c(.66, .95),
@@ -346,7 +368,7 @@ plot_ibbu_test_categorization = function(
 
   # Setting aes defaults
   if(is.null(group.labels)) group.labels = paste0("posterior (", group.ids[-1], ")")
-  if(is.null(group.colors)) group.colors = rep("black", length(group.ids) - 1)
+  if(is.null(group.colors)) group.colors = get_default_colors("group", length(group.ids) - 1)
   if(is.null(group.linetypes)) group.linetypes = rep(1, length(group.ids) - 1)
   # If no specific color for prior was specified
   if(length(group.labels) < length(group.ids)) group.labels = c("prior", group.labels)
@@ -497,21 +519,37 @@ plot_ibbu_test_categorization = function(
 #'
 #' Plot bivariate Gaussian categories expected given the parameters inferred by incremental Bayesian belief-
 #' updating (IBBU). Specifically, the categories are derived by marginalizing over the uncertainty represented
-#' by the (post-warmup) MCMC samples.
+#' by the (post-warmup) MCMC samples. Two methods are available (specified by `type`), which differ in their
+#' computational demands and speed.
 #'
 #' @param fit mv-ibbu-stanfit object.
 #' @param fit.input Optionally, the input to the mv-ibbu-stanfit object, in which case the test tokens will also be plotted,
 #' using `geom_point()`.
-#' @param which Should expected categories for the prior, posterior, or both be plotted? (default: `"both"`)
+#' @param type Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
+#' faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{M}) and \code{Sigma}
+#' (based on the NIW parameters \code{S} and \code{nu}) at each MCMC draw, and then averages over
+#' all MCMC draws. The plotted categories represent those means of the expected \code{mu} and \code{Sigma}. The
+#' density plot instead calculates the posterior predictive for each MCMC draw (i.e, the multivariate Student-T
+#' density based on the NIW parameters \code{M, S, kappa, nu}), and then averages those densities. Since this is
+#' done for *all* points defined by the data.grid this can be rather computationally expensive and slow.
 #' @param summarize Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
-#' expected categories be plotted for each MCMC draw (`FALSE`)? (default: `FALSE`)
-#' @param n.draws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
-#' @param levels The cumulative probability levels that should be plotted (using `geom_polygon()`) around the mean. By default
+#' expected categories be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`) Currently being ignored.
+#' @param n.draws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
+#' (default: `NULL`) Currently being ignored.
+#' @param Used only if `type` is `"contour"`. levels The cumulative probability levels that should be plotted (using
+#' `geom_polygon()`) around the mean. By default
 #' the most transparent ellipse still drawn corresponds to .95.
 #' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
 #' @param category.colors Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
+#' @param category.linetypes Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
+#' Currently being ignored.
+#' @param data.grid.xlim,data.grid.ylim,data.grid.resolution Used only if `type` is `"density"`. Limits for x- and y-axis as
+#' well as resolution of the data.grid, defining the range over which the posterior predictive (multivariate Student-T density)
+#' is calculated. Note that the number of densities to calculate is a *quadratic* function of `data.grid.resolution`. The default
+#' for `data.grid.resolution` is 10, corresponding to 100 densities to be calculated for each MCMC draw.
+#'
 #'
 #' @return ggplot object.
 #'
@@ -519,23 +557,44 @@ plot_ibbu_test_categorization = function(
 #' @keywords TBD
 #' @examples
 #' TBD
+#' @rdname plot_expected_ibbu_categories_2D
 #' @export
 plot_expected_ibbu_categories_2D = function(
-  fit,
+  x,
   fit.input = NULL,
-  which = c("prior", "posterior", "both")[3],
-  summarize = T,
-  n.draws = NULL,
-  levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
-  category.ids = NULL, category.labels = NULL, category.colors = NULL
+  type,
+  ...
 ) {
-  assert_that(is.mv_ibbu_stanfit(fit) | is.mv_ibbu_MCMC(fit))
-  message("category.ids, .labels, .colors, which, summarize, and n.draws are currently being ignored.")
+  assert_that(all(type %in% c("contour", "density"), length(type) == 1))
+  if (type == "contour")
+    plot_expected_ibbu_categories_contour2D(x = x, fit.input = fit.input, ...)
+  else {
+    plot_expected_ibbu_categories_density2D(x = x, fit.input = fit.input, ...)
+  }
+}
+
+#' @rdname plot_expected_ibbu_categories_2D
+#' @export
+plot_expected_ibbu_categories_contour2D = function(
+  x,
+  fit.input = NULL, # should change in the future
+  levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
+  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
+) {
+  assert_that(is.mv_ibbu_stanfit(x) | is.mv_ibbu_MCMC(x))
+
+  d = get_expected_category_statistic(x)
+
+  # Setting aes defaults
+  if(is.null(category.ids)) category.ids = levels(d$category)
+  if(is.null(category.labels)) category.labels = levels(d$category)
+  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
+  if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   ellipse.pmap = function(x, centre, level, ...)
     ellipse(x = x, centre = centre, level = level)
 
-  d.contour = get_expected_category_statistic(fit) %>%
+  d %<>%
     rename(x = Sigma.mean, centre = mu.mean) %>%
     crossing(level = levels) %>%
     mutate(ellipse = pmap(., ellipse.pmap)) %>%
@@ -544,12 +603,12 @@ plot_expected_ibbu_categories_2D = function(
     mutate(ellipse = map(ellipse, as_tibble)) %>%
     unnest(ellipse)
 
-  cue.names = setdiff(names(d.contour), c("group", "category", "centre", "x", "level"))
-  d.contour %<>%
+  cue.names = setdiff(names(d), c("group", "category", "centre", "x", "level"))
+  d %<>%
     rename_at(cue.names,
               function(x) paste0("cue", which(x == cue.names)))
 
-  ggplot(d.contour,
+  ggplot(d,
          aes(x = cue1, y = cue2,
              fill = category,
              alpha = 1-level,
@@ -567,7 +626,10 @@ plot_expected_ibbu_categories_2D = function(
       )} +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
-    scale_fill_discrete("Category") +
+    scale_fill_manual("Category",
+                      breaks = category.ids,
+                      labels = category.labels,
+                      values = category.colors) +
     scale_alpha("",
                 range = c(0.1,.9)) +
     facet_wrap(~ group) +
@@ -575,36 +637,35 @@ plot_expected_ibbu_categories_2D = function(
 }
 
 
-
-
-
-
+#' @rdname plot_expected_ibbu_categories_2D
+#' @export
 plot_expected_ibbu_categories_density2D = function(
-  fit,
-  fit.input = NULL,
-  which = c("prior", "posterior", "both")[3],
+  x,
+  fit.input = NULL, # should change in the future
   summarize = T,
   n.draws = NULL,
-  levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
-  category.ids = NULL, category.labels = NULL, category.colors = NULL,
-  xlim = NULL, ylim = NULL, resolution = 10
+  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
+  xlim = c(-10, 10), ylim = c(-10, 10), resolution = 10
 ) {
-  assert_that(is.mv_ibbu_stanfit(fit) | is.mv_ibbu_MCMC(fit))
-  message("category.ids, .labels, .colors, which, summarize, and n.draws are currently being ignored.")
+  assert_that(is.mv_ibbu_stanfit(x) | is.mv_ibbu_MCMC(x))
 
-  if (is.mv_ibbu_stanfit(fit))
-    fit = add_ibbu_draws(fit, which = "both", wide = F, nest = T)
+  if (is.mv_ibbu_stanfit(x))
+    d = add_ibbu_draws(x, which = which, wide = F, nest = T)
+  else
+    d = x
 
-  # This is where reasonable defaults for x and ylim should be calculated later
-  xlim = c(-10,10)
-  ylim = c(-10,10)
+  # Setting aes defaults
+  if(is.null(category.ids)) category.ids = levels(d$category)
+  if(is.null(category.labels)) category.labels = levels(d$category)
+  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
+  if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   get_posterior_predictive.pmap = function(x, M, S, kappa, nu, ...) {
     get_posterior_predictive(x, M, S, kappa, nu, log = F)
   }
 
-  cue.names = row.names(fit$M[[1]])
-  fit %<>%
+  cue.names = row.names(d$M[[1]])
+  d %<>%
     crossing(
       cue1 = seq(min(xlim), max(xlim), length.out = resolution),
       cue2 = seq(min(ylim), max(ylim), length.out = resolution)) %>%
@@ -617,7 +678,7 @@ plot_expected_ibbu_categories_density2D = function(
     group_by(group, category, cue1, cue2) %>%
     summarise(density = mean(density))
 
-  ggplot(fit,
+  ggplot(d,
          aes(x = cue1, y = cue2,
              color = category, fill = category,
              z = density)) +
@@ -634,7 +695,10 @@ plot_expected_ibbu_categories_density2D = function(
       )} +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
-    scale_fill_discrete("Category") +
+    scale_color_manual("Category",
+                       breaks = category.ids,
+                       labels = category.labels,
+                       values = category.colors) +
     coord_fixed(xlim = xlim, ylim = ylim, ratio = 1) +
     facet_wrap(~ group) +
     theme_bw()

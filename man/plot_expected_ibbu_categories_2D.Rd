@@ -2,35 +2,47 @@
 % Please edit documentation in R/visualize-fit.R
 \name{plot_expected_ibbu_categories_2D}
 \alias{plot_expected_ibbu_categories_2D}
+\alias{plot_expected_ibbu_categories_contour2D}
+\alias{plot_expected_ibbu_categories_density2D}
 \title{Plot expected bivariate (2D) categories.}
 \usage{
-plot_expected_ibbu_categories_2D(
-  fit,
+plot_expected_ibbu_categories_2D(x, fit.input = NULL, type, ...)
+
+plot_expected_ibbu_categories_contour2D(
+  x,
   fit.input = NULL,
-  which = c("prior", "posterior", "both")[3],
-  summarize = T,
-  n.draws = NULL,
   levels = plogis(seq(-15, qlogis(0.95), length.out = 20)),
   category.ids = NULL,
   category.labels = NULL,
-  category.colors = NULL
+  category.colors = NULL,
+  category.linetypes = NULL
+)
+
+plot_expected_ibbu_categories_density2D(
+  x,
+  fit.input = NULL,
+  summarize = T,
+  n.draws = NULL,
+  category.ids = NULL,
+  category.labels = NULL,
+  category.colors = NULL,
+  category.linetypes = NULL,
+  xlim = c(-10, 10),
+  ylim = c(-10, 10),
+  resolution = 10
 )
 }
 \arguments{
-\item{fit}{mv-ibbu-stanfit object.}
-
 \item{fit.input}{Optionally, the input to the mv-ibbu-stanfit object, in which case the test tokens will also be plotted,
 using `geom_point()`.}
 
-\item{which}{Should expected categories for the prior, posterior, or both be plotted? (default: `"both"`)}
-
-\item{summarize}{Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
-expected categories be plotted for each MCMC draw (`FALSE`)? (default: `FALSE`)}
-
-\item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
-
-\item{levels}{The cumulative probability levels that should be plotted (using `geom_polygon()`) around the mean. By default
-the most transparent ellipse still drawn corresponds to .95.}
+\item{type}{Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
+faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{M}) and \code{Sigma}
+(based on the NIW parameters \code{S} and \code{nu}) at each MCMC draw, and then averages over
+all MCMC draws. The plotted categories represent those means of the expected \code{mu} and \code{Sigma}. The
+density plot instead calculates the posterior predictive for each MCMC draw (i.e, the multivariate Student-T
+density based on the NIW parameters \code{M, S, kappa, nu}), and then averages those densities. Since this is
+done for *all* points defined by the data.grid this can be rather computationally expensive and slow.}
 
 \item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}
@@ -38,6 +50,26 @@ to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to han
 \item{category.labels}{Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)}
 
 \item{category.colors}{Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)}
+
+\item{category.linetypes}{Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
+Currently being ignored.}
+
+\item{summarize}{Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
+expected categories be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`) Currently being ignored.}
+
+\item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
+(default: `NULL`) Currently being ignored.}
+
+\item{fit}{mv-ibbu-stanfit object.}
+
+\item{Used}{only if `type` is `"contour"`. levels The cumulative probability levels that should be plotted (using
+`geom_polygon()`) around the mean. By default
+the most transparent ellipse still drawn corresponds to .95.}
+
+\item{data.grid.xlim, data.grid.ylim, data.grid.resolution}{Used only if `type` is `"density"`. Limits for x- and y-axis as
+well as resolution of the data.grid, defining the range over which the posterior predictive (multivariate Student-T density)
+is calculated. Note that the number of densities to calculate is a *quadratic* function of `data.grid.resolution`. The default
+for `data.grid.resolution` is 10, corresponding to 100 densities to be calculated for each MCMC draw.}
 }
 \value{
 ggplot object.
@@ -45,7 +77,8 @@ ggplot object.
 \description{
 Plot bivariate Gaussian categories expected given the parameters inferred by incremental Bayesian belief-
 updating (IBBU). Specifically, the categories are derived by marginalizing over the uncertainty represented
-by the (post-warmup) MCMC samples.
+by the (post-warmup) MCMC samples. Two methods are available (specified by `type`), which differ in their
+computational demands and speed.
 }
 \examples{
 TBD

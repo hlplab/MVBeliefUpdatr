@@ -7,7 +7,7 @@
 plot_ibbu_test_categorization(
   fit,
   fit.input,
-  which = c("prior", "posterior", "both")[3],
+  which = "both",
   summarize = T,
   n.draws = NULL,
   confidence.intervals = c(0.66, 0.95),
@@ -26,9 +26,10 @@ plot_ibbu_test_categorization(
 \item{which}{Should categorization for the prior, posterior, or both be plotted? (default: `"both"`)}
 
 \item{summarize}{Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
-unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `FALSE`)}
+unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)}
 
-\item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
+\item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
+(default: `NULL`)}
 
 \item{confidence.intervals}{The two confidence intervals that should be plotted (using `geom_ribbon`) around the mean.
 (default: `c(.66, .95)`)}
