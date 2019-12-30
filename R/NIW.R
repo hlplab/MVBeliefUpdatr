@@ -40,6 +40,10 @@ get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
                 log = log)
 }
 
+get_posterior_predictive.pmap = function(x, M, S, kappa, nu, ...) {
+  get_posterior_predictive(x, M, S, kappa, nu, log = F)
+}
+
 
 #' Get expected category covariance from Scatter matrix and nu
 #' @export

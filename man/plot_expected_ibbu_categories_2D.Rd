@@ -12,6 +12,8 @@ plot_expected_ibbu_categories_contour2D(
   x,
   fit.input = NULL,
   levels = plogis(seq(-15, qlogis(0.95), length.out = 20)),
+  plot.test = T,
+  plot.exposure = F,
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
@@ -21,8 +23,8 @@ plot_expected_ibbu_categories_contour2D(
 plot_expected_ibbu_categories_density2D(
   x,
   fit.input = NULL,
-  summarize = T,
-  n.draws = NULL,
+  plot.test = T,
+  plot.exposure = F,
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
@@ -44,6 +46,11 @@ density plot instead calculates the posterior predictive for each MCMC draw (i.e
 density based on the NIW parameters \code{M, S, kappa, nu}), and then averages those densities. Since this is
 done for *all* points defined by the data.grid this can be rather computationally expensive and slow.}
 
+\item{plot.test, plot.exposure}{Should the test and/or exposure stimuli be plotted? (default: `TRUE` for `plot.test`,
+`FALSE` for `plot.exposure`) The test items are plotted as black points. The exposure mean is plotted as point,
+and the .95 interval of cue distributions during exposure are plotted as dashed ellipse in the same color as the
+expected categories.}
+
 \item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}
 
@@ -54,13 +61,13 @@ to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to han
 \item{category.linetypes}{Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 Currently being ignored.}
 
+\item{fit}{mv-ibbu-stanfit object.}
+
 \item{summarize}{Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
 expected categories be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`) Currently being ignored.}
 
 \item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
 (default: `NULL`) Currently being ignored.}
-
-\item{fit}{mv-ibbu-stanfit object.}
 
 \item{Used}{only if `type` is `"contour"`. levels The cumulative probability levels that should be plotted (using
 `geom_polygon()`) around the mean. By default

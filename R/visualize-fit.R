@@ -64,6 +64,8 @@ get_limits = function(data, measure, hdi.prob = .99) {
     as.numeric()
 }
 
+ellipse.pmap = function(x, centre, level, ...)
+  ellipse(x = x, centre = centre, level = level)
 
 #' Plot distribution of IBBU parameters.
 #'
@@ -532,6 +534,10 @@ plot_ibbu_test_categorization = function(
 #' density plot instead calculates the posterior predictive for each MCMC draw (i.e, the multivariate Student-T
 #' density based on the NIW parameters \code{M, S, kappa, nu}), and then averages those densities. Since this is
 #' done for *all* points defined by the data.grid this can be rather computationally expensive and slow.
+#' @param plot.test,plot.exposure Should the test and/or exposure stimuli be plotted? (default: `TRUE` for `plot.test`,
+#' `FALSE` for `plot.exposure`) The test items are plotted as black points. The exposure mean is plotted as point,
+#' and the .95 interval of cue distributions during exposure are plotted as dashed ellipse in the same color as the
+#' expected categories.
 #' @param summarize Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
 #' expected categories be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`) Currently being ignored.
 #' @param n.draws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
@@ -579,9 +585,11 @@ plot_expected_ibbu_categories_contour2D = function(
   x,
   fit.input = NULL, # should change in the future
   levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
+  plot.test = T, plot.exposure = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
   assert_that(is.mv_ibbu_stanfit(x) | is.mv_ibbu_MCMC(x))
+  assert_that(!all(is.null(fit.input), plot.test))
 
   d = get_expected_category_statistic(x)
 
@@ -590,9 +598,6 @@ plot_expected_ibbu_categories_contour2D = function(
   if(is.null(category.labels)) category.labels = levels(d$category)
   if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
-
-  ellipse.pmap = function(x, centre, level, ...)
-    ellipse(x = x, centre = centre, level = level)
 
   d %<>%
     rename(x = Sigma.mean, centre = mu.mean) %>%
@@ -615,7 +620,7 @@ plot_expected_ibbu_categories_contour2D = function(
              group = paste(category, level))) +
     geom_polygon() +
     # Optionally plot test data
-    { if (!is.null(fit.input))
+    { if (!is.null(fit.input) & plot.test)
       geom_point(
         data = fit.input$x_test %>%
           rename_at(cue.names,
@@ -624,6 +629,36 @@ plot_expected_ibbu_categories_contour2D = function(
         inherit.aes = F,
         color = "black", size = 1
       )} +
+    # Optionally plot exposure data
+      { if (!is.null(fit.input) & plot.exposure)
+        geom_point(
+          data = get_exposure_mean(fit.input,
+                                   group = levels(d$group),
+                                   category = levels(d$category)) %>%
+            rename_at(cue.names,
+                      function(x) paste0("cue", which(x == cue.names))),
+          mapping = aes(cue1, cue2, shape = category, color = category),
+          inherit.aes = F, size = 2
+        ) +
+          geom_path(
+            data = crossing(
+              group = levels(d$group),
+              category = levels(d$category),
+              level = .95
+            ) %>%
+              mutate(
+                x = map2(group, category, get_exposure_covariance(fit.input, .x, .y)),
+                centre = map2(group, category, get_exposure_mean(fit.input, .x, .y))
+              ) %>%
+              mutate(ellipse = pmap(., ellipse.pmap)) %>%
+              mutate(ellipse = map(ellipse, as_tibble)) %>%
+              unnest(ellipse) %>%
+              rename_at(cue.names,
+                        function(x) paste0("cue", which(x == cue.names))),
+            mapping = aes(cue1, cue2, shape = category, color = category),
+            linetype = 2,
+            inherit.aes = F)
+      } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
     scale_fill_manual("Category",
@@ -642,12 +677,12 @@ plot_expected_ibbu_categories_contour2D = function(
 plot_expected_ibbu_categories_density2D = function(
   x,
   fit.input = NULL, # should change in the future
-  summarize = T,
-  n.draws = NULL,
+  plot.test = T, plot.exposure = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   xlim = c(-10, 10), ylim = c(-10, 10), resolution = 10
 ) {
   assert_that(is.mv_ibbu_stanfit(x) | is.mv_ibbu_MCMC(x))
+  assert_that(!all(is.null(fit.input), plot.test))
 
   if (is.mv_ibbu_stanfit(x))
     d = add_ibbu_draws(x, which = which, wide = F, nest = T)
@@ -659,10 +694,6 @@ plot_expected_ibbu_categories_density2D = function(
   if(is.null(category.labels)) category.labels = levels(d$category)
   if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
-
-  get_posterior_predictive.pmap = function(x, M, S, kappa, nu, ...) {
-    get_posterior_predictive(x, M, S, kappa, nu, log = F)
-  }
 
   cue.names = row.names(d$M[[1]])
   d %<>%
@@ -684,7 +715,7 @@ plot_expected_ibbu_categories_density2D = function(
              z = density)) +
     geom_contour() +
     # Optionally plot test data
-    { if (!is.null(fit.input))
+    { if (!is.null(fit.input) & plot.test)
       geom_point(
         data = fit.input$x_test %>%
           rename_at(cue.names,
@@ -693,6 +724,36 @@ plot_expected_ibbu_categories_density2D = function(
         inherit.aes = F,
         color = "black", size = 1
       )} +
+    # Optionally plot exposure data
+      { if (!is.null(fit.input) & plot.exposure)
+        geom_point(
+          data = get_exposure_mean(fit.input,
+                                   group = levels(d$group),
+                                   category = levels(d$category)) %>%
+            rename_at(cue.names,
+                      function(x) paste0("cue", which(x == cue.names))),
+          mapping = aes(cue1, cue2, shape = category, color = category),
+          inherit.aes = F, size = 2
+        ) +
+        geom_path(
+          data = crossing(
+            group = levels(d$group),
+            category = levels(d$category),
+            level = .95
+          ) %>%
+            mutate(
+              x = map2(group, category, get_exposure_covariance(fit.input, .x, .y)),
+              centre = map2(group, category, get_exposure_mean(fit.input, .x, .y))
+            ) %>%
+            mutate(ellipse = pmap(., ellipse.pmap)) %>%
+            mutate(ellipse = map(ellipse, as_tibble)) %>%
+            unnest(ellipse) %>%
+                    rename_at(cue.names,
+                              function(x) paste0("cue", which(x == cue.names))),
+          mapping = aes(cue1, cue2, shape = category, color = category),
+          linetype = 2,
+          inherit.aes = F)
+        } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
     scale_color_manual("Category",

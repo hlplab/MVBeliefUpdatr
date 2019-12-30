@@ -57,7 +57,9 @@ fit %>%
   add_ibbu_draws(wide = F, which = "both", draws = c(10, 5), nest = T) -> g
 get_expected_category_statistic(g)
 plot_expected_ibbu_categories_2D(g, type = "contour")
-plot_expected_ibbu_categories_contour2D(g, fit.input)
+# should throw error since not fit.input is provided:
+# plot_expected_ibbu_categories_2D(g, type = "contour", plot.test = T)
+plot_expected_ibbu_categories_contour2D(g, fit.input, plot.test = F)
 plot_expected_ibbu_categories_2D(g, fit.input, type = "density", resolution = 5)
 
 

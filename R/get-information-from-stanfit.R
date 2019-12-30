@@ -101,6 +101,8 @@ get_group_levels = function(fit, indices = NULL) {
   return(get_original_levels(fit, "group", indices))
 }
 
+get_exposure_mean = function(fit, group = NULL, category = NULL) {}
+get_exposure_covariance = function(fit, group = NULL, category = NULL) {}
 
 #' Add MCMC draws of IBBU parameters to a tibble.
 #'
@@ -141,7 +143,7 @@ get_group_levels = function(fit, indices = NULL) {
 #'
 add_ibbu_draws = function(
   fit,
-  which = c("prior", "posterior", "both")[2],
+  which = "posterior",
   draws = NULL,
   summarize = FALSE,
   wide = FALSE,

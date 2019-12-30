@@ -6,7 +6,7 @@
 \usage{
 add_ibbu_draws(
   fit,
-  which = c("prior", "posterior", "both")[2],
+  which = "posterior",
   draws = NULL,
   summarize = FALSE,
   wide = FALSE,
