@@ -23,15 +23,19 @@ NULL
 #' TBD
 #' @export
 get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
-  assert_that(all(is.matrix(M), is.matrix(S)))
+  assert_that(all(is.matrix(x), is.matrix(M), is.matrix(S)))
   assert_that(all(is.number(kappa), is.number(nu)))
   assert_that(is.flag(log))
   D = dim(S)[1]
   assert_that(nu >= D,
               msg = "nu must be at least as large as the number of dimensions of the multivariate
               Normal.")
-  assert_that(dim(S)[2] == D)
-  assert_that(all(dim(M) == c(D, 1)))
+  assert_that(dim(S)[2] == D,
+              msg = "S is not a square matrix, and thus not a Scatter matrix")
+  assert_that(all(dim(M) == dim(x)) | dim(M)[1] == dim(x)[1] & dim(x)[2] > 1,
+              msg = "M and input are not of compatible dimensions.")
+  assert_that(all(dim(M) == c(D, 1)),
+              msg = "S and M are not of compatible dimensions.")
 
   mvtnorm::dmvt(x,
                 delta = M,
