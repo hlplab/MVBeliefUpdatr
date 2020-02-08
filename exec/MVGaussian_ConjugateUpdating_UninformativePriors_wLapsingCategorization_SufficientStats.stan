@@ -1,10 +1,12 @@
 /*
  * Fit multinomial response data using a belief-updating model to infer prior
- * parameters.  A normal-inverse-Wishart prior is used, and it's assumed
+ * parameters (prior means and covariances can be inferred or provided by the
+ * user). A normal-inverse-Wishart prior is used, and it's assumed
  * that the subject knows the true labels of all the input stimuli (e.g.,
  * doesn't model any uncertainty in classification.
  *
- * This version has a lapse rate parameter (probability of random guessing)
+ * This version has a lapse rate parameter (probability of random guessing).
+ * The parameter can be inferred or provided by the user.
  *
  * Input is in the form of raw data points for observations
  *
@@ -41,13 +43,13 @@ data {
   tau_0, and correlation matrices, L_omega_0 */
   int<lower = 0, upper = 1> mu_0_known;          // are the prior expected means known and provided by the user?
   int<lower = 0, upper = 1> sigma_0_known;       // are the prior variance-covariance matrices known and provided by the user?
+  int<lower = 0, upper = 1> lapse_known;         // is the lapse rate known and provided by the user?
 
-  vector[mu_0_known ? 0 : K] mu_0_data[M];                    // prior expected means (set to zero to ignore)
-//  vector<lower=0>[mu_0_known ? 0 : K] mu_0_tau_data;          // prior variances of mu_0
-//  cholesky_factor_corr[mu_0_known ? 0 : K] mu_0_L_omega_data; // prior correlations of variances of mu_0
-  cov_matrix[mu_0_known ? 0 : K] mu_0_sigma_data[M];          // prior covariance matrix of mu_0
+  vector[mu_0_known ? 0 : K] mu_0_data[M];              // prior expected means (set to zero to ignore)
+  cov_matrix[mu_0_known ? 0 : K] mu_0_sigma_data[M];    // prior covariance matrix of mu_0
+  cov_matrix[sigma_0_known ? 0 : K] sigma_0_data[M];    // prior expected covariance matrix
+  real<lower=0, upper=1> lapse_rate_data[lapse_known ? 0 : 1];
 
-  cov_matrix[sigma_0_known ? 0 : K] sigma_0_data[M];               // prior expected covariance matrix
   /* These declarations could be made optional (tau_scale is only required if either mu_0 or tau_0 is unknown;
      L_omega_scale is only required if mu_0 or L_omega_0 are unknown). But it doesn't seem worth the additional
      decrease in coding transparency given that the model code already has if-statements in place to do this
@@ -68,37 +70,26 @@ parameters {
   real<lower=K> nu_0;                   // prior pseudocount for sd
 
   /* If mu_0 is known, set these parameters for the prior distribution of the mean to have zero dimensionality. */
-  vector[!mu_0_known ? 0 : K] mu_0_param[M];                       // prior expected means (set to zero to ignore)
-  vector<lower=0>[!mu_0_known ? 0 : K] mu_0_tau_param;             // prior variances of mu_0
-  cholesky_factor_corr[!mu_0_known ? 0 : K] mu_0_L_param;          // prior correlations of variances of mu_0
+  vector[!mu_0_known ? 0 : K] mu_0_param[M];                 // prior expected means (set to zero to ignore)
+  vector<lower=0>[!mu_0_known ? 0 : K] mu_0_tau;             // prior variances of mu_0
+  cholesky_factor_corr[!mu_0_known ? 0 : K] mu_0_L_omega;    // prior correlations of variances of mu_0
 
-  /* If sigma_0 is known, set parameters ofr the prior distribution of the standard deviations and correlation
+  /* If sigma_0 is known, set parameters for the prior distribution of the standard deviations and correlation
      matrices to have zero dimensionality. */
-  vector<lower=0>[!sigma_0_known ? 0 : K] tau_0_param[M];          // prior standard deviations of sigma_0
-  cholesky_factor_corr[!sigma_0_known ? 0 : K] L_omega_0_param[M]; // prior correlations of variances of sigma_0
+  vector<lower=0>[!sigma_0_known ? 0 : K] tau_0[M];          // prior standard deviations of sigma_0
+  cholesky_factor_corr[!sigma_0_known ? 0 : K] L_omega_0[M]; // prior correlations of variances of sigma_0
 
-  real<lower=0, upper=1> lapse_rate;
+  real<lower=0, upper=1> lapse_rate_param[!lapse_known ? 0 : 1];
 }
 
 transformed parameters {
   /* This is where the parameters for the prior distribution of means, standard deviations, and correlation matrices
      are defined, depending on whether they were provided by the user (and are thus 'known') or not. */
-  vector[K] mu_0[M];
-  if (mu_0_known) {
-    mu_0 = mu_0_data;
-  } else {
-    mu_0 = mu_0_param;
-  }
+  vector[K] mu_0[M];                    // prior expected means
+  cov_matrix[K] sigma_0[M];             // prior expected covariance matrices
+  real<lower=0, upper=1> lapse_rate;
 
-  cov_matrix[K] sigma_0[M];             // prior expected covariance matrix
-  // If this does not work (vectorized form might not; MOVE IT TO THE COMMENTED OUT PART WITHIN THE CAT LOOP)
-  if (sigma_0_known) {
-    sigma_0 = sigma_0_data;
-  } else {
-    sigma_0 = quad_form_diag(multiply_lower_tri_self_transpose(L_omega_0[cat]), tau_0[cat]);
-  }
-
-  // updated beliefs depend on input/subject
+  // Updated beliefs depend on input/subject
   real<lower=K> kappa_n[M,L];           // updated mean pseudocount
   real<lower=K> nu_n[M,L];              // updated sd pseudocount
   vector[K] mu_n[M,L];                  // updated expected mean
@@ -108,11 +99,30 @@ transformed parameters {
   simplex[M] p_test_conj[N_test];
   vector[M] log_p_test_conj[N_test];
 
+  if (mu_0_known) {
+    mu_0 = mu_0_data;
+  } else {
+    mu_0 = mu_0_param;
+  }
+
+  if (sigma_0_known) {
+    sigma_0 = sigma_0_data;
+  }
+
+  if (lapse_known) {
+    lapse_rate = lapse_rate_data[1];
+  } else {
+    lapse_rate = lapse_rate_param[1];
+  }
+
   // update NIW parameters according to conjugate updating rules are taken from
   // Murphy (2007, p. 136)
   for (cat in 1:M) {
     // Get sigma_0 from its components: correlation matrix and vector of standard deviations
-//    sigma_0[cat] = quad_form_diag(multiply_lower_tri_self_transpose(L_omega_0[cat]), tau_0[cat]);
+    if (!sigma_0_known) {
+      sigma_0[cat] = quad_form_diag(multiply_lower_tri_self_transpose(L_omega_0[cat]), tau_0[cat]);
+    }
+
     for (subj in 1:L) {
       if (N[cat,subj] > 0 ) {
         kappa_n[cat,subj] = kappa_0 + N[cat,subj];
