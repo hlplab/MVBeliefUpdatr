@@ -186,7 +186,7 @@ model {
   kappa_0 ~ normal(0, sigma_kappanu);
   nu_0 ~ normal(0, sigma_kappanu);
 
-  /* If mu_0 is NOT known, specifying prior for mu_0:
+  /* If prior mu is NOT known, specifying prior for mu:
      - If no scale for variances (tau) of mu_0 is user-specified use weakly regularizing
        scale (5) for variances of mean.
      - If no scale for LKJ prior over correlation matrix of mu_0 is user-specified use
@@ -197,7 +197,7 @@ model {
     m_0 ~ multi_normal_cholesky(rep_vector(0, K), diag_pre_multiply(m_0_tau, m_0_L_omega));
   }
 
-  /* If sigma_0 is NOT known, set priors for tau_0 and L_omega_0. */
+  /* If prior sigma is NOT known, set priors for tau_0 and L_omega_0. */
   if (!prior_sigma_known) {
     for (cat in 1:M) {
       tau_0[cat] ~ cauchy(0, tau_scale > 0 ? tau_scale : 10);
