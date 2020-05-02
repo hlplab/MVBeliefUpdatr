@@ -73,7 +73,7 @@ get_original_levels = function(fit, variable = c("category", "group"), indices =
 
   if (is.null(attr(fit, "constructors")[[rlang::sym(variable)]])) {
     warning(paste0(class_name, " object does not contain type information about the ", variable,
-                   " variable. Consider applying recover_types() from the tidybayes package first."))
+                   " variable. Consider applying tidybayes::recover_types() first."))
     return(NULL)
   }
 

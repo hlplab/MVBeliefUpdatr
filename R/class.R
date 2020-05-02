@@ -29,3 +29,5 @@ is.mv_ibbu_MCMC = function(x, nested = T, long = T) {
 
   if (nested) return(flag) else return(all(flag, c("cue", "cue2") %in% names(x)))
 }
+
+
