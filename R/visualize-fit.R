@@ -100,7 +100,10 @@ plot_ibbu_parameters = function(
   if (!is.null(n.draws)) draws = get_random_draw_indices(fit, n.draws)
 
   d.pars = fit %>%
-    add_ibbu_draws(which = which, draws = draws, nest = F)
+    add_ibbu_draws(
+      which = which,
+      draws = if (!is.null(n.draws)) draws else NULL,
+      nest = F)
 
   if (missing(group.ids)) group.ids = levels(d.pars$group)
   # Setting aes defaults
