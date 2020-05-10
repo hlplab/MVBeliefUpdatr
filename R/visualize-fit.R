@@ -120,7 +120,7 @@ plot_ibbu_parameters = function(
   which = "both",
   n.draws = NULL,
   group.ids = NULL, group.labels = NULL, group.colors = NULL,
-  panel.scaling = F
+  panel_scaling = F
 ) {
   # If n.draws is specified, get the IDs of the specific (randomly drawn n.draws) samples
   if (!is.null(n.draws)) draws = get_random_draw_indices(fit, n.draws)
