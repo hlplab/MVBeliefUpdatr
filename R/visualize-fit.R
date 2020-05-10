@@ -212,7 +212,7 @@ plot_ibbu_parameters = function(
       nrow = 1, rel_widths = c(K,1)),
     rel_heights = c(1, K), nrow = 2, axis = "lrtb")
   return(
-    if (!debug) suppressWarnings(p) else p
+    if (!debug) suppressMessages(p) else p
   )
 }
 
