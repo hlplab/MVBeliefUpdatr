@@ -51,16 +51,30 @@ get_default_colors = function(var, n) {
   return(c)
 }
 
-#' Get suitable limits for coordinate system.
+#' Get suitable limits for coordinate system based on the MCMC samples of a variable.
 #'
 #' Useful for, for example, plotting of distribution.
-#' @noRd
-get_limits = function(data, measure, hdi.prob = .99) {
+#'
+#' @param data A `tibble`` or `data.frame` that contains `measure`.
+#' @param measure Name of variable in `data` for which limits are sought.
+#' @param hdi.prob Proportion of MCMC samples that are within the limits.
+#' @param min,max If min or max are specified, then those limits are returned instead of the HDI-based limits.
+#'
+#' @return Vector with two values.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#'
+#' @export
+#'
+get_limits = function(data, measure, hdi.prob = .99, min = NULL, max = NULL) {
   data %>%
     mean_hdi((!! rlang::sym(measure)), .width = hdi.prob) %>%
     ungroup() %>%
-    summarise(.lower = min(.lower),
-              .upper = max(.upper)) %>%
+    summarise(.lower = if (!is.null(min)) min else min(.lower),
+              .upper = if (!is.null(max)) max else max(.upper)) %>%
     as.numeric()
 }
 
@@ -148,7 +162,7 @@ plot_ibbu_parameters = function(
                            ceiling(signed_log(min(x.limits))),
                            floor(signed_log(max(x.limits)))
                          ))) +
-    coord_trans(x = "signed_log", limx = x.limits) +
+    coord_trans(x = "signed_log", xlim = x.limits) +
     facet_grid(cue2 ~ cue)
 
   p.KN = p.M %+%
@@ -156,7 +170,7 @@ plot_ibbu_parameters = function(
        select(.draw, group, category, kappa, nu) %>%
        distinct() %>%
        gather(key = "key", value = "value", -c(.draw, group, category)) %T>%
-       { get_limits(., "value") ->> x.limits } ) +
+       { get_limits(., "value", min = 0) ->> x.limits } ) +
     aes(x = value) +
     scale_x_continuous("Pseudocounts",
                        breaks = 10^(
@@ -165,7 +179,7 @@ plot_ibbu_parameters = function(
                            floor(log10(max(x.limits)))
                          ))) +
     scale_y_discrete("") +
-    coord_trans(x = "log10", limx = x.limits) +
+    coord_trans(x = "log10", xlim = x.limits) +
     facet_grid(~ key)
 
   p.LR =
