@@ -10,7 +10,8 @@ plot_ibbu_parameters(
   n.draws = NULL,
   group.ids = NULL,
   group.labels = NULL,
-  group.colors = NULL
+  group.colors = NULL,
+  panel_scaling = F
 )
 }
 \arguments{
