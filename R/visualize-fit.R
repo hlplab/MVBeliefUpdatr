@@ -144,7 +144,7 @@ plot_ibbu_parameters = function(
       labels = group.labels,
       values = group.colors
     ) +
-    coord_cartesian(xlim = x.limits) +
+    coord_cartesian(xlim = x.limits,default = T) +
     facet_grid(~ cue) +
     theme_bw() + theme(legend.position = "right")
   legend = cowplot::get_legend(p.M)
@@ -156,12 +156,13 @@ plot_ibbu_parameters = function(
        distinct() %T>%
        { get_limits(., "S") ->> x.limits }) +
     aes(x = S) +
-    scale_x_continuous("Scatter matrix",
+    { suppressWarnings(
+      scale_x_continuous("Scatter matrix",
                        breaks = 10^(
                          seq(
                            ceiling(signed_log(min(x.limits))),
                            floor(signed_log(max(x.limits)))
-                         ))) +
+                         )))) } +
     coord_trans(x = "signed_log", xlim = x.limits) +
     facet_grid(cue2 ~ cue)
 
@@ -170,14 +171,15 @@ plot_ibbu_parameters = function(
        select(.draw, group, category, kappa, nu) %>%
        distinct() %>%
        gather(key = "key", value = "value", -c(.draw, group, category)) %T>%
-       { get_limits(., "value", min = 0) ->> x.limits } ) +
+       { get_limits(., "value", min = 1) ->> x.limits } ) +
     aes(x = value) +
-    scale_x_continuous("Pseudocounts",
+    { suppressWarnings(
+      scale_x_continuous("Pseudocounts",
                        breaks = 10^(
                          seq(
                            ceiling(log10(min(x.limits))),
                            floor(log10(max(x.limits)))
-                         ))) +
+                         )))) } +
     scale_y_discrete("") +
     coord_trans(x = "log10", xlim = x.limits) +
     facet_grid(~ key)
