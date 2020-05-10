@@ -108,7 +108,8 @@ plot_ibbu_parameters = function(
   fit,
   which = "both",
   n.draws = NULL,
-  group.ids = NULL, group.labels = NULL, group.colors = NULL
+  group.ids = NULL, group.labels = NULL, group.colors = NULL,
+  debug = F
 ) {
   # If n.draws is specified, get the IDs of the specific (randomly drawn n.draws) samples
   if (!is.null(n.draws)) draws = get_random_draw_indices(fit, n.draws)
@@ -156,13 +157,12 @@ plot_ibbu_parameters = function(
        distinct() %T>%
        { get_limits(., "S") ->> x.limits }) +
     aes(x = S) +
-    { suppressWarnings(
-      scale_x_continuous("Scatter matrix",
+    scale_x_continuous("Scatter matrix",
                        breaks = 10^(
                          seq(
                            ceiling(signed_log(min(x.limits))),
                            floor(signed_log(max(x.limits)))
-                         )))) } +
+                         ))) +
     coord_trans(x = "signed_log", xlim = x.limits) +
     facet_grid(cue2 ~ cue)
 
@@ -173,13 +173,12 @@ plot_ibbu_parameters = function(
        gather(key = "key", value = "value", -c(.draw, group, category)) %T>%
        { get_limits(., "value", min = 1) ->> x.limits } ) +
     aes(x = value) +
-    { suppressWarnings(
-      scale_x_continuous("Pseudocounts",
+    scale_x_continuous("Pseudocounts",
                        breaks = 10^(
                          seq(
                            ceiling(log10(min(x.limits))),
                            floor(log10(max(x.limits)))
-                         )))) } +
+                         ))) +
     scale_y_discrete("") +
     coord_trans(x = "log10", xlim = x.limits) +
     facet_grid(~ key)
@@ -204,15 +203,16 @@ plot_ibbu_parameters = function(
     theme_bw() + theme(legend.position = "none")
 
   K = length(unique(d.pars$cue))
+  p = cowplot::plot_grid(
+    cowplot::plot_grid(plotlist = list(p.M, p.KN), nrow = 1, rel_widths = c(K,2)),
+    cowplot::plot_grid(plotlist = list(
+      p.S,
+      cowplot::plot_grid(plotlist = list(legend, p.LR),
+                         nrow = 2, rel_heights = c(.45, .55))),
+      nrow = 1, rel_widths = c(K,1)),
+    rel_heights = c(1, K), nrow = 2, axis = "lrtb")
   return(
-    cowplot::plot_grid(
-        cowplot::plot_grid(plotlist = list(p.M, p.KN), nrow = 1, rel_widths = c(K,2)),
-        cowplot::plot_grid(plotlist = list(
-          p.S,
-          cowplot::plot_grid(plotlist = list(legend, p.LR),
-                             nrow = 2, rel_heights = c(.45, .55))),
-          nrow = 1, rel_widths = c(K,1)),
-      rel_heights = c(1, K), nrow = 2, axis = "lrtb")
+    if (!debug) suppressWarnings(p) else p
   )
 }
 
