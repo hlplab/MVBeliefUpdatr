@@ -35,10 +35,10 @@ symlog = function(x, C = 0) sign(x)*log10(1+abs(x)/10^C)
 
 #' @rdname symlog
 #' @export
-symlog_trans = function(C){
+symlog_trans = function(){
   scales::trans_new("symlog",
-                    transform=function(x) sign(x)*log10(1+abs(x)),
-                    inverse=function(x) sign(x)*(10^(abs(x)) - 1))
+                    transform=function(x) sign(x) * log10(1+abs(x)),
+                    inverse=function(x) sign(x) * (10^abs(x) - 1))
 }
 
 
