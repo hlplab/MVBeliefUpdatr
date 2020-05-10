@@ -190,7 +190,7 @@ plot_ibbu_parameters = function(
                            ceiling(log10(min(x.limits))),
                            floor(log10(max(x.limits)))
                          ))) +
-    scale_y_discrete("") +
+    scale_y_discrete("", expand = c(0,0)) +
     coord_trans(x = "log10", xlim = x.limits) +
     facet_grid(~ key)
 
