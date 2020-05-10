@@ -11,23 +11,34 @@
 NULL
 
 
-#' Signed log transform and function.
+#' Symmetric log transform and function.
 #'
 #' Makes it possible to use log-stepped scales or coordinate systems even when negative values
-#' are included in the data. E.g., in `coord_trans(x = "signed_log")`.
+#' are included in the data. E.g., in `coord_trans(x = "symlog")`. `symlog`` applies a modified
+#' logarithm scale to the specified or current axes that handles negative values while maintaining
+#' continuity across zero:
 #'
+#' y = sign(x)*(log10(1+abs(x)/(10^C)))
+#'
+#' where the scaling constant C determines the resolution of the data around zero. The smallest
+#' order of magnitude shown on either side of zero will be 10^ceil(C). If applies as a transform
+#' for a ggplot2 coordinate system, C is taken to be 0.
+#'
+#' Taken from https://www.mathworks.com/matlabcentral/fileexchange/57902-symlog.
+#'
+#' @references Webber (2012). Measurement Science and Technology .
 #' @examples
 #' TBD
-#' @rdname signed_log
+#' @rdname symlog
 #' @export
-signed_log = function(x) sign(x)*log10(abs(x))
+symlog = function(x, C = 0) sign(x)*log10(1+abs(x)/10^C)
 
-#' @rdname signed_log
+#' @rdname symlog
 #' @export
-signed_log_trans = function(){
-  scales::trans_new("signed_log",
-                    transform=function(x) sign(x)*log10(abs(x)),
-                    inverse=function(x) sign(x)*10^(abs(x)))
+symlog_trans = function(C){
+  scales::trans_new("symlog",
+                    transform=function(x) sign(x)*log10(1+abs(x)),
+                    inverse=function(x) sign(x)*(10^(abs(x)) - 1))
 }
 
 
@@ -109,7 +120,7 @@ plot_ibbu_parameters = function(
   which = "both",
   n.draws = NULL,
   group.ids = NULL, group.labels = NULL, group.colors = NULL,
-  debug = F
+  panel.scaling = F
 ) {
   # If n.draws is specified, get the IDs of the specific (randomly drawn n.draws) samples
   if (!is.null(n.draws)) draws = get_random_draw_indices(fit, n.draws)
@@ -135,7 +146,7 @@ plot_ibbu_parameters = function(
     { get_limits(., "M") ->> x.limits } %>%
     ggplot(aes(y = fct_rev(category), x = M, fill = group)) +
     ggridges::geom_density_ridges(alpha = .5, color = NA,
-                                  panel_scaling = F, scale = .95,
+                                  panel_scaling = panel_scaling, scale = .95,
                                   stat = "density", aes(height = ..density..)) +
     scale_x_continuous("Mean of category means") +
     scale_y_discrete("Category") +
@@ -160,10 +171,10 @@ plot_ibbu_parameters = function(
     scale_x_continuous("Scatter matrix",
                        breaks = 10^(
                          seq(
-                           ceiling(signed_log(min(x.limits))),
-                           floor(signed_log(max(x.limits)))
+                           ceiling(symlog(min(x.limits))),
+                           floor(symlog(max(x.limits)))
                          ))) +
-    coord_trans(x = "signed_log", xlim = x.limits) +
+    coord_trans(x = "symlog", xlim = x.limits) +
     facet_grid(cue2 ~ cue)
 
   p.KN = p.M %+%
@@ -210,10 +221,8 @@ plot_ibbu_parameters = function(
       cowplot::plot_grid(plotlist = list(legend, p.LR),
                          nrow = 2, rel_heights = c(.45, .55))),
       nrow = 1, rel_widths = c(K,1)),
-    rel_heights = c(1, K), nrow = 2, axis = "lrtb")
-  return(
-    if (!debug) suppressMessages(p) else p
-  )
+    rel_heights = c(2, K), nrow = 2, axis = "lrtb")
+  return(p)
 }
 
 #' Get categorization function
