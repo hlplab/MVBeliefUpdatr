@@ -22,7 +22,7 @@
 #'
 transform_cues = function(data, cues,
                           transform = NULL, return.transform = F,
-                          center = T, scale = T, PCA = F) {
+                          center = T, scale = T, PCA = F, PCA.cutoff = 1) {
   assert_that(is.data.frame(data) | is_tibble(data))
   assert_that(is.null(transform) | is.list(transform))
 
@@ -34,8 +34,7 @@ transform_cues = function(data, cues,
         select(!!! rlang::syms(cues)) %>%
         prcomp(center = center, scale. = scale)
 
-      s = summary(pca)$importance
-      cue = colnames(s)[1:min(which(s["Cumulative Proportion",] > pca.cutoff))]
+      print(summary(pca)$importance)
       center = FALSE
       scale = FALSE
 
