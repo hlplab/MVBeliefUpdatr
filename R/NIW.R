@@ -23,7 +23,12 @@ NULL
 #' TBD
 #' @export
 get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
-  assert_that(all(is.matrix(x), is.matrix(M), is.matrix(S)))
+  # mvtnorm::dmvt now expects means to be vectors, and x to be either a vector or a matrix.
+  # in the latter case, each *row* of the matrix is an input.
+  assert_that(all(is.vector(x) | is.matrix(M), is.vector(M) | is.matrix(M), is.matrix(S)))
+  if (is.vector(x)) x = matrix(M, nrow = 1)
+  if (is.matrix(M)) M = as.vector(M)
+
   assert_that(all(is.number(kappa), is.number(nu)))
   assert_that(is.flag(log))
   D = dim(S)[1]
@@ -32,9 +37,9 @@ get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
               Normal.")
   assert_that(dim(S)[2] == D,
               msg = "S is not a square matrix, and thus not a Scatter matrix")
-  assert_that(all(dim(M) == dim(x)) | dim(M)[1] == dim(x)[1] & dim(x)[2] > 1,
-              msg = "M and input are not of compatible dimensions.")
-  assert_that(all(dim(M) == c(D, 1)),
+  assert_that(length(M) == dim(x)[2],
+              msg = paste("M and input are not of compatible dimensions. M is of length", length(M), "but input has", dim(x)[2], "columns."))
+  assert_that(length(M) == D,
               msg = "S and M are not of compatible dimensions.")
 
   mvtnorm::dmvt(x,

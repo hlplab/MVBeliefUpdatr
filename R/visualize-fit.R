@@ -149,14 +149,14 @@ plot_ibbu_parameters = function(
                                   panel_scaling = panel_scaling, scale = .95,
                                   stat = "density", aes(height = ..density..)) +
     scale_x_continuous("Mean of category means") +
-    scale_y_discrete("Category") +
+    scale_y_discrete("Category", expand = c(0,0)) +
     scale_fill_manual(
       "Group",
       breaks = group.ids,
       labels = group.labels,
       values = group.colors
     ) +
-    coord_cartesian(xlim = x.limits,default = T) +
+    coord_cartesian(xlim = x.limits, default = T) +
     facet_grid(~ cue) +
     theme_bw() + theme(legend.position = "right")
   legend = cowplot::get_legend(p.M)
@@ -219,9 +219,9 @@ plot_ibbu_parameters = function(
     cowplot::plot_grid(plotlist = list(
       p.S,
       cowplot::plot_grid(plotlist = list(legend, p.LR),
-                         nrow = 2, rel_heights = c(.45, .55))),
+                         nrow = 2, rel_heights = c(.5, .5))),
       nrow = 1, rel_widths = c(K,1)),
-    rel_heights = c(2, K), nrow = 2, axis = "lrtb")
+    rel_heights = c(1.5, K), nrow = 2, axis = "lrtb")
   return(p)
 }
 
@@ -437,13 +437,10 @@ plot_ibbu_test_categorization = function(
     # function from each row (derived from the prior parameters of that draw) to the
     # token in that row.
     left_join(test_data) %>%
-    rowwise() %>%
-    do(
-      .draw = .$.draw,
-      group = .$group,
-      token = .$token,
-      token.cues = paste(.$x, collapse = ","),
-      probability_cat1 = .$f(.$x)
+    mutate(
+      token.cues = map(x, ~paste(.x, collapse = ",")),
+      probability_cat1 = map(x, f),
+      x = NULL
     ) %>%
     mutate_all(.funs = unlist) %>%
     ungroup()
