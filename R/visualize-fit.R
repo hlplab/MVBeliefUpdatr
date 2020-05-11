@@ -121,7 +121,7 @@ ellipse.pmap = function(x, centre, level, ...)
 #'
 plot_ibbu_parameters = function(
   fit,
-  which = "both",
+  which = c("prior", "posterior", "both")[3],
   n.draws = NULL,
   group.ids = NULL, group.labels = NULL, group.colors = NULL,
   panel_scaling = F
@@ -135,14 +135,18 @@ plot_ibbu_parameters = function(
       draws = if (!is.null(n.draws)) draws else NULL,
       nest = F)
 
-  if (missing(group.ids)) group.ids = levels(d.pars$group)
+  if (is.null(group.ids)) group.ids = levels(d.pars$group)
   # Setting aes defaults
-  if(missing(group.labels)) group.labels = paste0("posterior (", group.ids[-1], ")")
-  if(missing(group.colors)) group.colors = get_default_colors("group",
-                                                              length(group.ids) - 1)
-  # If no specific color for prior was specified
-  if(length(group.labels) < length(group.ids)) group.labels = c("prior", group.labels)
-  if(length(group.colors) < length(group.ids)) group.colors = c("darkgray", group.colors)
+  if (which  == "prior") {
+    if(is.null(group.labels)) group.labels[1] = "prior"
+    if(is.null(group.colors)) group.colors[1] = "darkgray"
+  } else if (which == "posterior") {
+    if(is.null(group.labels)) group.labels = paste0("posterior (", group.ids, ")")
+    if(is.null(group.colors)) group.colors = get_default_colors("group", length(group.ids))
+  } else {
+    if(is.null(group.labels)) group.labels = ifelse(group.ids == "prior", group.ids, paste0("posterior (", group.ids, ")"))
+    if(is.null(group.colors)) group.colors = c("darkgray", get_default_colors("group", length(group.ids) - 1))
+  }
 
   p.M = d.pars %>%
     select(.draw, group, category, cue, M) %>%
@@ -151,7 +155,12 @@ plot_ibbu_parameters = function(
     ggplot(aes(y = fct_rev(category), x = M, fill = group)) +
     ggridges::geom_density_ridges(alpha = .5, color = NA,
                                   panel_scaling = panel_scaling, scale = .95,
-                                  stat = "density", aes(height = ..density..)) +
+                                  stat = "density", aes(height = ..density..),
+                                  # trim in order to increase resolution and avoid misleading
+                                  # overlap with zero for S matrix; if not trimmed, density range
+                                  # is estimated for the entire data in each plot
+                                  trim = T) +
+    geom_vline(xintercept = 0, color = "darkgray") +
     scale_x_continuous("Mean of category means") +
     scale_y_discrete("Category", expand = c(0,0)) +
     scale_fill_manual(
@@ -166,38 +175,41 @@ plot_ibbu_parameters = function(
   legend = cowplot::get_legend(p.M)
 
   p.M = p.M + theme(legend.position = "none")
-  p.S = p.M %+%
-    (d.pars %>%
-       select(.draw, group, category, cue, cue2, S) %>%
-       distinct() %T>%
-       { get_limits(., "S") ->> x.limits }) +
-    aes(x = S) +
-    scale_x_continuous("Scatter matrix",
-                       breaks = inv_symlog(
-                         seq(
-                           ceiling(symlog(min(x.limits))),
-                           floor(symlog(max(x.limits))),
-                         ))
-                       ) +
-    coord_trans(x = "symlog", xlim = x.limits) +
-    facet_grid(cue2 ~ cue)
+  p.S = suppressMessages(
+    p.M %+%
+      (d.pars %>%
+         select(.draw, group, category, cue, cue2, S) %>%
+         distinct() %T>%
+         { get_limits(., "S") ->> x.limits }) +
+      aes(x = S) +
+      scale_x_continuous("Scatter matrix",
+                         breaks = inv_symlog(
+                           seq(
+                             ceiling(symlog(min(x.limits))),
+                             floor(symlog(max(x.limits))),
+                           ))
+      ) +
+      coord_trans(x = "symlog", xlim = x.limits) +
+      facet_grid(cue2 ~ cue))
 
-  p.KN = p.M %+%
-    (d.pars %>%
-       select(.draw, group, category, kappa, nu) %>%
-       distinct() %>%
-       gather(key = "key", value = "value", -c(.draw, group, category)) %T>%
-       { get_limits(., "value", min = 1) ->> x.limits } ) +
-    aes(x = value) +
-    scale_x_continuous("Pseudocounts",
-                       breaks = 10^(
-                         seq(
-                           ceiling(log10(min(x.limits))),
-                           floor(log10(max(x.limits)))
-                         ))) +
-    scale_y_discrete("", expand = c(0,0)) +
-    coord_trans(x = "log10", xlim = x.limits) +
-    facet_grid(~ key)
+  p.KN = suppressWarnings(
+    suppressMessages(
+      p.M %+%
+        (d.pars %>%
+           select(.draw, group, category, kappa, nu) %>%
+           distinct() %>%
+           gather(key = "key", value = "value", -c(.draw, group, category)) %T>%
+           { get_limits(., "value", min = 1) ->> x.limits } ) +
+        aes(x = value) +
+        scale_x_continuous("Pseudocounts",
+                           breaks = 10^(
+                             seq(
+                               ceiling(log10(min(x.limits))),
+                               floor(log10(max(x.limits)))
+                             ))) +
+        scale_y_discrete("", expand = c(0,0)) +
+        coord_trans(x = "log10", xlim = x.limits) +
+        facet_grid(~ key)))
 
   p.LR =
     d.pars %>%
@@ -206,7 +218,7 @@ plot_ibbu_parameters = function(
     { get_limits(., "lapse_rate") ->> x.limits } %>%
     ggplot(aes(x = lapse_rate)) +
     geom_density(color = NA, fill = "darkgray", alpha = .5,
-                           stat = "density") +
+                 stat = "density") +
     scale_x_continuous("Lapse rate")  +
     scale_y_discrete("") +
     scale_fill_manual(
@@ -219,14 +231,14 @@ plot_ibbu_parameters = function(
     theme_bw() + theme(legend.position = "none")
 
   K = length(unique(d.pars$cue))
-  p = cowplot::plot_grid(
+  p = suppressWarnings(cowplot::plot_grid(
     cowplot::plot_grid(plotlist = list(p.M, p.KN), nrow = 1, rel_widths = c(K,2)),
     cowplot::plot_grid(plotlist = list(
       p.S,
       cowplot::plot_grid(plotlist = list(legend, p.LR),
                          nrow = 2, rel_heights = c(.5, .5))),
       nrow = 1, rel_widths = c(K,1)),
-    rel_heights = c(1.5, K), nrow = 2, axis = "lrtb")
+    rel_heights = c(1.5, K), nrow = 2, axis = "lrtb"))
   return(p)
 }
 
