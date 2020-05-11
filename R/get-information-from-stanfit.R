@@ -101,8 +101,8 @@ get_group_levels = function(fit, indices = NULL) {
   return(get_original_levels(fit, "group", indices))
 }
 
-get_exposure_mean = function(fit, group = NULL, category = NULL) {}
-get_exposure_covariance = function(fit, group = NULL, category = NULL) {}
+get_exposure_mean = function(fit, group = NULL, category = NULL) { stop("get_exposure_mean not yet implemented!") }
+get_exposure_covariance = function(fit, group = NULL, category = NULL) { stop("get_exposure_covariance not yet implemented!") }
 
 #' Add MCMC draws of IBBU parameters to a tibble.
 #'
