@@ -143,7 +143,7 @@ get_exposure_covariance = function(fit, group = NULL, category = NULL) {}
 #'
 add_ibbu_draws = function(
   fit,
-  which = c("prior", "posterior", "both")[2],
+  which = "posterior",
   draws = NULL,
   summarize = FALSE,
   wide = FALSE,

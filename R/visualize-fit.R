@@ -121,7 +121,7 @@ ellipse.pmap = function(x, centre, level, ...)
 #'
 plot_ibbu_parameters = function(
   fit,
-  which = c("prior", "posterior", "both")[3],
+  which = "both",
   n.draws = NULL,
   group.ids = NULL, group.labels = NULL, group.colors = NULL,
   panel_scaling = F
