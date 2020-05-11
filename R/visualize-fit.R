@@ -18,7 +18,7 @@ NULL
 #' logarithm scale to the specified or current axes that handles negative values while maintaining
 #' continuity across zero:
 #'
-#' y = sign(x)*(log10(1+abs(x)/(10^C)))
+#' y = sign(x) * log10(1 + abs(x) / 10^C )
 #'
 #' where the scaling constant C determines the resolution of the data around zero. The smallest
 #' order of magnitude shown on either side of zero will be 10^ceil(C). If applies as a transform
@@ -31,14 +31,18 @@ NULL
 #' TBD
 #' @rdname symlog
 #' @export
-symlog = function(x, C = 0) sign(x)*log10(1+abs(x)/10^C)
+symlog = function(x, C = 0) sign(x) * log10(1 + abs(x) / 10^C)
+
+#' @rdname symlog
+#' @export
+inv_symlog = function(x, C = 0) sign(x) * (10^abs(x) * 10^C - 10^C)
 
 #' @rdname symlog
 #' @export
 symlog_trans = function(){
   scales::trans_new("symlog",
-                    transform=function(x) sign(x) * log10(1+abs(x)),
-                    inverse=function(x) sign(x) * (10^abs(x) - 1))
+                    transform = function(x) sign(x) * log10(1 + abs(x)),
+                    inverse = function(x) sign(x) * (10^abs(x) - 1))
 }
 
 
@@ -169,11 +173,12 @@ plot_ibbu_parameters = function(
        { get_limits(., "S") ->> x.limits }) +
     aes(x = S) +
     scale_x_continuous("Scatter matrix",
-                       breaks = 10^(
+                       breaks = inv_symlog(
                          seq(
                            ceiling(symlog(min(x.limits))),
-                           floor(symlog(max(x.limits)))
-                         ))) +
+                           floor(symlog(max(x.limits))),
+                         ))
+                       ) +
     coord_trans(x = "symlog", xlim = x.limits) +
     facet_grid(cue2 ~ cue)
 

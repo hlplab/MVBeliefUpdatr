@@ -22,7 +22,7 @@
 #'
 transform_cues = function(data, cues,
                           transform = NULL, return.transform = F,
-                          center = T, scale = T, PCA = F, PCA.cutoff = 1) {
+                          center = T, scale = T, PCA = F) {
   assert_that(is.data.frame(data) | is_tibble(data))
   assert_that(is.null(transform) | is.list(transform))
 
