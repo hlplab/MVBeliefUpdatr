@@ -429,9 +429,7 @@ plot_ibbu_test_categorization = function(
   # Prepare test_data
   test_data = fit.input$x_test %>%
     distinct() %>%
-    rowwise() %>%
-    transmute(x = list(c(!!! rlang::syms(cues)))) %>%
-    ungroup() %>%
+    transmute(x = pmap(.l = list(!!! syms(cues)), .f = ~ c(...))) %>%
     mutate(token = 1:length(x))
 
   # Store the number of test tokens since it's reused a number of times
