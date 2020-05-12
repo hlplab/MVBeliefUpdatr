@@ -101,8 +101,117 @@ get_group_levels = function(fit, indices = NULL) {
   return(get_original_levels(fit, "group", indices))
 }
 
-get_exposure_mean = function(fit, group = NULL, category = NULL) { stop("get_exposure_mean not yet implemented!") }
-get_exposure_covariance = function(fit, group = NULL, category = NULL) { stop("get_exposure_covariance not yet implemented!") }
+#' Get category mean mu or covariance matrix sigma from a tibble of cues.
+#'
+#' Returns the category means mu and/or category covariance matrix Sigma for the exposure data.
+#'
+#' @param x An mv_ibbu_stanfit or mv_ibbu_MCMC object.
+#' @param category Character vector with categories (or category) for which category statistics are to be
+#' returned.  If `NULL` then all categories are included. (default: `NULL`)
+#' @param group Character vector with groups (or group) for which category statistics are to be
+#' returned. If `NULL` then all groups are included. (default: `NULL`)
+#' @param statistic Which category statistic should be returned? `mu` for category mean or `Sigma` for category
+#' covariance matrix, or `c("mu", "Sigma")` for both. (default: both)
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname get_category_statistic
+#' @export
+get_category_statistic = function(x, grouping.vars = NULL,
+                                  statistic = c("mu", "Sigma")) {
+  assert_that(all(statistic %in% c("mu", "Sigma")))
+  stop("get_category_statistics not yet implemented!")
+
+  # More here ######################################
+  # Make general so as to extract mu and sigma for any combination of grouping variables
+  # Catch case when grouping variables are not specified (NULL)
+
+  # FIX FIX FIX FIX If just one category and group was requested, just return that object, rather
+  # than the tibble
+  if (nrow(x) == 1) x = x[,paste0(statistic, ".mean")][[1]][[1]]
+  return(x)
+}
+
+
+#' Get category mean mu or covariance matrix sigma of exposure data
+#'
+#' The category means mu and/or category covariance matrix Sigma for the exposure data.
+#'
+#' @param x An mv_ibbu_stanfit or mv_ibbu_MCMC object.
+#' @param category Character vector with categories (or category) for which category statistics are to be
+#' returned.  If `NULL` then all categories are included. (default: `NULL`)
+#' @param group Character vector with groups (or group) for which category statistics are to be
+#' returned. If `NULL` then all groups are included. (default: `NULL`)
+#' @param statistic Which category statistic should be returned? `mu` for category mean or `Sigma` for category
+#' covariance matrix, or `c("mu", "Sigma")` for both. (default: both)
+#'
+#' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
+#' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
+#' of group and category.
+
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname get_exposure_category_statistic
+#' @export
+get_exposure_category_statistic = function(x, category = NULL, group = NULL,
+                                  statistic = c("mu", "Sigma")) {
+  assert_that(is.mv_ibbu_input(x) | is.mv_ibbu_stanfit(x))
+  stop("get_exposure_statistics not yet implemented!")
+
+  x = get_ibbu_input(x)
+
+  # More here. ######################################
+  # filter out group "prior"
+  # deal with cases for which there is no exposure data
+  # Assume that all cues are used
+
+  return(get_category_statistic(x, grouping.vars = c("category", "group"), statistic))
+}
+
+#' @rdname get_exposure_category_statistic
+#' @export
+get_exposure_mean = function(x, category, group) {
+  return(get_exposure_category_statistic(x, category, group, statistic = "mu"))
+}
+
+#' @rdname get_exposure_category_statistic
+#' @export
+get_exposure_Sigma = function(x, category, group) {
+  return(get_exposure_category_statistic(x, category, group, statistic = "Sigma"))
+}
+
+
+
+#' Get the input data from an MV IBBU stanfit object.
+#'
+#' Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
+#' object.
+#'
+#' @param x An mv_ibbu_stanfit object.
+#'
+#' @return A list with element names and structure determined by the type of MV IBBU model.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname get_ibbu_input
+#' @export
+get_ibbu_input = function(x) {
+  assert_that(is.mv_ibbu_input(x) | is.mv_ibbu_stanfit(x))
+
+  if (is.mv_ibbu_input(x)) return(x) else {
+    stop("Extraction of input data from MV IBBU stanfit not yet implemented!")
+  }
+
+  return(x)
+}
+
+
 
 #' Add MCMC draws of IBBU parameters to a tibble.
 #'

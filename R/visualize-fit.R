@@ -670,37 +670,37 @@ plot_expected_ibbu_categories_contour2D = function(
         mapping = aes(cue1, cue2),
         inherit.aes = F,
         color = "black", size = 1
-      )} +
+    )} +
     # Optionally plot exposure data
-      { if (!is.null(fit.input) & plot.exposure)
-        geom_point(
-          data = get_exposure_mean(fit.input,
-                                   group = levels(d$group),
-                                   category = levels(d$category)) %>%
+    { if (!is.null(fit.input) & plot.exposure)
+      geom_point(
+        data = get_exposure_mean(fit.input,
+                                 category = levels(d$category),
+                                 group = levels(d$group)) %>%
+          rename_at(cue.names,
+                    function(x) paste0("cue", which(x == cue.names))),
+        mapping = aes(cue1, cue2, shape = category, color = category),
+        inherit.aes = F, size = 2
+      ) +
+        geom_path(
+          data = crossing(
+            group = levels(d$group),
+            category = levels(d$category),
+            level = .95
+          ) %>%
+            mutate(
+              x = map2(category, group, get_exposure_sigma(fit.input, .x, .y)),
+              centre = map2(category, group, get_exposure_mean(fit.input, .x, .y))
+            ) %>%
+            mutate(ellipse = pmap(., ellipse.pmap)) %>%
+            mutate(ellipse = map(ellipse, as_tibble)) %>%
+            unnest(ellipse) %>%
             rename_at(cue.names,
                       function(x) paste0("cue", which(x == cue.names))),
           mapping = aes(cue1, cue2, shape = category, color = category),
-          inherit.aes = F, size = 2
-        ) +
-          geom_path(
-            data = crossing(
-              group = levels(d$group),
-              category = levels(d$category),
-              level = .95
-            ) %>%
-              mutate(
-                x = map2(group, category, get_exposure_covariance(fit.input, .x, .y)),
-                centre = map2(group, category, get_exposure_mean(fit.input, .x, .y))
-              ) %>%
-              mutate(ellipse = pmap(., ellipse.pmap)) %>%
-              mutate(ellipse = map(ellipse, as_tibble)) %>%
-              unnest(ellipse) %>%
-              rename_at(cue.names,
-                        function(x) paste0("cue", which(x == cue.names))),
-            mapping = aes(cue1, cue2, shape = category, color = category),
-            linetype = 2,
-            inherit.aes = F)
-      } +
+          linetype = 2,
+          inherit.aes = F)
+    } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
     scale_fill_manual("Category",
@@ -767,16 +767,16 @@ plot_expected_ibbu_categories_density2D = function(
         color = "black", size = 1
       )} +
     # Optionally plot exposure data
-      { if (!is.null(fit.input) & plot.exposure)
-        geom_point(
-          data = get_exposure_mean(fit.input,
-                                   group = levels(d$group),
-                                   category = levels(d$category)) %>%
-            rename_at(cue.names,
-                      function(x) paste0("cue", which(x == cue.names))),
-          mapping = aes(cue1, cue2, shape = category, color = category),
-          inherit.aes = F, size = 2
-        ) +
+    { if (!is.null(fit.input) & plot.exposure)
+      geom_point(
+        data = get_exposure_mean(fit.input,
+                                 category = levels(d$category),
+                                 group = levels(d$group)) %>%
+          rename_at(cue.names,
+                    function(x) paste0("cue", which(x == cue.names))),
+        mapping = aes(cue1, cue2, shape = category, color = category),
+        inherit.aes = F, size = 2
+      ) +
         geom_path(
           data = crossing(
             group = levels(d$group),
@@ -784,18 +784,18 @@ plot_expected_ibbu_categories_density2D = function(
             level = .95
           ) %>%
             mutate(
-              x = map2(group, category, get_exposure_covariance(fit.input, .x, .y)),
-              centre = map2(group, category, get_exposure_mean(fit.input, .x, .y))
+              x = map2(category, group, get_exposure_sigma(fit.input, .x, .y)),
+              centre = map2(category, group, get_exposure_mean(fit.input, .x, .y))
             ) %>%
             mutate(ellipse = pmap(., ellipse.pmap)) %>%
             mutate(ellipse = map(ellipse, as_tibble)) %>%
             unnest(ellipse) %>%
-                    rename_at(cue.names,
-                              function(x) paste0("cue", which(x == cue.names))),
+            rename_at(cue.names,
+                      function(x) paste0("cue", which(x == cue.names))),
           mapping = aes(cue1, cue2, shape = category, color = category),
           linetype = 2,
           inherit.aes = F)
-        } +
+    } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
     scale_color_manual("Category",

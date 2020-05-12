@@ -7,5 +7,5 @@
 is.mv_ibbu_stanfit(x)
 }
 \description{
-Is this an MV IBBU stanfit?
+Check whether \code{x} is of class \code{mv_ibbu_stanfit}.
 }

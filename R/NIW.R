@@ -63,15 +63,15 @@ get_Sigma_from_S = function(S, nu) {
 
 #' Get expected category mean mu or covariance matrix sigma
 #'
-#' Returns the expected value of posterior marginal distribution over category means mu or
+#' Returns the expected value of posterior marginal distribution over category means mu and/or
 #' category covariance matrix Sigma, marginalized over all MCMC samples.
 #'
-#' Each MCMC samples' expected value \code{E[mu] = M_n}
-#' (i.e, the posterior/updated mean of the mulativariate Normal over category means \code{mu}).
+#' Each MCMC samples' expected value for the category mean \code{E[mu] = M_n}
+#' (i.e, the posterior/updated mean of the multivariate Normal over category means \code{mu}).
 #' Marginalizing across all MCMC samples (representing uncertainty in the true value of
-#' \code{M_n}), we get \code{E\[E\[mu\]\] = mean(M_n)}.
+#' \code{M_n}), we get \code{E[E[mu]] = mean(M_n)}.
 #'
-#' Each MCMC samples' expected value
+#' Each MCMC samples' expected value for the category covariance matrix
 #' \code{E[Sigma] = S_n / (nu_n - D - 1)}, where \code{S_n} is the posterior/updated scatter matrix,
 #' \code{nu_n} is the posterior/updated pseudocount representing the strength of the posterior/updated
 #' beliefs over category covariance matrices sigma (i.e., the inverse-Wishart), and \code{D} is
@@ -86,6 +86,10 @@ get_Sigma_from_S = function(S, nu) {
 #' returned. If `NULL` then all groups are included. (default: `NULL`)
 #' @param statistic Which category statistic should be returned? `mu` for category mean or `Sigma` for category
 #' covariance matrix, or `c("mu", "Sigma")` for both. (default: both)
+#'
+#' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
+#' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
+#' of group and category.
 #'
 #' @seealso TBD
 #' @keywords TBD

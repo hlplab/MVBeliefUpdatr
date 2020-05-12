@@ -2,7 +2,7 @@
 % Please edit documentation in R/class.R
 \name{is.mv_ibbu_MCMC}
 \alias{is.mv_ibbu_MCMC}
-\title{Is this a tibble of IBBU draws?}
+\title{Is this a tibble of MV IBBU draws?}
 \usage{
 is.mv_ibbu_MCMC(x, nested = T, long = T)
 }
