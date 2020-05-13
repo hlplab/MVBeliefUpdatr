@@ -83,7 +83,8 @@ make_NIW_prior_from_data = function(
       kappa = kappa,
       nu = nu,
       M = mu,
-      S = map2(Sigma, nu, get_S_from_Sigma)) %>%
+      S = map2(Sigma, nu, get_S_from_Sigma),
+      lapse = lapse) %>%
     select(-c(mu, Sigma))
 
   return(data)
