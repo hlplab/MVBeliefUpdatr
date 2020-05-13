@@ -25,7 +25,9 @@ is.NIW_belief = function(x, is.long = T, category = "category") {
   flag = all(
     is_tibble(x),
     c(!! sym(category),
-      "kappa", "nu", "M", "S") %in% names(x))
+      "kappa", "nu", "M", "S") %in% names(x),
+    is.factor(x$category))
+
 
   return(flag)
 }
