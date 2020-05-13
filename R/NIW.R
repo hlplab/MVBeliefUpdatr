@@ -1,4 +1,5 @@
 #' @import assertthat
+#' @importFrom purrr reduce
 #' @importFrom mvtnorm dmvt
 NULL
 
@@ -54,12 +55,17 @@ get_posterior_predictive.pmap = function(x, M, S, kappa, nu, ...) {
 }
 
 
-#' Get expected category covariance from Scatter matrix and nu
+#' Get expected category covariance from Scatter matrix S and pseudocount nu
 #' @export
 get_Sigma_from_S = function(S, nu) {
   return(S / (nu - dim(S)[1] - 1))
 }
 
+#' Get Scatter matrix S from expected category covariance Sigma and pseudocount nu
+#' @export
+get_S_from_Sigma = function(Sigma, nu) {
+  return(Sigma * (nu - dim(Sigma)[1] - 1))
+}
 
 #' Get expected category mean mu or covariance matrix sigma
 #'
@@ -115,8 +121,8 @@ get_expected_category_statistic = function(x, category = NULL, group = NULL,
     mutate(Sigma = map2(S, nu, get_Sigma_from_S)) %>%
     group_by(group, category) %>%
     summarise(
-      mu.mean = list(M %>% purrr::reduce(`+`) / length(M)),
-      Sigma.mean = list(Sigma %>% purrr::reduce(`+`) / length(Sigma))) %>%
+      mu.mean = list(M %>% reduce(`+`) / length(M)),
+      Sigma.mean = list(Sigma %>% reduce(`+`) / length(Sigma))) %>%
     select(group, category, !!! rlang::syms(paste0(statistic, ".mean")))
 
   if (!all(sort(unique(as.character(x$group))) == sort(as.character(group))))
