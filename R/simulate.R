@@ -1,21 +1,91 @@
 #' @import assertthat
+#' @importFrom rlang is_symbol sym syms
+#' @importFrom magrittr %<>%
+#' @importFrom dplyr %>% select filter mutate summarise left_join rename rename_at group_by ungroup
+#' @importFrom tibble is_tibble
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom purrr pmap
 NULL
 
-example_prior1 = function() {
-  tibble(
-    category = c("A", "B"),
-    kappa = 10,
-    nu = 30,
-    M = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
-    S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
-             matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
-    lapse = .05
-  ) %>%
+example_NIW_prior = function(example = 1) {
+  if (example == 1) {
+    tibble(
+      category = c("A", "B"),
+      kappa = 10,
+      nu = 30,
+      M = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
+      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
+      lapse = .05
+    ) %>%
     mutate(category = factor(category))
+  }
 }
 
+
+#' Make NIW prior from data.
+#'
+#' Constructs an NIW_belief object, representing Normal-Inverse Wishart (NIW) parameters for all categories found in
+#' the data. This object can be used as a prior for functions like \code{\link{update_NIW_beliefs()}}.
+#'
+#' Currently, \code{make_NIW_prior_from_data()} does not infer kappa or nu, nor does it fit hierarchical data. Rather
+#' the function simply estimates the category mean and covariance matrix from the sample (\code{data}), assumes them
+#' to be the expected category mean (mu) and covariance (Sigma), and derives the M and S parameters
+#' of the NIW from mu and Sigma based on the user-provided kappa and nu. That means M = mu and S = Sigma * (nu - D -1),
+#' where D is the dimensionality of the data.
+#'
+#' @param data The tibble or data.frame from which to construct the prior.
+#' @param category Name of variable in \code{data} that contains the category information. (default: "category")
+#' @param cues Name(s) of variables in \code{data} that contain the cue information.
+#' @param kappa The strength of the beliefs over the category mean (pseudocounts).
+#' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts).
+#' @param lapse Optionally specify a lapse rate. (default: \code{NA})
+#'
+#' @return A tibble that is an NIW_belief object.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+#'
+make_NIW_prior_from_data = function(
+  data,
+  group = NULL,
+  category = "category",
+  cues,
+  kappa = NA,
+  nu = NA,
+  lapse = NA
+) {
+  warn("This function has not yet been debugged!")
+  assert_that(is.data.frame(data) | is_tibble(data))
+  assert_that(all(is.null(group) | all(is.character(group) | is_symbol(group), length(group) == 1)))
+  assert_that(all(is.character(category) | is_symbol(category), length(category) == 1))
+  assert_that(all(is.character(cues) | is_symbol(cues), length(cues) > 0))
+  assert_that(all(is.numeric(kappa), is.numeric(nu)))
+  assert_that(nu > length(cues) + 1,
+              msg = "nu must be larger than D (dimensionality of cues) + 1.")
+
+  if (is.character(group)) group = sym(group)
+  if (is.character(category)) category = sym(category)
+  if (is.character(cues)) cues = syms(cues)
+
+  data %<>%
+    select(!! category, !!! cues, !! group) %>%
+    mutate(cues = pmap(list(!!! cues), ~ c(...))) %>%
+    { if (is.null(group)) group_by(., !! category) else group_by(., !! group, !! category) } %>%
+    summarise(
+      mu = list(reduce(cues, `+`) / length(cues)),
+      Sigma = list(cov(cbind(!!! cues)))) %>%
+    transmute(
+      kappa = kappa,
+      nu = nu,
+      M = mu,
+      S = map2(Sigma, nu, get_S_from_Sigma))
+
+  return(data)
+}
 
 
 #' Make multivariate Gaussian exposure data.
@@ -65,9 +135,9 @@ make_MV_exposure_data = function(Ns, means, Sigmas, category.labels = NULL, cue.
 
 
 
-#' Update prior beliefs about multivariate Gaussian category based on exposure data and the conjugate NIW prior.
+#' Update NIW prior beliefs about multivariate Gaussian category based on exposure data.
 #'
-#' Returns updated/posterior beliefs about the Gaussian categories.
+#' Returns updated/posterior beliefs about the Gaussian categories based on conjugate NIW prior.
 #'
 #' The priors for the categories are specified through the \code{priors} argument. This is expected to be a tibble
 #' of the same format as the posterior draws stored in an MV IBBU stanfit object. Each row of the tibble specifies
@@ -90,7 +160,7 @@ make_MV_exposure_data = function(Ns, means, Sigmas, category.labels = NULL, cue.
 #' TBD
 #' @export
 #'
-update_MV_beliefs <- function(
+update_NIW_beliefs <- function(
   data,
   priors,
   category = "category",
