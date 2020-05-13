@@ -7,8 +7,8 @@
 plot_expected_categories_contour2D(
   x,
   grouping.var = NULL,
-  panel.group = !animate.group,
-  animate.group = !panel.group,
+  panel.group = F,
+  animate.group = F,
   levels = plogis(seq(-15, qlogis(0.95), length.out = 20)),
   category.ids = NULL,
   category.labels = NULL,

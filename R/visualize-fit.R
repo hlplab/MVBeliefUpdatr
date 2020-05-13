@@ -583,7 +583,7 @@ plot_ibbu_test_categorization = function(
 #' @export
 plot_expected_categories_contour2D = function(
   x,
-  grouping.var = NULL, panel.group = !animate.group, animate.group = !panel.group,
+  grouping.var = NULL, panel.group = F, animate.group = F,
   levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
   # data.exposure = NULL,
   # data.test = NULL,
@@ -604,7 +604,7 @@ plot_expected_categories_contour2D = function(
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   x %<>%
-    mutate(!! sym(grouping.var) := factor(!! sym(grouping.var))) %>%
+    { if(!is.null(grouping.var)) mutate(., !! sym(grouping.var) := factor(!! sym(grouping.var))) else . } %>%
     mutate(Sigma = map2(S, nu, get_Sigma_from_S)) %>%
     crossing(level = levels) %>%
     mutate(ellipse = pmap(.l = list(Sigma, M, level), ellipse.pmap)) %>%
