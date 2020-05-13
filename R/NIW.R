@@ -107,7 +107,7 @@ get_S_from_Sigma = function(Sigma, nu) {
 get_expected_category_statistic = function(x, category = NULL, group = NULL,
                                            statistic = c("mu", "Sigma")) {
   assert_that(all(statistic %in% c("mu", "Sigma")))
-  assert_that(is.mv_ibbu_stanfit(x) | is.mv_ibbu_MCMC(x, nested = T, long = T))
+  assert_that(is.mv_ibbu_stanfit(x) | is.mv_ibbu_MCMC(x, is.nested = T, is.long = T))
   if (is.mv_ibbu_stanfit(x))
     x = add_ibbu_draws(x, which = "both", wide = F, nest = T)
 
