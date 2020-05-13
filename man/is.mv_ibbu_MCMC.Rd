@@ -4,7 +4,7 @@
 \alias{is.mv_ibbu_MCMC}
 \title{Is this a tibble of MV IBBU draws?}
 \usage{
-is.mv_ibbu_MCMC(x, nested = T, long = T)
+is.mv_ibbu_MCMC(x, is.nested = T, is.long = T)
 }
 \description{
 Check whether \code{x} is a tibble of post-warmup draws of parameters obtained from incremental

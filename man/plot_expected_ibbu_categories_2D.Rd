@@ -4,7 +4,7 @@
 \alias{plot_expected_ibbu_categories_2D}
 \alias{plot_expected_ibbu_categories_contour2D}
 \alias{plot_expected_ibbu_categories_density2D}
-\title{Plot expected bivariate (2D) categories.}
+\title{Plot expected bivariate (2D) categories from MV IBBU stanfit.}
 \usage{
 plot_expected_ibbu_categories_2D(x, fit.input = NULL, type, ...)
 
@@ -46,6 +46,9 @@ density plot instead calculates the posterior predictive for each MCMC draw (i.e
 density based on the NIW parameters \code{M, S, kappa, nu}), and then averages those densities. Since this is
 done for *all* points defined by the data.grid this can be rather computationally expensive and slow.}
 
+\item{levels}{Used only if `type` is `"contour"`. levels The cumulative probability levels that should be plotted (using
+`geom_polygon()`) around the mean. By default the most transparent ellipse still drawn corresponds to .95.}
+
 \item{plot.test, plot.exposure}{Should the test and/or exposure stimuli be plotted? (default: `TRUE` for `plot.test`,
 `FALSE` for `plot.exposure`) The test items are plotted as black points. The exposure mean is plotted as point,
 and the .95 interval of cue distributions during exposure are plotted as dashed ellipse in the same color as the
@@ -68,10 +71,6 @@ expected categories be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`) C
 
 \item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
 (default: `NULL`) Currently being ignored.}
-
-\item{Used}{only if `type` is `"contour"`. levels The cumulative probability levels that should be plotted (using
-`geom_polygon()`) around the mean. By default
-the most transparent ellipse still drawn corresponds to .95.}
 
 \item{data.grid.xlim, data.grid.ylim, data.grid.resolution}{Used only if `type` is `"density"`. Limits for x- and y-axis as
 well as resolution of the data.grid, defining the range over which the posterior predictive (multivariate Student-T density)
