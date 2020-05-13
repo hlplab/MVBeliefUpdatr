@@ -2,10 +2,10 @@
 % Please edit documentation in R/NIW.R
 \name{get_Sigma_from_S}
 \alias{get_Sigma_from_S}
-\title{Get expected category covariance from Scatter matrix and nu}
+\title{Get expected category covariance from Scatter matrix S and pseudocount nu}
 \usage{
 get_Sigma_from_S(S, nu)
 }
 \description{
-Get expected category covariance from Scatter matrix and nu
+Get expected category covariance from Scatter matrix S and pseudocount nu
 }
