@@ -78,11 +78,13 @@ make_NIW_prior_from_data = function(
     summarise(
       mu = list(reduce(cues, `+`) / length(cues)),
       Sigma = list(cov(cbind(!!! cues)))) %>%
-    transmute(
+    mutate(
+      !! category := factor(!! category),
       kappa = kappa,
       nu = nu,
       M = mu,
-      S = map2(Sigma, nu, get_S_from_Sigma))
+      S = map2(Sigma, nu, get_S_from_Sigma)) %>%
+    select(-c(mu, Sigma))
 
   return(data)
 }

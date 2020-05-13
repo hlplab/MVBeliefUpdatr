@@ -22,15 +22,12 @@ is.mv_ibbu_stanfit = function(x) {
 is.NIW_belief = function(x, is.long = T, category = "category") {
   assert_that(is.flag(is.long) & is.long == T,
               msg = "Currently only NIW beliefs in long tibble format can be recognized.")
-  flag = all(
-    is_tibble(x),
-    c(category,
-      "kappa", "nu", "M", "S") %in% names(x),
-    # Is category a factor?
-    is.factor(x %>% select(!! sym(category)) %>% unlist()))
+  assert_that(is.factor(x %>% select(!! sym(category)) %>% unlist()),
+              msg = "category must be a factor.")
+  assert_that(is_tibble(x))
+  assert_that(all(c(category, "kappa", "nu", "M", "S") %in% names(x)))
 
-
-  return(flag)
+  T
 }
 
 
@@ -41,12 +38,13 @@ is.NIW_belief = function(x, is.long = T, category = "category") {
 is.mv_ibbu_MCMC = function(x, is.nested = T, is.long = T) {
   assert_that(is.flag(is.long) & is.long == T,
               msg = "Currently only IBBU MCMC tibbles in long format can be recognized.")
-  flag = all(
-    is.NIW_belief(x, category = "category"),
-    c(".chain", ".iteration", ".draw",
-      "group", "lapse_rate") %in% names(x))
+  assert_that(is.NIW_belief(x, category = "category"),
+              msg = "x is missing information required from an NIW_belief object.")
+  assert_that(all(c(".chain", ".iteration", ".draw",
+                "group", "lapse_rate") %in% names(x)))
+  assert_that(!is.nested | all(flag, c("cue", "cue2") %in% names(x)))
 
-  if (is.nested) return(flag) else return(all(flag, c("cue", "cue2") %in% names(x)))
+  T
 }
 
 
