@@ -15,20 +15,35 @@ is.mv_ibbu_stanfit = function(x) {
     return(TRUE) else return(FALSE)
 }
 
+
+#' Is this a tibble of NIW beliefs?
+#'
+#' Check whether \code{x} is a tibble of NIW beliefs.
+is.NIW_belief = function(x, is.long = T, category = "category") {
+  assert_that(is.flag(long) & is.long == T,
+              msg = "Currently only NIW beliefs in long tibble format can be recognized.")
+  flag = all(
+    is_tibble(x),
+    c(!! sym(category),
+      "kappa", "nu", "M", "S") %in% names(x))
+
+  return(flag)
+}
+
+
 #' Is this a tibble of MV IBBU draws?
 #'
 #' Check whether \code{x} is a tibble of post-warmup draws of parameters obtained from incremental
 #' Bayesian belief-updating (IBBU).
-is.mv_ibbu_MCMC = function(x, nested = T, long = T) {
-  assert_that(is.flag(long) & long == T,
+is.mv_ibbu_MCMC = function(x, is.nested = T, is.long = T) {
+  assert_that(is.flag(is.long) & is.long == T,
               msg = "Currently only IBBU MCMC tibbles in long format can be recognized.")
   flag = all(
-    is_tibble(x),
+    is.NIW_belief(x, category = "category"),
     c(".chain", ".iteration", ".draw",
-      "group", "category",
-      "kappa", "nu", "M", "S", "lapse_rate") %in% names(x))
+      "group", "lapse_rate") %in% names(x))
 
-  if (nested) return(flag) else return(all(flag, c("cue", "cue2") %in% names(x)))
+  if (is.nested) return(flag) else return(all(flag, c("cue", "cue2") %in% names(x)))
 }
 
 
