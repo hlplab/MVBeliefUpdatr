@@ -61,7 +61,7 @@ is.mv_ibbu_MCMC = function(x, is.nested = T, is.long = T) {
 #'
 #' Check whether \code{x} is of class \code{mv_ibbu_input}.
 is.mv_ibbu_input = function(x) {
-  warn("Test of mv_ibbu_input class not yet implemented. Always returning T.")
+  warning("Test of mv_ibbu_input class not yet implemented. Always returning T.")
 
   # Proposed names for slides in input object (at least internally / not necessarily handed to stan like this:
   #
