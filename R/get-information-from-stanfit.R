@@ -404,13 +404,10 @@ add_ibbu_draws = function(
         )
     }
 
-    # Make sure that group is a factor (even if group ids are just numbers)
-    if (which == "prior")
-      d.pars %<>% mutate((!! rlang::sym(group)) := factor("prior")) else
-      d.pars %<>% mutate((!! rlang::sym(group)) := factor(!! rlang::sym(group)))
 
     # Make sure order of variables is identical for prior or posterior (facilitates processing of the
-    # output of this function).
+    # output of this function). If group is prior, then add that variable to d.pars first.
+    if (which == "prior") d.pars %<>% mutate((!! rlang::sym(group)) := "prior")
     d.pars %<>% select(.chain, .iteration, .draw,
                        !! rlang::sym(group), !! rlang::sym(category),
                        # Using starts_with in order to capture case in which variables are *not* nested
@@ -428,8 +425,13 @@ add_ibbu_draws = function(
         spread(temp, value)
     }
 
-    return(d.pars %>%
-             ungroup())
+    # Final clean-up
+    d.pars %<>%
+      ungroup() %>%
+      # Make sure that group and category are factors (even if group or category ids are just numbers)
+      mutate_at(vars(!! rlang::sym(group), !! rlang::sym(category)), factor)
+
+    return(d.pars)
   }
 }
 
