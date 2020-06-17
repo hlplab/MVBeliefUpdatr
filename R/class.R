@@ -20,14 +20,16 @@ is.mv_ibbu_stanfit = function(x) {
 #'
 #' Check whether \code{x} is a tibble of NIW beliefs.
 is.NIW_belief = function(x, is.long = T, category = "category") {
-  assert_that(is.flag(is.long) & is.long == T,
-              msg = "Currently only NIW beliefs in long tibble format can be recognized.")
-  assert_that(is_tibble(x))
-  assert_that(all(c(category, "kappa", "nu", "M", "S") %in% names(x)))
-  assert_that(is.factor(get(category, x)),
-              msg = "category must be a factor.")
-
-  T
+  if (
+    all(
+      # Currently only IBBU MCMC tibbles in long format can be recognized.
+      is.flag(is.long), is.long == T,
+      is_tibble(x),
+      all(c(category, "kappa", "nu", "M", "S") %in% names(x)),
+      # Check whether category is a factor
+      is.factor(get(category, x))
+    )
+  ) return(T) else return(F)
 }
 
 
@@ -36,15 +38,14 @@ is.NIW_belief = function(x, is.long = T, category = "category") {
 #' Check whether \code{x} is a tibble of post-warmup draws of parameters obtained from incremental
 #' Bayesian belief-updating (IBBU).
 is.mv_ibbu_MCMC = function(x, is.nested = T, is.long = T) {
-  assert_that(is.flag(is.long) & is.long == T,
-              msg = "Currently only IBBU MCMC tibbles in long format can be recognized.")
-  assert_that(is.NIW_belief(x, category = "category"),
-              msg = "x is missing information required from an NIW_belief object.")
-  assert_that(all(c(".chain", ".iteration", ".draw",
-                "group", "lapse_rate") %in% names(x)))
-  assert_that(!is.nested | all(flag, c("cue", "cue2") %in% names(x)))
-
-  T
+  if(
+    all(
+       is.NIW_belief(x, category = "category", is.long = is.long),
+       all(c(".chain", ".iteration", ".draw",
+             "group", "lapse_rate") %in% names(x)),
+       (!is.nested | all(c("cue", "cue2") %in% names(x)))
+    )
+  ) return(T) else return(F)
 }
 
 
