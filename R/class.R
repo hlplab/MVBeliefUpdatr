@@ -21,15 +21,22 @@ is.mv_ibbu_stanfit = function(x) {
 #' Check whether \code{x} is a tibble of NIW beliefs.
 is.NIW_belief = function(x, is.long = T, category = "category") {
   if (
-    all(
+    any(
       # Currently only IBBU MCMC tibbles in long format can be recognized.
-      is.flag(is.long), is.long == T,
-      is_tibble(x),
-      all(c(category, "kappa", "nu", "M", "S") %in% names(x)),
-      # Check whether category is a factor
-      is.factor(get(category, x))
+      !is.flag(is.long), !is.long == T,
+      !is_tibble(x),
+      !all(c(category, "kappa", "nu", "M", "S") %in% names(x))
     )
-  ) return(T) else return(F)
+  ) return(FALSE)
+
+  # Check whether category is a factor only after everything else is checked.
+  if (
+    any(
+      !is.factor(get(category, x))
+    )
+  ) return(FALSE)
+
+  return(TRUE)
 }
 
 
@@ -39,13 +46,13 @@ is.NIW_belief = function(x, is.long = T, category = "category") {
 #' Bayesian belief-updating (IBBU).
 is.mv_ibbu_MCMC = function(x, is.nested = T, is.long = T) {
   if(
-    all(
-       is.NIW_belief(x, category = "category", is.long = is.long),
-       all(c(".chain", ".iteration", ".draw",
+    any(
+       !is.NIW_belief(x, category = "category", is.long = is.long),
+       !all(c(".chain", ".iteration", ".draw",
              "group", "lapse_rate") %in% names(x)),
-       (!is.nested | all(c("cue", "cue2") %in% names(x)))
+       !(!is.nested | all(c("cue", "cue2") %in% names(x)))
     )
-  ) return(T) else return(F)
+  ) return(F) else return(T)
 }
 
 
