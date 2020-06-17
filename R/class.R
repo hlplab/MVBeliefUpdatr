@@ -22,10 +22,10 @@ is.mv_ibbu_stanfit = function(x) {
 is.NIW_belief = function(x, is.long = T, category = "category") {
   assert_that(is.flag(is.long) & is.long == T,
               msg = "Currently only NIW beliefs in long tibble format can be recognized.")
-  assert_that(is.factor(x %>% select(!! sym(category)) %>% unlist()),
-              msg = "category must be a factor.")
   assert_that(is_tibble(x))
   assert_that(all(c(category, "kappa", "nu", "M", "S") %in% names(x)))
+  assert_that(is.factor(get(category, x)),
+              msg = "category must be a factor.")
 
   T
 }
