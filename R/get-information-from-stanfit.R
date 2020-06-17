@@ -316,7 +316,7 @@ add_ibbu_draws = function(
             lapse_rate
           )
       d.pars %<>%
-        rename_at(vars(ends_with(postfix)), funs(sub(postfix, "", .))) %>%
+        rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .)) %>%
         rename(M = mu, S = sigma)
     # If nesting is the goal:
     } else {
