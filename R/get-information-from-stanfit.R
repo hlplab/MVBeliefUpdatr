@@ -320,8 +320,8 @@ add_ibbu_draws = function(
               add_ibbu_draws() renames these parameters to M and S.")
       # See also naming of parameters at beginning of this else block (no other part of the code needs to change.)
       d.pars %<>%
-        rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .)) %>%
-        rename(M = !! rlang::sym(M), S = !! rlang::sym(S))
+        rename(M = !! rlang::sym(M), S = !! rlang::sym(S)) %>%
+        rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .))
 
     # If nesting is the goal:
     } else {
