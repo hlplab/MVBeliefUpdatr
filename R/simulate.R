@@ -1,7 +1,7 @@
 #' @import assertthat
 #' @importFrom rlang is_symbol sym syms
 #' @importFrom magrittr %<>%
-#' @importFrom dplyr %>% select filter mutate summarise left_join rename rename_at group_by ungroup
+#' @importFrom dplyr %>% select filter mutate summarise left_join rename rename_at group_by ungroup sample_frac
 #' @importFrom tibble is_tibble
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom purrr pmap
@@ -107,6 +107,8 @@ make_NIW_prior_from_data = function(
 #' @param category.labels List of category names, each specifying the category label of a multivariate Gaussian. If \code{NULL}
 #' (default) then Gaussians will be numbered from 1:N.
 #' @param cue.labels List of cue names. If \code{NULL} (default) then the cues will be numbered cue1, cue2, ...
+#' @param randomize.order Should the order of the data be randomized? (default: FALSE) This won't affect the final outcome of
+#' NIW belief updating, but it will change the incremental updates (and thus, for example, visualizations of the update process).
 #' @param keep.parameters Should the parameters handed to this function be included in the output? (default: FALSE)
 #'
 #' @return A tibble.
@@ -117,7 +119,12 @@ make_NIW_prior_from_data = function(
 #' TBD
 #' @export
 #'
-make_MV_exposure_data = function(Ns, means, Sigmas, category.labels = NULL, cue.labels = NULL, keep.parameters = F) {
+make_MV_exposure_data = function(
+  Ns, means, Sigmas,
+  category.labels = NULL, cue.labels = NULL,
+  randomize.order = F,
+  keep.parameters = F
+) {
   assert_that(!is.null(means), !is.null(Sigmas))
   assert_that(is.null(category.labels) | length(means) == length(category.labels),
               msg = "Number of category labels mismatch number of means.")
@@ -132,6 +139,9 @@ make_MV_exposure_data = function(Ns, means, Sigmas, category.labels = NULL, cue.
     mutate(category = unlist(category.labels)) %>%
     mutate(data = map(data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
     unnest(data)
+
+  if (randomize.order)
+    x = sample_frac(x, 1)
 
   if (keep.parameters) return(x) else return(x %>% select(category, everything(), -c(n, mean, sigma)))
 }
