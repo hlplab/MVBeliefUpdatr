@@ -6,7 +6,7 @@
 \usage{
 make_MV_exposure_data(
   Ns,
-  means,
+  mus,
   Sigmas,
   category.labels = NULL,
   cue.labels = NULL,
@@ -18,7 +18,7 @@ make_MV_exposure_data(
 \item{Ns}{A list of integers, with each number specifying the number of observations to be drawn from the corresponding
 Gaussian.}
 
-\item{means}{List of mean vectors, each specifying the mean of a multivariate Gaussian.}
+\item{mus}{List of mean vectors, each specifying the mean of a multivariate Gaussian.}
 
 \item{category.labels}{List of category names, each specifying the category label of a multivariate Gaussian. If \code{NULL}
 (default) then Gaussians will be numbered from 1:N.}

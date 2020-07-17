@@ -65,7 +65,7 @@ make_NIW_prior_from_data = function(
   nu = NA,
   lapse = NA
 ) {
-  warning("This function has not yet been debugged!")
+  warning("This function has only been subjected to mild levels of debugging!")
   assert_that(is.data.frame(data) | is_tibble(data))
   assert_that(all(is.null(groups) | all(is.character(groups) | is_symbol(groups))))
   assert_that(all(is.character(category) | is_symbol(category), length(category) == 1))
@@ -86,6 +86,8 @@ make_NIW_prior_from_data = function(
       mu = list(reduce(cues, `+`) / length(cues)),
       Sigma = list(cov(cbind(!!! cues))))
 
+
+  warning("Make sure that mean inherits cue names even when multiple group variables are used.")
   while(length(groups) > 1) {
     groups = groups[2:length(groups)]
     data %<>%
@@ -119,7 +121,7 @@ make_NIW_prior_from_data = function(
 #'
 #' @param Ns A list of integers, with each number specifying the number of observations to be drawn from the corresponding
 #' Gaussian.
-#' @param means List of mean vectors, each specifying the mean of a multivariate Gaussian.
+#' @param mus List of mean vectors, each specifying the mean of a multivariate Gaussian.
 #' @param sigmas List of covariance matrices, each specifying the covariance of a multivariate Gaussian.
 #' @param category.labels List of category names, each specifying the category label of a multivariate Gaussian. If \code{NULL}
 #' (default) then Gaussians will be numbered from 1:N.
@@ -137,22 +139,22 @@ make_NIW_prior_from_data = function(
 #' @export
 #'
 make_MV_exposure_data = function(
-  Ns, means, Sigmas,
+  Ns, mus, Sigmas,
   category.labels = NULL, cue.labels = NULL,
   randomize.order = F,
   keep.parameters = F
 ) {
-  assert_that(!is.null(means), !is.null(Sigmas))
-  assert_that(is.null(category.labels) | length(means) == length(category.labels),
-              msg = "Number of category labels mismatch number of means.")
-  assert_that(is.null(cue.labels) | length(means[[1]]) == length(cue.labels),
-              msg = "Number of cue labels mismatches dimensionality of means.")
+  assert_that(!is.null(mus), !is.null(Sigmas))
+  assert_that(is.null(category.labels) | length(mus) == length(category.labels),
+              msg = "Number of category labels mismatch number of mus.")
+  assert_that(is.null(cue.labels) | length(mus[[1]]) == length(cue.labels),
+              msg = "Number of cue labels mismatches dimensionality of mus.")
 
-  if (is.null(category.labels)) category.labels = 1:length(means)
-  if (is.null(cue.labels)) cue.labels = paste0("cue", 1:length(means[[1]]))
+  if (is.null(category.labels)) category.labels = 1:length(mus)
+  if (is.null(cue.labels)) cue.labels = paste0("cue", 1:length(mus[[1]]))
 
-  x = tibble(n = unlist(Ns), mean = means, sigma = Sigmas) %>%
-    mutate(data = pmap(.l = list(n, mean, sigma), .f = rmvnorm)) %>%
+  x = tibble(n = unlist(Ns), mu = mus, Sigma = Sigmas) %>%
+    mutate(data = pmap(.l = list(n, mu, Sigma), .f = rmvnorm)) %>%
     mutate(category = unlist(category.labels)) %>%
     mutate(data = map(data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
     unnest(data)
@@ -160,7 +162,7 @@ make_MV_exposure_data = function(
   if (randomize.order)
     x = sample_frac(x, 1)
 
-  if (keep.parameters) return(x) else return(x %>% select(category, everything(), -c(n, mean, sigma)))
+  if (keep.parameters) return(x) else return(x %>% select(category, everything(), -c(n, mu, Sigma)))
 }
 
 
