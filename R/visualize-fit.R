@@ -1,4 +1,4 @@
-#' @import ggplot2 cowplot gganimate transformr
+#' @import ggplot2 cowplot gganimate transformr av
 #' @importFrom ellipse ellipse
 #' @importFrom mvtnorm dmvt
 #' @importFrom tidybayes mean_hdi
@@ -640,9 +640,13 @@ plot_expected_categories_contour2D = function(
     else if (animate.group) {
       message("Preparing for rendering. This might take a moment.\n")
       p = p +
+        labs(title = "Observation: {closest_state}") +
         transition_states(!! sym(grouping.var),
                           transition_length = 1,
-                          state_length = 1)
+                          state_length = 1) +
+        enter_fade() +
+        exit_fade() +
+        shadow_mark(alpha = 1/10, fill = "gray")
     }
   }
 
