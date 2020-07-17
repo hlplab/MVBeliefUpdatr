@@ -110,7 +110,9 @@ make_NIW_prior_from_data = function(
       S = map2(Sigma, nu, get_S_from_Sigma),
       lapse = lapse)
 
-  if (keep.category_parameters) return(data) else return(data %>% select(-c(mu, Sigma)))
+  if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
+  if (!is.NIW_belief(data)) warning("Something went wrong. The returned object is not an NIW belief.")
+  return(data)
 }
 
 #' Make multivariate Gaussian exposure data.
