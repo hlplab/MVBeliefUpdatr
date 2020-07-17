@@ -2,6 +2,9 @@
 #' @importFrom mvtnorm rmvnorm
 NULL
 
+#' Example NIW priors.
+#'
+#' @export
 example_NIW_prior = function(example = 1) {
   if (example == 1) {
     tibble(
