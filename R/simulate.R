@@ -66,7 +66,6 @@ make_NIW_prior_from_data = function(
   lapse = NA,
   keep.category_parameters = F
 ) {
-  warning("This function has only been subjected to mild levels of debugging!")
   assert_that(is.data.frame(data) | is_tibble(data))
   assert_that(all(is.null(groups) | all(is.character(groups) | is_symbol(groups))))
   assert_that(all(is.character(category) | is_symbol(category), length(category) == 1))

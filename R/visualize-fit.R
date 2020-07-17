@@ -614,7 +614,7 @@ plot_expected_categories_contour2D = function(
   # This is somewhat fragile. E.g., if x has more columns than required. It assumes that the all
   # colums that are not the grouping variable, category, or level MUST be cues.
   cue.names = setdiff(names(x), c(if (!is.null(grouping.var)) grouping.var else NA, "category", "level"))
-  message(paste("The following variables are assumed to be cues:"), paste(cue.names, collapse = ", "))
+  message(paste("The following variables are assumed to be cues:", paste(cue.names, collapse = ", ")))
   x %<>%
     rename_at(cue.names,
               function(x) paste0("cue", which(x == cue.names)))
