@@ -15,15 +15,15 @@ make_MV_exposure_data(
 )
 }
 \arguments{
-\item{Ns}{A list of integers, with each number specifying the number of observations to be drawn from the corresponding
+\item{Ns}{Integer vector, with each number specifying the number of observations to be drawn from the corresponding
 Gaussian.}
 
 \item{mus}{List of mean vectors, each specifying the mean of a multivariate Gaussian.}
 
-\item{category.labels}{List of category names, each specifying the category label of a multivariate Gaussian. If \code{NULL}
+\item{category.labels}{Character vector of category names, each specifying the category label of a multivariate Gaussian. If \code{NULL}
 (default) then Gaussians will be numbered from 1:N.}
 
-\item{cue.labels}{List of cue names. If \code{NULL} (default) then the cues will be numbered cue1, cue2, ...}
+\item{cue.labels}{Character vector of cue names. If \code{NULL} (default) then the cues will be numbered cue1, cue2, ...}
 
 \item{randomize.order}{Should the order of the data be randomized? (default: FALSE) This won't affect the final outcome of
 NIW belief updating, but it will change the incremental updates (and thus, for example, visualizations of the update process).}
@@ -41,8 +41,8 @@ provides the category label and cue values. If \code{keep.parameters = T} then t
 are also returned.
 }
 \details{
-The input is expected to be lists of parameters which the n-th element of each list specifying the n-th Gaussian and the
-number of observations to be drawn from that Gaussian.
+The input is expected to be lists/vectors of parameters with the n-th element of each list/vector specifying the
+category label, number of observations, \mu, and \Sigma of the n-th Gaussian.
 }
 \examples{
 TBD

@@ -116,16 +116,16 @@ make_NIW_prior_from_data = function(
 #' provides the category label and cue values. If \code{keep.parameters = T} then the parameters (\code{N, mean, sigma})
 #' are also returned.
 #'
-#' The input is expected to be lists of parameters which the n-th element of each list specifying the n-th Gaussian and the
-#' number of observations to be drawn from that Gaussian.
+#' The input is expected to be lists/vectors of parameters with the n-th element of each list/vector specifying the
+#' category label, number of observations, \mu, and \Sigma of the n-th Gaussian.
 #'
-#' @param Ns A list of integers, with each number specifying the number of observations to be drawn from the corresponding
+#' @param Ns Integer vector, with each number specifying the number of observations to be drawn from the corresponding
 #' Gaussian.
 #' @param mus List of mean vectors, each specifying the mean of a multivariate Gaussian.
 #' @param sigmas List of covariance matrices, each specifying the covariance of a multivariate Gaussian.
-#' @param category.labels List of category names, each specifying the category label of a multivariate Gaussian. If \code{NULL}
+#' @param category.labels Character vector of category names, each specifying the category label of a multivariate Gaussian. If \code{NULL}
 #' (default) then Gaussians will be numbered from 1:N.
-#' @param cue.labels List of cue names. If \code{NULL} (default) then the cues will be numbered cue1, cue2, ...
+#' @param cue.labels Character vector of cue names. If \code{NULL} (default) then the cues will be numbered cue1, cue2, ...
 #' @param randomize.order Should the order of the data be randomized? (default: FALSE) This won't affect the final outcome of
 #' NIW belief updating, but it will change the incremental updates (and thus, for example, visualizations of the update process).
 #' @param keep.input_parameters Should the parameters handed to this function be included in the output? (default: FALSE)
@@ -140,7 +140,8 @@ make_NIW_prior_from_data = function(
 #'
 make_MV_exposure_data = function(
   Ns, mus, Sigmas,
-  category.labels = NULL, cue.labels = NULL,
+  category.labels = NULL,
+  cue.labels = NULL,
   randomize.order = F,
   keep.input_parameters = F
 ) {
@@ -153,9 +154,8 @@ make_MV_exposure_data = function(
   if (is.null(category.labels)) category.labels = 1:length(mus)
   if (is.null(cue.labels)) cue.labels = paste0("cue", 1:length(mus[[1]]))
 
-  x = tibble(n = unlist(Ns), mu = mus, Sigma = Sigmas) %>%
+  x = tibble(category = category.labels, n = Ns, mu = mus, Sigma = Sigmas) %>%
     mutate(data = pmap(.l = list(n, mu, Sigma), .f = rmvnorm)) %>%
-    mutate(category = unlist(category.labels)) %>%
     mutate(data = map(data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
     unnest(data)
 
