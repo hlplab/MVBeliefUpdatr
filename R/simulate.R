@@ -106,7 +106,8 @@ make_NIW_prior_from_data = function(
       nu = nu,
       M = mu,
       S = map2(Sigma, nu, get_S_from_Sigma),
-      lapse = lapse)
+      lapse = lapse) %>%
+    ungroup()
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
   if (!is.NIW_belief(data)) warning("Something went wrong. The returned object is not an NIW belief.")
