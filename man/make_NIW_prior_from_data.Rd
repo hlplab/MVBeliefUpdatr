@@ -11,7 +11,8 @@ make_NIW_prior_from_data(
   cues,
   kappa = NA,
   nu = NA,
-  lapse = NA
+  lapse = NA,
+  keep.category_parameters = F
 )
 }
 \arguments{
@@ -34,6 +35,9 @@ of the second group variable; etc. (default: NULL)}
 \item{nu}{The strength of the beliefs over the category covariance matrix (pseudocounts).}
 
 \item{lapse}{Optionally specify a lapse rate. (default: \code{NA})}
+
+\item{keep.category_parameters}{Should categories' mu and Sigma be included in the output (in addition to M
+and S of the prior)? (default: FALSE)}
 }
 \value{
 A tibble that is an NIW_belief object.

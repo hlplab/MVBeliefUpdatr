@@ -11,7 +11,7 @@ make_MV_exposure_data(
   category.labels = NULL,
   cue.labels = NULL,
   randomize.order = F,
-  keep.parameters = F
+  keep.input_parameters = F
 )
 }
 \arguments{
@@ -28,7 +28,7 @@ Gaussian.}
 \item{randomize.order}{Should the order of the data be randomized? (default: FALSE) This won't affect the final outcome of
 NIW belief updating, but it will change the incremental updates (and thus, for example, visualizations of the update process).}
 
-\item{keep.parameters}{Should the parameters handed to this function be included in the output? (default: FALSE)}
+\item{keep.input_parameters}{Should the parameters handed to this function be included in the output? (default: FALSE)}
 
 \item{sigmas}{List of covariance matrices, each specifying the covariance of a multivariate Gaussian.}
 }

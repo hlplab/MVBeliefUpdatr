@@ -47,6 +47,8 @@ example_NIW_prior = function(example = 1) {
 #' @param kappa The strength of the beliefs over the category mean (pseudocounts).
 #' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts).
 #' @param lapse Optionally specify a lapse rate. (default: \code{NA})
+#' @param keep.category_parameters Should categories' mu and Sigma be included in the output (in addition to M
+#' and S of the prior)? (default: FALSE)
 #'
 #' @return A tibble that is an NIW_belief object.
 #'
@@ -63,7 +65,8 @@ make_NIW_prior_from_data = function(
   cues,
   kappa = NA,
   nu = NA,
-  lapse = NA
+  lapse = NA,
+  keep.category_parameters = F
 ) {
   warning("This function has only been subjected to mild levels of debugging!")
   assert_that(is.data.frame(data) | is_tibble(data))
@@ -80,7 +83,11 @@ make_NIW_prior_from_data = function(
 
   data %<>%
     select(!! category, !!! cues, !!! groups) %>%
-    mutate(cues = pmap(list(!!! cues), ~ c(...))) %>%
+    mutate(cues = pmap(list(!!! cues),
+                       .f = function(...) {
+                         x = c(...)
+                         names(x) = as.character(cues)
+                         return(x) })) %>%
     { if (is.null(groups)) group_by(., !! category) else group_by(., !!! groups, !! category) } %>%
     summarise(
       mu = list(reduce(cues, `+`) / length(cues)),
@@ -103,12 +110,10 @@ make_NIW_prior_from_data = function(
       nu = nu,
       M = mu,
       S = map2(Sigma, nu, get_S_from_Sigma),
-      lapse = lapse) %>%
-    select(-c(mu, Sigma))
+      lapse = lapse)
 
-  return(data)
+  if (keep.category_parameters) return(data) else return(data %>% select(-c(mu, Sigma)))
 }
-
 
 #' Make multivariate Gaussian exposure data.
 #'
@@ -128,7 +133,7 @@ make_NIW_prior_from_data = function(
 #' @param cue.labels List of cue names. If \code{NULL} (default) then the cues will be numbered cue1, cue2, ...
 #' @param randomize.order Should the order of the data be randomized? (default: FALSE) This won't affect the final outcome of
 #' NIW belief updating, but it will change the incremental updates (and thus, for example, visualizations of the update process).
-#' @param keep.parameters Should the parameters handed to this function be included in the output? (default: FALSE)
+#' @param keep.input_parameters Should the parameters handed to this function be included in the output? (default: FALSE)
 #'
 #' @return A tibble.
 #'
@@ -142,7 +147,7 @@ make_MV_exposure_data = function(
   Ns, mus, Sigmas,
   category.labels = NULL, cue.labels = NULL,
   randomize.order = F,
-  keep.parameters = F
+  keep.input_parameters = F
 ) {
   assert_that(!is.null(mus), !is.null(Sigmas))
   assert_that(is.null(category.labels) | length(mus) == length(category.labels),
@@ -162,7 +167,7 @@ make_MV_exposure_data = function(
   if (randomize.order)
     x = sample_frac(x, 1)
 
-  if (keep.parameters) return(x) else return(x %>% select(category, everything(), -c(n, mu, Sigma)))
+  if (keep.input_parameters) return(x) else return(x %>% select(category, everything(), -c(n, mu, Sigma)))
 }
 
 

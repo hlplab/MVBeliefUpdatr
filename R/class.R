@@ -29,12 +29,15 @@ is.NIW_belief = function(x, is.long = T, category = "category") {
     )
   ) return(FALSE)
 
-  # Check whether category is a factor only after everything else is checked.
+  # Check that category is a factor only after everything else is checked.
   if (
     any(
       !is.factor(get(category, x))
     )
   ) return(FALSE)
+
+  # Check that M and S contain the cue names and that those cue names match.
+
 
   return(TRUE)
 }
