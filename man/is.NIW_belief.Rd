@@ -6,6 +6,16 @@
 \usage{
 is.NIW_belief(x, is.long = T, category = "category")
 }
+\value{
+A logical.
+}
 \description{
 Check whether \code{x} is a tibble of NIW beliefs.
 }
+\examples{
+TBD
+}
+\seealso{
+TBD
+}
+\keyword{TBD}

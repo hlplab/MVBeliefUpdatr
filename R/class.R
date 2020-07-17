@@ -9,6 +9,15 @@ setClass(class_name,
 #' Is this an MV IBBU stanfit?
 #'
 #' Check whether \code{x} is of class \code{mv_ibbu_stanfit}.
+#'
+#' @return A logical.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+#'
 is.mv_ibbu_stanfit = function(x) {
   if ("stanfit" %in% class(x)) message("Accepting stanfit as valid class. This might change in the future.")
   if (class_name %in% class(x) | "stanfit" %in% class(x))
@@ -19,6 +28,15 @@ is.mv_ibbu_stanfit = function(x) {
 #' Is this a tibble of NIW beliefs?
 #'
 #' Check whether \code{x} is a tibble of NIW beliefs.
+#'
+#' @return A logical.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+#'
 is.NIW_belief = function(x, is.long = T, category = "category") {
   if (
     any(
@@ -57,6 +75,15 @@ is.NIW_belief = function(x, is.long = T, category = "category") {
 #'
 #' Check whether \code{x} is a tibble of post-warmup draws of parameters obtained from incremental
 #' Bayesian belief-updating (IBBU).
+#'
+#' @return A logical.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+#'
 is.mv_ibbu_MCMC = function(x, is.nested = T, is.long = T) {
   if(
     any(
@@ -73,6 +100,15 @@ is.mv_ibbu_MCMC = function(x, is.nested = T, is.long = T) {
 #' Is this a list of MV IBBU inputs?
 #'
 #' Check whether \code{x} is of class \code{mv_ibbu_input}.
+#'
+#' @return A logical.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+#'
 is.mv_ibbu_input = function(x) {
   warning("Test of mv_ibbu_input class not yet implemented. Always returning T.")
 

@@ -6,6 +6,16 @@
 \usage{
 is.mv_ibbu_input(x)
 }
+\value{
+A logical.
+}
 \description{
 Check whether \code{x} is of class \code{mv_ibbu_input}.
 }
+\examples{
+TBD
+}
+\seealso{
+TBD
+}
+\keyword{TBD}

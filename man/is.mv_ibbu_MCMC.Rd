@@ -6,7 +6,17 @@
 \usage{
 is.mv_ibbu_MCMC(x, is.nested = T, is.long = T)
 }
+\value{
+A logical.
+}
 \description{
 Check whether \code{x} is a tibble of post-warmup draws of parameters obtained from incremental
 Bayesian belief-updating (IBBU).
 }
+\examples{
+TBD
+}
+\seealso{
+TBD
+}
+\keyword{TBD}
