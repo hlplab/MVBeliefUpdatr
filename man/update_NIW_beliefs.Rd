@@ -8,7 +8,7 @@ update_NIW_beliefs(
   data,
   priors,
   category = "category",
-  cues = names(prior$M[[1]]),
+  cues = names(priors$M[[1]]),
   store.history = T
 )
 }

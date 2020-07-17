@@ -611,7 +611,10 @@ plot_expected_categories_contour2D = function(
     select(-c(kappa, nu, M, S, Sigma, lapse)) %>%
     unnest(ellipse)
 
+  # This is somewhat fragile. E.g., if x has more columns than required. It assumes that the all
+  # colums that are not the grouping variable, category, or level MUST be cues.
   cue.names = setdiff(names(x), c(if (!is.null(grouping.var)) grouping.var else NA, "category", "level"))
+  message(paste("The following variables are assumed to be cues:"), paste(cue.names, collapse = ", "))
   x %<>%
     rename_at(cue.names,
               function(x) paste0("cue", which(x == cue.names)))
@@ -634,10 +637,13 @@ plot_expected_categories_contour2D = function(
 
   if (!is.null(grouping.var)) {
     if (panel.group) p = p + facet_wrap(vars(!! sym(grouping.var)))
-    else if (animate.group) p = p +
+    else if (animate.group) {
+      message("Preparing for rendering. This might take a moment.\n")
+      p = p +
         transition_states(!! sym(grouping.var),
                           transition_length = 1,
                           state_length = 1)
+    }
   }
 
   return(p)
