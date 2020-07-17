@@ -187,6 +187,8 @@ make_MV_exposure_data = function(
 #' @param cues Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
 #' extracted from the prior object.
 #' @param priors A tibble with information about the prior. See Details for expected format of the \code{priors} argument.
+#' @param keep.input_data Should the input data be included in the output? If `FALSE` then only the category and cue
+#' columns will be kept. If `TRUE` then all columns will be kept. (default: FALSE)
 #'
 #' @return A tibble.
 #'
@@ -202,7 +204,8 @@ update_NIW_beliefs <- function(
   priors,
   category = "category",
   cues = names(priors$M[[1]]),
-  store.history = T
+  store.history = T,
+  keep.input_data = F
 ){
   assert_that(is.NIW_belief(priors),
               msg = "Priors must be NIW belief objec. Check is.NIW_belief().")
@@ -215,14 +218,14 @@ update_NIW_beliefs <- function(
   # Prepare data
   data %<>%
     mutate(cues = pmap(.l = list(!!! syms(cues)), .f = ~ c(...))) %>%
-    select(category, cues)
+    { if (!keep.input_data) . %>% select(category, cues) else . }
 
   if (store.history)
     priors %<>%
-      mutate(observation = 0)
+      mutate(observation.n = 0)
 
   for (i in 1:nrow(data)) {
-    posteriors = if (store.history) priors %>% filter(observation == i - 1) else priors
+    posteriors = if (store.history) priors %>% filter(observation.n == i - 1) else priors
 
     current_category_index = which(posteriors$category == data[i,]$category)
     current_observation = unlist(data[i, "cues"])
@@ -244,9 +247,18 @@ update_NIW_beliefs <- function(
 
     if (store.history) {
       posteriors %<>%
-        mutate(observation = i)
+        mutate(observation.n = i)
       priors = rbind(priors, posteriors)
     } else priors = posteriors
+  }
+
+  if (keep.input_data) {
+    data %<>%
+      rename_all(~ paste0("observation.", names(data))) %>%
+      mutate(observation.n = 1:nrow(data))
+
+    priors %<>%
+      left_join(data)
   }
 
   return(priors)
