@@ -93,8 +93,6 @@ make_NIW_prior_from_data = function(
       mu = list(reduce(cues, `+`) / length(cues)),
       Sigma = list(cov(cbind(!!! cues))))
 
-
-  warning("Make sure that mean inherits cue names even when multiple group variables are used.")
   while(length(groups) > 1) {
     groups = groups[2:length(groups)]
     data %<>%
