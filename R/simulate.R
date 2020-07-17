@@ -35,6 +35,13 @@ example_NIW_prior = function(example = 1) {
 #' where D is the dimensionality of the data.
 #'
 #' @param data The tibble or data.frame from which to construct the prior.
+#' @param groups Optionally, a group variable can be specified. If group is not NULL, one prior will be derived for
+#' each level of group. If groups is a vector, then the data will be aggregated in the order of the specified
+#' grouping variables: the first group variable will be used to obtain a mean and covariance matrix; the next group
+#' variable will be used to obtain the average of those means and covariance matrices; and so on. For this process
+#' to have a reasonable outcome, it is important that the group variables are hierarchically organized: the second
+#' group variable should be a superset of the first group variable; the third group variable should be a superset
+#' of the second group variable; etc. (default: NULL)
 #' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param cues Name(s) of variables in \code{data} that contain the cue information.
 #' @param kappa The strength of the beliefs over the category mean (pseudocounts).
@@ -51,7 +58,7 @@ example_NIW_prior = function(example = 1) {
 #'
 make_NIW_prior_from_data = function(
   data,
-  group = NULL,
+  groups = NULL,
   category = "category",
   cues,
   kappa = NA,
@@ -60,24 +67,34 @@ make_NIW_prior_from_data = function(
 ) {
   warning("This function has not yet been debugged!")
   assert_that(is.data.frame(data) | is_tibble(data))
-  assert_that(all(is.null(group) | all(is.character(group) | is_symbol(group), length(group) == 1)))
+  assert_that(all(is.null(groups) | all(is.character(groups) | is_symbol(groups))))
   assert_that(all(is.character(category) | is_symbol(category), length(category) == 1))
   assert_that(all(is.character(cues) | is_symbol(cues), length(cues) > 0))
   assert_that(all(is.numeric(kappa), is.numeric(nu)))
   assert_that(nu > length(cues) + 1,
               msg = "nu must be larger than D (dimensionality of cues) + 1.")
 
-  if (is.character(group)) group = sym(group)
+  if (is.character(groups)) groups = syms(groups)
   if (is.character(category)) category = sym(category)
   if (is.character(cues)) cues = syms(cues)
 
   data %<>%
-    select(!! category, !!! cues, !! group) %>%
+    select(!! category, !!! cues, !!! groups) %>%
     mutate(cues = pmap(list(!!! cues), ~ c(...))) %>%
-    { if (is.null(group)) group_by(., !! category) else group_by(., !! group, !! category) } %>%
+    { if (is.null(groups)) group_by(., !! category) else group_by(., !!! groups, !! category) } %>%
     summarise(
       mu = list(reduce(cues, `+`) / length(cues)),
-      Sigma = list(cov(cbind(!!! cues)))) %>%
+      Sigma = list(cov(cbind(!!! cues))))
+
+  while(length(groups) > 1) {
+    groups = groups[2:length(groups)]
+    data %<>%
+      group_by(., !!! groups, !! category) %>%
+      summarise_at(vars(starts_with(c("mu", "Sigma"))),
+                   ~ list(reduce(.x, `+`) / length(.x)))
+  }
+
+  data %<>%
     mutate(
       !! category := factor(!! category),
       kappa = kappa,

@@ -6,7 +6,7 @@
 \usage{
 make_NIW_prior_from_data(
   data,
-  group = NULL,
+  groups = NULL,
   category = "category",
   cues,
   kappa = NA,
@@ -16,6 +16,14 @@ make_NIW_prior_from_data(
 }
 \arguments{
 \item{data}{The tibble or data.frame from which to construct the prior.}
+
+\item{groups}{Optionally, a group variable can be specified. If group is not NULL, one prior will be derived for
+each level of group. If groups is a vector, then the data will be aggregated in the order of the specified
+grouping variables: the first group variable will be used to obtain a mean and covariance matrix; the next group
+variable will be used to obtain the average of those means and covariance matrices; and so on. For this process
+to have a reasonable outcome, it is important that the group variables are hierarchically organized: the second
+group variable should be a superset of the first group variable; the third group variable should be a superset
+of the second group variable; etc. (default: NULL)}
 
 \item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
 
