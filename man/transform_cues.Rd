@@ -3,10 +3,7 @@
 \name{transform_cues}
 \alias{transform_cues}
 \alias{untransform_cues}
-\title{Transform and untransform cues by applying or undoing PCA, centering, and/or scaling. If the `transform` argument
-is specified, the transforms in that object will be applied. This can be useful when the goal is to transform one
-data set (e.g., test data) based on the statistics of the another data set (e.g.., training data). If no `transform`
-is specified, then the transformations specified by the `center`, `scale`, and `PCA` flags will be applied.}
+\title{Transform and untransform cues by applying or undoing PCA, centering, and/or scaling.}
 \usage{
 transform_cues(
   data,
@@ -46,7 +43,7 @@ untransform_cues(
 Data frame, unless `return.transform = T`. In that case, a list with two elements (`data` and `transform`).
 }
 \description{
-Transform and untransform cues by applying or undoing PCA, centering, and/or scaling. If the `transform` argument
+If the `transform` argument
 is specified, the transforms in that object will be applied. This can be useful when the goal is to transform one
 data set (e.g., test data) based on the statistics of the another data set (e.g.., training data). If no `transform`
 is specified, then the transformations specified by the `center`, `scale`, and `PCA` flags will be applied.

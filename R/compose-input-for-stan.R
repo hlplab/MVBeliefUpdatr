@@ -1,4 +1,6 @@
-#' Transform and untransform cues by applying or undoing PCA, centering, and/or scaling. If the `transform` argument
+#' Transform and untransform cues by applying or undoing PCA, centering, and/or scaling.
+#'
+#' If the `transform` argument
 #' is specified, the transforms in that object will be applied. This can be useful when the goal is to transform one
 #' data set (e.g., test data) based on the statistics of the another data set (e.g.., training data). If no `transform`
 #' is specified, then the transformations specified by the `center`, `scale`, and `PCA` flags will be applied.
