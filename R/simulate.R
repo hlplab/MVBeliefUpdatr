@@ -202,7 +202,7 @@ update_NIW_beliefs <- function(
   data,
   priors,
   category = "category",
-  cues = names(prior$M[[1]]),
+  cues = names(priors$M[[1]]),
   store.history = T
 ){
   assert_that(is.NIW_belief(priors),
