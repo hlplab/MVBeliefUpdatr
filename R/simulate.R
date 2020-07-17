@@ -1,10 +1,5 @@
-#' @import assertthat
-#' @importFrom rlang is_symbol sym syms
-#' @importFrom magrittr %<>%
-#' @importFrom dplyr %>% select filter mutate summarise left_join rename rename_at group_by ungroup sample_frac
-#' @importFrom tibble is_tibble
+#' @importFrom dplyr sample_frac
 #' @importFrom mvtnorm rmvnorm
-#' @importFrom purrr pmap
 NULL
 
 example_NIW_prior = function(example = 1) {

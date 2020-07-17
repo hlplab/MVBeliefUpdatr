@@ -1,5 +1,3 @@
-#' @import assertthat
-#' @importFrom purrr reduce
 #' @importFrom mvtnorm dmvt
 NULL
 

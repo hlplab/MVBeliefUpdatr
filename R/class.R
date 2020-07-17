@@ -1,4 +1,3 @@
-#' @import assertthat
 #' @import rstan
 
 class_name = "mv_ibbu_stanfit"

@@ -1,9 +1,6 @@
-#' @import assertthat dplyr purrr ggplot2 cowplot gganimate transformr
+#' @import ggplot2 cowplot gganimate transformr
 #' @importFrom ellipse ellipse
 #' @importFrom mvtnorm dmvt
-#' @importFrom magrittr %<>% %T>%
-#' @importFrom tidyr crossing nest unnest
-#' @importFrom rlang !! !!! sym syms expr
 #' @importFrom tidybayes mean_hdi
 #' @importFrom ggridges geom_density_ridges
 #' @importFrom forcats fct_rev
