@@ -117,7 +117,7 @@ make_NIW_prior_from_data = function(
 #' are also returned.
 #'
 #' The input is expected to be lists/vectors of parameters with the n-th element of each list/vector specifying the
-#' category label, number of observations, \mu, and \Sigma of the n-th Gaussian.
+#' category label, number of observations, \code{mu}, and \code{Sigma} of the n-th Gaussian.
 #'
 #' @param Ns Integer vector, with each number specifying the number of observations to be drawn from the corresponding
 #' Gaussian.
@@ -179,8 +179,10 @@ make_MV_exposure_data = function(
 #' matrix (\code{S}, same as \code{S_0} in Murphy, 2012).
 #'
 #' @param data \code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.
+#' @param priors A \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
 #' @param category Name of variable in \code{data} that contains the category information. (default: "category")
-#' @param cues Name(s) of variables in \code{data} that contain the cue information.
+#' @param cues Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
+#' extracted from the prior object.
 #' @param priors A tibble with information about the prior. See Details for expected format of the \code{priors} argument.
 #'
 #' @return A tibble.
@@ -196,11 +198,11 @@ update_NIW_beliefs <- function(
   data,
   priors,
   category = "category",
-  cues = paste0("cue", 1:length(priors$M[[1]])),
+  cues = names(prior$M[[1]]),
   store.history = T
 ){
   assert_that(is.NIW_belief(priors),
-              msg = "Priors must be NIW beliefs. Check is.NIW_belief().")
+              msg = "Priors must be NIW belief objec. Check is.NIW_belief().")
 
   # Number of dimensions/cues
   D = length(cues)

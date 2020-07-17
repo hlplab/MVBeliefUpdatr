@@ -42,7 +42,7 @@ are also returned.
 }
 \details{
 The input is expected to be lists/vectors of parameters with the n-th element of each list/vector specifying the
-category label, number of observations, \mu, and \Sigma of the n-th Gaussian.
+category label, number of observations, \code{mu}, and \code{Sigma} of the n-th Gaussian.
 }
 \examples{
 TBD

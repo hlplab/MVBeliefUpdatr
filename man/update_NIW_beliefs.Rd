@@ -8,7 +8,7 @@ update_NIW_beliefs(
   data,
   priors,
   category = "category",
-  cues = paste0("cue", 1:length(priors$M[[1]])),
+  cues = names(prior$M[[1]]),
   store.history = T
 )
 }
@@ -19,7 +19,8 @@ update_NIW_beliefs(
 
 \item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
 
-\item{cues}{Name(s) of variables in \code{data} that contain the cue information.}
+\item{cues}{Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
+extracted from the prior object.}
 }
 \value{
 A tibble.
