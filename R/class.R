@@ -25,9 +25,15 @@ is.NIW_belief = function(x, is.long = T, category = "category") {
       # Currently only IBBU MCMC tibbles in long format can be recognized.
       !is.flag(is.long), !is.long == T,
       !is_tibble(x),
-      !all(c(category, "kappa", "nu", "M", "S") %in% names(x))
+      !all(c("kappa", "nu", "M", "S") %in% names(x))
     )
   ) return(FALSE)
+
+  if (!(category %in% names(x))) {
+    warning("Column category not found. Did you use another name for this column? You can use the category
+            argument to specify the name of that column.")
+    return(FALSE)
+  }
 
   # Check that category is a factor only after everything else is checked.
   if (
@@ -37,7 +43,11 @@ is.NIW_belief = function(x, is.long = T, category = "category") {
   ) return(FALSE)
 
   # Check that M and S contain the cue names and that those cue names match.
-
+  names_M = names(x$M[[1]])
+  names_S = dimnames(x$S[[1]])
+  if (!all(
+    names_S[[1]] == names_S[[2]],
+    names_S[[1]] == names_M)) return(FALSE)
 
   return(TRUE)
 }
