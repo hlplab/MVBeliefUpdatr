@@ -44,7 +44,7 @@ A tibble that is an NIW_belief object.
 }
 \description{
 Constructs an NIW_belief object, representing Normal-Inverse Wishart (NIW) parameters for all categories found in
-the data. This object can be used as a prior for functions like \code{\link{update_NIW_beliefs()}}.
+the data. This object can be used as a prior for functions like \code{\link{update_NIW_beliefs}}.
 }
 \details{
 Currently, \code{make_NIW_prior_from_data()} does not infer kappa or nu, nor does it fit hierarchical data. Rather
