@@ -2,12 +2,15 @@
 % Please edit documentation in R/NIW.R
 \name{get_posterior_predictive}
 \alias{get_posterior_predictive}
+\alias{get_posterior_predictive.pmap}
 \title{Get posterior predictive}
 \usage{
 get_posterior_predictive(x, M, S, kappa, nu, log = T)
+
+get_posterior_predictive.pmap(x, M, S, kappa, nu, ...)
 }
 \arguments{
-\item{x}{Input (observation).}
+\item{x}{Observations.}
 
 \item{M}{The mean of the multivariate Normal distribution of the category mean mu.}
 
@@ -21,7 +24,7 @@ matrix Sigma.}
 \item{log}{Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)}
 }
 \description{
-Get posterior predictive of observation x given the NIW parameters M, S, kappa, and nu. This is
+Get posterior predictive of observations x given the NIW parameters M, S, kappa, and nu. This is
 a multivariate Student-T distribution (Murphy, 2012, p. 135).
 }
 \examples{

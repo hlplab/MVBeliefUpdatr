@@ -9,7 +9,8 @@ update_NIW_beliefs(
   priors,
   category = "category",
   cues = names(priors$M[[1]]),
-  store.history = T
+  store.history = T,
+  keep.input_data = F
 )
 }
 \arguments{
@@ -21,6 +22,9 @@ update_NIW_beliefs(
 
 \item{cues}{Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
 extracted from the prior object.}
+
+\item{keep.input_data}{Should the input data be included in the output? If `FALSE` then only the category and cue
+columns will be kept. If `TRUE` then all columns will be kept. (default: FALSE)}
 }
 \value{
 A tibble.

@@ -1,4 +1,5 @@
 #' @importFrom mvtnorm dmvt
+#' @importFrom foreach foreach %do%
 NULL
 
 
@@ -20,12 +21,13 @@ NULL
 #' @references Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
 #' @examples
 #' TBD
+#' @rdname get_posterior_predictive
 #' @export
 get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
   # mvtnorm::dmvt now expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
-  assert_that(all(is.vector(x) | is.matrix(x), is.vector(M) | is.matrix(M), is.matrix(S)))
-  if (is.vector(x)) x = matrix(x, nrow = 1)
+  assert_that(all(is.vector(x) | is.matrix(x) | is.tibble(x), is.vector(M) | is.matrix(M), is.matrix(S)))
+  if (is.vector(x)) x = matrix(x, nrow = 1) else if (is.tibble(x)) x = matrix(x)
   if (is.matrix(M)) M = as.vector(M)
 
   assert_that(all(is.number(kappa), is.number(nu)))
@@ -48,8 +50,54 @@ get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
        log = log)
 }
 
+
+#' @rdname get_posterior_predictive
+#' @export
 get_posterior_predictive.pmap = function(x, M, S, kappa, nu, ...) {
   get_posterior_predictive(x, M, S, kappa, nu, log = F)
+}
+
+#' @export
+get_posterior_predictive_from_NIW_belief = function(
+  x,
+  belief,
+  log = T,
+  category = "category",
+  category.label = NULL,
+  wide = FALSE
+) {
+  assert_that(is.NIW_belief(belief))
+  assert_that(any(is.null(category.label) | is.character(category.label)))
+
+  if (is.null(category.label)) {
+    belief %<>%
+      droplevels()
+    category.label = belief %>%
+      pull(!! sym(category)) %>%
+      unique()
+  }
+
+  pp = foreach(c = category.label) %do% {
+    b = belief %>%
+      filter(!! sym(category) == c)
+
+    get_posterior_predictive(
+      x = x,
+      M = b$M[[1]], S = b$S[[1]], kappa = b$kappa[[1]], nu = b$nu[[1]], log = log) %>%
+      as_tibble() %>%
+      rename_all(~ "pp") %>%
+      mutate(!! sym(category) := c)
+  }
+
+  pp = reduce(pp, rbind)
+  if (wide)
+    pp %<>%
+    pivot_wider(
+      values_from = "pp",
+      names_from = !! sym(category),
+      names_prefix = "pp.")
+
+  return(pp)
 }
 
 
