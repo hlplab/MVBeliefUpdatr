@@ -226,7 +226,9 @@ get_ibbu_stanfit_input = function(x) {
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)
 #' @param wide Should all parameters be returned in one row? (default: `FALSE`)
 #' @param nest Should the category mean vectors and scatter matrices be nested into one cell each, or should each element
-#' be stored in a separate cell? (defaul: `TRUE`)
+#' be stored in a separate cell? (default: `TRUE`)
+#' @param category Name of the category variable. (default: "category")
+#' @param group Name of the group variable. (default: "group")
 #'
 #' @return tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
 #' (\code{kappa, nu, M, S, lapse_rate}). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
@@ -251,7 +253,9 @@ add_ibbu_stanfit_draws = function(
   draws = NULL,
   summarize = FALSE,
   wide = FALSE,
-  nest = TRUE
+  nest = TRUE,
+  category = "category",
+  group = "group"
 ) {
   assert_that(which %in% c("prior", "posterior", "both"))
   assert_that(any(is.null(draws), all(draws > 0)))
@@ -260,15 +264,12 @@ add_ibbu_stanfit_draws = function(
   assert_that(!all(wide, !nest),
               msg = "Wide format is currently not implemented without nesting.")
 
-  category = "category"
-  group = "group"
-
   if (which == "both") {
     d.prior = add_ibbu_stanfit_draws(fit = fit, which = "prior",
-                             draws = if(!is.null(draws)) draws else NULL,
+                             draws = draws,
                              summarize = summarize, wide = wide, nest = nest)
     d.posterior = add_ibbu_stanfit_draws(fit = fit, which = "posterior",
-                   draws = if(!is.null(draws)) draws else NULL,
+                   draws = draws,
                    summarize = summarize, wide = wide, nest = nest)
     d.pars = rbind(d.prior, d.posterior) %>%
       mutate(!! rlang::sym(group) :=
@@ -299,7 +300,8 @@ add_ibbu_stanfit_draws = function(
             !! rlang::sym(nu),
             (!! rlang::sym(M))[!!! rlang::syms(pars.index), cue],
             (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
-            lapse_rate
+            lapse_rate,
+            n = draws
           )
       else
         d.pars = fit %>%
@@ -308,10 +310,11 @@ add_ibbu_stanfit_draws = function(
             (!! rlang::sym(nu))[!!! rlang::syms(pars.index)],
             (!! rlang::sym(M))[!!! rlang::syms(pars.index), cue],
             (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
-            lapse_rate
+            lapse_rate,
+            n = draws
           )
 
-      warning("Currently mv_ibbu_stanfits have mu_{0,n} and sigma_{0,n} as parameter names. These are actually M_{0,n} and S_{0,n}.\n
+      message("Currently mv_ibbu_stanfits have mu_{0,n} and sigma_{0,n} as parameter names. These are actually M_{0,n} and S_{0,n}.\n
               add_ibbu_stanfit_draws() renames these parameters to M and S.")
       # See also naming of parameters at beginning of this else block (no other part of the code needs to change.)
       d.pars %<>%
@@ -403,7 +406,6 @@ add_ibbu_stanfit_draws = function(
                                  nrow = sqrt(length((!! rlang::sym(S)))))))
         )
     }
-
 
     # Make sure order of variables is identical for prior or posterior (facilitates processing of the
     # output of this function). If group is prior, then add that variable to d.pars first.

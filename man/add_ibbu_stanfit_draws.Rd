@@ -10,7 +10,9 @@ add_ibbu_stanfit_draws(
   draws = NULL,
   summarize = FALSE,
   wide = FALSE,
-  nest = TRUE
+  nest = TRUE,
+  category = "category",
+  group = "group"
 )
 }
 \arguments{
@@ -25,7 +27,11 @@ add_ibbu_stanfit_draws(
 \item{wide}{Should all parameters be returned in one row? (default: `FALSE`)}
 
 \item{nest}{Should the category mean vectors and scatter matrices be nested into one cell each, or should each element
-be stored in a separate cell? (defaul: `TRUE`)}
+be stored in a separate cell? (default: `TRUE`)}
+
+\item{category}{Name of the category variable. (default: "category")}
+
+\item{group}{Name of the group variable. (default: "group")}
 }
 \value{
 tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
