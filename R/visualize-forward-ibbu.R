@@ -87,7 +87,7 @@ plot_expected_categories_contour2D = function(
                x = .data[[cue.labels[1]]],
                y = .data[[cue.labels[2]]],
                fill = .data$category)) +
-    geom_polygon(aes(alpha = 1-.data$level,
+    geom_polygon(aes(alpha = 1 - .data$level,
                      group = paste(.data$category, .data$level))) +
     # Optionally plot test data
     { if (plot.test)
@@ -111,9 +111,9 @@ plot_expected_categories_contour2D = function(
                       breaks = category.ids,
                       labels = category.labels,
                       values = category.colors) +
-    scale_alpha_manual("",
-                       breaks = levels,
-                       values = .1 + .4 * (levels - min(levels)) / (max(levels) - min(levels))) +
+    scale_alpha_continuous("Cumulative probability",
+                           range = c(.1, .5),
+                           breaks = 1 - levels) +
     theme_bw()
 
   if (!is.null(grouping.var)) {
