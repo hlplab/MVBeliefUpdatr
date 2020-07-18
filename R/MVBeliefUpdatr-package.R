@@ -1,5 +1,6 @@
 #' @import assertthat
 #' @importFrom magrittr %<>% %T>%
+#' @importFrom Hmisc %nin%
 #' @importFrom rlang !! !!! is_symbol sym syms expr
 #' @importFrom purrr map map2 pmap reduce
 #' @importFrom dplyr %>% select filter mutate mutate_at summarise summarise_at left_join rename rename_at group_by ungroup

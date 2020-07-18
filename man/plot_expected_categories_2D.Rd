@@ -44,7 +44,15 @@ Currently being ignored.}
 ggplot object.
 }
 \description{
-Plot bivariate Gaussian categories expected given NIW parameters.
+Plot bivariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
+category statistics of all categories. This includes the M (the mean of category means \eqn{\mu}), S (the scattermatrix),
+kappa (the strength of the belief in M) and nu (the strength of the belief in S).
+}
+\details{
+It is possible to hand more than one NIW belief to this function, one for each level of a grouping variable. This allows
+to plot different sets of beliefs, for example, across different panels or as an animation. For example, one can plot
+different priors for different talkers (grouping by talker), or different posteriors for different exposure conditions
+(grouping by exposure condition), or the incremental updating of NIW beliefs (grouping by observations).
 }
 \examples{
 TBD
