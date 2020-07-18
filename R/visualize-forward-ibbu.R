@@ -87,18 +87,19 @@ plot_expected_categories_contour2D = function(
               function(x) paste0("cue", which(x == cue.labels)))
 
   p = ggplot(x,
-             aes(x = !!! syms(cue.labels)[[1]],
-                 y = !!! syms(cue.labels)[[2]],
-                 fill = category)) +
-    geom_polygon(aes(alpha = 1-level,
-                     group = paste(category, level))) +
+             aes(
+               x = .data[[cue.labels[1]]],
+               y = .data[[cue.labels[2]]],
+               fill = .data$category)) +
+    geom_polygon(aes(alpha = 1-.data$level,
+                     group = paste(.data$category, .data$level))) +
     # Optionally plot test data
     { if (plot.test)
       geom_point(
         data = data.test,
         mapping = aes(
-          x = !!! syms(cue.labels)[[1]],
-          y = !!! syms(cue.labels)[[2]]),
+          x = .data[[cue.labels[1]]],
+          y = .data[[cue.labels[2]]]),
         inherit.aes = F,
         color = "black", size = 1
       )} +
@@ -106,7 +107,7 @@ plot_expected_categories_contour2D = function(
     { if (plot.exposure)
       geom_point(
         data = data.exposure,
-        mapping = aes(shape = category, color = category),
+        mapping = aes(shape = .data$category, color = .data$category),
         size = 2, alpha = .75) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
