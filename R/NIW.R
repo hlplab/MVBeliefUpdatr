@@ -85,7 +85,7 @@ get_posterior_predictive_from_NIW_belief = function(
       x = x,
       M = b$M[[1]], S = b$S[[1]], kappa = b$kappa[[1]], nu = b$nu[[1]], log = log) %>%
       as_tibble() %>%
-      rename_all(~ "pp") %>%
+      rename_all(~ if (log) "lpp" else "pp") %>%
       mutate(!! sym(category) := c)
   }
 
@@ -93,9 +93,9 @@ get_posterior_predictive_from_NIW_belief = function(
   if (wide)
     pp %<>%
     pivot_wider(
-      values_from = "pp",
+      values_from = if (log) "lpp" else "pp",
       names_from = !! sym(category),
-      names_prefix = "pp.") %>%
+      names_prefix = if (log) "lpp." else "pp.") %>%
     unnest()
 
   return(pp)
