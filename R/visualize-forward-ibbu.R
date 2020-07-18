@@ -102,9 +102,7 @@ plot_expected_categories_contour2D = function(
         mapping = aes(shape = .data$category, color = .data$category),
         size = 2, alpha = .9) } +
     { if (!is.null(data.exposure))
-      scale_shape_discrete("Category",
-                          breaks = category.ids,
-                          labels = category.labels) } +
+      scale_shape("Category") } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
     scale_fill_manual("Category",
@@ -113,7 +111,7 @@ plot_expected_categories_contour2D = function(
                       values = category.colors) +
     scale_alpha_continuous("Cumulative\nprobability",
                            range = c(0, 1),
-                           breaks = round(1 - levels), 2) +
+                           breaks = round(1 - levels, 2)) +
     theme_bw()
 
   if (!is.null(grouping.var)) {
