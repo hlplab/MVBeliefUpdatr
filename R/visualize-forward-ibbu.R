@@ -4,6 +4,32 @@
 #' @importFrom scales trans_new
 NULL
 
+#' Checking that input to plotting function is compatible
+check_compatibility_between_NIW_belief_and_data = function(
+  x,
+  data.exposure = NULL,
+  data.test = NULL,
+  return.cues = T
+) {
+  assert_that(!all(panel.group, animate.group))
+  assert_that(is.NIW_belief(x))
+
+  cue.labels = get_cue_labels_from_NIW_belief(x)
+  message(paste("The following variables are assumed to be cues:", paste(cue.labels, collapse = ", ")))
+
+  assert_that(!all(!is.null(data.exposure), cue.labels %nin% names(data.exposure)),
+              msg = "Can't plot exposure data: cue names in exposure data must match those in the NIW belief object.")
+  assert_that(!all(!is.null(data.exposure), "category" %nin% names(data.exposure)),
+              msg = "Can't plot exposure data: exposure data does not contain column category.")
+  assert_that(!all(!is.null(data.exposure), !is.null(grouping.var), grouping.var %nin% names(data.exposure)),
+              msg = "Can't plot exposure data: if a grouping variable is specified, it must be present in the exposure data.")
+  assert_that(!all(!is.null(data.test), is.null(data.test)),
+              msg = "Can't plot test data: No test data provided.")
+  assert_that(!all(!is.null(data.test), cue.labels %nin% names(data.test)),
+              msg = "Can't plot test data: cue names in test data must match those in the NIW belief object.")
+
+  if (return.cues) return(cue.labels)
+}
 
 #' Plot expected bivariate (2D) categories.
 #'
@@ -21,6 +47,8 @@ NULL
 #' can be plotted in separate panels (if panel.group is `TRUE`) or used to create animates (if animate.group is `TRUE`).
 #' @param panel.group,animate.group Determines whether the grouping variable is for paneling or animation. (both defaults: `FALSE`)
 #' @param levels Levels of the confidence ellipses. (default: .5, .66, .8, .9., and .95)
+#' @param data.exposure Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)
+#' @param data.test Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)
 #' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
@@ -45,22 +73,7 @@ plot_expected_categories_contour2D = function(
   data.test = NULL,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
-  assert_that(!all(panel.group, animate.group))
-  assert_that(is.NIW_belief(x))
-
-  cue.labels = get_cue_labels_from_NIW_belief(x)
-  message(paste("The following variables are assumed to be cues:", paste(cue.labels, collapse = ", ")))
-
-  assert_that(!all(!is.null(data.exposure), cue.labels %nin% names(data.exposure)),
-              msg = "Can't plot exposure data: cue names in exposure data must match those in the NIW belief object.")
-  assert_that(!all(!is.null(data.exposure), "category" %nin% names(data.exposure)),
-              msg = "Can't plot exposure data: exposure data does not contain column category.")
-  assert_that(!all(!is.null(data.exposure), !is.null(grouping.var), grouping.var %nin% names(data.exposure)),
-              msg = "Can't plot exposure data: if a grouping variable is specified, it must be present in the exposure data.")
-  assert_that(!all(!is.null(data.test), is.null(data.test)),
-              msg = "Can't plot test data: No test data provided.")
-  assert_that(!all(!is.null(data.test), cue.labels %nin% names(data.test)),
-              msg = "Can't plot test data: cue names in test data must match those in the NIW belief object.")
+  cue.labels = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test, return.cues = T)
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(x$category)
@@ -101,7 +114,7 @@ plot_expected_categories_contour2D = function(
         geom_point(
           data = data.exposure,
           mapping = aes(shape = .data$category, color = .data$category),
-          size = 2.5, alpha = .9),
+          size = 3, alpha = .9),
         scale_shape("Category"),
         scale_color_manual("Category",
                            breaks = category.labels,
@@ -146,7 +159,8 @@ plot_expected_categories_contour2D = function(
 #' @param grouping.var Grouping variable that is used to create separate instances of the categories. These instances
 #' can be plotted in separate panels (if panel.group is `TRUE`) or used to create animates (if animate.group is `TRUE`).
 #' @param panel.group,animate.group Determines whether the grouping variable is for paneling or animation. (both defaults: `FALSE`)
-#' @param levels Levels of the confidence ellipses. (default: 5 steps from close to 0 to 95 percent probability mass)
+#' @param data.exposure Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)
+#' @param data.test Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)
 #' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
@@ -166,11 +180,16 @@ plot_expected_categories_contour2D = function(
 plot_expected_categorization_function_2D = function(
   x,
   grouping.var = NULL, panel.group = F, animate.group = F,
-  levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
-  # data.exposure = NULL,
-  # data.test = NULL,
-  # plot.exposure = F, plot.test = F,
+  data.exposure = NULL,
+  data.test = NULL,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
+  cue.labels = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test, return.cues = T)
+
+  # Setting aes defaults
+  if(is.null(category.ids)) category.ids = levels(x$category)
+  if(is.null(category.labels)) category.labels = levels(x$category)
+  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
+  if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
 }
