@@ -7,8 +7,10 @@ NULL
 #' Checking that input to plotting function is compatible
 check_compatibility_between_NIW_belief_and_data = function(
   x,
-  data.exposure = NULL,
-  data.test = NULL,
+  data.exposure,
+  data.test,
+  panel.group,
+  animate.group,
   return.cues = T
 ) {
   assert_that(!all(panel.group, animate.group))
@@ -73,7 +75,9 @@ plot_expected_categories_contour2D = function(
   data.test = NULL,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
-  cue.labels = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test, return.cues = T)
+  cue.labels = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
+                                                               panel.group, animate.group,
+                                                               return.cues = T)
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(x$category)
@@ -184,7 +188,9 @@ plot_expected_categorization_function_2D = function(
   data.test = NULL,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
-  cue.labels = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test, return.cues = T)
+  cue.labels = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
+                                                               panel.group, animate.group,
+                                                               return.cues = T)
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(x$category)
