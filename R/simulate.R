@@ -217,8 +217,7 @@ update_NIW_beliefs <- function(
 
   # Prepare data
   data %<>%
-    mutate(cues = pmap(.l = list(!!! syms(cues)), .f = ~ c(...))) %>%
-    { if (!keep.input_data) . %>% select(category, cues) else . }
+    mutate(cues = pmap(.l = list(!!! syms(cues)), .f = ~ c(...)))
 
   if (store.history)
     priors %<>%
