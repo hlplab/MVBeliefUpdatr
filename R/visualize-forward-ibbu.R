@@ -111,7 +111,10 @@ plot_expected_categories_contour2D = function(
                       breaks = category.ids,
                       labels = category.labels,
                       values = category.colors) +
-    scale_alpha("", range = c(.1,.5), breaks = levels, values = .1 + .4 * (levels - min(levels)) / (max(levels) - min(levels))) +
+    scale_alpha_manual("",
+                       range = c(.1,.5),
+                       breaks = levels,
+                       values = .1 + .4 * (levels - min(levels)) / (max(levels) - min(levels))) +
     theme_bw()
 
   if (!is.null(grouping.var)) {
