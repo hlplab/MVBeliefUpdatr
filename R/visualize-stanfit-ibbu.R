@@ -273,7 +273,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #' TBD
 #' @export
 #'
-plot_stanfit_test_categorization = function(
+plot_ibbu_stanfit_test_categorization = function(
   fit,
   fit.input,
   which = "both",

@@ -12,8 +12,6 @@ plot_expected_categories_contour2D(
   levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
   data.exposure = NULL,
   data.test = NULL,
-  plot.exposure = F,
-  plot.test = F,
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
@@ -29,6 +27,10 @@ can be plotted in separate panels (if panel.group is `TRUE`) or used to create a
 \item{panel.group, animate.group}{Determines whether the grouping variable is for paneling or animation. (both defaults: `FALSE`)}
 
 \item{levels}{Levels of the confidence ellipses. (default: .5, .66, .8, .9., and .95)}
+
+\item{data.exposure}{Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)}
+
+\item{data.test}{Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)}
 
 \item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}
