@@ -129,9 +129,10 @@ get_category_statistic = function(x, grouping.vars = NULL,
 }
 
 
-#' Get category mean mu or covariance matrix sigma of exposure data
+#' Get category mean mu or covariance matrix sigma of exposure data for IBBU
 #'
-#' The category means mu and/or category covariance matrix Sigma for the exposure data.
+#' The category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
+#' Bayesian belief-updating (IBBU) model.
 #'
 #' @param x An mv_ibbu_stanfit or mv_ibbu_MCMC object.
 #' @param category Character vector with categories (or category) for which category statistics are to be
@@ -149,12 +150,12 @@ get_category_statistic = function(x, grouping.vars = NULL,
 #' @keywords TBD
 #' @examples
 #' TBD
-#' @rdname get_exposure_category_statistic
+#' @rdname get_ibbu_exposure_category_statistic
 #' @export
-get_exposure_category_statistic = function(x, category = NULL, group = NULL,
+get_ibbu_exposure_category_statistic = function(x, category = NULL, group = NULL,
                                   statistic = c("mu", "Sigma")) {
   assert_that(is.mv_ibbu_input(x) | is.mv_ibbu_stanfit(x))
-  stop("get_exposure_statistics not yet implemented!")
+  stop("get_ibbu_exposure_statistics not yet implemented!")
 
   x = get_ibbu_input(x)
 
@@ -163,19 +164,19 @@ get_exposure_category_statistic = function(x, category = NULL, group = NULL,
   # deal with cases for which there is no exposure data
   # Assume that all cues are used
 
-  return(get_category_statistic(x, grouping.vars = c("category", "group"), statistic))
+  return(get_ibbu_category_statistic(x, grouping.vars = c("category", "group"), statistic))
 }
 
-#' @rdname get_exposure_category_statistic
+#' @rdname get_ibbu_exposure_category_statistic
 #' @export
-get_exposure_mean = function(x, category, group) {
-  return(get_exposure_category_statistic(x, category, group, statistic = "mu"))
+get_ibbu_exposure_mean = function(x, category, group) {
+  return(get_ibbu_exposure_category_statistic(x, category, group, statistic = "mu"))
 }
 
-#' @rdname get_exposure_category_statistic
+#' @rdname get_ibbu_exposure_category_statistic
 #' @export
-get_exposure_Sigma = function(x, category, group) {
-  return(get_exposure_category_statistic(x, category, group, statistic = "Sigma"))
+get_ibbu_exposure_Sigma = function(x, category, group) {
+  return(get_ibbu_exposure_category_statistic(x, category, group, statistic = "Sigma"))
 }
 
 

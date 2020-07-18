@@ -584,17 +584,21 @@ plot_expected_categories_contour2D = function(
   x,
   grouping.var = NULL, panel.group = F, animate.group = F,
   levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
-  # data.exposure = NULL,
-  # data.test = NULL,
-  # plot.exposure = F, plot.test = F,
+  data.exposure = NULL,
+  data.test = NULL,
+  plot.exposure = F, plot.test = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
   assert_that(!all(panel.group, animate.group))
   assert_that(is.NIW_belief(x))
-  # assert_that(!all(is.null(data.exposure), plot.exposure),
-  #             msg = "No exposure data provided.")
-  # assert_that(!all(is.null(data.test), plot.test),
-  #             msg = "No test data provided.")
+  assert_that(!all(plot.exposure, is.null(data.exposure)),
+              msg = "Can't plot exposure data: No exposure data provided.")
+  assert_that(!all(plot.exposure, ),
+              msg = "Can't plot exposure data: cue names in exposure data must match those in the NIW belief object.")
+  assert_that(!all(plot.exposure, !is.null(grouping.var), !(grouping.var %in% names(data.exposure))),
+              msg = "Can't plot exposure data: if a grouping variable is specified, it must be present in the exposure data.")
+  assert_that(!all(plot.test, is.null(data.test)),
+              msg = "Can't plot test data: No test data provided.")
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(x$category)
@@ -627,14 +631,49 @@ plot_expected_categories_contour2D = function(
              alpha = 1-level,
              group = paste(category, level))) +
     geom_polygon() +
+    # Optionally plot test data
+    { if (plot.test)
+      geom_point(
+        data = fit.input$x_test %>%
+          rename_at(cue.names,
+                    function(x) paste0("cue", which(x == cue.names))),
+        mapping = aes(cue1, cue2),
+        inherit.aes = F,
+        color = "black", size = 1
+      )} +
+    # Optionally plot exposure data
+    { if (plot.exposure)
+      geom_point(
+        data = data.exposure,
+        mapping = aes(cue1, cue2, shape = category, color = category),
+        inherit.aes = F, size = 2
+      ) +
+        geom_path(
+          data = crossing(
+            group = levels(d$group),
+            category = levels(d$category),
+            level = .95
+          ) %>%
+            mutate(
+              x = map2(category, group, get_ibbu_exposure_sigma(fit.input, .x, .y)),
+              centre = map2(category, group, get_ibbu_exposure_mean(fit.input, .x, .y))
+            ) %>%
+            mutate(ellipse = pmap(., ellipse.pmap)) %>%
+            mutate(ellipse = map(ellipse, as_tibble)) %>%
+            unnest(ellipse) %>%
+            rename_at(cue.names,
+                      function(x) paste0("cue", which(x == cue.names))),
+          mapping = aes(cue1, cue2, shape = category, color = category),
+          linetype = 2,
+          inherit.aes = F)
+    } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
     scale_fill_manual("Category",
                       breaks = category.ids,
                       labels = category.labels,
                       values = category.colors) +
-    scale_alpha("",
-                range = c(0.1,.9)) +
+    scale_alpha("", range = c(.1, .5), breaks = levels) +
     theme_bw()
 
   if (!is.null(grouping.var)) {
@@ -870,7 +909,7 @@ plot_expected_ibbu_categories_contour2D = function(
     # Optionally plot exposure data
     { if (plot.exposure)
       geom_point(
-        data = get_exposure_mean(fit.input,
+        data = get_ibbu_exposure_mean(fit.input,
                                  category = levels(d$category),
                                  group = levels(d$group)) %>%
           rename_at(cue.names,
@@ -885,8 +924,8 @@ plot_expected_ibbu_categories_contour2D = function(
             level = .95
           ) %>%
             mutate(
-              x = map2(category, group, get_exposure_sigma(fit.input, .x, .y)),
-              centre = map2(category, group, get_exposure_mean(fit.input, .x, .y))
+              x = map2(category, group, get_ibbu_exposure_sigma(fit.input, .x, .y)),
+              centre = map2(category, group, get_ibbu_exposure_mean(fit.input, .x, .y))
             ) %>%
             mutate(ellipse = pmap(., ellipse.pmap)) %>%
             mutate(ellipse = map(ellipse, as_tibble)) %>%
@@ -965,7 +1004,7 @@ plot_expected_ibbu_categories_density2D = function(
     # Optionally plot exposure data
     { if (plot.exposure)
       geom_point(
-        data = get_exposure_mean(fit.input,
+        data = get_ibbu_exposure_mean(fit.input,
                                  category = levels(d$category),
                                  group = levels(d$group)) %>%
           rename_at(cue.names,
@@ -980,8 +1019,8 @@ plot_expected_ibbu_categories_density2D = function(
             level = .95
           ) %>%
             mutate(
-              x = map2(category, group, get_exposure_sigma(fit.input, .x, .y)),
-              centre = map2(category, group, get_exposure_mean(fit.input, .x, .y))
+              x = map2(category, group, get_ibbu_exposure_sigma(fit.input, .x, .y)),
+              centre = map2(category, group, get_ibbu_exposure_mean(fit.input, .x, .y))
             ) %>%
             mutate(ellipse = pmap(., ellipse.pmap)) %>%
             mutate(ellipse = map(ellipse, as_tibble)) %>%
