@@ -97,16 +97,16 @@ plot_expected_categories_contour2D = function(
         color = "black", size = 1) } +
     # Optionally plot exposure data
     { if (!is.null(data.exposure))
-      geom_point(
+      list(
+        geom_point(
         data = data.exposure,
         mapping = aes(shape = .data$category, color = .data$category),
-        size = 2, alpha = .9) } +
-    { if (!is.null(data.exposure))
-      scale_shape("Category") +
+        size = 2, alpha = .9),
+      scale_shape("Category"),
       scale_color_manual("Category",
                          breaks = category.labels,
                          labels = category.labels,
-                         values = category.colors) } +
+                         values = category.colors)) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
     scale_fill_manual("Category",
