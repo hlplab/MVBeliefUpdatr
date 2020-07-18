@@ -43,7 +43,6 @@ plot_expected_categories_contour2D = function(
   levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
   data.exposure = NULL,
   data.test = NULL,
-  plot.exposure = F, plot.test = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
   assert_that(!all(panel.group, animate.group))
@@ -52,17 +51,15 @@ plot_expected_categories_contour2D = function(
   cue.labels = get_cue_labels_from_NIW_belief(x)
   message(paste("The following variables are assumed to be cues:", paste(cue.labels, collapse = ", ")))
 
-  assert_that(!all(plot.exposure, is.null(data.exposure)),
-              msg = "Can't plot exposure data: No exposure data provided.")
-  assert_that(!all(plot.exposure, cue.labels %nin% names(data.exposure)),
+  assert_that(!all(!is.null(data.exposure), cue.labels %nin% names(data.exposure)),
               msg = "Can't plot exposure data: cue names in exposure data must match those in the NIW belief object.")
-  assert_that(!all(plot.exposure, "category" %nin% names(data.exposure)),
+  assert_that(!all(!is.null(data.exposure), "category" %nin% names(data.exposure)),
               msg = "Can't plot exposure data: exposure data does not contain column category.")
-  assert_that(!all(plot.exposure, !is.null(grouping.var), grouping.var %nin% names(data.exposure)),
+  assert_that(!all(!is.null(data.exposure), !is.null(grouping.var), grouping.var %nin% names(data.exposure)),
               msg = "Can't plot exposure data: if a grouping variable is specified, it must be present in the exposure data.")
-  assert_that(!all(plot.test, is.null(data.test)),
+  assert_that(!all(!is.null(data.test), is.null(data.test)),
               msg = "Can't plot test data: No test data provided.")
-  assert_that(!all(plot.test, cue.labels %nin% names(data.test)),
+  assert_that(!all(!is.null(data.test), cue.labels %nin% names(data.test)),
               msg = "Can't plot test data: cue names in test data must match those in the NIW belief object.")
 
   # Setting aes defaults
@@ -90,7 +87,7 @@ plot_expected_categories_contour2D = function(
     geom_polygon(aes(alpha = 1 - .data$level,
                      group = paste(.data$category, .data$level))) +
     # Optionally plot test data
-    { if (plot.test)
+    { if (!is.null(data.test))
       geom_point(
         data = data.test,
         mapping = aes(
@@ -100,20 +97,23 @@ plot_expected_categories_contour2D = function(
         color = "black", size = 1
       )} +
     # Optionally plot exposure data
-    { if (plot.exposure)
+    { if (!is.null(data.exposure))
       geom_point(
         data = data.exposure,
         mapping = aes(shape = .data$category, color = .data$category),
-        size = 2, alpha = .75) } +
+        size = 2, alpha = .9) +
+      scale_shape_discrete("Category",
+                          breaks = category.ids,
+                          labels = category.labels) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
     scale_fill_manual("Category",
                       breaks = category.ids,
                       labels = category.labels,
                       values = category.colors) +
-    scale_alpha_continuous("Cumulative probability",
-                           range = c(.1, .5),
-                           breaks = 1 - levels) +
+    scale_alpha_continuous("Cumulative\nprobability",
+                           range = c(0, 1),
+                           breaks = round(1 - levels), 2) +
     theme_bw()
 
   if (!is.null(grouping.var)) {
