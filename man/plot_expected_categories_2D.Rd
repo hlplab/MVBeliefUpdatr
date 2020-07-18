@@ -9,7 +9,7 @@ plot_expected_categories_contour2D(
   grouping.var = NULL,
   panel.group = F,
   animate.group = F,
-  levels = plogis(seq(-15, qlogis(0.95), length.out = 5)),
+  levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
@@ -24,7 +24,7 @@ can be plotted in separate panels (if panel.group is `TRUE`) or used to create a
 
 \item{panel.group, animate.group}{Determines whether the grouping variable is for paneling or animation. (both defaults: `FALSE`)}
 
-\item{levels}{Levels of the confidence ellipses. (default: 5 steps from close to 0 to 95 percent probability mass)}
+\item{levels}{Levels of the confidence ellipses. (default: .5, .66, .8, .9., and .95)}
 
 \item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}
