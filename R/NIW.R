@@ -95,7 +95,8 @@ get_posterior_predictive_from_NIW_belief = function(
     pivot_wider(
       values_from = "pp",
       names_from = !! sym(category),
-      names_prefix = "pp.")
+      names_prefix = "pp.") %>%
+    unnest()
 
   return(pp)
 }
