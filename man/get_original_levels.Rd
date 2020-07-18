@@ -13,7 +13,7 @@ get_category_levels(fit, indices = NULL)
 get_group_levels(fit, indices = NULL)
 }
 \arguments{
-\item{fit}{mv-ibbu-stanfit object.}
+\item{fit}{mv_ibbu_stanfit object.}
 
 \item{variable}{Either "category" or "group".}
 

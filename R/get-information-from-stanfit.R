@@ -24,7 +24,7 @@ get_number_of_draws = function(fit) {
 #' Returns `n.draws` indices for random post-warmup MCMC draws (without replacement) from
 #' `fit`.
 #'
-#' @param fit mv-ibbu-stanfit object.
+#' @param fit mv_ibbu_stanfit object.
 #' @param n.draws Number of indices to be returned. Can't be larger than total number of
 #' post-warmup samples across all MCMC chains in `fit`.
 #'
@@ -47,7 +47,7 @@ get_random_draw_indices = function(fit, n.draws)
 #' that information is returned. `get_category_levels()` and `get_group_levels()` are
 #' convenience functions, calling `get_original_levels()`.
 #'
-#' @param fit mv-ibbu-stanfit object.
+#' @param fit mv_ibbu_stanfit object.
 #' @param variable Either "category" or "group".
 #' @param indeces A vector of category or group indices that should be turned into the original
 #' category levels, or `NULL` if only the unique levels in their original order (as vector of characters)
@@ -150,33 +150,33 @@ get_category_statistic = function(x, grouping.vars = NULL,
 #' @keywords TBD
 #' @examples
 #' TBD
-#' @rdname get_ibbu_exposure_category_statistic
+#' @rdname get_ibbu_stanfit_exposure_category_statistic
 #' @export
-get_ibbu_exposure_category_statistic = function(x, category = NULL, group = NULL,
+get_ibbu_stanfit_exposure_category_statistic = function(x, category = NULL, group = NULL,
                                   statistic = c("mu", "Sigma")) {
   assert_that(is.mv_ibbu_input(x) | is.mv_ibbu_stanfit(x))
-  stop("get_ibbu_exposure_statistics not yet implemented!")
+  stop("get_ibbu_stanfit_exposure_statistics not yet implemented!")
 
-  x = get_ibbu_input(x)
+  x = get_ibbu_stanfit_input(x)
 
   # More here. ######################################
   # filter out group "prior"
   # deal with cases for which there is no exposure data
   # Assume that all cues are used
 
-  return(get_ibbu_category_statistic(x, grouping.vars = c("category", "group"), statistic))
+  return(get_ibbu_stanfit_category_statistic(x, grouping.vars = c("category", "group"), statistic))
 }
 
-#' @rdname get_ibbu_exposure_category_statistic
+#' @rdname get_ibbu_stanfit_exposure_category_statistic
 #' @export
-get_ibbu_exposure_mean = function(x, category, group) {
-  return(get_ibbu_exposure_category_statistic(x, category, group, statistic = "mu"))
+get_ibbu_stanfit_exposure_mean = function(x, category, group) {
+  return(get_ibbu_stanfit_exposure_category_statistic(x, category, group, statistic = "mu"))
 }
 
-#' @rdname get_ibbu_exposure_category_statistic
+#' @rdname get_ibbu_stanfit_exposure_category_statistic
 #' @export
-get_ibbu_exposure_Sigma = function(x, category, group) {
-  return(get_ibbu_exposure_category_statistic(x, category, group, statistic = "Sigma"))
+get_ibbu_stanfit_exposure_Sigma = function(x, category, group) {
+  return(get_ibbu_stanfit_exposure_category_statistic(x, category, group, statistic = "Sigma"))
 }
 
 
@@ -196,7 +196,7 @@ get_ibbu_exposure_Sigma = function(x, category, group) {
 #' TBD
 #' @rdname get_ibbu_input
 #' @export
-get_ibbu_input = function(x) {
+get_ibbu_stanfit_input = function(x) {
   assert_that(is.mv_ibbu_input(x) | is.mv_ibbu_stanfit(x))
 
   if (is.mv_ibbu_input(x)) return(x) else {
@@ -245,7 +245,7 @@ get_ibbu_input = function(x) {
 #' TBD
 #' @export
 #'
-add_ibbu_draws = function(
+add_ibbu_stanfit_draws = function(
   fit,
   which = "posterior",
   draws = NULL,
@@ -264,10 +264,10 @@ add_ibbu_draws = function(
   group = "group"
 
   if (which == "both") {
-    d.prior = add_ibbu_draws(fit = fit, which = "prior",
+    d.prior = add_ibbu_stanfit_draws(fit = fit, which = "prior",
                              draws = if(!is.null(draws)) draws else NULL,
                              summarize = summarize, wide = wide, nest = nest)
-    d.posterior = add_ibbu_draws(fit = fit, which = "posterior",
+    d.posterior = add_ibbu_stanfit_draws(fit = fit, which = "posterior",
                    draws = if(!is.null(draws)) draws else NULL,
                    summarize = summarize, wide = wide, nest = nest)
     d.pars = rbind(d.prior, d.posterior) %>%
@@ -312,7 +312,7 @@ add_ibbu_draws = function(
           )
 
       warning("Currently mv_ibbu_stanfits have mu_{0,n} and sigma_{0,n} as parameter names. These are actually M_{0,n} and S_{0,n}.\n
-              add_ibbu_draws() renames these parameters to M and S.")
+              add_ibbu_stanfit_draws() renames these parameters to M and S.")
       # See also naming of parameters at beginning of this else block (no other part of the code needs to change.)
       d.pars %<>%
         rename(M = !! rlang::sym(M), S = !! rlang::sym(S)) %>%
