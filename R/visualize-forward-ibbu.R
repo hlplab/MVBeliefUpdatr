@@ -99,14 +99,14 @@ plot_expected_categories_contour2D = function(
     { if (!is.null(data.exposure))
       list(
         geom_point(
-        data = data.exposure,
-        mapping = aes(shape = .data$category, color = .data$category),
-        size = 2, alpha = .9),
-      scale_shape("Category"),
-      scale_color_manual("Category",
-                         breaks = category.labels,
-                         labels = category.labels,
-                         values = category.colors)) } +
+          data = data.exposure,
+          mapping = aes(shape = .data$category, color = .data$category),
+          size = 2.5, alpha = .9),
+        scale_shape("Category"),
+        scale_color_manual("Category",
+                           breaks = category.labels,
+                           labels = category.labels,
+                           values = category.colors)) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
     scale_fill_manual("Category",
