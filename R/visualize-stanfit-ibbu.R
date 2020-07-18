@@ -63,7 +63,10 @@ plot_ibbu_stanfit_parameters = function(
     select(.draw, group, category, cue, M) %>%
     distinct() %T>%
     { get_limits(., "M") ->> x.limits } %>%
-    ggplot(aes(y = fct_rev(category), x = M, fill = group)) +
+    ggplot(aes(
+      y = fct_rev(.data$category),
+      x = .data$M,
+      fill = .data$group)) +
     ggridges::geom_density_ridges(alpha = .5, color = NA,
                                   panel_scaling = panel_scaling, scale = .95,
                                   stat = "density", aes(height = ..density..),
@@ -81,7 +84,7 @@ plot_ibbu_stanfit_parameters = function(
       values = group.colors
     ) +
     coord_cartesian(xlim = x.limits, default = T) +
-    facet_grid(~ cue) +
+    facet_grid(~ .data$cue) +
     theme_bw() + theme(legend.position = "right")
   legend = cowplot::get_legend(p.M)
 
@@ -92,7 +95,7 @@ plot_ibbu_stanfit_parameters = function(
          select(.draw, group, category, cue, cue2, S) %>%
          distinct() %T>%
          { get_limits(., "S") ->> x.limits }) +
-      aes(x = S) +
+      aes(x = .data$S) +
       scale_x_continuous("Scatter matrix",
                          breaks = inv_symlog(
                            seq(
@@ -101,7 +104,7 @@ plot_ibbu_stanfit_parameters = function(
                            ))
       ) +
       coord_trans(x = "symlog", xlim = x.limits) +
-      facet_grid(cue2 ~ cue))
+      facet_grid(.data$cue2 ~ .data$cue))
 
   p.KN = suppressWarnings(
     suppressMessages(
@@ -111,7 +114,7 @@ plot_ibbu_stanfit_parameters = function(
            distinct() %>%
            gather(key = "key", value = "value", -c(.draw, group, category)) %T>%
            { get_limits(., "value", min = 1) ->> x.limits } ) +
-        aes(x = value) +
+        aes(x = .data$value) +
         scale_x_continuous("Pseudocounts",
                            breaks = 10^(
                              seq(
@@ -120,14 +123,14 @@ plot_ibbu_stanfit_parameters = function(
                              ))) +
         scale_y_discrete("", expand = c(0,0)) +
         coord_trans(x = "log10", xlim = x.limits) +
-        facet_grid(~ key)))
+        facet_grid(~ .data$key)))
 
   p.LR =
     d.pars %>%
     select(.draw, lapse_rate) %>%
     distinct() %T>%
     { get_limits(., "lapse_rate") ->> x.limits } %>%
-    ggplot(aes(x = lapse_rate)) +
+    ggplot(aes(x = .data$lapse_rate)) +
     geom_density(color = NA, fill = "darkgray", alpha = .5,
                  stat = "density") +
     scale_x_continuous("Lapse rate")  +
@@ -406,7 +409,11 @@ plot_stanfit_test_categorization = function(
   p = d.pars %>%
     ungroup() %>%
     mutate(group = factor(group, levels = group.ids)) %>%
-    ggplot(aes(x = token, y = probability_cat1, color = group, linetype = group)) +
+    ggplot(aes(
+      x = .data$token,
+      y = .data$probability_cat1,
+      color = .data$group,
+      linetype = .data$group)) +
     scale_x_discrete("Test token") +
     scale_y_continuous(
       paste0("Predicted proportion of ", category1, "-responses"),
@@ -428,11 +435,19 @@ plot_stanfit_test_categorization = function(
   if (summarize & !is.null(confidence.intervals)) {
     p = p +
       geom_ribbon(
-        aes(x = as.numeric(token), ymin = y.outer.min, ymax = y.outer.max, fill = group),
+        aes(
+          x = as.numeric(.data$token),
+          ymin = .data$y.outer.min,
+          ymax = .data$y.outer.max,
+          fill = .data$group),
         color = NA, alpha = .1
       ) +
       geom_ribbon(
-        aes(x = as.numeric(token), ymin = y.inner.min, ymax = y.inner.max, fill = group),
+        aes(
+          x = as.numeric(.data$token),
+          ymin = .data$y.inner.min,
+          ymax = .data$y.inner.max,
+          fill = .data$group),
         color = NA, alpha = .3
       ) +
       scale_fill_manual(
@@ -458,7 +473,7 @@ plot_stanfit_test_categorization = function(
 
   p = p +
     geom_point(alpha = .9) +
-    geom_line(size = 1, alpha = .9, aes(x = as.numeric(token))) +
+    geom_line(size = 1, alpha = .9, aes(x = as.numeric(.data$token))) +
     theme_bw()
 
   if (!summarize) p = p + facet_wrap(~ .draw)
@@ -562,12 +577,15 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
   d %<>%
     rename_at(cue.names,
               function(x) paste0("cue", which(x == cue.names)))
+  message("If cues labels can be extracted from stanfit, this code can be improved, and .data[[cue.labels[1]]], etc. can be used.
+          See plot_expected_categories for NIW_belief objects.")
 
   ggplot(d,
-         aes(x = cue1, y = cue2,
-             fill = category,
-             alpha = 1-level,
-             group = paste(category, level))) +
+         aes(x = .data$cue1,
+             y = .data$cue2,
+             fill = .data$category,
+             alpha = 1 - .data$level,
+             group = paste(.data$category, .data$level))) +
     geom_polygon() +
     # Optionally plot test data
     { if (plot.test)
@@ -575,7 +593,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
         data = fit.input$x_test %>%
           rename_at(cue.names,
                     function(x) paste0("cue", which(x == cue.names))),
-        mapping = aes(cue1, cue2),
+        mapping = aes(x = .data$cue1, y = .data$cue2),
         inherit.aes = F,
         color = "black", size = 1
     )} +
@@ -587,7 +605,11 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
                                  group = levels(d$group)) %>%
           rename_at(cue.names,
                     function(x) paste0("cue", which(x == cue.names))),
-        mapping = aes(cue1, cue2, shape = category, color = category),
+        mapping = aes(
+          x = .data$cue1,
+          y = .data$cue2,
+          shape = .data$category,
+          color = .data$category),
         inherit.aes = F, size = 2
       ) +
         geom_path(
@@ -605,7 +627,11 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
             unnest(ellipse) %>%
             rename_at(cue.names,
                       function(x) paste0("cue", which(x == cue.names))),
-          mapping = aes(cue1, cue2, shape = category, color = category),
+          mapping = aes(
+            x = .data$cue1,
+            y = .data$cue2,
+            shape = .data$category,
+            color = .data$category),
           linetype = 2,
           inherit.aes = F)
     } +
@@ -660,9 +686,11 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
     summarise(density = mean(density))
 
   ggplot(d,
-         aes(x = cue1, y = cue2,
-             color = category, fill = category,
-             z = density)) +
+         aes(x = .data$cue1,
+             y = .data$cue2,
+             color = .data$category,
+             fill = .data$category,
+             z = .data$density)) +
     geom_contour() +
     # Optionally plot test data
     { if (plot.test)
@@ -670,7 +698,9 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
         data = fit.input$x_test %>%
           rename_at(cue.names,
                     function(x) paste0("cue", which(x == cue.names))),
-        mapping = aes(cue1, cue2),
+        mapping = aes(
+          x = .data$cue1,
+          y = .data$cue2),
         inherit.aes = F,
         color = "black", size = 1
       )} +
@@ -682,7 +712,11 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
                                  group = levels(d$group)) %>%
           rename_at(cue.names,
                     function(x) paste0("cue", which(x == cue.names))),
-        mapping = aes(cue1, cue2, shape = category, color = category),
+        mapping = aes(
+          x = .data$cue1,
+          y = .data$cue2,
+          shape = .data$category,
+          color = .data$category),
         inherit.aes = F, size = 2
       ) +
         geom_path(
@@ -700,7 +734,11 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
             unnest(ellipse) %>%
             rename_at(cue.names,
                       function(x) paste0("cue", which(x == cue.names))),
-          mapping = aes(cue1, cue2, shape = category, color = category),
+          mapping = aes(
+            x = .data$cue1,
+            y = .data$cue2,
+            shape = .data$category,
+            color = .data$category),
           linetype = 2,
           inherit.aes = F)
     } +
@@ -711,7 +749,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
                        labels = category.labels,
                        values = category.colors) +
     coord_fixed(xlim = xlim, ylim = ylim, ratio = 1) +
-    facet_wrap(~ group) +
+    facet_wrap(~ .data$group) +
     theme_bw()
 }
 
