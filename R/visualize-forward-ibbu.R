@@ -94,14 +94,14 @@ plot_expected_categories_contour2D = function(
           x = .data[[cue.labels[1]]],
           y = .data[[cue.labels[2]]]),
         inherit.aes = F,
-        color = "black", size = 1
-      )} +
+        color = "black", size = 1) } +
     # Optionally plot exposure data
     { if (!is.null(data.exposure))
       geom_point(
         data = data.exposure,
         mapping = aes(shape = .data$category, color = .data$category),
-        size = 2, alpha = .9) +
+        size = 2, alpha = .9) } +
+    { if (!is.null(data.exposure))
       scale_shape_discrete("Category",
                           breaks = category.ids,
                           labels = category.labels) } +
