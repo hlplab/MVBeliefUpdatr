@@ -82,10 +82,6 @@ plot_expected_categories_contour2D = function(
     select(-c(kappa, nu, M, S, Sigma, lapse)) %>%
     unnest(ellipse)
 
-  x %<>%
-    rename_at(cue.labels,
-              function(x) paste0("cue", which(x == cue.labels)))
-
   p = ggplot(x,
              aes(
                x = .data[[cue.labels[1]]],
