@@ -4,10 +4,10 @@ NULL
 
 #' Get posterior predictive
 #'
-#' Get posterior predictive of observation x given the NIW parameters M, S, kappa, and nu. This is
+#' Get posterior predictive of observations x given the NIW parameters M, S, kappa, and nu. This is
 #' a multivariate Student-T distribution (Murphy, 2012, p. 135).
 #'
-#' @param x Input (observation).
+#' @param x Observations.
 #' @param M The mean of the multivariate Normal distribution of the category mean mu.
 #' @param S The scatter matrix of the inverse-Wishart distribution over the category covariance
 #' matrix Sigma.
@@ -24,8 +24,8 @@ NULL
 get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
   # mvtnorm::dmvt now expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
-  assert_that(all(is.vector(x) | is.matrix(M), is.vector(M) | is.matrix(M), is.matrix(S)))
-  if (is.vector(x)) x = matrix(M, nrow = 1)
+  assert_that(all(is.vector(x) | is.matrix(x), is.vector(M) | is.matrix(M), is.matrix(S)))
+  if (is.vector(x)) x = matrix(x, nrow = 1)
   if (is.matrix(M)) M = as.vector(M)
 
   assert_that(all(is.number(kappa), is.number(nu)))
@@ -41,11 +41,11 @@ get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
   assert_that(length(M) == D,
               msg = "S and M are not of compatible dimensions.")
 
-  mvtnorm::dmvt(x,
-                delta = M,
-                sigma = S * (kappa + 1) / (kappa * (nu - D + 1)),
-                df = nu - D + 1,
-                log = log)
+  dmvt(x,
+       delta = M,
+       sigma = S * (kappa + 1) / (kappa * (nu - D + 1)),
+       df = nu - D + 1,
+       log = log)
 }
 
 get_posterior_predictive.pmap = function(x, M, S, kappa, nu, ...) {
