@@ -199,21 +199,26 @@ get_categorization_function = function(
   assert_that(nus[[1]] >= D,
     msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
 
-  f <- function(x) {
-    log_p = array()
+  f <- function(x, target_category = 1) {
+    log_p = matrix(
+      nrow = length(x),
+      ncol = n.cat
+    )
     for (cat in 1:n.cat) {
-      log_p[cat] = get_posterior_predictive(x, Ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T)
+      log_p[, cat] = get_posterior_predictive(x, Ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T)
     }
 
-    log_p1 = exp(
-      log_p[1] + log(priors[1]) -
-        log(sum(exp(log_p) * priors
-        ))) * (1 - lapse_rate) + lapse_rate / n.cat
+    p_target =
+      exp(
+        log_p[,target_category] + log(priors[target_category]) -
+          log(rowSums(exp(log_p) * priors))) *
+      # Assuming a uniform (unbiased) lapse rate:
+      (1 - lapse_rate) + lapse_rate / n.cat
 
     if (logit)
-      return(qlogis(log_p1))
+      return(qlogis(p_target))
     else
-      return(log_p1)
+      return(p_target)
   }
 
   return(f)
@@ -255,6 +260,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #' (default: `NULL`)
 #' @param confidence.intervals The two confidence intervals that should be plotted (using `geom_ribbon`) around the mean.
 #' (default: `c(.66, .95)`)
+#' @param target_category The index of the category for which categorization should be shown. (default: `1`)
 #' @param group.ids Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param group.labels Vector of group labels of same length as `group.ids` or `NULL` to use defaults. (default: `NULL`)
@@ -280,6 +286,7 @@ plot_ibbu_stanfit_test_categorization = function(
   summarize = T,
   n.draws = NULL,
   confidence.intervals = c(.66, .95),
+  target_category = 1,
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
   sort.by = "prior"
 ) {
@@ -348,61 +355,59 @@ plot_ibbu_stanfit_test_categorization = function(
     mutate(group = get_group_constructor(ibbu.fit)(group)) %>%
     group_by(group) %>%
     transmute(x = pmap(.l = list(!!! syms(cues)), .f = ~ c(...))) %>%
-    mutate(token = 1:length(x))
+    mutate(token = 1:length(x)) %>%
+    nest(cues = x, tokens = token)
 
-  # Store the number of test tokens since it's reused a number of times
-  # THOUGH THERE MIGHT BE MORE ELEGANT SOLUTIONS TO THOSE LINES (SEE BELOW).
-  # If you remove this line, make sure all dependencies are dealt with.
-  n.tokens = nrow(test_data)
-
-  message("There shouldn't be a need to copy the categorization function into each row.
-          instead have it once per group and then hand it a vector of observations. This
-          would seem to be doable by mapping all categorization functions onto all test tokens.")
-  # THIS PART (RATHER THAN THE SUMMARY BELOW) SEEMS TO BE THE SLOW PART.
   d.pars %<>%
     # Write a categorization function for each draw
     group_by(group, .draw) %>%
     do(f = get_categorization_function_from_grouped_ibbu_stanfit_draws(., logit = T)) %>%
-    ungroup() %>%
-    crossing(token = 1:n.tokens) %>%
-    # Join the test data with the cue information and then apply the categorization
-    # function from each row (derived from the prior parameters of that draw) to the
-    # token in that row.
     left_join(test_data) %>%
+    group_by(group, .draw) %>%
     mutate(
-      token.cues = map(x, ~paste(.x, collapse = ",")),
-      probability_cat1 = map(x, f),
-      x = NULL
-    ) %>%
-    mutate_all(.funs = unlist) %>%
-    ungroup()
+      p_cat = invoke_map(.f = f, .x = cues, target_category = target_category),
+      f = NULL) %>%
+    unnest(c(cues, p_cat, tokens))
 
+  summarize = F
   if (summarize) {
     d.pars %<>%
-      select(-.draw) %>%
       # For each unique group and test token obtain the CIs and the mean.
-      group_by(group, token, token.cues) %>%
-      summarise_all(.funs = list(
-        # na.rm = T excludes cases that might result from estimated probabilities of 0 and 1 (infinities in log-odds)
-        y.outer.min = function(x) plogis(quantile(x, confidence.intervals[1], na.rm = T)),
-        y.outer.max = function(x) plogis(quantile(x, confidence.intervals[4], na.rm = T)),
-        y.inner.min = function(x) plogis(quantile(x, confidence.intervals[2], na.rm = T)),
-        y.inner.max = function(x) plogis(quantile(x, confidence.intervals[3], na.rm = T)),
-        probability_cat1 = function(x) plogis(mean(x, na.rm = T)))
+      group_by(group) %>%
+      summarise_at(
+        "p_cat",
+        .funs = list(
+          # na.rm = T excludes cases that might result from estimated probabilities of 0 and 1 (infinities in log-odds)
+          y.outer.min = function(x) plogis(quantile(x, confidence.intervals[1], na.rm = T)),
+          y.outer.max = function(x) plogis(quantile(x, confidence.intervals[4], na.rm = T)),
+          y.inner.min = function(x) plogis(quantile(x, confidence.intervals[2], na.rm = T)),
+          y.inner.max = function(x) plogis(quantile(x, confidence.intervals[3], na.rm = T)),
+          p_cat = function(x) plogis(mean(x, na.rm = T)))
       )
   } else {
     d.pars %<>%
-      mutate(probability_cat1 = plogis(probability_cat1))
+      mutate(p_cat = plogis(p_cat))
   }
+
+  d.pars %<>%
+    # Get cues as character strings (just in case)
+    mutate(
+      token.cues = map(x, ~paste(.x, collapse = ",\n")),
+      x = NULL) %>%
+    ungroup()
 
   # If sort.by is specified, sort levels of x-axis by that group.
   if (!is.null(sort.by)) {
-    token.levels = unique(test_data$token)[order((d.pars %>% filter(group == sort.by) %>%
-                                                    select(group, token, probability_cat1) %>%
-                                                    distinct())[["probability_cat1"]])]
+    d.sort = d.pars %>%
+      filter(group == sort.by) %>%
+      group_by(token, token.cues) %>%
+      summarise(p_cat = mean(p_cat)) %>%
+      arrange(p_cat)
+
     d.pars %<>%
-      ungroup() %>%
-      mutate(token = factor(token, levels = token.levels))
+      mutate(
+        token = factor(token, levels =  d.sort %>% pull(token)),
+        token.cues = factor(token.cues, levels =  d.sort %>% pull(token.cues)))
   }
 
   if (is.null(get_category_levels(fit)))
@@ -413,10 +418,13 @@ plot_ibbu_stanfit_test_categorization = function(
     mutate(group = factor(group, levels = group.ids)) %>%
     ggplot(aes(
       x = .data$token,
-      y = .data$probability_cat1,
+      y = .data$p_cat,
       color = .data$group,
       linetype = .data$group)) +
-    scale_x_discrete("Test token") +
+    scale_x_discrete("Test token",
+                     breaks = levels(.data$token),
+                     labels = paste0(levels(.data$token), "\n",
+                                     levels(.data$token.cues))) +
     scale_y_continuous(
       paste0("Predicted proportion of ", category1, "-responses"),
       limits = c(0,1)
