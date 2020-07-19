@@ -63,7 +63,8 @@ get_random_draw_indices = function(fit, n.draws)
 #' @rdname get_original_levels
 #' @export
 get_original_levels = function(fit, variable = c("category", "group"), indices = NULL) {
-  f = get_constructor(variable)
+  assert_that(is.null(indices) | all(indices > 0))
+  f = get_constructor(fit, variable)
 
   if (is.null(indices)) return(levels(f(c()))) else return(f(indices))
 }
@@ -72,18 +73,12 @@ get_original_levels = function(fit, variable = c("category", "group"), indices =
 #' @rdname get_original_levels
 #' @export
 get_category_levels = function(fit, indices = NULL) {
-  assert_that(is.mv_ibbu_stanfit(fit))
-  assert_that(is.null(indices) | all(indices > 0))
-
   return(get_original_levels(fit, "category", indices))
 }
 
 #' @rdname get_original_levels
 #' @export
 get_group_levels = function(fit, indices = NULL) {
-  assert_that(is.mv_ibbu_stanfit(fit))
-  assert_that(is.null(indices) | all(indices > 0))
-
   return(get_original_levels(fit, "group", indices))
 }
 
