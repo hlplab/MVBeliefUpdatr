@@ -374,7 +374,6 @@ plot_ibbu_stanfit_test_categorization = function(
       f = NULL) %>%
     unnest(c(cues, p_cat))
 
-  summarize = F
   if (summarize) {
     d.pars %<>%
       # For each unique group and test token obtain the CIs and the mean.
