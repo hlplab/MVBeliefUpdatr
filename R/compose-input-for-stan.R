@@ -140,6 +140,8 @@ compose_data = function() {
 
   # Make sure to hand through for the the test data, too, for which group / condition
   # it was collected. SPECIFCIALLY, ANNOTATE Y_TEST WITH THE GROUP CHARACTER LABELS.
+
+  # see also tidybayes::compose_data
 }
 
 

@@ -34,6 +34,7 @@ check_compatibility_between_NIW_belief_and_data = function(
   if (return.cues) return(cue.labels)
 }
 
+
 #' Plot expected bivariate (2D) categories.
 #'
 #' Plot bivariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the

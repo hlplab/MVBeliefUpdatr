@@ -36,6 +36,6 @@ convenience functions, calling `get_original_levels()`.
 TBD
 }
 \seealso{
-
+\code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_constructor}}
 }
 \keyword{TBD}

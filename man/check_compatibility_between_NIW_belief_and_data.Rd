@@ -6,8 +6,11 @@
 \usage{
 check_compatibility_between_NIW_belief_and_data(
   x,
-  data.exposure = NULL,
-  data.test = NULL,
+  data.exposure,
+  data.test,
+  grouping.var,
+  panel.group,
+  animate.group,
   return.cues = T
 )
 }

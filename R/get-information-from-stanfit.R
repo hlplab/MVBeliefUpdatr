@@ -56,22 +56,14 @@ get_random_draw_indices = function(fit, n.draws)
 #' @return If no category or group indices are provided, the levels of the category/group are returned (in the
 #' original order). Otherwise a vector of the same length as \code{indices}
 #'
-#' @seealso
+#' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_constructor}}
 #' @keywords TBD
 #' @examples
 #' TBD
 #' @rdname get_original_levels
 #' @export
 get_original_levels = function(fit, variable = c("category", "group"), indices = NULL) {
-  assert_that(variable %in% c("category", "group"))
-
-  if (is.null(attr(fit, "constructors")[[rlang::sym(variable)]])) {
-    warning(paste0(class_name, " object does not contain type information about the ", variable,
-                   " variable. Consider applying tidybayes::recover_types() first."))
-    return(NULL)
-  }
-
-  f = attr(fit, "constructors")[[rlang::sym(variable)]]
+  f = get_constructor(variable)
 
   if (is.null(indices)) return(levels(f(c()))) else return(f(indices))
 }
@@ -94,6 +86,57 @@ get_group_levels = function(fit, indices = NULL) {
 
   return(get_original_levels(fit, "group", indices))
 }
+
+
+
+#' Get tidybayes constructor from IBBU stanfit
+#'
+#' Gets the tidybayes constructor function from the stanfit object. `get_category_constructor()` and
+#' `get_group_constructor()` are convenience functions, calling `get_constructor()`. See \code{
+#' \link[tidybayes]{recover_types}}.
+#'
+#' @param fit mv_ibbu_stanfit object.
+#' @param variable Either "category" or "group".
+#'
+#' @return A constructor function.
+#'
+#' @seealso \code{\link[tidybayes]{recover_types}}, \code{\link{get_original_levels}}
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname get_constructor
+#' @export
+get_constructor = function(fit, variable = c("category", "group")) {
+  assert_that(variable %in% c("category", "group"))
+
+  if (is.null(attr(fit, "tidybayes_constructors")[[rlang::sym(variable)]])) {
+    warning(paste0(class_name, " object does not contain type information about the ", variable,
+                   " variable. Consider applying tidybayes::recover_types() first."))
+    return(NULL)
+  }
+
+  f = attr(fit, "tidybayes_constructors")[[rlang::sym(variable)]]
+
+  return(f)
+}
+
+
+#' @rdname get_constructor
+#' @export
+get_category_constructor = function(fit) {
+  assert_that(is.mv_ibbu_stanfit(fit))
+
+  return(get_constructor(fit, "category"))
+}
+
+#' @rdname get_constructor
+#' @export
+get_group_constructor = function(fit) {
+  assert_that(is.mv_ibbu_stanfit(fit))
+
+  return(get_constructor(fit, "group"))
+}
+
 
 #' Get category mean mu or covariance matrix sigma from a tibble of cues.
 #'
