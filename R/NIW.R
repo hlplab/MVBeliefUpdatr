@@ -156,7 +156,7 @@ get_expected_category_statistic = function(x, category = NULL, group = NULL,
   assert_that(all(statistic %in% c("mu", "Sigma")))
   assert_that(is.mv_ibbu_stanfit(x) | is.mv_ibbu_MCMC(x, is.nested = T, is.long = T))
   if (is.mv_ibbu_stanfit(x))
-    x = add_ibbu_draws(x, which = "both", wide = F, nest = T)
+    x = add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T)
 
   assert_that(any(is.null(category), is.character(category), is.numeric(category)))
   assert_that(any(is.null(group), is.character(group), is.numeric(group)))
