@@ -11,6 +11,8 @@ plot_ibbu_stanfit_test_categorization(
   summarize = T,
   n.draws = NULL,
   confidence.intervals = c(0.66, 0.95),
+  target_category = 1,
+  panel.group = FALSE,
   group.ids = NULL,
   group.labels = NULL,
   group.colors = NULL,
@@ -33,6 +35,10 @@ unique categorization function be plotted for each MCMC draw (`FALSE`)? (default
 
 \item{confidence.intervals}{The two confidence intervals that should be plotted (using `geom_ribbon`) around the mean.
 (default: `c(.66, .95)`)}
+
+\item{target_category}{The index of the category for which categorization should be shown. (default: `1`)}
+
+\item{panel.group}{Should the groups be plotted in separate panels? (default: `FALSE`)}
 
 \item{group.ids}{Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}

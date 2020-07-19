@@ -10,12 +10,15 @@ get_posterior_predictive(x, M, S, kappa, nu, log = T)
 get_posterior_predictive.pmap(x, M, S, kappa, nu, ...)
 }
 \arguments{
-\item{x}{Observations.}
+\item{x}{Observations. Can be a vector with k elements for a single observation or a matrix with k
+columns and n rows, in which case each row of the matrix is taken to be one observation. If x is a
+tibble with k columns or a list of vectors of length k, it is reduced into a matrix with k columns.}
 
-\item{M}{The mean of the multivariate Normal distribution of the category mean mu.}
+\item{M}{The mean of the multivariate Normal distribution of the category mean mu. Should be a
+matrix or vector of length k.}
 
 \item{S}{The scatter matrix of the inverse-Wishart distribution over the category covariance
-matrix Sigma.}
+matrix Sigma. Should be a square k x k matrix.}
 
 \item{kappa}{The strength of the beliefs over the category mean (pseudocounts).}
 

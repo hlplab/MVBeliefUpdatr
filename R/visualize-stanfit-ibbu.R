@@ -261,6 +261,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #' @param confidence.intervals The two confidence intervals that should be plotted (using `geom_ribbon`) around the mean.
 #' (default: `c(.66, .95)`)
 #' @param target_category The index of the category for which categorization should be shown. (default: `1`)
+#' @param panel.group Should the groups be plotted in separate panels? (default: `FALSE`)
 #' @param group.ids Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param group.labels Vector of group labels of same length as `group.ids` or `NULL` to use defaults. (default: `NULL`)
@@ -287,6 +288,7 @@ plot_ibbu_stanfit_test_categorization = function(
   n.draws = NULL,
   confidence.intervals = c(.66, .95),
   target_category = 1,
+  panel.group = FALSE,
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
   sort.by = "prior"
 ) {
@@ -491,7 +493,9 @@ plot_ibbu_stanfit_test_categorization = function(
     geom_line(size = 1, alpha = .9, aes(x = as.numeric(.data$token))) +
     theme_bw()
 
-  if (!summarize) p = p + facet_wrap(~ .draw)
+  if (!summarize & panel.group) p = p + facet_grid(group ~ .draw) else
+    if (panel.group) p = p + facet_wrap(~ group) else
+      if (!summarize) p = p + facet_wrap(~ .draw)
 
   return(p)
 }
