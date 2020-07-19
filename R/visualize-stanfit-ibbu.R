@@ -377,7 +377,7 @@ plot_ibbu_stanfit_test_categorization = function(
   if (summarize) {
     d.pars %<>%
       # For each unique group and test token obtain the CIs and the mean.
-      group_by(group, token, x) %>%
+      group_by(group, x) %>%
       summarise_at(
         "p_cat",
         .funs = list(
