@@ -107,7 +107,8 @@ get_group_levels = function(fit, indices = NULL) {
 #' @rdname get_constructor
 #' @export
 get_constructor = function(fit, variable = c("category", "group")) {
-  assert_that(variable %in% c("category", "group"))
+  assert_that(!is.null(variable), "Variable name not specified.")
+  assert_that(variable %in% c("category", "group"), "Variable name must be one of category or group.")
 
   if (is.null(attr(fit, "tidybayes_constructors")[[rlang::sym(variable)]])) {
     warning(paste0(class_name, " object does not contain type information about the ", variable,

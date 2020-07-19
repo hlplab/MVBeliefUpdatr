@@ -342,8 +342,11 @@ plot_ibbu_stanfit_test_categorization = function(
     filter(group %in% group.ids)
 
   # Prepare test_data
+  message("Using IBBU stanfit input to extract information about test data.")
   test_data = fit.input$x_test %>%
-    distinct() %>% # NOTE: this might have to be removed. See ALTERNATIVE IN CHIGUSA's PROJECT
+    cbind("group" = fit.input$y_test) %>%
+    mutate(group = get_constructor(ibbu.fit, "group")(group)) %>%
+    group_by(group) %>%
     transmute(x = pmap(.l = list(!!! syms(cues)), .f = ~ c(...))) %>%
     mutate(token = 1:length(x))
 

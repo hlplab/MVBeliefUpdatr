@@ -8,10 +8,13 @@ NULL
 #' Get posterior predictive of observations x given the NIW parameters M, S, kappa, and nu. This is
 #' a multivariate Student-T distribution (Murphy, 2012, p. 135).
 #'
-#' @param x Observations.
-#' @param M The mean of the multivariate Normal distribution of the category mean mu.
+#' @param x Observations. Can be a vector with k elements for a single observation or a matrix with k
+#' columns and n rows, in which case each row of the matrix is taken to be one observation. If x is a
+#' tibble with k columns or a list of vectors of length k, it is reduced into a matrix with k columns.
+#' @param M The mean of the multivariate Normal distribution of the category mean mu. Should be a
+#' matrix or vector of length k.
 #' @param S The scatter matrix of the inverse-Wishart distribution over the category covariance
-#' matrix Sigma.
+#' matrix Sigma. Should be a square k x k matrix.
 #' @param kappa The strength of the beliefs over the category mean (pseudocounts).
 #' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts).
 #' @param log Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)
@@ -26,8 +29,10 @@ NULL
 get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
   # mvtnorm::dmvt now expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
-  assert_that(all(is.vector(x) | is.matrix(x) | is.tibble(x), is.vector(M) | is.matrix(M), is.matrix(S)))
-  if (is.vector(x)) x = matrix(x, nrow = 1) else if (is.tibble(x)) x = as.matrix(x)
+  assert_that(all(is.vector(x) | is.matrix(x) | is.tibble(x) | is.list(x), is.vector(M) | is.matrix(M), is.matrix(S)))
+  if (is.vector(x)) x %<>% matrix(nrow = 1) else
+    if (is.tibble(x)) x %<>% as.matrix() else
+      if (is.list(x)) x %<>% reduce(matrix)
   if (is.matrix(M)) M = as.vector(M)
 
   assert_that(all(is.number(kappa), is.number(nu)))
