@@ -343,7 +343,7 @@ plot_ibbu_stanfit_test_categorization = function(
 
   # Prepare test_data
   test_data = fit.input$x_test %>%
-    distinct() %>%
+    distinct() %>% # NOTE: this might have to be removed. See ALTERNATIVE IN CHIGUSA's PROJECT
     transmute(x = pmap(.l = list(!!! syms(cues)), .f = ~ c(...))) %>%
     mutate(token = 1:length(x))
 
@@ -352,17 +352,16 @@ plot_ibbu_stanfit_test_categorization = function(
   # If you remove this line, make sure all dependencies are dealt with.
   n.tokens = nrow(test_data)
 
+  message("There shouldn't be a need to copy the categorization function into each row.
+          instead have it once per group and then hand it a vector of observations. This
+          would seem to be doable by mapping all categorization functions onto all test tokens.")
   # THIS PART (RATHER THAN THE SUMMARY BELOW) SEEMS TO BE THE SLOW PART.
   d.pars %<>%
     # Write a categorization function for each draw
     group_by(group, .draw) %>%
     do(f = get_categorization_function_from_grouped_ibbu_stanfit_draws(., logit = T)) %>%
     ungroup() %>%
-    # Make as many copies of the data as there are test token (types) and label
-    # each row for the test token (so that each data point can be categorized).
-    # THERE MUST BE A MORE ELEGANT SOLUTION TO THIS.
-    slice(rep(1:n(), each = n.tokens)) %>%
-    mutate(token = rep(1:n.tokens, nrow(.) / n.tokens)) %>%
+    crossing(token = 1:n.tokens) %>%
     # Join the test data with the cue information and then apply the categorization
     # function from each row (derived from the prior parameters of that draw) to the
     # token in that row.
