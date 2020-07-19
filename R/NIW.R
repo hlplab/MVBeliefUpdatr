@@ -29,10 +29,11 @@ NULL
 get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
   # mvtnorm::dmvt now expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
-  assert_that(all(is.vector(x) | is.matrix(x) | is.tibble(x) | is.list(x), is.vector(M) | is.matrix(M), is.matrix(S)))
-  if (is.vector(x)) x %<>% matrix(nrow = 1) else
-    if (is.tibble(x)) x %<>% as.matrix() else
-      if (is.list(x)) x %<>% reduce(matrix)
+  assert_that(all(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x), is.vector(M) | is.matrix(M), is.matrix(S)))
+  if (is_tibble(x)) x %<>% as.matrix() else
+    if (is.list(x)) x %<>% reduce(rbind) else
+      if (is.vector(x)) x %<>% matrix(nrow = 1)
+
   if (is.matrix(M)) M = as.vector(M)
 
   assert_that(all(is.number(kappa), is.number(nu)))
