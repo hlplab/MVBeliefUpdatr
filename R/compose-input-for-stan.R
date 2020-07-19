@@ -133,11 +133,14 @@ untransform_cues = function(data, cues,
 
 
 compose_data = function() {
-
-}
   # in composing the data and fitting the model make sure that the model inherits
   # variable names and values for e.g., the categories and cues, so that they can
   # can be used in spread_draws and alike.
+
+
+  # Make sure to hand through for the the test data, too, for which group / condition
+  # it was collected. SPECIFCIALLY, ANNOTATE Y_TEST WITH THE GROUP CHARACTER LABELS.
+}
 
 
 make_standata = function() {
