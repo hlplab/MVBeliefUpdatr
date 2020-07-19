@@ -290,7 +290,6 @@ plot_ibbu_stanfit_test_categorization = function(
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
   sort.by = "prior"
 ) {
-  warning("This function is not yet implemented!")
   assert_that(is.mv_ibbu_stanfit(fit))
   assert_that(!is.null(fit.input))
   assert_that(is.flag(summarize))
@@ -350,13 +349,19 @@ plot_ibbu_stanfit_test_categorization = function(
 
   # Prepare test_data
   message("Using IBBU stanfit input to extract information about test data.")
+  # If one wants to extract different test data for each group
+  # test_data = fit.input$x_test %>%
+  #   cbind("group" = fit.input$y_test) %>%
+  #   mutate(group = get_group_constructor(ibbu.fit)(group)) %>%
+  #   group_by(group) %>%
+  #   transmute(x = pmap(.l = list(!!! syms(cues)), .f = ~ c(...))) %>%
+  #   mutate(token = 1:length(x)) %>%
+  #   nest(cues = x, tokens = token)
   test_data = fit.input$x_test %>%
-    cbind("group" = fit.input$y_test) %>%
-    mutate(group = get_group_constructor(ibbu.fit)(group)) %>%
-    group_by(group) %>%
+    distinct() %>%
     transmute(x = pmap(.l = list(!!! syms(cues)), .f = ~ c(...))) %>%
-    mutate(token = 1:length(x)) %>%
-    nest(cues = x, tokens = token)
+    nest(cues = x) %>%
+    crossing(group = levels(d.pars$group))
 
   d.pars %<>%
     # Write a categorization function for each draw
@@ -367,13 +372,13 @@ plot_ibbu_stanfit_test_categorization = function(
     mutate(
       p_cat = invoke_map(.f = f, .x = cues, target_category = target_category),
       f = NULL) %>%
-    unnest(c(cues, p_cat, tokens))
+    unnest(c(cues, p_cat))
 
   summarize = F
   if (summarize) {
     d.pars %<>%
       # For each unique group and test token obtain the CIs and the mean.
-      group_by(group) %>%
+      group_by(group, token, x) %>%
       summarise_at(
         "p_cat",
         .funs = list(
@@ -398,16 +403,17 @@ plot_ibbu_stanfit_test_categorization = function(
 
   # If sort.by is specified, sort levels of x-axis by that group.
   if (!is.null(sort.by)) {
-    d.sort = d.pars %>%
+    sort.levels = d.pars %>%
       filter(group == sort.by) %>%
-      group_by(token, token.cues) %>%
+      group_by(token.cues) %>%
       summarise(p_cat = mean(p_cat)) %>%
-      arrange(p_cat)
+      arrange(p_cat) %>% pull(token.cues)
 
     d.pars %<>%
       mutate(
-        token = factor(token, levels =  d.sort %>% pull(token)),
-        token.cues = factor(token.cues, levels =  d.sort %>% pull(token.cues)))
+        token.cues = factor(token.cues,
+                            levels = sort.levels),
+        token = factor(as.numeric(token.cues), levels = 1:length(levels(token.cues))))
   }
 
   if (is.null(get_category_levels(fit)))
