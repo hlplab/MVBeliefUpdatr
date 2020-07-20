@@ -45,6 +45,8 @@ example_NIW_prior = function(example = 1) {
 #' @param kappa The strength of the beliefs over the category mean (pseudocounts).
 #' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts).
 #' @param lapse Optionally specify a lapse rate. (default: \code{NA})
+#' @param Sigma_noise Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be
+#' ignored if `NULL`. (default: NULL)
 #' @param keep.category_parameters Should categories' mu and Sigma be included in the output (in addition to M
 #' and S of the prior)? (default: FALSE)
 #'
@@ -63,14 +65,15 @@ make_NIW_prior_from_data = function(
   cues,
   kappa = NA,
   nu = NA,
-  lapse = NA,
+  lapse = NA_real_,
+  Sigma_noise = NULL,
   keep.category_parameters = F
 ) {
   assert_that(is.data.frame(data) | is_tibble(data))
   assert_that(all(is.null(groups) | all(is.character(groups) | is_symbol(groups))))
   assert_that(all(is.character(category) | is_symbol(category), length(category) == 1))
   assert_that(all(is.character(cues) | is_symbol(cues), length(cues) > 0))
-  assert_that(all(is.numeric(kappa), is.numeric(nu)))
+  assert_that(all(is.numeric(kappa), is.numeric(nu), !is.na(kappa), !is.na(nu)))
   assert_that(nu > length(cues) + 1,
               msg = "nu must be larger than D (dimensionality of cues) + 1.")
 
@@ -106,6 +109,7 @@ make_NIW_prior_from_data = function(
       M = mu,
       S = map2(Sigma, nu, get_S_from_Sigma),
       lapse = lapse) %>%
+    { if (!is.null(Sigma_noise)) mutate(., Sigma_noise = Sigma_noise)}
     ungroup()
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
@@ -188,6 +192,10 @@ make_MV_exposure_data = function(
 #' extracted from the prior object.
 #' @param exposure.order Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 #' exposure data is assumed to be in the order in which it should be presented.
+#' @param add_noise Logical or character. If `FALSE` no noise is added during updating. If "sample" then s sample of
+#' noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
+#' that result from convolving the input with noise. If not `FALSE` a Sigma_noise column must be present in the
+#' NIW_belief object specified as the priors argument. (default: `FALSE`)
 #' @param store.history Should the history of the belief-updating be stored and returned? (default: `TRUE`)
 #' @param keep.exposure_data Should the input data be included in the output? If `FALSE` then only the category and cue
 #' columns will be kept. If `TRUE` then all columns will be kept. (default: `FALSE`)
@@ -207,8 +215,9 @@ update_NIW_beliefs <- function(
   category = "category",
   cues = names(priors$M[[1]]),
   exposure.order = NULL,
-  store.history = T,
-  keep.exposure_data = F
+  add_noise = FALSE,
+  store.history = TRUE,
+  keep.exposure_data = FALSE
 ){
   assert_that(is.NIW_belief(priors),
               msg = "Priors must be NIW belief objec. Check is.NIW_belief().")
@@ -218,6 +227,8 @@ update_NIW_beliefs <- function(
               msg = paste0("exposure.order variable not found: ", exposure.order, " must be a column in the exposure data."))
   assert_that(any(is.null(exposure.order), if (!is.null(exposure.order)) is.numeric(exposure[[exposure.order]]) else T),
               msg = "exposure.order variable must be numeric.")
+  assert_that(any(!add_noise, "Sigma_noise" %in% names(priors)),
+              msg = "Can't add noise: argument priors does not have column Sigma_noise.")
 
   # Number of dimensions/cues
   D = length(cues)
@@ -237,11 +248,16 @@ update_NIW_beliefs <- function(
     posteriors = if (store.history) priors %>% filter(observation.n == i - 1) else priors
 
     current_category_index = which(posteriors$category == exposure[i,]$category)
+
     current_observation = unlist(exposure[i, "cues"])
+    if (add_noise == "sample") current_observation = current_observation + rmvnorm(1, 0, posteriors$Sigma_noise)
 
     # Keep this order, see Murphy 2012, p. 134
+    # (the only aspect of updating that is affected by marginalized noise is the updating of S)
     posteriors[current_category_index,]$S[[1]] =
       posteriors[current_category_index,]$S[[1]] +
+      # The centered sum of squares is either Sigma_noise (when we marginalize over noise) or 0 (since we're adding only one observation)
+      { if (add_noise == "marginalize") posterior[current_category_index,]$Sigma_noise else 0 } +
       # Using centered versions, rather than uncentered sum of squares
       (posteriors[current_category_index,]$kappa / (posteriors[current_category_index,]$kappa + 1)) *
       matrix(current_observation - posteriors[current_category_index,]$M[[1]]) %*%
