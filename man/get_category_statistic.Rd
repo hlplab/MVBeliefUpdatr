@@ -2,12 +2,12 @@
 % Please edit documentation in R/get-information-from-stanfit.R
 \name{get_category_statistic}
 \alias{get_category_statistic}
-\title{Get category mean mu or covariance matrix sigma from a tibble of cues.}
+\title{Get category mean mu or covariance matrix sigma from an NIW belief MCMC object.}
 \usage{
 get_category_statistic(x, grouping.vars = NULL, statistic = c("mu", "Sigma"))
 }
 \arguments{
-\item{x}{An mv_ibbu_stanfit or mv_ibbu_MCMC object.}
+\item{x}{An mv_ibbu_stanfit or NIW belief MCMC object.}
 
 \item{statistic}{Which category statistic should be returned? `mu` for category mean or `Sigma` for category
 covariance matrix, or `c("mu", "Sigma")` for both. (default: both)}
@@ -19,7 +19,8 @@ returned.  If `NULL` then all categories are included. (default: `NULL`)}
 returned. If `NULL` then all groups are included. (default: `NULL`)}
 }
 \description{
-Returns the category means mu and/or category covariance matrix Sigma for the exposure data.
+Returns the category means mu and/or category covariance matrix Sigma for the exposure data from an IBBU
+stanfit or NIW belief MCMC object.
 }
 \examples{
 TBD

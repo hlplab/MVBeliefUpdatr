@@ -15,15 +15,17 @@ get_group_constructor(fit)
 \arguments{
 \item{fit}{mv_ibbu_stanfit object.}
 
-\item{variable}{Either "category" or "group".}
+\item{variable}{Either "category" or "group". If set to `NULL` then a list of all constructors is
+returned. That list is `NULL` if not tidybayes constructors are found in fit. (default: c("category", "group"))}
 }
 \value{
-A constructor function.
+A constructor function, a list of constructor functions, or `NULL`. If a specific constructor
+function is requested but not found, a warning is shown.
 }
 \description{
 Gets the tidybayes constructor function from the stanfit object. `get_category_constructor()` and
 `get_group_constructor()` are convenience functions, calling `get_constructor()`. See \code{
-\link[tidybayes]{recover_types}}.
+\link[tidybayes]{recover_types}}. If variable is
 }
 \examples{
 TBD

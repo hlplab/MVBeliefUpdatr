@@ -200,4 +200,70 @@ plot_expected_categorization_function_2D = function(
   if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
+
+  x %<>%
+    { if(!is.null(grouping.var)) mutate(., !! sym(grouping.var) := factor(!! sym(grouping.var))) else . } %>%
+    mutate(Sigma = map2(S, nu, get_Sigma_from_S)) %>%
+    mutate(ellipse = map2(Sigma, M, ellipse.pmap)) %>%
+    # This step is necessary since unnest() can't yet unnest lists of matrices
+    # (bug was reported and added as milestone, 11/2019)
+    mutate(ellipse = map(ellipse, as_tibble)) %>%
+    select(-c(kappa, nu, M, S, Sigma, lapse)) %>%
+    unnest(ellipse)
+
+  p = ggplot(x,
+             aes(
+               x = .data[[cue.labels[1]]],
+               y = .data[[cue.labels[2]]],
+               fill = .data$category)) +
+    geom_polygon(aes(alpha = 1 - .data$level,
+                     group = paste(.data$category, .data$level))) +
+    # Optionally plot test data
+    { if (!is.null(data.test))
+      geom_point(
+        data = data.test,
+        mapping = aes(
+          x = .data[[cue.labels[1]]],
+          y = .data[[cue.labels[2]]]),
+        inherit.aes = F,
+        color = "black", size = 1) } +
+    # Optionally plot exposure data
+    { if (!is.null(data.exposure))
+      list(
+        geom_point(
+          data = data.exposure,
+          mapping = aes(shape = .data$category, color = .data$category),
+          size = 3, alpha = .9),
+        scale_shape("Category"),
+        scale_color_manual("Category",
+                           breaks = category.labels,
+                           labels = category.labels,
+                           values = category.colors)) } +
+    scale_x_continuous(cue.labels[1]) +
+    scale_y_continuous(cue.labels[2]) +
+    scale_fill_manual("Category",
+                      breaks = category.ids,
+                      labels = category.labels,
+                      values = category.colors) +
+    scale_alpha_continuous("Cumulative\nprobability",
+                           range = c(0, .3),
+                           breaks = round(1 - levels, 2)) +
+    theme_bw()
+
+  if (!is.null(grouping.var)) {
+    if (panel.group) p = p + facet_wrap(vars(!! sym(grouping.var)),
+                                        labeller = label_both)
+    else if (animate.group) {
+      message("Preparing for rendering. This might take a moment.\n")
+      p = p +
+        labs(title = paste0(grouping.var, ": {closest_state}")) +
+        transition_states(!! sym(grouping.var),
+                          transition_length = 1,
+                          state_length = 1) +
+        enter_fade() +
+        exit_fade()
+    }
+  }
+
+  return(p)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/get-information-from-stanfit.R
 \name{get_number_of_draws}
 \alias{get_number_of_draws}
-\title{Get number of post-warmup MCMC samples}
+\title{Get number of post-warmup MCMC samples from stanfit}
 \usage{
 get_number_of_draws(fit)
 }

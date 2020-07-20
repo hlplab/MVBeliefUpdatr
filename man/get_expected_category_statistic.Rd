@@ -18,7 +18,7 @@ get_expected_mu(x, category, group)
 get_expected_sigma(x, category, group)
 }
 \arguments{
-\item{x}{An mv_ibbu_stanfit or mv_ibbu_MCMC object.}
+\item{x}{An mv_ibbu_stanfit or NIW_belief_MCMC object.}
 
 \item{category}{Character vector with categories (or category) for which category statistics are to be
 returned.  If `NULL` then all categories are included. (default: `NULL`)}

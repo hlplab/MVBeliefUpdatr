@@ -11,7 +11,7 @@ get_params = function(fit) {
   return(fit@model_pars)
 }
 
-#' Get number of post-warmup MCMC samples
+#' Get number of post-warmup MCMC samples from stanfit
 #'
 #' Get the total number of post-warmup MCMC samples in `fit`.
 #' @export
@@ -19,7 +19,7 @@ get_number_of_draws = function(fit) {
   return(length(fit@sim$samples[[1]][[1]]))
 }
 
-#' Get indices for random MCMC draws
+#' Get indices for random MCMC draws from stanfit
 #'
 #' Returns `n.draws` indices for random post-warmup MCMC draws (without replacement) from
 #' `fit`.
@@ -83,17 +83,18 @@ get_group_levels = function(fit, indices = NULL) {
 }
 
 
-
 #' Get tidybayes constructor from IBBU stanfit
 #'
 #' Gets the tidybayes constructor function from the stanfit object. `get_category_constructor()` and
 #' `get_group_constructor()` are convenience functions, calling `get_constructor()`. See \code{
-#' \link[tidybayes]{recover_types}}.
+#' \link[tidybayes]{recover_types}}. If variable is
 #'
 #' @param fit mv_ibbu_stanfit object.
-#' @param variable Either "category" or "group".
+#' @param variable Either "category" or "group". If set to `NULL` then a list of all constructors is
+#' returned. That list is `NULL` if not tidybayes constructors are found in fit. (default: c("category", "group"))
 #'
-#' @return A constructor function.
+#' @return A constructor function, a list of constructor functions, or `NULL`. If a specific constructor
+#' function is requested but not found, a warning is shown.
 #'
 #' @seealso \code{\link[tidybayes]{recover_types}}, \code{\link{get_original_levels}}
 #' @keywords TBD
@@ -103,7 +104,8 @@ get_group_levels = function(fit, indices = NULL) {
 #' @export
 get_constructor = function(fit, variable = c("category", "group")) {
   assert_that(is.mv_ibbu_stanfit(fit))
-  assert_that(!is.null(variable), msg = "Variable name not specified.")
+  if (is.null(variable)) return(attr(fit, "tidybayes_constructors"))
+
   assert_that(variable %in% c("category", "group"), msg = "Variable name must be one of category or group.")
 
   if (is.null(attr(fit, "tidybayes_constructors")[[rlang::sym(variable)]])) {
@@ -131,11 +133,14 @@ get_group_constructor = function(fit) {
 }
 
 
-#' Get category mean mu or covariance matrix sigma from a tibble of cues.
+
+
+#' Get category mean mu or covariance matrix sigma from an NIW belief MCMC object.
 #'
-#' Returns the category means mu and/or category covariance matrix Sigma for the exposure data.
+#' Returns the category means mu and/or category covariance matrix Sigma for the exposure data from an IBBU
+#' stanfit or NIW belief MCMC object.
 #'
-#' @param x An mv_ibbu_stanfit or mv_ibbu_MCMC object.
+#' @param x An mv_ibbu_stanfit or NIW belief MCMC object.
 #' @param category Character vector with categories (or category) for which category statistics are to be
 #' returned.  If `NULL` then all categories are included. (default: `NULL`)
 #' @param group Character vector with groups (or group) for which category statistics are to be
@@ -167,10 +172,10 @@ get_category_statistic = function(x, grouping.vars = NULL,
 
 #' Get category mean mu or covariance matrix sigma of exposure data for IBBU
 #'
-#' The category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
-#' Bayesian belief-updating (IBBU) model.
+#' Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
+#' Bayesian belief-updating (IBBU) model from an IBBU stanfit or NIW belief MCMC object.
 #'
-#' @param x An mv_ibbu_stanfit or mv_ibbu_MCMC object.
+#' @param x An mv_ibbu_stanfit or NIW belief MCMC object.
 #' @param category Character vector with categories (or category) for which category statistics are to be
 #' returned.  If `NULL` then all categories are included. (default: `NULL`)
 #' @param group Character vector with groups (or group) for which category statistics are to be

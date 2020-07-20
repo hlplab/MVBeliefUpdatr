@@ -351,6 +351,7 @@ plot_ibbu_stanfit_test_categorization = function(
 
   # Prepare test_data
   message("Using IBBU stanfit input to extract information about test data.")
+  cue.labels = get_cue_labels(d.pars) # <---------------------------------------- NEEDS FIXING
   # If one wants to extract different test data for each group
   # test_data = fit.input$x_test %>%
   #   cbind("group" = fit.input$y_test) %>%
@@ -361,7 +362,7 @@ plot_ibbu_stanfit_test_categorization = function(
   #   nest(cues = x, tokens = token)
   test_data = fit.input$x_test %>%
     distinct() %>%
-    transmute(x = pmap(.l = list(!!! syms(cues)), .f = ~ c(...))) %>%
+    transmute(x = pmap(.l = list(!!! syms(cue.labels)), .f = ~ c(...))) %>%
     nest(cues = x) %>%
     crossing(group = levels(d.pars$group))
 
@@ -572,7 +573,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
   plot.test = T, plot.exposure = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
-  assert_that(is.mv_ibbu_stanfit(x) | is.mv_ibbu_MCMC(x))
+  assert_that(is.mv_ibbu_stanfit(x) | is.NIW_belief_MCMC(x))
   assert_that(!all(is.null(fit.input), plot.test))
 
   d = get_expected_category_statistic(x)
@@ -676,7 +677,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   xlim = c(-10, 10), ylim = c(-10, 10), resolution = 10
 ) {
-  assert_that(is.mv_ibbu_stanfit(x) | is.mv_ibbu_MCMC(x))
+  assert_that(is.mv_ibbu_stanfit(x) | is.NIW_belief_MCMC(x))
   assert_that(!all(is.null(fit.input), plot.test))
 
   if (is.mv_ibbu_stanfit(x))

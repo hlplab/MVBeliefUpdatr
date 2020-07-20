@@ -2,7 +2,7 @@
 % Please edit documentation in R/get-information-from-stanfit.R
 \name{get_random_draw_indices}
 \alias{get_random_draw_indices}
-\title{Get indices for random MCMC draws}
+\title{Get indices for random MCMC draws from stanfit}
 \usage{
 get_random_draw_indices(fit, n.draws)
 }

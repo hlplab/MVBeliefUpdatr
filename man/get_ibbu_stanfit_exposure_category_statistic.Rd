@@ -18,7 +18,7 @@ get_ibbu_stanfit_exposure_mean(x, category, group)
 get_ibbu_stanfit_exposure_Sigma(x, category, group)
 }
 \arguments{
-\item{x}{An mv_ibbu_stanfit or mv_ibbu_MCMC object.}
+\item{x}{An mv_ibbu_stanfit or NIW belief MCMC object.}
 
 \item{category}{Character vector with categories (or category) for which category statistics are to be
 returned.  If `NULL` then all categories are included. (default: `NULL`)}
@@ -35,8 +35,8 @@ matrix). If more than one group or category was requested, a tibble with one row
 of group and category.
 }
 \description{
-The category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
-Bayesian belief-updating (IBBU) model.
+Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
+Bayesian belief-updating (IBBU) model from an IBBU stanfit or NIW belief MCMC object.
 }
 \examples{
 TBD

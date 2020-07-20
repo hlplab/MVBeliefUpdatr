@@ -26,7 +26,14 @@ is.mv_ibbu_stanfit = function(x) {
 
 #' Is this a tibble of NIW beliefs?
 #'
-#' Check whether \code{x} is a tibble of NIW beliefs.
+#' Check whether \code{x} is a tibble of NIW beliefs. Optionally, one can also check whether a lapse rate
+#' and bias is part of the belief.
+#'
+#' @param x Object to be checked.
+#' @param category Name of the category variable. (default: "category")
+#' @param is.long Is this check assessing whether the belief is in long format (`TRUE`) or wide format (`FALSE`)?
+#' (default: `TRUE`)
+#' @param w
 #'
 #' @return A logical.
 #'
@@ -34,17 +41,22 @@ is.mv_ibbu_stanfit = function(x) {
 #' @keywords TBD
 #' @examples
 #' TBD
+#' @rdname is_NIW_belief
 #' @export
 #'
-is.NIW_belief = function(x, is.long = T, category = "category") {
+is.NIW_belief = function(x, category = "category", is.long = T, with.lapse = if (with.bias) T else F, with.bias = F) {
+  assert_that(all(is.flag(is.long), is.flag(with.lapse), is.flag(with.bias)))
+
   if (
     any(
-      # Currently only IBBU MCMC tibbles in long format can be recognized.
-      !is.flag(is.long), !is.long == T,
+      !is.long == T,
       !is_tibble(x),
       !all(c("kappa", "nu", "M", "S") %in% names(x))
     )
-  ) return(FALSE)
+  ) {
+    warning("Currently only NIW beliefs in long format can be recognized.")
+    return(FALSE)
+  }
 
   if (!(category %in% names(x))) {
     warning("Column category not found. Did you use another name for this column? You can use the category
@@ -52,12 +64,15 @@ is.NIW_belief = function(x, is.long = T, category = "category") {
     return(FALSE)
   }
 
-  # Check that category is a factor only after everything else is checked.
   if (
     any(
-      !is.factor(get(category, x))
+      with.lapse & "lapse" %nin% names(x),
+      with.bias & "bias" %nin% names(x)
     )
   ) return(FALSE)
+
+  # Check that category is a factor only after everything else is checked.
+  if (any(!is.factor(get(category, x)))) return(FALSE)
 
   # Check that M and S contain the cue names and that those cue names match.
   names_M = names(x$M[[1]])
@@ -69,11 +84,22 @@ is.NIW_belief = function(x, is.long = T, category = "category") {
   return(TRUE)
 }
 
+#' @rdname is_NIW_belief
+#' @export
+is.NIW_belief_w_lapse = function(x, category = "category", is.long = T, with.bias = F) {
+  is.NIW_belief(x, category = category, is.long = is.long, with.lapse = T, with.bias = with.bias)
+}
 
-#' Is this a tibble of MV IBBU draws?
+#' @rdname is_NIW_belief
+#' @export
+is.NIW_belief_w_bias = function(x, category = "category", is.long = T) {
+  is.NIW_belief(x, category = category, is.long = is.long, with.lapse = T, with.bias = T)
+}
+
+#' Is this a tibble of MCMC draws of NIW beliefs?
 #'
 #' Check whether \code{x} is a tibble of post-warmup draws of parameters obtained from incremental
-#' Bayesian belief-updating (IBBU).
+#' conjugate Bayesian belief-updating (IBBU) over a Normal-Inverse-Wishart (NIW) prior.
 #'
 #' @return A logical.
 #'
@@ -81,19 +107,31 @@ is.NIW_belief = function(x, is.long = T, category = "category") {
 #' @keywords TBD
 #' @examples
 #' TBD
+#' @rdname is.NIW_belief_MCMC
 #' @export
 #'
-is.mv_ibbu_MCMC = function(x, is.nested = T, is.long = T) {
+is.NIW_belief_MCMC = function(x, is.nested = T, is.long = T, with.lapse = if (with.bias) T else F, with.bias = F) {
   if(
-    any(
-       !is.NIW_belief(x, category = "category", is.long = is.long),
-       !all(c(".chain", ".iteration", ".draw",
+    all(
+       is.NIW_belief(x, is.long = is.long, category = "category", with.lapse = with.lapse, with.bias = with.bias),
+       all(c(".chain", ".iteration", ".draw",
              "group", "lapse_rate") %in% names(x)),
-       !(!is.nested | all(c("cue", "cue2") %in% names(x)))
+       xor(is.nested, all(c("cue", "cue2") %in% names(x)))
     )
-  ) return(F) else return(T)
+  ) return(T) else return(F)
 }
 
+#' @rdname is.NIW_belief_MCMC
+#' @export
+is.NIW_belief_w_lapse_MCMC = function(x, is.nested = T, is.long = T, with.bias = F) {
+  is.NIW_belief_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.bias = with.bias)
+}
+
+#' @rdname is.NIW_belief_MCMC
+#' @export
+is.NIW_belief_w_bias_MCMC = function(x, is.nested = T, is.long = T) {
+  is.NIW_belief_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.bias = T)
+}
 
 
 #' Is this a list of MV IBBU inputs?
