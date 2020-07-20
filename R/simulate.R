@@ -231,6 +231,7 @@ update_NIW_beliefs <- function(
               msg = 'add_noise must be one of "sample" or "marginalize"')
   assert_that(any(is.null(add_noise), "Sigma_noise" %in% names(priors)),
               msg = "Can't add noise: argument priors does not have column Sigma_noise.")
+  if (is.null(add_noise)) add_noise = ""
 
   # Number of dimensions/cues
   D = length(cues)
