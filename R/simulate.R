@@ -181,14 +181,16 @@ make_MV_exposure_data = function(
 #' nu}), as well as the prior mean of means (\code{M}, same as \code{M_0} in Murphy, 2012) and the prior scatter
 #' matrix (\code{S}, same as \code{S_0} in Murphy, 2012).
 #'
-#' @param data \code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.
+#' @param exposure \code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.
 #' @param priors A \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
 #' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param cues Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
 #' extracted from the prior object.
-#' @param priors A tibble with information about the prior. See Details for expected format of the \code{priors} argument.
-#' @param keep.input_data Should the input data be included in the output? If `FALSE` then only the category and cue
-#' columns will be kept. If `TRUE` then all columns will be kept. (default: FALSE)
+#' @param exposure.order Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
+#' exposure data is assumed to be in the order in which it should be presented.
+#' @param store.history Should the history of the belief-updating be stored and returned? (default: `TRUE`)
+#' @param keep.exposure_data Should the input data be included in the output? If `FALSE` then only the category and cue
+#' columns will be kept. If `TRUE` then all columns will be kept. (default: `FALSE`)
 #'
 #' @return A tibble.
 #'
@@ -200,34 +202,42 @@ make_MV_exposure_data = function(
 #' @export
 #'
 update_NIW_beliefs <- function(
-  data,
+  exposure,
   priors,
   category = "category",
   cues = names(priors$M[[1]]),
+  exposure.order = NULL,
   store.history = T,
-  keep.input_data = F
+  keep.exposure_data = F
 ){
   assert_that(is.NIW_belief(priors),
               msg = "Priors must be NIW belief objec. Check is.NIW_belief().")
+  assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
+  assert_that(all(is.flag(store.history), is.flag(keep.exposure_data)))
+  assert_that(!all(!is.null(exposure.order), exposure.order %nin% names(exposure)),
+              msg = paste0("exposure.order variable not found: ", exposure.order, " must be a column in the exposure data."))
+  assert_that(!all(!is.null(exposure.order), is.numeric(exposure[[exposure.order]])),
+              msg = paste0("exposure.order variable must be numeric."))
 
   # Number of dimensions/cues
   D = length(cues)
   if (any(priors$nu < D + 2))
     message(paste0("Prior for at least one category had nu smaller than allowed (", D, ").\n"))
 
-  # Prepare data
-  data %<>%
+  # Prepare exposure data
+  exposure %<>%
+    { if (!is.null(exposure.order)) arrange(., !! sym(exposure.order)) else . } %>%
     mutate(cues = pmap(.l = list(!!! syms(cues)), .f = ~ c(...)))
 
   if (store.history)
     priors %<>%
       mutate(observation.n = 0)
 
-  for (i in 1:nrow(data)) {
+  for (i in 1:nrow(exposure)) {
     posteriors = if (store.history) priors %>% filter(observation.n == i - 1) else priors
 
-    current_category_index = which(posteriors$category == data[i,]$category)
-    current_observation = unlist(data[i, "cues"])
+    current_category_index = which(posteriors$category == exposure[i,]$category)
+    current_observation = unlist(exposure[i, "cues"])
 
     # Keep this order, see Murphy 2012, p. 134
     posteriors[current_category_index,]$S[[1]] =
@@ -251,13 +261,15 @@ update_NIW_beliefs <- function(
     } else priors = posteriors
   }
 
-  if (keep.input_data) {
-    data %<>%
-      rename_all(~ paste0("observation.", names(data))) %>%
-      mutate(observation.n = 1:nrow(data))
+  if (keep.exposure_data) {
+    exposure %<>%
+      { if (!is.null(exposure.order))
+        rename(., observation.n = !! sym(exposure.order)) else
+        mutate(., observation.n = 1:nrow(exposure)) } %>%
+      rename_with(~ paste0("observation.", .x), !starts_with("observation.n"))
 
     priors %<>%
-      left_join(data)
+      left_join(exposure)
   }
 
   return(priors)

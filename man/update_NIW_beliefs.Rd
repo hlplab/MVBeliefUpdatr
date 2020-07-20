@@ -5,26 +5,32 @@
 \title{Update NIW prior beliefs about multivariate Gaussian category based on exposure data.}
 \usage{
 update_NIW_beliefs(
-  data,
+  exposure,
   priors,
   category = "category",
   cues = names(priors$M[[1]]),
+  exposure.order = NULL,
   store.history = T,
-  keep.input_data = F
+  keep.exposure_data = F
 )
 }
 \arguments{
-\item{data}{\code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.}
+\item{exposure}{\code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.}
 
-\item{priors}{A tibble with information about the prior. See Details for expected format of the \code{priors} argument.}
+\item{priors}{A \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.}
 
 \item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
 
 \item{cues}{Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
 extracted from the prior object.}
 
-\item{keep.input_data}{Should the input data be included in the output? If `FALSE` then only the category and cue
-columns will be kept. If `TRUE` then all columns will be kept. (default: FALSE)}
+\item{exposure.order}{Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
+exposure data is assumed to be in the order in which it should be presented.}
+
+\item{store.history}{Should the history of the belief-updating be stored and returned? (default: `TRUE`)}
+
+\item{keep.exposure_data}{Should the input data be included in the output? If `FALSE` then only the category and cue
+columns will be kept. If `TRUE` then all columns will be kept. (default: `FALSE`)}
 }
 \value{
 A tibble.
