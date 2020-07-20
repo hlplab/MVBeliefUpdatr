@@ -215,7 +215,7 @@ update_NIW_beliefs <- function(
   category = "category",
   cues = names(priors$M[[1]]),
   exposure.order = NULL,
-  add_noise = FALSE,
+  add_noise = NULL,
   store.history = TRUE,
   keep.exposure_data = FALSE
 ){
@@ -227,6 +227,8 @@ update_NIW_beliefs <- function(
               msg = paste0("exposure.order variable not found: ", exposure.order, " must be a column in the exposure data."))
   assert_that(any(is.null(exposure.order), if (!is.null(exposure.order)) is.numeric(exposure[[exposure.order]]) else T),
               msg = "exposure.order variable must be numeric.")
+  assert_that(any(is.null(add_noise), add_noise %in% c("sample", "marginalize")),
+              msg = 'add_noise must be one of "sample" or "marginalize"')
   assert_that(any(is.null(add_noise), "Sigma_noise" %in% names(priors)),
               msg = "Can't add noise: argument priors does not have column Sigma_noise.")
 
@@ -250,7 +252,7 @@ update_NIW_beliefs <- function(
     current_category_index = which(posteriors$category == exposure[i,]$category)
 
     current_observation = unlist(exposure[i, "cues"])
-    if (add_noise == "sample") current_observation = current_observation + rmvnorm(1, 0, posteriors$Sigma_noise)
+    if (add_noise == "sampling") current_observation = current_observation + rmvnorm(1, 0, posteriors[current_category_index,]$Sigma_noise[[1]])
 
     # Keep this order, see Murphy 2012, p. 134
     # (the only aspect of updating that is affected by marginalized noise is the updating of S)

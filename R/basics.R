@@ -6,5 +6,7 @@ cor2cov = function(omega, tau) {
   outer(tau,tau) * omega
 }
 
-cov2tau = function(v)
-  diag(v)
+cov2tau = function(v) {
+  sqrt(diag(v))
+}
+
