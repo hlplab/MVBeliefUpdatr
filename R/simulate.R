@@ -109,7 +109,7 @@ make_NIW_prior_from_data = function(
       M = mu,
       S = map2(Sigma, nu, get_S_from_Sigma),
       lapse = lapse) %>%
-    { if (!is.null(Sigma_noise)) mutate(., Sigma_noise = Sigma_noise) } %>%
+    { if (!is.null(Sigma_noise)) mutate(., Sigma_noise = Sigma_noise) else . } %>%
     ungroup()
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
