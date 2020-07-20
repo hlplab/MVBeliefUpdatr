@@ -7,6 +7,7 @@ NULL
 #' @export
 example_NIW_prior = function(example = 1) {
   if (example == 1) {
+    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.")
     tibble(
       category = c("A", "B"),
       kappa = 10,
@@ -17,6 +18,20 @@ example_NIW_prior = function(example = 1) {
       lapse = .05
     ) %>%
     mutate(category = factor(category))
+  } else if (example == 2) {
+    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
+            Same as Example 1, but with independent perceptual noise along both cue dimensions.")
+    tibble(
+      category = c("A", "B"),
+      kappa = 10,
+      nu = 30,
+      M = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
+      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
+      lapse = .05,
+      Sigma_noise = list(matrix(c(1, 0, 0, .25), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))
+    ) %>%
+      mutate(category = factor(category))
   }
 }
 
@@ -192,7 +207,8 @@ make_MV_exposure_data = function(
 #' extracted from the prior object.
 #' @param exposure.order Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 #' exposure data is assumed to be in the order in which it should be presented.
-#' @param add_noise If `NULL` no noise is added during the updating. If "sample" then s sample of
+#' @param add_noise Determines whether multivariate Gaussian noise is added to the input.
+#' If `NULL`, no noise is added during the updating. If "sample" then a sample of
 #' noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
 #' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
 #' interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
@@ -224,7 +240,7 @@ update_NIW_beliefs <- function(
               msg = "Priors must be NIW belief objec. Check is.NIW_belief().")
   assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
   assert_that(all(is.flag(store.history), is.flag(keep.exposure_data)))
-  assert_that(any(is.null(exposure.order), exposure.order %nin% names(exposure)),
+  assert_that(any(is.null(exposure.order), exposure.order %in% names(exposure)),
               msg = paste0("exposure.order variable not found: ", exposure.order, " must be a column in the exposure data."))
   assert_that(any(is.null(exposure.order), if (!is.null(exposure.order)) is.numeric(exposure[[exposure.order]]) else T),
               msg = "exposure.order variable must be numeric.")
