@@ -214,9 +214,9 @@ update_NIW_beliefs <- function(
               msg = "Priors must be NIW belief objec. Check is.NIW_belief().")
   assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
   assert_that(all(is.flag(store.history), is.flag(keep.exposure_data)))
-  assert_that(!all(!is.null(exposure.order), exposure.order %nin% names(exposure)),
+  assert_that(any(is.null(exposure.order), exposure.order %nin% names(exposure)),
               msg = paste0("exposure.order variable not found: ", exposure.order, " must be a column in the exposure data."))
-  assert_that(!all(!is.null(exposure.order), is.numeric(exposure[[exposure.order]])),
+  assert_that(any(is.null(exposure.order), is.numeric(exposure[[exposure.order]])),
               msg = paste0("exposure.order variable must be numeric."))
 
   # Number of dimensions/cues
