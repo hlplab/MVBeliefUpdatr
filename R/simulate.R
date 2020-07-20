@@ -260,7 +260,7 @@ update_NIW_beliefs <- function(
     posteriors[current_category_index,]$S[[1]] =
       posteriors[current_category_index,]$S[[1]] +
       # The centered sum of squares is either Sigma_noise (when we marginalize over noise) or 0 (since we're adding only one observation)
-      { if (add_noise == "marginalize") posterior[current_category_index,]$Sigma_noise else 0 } +
+      { if (add_noise == "marginalize") posteriors[current_category_index,]$Sigma_noise else 0 } +
       # Using centered versions, rather than uncentered sum of squares
       (posteriors[current_category_index,]$kappa / (posteriors[current_category_index,]$kappa + 1)) *
       matrix(current_observation - posteriors[current_category_index,]$M[[1]]) %*%
