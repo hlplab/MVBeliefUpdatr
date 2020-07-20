@@ -252,7 +252,7 @@ update_NIW_beliefs <- function(
     current_category_index = which(posteriors$category == exposure[i,]$category)
 
     current_observation = unlist(exposure[i, "cues"])
-    if (add_noise == "sampling") current_observation = current_observation + rmvnorm(1, 0, posteriors[current_category_index,]$Sigma_noise[[1]])
+    if (add_noise == "sample") current_observation = current_observation + rmvnorm(1, 0, posteriors[current_category_index,]$Sigma_noise[[1]])
 
     # Keep this order, see Murphy 2012, p. 134
     # (the only aspect of updating that is affected by marginalized noise is the updating of S)
