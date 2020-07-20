@@ -192,10 +192,10 @@ make_MV_exposure_data = function(
 #' extracted from the prior object.
 #' @param exposure.order Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 #' exposure data is assumed to be in the order in which it should be presented.
-#' @param add_noise Logical or character. If `FALSE` no noise is added during updating. If "sample" then s sample of
+#' @param add_noise If `NULL` no noise is added during the updating. If "sample" then s sample of
 #' noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
-#' that result from convolving the input with noise. If not `FALSE` a Sigma_noise column must be present in the
-#' NIW_belief object specified as the priors argument. (default: `FALSE`)
+#' that result from convolving the input with noise. If not `NULL` a Sigma_noise column must be present in the
+#' NIW_belief object specified as the priors argument. (default: `NULL`)
 #' @param store.history Should the history of the belief-updating be stored and returned? (default: `TRUE`)
 #' @param keep.exposure_data Should the input data be included in the output? If `FALSE` then only the category and cue
 #' columns will be kept. If `TRUE` then all columns will be kept. (default: `FALSE`)
@@ -227,7 +227,7 @@ update_NIW_beliefs <- function(
               msg = paste0("exposure.order variable not found: ", exposure.order, " must be a column in the exposure data."))
   assert_that(any(is.null(exposure.order), if (!is.null(exposure.order)) is.numeric(exposure[[exposure.order]]) else T),
               msg = "exposure.order variable must be numeric.")
-  assert_that(any(!add_noise, "Sigma_noise" %in% names(priors)),
+  assert_that(any(is.null(add_noise), "Sigma_noise" %in% names(priors)),
               msg = "Can't add noise: argument priors does not have column Sigma_noise.")
 
   # Number of dimensions/cues
