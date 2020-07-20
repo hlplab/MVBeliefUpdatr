@@ -216,8 +216,8 @@ update_NIW_beliefs <- function(
   assert_that(all(is.flag(store.history), is.flag(keep.exposure_data)))
   assert_that(any(is.null(exposure.order), exposure.order %nin% names(exposure)),
               msg = paste0("exposure.order variable not found: ", exposure.order, " must be a column in the exposure data."))
-  assert_that(any(is.null(exposure.order), is.numeric(exposure[[exposure.order]])),
-              msg = paste0("exposure.order variable must be numeric."))
+  assert_that(any(is.null(exposure.order), if (!is.null(exposure.order)) is.numeric(exposure[[exposure.order]]) else T),
+              msg = "exposure.order variable must be numeric.")
 
   # Number of dimensions/cues
   D = length(cues)

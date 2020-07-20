@@ -80,6 +80,7 @@ plot_expected_categories_contour2D = function(
   cue.labels = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                                grouping.var, panel.group, animate.group,
                                                                return.cues = T)
+  assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(x$category)
@@ -188,11 +189,13 @@ plot_expected_categorization_function_2D = function(
   grouping.var = NULL, panel.group = F, animate.group = F,
   data.exposure = NULL,
   data.test = NULL,
+  xlim = c(-10, 10), ylim = c(-10, 10), resolution = 10,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
   cue.labels = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                                grouping.var, panel.group, animate.group,
                                                                return.cues = T)
+  assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(x$category)
@@ -200,6 +203,11 @@ plot_expected_categorization_function_2D = function(
   if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
+
+  d = crossing(
+    !! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution),
+    !! sym(cue.labels[2]) := seq(min(ylim), max(ylim), length.out = resolution)
+  )
 
   x %<>%
     { if(!is.null(grouping.var)) mutate(., !! sym(grouping.var) := factor(!! sym(grouping.var))) else . } %>%

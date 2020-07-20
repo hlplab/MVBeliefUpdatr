@@ -50,22 +50,22 @@ is.NIW_belief = function(x, category = "category", is.long = T, with.lapse = if 
   if (
     any(
       !is.long == T,
-      !is_tibble(x),
-      !all(c("kappa", "nu", "M", "S") %in% names(x))
+      all(!is_tibble(x), is.data.frame(x))
     )
   ) {
-    warning("Currently only NIW beliefs in long format can be recognized.")
+    message("Currently only NIW beliefs in long format can be recognized.")
     return(FALSE)
   }
 
   if (!(category %in% names(x))) {
-    warning("Column category not found. Did you use another name for this column? You can use the category
+    message("Column category not found. Did you use another name for this column? You can use the category
             argument to specify the name of that column.")
     return(FALSE)
   }
 
   if (
     any(
+      any(c("kappa", "nu", "M", "S") %nin% names(x)),
       with.lapse & "lapse" %nin% names(x),
       with.bias & "bias" %nin% names(x)
     )
