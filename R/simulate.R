@@ -194,8 +194,9 @@ make_MV_exposure_data = function(
 #' exposure data is assumed to be in the order in which it should be presented.
 #' @param add_noise If `NULL` no noise is added during the updating. If "sample" then s sample of
 #' noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
-#' that result from convolving the input with noise. If not `NULL` a Sigma_noise column must be present in the
-#' NIW_belief object specified as the priors argument. (default: `NULL`)
+#' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
+#' interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
+#' column must be present in the NIW_belief object specified as the priors argument. (default: `NULL`)
 #' @param store.history Should the history of the belief-updating be stored and returned? (default: `TRUE`)
 #' @param keep.exposure_data Should the input data be included in the output? If `FALSE` then only the category and cue
 #' columns will be kept. If `TRUE` then all columns will be kept. (default: `FALSE`)
@@ -260,7 +261,7 @@ update_NIW_beliefs <- function(
     posteriors[current_category_index,]$S[[1]] =
       posteriors[current_category_index,]$S[[1]] +
       # The centered sum of squares is either Sigma_noise (when we marginalize over noise) or 0 (since we're adding only one observation)
-      { if (add_noise == "marginalize") posteriors[current_category_index,]$Sigma_noise else 0 } +
+      { if (add_noise == "marginalize") posteriors[current_category_index,]$Sigma_noise[[1]] else 0 } +
       # Using centered versions, rather than uncentered sum of squares
       (posteriors[current_category_index,]$kappa / (posteriors[current_category_index,]$kappa + 1)) *
       matrix(current_observation - posteriors[current_category_index,]$M[[1]]) %*%
