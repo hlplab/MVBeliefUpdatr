@@ -96,7 +96,7 @@ plot_expected_categories_contour2D = function(
     # This step is necessary since unnest() can't yet unnest lists of matrices
     # (bug was reported and added as milestone, 11/2019)
     mutate(ellipse = map(ellipse, as_tibble)) %>%
-    select(-c(kappa, nu, M, S, Sigma, lapse)) %>%
+    select(-c(kappa, nu, M, S, Sigma, lapse_rate)) %>%
     unnest(ellipse)
 
   p = ggplot(x,
@@ -168,6 +168,10 @@ plot_expected_categories_contour2D = function(
 #' @param panel.group,animate.group Determines whether the grouping variable is for paneling or animation. (both defaults: `FALSE`)
 #' @param data.exposure Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)
 #' @param data.test Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)
+#' @param target_category The index of the category for which categorization should be shown. (default: `1`)
+#' @param xlim,ylim Limits for the x- and y-axis.
+#' @param resolution How many steps along x and y should be calculated? Note that computational
+#' complexity increases quadratically with resolution. (default: 25)
 #' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
@@ -189,7 +193,8 @@ plot_expected_categorization_function_2D = function(
   grouping.var = NULL, panel.group = F, animate.group = F,
   data.exposure = NULL,
   data.test = NULL,
-  xlim = c(-10, 10), ylim = c(-10, 10), resolution = 10,
+  target_category = 1,
+  xlim, ylim, resolution = 25,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
   cue.labels = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
@@ -203,21 +208,35 @@ plot_expected_categorization_function_2D = function(
   if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
+  x %<>%
+    { if(!is.null(grouping.var)) mutate(., !! sym(grouping.var) := factor(!! sym(grouping.var))) else . }
 
   d = crossing(
     !! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution),
     !! sym(cue.labels[2]) := seq(min(ylim), max(ylim), length.out = resolution)
   )
 
-  x %<>%
-    { if(!is.null(grouping.var)) mutate(., !! sym(grouping.var) := factor(!! sym(grouping.var))) else . } %>%
-    mutate(Sigma = map2(S, nu, get_Sigma_from_S)) %>%
-    mutate(ellipse = map2(Sigma, M, ellipse.pmap)) %>%
-    # This step is necessary since unnest() can't yet unnest lists of matrices
-    # (bug was reported and added as milestone, 11/2019)
-    mutate(ellipse = map(ellipse, as_tibble)) %>%
-    select(-c(kappa, nu, M, S, Sigma, lapse)) %>%
-    unnest(ellipse)
+  d %<>%
+    cbind(get_posterior_predictives_from_NIW_beliefs(d, x, wide = T, log = T, grouping.var = grouping.var))
+
+  # TO BE DONE: handle case that grouping var might be part OF THE OUTPUT <------------------------- CONTINUE HERE
+  log_p = d %>%
+    select(starts_with("lpp."))
+
+  d %<>%
+    mutate(p_target =
+             exp(
+               log_p[,target_category] + log(priors[target_category]) -
+                 log(rowSums(exp(log_p) * priors))) *
+             # Assuming a uniform (unbiased) lapse rate:
+             (1 - lapse_rate) + lapse_rate / n.cat)
+
+
+
+
+
+
+
 
   p = ggplot(x,
              aes(
