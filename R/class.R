@@ -24,12 +24,12 @@ setClass(new_stanfit_class_name,
 #' @export
 #'
 as.mvg_ibbu_stanfit = function(stanfit, input) {
-  attest_that(class(stanfit) == "stanfit",
+  assert_that(class(stanfit) == "stanfit",
               msg = paste0("Only stanfit objects can be converted into ", class_name, " objects."))
-  attest_that(stanfit@stanmodel@model_name %in% acceptable_stan_codes,
+  assert_that(stanfit@stanmodel@model_name %in% acceptable_stan_codes,
               msg = paste0("stanfit object was not created by one of the accepted stancodes: code is ",
                            stanfit@stanmodel@model_name, " but would have to be one of ", acceptable_stan_codes))
-  attest_that(is.mvg_ibbu_input(input),
+  assert_that(is.mvg_ibbu_input(input),
               msg = "input is not an acceptable input data.")
 
   class(stanfit) <- new_stanfit_class_name

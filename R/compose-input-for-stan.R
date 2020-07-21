@@ -152,7 +152,7 @@ make_standata = function() {
 
 
 attach_stanfit_input_data = function(stanfit, input) {
-  attest_that(is.mvg_ibbu_stanfit(stanfit),
+  assert_that(is.mvg_ibbu_stanfit(stanfit),
               msg = paste0("stanfit must be of class ", new_stanfit_class_name))
   assert_that(is.list(input),
               msg = "input must be a list.")
