@@ -128,7 +128,7 @@ make_NIW_prior_from_data = function(
     ungroup()
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
-  if (!is.NIW_belief(data)) warning("Something went wrong. The returned object is not an NIW belief.")
+  if (!is.NIW_belief(data, category=category)) warning("Something went wrong. The returned object is not an NIW belief.")
   return(data)
 }
 

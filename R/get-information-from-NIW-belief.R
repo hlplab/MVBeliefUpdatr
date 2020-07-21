@@ -75,7 +75,7 @@ get_posterior_predictives_from_NIW_beliefs = function(
       category.label = category.label,
       wide = wide))
   } else {
-    attest_that(grouping.var %in% names(x),
+    assert_that(grouping.var %in% names(x),
                 msg = "Grouping variable not found in the NIW belief object.")
 
     foreach (i = unique(x[[grouping.var]])) %do% {

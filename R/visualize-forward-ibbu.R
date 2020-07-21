@@ -201,6 +201,8 @@ plot_expected_categorization_function_2D = function(
                                                                grouping.var, panel.group, animate.group,
                                                                return.cues = T)
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
+  assert_that(!missing(xlim), msg = "`xlim` must be specified")
+  assert_that(!missing(ylim), msg = "`ylim` must be specified")
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(x$category)
@@ -230,10 +232,6 @@ plot_expected_categorization_function_2D = function(
                  log(rowSums(exp(log_p) * priors))) *
              # Assuming a uniform (unbiased) lapse rate:
              (1 - lapse_rate) + lapse_rate / n.cat)
-
-
-
-
 
 
 
