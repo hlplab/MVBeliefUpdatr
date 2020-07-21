@@ -104,7 +104,7 @@ get_categorization_function_from_NIW_belief = function(x, ...) {
     Ss = x$S,
     kappas = x$kappa,
     nus = x$nu,
-    lapse_rate = x$lapse_rate,
+    lapse_rate = x$lapse_rate[[1]],
     ...
   )
 }
