@@ -21,8 +21,8 @@ get_posterior_predictive_from_NIW_belief = function(
   category.label = NULL,
   wide = FALSE
 ) {
-  assert_that(is.NIW_belief(belief))
-  assert_that(any(is.null(category.label) | is.character(category.label)))
+  attest_that(is.NIW_belief(belief))
+  attest_that(any(is.null(category.label) | is.character(category.label)))
 
   if (is.null(category.label)) {
     belief %<>%
