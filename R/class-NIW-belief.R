@@ -31,7 +31,7 @@ is.NIW_belief = function(x, category = "category", is.long = T, with.lapse = if 
     return(FALSE)
   }
 
-  if (!(category %in% names(x))) {
+  if (category %nin% names(x)) {
     message("Column category not found. Did you use another name for this column? You can use the category
             argument to specify the name of that column.")
     return(FALSE)
