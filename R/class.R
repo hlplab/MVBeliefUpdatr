@@ -29,8 +29,6 @@ as.mvg_ibbu_stanfit = function(stanfit, input) {
   assert_that(stanfit@stanmodel@model_name %in% acceptable_stan_codes,
               msg = paste0("stanfit object was not created by one of the accepted stancodes: code is ",
                            stanfit@stanmodel@model_name, " but would have to be one of ", acceptable_stan_codes))
-  assert_that(is.mvg_ibbu_input(input),
-              msg = "input is not an acceptable input data.")
 
   class(stanfit) <- new_stanfit_class_name
   stanfit %<>%
@@ -52,7 +50,7 @@ as.mvg_ibbu_stanfit = function(stanfit, input) {
 #' @export
 #'
 is.mvg_ibbu_stanfit = function(x) {
-  if (new_stanfit_class_name  %in% class(x))
+  if (all(c(new_stanfit_class_name, "stanfit")  %in% class(x)))
     return(TRUE) else return(FALSE)
 }
 
@@ -180,7 +178,7 @@ is.NIW_belief_w_bias_MCMC = function(x, is.nested = T, is.long = T) {
 #' @export
 #'
 is.mvg_ibbu_input = function(x) {
-  warning("Test of mvg_ibbu_input class not yet implemented. Always returning T.")
+  message("Test of mvg_ibbu_input class not yet implemented. Always returning T.")
 
   # Proposed names for slides in input object (at least internally / not necessarily handed to stan like this:
   #
