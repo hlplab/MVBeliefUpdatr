@@ -11,7 +11,7 @@ make_NIW_prior_from_data(
   cues,
   kappa = NA,
   nu = NA,
-  lapse = NA_real_,
+  lapse_rate = NA_real_,
   Sigma_noise = NULL,
   keep.category_parameters = F
 )
@@ -35,7 +35,7 @@ of the second group variable; etc. (default: NULL)}
 
 \item{nu}{The strength of the beliefs over the category covariance matrix (pseudocounts).}
 
-\item{lapse}{Optionally specify a lapse rate. (default: \code{NA})}
+\item{lapse_rate}{Optionally specify a lapse rate. (default: \code{NA})}
 
 \item{Sigma_noise}{Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be
 ignored if `NULL`. (default: NULL)}

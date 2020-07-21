@@ -29,9 +29,9 @@ plot_expected_ibbu_stanfit_categories_density2D(
   category.labels = NULL,
   category.colors = NULL,
   category.linetypes = NULL,
-  xlim = c(-10, 10),
-  ylim = c(-10, 10),
-  resolution = 10
+  xlim,
+  ylim,
+  resolution = 25
 )
 }
 \arguments{
@@ -63,6 +63,11 @@ to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to han
 
 \item{category.linetypes}{Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 Currently being ignored.}
+
+\item{xlim, ylim}{For density plots. Limits for the x- and y-axis.}
+
+\item{resolution}{For density plots. How many steps along x and y should be calculated? Note that computational
+complexity increases quadratically with resolution. (default: 25)}
 
 \item{fit}{mv-ibbu-stanfit object.}
 

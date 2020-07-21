@@ -11,9 +11,10 @@ plot_expected_categorization_function_2D(
   animate.group = F,
   data.exposure = NULL,
   data.test = NULL,
-  xlim = c(-10, 10),
-  ylim = c(-10, 10),
-  resolution = 10,
+  target_category = 1,
+  xlim,
+  ylim,
+  resolution = 25,
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
@@ -31,6 +32,13 @@ can be plotted in separate panels (if panel.group is `TRUE`) or used to create a
 \item{data.exposure}{Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)}
 
 \item{data.test}{Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)}
+
+\item{target_category}{The index of the category for which categorization should be shown. (default: `1`)}
+
+\item{xlim, ylim}{Limits for the x- and y-axis.}
+
+\item{resolution}{How many steps along x and y should be calculated? Note that computational
+complexity increases quadratically with resolution. (default: 25)}
 
 \item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}

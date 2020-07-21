@@ -15,7 +15,7 @@ example_NIW_prior = function(example = 1) {
       M = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
       S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
                matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
-      lapse = .05
+      lapse_rate = .05
     ) %>%
     mutate(category = factor(category))
   } else if (example == 2) {
@@ -28,7 +28,7 @@ example_NIW_prior = function(example = 1) {
       M = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
       S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
                matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
-      lapse = .05,
+      lapse_rate = .05,
       Sigma_noise = list(matrix(c(1, 0, 0, .25), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))
     ) %>%
       mutate(category = factor(category))
@@ -59,7 +59,7 @@ example_NIW_prior = function(example = 1) {
 #' @param cues Name(s) of variables in \code{data} that contain the cue information.
 #' @param kappa The strength of the beliefs over the category mean (pseudocounts).
 #' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts).
-#' @param lapse Optionally specify a lapse rate. (default: \code{NA})
+#' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
 #' @param Sigma_noise Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be
 #' ignored if `NULL`. (default: NULL)
 #' @param keep.category_parameters Should categories' mu and Sigma be included in the output (in addition to M
@@ -80,7 +80,7 @@ make_NIW_prior_from_data = function(
   cues,
   kappa = NA,
   nu = NA,
-  lapse = NA_real_,
+  lapse_rate = NA_real_,
   Sigma_noise = NULL,
   keep.category_parameters = F
 ) {
@@ -123,7 +123,7 @@ make_NIW_prior_from_data = function(
       nu = nu,
       M = mu,
       S = map2(Sigma, nu, get_S_from_Sigma),
-      lapse = lapse) %>%
+      lapse_rate = lapse_rate) %>%
     { if (!is.null(Sigma_noise)) mutate(., Sigma_noise = list(Sigma_noise)) else . } %>%
     ungroup()
 

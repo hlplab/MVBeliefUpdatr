@@ -66,7 +66,7 @@ is.NIW_belief = function(x, category = "category", is.long = T, with.lapse = if 
   if (
     any(
       any(c("kappa", "nu", "M", "S") %nin% names(x)),
-      with.lapse & "lapse" %nin% names(x),
+      with.lapse & "lapse_rate" %nin% names(x),
       with.bias & "bias" %nin% names(x)
     )
   ) return(FALSE)

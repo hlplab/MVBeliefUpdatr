@@ -10,7 +10,7 @@ update_NIW_beliefs(
   category = "category",
   cues = names(priors$M[[1]]),
   exposure.order = NULL,
-  add_noise = FALSE,
+  add_noise = NULL,
   store.history = TRUE,
   keep.exposure_data = FALSE
 )
@@ -28,10 +28,12 @@ extracted from the prior object.}
 \item{exposure.order}{Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 exposure data is assumed to be in the order in which it should be presented.}
 
-\item{add_noise}{If `NULL` no noise is added during the updating. If "sample" then s sample of
+\item{add_noise}{Determines whether multivariate Gaussian noise is added to the input.
+If `NULL`, no noise is added during the updating. If "sample" then a sample of
 noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
-that result from convolving the input with noise. If not `NULL` a Sigma_noise column must be present in the
-NIW_belief object specified as the priors argument. (default: `NULL`)}
+that results from convolving the input with noise. This latter option might be helpful, for example, if one is
+interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
+column must be present in the NIW_belief object specified as the priors argument. (default: `NULL`)}
 
 \item{store.history}{Should the history of the belief-updating be stored and returned? (default: `TRUE`)}
 

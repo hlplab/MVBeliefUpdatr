@@ -180,6 +180,7 @@ plot_ibbu_stanfit_parameters = function(
 #' @keywords TBD
 #' @examples
 #' TBD
+#' @rdname get_categorization_function
 #' @export
 get_categorization_function = function(
   Ms, Ss, kappas, nus, lapse_rate,
@@ -225,11 +226,8 @@ get_categorization_function = function(
 }
 
 
-
-#' Get categorization function from grouped IBBU draws
-#'
-#' Convenience function intended for internal use.
-#' @noRd
+#' @rdname get_categorization_function
+#' @export
 get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...) {
   get_categorization_function(
     Ms = fit$M,
@@ -351,7 +349,7 @@ plot_ibbu_stanfit_test_categorization = function(
 
   # Prepare test_data
   message("Using IBBU stanfit input to extract information about test data.")
-  cue.labels = get_cue_labels(d.pars) # <---------------------------------------- NEEDS FIXING
+  cue.labels = get_cue_labels(d.pars)
   # If one wants to extract different test data for each group
   # test_data = fit.input$x_test %>%
   #   cbind("group" = fit.input$y_test) %>%
@@ -530,6 +528,9 @@ plot_ibbu_stanfit_test_categorization = function(
 #' (default: `NULL`) Currently being ignored.
 #' @param levels Used only if `type` is `"contour"`. levels The cumulative probability levels that should be plotted (using
 #' `geom_polygon()`) around the mean. By default the most transparent ellipse still drawn corresponds to .95.
+#' @param xlim,ylim For density plots. Limits for the x- and y-axis.
+#' @param resolution For density plots. How many steps along x and y should be calculated? Note that computational
+#' complexity increases quadratically with resolution. (default: 25)
 #' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
@@ -675,7 +676,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
   fit.input = NULL, # should change in the future
   plot.test = T, plot.exposure = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
-  xlim = c(-10, 10), ylim = c(-10, 10), resolution = 10
+  xlim, ylim, resolution = 25
 ) {
   assert_that(is.mv_ibbu_stanfit(x) | is.NIW_belief_MCMC(x))
   assert_that(!all(is.null(fit.input), plot.test))
