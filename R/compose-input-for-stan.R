@@ -131,12 +131,12 @@ untransform_cues = function(data, cues,
   if (return.transform) return(list(data = data, transform = transform)) else return(data)
 }
 
-
+#' @export
 compose_data = function() {
   # in composing the data and fitting the model make sure that the model inherits
   # variable names and values for e.g., the categories and cues, so that they can
   # can be used in spread_draws and alike.
-
+  message("This function is not doing anything yet.")
 
   # Make sure to hand through for the the test data, too, for which group / condition
   # it was collected. SPECIFCIALLY, ANNOTATE Y_TEST WITH THE GROUP CHARACTER LABELS.
@@ -146,6 +146,20 @@ compose_data = function() {
 
 
 make_standata = function() {
+  message("This function is not doing anything yet.")
   # Check brms::make_standata
+}
+
+
+attach_stanfit_input_data = function(stanfit, input) {
+  attest_that(is.mvg_ibbu_stanfit(stanfit),
+              msg = paste0("stanfit must be of class ", new_stanfit_class_name))
+  assert_that(is.list(input),
+              msg = "input must be a list.")
+
+    message("Currently this function is only checking whether input is a list.")
+    stanfit@input = input
+
+    return(stanfit)
 }
 

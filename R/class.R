@@ -1,13 +1,47 @@
 #' @import rstan
 
-class_name = "mv_ibbu_stanfit"
+new_stanfit_class_name = "mvg_ibbu_stanfit"
+acceptable_stan_codes = c("dev_conj_id_lapsing_sufficient_stats_fit_mv")
 
-setClass(class_name,
-        contains = "stanfit")
+setClass(new_stanfit_class_name,
+         slots = c(input = "list"),
+         contains = "stanfit",
+         package = "MVBeliefUpdatr")
+
+#' Make an mvg_ibbu_stanfit
+#'
+#' Combines a stanfit object and its input into an mvg_ibbu_stanfit object.
+#'
+#' @param stanfit stanfit object
+#' @param input Input for a call to rstan prepared for one of the acceptable
+#' stan programs. See \code{\link{compose_data}}.
+#'
+#' @return An mvg_ibbu_stanfit object
+#'
+#' @seealso \code{\link[rstan]{stanfit}}
+#' @examples
+#' TBD
+#' @export
+#'
+as.mvg_ibbu_stanfit = function(stanfit, input) {
+  attest_that(class(stanfit) == "stanfit",
+              msg = paste0("Only stanfit objects can be converted into ", class_name, " objects."))
+  attest_that(stanfit@stanmodel@model_name %in% acceptable_stan_codes,
+              msg = paste0("stanfit object was not created by one of the accepted stancodes: code is ",
+                           stanfit@stanmodel@model_name, " but would have to be one of ", acceptable_stan_codes))
+  attest_that(is.mvg_ibbu_input(input),
+              msg = "input is not an acceptable input data.")
+
+  class(stanfit) <- new_stanfit_class_name
+  stanfit %<>%
+    attach_stanfit_input_data(input)
+
+  return(stanfit)
+}
 
 #' Is this an MV IBBU stanfit?
 #'
-#' Check whether \code{x} is of class \code{mv_ibbu_stanfit}.
+#' Check whether \code{x} is of class \code{mvg_ibbu_stanfit}.
 #'
 #' @return A logical.
 #'
@@ -17,9 +51,8 @@ setClass(class_name,
 #' TBD
 #' @export
 #'
-is.mv_ibbu_stanfit = function(x) {
-  if ("stanfit" %in% class(x)) message("Accepting stanfit as valid class. This might change in the future.")
-  if (class_name %in% class(x) | "stanfit" %in% class(x))
+is.mvg_ibbu_stanfit = function(x) {
+  if (new_stanfit_class_name  %in% class(x))
     return(TRUE) else return(FALSE)
 }
 
@@ -136,7 +169,7 @@ is.NIW_belief_w_bias_MCMC = function(x, is.nested = T, is.long = T) {
 
 #' Is this a list of MV IBBU inputs?
 #'
-#' Check whether \code{x} is of class \code{mv_ibbu_input}.
+#' Check whether \code{x} is of class \code{mvg_ibbu_input}.
 #'
 #' @return A logical.
 #'
@@ -146,8 +179,8 @@ is.NIW_belief_w_bias_MCMC = function(x, is.nested = T, is.long = T) {
 #' TBD
 #' @export
 #'
-is.mv_ibbu_input = function(x) {
-  warning("Test of mv_ibbu_input class not yet implemented. Always returning T.")
+is.mvg_ibbu_input = function(x) {
+  warning("Test of mvg_ibbu_input class not yet implemented. Always returning T.")
 
   # Proposed names for slides in input object (at least internally / not necessarily handed to stan like this:
   #
