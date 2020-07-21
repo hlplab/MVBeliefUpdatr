@@ -201,8 +201,8 @@ plot_expected_categorization_function_2D = function(
                                                                grouping.var, panel.group, animate.group,
                                                                return.cues = T)
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
-  assert_that(!is.missing(xlim), msg = "`xlim` must be specified")
-  assert_that(!is.missing(ylim), msg = "`ylim` must be specified")
+  assert_that(!missing(xlim), msg = "`xlim` must be specified")
+  assert_that(!missing(ylim), msg = "`ylim` must be specified")
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(x$category)
