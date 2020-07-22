@@ -4,37 +4,6 @@
 #' @importFrom scales trans_new
 NULL
 
-#' #' Checking that input to plotting function is compatible
-#' check_compatibility_between_NIW_belief_and_data = function(
-#'   x,
-#'   data.exposure,
-#'   data.test,
-#'   grouping.var,
-#'   panel.group,
-#'   animate.group,
-#'   return.cues = T
-#' ) {
-#'   assert_that(!all(panel.group, animate.group))
-#'   assert_NIW_belief(x)
-#'
-#'   cue.labels = get_cue_labels_from_NIW_belief(x)
-#'   message(paste("The following variables are assumed to be cues:", paste(cue.labels, collapse = ", ")))
-#'
-#'   assert_that(!all(!is.null(data.exposure), cue.labels %nin% names(data.exposure)),
-#'               msg = "Can't plot exposure data: cue names in exposure data must match those in the NIW belief object.")
-#'   assert_that(!all(!is.null(data.exposure), "category" %nin% names(data.exposure)),
-#'               msg = "Can't plot exposure data: exposure data does not contain column category.")
-#'   assert_that(!all(!is.null(data.exposure), !is.null(grouping.var), grouping.var %nin% names(data.exposure)),
-#'               msg = "Can't plot exposure data: if a grouping variable is specified, it must be present in the exposure data.")
-#'   assert_that(!all(!is.null(data.test), is.null(data.test)),
-#'               msg = "Can't plot test data: No test data provided.")
-#'   assert_that(!all(!is.null(data.test), cue.labels %nin% names(data.test)),
-#'               msg = "Can't plot test data: cue names in test data must match those in the NIW belief object.")
-#'
-#'   if (return.cues) return(cue.labels)
-#' }
-#'
-
 #' Plot expected bivariate (2D) categories.
 #'
 #' Plot bivariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
@@ -68,7 +37,6 @@ NULL
 #' TBD
 #' @rdname plot_expected_categories_2D
 #' @export
-#'
 plot_expected_categories_contour2D = function(
   x,
   grouping.var = NULL, panel.group = F, animate.group = F,
@@ -249,7 +217,6 @@ check_compatibility_between_NIW_belief_and_data = function(
 #' @keywords TBD
 #' @examples
 #' TBD
-#' @rdname plot_expected_categories_2D
 #' @export
 #'
 plot_expected_categories_contour2D_new = function(
