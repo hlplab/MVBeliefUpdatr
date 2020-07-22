@@ -255,9 +255,12 @@ plot_expected_categories_contour2D_new = function(
   data.test = NULL,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
+  facet_rows_by = enquo(facet_rows_by)
+  facet_cols_by = enquo(facet_cols_by)
+  animate_by = enquo(animate_by)
   x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                       enquo(.group_by),
-                                                      enquo(facet_rows_by), facet_cols_by, animate_by)
+                                                      facet_rows_by, facet_cols_by, animate_by)
   # Remember groups
   cue.labels = get_cue_labels_from_NIW_belief(x)
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
@@ -317,16 +320,16 @@ plot_expected_categories_contour2D_new = function(
                            breaks = round(1 - levels, 2)) +
     theme_bw()
 
-  if (!is.null(facet_rows_by) | !is.null(facet_cols_by))
+  if (!quo_is_null(facet_rows_by) | !quo_is_null(facet_cols_by))
     p = p + facet_grid(
-      rows = vars({{ facet_rows_by }}),
-      cols = vars({{ facet_cols_by }}),
+      rows = vars(!! facet_rows_by),
+      cols = vars(!! facet_cols_by),
       labeller = label_both)
-  if (!is.null(animate_by)) {
+  if (!quo_is_null(animate_by)) {
     message("Preparing for rendering. This might take a moment.\n")
     p = p +
-      labs(title = paste0({{ animate_by }}, ": {closest_state}")) +
-      transition_states({{ animate_by }},
+      labs(title = paste0(!! animate_by, ": {closest_state}")) +
+      transition_states(!! animate_by,
                         transition_length = 1,
                         state_length = 1) +
       enter_fade() +
