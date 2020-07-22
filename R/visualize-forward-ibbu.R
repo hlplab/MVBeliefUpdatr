@@ -15,7 +15,7 @@ check_compatibility_between_NIW_belief_and_data = function(
   return.cues = T
 ) {
   assert_that(!all(panel.group, animate.group))
-  assert_that(is.NIW_belief(x))
+  assert_NIW_belief(x)
 
   cue.labels = get_cue_labels_from_NIW_belief(x)
   message(paste("The following variables are assumed to be cues:", paste(cue.labels, collapse = ", ")))

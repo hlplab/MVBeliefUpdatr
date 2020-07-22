@@ -190,6 +190,85 @@ make_MV_exposure_data = function(
 
 
 
+
+#' Update NIW prior beliefs about multivariate Gaussian category based on sufficient statistics of observations.
+#'
+#' Returns updated/posterior beliefs about the Gaussian categories based on conjugate NIW prior.
+#'
+#' The priors for the categories are specified through the \code{priors} argument, an
+#' \code{\link[=is.NIW_belief]{NIW_belief}} object. Which category is updated is determined by x_category.
+#' Updating proceeds as in Murphy, 2012, p. 134). The prior kappa
+#' and nu will be incremented by the number of observations (x_N). The prior M and S will be updated based on the
+#' prior kappa, prior nu, x_N and, of course, the sample mean (x_mean) and sum of squares (x_S) of the observations.
+#'
+#' @param prior An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
+#' @param x_category Character. The label of the category that is to be updated.
+#' @param x A single observation.
+#' @param x_mean Mean of the observations.
+#' @param x_S Centered sum of squares matrix of the observations.
+#' @param x_N Number of observations that went into the mean and sum of squares matrix.
+#' @param add_noise Determines whether multivariate Gaussian noise is added to the input.
+#' If `NULL`, no noise is added during the updating. If "sample" then a sample of
+#' noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
+#' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
+#' interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
+#' column must be present in the NIW_belief object specified as the priors argument. (default: `NULL`)
+#'
+#' @return A tibble.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @references Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
+#' @examples
+#' TBD
+#' @rdname
+#' @export update_NIW_belief
+update_NIW_belief_by_sufficient_statistics = function(
+  prior, x_category, x_mean, x_S, x_N,
+  add_noise = NULL
+) {
+  assert_NIW_belief(prior)
+  assert_that(any(is.null(add_noise), add_noise %in% c("sample", "marginalize")),
+              msg = 'add_noise must be one of "sample" or "marginalize"')
+  assert_that(any(is.null(add_noise), "Sigma_noise" %in% names(priors)),
+              msg = "Can't add noise: argument priors does not have column Sigma_noise.")
+  if (is.null(add_noise)) add_noise = ""
+  # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
+
+  prior %<>%
+    filter(category = x_category)
+  assert_that(nrow(prior) == 1, msg = "The prior does not uniquely specify which of its rows should be updated.")
+
+  M_0 = prior$M
+  kappa_0 = prior$kappa
+  nu_0 = prior$nu
+  S_0 = prior$S
+
+  if (add_noise == "sample") {
+    x = rmvnorm(n = x_N,
+                sigma = prior %>%
+                  filter(category == x_category) %>%
+                  pull(Sigma_noise))
+    x_mean = x_mean + colMeans(x)
+    x_S = x_S + cov(x)
+  } else if (add_noise == "marginalize") x_S = x_S + prior$Sigma_noise
+
+  tibble(
+    M = (kappa_0 / (kappa_0 + x_N)) * M_0 + x_N * (kappa_0 + x_N) * x_mean,
+    kappa = kappa_0 + x_N,
+    nu = nu_0 + x_N,
+    S = S_0 + x_S + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - M_0) %*% t(x_mean - M_0)) %>%
+    select(kappa, nu, M, S)
+}
+
+#' @export update_NIW_belief
+update_NIW_belief_by_one_observation = function(
+  prior, x_category, x,
+  add_noise = NULL
+) {
+  update_NIW_belief_by_sufficient_statistics(prior, x_mean = x, x_S = 0, x_N = 1, x_category = x_category, add_noise = add_noise)
+}
+
 #' Update NIW prior beliefs about multivariate Gaussian category based on exposure data.
 #'
 #' Returns updated/posterior beliefs about the Gaussian categories based on conjugate NIW prior.
@@ -237,8 +316,7 @@ update_NIW_beliefs <- function(
   store.history = TRUE,
   keep.exposure_data = FALSE
 ){
-  assert_that(is.NIW_belief(priors),
-              msg = "Priors must be NIW belief objec. Check is.NIW_belief().")
+  assert_NIW_belief()
   assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
   assert_that(all(is.flag(store.history), is.flag(keep.exposure_data)))
   assert_that(any(is.null(exposure.order), exposure.order %in% names(exposure)),
@@ -290,6 +368,9 @@ update_NIW_beliefs <- function(
 
     posteriors[current_category_index,]$kappa = posteriors[current_category_index,]$kappa + 1
     posteriors[current_category_index,]$nu = posteriors[current_category_index,]$nu + 1
+
+
+
 
     if (store.history) {
       posteriors %<>%
