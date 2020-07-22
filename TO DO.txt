@@ -1,0 +1,46 @@
+IMPORTANT
+
++ Look at brms::make_standata and brms::stan_data to see how brms makes and attaches data to brms.fit objects. Make corresponding functions standata and make_standata!
+
++ then figure out to add information about input to that new class
+++ add exposure mean in more accessible format. Update get_exposure_mean to read in that mean
+++ add exposure covariance (not uncentered squares) in accessible format. Updated get_expsoure_covariance to read in the information
++++ test whether plot_expected_categories_2D works with plot.exposure = T after those two steps.
+++ add information about groups and categories (number and order of levels)
++++ update get_category_levels(), get_group_level(), and get_original_levels().
++++ Test that everything still works
+++ add information about centering, standardization, and PCA to the object
+++ write functions to back-transform cues into original space
+++ add option to back-transform cues to plotting functions.
+
+
+EFFICIENCY IMPROVEMENTS
++ it should be possible to speed up marginalizing a LOT if prior is uniform. even if it isn't one might be able to derive the analytic form , rather than to sum by row.
+
+
+CATCH UP
++ implement tests for NIW functions
+
+
+LESS IMPORTANT
++ change "IBBU" parameters to "NIW" through documentation.
+
++ Rename variable names in .stan program to appropriately use M_0 and M_n (rather than mu_0 and mu_n) as well as S_0 and S_n (rather than sigma_0 and sigma_n). Then change add_ibbu_draws() function to refer to those parameters. This will reduce confusion. ADD_IBBU_DRAWS HAS BEEN UPDATED TO *RETURN* Ms AND Ss, BUT THE .STAN PROGRAM HAS NOT YET BEEN CHANGED AND ADD_IBBU_DRAWS STILL EXPECTS THE *INPUT* TO BE MU AND SIGMA.
+
+
+
+
+
+
+
+
+DONE:
+
++ figure out how to make class so that the new class is ADDED to stanfit class and inherits from it.
++ Implement class for mv_ibbu stanfits. See class.R
+++ Test that add_ibbu_draws still works on the new object class.
+++ Test that plotting functions still work on the new object class.
+
+
+EFFICIENCY IMPROVEMENTS
++ consider reworking add_ibbu_draws following part that gets non-nested samples. consider using that to THEN nest those samples. might be faster and less code + more transparent?
