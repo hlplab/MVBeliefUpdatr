@@ -280,19 +280,13 @@ update_NIW_belief_by_one_observation = function(
 #' nu}), as well as the prior mean of means (\code{M}, same as \code{M_0} in Murphy, 2012) and the prior scatter
 #' matrix (\code{S}, same as \code{S_0} in Murphy, 2012).
 #'
+#' @param prior A \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
 #' @param exposure \code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.
-#' @param priors A \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
 #' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param cues Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
 #' extracted from the prior object.
 #' @param exposure.order Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 #' exposure data is assumed to be in the order in which it should be presented.
-#' @param add_noise Determines whether multivariate Gaussian noise is added to the input.
-#' If `NULL`, no noise is added during the updating. If "sample" then a sample of
-#' noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
-#' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
-#' interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
-#' column must be present in the NIW_belief object specified as the priors argument. (default: `NULL`)
 #' @param store.history Should the history of the belief-updating be stored and returned? (default: `TRUE`)
 #' @param keep.exposure_data Should the input data be included in the output? If `FALSE` then only the category and cue
 #' columns will be kept. If `TRUE` then all columns will be kept. (default: `FALSE`)
@@ -307,8 +301,8 @@ update_NIW_belief_by_one_observation = function(
 #' @export
 #'
 update_NIW_beliefs <- function(
+  prior,
   exposure,
-  priors,
   category = "category",
   cues = names(priors$M[[1]]),
   exposure.order = NULL,
@@ -316,22 +310,17 @@ update_NIW_beliefs <- function(
   store.history = TRUE,
   keep.exposure_data = FALSE
 ){
-  assert_NIW_belief()
+  assert_NIW_belief(prior)
   assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
   assert_that(all(is.flag(store.history), is.flag(keep.exposure_data)))
   assert_that(any(is.null(exposure.order), exposure.order %in% names(exposure)),
               msg = paste0("exposure.order variable not found: ", exposure.order, " must be a column in the exposure data."))
   assert_that(any(is.null(exposure.order), if (!is.null(exposure.order)) is.numeric(exposure[[exposure.order]]) else T),
               msg = "exposure.order variable must be numeric.")
-  assert_that(any(is.null(add_noise), add_noise %in% c("sample", "marginalize")),
-              msg = 'add_noise must be one of "sample" or "marginalize"')
-  assert_that(any(is.null(add_noise), "Sigma_noise" %in% names(priors)),
-              msg = "Can't add noise: argument priors does not have column Sigma_noise.")
-  if (is.null(add_noise)) add_noise = ""
 
   # Number of dimensions/cues
   D = length(cues)
-  if (any(priors$nu < D + 2))
+  if (any(prior$nu < D + 2))
     message(paste0("Prior for at least one category had nu smaller than allowed (", D, ").\n"))
 
   # Prepare exposure data
@@ -340,43 +329,52 @@ update_NIW_beliefs <- function(
     mutate(cues = pmap(.l = list(!!! syms(cues)), .f = ~ c(...)))
 
   if (store.history)
-    priors %<>%
+    prior %<>%
       mutate(observation.n = 0)
 
   for (i in 1:nrow(exposure)) {
-    posteriors = if (store.history) priors %>% filter(observation.n == i - 1) else priors
+    posterior = if (store.history) prior %>% filter(observation.n == i - 1) else prior
 
-    current_category_index = which(posteriors$category == exposure[i,]$category)
+    current_category_index = which(posterior$category == exposure[i,]$category)
+    # current_observation = unlist(exposure[i, "cues"])
 
-    current_observation = unlist(exposure[i, "cues"])
-    if (add_noise == "sample") current_observation = current_observation + rmvnorm(n = 1, sigma = posteriors[current_category_index,]$Sigma_noise[[1]])
+    posterior[which(posterior$category == exposure[i,]$category),] =
+      update_NIW_belief_by_one_observation(
+        prior = posterior,
+        x = unlist(exposure[i, "cues"]),
+        x_category = exposure[i,]$category,
+        add_noise = add_noise)
 
-    # Keep this order, see Murphy 2012, p. 134
-    # (the only aspect of updating that is affected by marginalized noise is the updating of S)
-    posteriors[current_category_index,]$S[[1]] =
-      posteriors[current_category_index,]$S[[1]] +
-      # The centered sum of squares is either Sigma_noise (when we marginalize over noise) or 0 (since we're adding only one observation)
-      { if (add_noise == "marginalize") posteriors[current_category_index,]$Sigma_noise[[1]] else 0 } +
-      # Using centered versions, rather than uncentered sum of squares
-      (posteriors[current_category_index,]$kappa / (posteriors[current_category_index,]$kappa + 1)) *
-      matrix(current_observation - posteriors[current_category_index,]$M[[1]]) %*%
-      t(matrix(current_observation - posteriors[current_category_index,]$M[[1]]))
 
-    posteriors[current_category_index,]$M[[1]] =
-      (posteriors[current_category_index,]$kappa / (posteriors[current_category_index,]$kappa + 1)) * posteriors[current_category_index,]$M[[1]] +
-      (1 / (posteriors[current_category_index,]$kappa + 1)) * current_observation
 
-    posteriors[current_category_index,]$kappa = posteriors[current_category_index,]$kappa + 1
-    posteriors[current_category_index,]$nu = posteriors[current_category_index,]$nu + 1
+    #   if (add_noise == "sample") current_observation = current_observation + rmvnorm(n = 1, sigma = posterior[current_category_index,]$Sigma_noise[[1]])
+    #
+    # # Keep this order, see Murphy 2012, p. 134
+    # # (the only aspect of updating that is affected by marginalized noise is the updating of S)
+    # posterior[current_category_index,]$S[[1]] =
+    #   posterior[current_category_index,]$S[[1]] +
+    #   # The centered sum of squares is either Sigma_noise (when we marginalize over noise) or 0 (since we're adding only one observation)
+    #   { if (add_noise == "marginalize") posterior[current_category_index,]$Sigma_noise[[1]] else 0 } +
+    #   # Using centered versions, rather than uncentered sum of squares
+    #   (posterior[current_category_index,]$kappa / (posterior[current_category_index,]$kappa + 1)) *
+    #   matrix(current_observation - posterior[current_category_index,]$M[[1]]) %*%
+    #   t(matrix(current_observation - posterior[current_category_index,]$M[[1]]))
+    #
+    # posterior[current_category_index,]$M[[1]] =
+    #   (posterior[current_category_index,]$kappa / (posterior[current_category_index,]$kappa + 1)) * posterior[current_category_index,]$M[[1]] +
+    #   (1 / (posterior[current_category_index,]$kappa + 1)) * current_observation
+    #
+    # posterior[current_category_index,]$kappa = posterior[current_category_index,]$kappa + 1
+    # posterior[current_category_index,]$nu = posterior[current_category_index,]$nu + 1
 
 
 
 
     if (store.history) {
-      posteriors %<>%
+      posterior %<>%
         mutate(observation.n = i)
-      priors = rbind(priors, posteriors)
-    } else priors = posteriors
+      prior = rbind(prior, posterior)
+    } else prior = posterior
   }
 
   if (keep.exposure_data) {
@@ -386,9 +384,9 @@ update_NIW_beliefs <- function(
         mutate(., observation.n = 1:nrow(exposure)) } %>%
       rename_with(~ paste0("observation.", .x), !starts_with("observation.n"))
 
-    priors %<>%
+    prior %<>%
       left_join(exposure)
   }
 
-  return(priors)
+  return(prior)
 }
