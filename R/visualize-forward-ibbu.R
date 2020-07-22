@@ -77,9 +77,6 @@ plot_expected_categories_contour2D = function(
   data.test = NULL,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
-  cue.labels = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
-                                                               grouping.var, panel.group, animate.group,
-                                                               return.cues = T)
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
 
   # Setting aes defaults
