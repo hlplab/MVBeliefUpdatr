@@ -239,6 +239,7 @@ update_NIW_belief_by_sufficient_statistics = function(
     filter(category == x_category)
   assert_that(nrow(prior) == 1, msg = "The prior does not uniquely specify which of its rows should be updated.")
 
+  print(prior)
   M_0 = prior$M
   kappa_0 = prior$kappa
   nu_0 = prior$nu
@@ -253,6 +254,7 @@ update_NIW_belief_by_sufficient_statistics = function(
     x_S = x_S + cov(x)
   } else if (add_noise == "marginalize") x_S = x_S + prior$Sigma_noise
 
+  print(x_mean, x_S, x_N, M_0, kappa_0, nu_0, S_0)
   tibble(
     M = (kappa_0 / (kappa_0 + x_N)) * M_0 + x_N * (kappa_0 + x_N) * x_mean,
     kappa = kappa_0 + x_N,
