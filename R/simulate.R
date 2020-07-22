@@ -304,7 +304,7 @@ update_NIW_beliefs <- function(
   prior,
   exposure,
   category = "category",
-  cues = names(priors$M[[1]]),
+  cues = names(prior$M[[1]]),
   exposure.order = NULL,
   add_noise = NULL,
   store.history = TRUE,
