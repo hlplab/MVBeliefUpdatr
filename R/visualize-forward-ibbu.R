@@ -165,30 +165,35 @@ check_compatibility_between_NIW_belief_and_data = function(
   .group_by,
   facet_rows_by, facet_cols_by, animate_by
 ) {
+  .group_by = enquo(.group_by)
+  facet_rows_by = enquo(facet_rows_by)
+  facet_cols_by = enquo(facet_cols_by)
+  animate_by = enquo(animate_by)
+
   assert_that(is.NIW_belief(x))
 
-  if (!is.null(.group_by)) {
+  if (!quo_is_null(.group_by)) {
     assert_that(all(as_name(.group_by) %in% names(x)),
                 msg = paste("Grouping variable(s) ", as_name(.group_by), " not found in x."))
 
     if (!is_empty(groups(x))) message("Overriding grouping structure of x with groups specified in .group_by.")
     x %<>%
-      group_by({{ .group_by }})
+      group_by(!! .group_by)
   }
 
-  if (!is.null(facet_rows_by)) {
+  if (!quo_is_null(facet_rows_by)) {
     assert_that(all(as_name(facet_rows_by) %in% groups(x)),
                 msg = paste(as_name(facet_rows_by), " not found in the groups of x."))
     assert_that(!all(!is.null(data.exposure), as_name(facet_rows_by) %nin% names(data.exposure)),
                 msg = "Can't plot exposure data: when facet_rows_by is specified, it must be present in the exposure data.")
   }
-  if (!is.null(facet_cols_by)) {
+  if (!quo_is_null(facet_cols_by)) {
     assert_that(all(as_name(facet_cols_by) %in% groups(x)),
                 msg = paste(as_name(facet_cols_by), " not found in the groups of x."))
     assert_that(!all(!is.null(data.exposure), as_name(facet_cols_by) %nin% names(data.exposure)),
                 msg = "Can't plot exposure data: when facet_cols_by is specified, it must be present in the exposure data.")
   }
-  if (!is.null(animate_by)) {
+  if (!quo_is_null(animate_by)) {
     assert_that(all(as_name(animate_by) %in% groups(x)),
                 msg = paste(as_name(animate_by), " not found in the groups of x."))
     assert_that(!all(!is.null(data.exposure), as_name(animate_by) %nin% names(data.exposure)),
@@ -260,8 +265,8 @@ plot_expected_categories_contour2D_new = function(
   facet_cols_by = enquo(facet_cols_by)
   animate_by = enquo(animate_by)
   x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
-                                                      enquo(.group_by),
-                                                      facet_rows_by, facet_cols_by, animate_by)
+                                                      .group_by,
+                                                      !! facet_rows_by, !! facet_cols_by, !! animate_by)
   # Remember groups
   cue.labels = get_cue_labels_from_NIW_belief(x)
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
