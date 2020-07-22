@@ -221,8 +221,8 @@ make_MV_exposure_data = function(
 #' @references Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
 #' @examples
 #' TBD
-#' @rdname
-#' @export update_NIW_belief
+#' @rdname update_NIW_belief
+#' @export
 update_NIW_belief_by_sufficient_statistics = function(
   prior, x_category, x_mean, x_S, x_N,
   add_noise = NULL
@@ -261,7 +261,9 @@ update_NIW_belief_by_sufficient_statistics = function(
   return(prior)
 }
 
-#' @export update_NIW_belief
+
+#' @rdname update_NIW_belief
+#' @export
 update_NIW_belief_by_one_observation = function(
   prior, x_category, x,
   add_noise = NULL

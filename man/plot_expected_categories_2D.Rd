@@ -2,6 +2,7 @@
 % Please edit documentation in R/visualize-forward-ibbu.R
 \name{plot_expected_categories_contour2D}
 \alias{plot_expected_categories_contour2D}
+\alias{plot_expected_categories_contour2D_new}
 \title{Plot expected bivariate (2D) categories.}
 \usage{
 plot_expected_categories_contour2D(
@@ -9,6 +10,21 @@ plot_expected_categories_contour2D(
   grouping.var = NULL,
   panel.group = F,
   animate.group = F,
+  levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
+  data.exposure = NULL,
+  data.test = NULL,
+  category.ids = NULL,
+  category.labels = NULL,
+  category.colors = NULL,
+  category.linetypes = NULL
+)
+
+plot_expected_categories_contour2D_new(
+  x,
+  .group_by = NULL,
+  facet_rows_by = NULL,
+  facet_cols_by = NULL,
+  animate_by = NULL,
   levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
   data.exposure = NULL,
   data.test = NULL,
@@ -41,11 +57,23 @@ to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to han
 
 \item{category.linetypes}{Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 Currently being ignored.}
+
+\item{.group_by}{Grouping variable that is used to create separate instances of the categories. These instances
+can be plotted in separate facets or used to animate the plot.}
+
+\item{facet_rows_by, facet_cols_by, animate_by}{Which group variables, if any, should be used for faceting and/or
+animation? (defaults: `NULL`)}
 }
 \value{
 ggplot object.
+
+ggplot object.
 }
 \description{
+Plot bivariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
+category statistics of all categories. This includes the M (the mean of category means \eqn{\mu}), S (the scattermatrix),
+kappa (the strength of the belief in M) and nu (the strength of the belief in S).
+
 Plot bivariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
 category statistics of all categories. This includes the M (the mean of category means \eqn{\mu}), S (the scattermatrix),
 kappa (the strength of the belief in M) and nu (the strength of the belief in S).
@@ -55,11 +83,22 @@ It is possible to hand more than one NIW belief to this function, one for each l
 to plot different sets of beliefs, for example, across different panels or as an animation. For example, one can plot
 different priors for different talkers (grouping by talker), or different posteriors for different exposure conditions
 (grouping by exposure condition), or the incremental updating of NIW beliefs (grouping by observations).
+
+It is possible to hand more than one NIW belief to this function, as long a the grouping structure is clear. This allows
+to plot different sets of beliefs, for example, across different panels or as an animation. Grouping structure can be
+indicated through the argument \code{.group_by} or by providing a grouped NIW belief object. Any of the grouping variables
+can then be used to facet or animate. For example, one can plot
+different priors for different talkers (grouping by talker), or different posteriors for different exposure conditions
+(grouping by exposure condition), the incremental updating of NIW beliefs (grouping by observations), or any combinations
+of these.
 }
 \examples{
 TBD
+TBD
 }
 \seealso{
+TBD
+
 TBD
 }
 \keyword{TBD}

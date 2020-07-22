@@ -5,10 +5,10 @@
 \title{Update NIW prior beliefs about multivariate Gaussian category based on exposure data.}
 \usage{
 update_NIW_beliefs(
+  prior,
   exposure,
-  priors,
   category = "category",
-  cues = names(priors$M[[1]]),
+  cues = names(prior$M[[1]]),
   exposure.order = NULL,
   add_noise = NULL,
   store.history = TRUE,
@@ -16,9 +16,9 @@ update_NIW_beliefs(
 )
 }
 \arguments{
-\item{exposure}{\code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.}
+\item{prior}{A \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.}
 
-\item{priors}{A \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.}
+\item{exposure}{\code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.}
 
 \item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
 
@@ -27,13 +27,6 @@ extracted from the prior object.}
 
 \item{exposure.order}{Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 exposure data is assumed to be in the order in which it should be presented.}
-
-\item{add_noise}{Determines whether multivariate Gaussian noise is added to the input.
-If `NULL`, no noise is added during the updating. If "sample" then a sample of
-noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
-that results from convolving the input with noise. This latter option might be helpful, for example, if one is
-interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
-column must be present in the NIW_belief object specified as the priors argument. (default: `NULL`)}
 
 \item{store.history}{Should the history of the belief-updating be stored and returned? (default: `TRUE`)}
 
