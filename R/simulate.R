@@ -236,7 +236,7 @@ update_NIW_belief_by_sufficient_statistics = function(
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
 
   prior %<>%
-    filter(category = x_category)
+    filter(category == x_category)
   assert_that(nrow(prior) == 1, msg = "The prior does not uniquely specify which of its rows should be updated.")
 
   M_0 = prior$M
