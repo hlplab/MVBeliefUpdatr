@@ -239,28 +239,26 @@ update_NIW_belief_by_sufficient_statistics = function(
     filter(category == x_category)
   assert_that(nrow(prior) == 1, msg = "The prior does not uniquely specify which of its rows should be updated.")
 
-  print(prior)
-  M_0 = prior$M
+  M_0 = prior$M[[1]]
   kappa_0 = prior$kappa
   nu_0 = prior$nu
-  S_0 = prior$S
+  S_0 = prior$S[[1]]
 
   if (add_noise == "sample") {
     x = rmvnorm(n = x_N,
-                sigma = prior %>%
-                  filter(category == x_category) %>%
-                  pull(Sigma_noise))
+                sigma = prior$Sigma_noise[[1]])
     x_mean = x_mean + colMeans(x)
     x_S = x_S + cov(x)
-  } else if (add_noise == "marginalize") x_S = x_S + prior$Sigma_noise
+  } else if (add_noise == "marginalize") x_S = x_S + prior$Sigma_noise[[1]]
 
-  print(paste(prior, x_category, x_mean, x_S, x_N, M_0, kappa_0, nu_0, S_0, sep = ","))
-  tibble(
-    M = (kappa_0 / (kappa_0 + x_N)) * M_0 + x_N * (kappa_0 + x_N) * x_mean,
-    kappa = kappa_0 + x_N,
-    nu = nu_0 + x_N,
-    S = S_0 + x_S + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - M_0) %*% t(x_mean - M_0)) %>%
-    select(kappa, nu, M, S)
+  prior %<>%
+    mutate(
+      M = list((kappa_0 / (kappa_0 + x_N)) * M_0 + x_N * (kappa_0 + x_N) * x_mean),
+      kappa = kappa_0 + x_N,
+      nu = nu_0 + x_N,
+      S = list(S_0 + x_S + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - M_0) %*% t(x_mean - M_0)))
+
+  return(prior)
 }
 
 #' @export update_NIW_belief
@@ -268,7 +266,7 @@ update_NIW_belief_by_one_observation = function(
   prior, x_category, x,
   add_noise = NULL
 ) {
-  update_NIW_belief_by_sufficient_statistics(prior, x_mean = x, x_S = 0, x_N = 1, x_category = x_category, add_noise = add_noise)
+  update_NIW_belief_by_sufficient_statistics(prior, x_category = x_category, x_mean = x, x_S = 0, x_N = 1, add_noise = add_noise)
 }
 
 #' Update NIW prior beliefs about multivariate Gaussian category based on exposure data.
@@ -332,45 +330,16 @@ update_NIW_beliefs <- function(
 
   if (store.history)
     prior %<>%
-      mutate(observation.n = 0)
+    mutate(observation.n = 0)
 
   for (i in 1:nrow(exposure)) {
     posterior = if (store.history) prior %>% filter(observation.n == i - 1) else prior
-
-    current_category_index = which(posterior$category == exposure[i,]$category)
-    # current_observation = unlist(exposure[i, "cues"])
-
     posterior[which(posterior$category == exposure[i,]$category),] =
       update_NIW_belief_by_one_observation(
         prior = posterior,
         x = unlist(exposure[i, "cues"]),
         x_category = exposure[i,]$category,
         add_noise = add_noise)
-
-
-
-    #   if (add_noise == "sample") current_observation = current_observation + rmvnorm(n = 1, sigma = posterior[current_category_index,]$Sigma_noise[[1]])
-    #
-    # # Keep this order, see Murphy 2012, p. 134
-    # # (the only aspect of updating that is affected by marginalized noise is the updating of S)
-    # posterior[current_category_index,]$S[[1]] =
-    #   posterior[current_category_index,]$S[[1]] +
-    #   # The centered sum of squares is either Sigma_noise (when we marginalize over noise) or 0 (since we're adding only one observation)
-    #   { if (add_noise == "marginalize") posterior[current_category_index,]$Sigma_noise[[1]] else 0 } +
-    #   # Using centered versions, rather than uncentered sum of squares
-    #   (posterior[current_category_index,]$kappa / (posterior[current_category_index,]$kappa + 1)) *
-    #   matrix(current_observation - posterior[current_category_index,]$M[[1]]) %*%
-    #   t(matrix(current_observation - posterior[current_category_index,]$M[[1]]))
-    #
-    # posterior[current_category_index,]$M[[1]] =
-    #   (posterior[current_category_index,]$kappa / (posterior[current_category_index,]$kappa + 1)) * posterior[current_category_index,]$M[[1]] +
-    #   (1 / (posterior[current_category_index,]$kappa + 1)) * current_observation
-    #
-    # posterior[current_category_index,]$kappa = posterior[current_category_index,]$kappa + 1
-    # posterior[current_category_index,]$nu = posterior[current_category_index,]$nu + 1
-
-
-
 
     if (store.history) {
       posterior %<>%
@@ -383,7 +352,7 @@ update_NIW_beliefs <- function(
     exposure %<>%
       { if (!is.null(exposure.order))
         rename(., observation.n = !! sym(exposure.order)) else
-        mutate(., observation.n = 1:nrow(exposure)) } %>%
+          mutate(., observation.n = 1:nrow(exposure)) } %>%
       rename_with(~ paste0("observation.", .x), !starts_with("observation.n"))
 
     prior %<>%
