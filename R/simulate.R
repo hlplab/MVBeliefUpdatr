@@ -230,7 +230,7 @@ update_NIW_belief_by_sufficient_statistics = function(
   assert_NIW_belief(prior)
   assert_that(any(is.null(add_noise), add_noise %in% c("sample", "marginalize")),
               msg = 'add_noise must be one of "sample" or "marginalize"')
-  assert_that(any(is.null(add_noise), "Sigma_noise" %in% names(priors)),
+  assert_that(any(is.null(add_noise), "Sigma_noise" %in% names(prior)),
               msg = "Can't add noise: argument priors does not have column Sigma_noise.")
   if (is.null(add_noise)) add_noise = ""
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
