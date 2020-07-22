@@ -77,8 +77,8 @@ plot_expected_categories_contour2D = function(
   data.test = NULL,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
-  assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
   cue.labels = get_cue_labels_from_NIW_belief(x)
+  assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(x$category)
