@@ -15,6 +15,7 @@ plot_expected_categorization_function_2D(
   xlim,
   ylim,
   resolution = 25,
+  logit = F,
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
@@ -43,6 +44,9 @@ animation? (defaults: `NULL`)}
 
 \item{resolution}{How many steps along x and y should be calculated? Note that computational
 complexity increases quadratically with resolution. (default: 25)}
+
+\item{logit}{Should the categorization function be plotted in logit (`TRUE`) or probabilities (`FALSE`)?
+(default: `FALSE`)}
 
 \item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}

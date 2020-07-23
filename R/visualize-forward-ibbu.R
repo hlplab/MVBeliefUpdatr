@@ -223,7 +223,7 @@ plot_expected_categorization_function_2D = function(
           !quo_is_null(facet_cols_by),
           !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! animate_by)
   d %<>%
-    cbind(get_posterior_predictives_from_NIW_beliefs(d, x, wide = T, log = T, grouping.var = grouping.var))
+    cbind(get_posterior_predictives_from_NIW_beliefs(d, x, wide = T, log = T, grouping.var = groups(x)))
 
   # TO BE DONE: handle case that grouping var might be part OF THE OUTPUT <------------------------- CONTINUE HERE
   log_p = d %>%
@@ -236,15 +236,18 @@ plot_expected_categorization_function_2D = function(
                  log(rowSums(exp(log_p) * priors))) *
              # Assuming a uniform (unbiased) lapse rate:
              (1 - lapse_rate) + lapse_rate / n.cat)
+
   p = ggplot(x,
              aes(
                x = .data[[cue.labels[1]]],
                y = .data[[cue.labels[2]]],
-               fill = .data$category)) +
+               fill = if (logit) qlogis(.data$p_target) else .data$p_target)) +
+    geom_raster(alpha = .5) +
+    geom_contour() +
     { if (!is.null(data.test))
       add_test_data_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
-      add_exposure_data_to_2D_plot(data = data.exposure, category.labels = category.labels, category.colors) } +
+      add_exposure_data_to_2D_plot(data = data.exposure, cue.labels = cue.labels, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
     # For now think about two colors and categories

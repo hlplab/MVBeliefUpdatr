@@ -6,13 +6,13 @@
 \usage{
 plot_expected_categories_contour2D(
   x,
+  levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
+  data.exposure = NULL,
+  data.test = NULL,
   facet_rows_by = NULL,
   facet_cols_by = NULL,
   animate_by = NULL,
   animation_follow = F,
-  levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
-  data.exposure = NULL,
-  data.test = NULL,
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
@@ -22,14 +22,16 @@ plot_expected_categories_contour2D(
 \arguments{
 \item{x}{NIW belief object.}
 
-\item{facet_rows_by, facet_cols_by, animate_by}{Which group variables, if any, should be used for faceting and/or
-animation? (defaults: `NULL`)}
-
 \item{levels}{Levels of the confidence ellipses. (default: .5, .66, .8, .9., and .95)}
 
 \item{data.exposure}{Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)}
 
 \item{data.test}{Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)}
+
+\item{facet_rows_by, facet_cols_by, animate_by}{Which group variables, if any, should be used for faceting and/or
+animation? (defaults: `NULL`)}
+
+\item{animation_follow}{Should the animation follow the data (zoom in and out)? (default: `FALSE`)}
 
 \item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}

@@ -222,6 +222,19 @@ get_ibbu_stanfit_exposure_Sigma = function(x, category, group) {
 
 
 
+#' @rdname get_categorization_function
+#' @export
+get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...) {
+  get_categorization_function(
+    Ms = fit$M,
+    Ss = fit$S,
+    kappas = fit$kappa,
+    nus = fit$nu,
+    lapse_rate = unique(unlist(fit$lapse_rate)),
+    ...
+  )
+}
+
 #' Get the input data from an MV IBBU stanfit object.
 #'
 #' Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
