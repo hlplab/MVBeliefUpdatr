@@ -1,4 +1,6 @@
 #' @importFrom dplyr sample_frac
+#' @importFrom magrittr is_weakly_greater_than
+#' @importFrom rlang is_scalar_integerish
 #' @importFrom mvtnorm rmvnorm
 NULL
 
@@ -233,9 +235,9 @@ update_NIW_belief_by_sufficient_statistics = function(
   assert_that(any(is.null(add_noise), "Sigma_noise" %in% names(prior)),
               msg = "Can't add noise: argument priors does not have column Sigma_noise.")
   if (add_noise == "sample")
-    assert_that(is_scalar_integer(x_N) & x_N >= 1,
-                msg = "For noise sampling, x_N must be a positive integer") else
-                  if (is.null(add_noise)) add_noise = ""
+    assert_that(all(is_scalar_integerish(x_N), is_weakly_greater_than(x_N, 1)),
+                msg = "For noise sampling, x_N must be a positive integer")
+  if (is.null(add_noise)) add_noise = ""
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
 
   prior %<>%
@@ -271,7 +273,7 @@ update_NIW_belief_by_one_observation = function(
   prior, x_category, x,
   add_noise = NULL
 ) {
-  update_NIW_belief_by_sufficient_statistics(prior, x_category = x_category, x_mean = x, x_S = 0, x_N = 1, add_noise = add_noise)
+  update_NIW_belief_by_sufficient_statistics(prior, x_category = x_category, x_mean = x, x_S = 0L, x_N = 1L, add_noise = add_noise)
 }
 
 #' Update NIW prior beliefs about multivariate Gaussian category based on exposure data.
