@@ -259,7 +259,7 @@ update_NIW_belief_by_sufficient_statistics = function(
 
   prior %<>%
     mutate(
-      M = list((kappa_0 / (kappa_0 + x_N)) * M_0 + x_N * (kappa_0 + x_N) * x_mean),
+      M = list((kappa_0 / (kappa_0 + x_N)) * M_0 + x_N / (kappa_0 + x_N) * x_mean),
       kappa = kappa_0 + x_N,
       nu = nu_0 + x_N,
       S = list(S_0 + x_S + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - M_0) %*% t(x_mean - M_0)))

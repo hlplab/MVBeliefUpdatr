@@ -168,6 +168,7 @@ plot_expected_categories_contour2D = function(
       transition_states(!! animate_by,
                         transition_length = 1,
                         state_length = 1) +
+      { if (animation_follow) view_follow() } +
       enter_fade() +
       exit_fade()
   }
