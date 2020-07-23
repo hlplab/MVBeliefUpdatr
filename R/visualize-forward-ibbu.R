@@ -186,12 +186,12 @@ plot_expected_categories_contour2D = function(
 #'
 plot_expected_categorization_function_2D = function(
   x,
-  facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL,
   data.exposure = NULL,
   data.test = NULL,
   target_category = 1,
-  xlim, ylim, resolution = 25,
   logit = F,
+  xlim, ylim, resolution = 25,
+  facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
   facet_rows_by = enquo(facet_rows_by)
@@ -199,13 +199,26 @@ plot_expected_categorization_function_2D = function(
   animate_by = enquo(animate_by)
   x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                       !! facet_rows_by, !! facet_cols_by, !! animate_by)
-  assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
-  assert_that(!missing(xlim), msg = "`xlim` must be specified")
-  assert_that(!missing(ylim), msg = "`ylim` must be specified")
-
-  # Remember groups
   cue.labels = get_cue_labels_from_NIW_belief(x)
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
+  if (is_missing(xlim)) {
+    if (!is.null(data.exposure) & !is.null(data.test))
+      xlim = range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
+        if (!is.null(data.exposure))
+          xlim = range(data.exposure[[cue.labels[1]]]) else
+            if (!is.null(data.test))
+              xlim = range(data.test[[cue.labels[1]]])
+  }
+  if (is_missing(ylim)) {
+    if (!is.null(data.exposure) & !is.null(data.test))
+      ylim = range(range(data.exposure[[cue.labels[2]]]), range(data.test[[cue.labels[2]]])) else
+        if (!is.null(data.exposure))
+          ylim = range(data.exposure[[cue.labels[2]]]) else
+            if (!is.null(data.test))
+              ylim = range(data.test[[cue.labels[2]]])
+  }
+  assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
+  assert_that(!is_missing(ylim), msg = "`ylim` must be specified")
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(x$category)
@@ -213,37 +226,59 @@ plot_expected_categorization_function_2D = function(
   if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
+  if (any(!quo_is_null(facet_rows_by),
+          !quo_is_null(facet_cols_by),
+          !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! animate_by,
+                                                     .add = TRUE)
+
+    # d %<>%
+  #   cbind(get_posterior_predictives_from_NIW_beliefs(d, x, wide = T, log = T, grouping.var = groups(x)))
+  #
+  # # TO BE DONE: handle case that grouping var might be part OF THE OUTPUT <------------------------- CONTINUE HERE
+  # log_p = d %>%
+  #   select(starts_with("lpp."))
+  #
+  # d %<>%
+  #   mutate(p_target =
+  #            exp(
+  #              log_p[,target_category] + log(priors[target_category]) -
+  #                log(rowSums(exp(log_p) * priors))) *
+  #            # Assuming a uniform (unbiased) lapse rate:
+  #            (1 - lapse_rate) + lapse_rate / n.cat)
 
   d = crossing(
     !! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution),
     !! sym(cue.labels[2]) := seq(min(ylim), max(ylim), length.out = resolution)
   )
 
-  if (any(!quo_is_null(facet_rows_by),
-          !quo_is_null(facet_cols_by),
-          !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! animate_by)
-  d %<>%
-    cbind(get_posterior_predictives_from_NIW_beliefs(d, x, wide = T, log = T, grouping.var = groups(x)))
+  x %<>%
+    group_by(Gender, observation.n) %>%
+    nest() %>%
+    mutate(f = map(data, get_categorization_function_from_NIW_belief, logit = logit)) %>%
+    # Join in vectored cues
+    left_join(
+      d %>%
+        transmute(x = pmap(.l = list(!!! syms(cue.labels)), .f = ~ c(...))) %>%
+        nest(cues = everything()),
+      by = character()) %>%
+    mutate(
+      p_cat = invoke_map(.f = f, .x = cues, target_category = target_category),
+      cues = NULL,
+      f = NULL) %>%
+    # Join separate cues back in
+    left_join(d %>% nest(cues = everything()), by = character()) %>%
+    unnest(c(cues, p_cat))
 
-  # TO BE DONE: handle case that grouping var might be part OF THE OUTPUT <------------------------- CONTINUE HERE
-  log_p = d %>%
-    select(starts_with("lpp."))
-
-  d %<>%
-    mutate(p_target =
-             exp(
-               log_p[,target_category] + log(priors[target_category]) -
-                 log(rowSums(exp(log_p) * priors))) *
-             # Assuming a uniform (unbiased) lapse rate:
-             (1 - lapse_rate) + lapse_rate / n.cat)
 
   p = ggplot(x,
-             aes(
+             mapping = aes(
                x = .data[[cue.labels[1]]],
-               y = .data[[cue.labels[2]]],
-               fill = if (logit) qlogis(.data$p_target) else .data$p_target)) +
-    geom_raster(alpha = .5) +
-    geom_contour() +
+               y = .data[[cue.labels[2]]])) +
+    geom_raster(
+      mapping = aes(fill = if (logit) qlogis(.data$p_cat) else .data$p_cat),
+      alpha = .5) +
+    # geom_contour(
+    #   mapping = aes(z = if (logit) qlogis(.data$p_cat) else .data$p_cat)) +
     { if (!is.null(data.test))
       add_test_data_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
@@ -251,7 +286,7 @@ plot_expected_categorization_function_2D = function(
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
     # For now think about two colors and categories
-    scale_fill_gradient2("Probability of response",
+    scale_fill_gradient2(paste0("P(resp = ", target_category, ")"),
                          low = category.colors[1],
                          mid = "white",
                          high = category.colors[2],
