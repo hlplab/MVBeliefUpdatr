@@ -128,7 +128,7 @@ plot_expected_categories_contour2D = function(
     { if (!is.null(data.test))
       add_test_data_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
-      add_exposure_data_to_2D_plot(data = data.exposure, category.labels = category.labels, category.colors) } +
+      add_exposure_data_to_2D_plot(data = data.exposure, cue.labels = cue.labels, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
     scale_fill_manual("Category",
@@ -171,6 +171,8 @@ plot_expected_categories_contour2D = function(
 #' @param xlim,ylim Limits for the x- and y-axis.
 #' @param resolution How many steps along x and y should be calculated? Note that computational
 #' complexity increases quadratically with resolution. (default: 25)
+#' @param logit Should the categorization function be plotted in logit (`TRUE`) or probabilities (`FALSE`)?
+#' (default: `FALSE`)
 #' @inheritParams plot_expected_categories_contour2D
 #'
 #' @return ggplot object.
@@ -189,6 +191,7 @@ plot_expected_categorization_function_2D = function(
   data.test = NULL,
   target_category = 1,
   xlim, ylim, resolution = 25,
+  logit = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
   facet_rows_by = enquo(facet_rows_by)
@@ -216,7 +219,9 @@ plot_expected_categorization_function_2D = function(
     !! sym(cue.labels[2]) := seq(min(ylim), max(ylim), length.out = resolution)
   )
 
-  # TO BE DONE: this now needs fixing since group.var is not longer used <------------------------- CONTINUE HERE
+  if (any(!quo_is_null(facet_rows_by),
+          !quo_is_null(facet_cols_by),
+          !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! animate_by)
   d %<>%
     cbind(get_posterior_predictives_from_NIW_beliefs(d, x, wide = T, log = T, grouping.var = grouping.var))
 
@@ -236,34 +241,35 @@ plot_expected_categorization_function_2D = function(
                x = .data[[cue.labels[1]]],
                y = .data[[cue.labels[2]]],
                fill = .data$category)) +
-    geom_polygon(aes(alpha = 1 - .data$level,
-                     group = paste(.data$category, .data$level))) +
-    { if (!is.null(data.test)) add_test_data_to_2D_plot(data.test, cue.labels) } +
-    { if (!is.null(data.exposure)) add_exposure_data_to_2D_plot(data.exposure) } +
+    { if (!is.null(data.test))
+      add_test_data_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
+    { if (!is.null(data.exposure))
+      add_exposure_data_to_2D_plot(data = data.exposure, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
-    scale_fill_manual("Category",
-                      breaks = category.ids,
-                      labels = category.labels,
-                      values = category.colors) +
-    scale_alpha_continuous("Cumulative\nprobability",
-                           range = c(0, .3),
-                           breaks = round(1 - levels, 2)) +
+    # For now think about two colors and categories
+    scale_fill_gradient2("Probability of response",
+                         low = category.colors[1],
+                         mid = "white",
+                         high = category.colors[2],
+                         midpoint = if (logit) 0 else .5) +
     theme_bw()
 
-  if (!is.null(grouping.var)) {
-    if (panel.group) p = p + facet_wrap(vars(!! sym(grouping.var)),
-                                        labeller = label_both)
-    else if (animate.group) {
-      message("Preparing for rendering. This might take a moment.\n")
-      p = p +
-        labs(title = paste0(grouping.var, ": {closest_state}")) +
-        transition_states(!! sym(grouping.var),
-                          transition_length = 1,
-                          state_length = 1) +
-        enter_fade() +
-        exit_fade()
-    }
+  if (!quo_is_null(facet_rows_by) | !quo_is_null(facet_cols_by))
+    p = p + facet_grid(
+      rows = vars(!! facet_rows_by),
+      cols = vars(!! facet_cols_by),
+      labeller = label_both)
+  if (!quo_is_null(animate_by)) {
+    message("Preparing for rendering. This might take a moment.\n")
+    p = p +
+      labs(title = paste0(as_name(animate_by), ": {closest_state}")) +
+      transition_states(!! animate_by,
+                        transition_length = 1,
+                        state_length = 1) +
+      { if (animation_follow) view_follow() } +
+      enter_fade() +
+      exit_fade()
   }
 
   return(p)
