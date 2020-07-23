@@ -126,25 +126,9 @@ plot_expected_categories_contour2D = function(
     geom_polygon(aes(alpha = 1 - .data$level,
                      group = paste(.data$category, .data$level))) +
     { if (!is.null(data.test))
-      geom_point(
-        data = data.test,
-        mapping = aes(
-          x = .data[[cue.labels[1]]],
-          y = .data[[cue.labels[2]]]),
-        inherit.aes = F,
-        color = "black", size = 1) } +
+      add_test_data_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
-      list(geom_point(
-        data = data.exposure,
-        mapping = aes(
-          shape = .data$category,
-          color = .data$category),
-        size = 3, alpha = .9),
-      scale_shape("Category"),
-      scale_color_manual("Category",
-                         breaks = category.labels,
-                         labels = category.labels,
-                         values = category.colors)) } +
+      add_exposure_data_to_2D_plot(data = data.exposure, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
     scale_fill_manual("Category",
