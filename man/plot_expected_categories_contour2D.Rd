@@ -2,13 +2,14 @@
 % Please edit documentation in R/visualize-forward-ibbu.R
 \name{plot_expected_categories_contour2D}
 \alias{plot_expected_categories_contour2D}
-\title{Plot expected bivariate (2D) categories.}
+\title{Plot expected bivariate (2D) categories}
 \usage{
 plot_expected_categories_contour2D(
   x,
-  grouping.var = NULL,
-  panel.group = F,
-  animate.group = F,
+  facet_rows_by = NULL,
+  facet_cols_by = NULL,
+  animate_by = NULL,
+  animation_follow = F,
   levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
   data.exposure = NULL,
   data.test = NULL,
@@ -21,10 +22,8 @@ plot_expected_categories_contour2D(
 \arguments{
 \item{x}{NIW belief object.}
 
-\item{grouping.var}{Grouping variable that is used to create separate instances of the categories. These instances
-can be plotted in separate panels (if panel.group is `TRUE`) or used to create animates (if animate.group is `TRUE`).}
-
-\item{panel.group, animate.group}{Determines whether the grouping variable is for paneling or animation. (both defaults: `FALSE`)}
+\item{facet_rows_by, facet_cols_by, animate_by}{Which group variables, if any, should be used for faceting and/or
+animation? (defaults: `NULL`)}
 
 \item{levels}{Levels of the confidence ellipses. (default: .5, .66, .8, .9., and .95)}
 
@@ -51,10 +50,11 @@ category statistics of all categories. This includes the M (the mean of category
 kappa (the strength of the belief in M) and nu (the strength of the belief in S).
 }
 \details{
-It is possible to hand more than one NIW belief to this function, one for each level of a grouping variable. This allows
-to plot different sets of beliefs, for example, across different panels or as an animation. For example, one can plot
+It is possible to hand more than one NIW belief to this function, and to facet or animate by variables that uniquely
+identify the different beliefs. For example, one can plot
 different priors for different talkers (grouping by talker), or different posteriors for different exposure conditions
-(grouping by exposure condition), or the incremental updating of NIW beliefs (grouping by observations).
+(grouping by exposure condition), the incremental updating of NIW beliefs (grouping by observations), or any combinations
+of these.
 }
 \examples{
 TBD

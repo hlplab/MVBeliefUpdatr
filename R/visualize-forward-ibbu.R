@@ -86,7 +86,7 @@ check_compatibility_between_NIW_belief_and_data = function(
 #'
 plot_expected_categories_contour2D = function(
   x,
-  facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL,
+  facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F,
   levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
   data.exposure = NULL,
   data.test = NULL,
@@ -124,27 +124,10 @@ plot_expected_categories_contour2D = function(
                fill = .data$category)) +
     geom_polygon(aes(alpha = 1 - .data$level,
                      group = paste(.data$category, .data$level))) +
-    # Optionally plot test data
     { if (!is.null(data.test))
-      geom_point(
-        data = data.test,
-        mapping = aes(
-          x = .data[[cue.labels[1]]],
-          y = .data[[cue.labels[2]]]),
-        inherit.aes = F,
-        color = "black", size = 1) } +
-    # Optionally plot exposure data
+      add_test_data_to_2D_plot(data = data.test, cue.lables = cue.labels) } +
     { if (!is.null(data.exposure))
-      list(
-        geom_point(
-          data = data.exposure,
-          mapping = aes(shape = .data$category, color = .data$category),
-          size = 3, alpha = .9),
-        scale_shape("Category"),
-        scale_color_manual("Category",
-                           breaks = category.labels,
-                           labels = category.labels,
-                           values = category.colors)) } +
+      add_exposure_data_to_2D_plot(data = data.exposure, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
     scale_fill_manual("Category",
@@ -164,7 +147,7 @@ plot_expected_categories_contour2D = function(
   if (!quo_is_null(animate_by)) {
     message("Preparing for rendering. This might take a moment.\n")
     p = p +
-      labs(title = paste0(!! animate_by, ": {closest_state}")) +
+      labs(title = paste0(as_name(animate_by), ": {closest_state}")) +
       transition_states(!! animate_by,
                         transition_length = 1,
                         state_length = 1) +
@@ -174,8 +157,6 @@ plot_expected_categories_contour2D = function(
 
   return(p)
 }
-
-
 
 
 
@@ -201,7 +182,7 @@ plot_expected_categories_contour2D = function(
 #'
 plot_expected_categorization_function_2D = function(
   x,
-  grouping.var = NULL, panel.group = F, animate.group = F,
+  facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL,
   data.exposure = NULL,
   data.test = NULL,
   target_category = 1,
@@ -227,14 +208,13 @@ plot_expected_categorization_function_2D = function(
   if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
-  x %<>%
-    { if(!is.null(grouping.var)) mutate(., !! sym(grouping.var) := factor(!! sym(grouping.var))) else . }
 
   d = crossing(
     !! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution),
     !! sym(cue.labels[2]) := seq(min(ylim), max(ylim), length.out = resolution)
   )
 
+  # TO BE DONE: this now needs fixing since group.var is not longer used <------------------------- CONTINUE HERE
   d %<>%
     cbind(get_posterior_predictives_from_NIW_beliefs(d, x, wide = T, log = T, grouping.var = grouping.var))
 
@@ -249,10 +229,6 @@ plot_expected_categorization_function_2D = function(
                  log(rowSums(exp(log_p) * priors))) *
              # Assuming a uniform (unbiased) lapse rate:
              (1 - lapse_rate) + lapse_rate / n.cat)
-
-
-
-
   p = ggplot(x,
              aes(
                x = .data[[cue.labels[1]]],
@@ -260,27 +236,8 @@ plot_expected_categorization_function_2D = function(
                fill = .data$category)) +
     geom_polygon(aes(alpha = 1 - .data$level,
                      group = paste(.data$category, .data$level))) +
-    # Optionally plot test data
-    { if (!is.null(data.test))
-      geom_point(
-        data = data.test,
-        mapping = aes(
-          x = .data[[cue.labels[1]]],
-          y = .data[[cue.labels[2]]]),
-        inherit.aes = F,
-        color = "black", size = 1) } +
-    # Optionally plot exposure data
-    { if (!is.null(data.exposure))
-      list(
-        geom_point(
-          data = data.exposure,
-          mapping = aes(shape = .data$category, color = .data$category),
-          size = 3, alpha = .9),
-        scale_shape("Category"),
-        scale_color_manual("Category",
-                           breaks = category.labels,
-                           labels = category.labels,
-                           values = category.colors)) } +
+    { if (!is.null(data.test)) add_test_data_to_2D_plot(data.test, cue.labels) } +
+    { if (!is.null(data.exposure)) add_exposure_data_to_2D_plot(data.exposure) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
     scale_fill_manual("Category",

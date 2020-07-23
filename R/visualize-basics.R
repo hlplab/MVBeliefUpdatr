@@ -89,3 +89,33 @@ get_limits = function(data, measure, hdi.prob = .99, min = NULL, max = NULL) {
 
 ellipse.pmap = function(x, centre, level, ...)
   ellipse(x = x, centre = centre, level = level)
+
+
+add_test_data_to_2D_plot = function(data, cue.labels) {
+  list(
+    geom_point(
+      data = data,
+      mapping = aes(
+        x = .data[[cue.labels[1]]],
+        y = .data[[cue.labels[2]]]),
+      inherit.aes = F,
+      color = "black", size = 1))
+}
+
+add_exposure_data_to_2D_plot = function(
+  data,
+  category.labels,
+  category.colors
+) {
+  list(
+    geom_point(
+      data = data,
+      mapping = aes(shape = .data$category, color = .data$category),
+      size = 3, alpha = .9),
+    scale_shape("Category"),
+    scale_color_manual("Category",
+                       breaks = category.labels,
+                       labels = category.labels,
+                       values = category.colors))
+}
+

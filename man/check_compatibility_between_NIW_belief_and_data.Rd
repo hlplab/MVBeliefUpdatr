@@ -8,7 +8,6 @@ check_compatibility_between_NIW_belief_and_data(
   x,
   data.exposure,
   data.test,
-  .group_by,
   facet_rows_by,
   facet_cols_by,
   animate_by

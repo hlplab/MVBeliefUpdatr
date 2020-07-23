@@ -6,9 +6,9 @@
 \usage{
 plot_expected_categorization_function_2D(
   x,
-  grouping.var = NULL,
-  panel.group = F,
-  animate.group = F,
+  facet_rows_by = NULL,
+  facet_cols_by = NULL,
+  animate_by = NULL,
   data.exposure = NULL,
   data.test = NULL,
   target_category = 1,
@@ -24,10 +24,14 @@ plot_expected_categorization_function_2D(
 \arguments{
 \item{x}{NIW belief object.}
 
-\item{grouping.var}{Grouping variable that is used to create separate instances of the categories. These instances
-can be plotted in separate panels (if panel.group is `TRUE`) or used to create animates (if animate.group is `TRUE`).}
+\item{facet_rows_by}{Which group variables, if any, should be used for faceting and/or
+animation? (defaults: `NULL`)}
 
-\item{panel.group, animate.group}{Determines whether the grouping variable is for paneling or animation. (both defaults: `FALSE`)}
+\item{facet_cols_by}{Which group variables, if any, should be used for faceting and/or
+animation? (defaults: `NULL`)}
+
+\item{animate_by}{Which group variables, if any, should be used for faceting and/or
+animation? (defaults: `NULL`)}
 
 \item{data.exposure}{Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)}
 
