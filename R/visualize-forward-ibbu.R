@@ -64,11 +64,12 @@ check_compatibility_between_NIW_belief_and_data = function(
 #' of these.
 #'
 #' @param x NIW belief object.
-#' @param facet_rows_by,facet_cols_by,animate_by Which group variables, if any, should be used for faceting and/or
-#' animation? (defaults: `NULL`)
 #' @param levels Levels of the confidence ellipses. (default: .5, .66, .8, .9., and .95)
 #' @param data.exposure Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)
 #' @param data.test Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)
+#' @param facet_rows_by,facet_cols_by,animate_by Which group variables, if any, should be used for faceting and/or
+#' animation? (defaults: `NULL`)
+#' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
 #' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
@@ -86,10 +87,10 @@ check_compatibility_between_NIW_belief_and_data = function(
 #'
 plot_expected_categories_contour2D = function(
   x,
-  facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F,
   levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
   data.exposure = NULL,
   data.test = NULL,
+  facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
   facet_rows_by = enquo(facet_rows_by)

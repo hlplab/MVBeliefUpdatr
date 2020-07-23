@@ -110,7 +110,11 @@ add_exposure_data_to_2D_plot = function(
   list(
     geom_point(
       data = data,
-      mapping = aes(shape = .data$category, color = .data$category),
+      mapping = aes(
+        x = .data[[cue.labels[1]]],
+        y = .data[[cue.labels[2]]],
+        shape = .data$category,
+        color = .data$category),
       size = 3, alpha = .9),
     scale_shape("Category"),
     scale_color_manual("Category",
