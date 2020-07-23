@@ -128,7 +128,7 @@ plot_expected_categories_contour2D = function(
     { if (!is.null(data.test))
       add_test_data_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
-      add_exposure_data_to_2D_plot(data = data.exposure, category.labels = category.labels, category.colors) } +
+      add_exposure_data_to_2D_plot(data = data.exposure, cue.labels = cue.labels, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
     scale_fill_manual("Category",
