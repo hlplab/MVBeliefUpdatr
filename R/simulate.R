@@ -232,7 +232,10 @@ update_NIW_belief_by_sufficient_statistics = function(
               msg = 'add_noise must be one of "sample" or "marginalize"')
   assert_that(any(is.null(add_noise), "Sigma_noise" %in% names(prior)),
               msg = "Can't add noise: argument priors does not have column Sigma_noise.")
-  if (is.null(add_noise)) add_noise = ""
+  if (add_noise == "sample")
+    assert_that(is_scalar_integer(x_N) & x_N >= 1,
+                msg = "For noise sampling, x_N must be a positive integer") else
+                  if (is.null(add_noise)) add_noise = ""
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
 
   prior %<>%
@@ -248,7 +251,7 @@ update_NIW_belief_by_sufficient_statistics = function(
     x = rmvnorm(n = x_N,
                 sigma = prior$Sigma_noise[[1]])
     x_mean = x_mean + colMeans(x)
-    x_S = x_S + cov(x)
+    if (x_N > 1) x_S = x_S + cov(x)
   } else if (add_noise == "marginalize") x_S = x_S + prior$Sigma_noise[[1]]
 
   prior %<>%

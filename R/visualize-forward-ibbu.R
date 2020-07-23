@@ -125,7 +125,7 @@ plot_expected_categories_contour2D = function(
     geom_polygon(aes(alpha = 1 - .data$level,
                      group = paste(.data$category, .data$level))) +
     { if (!is.null(data.test))
-      add_test_data_to_2D_plot(data = data.test, cue.lables = cue.labels) } +
+      add_test_data_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
       add_exposure_data_to_2D_plot(data = data.exposure, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
