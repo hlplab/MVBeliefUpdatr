@@ -191,6 +191,17 @@ make_MV_exposure_data = function(
 }
 
 
+#' Update parameters of NIW prior beliefs about multivariate Gaussian category.
+#'
+#' Returns updated/posterior M, S, kappa, or nu based on \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
+#'
+#' @rdname update_NIW_parameters
+#' @export
+update_NIW_belief_kappa = function(kappa_0, x_N) { kappa_0 + x_N }
+update_NIW_belief_nu = function(nu_0, x_N) { nu_0 + x_N }
+update_NIW_belief_M = function(kappa_0, M_0, x_N, x_mean) { (kappa_0 / (kappa_0 + x_N)) * M_0 + x_N / (kappa_0 + x_N) * x_mean }
+update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - M_0) %*% t(x_mean - M_0) }
+
 
 
 #' Update NIW prior beliefs about multivariate Gaussian category based on sufficient statistics of observations.
@@ -202,6 +213,20 @@ make_MV_exposure_data = function(
 #' Updating proceeds as in \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}. The prior kappa
 #' and nu will be incremented by the number of observations (x_N). The prior M and S will be updated based on the
 #' prior kappa, prior nu, x_N and, of course, the sample mean (x_mean) and sum of squares (x_S) of the observations.
+#'
+#' A number of different updating schemes are supported, including supervised updating based on labeled data and
+#' unsupervised updating based on unlabeled data.
+#' \itemize{
+#'   \item "no-updating" doesn't update the prior. Combined with keep_history = T, this allows the creation of baseline
+#'   against which to compare the updated beliefs. This option is likely most useful when used as part of a call to
+#'   \code{\link{update_NIW_beliefs}}.
+#'   \item "label-certain" assumes that the label is provided and known to the observer with 100% certainty, resulting
+#'   in fully Bayesian supervised belief-updating.
+#'   \item "nolabel-criterion" implements a winner-takes-all update based on the prior beliefs. The input is attributed
+#'   to the category with the highest posterior probability (calculated based on the prior beliefs), and this category
+#'   is updated using the "label-certain" method.
+#' }
+#' This functionality could be extended with additional proposals. Please feel free to suggest additional features.
 #'
 #' @param prior An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
 #' @param x_category Character. The label of the category that is to be updated.
@@ -215,6 +240,7 @@ make_MV_exposure_data = function(
 #' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
 #' interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
 #' column must be present in the NIW_belief object specified as the priors argument. (default: `NULL`)
+#' @param method Which updating method should be used? See details. (default: "supervised-certain")
 #'
 #' @return A tibble.
 #'
@@ -227,9 +253,17 @@ make_MV_exposure_data = function(
 #' @export
 update_NIW_belief_by_sufficient_statistics = function(
   prior, x_category, x_mean, x_S, x_N,
-  add_noise = NULL
+  add_noise = NULL,
+  method = "label-certain"
 ) {
+  # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
   assert_NIW_belief(prior)
+  assert_that(all(is_scalar_double(x_N), x_N >= 0), msg = "x_N must be >= 0.")
+  assert_that(method %in% c("no-updating", "label-certain", "nolabel-criterion"),
+              msg = paste0(method, "is not an acceptable updating method. See details section of help page."))
+  if (method %nin% c("no-updating", "label-certain"))
+    assert_that(x_N > 1,
+                msg = "For this updating method, only incremental updating (one observations at a time) is implemented.")
   assert_that(any(is.null(add_noise), add_noise %in% c("sample", "marginalize")),
               msg = 'add_noise must be one of "sample" or "marginalize"')
   if (!is.null(add_noise))
@@ -238,18 +272,27 @@ update_NIW_belief_by_sufficient_statistics = function(
               msg = "For noise sampling, x_N must be a positive integer")
   assert_that(any(is.null(add_noise), "Sigma_noise" %in% names(prior)),
               msg = "Can't add noise: argument priors does not have column Sigma_noise.")
+
+  x_Ns = as.list(rep(0, length(prior$category)))
+  # Determine how observation should be distributed across categories
+  if (method == "no-updating") return(prior) else
+    if (method == "label-certain") x_Ns[[which(prior$category == x_category)]] = x_N else
+      if (method == "nolabel-uniform") x_Ns = as.list(1 / length(prior$category)) * x_N else {
+        decision_rule = case_when(
+          method == "nolabel-criterion" ~ "criterion",
+          method == "nolabel-posterior" ~ "proportional",
+          T ~ NA_character_
+        )
+        message("get_categorization_from_NIW_belief still needs to be written. simplify = F is meant to return a vector of of
+                posterior probabilities. the function should also have an option 'sampling' which allows to sample based on luce's
+                choice rule. if simplify = T only the label of the category that is chosen will be displayed. incompatible with
+                decision_rule = 'proportional'")
+        x_Ns = as.list(get_categorization_from_NIW_belief(x = x_mean, belief = prior, decision_rule = decision_rule,
+                                                  simplify = F) * x_N)
+      }
+
+  # Handle noise
   if (is.null(add_noise)) add_noise = ""
-  # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
-
-  prior %<>%
-    filter(category == x_category)
-  assert_that(nrow(prior) == 1, msg = "The prior does not uniquely specify which of its rows should be updated.")
-
-  M_0 = prior$M[[1]]
-  kappa_0 = prior$kappa
-  nu_0 = prior$nu
-  S_0 = prior$S[[1]]
-
   if (add_noise == "sample") {
     x = rmvnorm(n = x_N,
                 sigma = prior$Sigma_noise[[1]])
@@ -257,12 +300,37 @@ update_NIW_belief_by_sufficient_statistics = function(
     if (x_N > 1) x_S = x_S + cov(x)
   } else if (add_noise == "marginalize") x_S = x_S + prior$Sigma_noise[[1]]
 
+  x_mean = replicate(length(prior$category), x_mean)
+  x_S = replicate(length(prior$category), x_S)
+
   prior %<>%
     mutate(
-      M = list((kappa_0 / (kappa_0 + x_N)) * M_0 + x_N / (kappa_0 + x_N) * x_mean),
-      kappa = kappa_0 + x_N,
-      nu = nu_0 + x_N,
-      S = list(S_0 + x_S + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - M_0) %*% t(x_mean - M_0)))
+      M = pmap(.l = list(kappa, M, x_Ns, x_mean), update_NIW_belief_M),
+      kappa = map2(kappa, x_Ns, update_NIW_belief_kappa),
+      nu = map2(nu, x_Ns, update_NIW_belief_nu),
+      S = pmap(.l = list(kappa, M, S, x_Ns, x_mean, x_S), update_NIW_belief_M))
+
+  # if (method %in% c("label-certain", "nolabel-criterion")) {
+  #   M_0 = prior[prior$category == x_category,]$M[[1]]
+  #   kappa_0 = prior[prior$category == x_category,]$kappa
+  #   nu_0 = prior[prior$category == x_category,]$nu
+  #   S_0 = prior[prior$category == x_category,]$S[[1]]
+  #
+  #   prior %<>%
+  #     mutate(
+  #       M = list((kappa_0 / (kappa_0 + x_N)) * M_0 + x_N / (kappa_0 + x_N) * x_mean),
+  #       kappa = kappa_0 + x_N,
+  #       nu = nu_0 + x_N,
+  #       S = list(S_0 + x_S + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - M_0) %*% t(x_mean - M_0)))
+  # } else if (method == "nolabel-criterion") {
+  #
+  #   prior %<>%
+  #     mutate(
+  #       M = list((kappa_0 / (kappa_0 + x_N)) * M_0 + x_N / (kappa_0 + x_N) * x_mean),
+  #       kappa = kappa_0 + x_N,
+  #       nu = nu_0 + x_N,
+  #       S = list(S_0 + x_S + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - M_0) %*% t(x_mean - M_0)))
+  # }
 
   return(prior)
 }
@@ -272,10 +340,13 @@ update_NIW_belief_by_sufficient_statistics = function(
 #' @export
 update_NIW_belief_by_one_observation = function(
   prior, x_category, x,
-  add_noise = NULL
+  add_noise = NULL,
+  method = "label-certain"
 ) {
-  update_NIW_belief_by_sufficient_statistics(prior, x_category = x_category, x_mean = x, x_S = 0L, x_N = 1L, add_noise = add_noise)
+  update_NIW_belief_by_sufficient_statistics(prior, x_category = x_category, x_mean = x, x_S = 0L, x_N = 1L,
+                                             add_noise = add_noise, method = method)
 }
+
 
 #' Update NIW prior beliefs about multivariate Gaussian category based on exposure data.
 #'
@@ -295,7 +366,13 @@ update_NIW_belief_by_one_observation = function(
 #' extracted from the prior object.
 #' @param exposure.order Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 #' exposure data is assumed to be in the order in which it should be presented.
-#' @param store.history Should the history of the belief-updating be stored and returned? (default: `TRUE`)
+#' @param add_noise Determines whether multivariate Gaussian noise is added to the input. See \code{\link{update_NIW_belief}}.
+#' (default: `NULL`)
+#' @param method Which updating method should be used? See \code{\link{update_NIW_belief}}. (default: "supervised-certain")
+#' @param keep.update_history Should the history of the belief-updating be stored and returned? If so, the output is
+#' tibble with the one set of NIW beliefs for each exposure observation. This is useful, for example, if one wants to
+#' visualize the changes in the category parameters, posterior predictive, categorization function, or alike across time.
+#' (default: `TRUE`)
 #' @param keep.exposure_data Should the input data be included in the output? If `FALSE` then only the category and cue
 #' columns will be kept. If `TRUE` then all columns will be kept. (default: `FALSE`)
 #'
@@ -315,12 +392,13 @@ update_NIW_beliefs <- function(
   cues = names(prior$M[[1]]),
   exposure.order = NULL,
   add_noise = NULL,
-  store.history = TRUE,
+  method = "label-certain",
+  keep.update_history = TRUE,
   keep.exposure_data = FALSE
 ){
   assert_NIW_belief(prior)
   assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
-  assert_that(all(is.flag(store.history), is.flag(keep.exposure_data)))
+  assert_that(all(is.flag(keep.update_history), is.flag(keep.exposure_data)))
   assert_that(any(is.null(exposure.order), exposure.order %in% names(exposure)),
               msg = paste0("exposure.order variable not found: ", exposure.order, " must be a column in the exposure data."))
   assert_that(any(is.null(exposure.order), if (!is.null(exposure.order)) is.numeric(exposure[[exposure.order]]) else T),
@@ -336,20 +414,21 @@ update_NIW_beliefs <- function(
     { if (!is.null(exposure.order)) arrange(., !! sym(exposure.order)) else . } %>%
     mutate(cues = pmap(.l = list(!!! syms(cues)), .f = ~ c(...)))
 
-  if (store.history)
+  if (keep.update_history)
     prior %<>%
     mutate(observation.n = 0)
 
   for (i in 1:nrow(exposure)) {
-    posterior = if (store.history) prior %>% filter(observation.n == i - 1) else prior
-    posterior[which(posterior$category == exposure[i,]$category),] =
+    posterior = if (keep.update_history) prior %>% filter(observation.n == i - 1) else prior
+    posterior =
       update_NIW_belief_by_one_observation(
         prior = posterior,
         x = unlist(exposure[i, "cues"]),
         x_category = exposure[i,]$category,
-        add_noise = add_noise)
+        add_noise = add_noise,
+        method = method)
 
-    if (store.history) {
+    if (keep.update_history) {
       posterior %<>%
         mutate(observation.n = i)
       prior = rbind(prior, posterior)

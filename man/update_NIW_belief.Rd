@@ -11,10 +11,17 @@ update_NIW_belief_by_sufficient_statistics(
   x_mean,
   x_S,
   x_N,
-  add_noise = NULL
+  add_noise = NULL,
+  method = "label-certain"
 )
 
-update_NIW_belief_by_one_observation(prior, x_category, x, add_noise = NULL)
+update_NIW_belief_by_one_observation(
+  prior,
+  x_category,
+  x,
+  add_noise = NULL,
+  method = "label-certain"
+)
 }
 \arguments{
 \item{prior}{An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.}
@@ -34,6 +41,8 @@ that results from convolving the input with noise. This latter option might be h
 interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
 column must be present in the NIW_belief object specified as the priors argument. (default: `NULL`)}
 
+\item{method}{Which updating method should be used? See details. (default: "supervised-certain")}
+
 \item{x}{A single observation.}
 }
 \value{
@@ -48,6 +57,20 @@ The priors for the categories are specified through the \code{priors} argument, 
 Updating proceeds as in \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}. The prior kappa
 and nu will be incremented by the number of observations (x_N). The prior M and S will be updated based on the
 prior kappa, prior nu, x_N and, of course, the sample mean (x_mean) and sum of squares (x_S) of the observations.
+
+A number of different updating schemes are supported, including supervised updating based on labeled data and
+unsupervised updating based on unlabeled data.
+\itemize{
+  \item "no-updating" doesn't update the prior. Combined with keep_history = T, this allows the creation of baseline
+  against which to compare the updated beliefs. This option is likely most useful when used as part of a call to
+  \code{\link{update_NIW_beliefs}}.
+  \item "label-certain" assumes that the label is provided and known to the observer with 100% certainty, resulting
+  in fully Bayesian supervised belief-updating.
+  \item "nolabel-criterion" implements a winner-takes-all update based on the prior beliefs. The input is attributed
+  to the category with the highest posterior probability (calculated based on the prior beliefs), and this category
+  is updated using the "label-certain" method.
+}
+This functionality could be extended with additional proposals. Please feel free to suggest additional features.
 }
 \examples{
 TBD

@@ -4,7 +4,7 @@
 #' @importFrom Hmisc %nin%
 #' @importFrom rlang !! !!! .data is_symbol sym syms expr as_name quo_is_null
 #' @importFrom purrr map map2 pmap reduce
-#' @importFrom dplyr %>% select filter mutate mutate_at summarise summarise_at left_join rename rename_at group_by ungroup between
+#' @importFrom dplyr %>% select filter mutate mutate_at summarise summarise_at left_join rename rename_at group_by ungroup between case_when
 #' @importFrom tidyr crossing nest unnest
 #' @importFrom tidyselect starts_with
 #' @importFrom tibble tibble is_tibble

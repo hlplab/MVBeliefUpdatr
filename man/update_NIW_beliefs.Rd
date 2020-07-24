@@ -11,7 +11,8 @@ update_NIW_beliefs(
   cues = names(prior$M[[1]]),
   exposure.order = NULL,
   add_noise = NULL,
-  store.history = TRUE,
+  method = "label-certain",
+  keep.update_history = TRUE,
   keep.exposure_data = FALSE
 )
 }
@@ -28,7 +29,15 @@ extracted from the prior object.}
 \item{exposure.order}{Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 exposure data is assumed to be in the order in which it should be presented.}
 
-\item{store.history}{Should the history of the belief-updating be stored and returned? (default: `TRUE`)}
+\item{add_noise}{Determines whether multivariate Gaussian noise is added to the input. See \code{\link{update_NIW_belief}}.
+(default: `NULL`)}
+
+\item{method}{Which updating method should be used? See \code{\link{update_NIW_belief}}. (default: "supervised-certain")}
+
+\item{keep.update_history}{Should the history of the belief-updating be stored and returned? If so, the output is
+tibble with the one set of NIW beliefs for each exposure observation. This is useful, for example, if one wants to
+visualize the changes in the category parameters, posterior predictive, categorization function, or alike across time.
+(default: `TRUE`)}
 
 \item{keep.exposure_data}{Should the input data be included in the output? If `FALSE` then only the category and cue
 columns will be kept. If `TRUE` then all columns will be kept. (default: `FALSE`)}
