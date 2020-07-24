@@ -285,7 +285,7 @@ update_NIW_belief_by_sufficient_statistics = function(
   # Determine how observation should be distributed across categories
   if (method == "no-updating") return(prior) else
     if (method == "label-certain") x_Ns[[which(prior$category == x_category)]] = x_N else
-      if (method == "nolabel-uniform") x_Ns = as.list(1 / length(prior$category)) * x_N else {
+      if (method == "nolabel-uniform") x_Ns = as.list(1 / length(prior$category) * x_N) else {
         decision_rule = case_when(
           method == "nolabel-criterion" ~ "criterion",
           method == "nolabel-posterior" ~ "proportional",
