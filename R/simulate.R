@@ -216,7 +216,7 @@ update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #'
 #' A number of different updating schemes are supported, including supervised updating based on labeled data and
 #' unsupervised updating based on unlabeled data. The unsupervised updating rules were originally presented in
-#' \insertCite{yan:jaeger2018;textual}{MVBeliefUpdatr}
+#' \insertCite{yan:jaeger2018;textual}{MVBeliefUpdatr}.
 #' \itemize{
 #'   \item "no-updating" doesn't update the prior. Combined with keep_history = T, this allows the creation of baseline
 #'   against which to compare the updated beliefs. This option is likely most useful when used as part of a call to
@@ -231,7 +231,10 @@ update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #'   \item "nolabel-uniform" implements unsupervised updating under maximal uninformed uncertainty. The input is attributed
 #'   to equal parts to all categories.
 #' }
-#' This functionality could be extended with additional proposals. Please feel free to suggest additional features.
+#' \strong{Note that category priors are currently assumed to be uniform.} This affects the categorization of the input
+#' based on the NIW prior and thus the way that the input observations are distributed across the categories during
+#' unsupervised updating.
+#' Please feel free to suggest additional features.
 #'
 #' @param prior An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
 #' @param x_category Character. The label of the category that is to be updated.
@@ -264,7 +267,7 @@ update_NIW_belief_by_sufficient_statistics = function(
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
   assert_NIW_belief(prior)
   assert_that(is_scalar_numeric(x_N) & x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
-  assert_that(method %in% c("no-updating", "label-certain", "nolabel-criterion"),
+  assert_that(method %in% c("no-updating", "label-certain", "nolabel-criterion", "nolabel-uniform", "nolabel-posterior"),
               msg = paste(method, "is not an acceptable updating method. See details section of help page."))
   if (method %nin% c("no-updating", "label-certain"))
     assert_that(x_N > 1,
@@ -305,15 +308,14 @@ update_NIW_belief_by_sufficient_statistics = function(
     if (x_N > 1) x_S = x_S + cov(x)
   } else if (add_noise == "marginalize") x_S = x_S + prior$Sigma_noise[[1]]
 
-  x_mean = replicate(length(prior$category), x_mean)
-  x_S = replicate(length(prior$category), x_S)
-
+  x_mean = list(x_mean)
+  x_S = list(x_S)
   prior %<>%
     mutate(
       M = pmap(.l = list(kappa, M, x_Ns, x_mean), update_NIW_belief_M),
       kappa = map2(kappa, x_Ns, update_NIW_belief_kappa),
       nu = map2(nu, x_Ns, update_NIW_belief_nu),
-      S = pmap(.l = list(kappa, M, S, x_Ns, x_mean, x_S), update_NIW_belief_M))
+      S = pmap(.l = list(kappa, M, S, x_Ns, x_mean, x_S), update_NIW_belief_S))
 
   # if (method %in% c("label-certain", "nolabel-criterion")) {
   #   M_0 = prior[prior$category == x_category,]$M[[1]]

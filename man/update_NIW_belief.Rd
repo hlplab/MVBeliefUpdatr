@@ -60,7 +60,7 @@ prior kappa, prior nu, x_N and, of course, the sample mean (x_mean) and sum of s
 
 A number of different updating schemes are supported, including supervised updating based on labeled data and
 unsupervised updating based on unlabeled data. The unsupervised updating rules were originally presented in
-\insertCite{yan:jaeger2018;textual}{MVBeliefUpdatr}
+\insertCite{yan:jaeger2018;textual}{MVBeliefUpdatr}.
 \itemize{
   \item "no-updating" doesn't update the prior. Combined with keep_history = T, this allows the creation of baseline
   against which to compare the updated beliefs. This option is likely most useful when used as part of a call to
@@ -75,7 +75,10 @@ unsupervised updating based on unlabeled data. The unsupervised updating rules w
   \item "nolabel-uniform" implements unsupervised updating under maximal uninformed uncertainty. The input is attributed
   to equal parts to all categories.
 }
-This functionality could be extended with additional proposals. Please feel free to suggest additional features.
+\strong{Note that category priors are currently assumed to be uniform.} This affects the categorization of the input
+based on the NIW prior and thus the way that the input observations are distributed across the categories during
+unsupervised updating.
+Please feel free to suggest additional features.
 }
 \examples{
 TBD

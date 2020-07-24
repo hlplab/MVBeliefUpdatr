@@ -108,3 +108,32 @@ get_categorization_function_from_NIW_belief = function(x, ...) {
     ...
   )
 }
+
+
+get_categorization_from_NIW_belief = function(
+  x,
+  belief,
+  decision_rule,
+  simplify = F
+) {
+  # TO DO: check dimensionality of x with regard to belief.
+  # NOTE: Currently this function is intended for 1 observation only. Category priors are not yet incorporated.
+  assert_NIW_belief(belief)
+  assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
+              msg = paste("Decision rule must be one of:", c("criterion", "proportional", "sampling")))
+
+  p = get_posterior_predictive_from_NIW_belief(x = x, belief = belief, log = F) %>%
+    pull(pp) %>%
+    divide_by(sum(.))
+
+  if (decision_rule == "criterion")
+    p = ifelse(p == max(p), 1, 0) else if (decision_rule == "sampling")
+      # could change the first 1 to be based on number of observations
+      p = as.vector(rmultinom(1, 1, p))
+
+  if (simplify) {
+    assert_that(decision_rule  %in% c("criterion", "sampling"),
+                msg = "For simplify = T, decision rule must be either criterion or sampling.")
+    return(belief$category[which(p) == 1])
+  } else return(p)
+}
