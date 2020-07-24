@@ -109,7 +109,27 @@ get_categorization_function_from_NIW_belief = function(x, ...) {
   )
 }
 
-
+#' Get categorization from an NIW belief
+#'
+#' Categorize a single observation based on an NIW belief. The decision rule can be specified to be either the
+#' criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
+#' Luce's choice rule.
+#'
+#' @param x An observation.
+#' @param belief An \code{\link[=is.NIW_belief]{NIW_belief}} object.
+#' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
+#' @param simplify Should the output be simplified, and just the label of the selected category be returned? This
+#' option is only availale for the criterion and sampling decision rules. (default: `FALSE`)
+#'
+#' @return Either a vector of posterior probabilities of the same length as the number of categories in the NIW
+#' belief object, or a character indicating the chosen category (if simplify = `TRUE`).
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+#'
 get_categorization_from_NIW_belief = function(
   x,
   belief,

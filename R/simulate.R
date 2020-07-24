@@ -342,7 +342,7 @@ update_NIW_belief_by_one_observation = function(
 #' nu}), as well as the prior mean of means (\code{M}, same as \code{M_0} in Murphy, 2012) and the prior scatter
 #' matrix (\code{S}, same as \code{S_0} in Murphy, 2012).
 #'
-#' @param prior A \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
+#' @param prior An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
 #' @param exposure \code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.
 #' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param cues Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
