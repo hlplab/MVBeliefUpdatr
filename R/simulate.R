@@ -270,7 +270,7 @@ update_NIW_belief_by_sufficient_statistics = function(
   assert_that(method %in% c("no-updating", "label-certain", "nolabel-criterion", "nolabel-uniform", "nolabel-posterior"),
               msg = paste(method, "is not an acceptable updating method. See details section of help page."))
   if (method %nin% c("no-updating", "label-certain"))
-    assert_that(x_N > 1,
+    assert_that(x_N <= 1,
                 msg = "For this updating method, only incremental updating (one observations at a time) is implemented.")
   assert_that(any(is.null(add_noise), add_noise %in% c("sample", "marginalize")),
               msg = 'add_noise must be one of "sample" or "marginalize"')
@@ -316,28 +316,6 @@ update_NIW_belief_by_sufficient_statistics = function(
       kappa = map2(kappa, x_Ns, update_NIW_belief_kappa),
       nu = map2(nu, x_Ns, update_NIW_belief_nu),
       S = pmap(.l = list(kappa, M, S, x_Ns, x_mean, x_S), update_NIW_belief_S))
-
-  # if (method %in% c("label-certain", "nolabel-criterion")) {
-  #   M_0 = prior[prior$category == x_category,]$M[[1]]
-  #   kappa_0 = prior[prior$category == x_category,]$kappa
-  #   nu_0 = prior[prior$category == x_category,]$nu
-  #   S_0 = prior[prior$category == x_category,]$S[[1]]
-  #
-  #   prior %<>%
-  #     mutate(
-  #       M = list((kappa_0 / (kappa_0 + x_N)) * M_0 + x_N / (kappa_0 + x_N) * x_mean),
-  #       kappa = kappa_0 + x_N,
-  #       nu = nu_0 + x_N,
-  #       S = list(S_0 + x_S + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - M_0) %*% t(x_mean - M_0)))
-  # } else if (method == "nolabel-criterion") {
-  #
-  #   prior %<>%
-  #     mutate(
-  #       M = list((kappa_0 / (kappa_0 + x_N)) * M_0 + x_N / (kappa_0 + x_N) * x_mean),
-  #       kappa = kappa_0 + x_N,
-  #       nu = nu_0 + x_N,
-  #       S = list(S_0 + x_S + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - M_0) %*% t(x_mean - M_0)))
-  # }
 
   return(prior)
 }
