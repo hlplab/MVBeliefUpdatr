@@ -351,7 +351,9 @@ update_NIW_belief_by_one_observation = function(
 #' exposure data is assumed to be in the order in which it should be presented.
 #' @param add_noise Determines whether multivariate Gaussian noise is added to the input. See \code{\link{update_NIW_belief}}.
 #' (default: `NULL`)
-#' @param method Which updating method should be used? See \code{\link{update_NIW_belief}}. (default: "supervised-certain")
+#' @param method Which updating method should be used? See \code{\link{update_NIW_belief}}. (default: "supervised-certain").
+#' The lenght of this argument should either be 1 (in which case it is recycled for each observation) or the same as
+#' the number of rows in \code{expsure}.
 #' @param keep.update_history Should the history of the belief-updating be stored and returned? If so, the output is
 #' tibble with the one set of NIW beliefs for each exposure observation. This is useful, for example, if one wants to
 #' visualize the changes in the category parameters, posterior predictive, categorization function, or alike across time.
@@ -386,6 +388,9 @@ update_NIW_beliefs <- function(
               msg = paste0("exposure.order variable not found: ", exposure.order, " must be a column in the exposure data."))
   assert_that(any(is.null(exposure.order), if (!is.null(exposure.order)) is.numeric(exposure[[exposure.order]]) else T),
               msg = "exposure.order variable must be numeric.")
+  assert_that(length(method) == 1 | length(method) == nrow(exposure),
+              msg = paste0("Length of method argument must be either 1 or the number of rows in exposure (", nrow(exposure),")."))
+  if (length(method) == 1) method = rep(method, nrow(exposure))
 
   # Number of dimensions/cues
   D = length(cues)
@@ -409,7 +414,7 @@ update_NIW_beliefs <- function(
         x = unlist(exposure[i, "cues"]),
         x_category = exposure[i,]$category,
         add_noise = add_noise,
-        method = method)
+        method = method[i])
 
     if (keep.update_history) {
       posterior %<>%
