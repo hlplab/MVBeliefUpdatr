@@ -194,6 +194,7 @@ plot_expected_categorization_function_2D = function(
   facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
+  message("This function needs work. Also there is something wrong with the posterior densities.")
   facet_rows_by = enquo(facet_rows_by)
   facet_cols_by = enquo(facet_cols_by)
   animate_by = enquo(animate_by)

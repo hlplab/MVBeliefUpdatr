@@ -291,12 +291,12 @@ get_ibbu_stanfit_input = function(x) {
 #' Inverse Wishart distribution over category covariance matrices Sigma.
 #'
 #' The expected value of the category mean mu is \code{M}. The expected value of the category covariance matrix Sigma
-#' is \code{S / (nu - D - 1)}, where \code{D} is the dimension of the multivariate Gaussian category. For details, see
-#' Murphy (2012, p. 134).
+#' is \code{S / (nu - D - 1)}, where \code{D} is the dimension of the multivariate Gaussian category. For details,
+#' \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @references Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
+#' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #' @examples
 #' TBD
 #' @export
@@ -527,7 +527,7 @@ add_ibbu_stanfit_draws = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @references Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
+#' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #' @examples
 #' TBD
 #' @rdname get_expected_category_statistic

@@ -56,7 +56,7 @@ the dimension of the multivariate Normal. Marginalizing across all MCMC samples
 TBD
 }
 \references{
-Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
+\insertRef{murphy2012}{MVBeliefUpdatr}
 }
 \seealso{
 TBD

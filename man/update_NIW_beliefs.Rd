@@ -51,7 +51,7 @@ matrix (\code{S}, same as \code{S_0} in Murphy, 2012).
 TBD
 }
 \references{
-Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
+\insertRef{murphy2012}{MVBeliefUpdatr}
 }
 \seealso{
 TBD

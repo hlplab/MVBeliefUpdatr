@@ -6,7 +6,7 @@ NULL
 #' Get posterior predictive
 #'
 #' Get posterior predictive of observations x given the NIW parameters M, S, kappa, and nu. This is
-#' a multivariate Student-T distribution (Murphy, 2012, p. 135).
+#' a multivariate Student-T distribution \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
 #'
 #' @param x Observations. Can be a vector with k elements for a single observation or a matrix with k
 #' columns and n rows, in which case each row of the matrix is taken to be one observation. If x is a
@@ -21,7 +21,7 @@ NULL
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @references Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
+#' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #' @examples
 #' TBD
 #' @rdname get_posterior_predictive

@@ -38,13 +38,13 @@ matrix Sigma. Should be a square k x k matrix.}
 }
 \description{
 Get posterior predictive of observations x given the NIW parameters M, S, kappa, and nu. This is
-a multivariate Student-T distribution (Murphy, 2012, p. 135).
+a multivariate Student-T distribution \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
 }
 \examples{
 TBD
 }
 \references{
-Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
+\insertRef{murphy2012}{MVBeliefUpdatr}
 }
 \seealso{
 TBD

@@ -199,7 +199,7 @@ make_MV_exposure_data = function(
 #'
 #' The priors for the categories are specified through the \code{priors} argument, an
 #' \code{\link[=is.NIW_belief]{NIW_belief}} object. Which category is updated is determined by x_category.
-#' Updating proceeds as in Murphy, 2012, p. 134). The prior kappa
+#' Updating proceeds as in \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}. The prior kappa
 #' and nu will be incremented by the number of observations (x_N). The prior M and S will be updated based on the
 #' prior kappa, prior nu, x_N and, of course, the sample mean (x_mean) and sum of squares (x_S) of the observations.
 #'
@@ -220,7 +220,7 @@ make_MV_exposure_data = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @references Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
+#' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #' @examples
 #' TBD
 #' @rdname update_NIW_belief
@@ -303,7 +303,7 @@ update_NIW_belief_by_one_observation = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @references Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
+#' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #' @examples
 #' TBD
 #' @export

@@ -1,4 +1,5 @@
 #' @import assertthat
+#' @importFrom Rdpack reprompt
 #' @importFrom magrittr %<>% %T>%
 #' @importFrom Hmisc %nin%
 #' @importFrom rlang !! !!! .data is_symbol sym syms expr as_name quo_is_null

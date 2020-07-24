@@ -6,16 +6,17 @@
 \usage{
 plot_expected_categorization_function_2D(
   x,
-  facet_rows_by = NULL,
-  facet_cols_by = NULL,
-  animate_by = NULL,
   data.exposure = NULL,
   data.test = NULL,
   target_category = 1,
+  logit = F,
   xlim,
   ylim,
   resolution = 25,
-  logit = F,
+  facet_rows_by = NULL,
+  facet_cols_by = NULL,
+  animate_by = NULL,
+  animation_follow = F,
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
@@ -24,6 +25,20 @@ plot_expected_categorization_function_2D(
 }
 \arguments{
 \item{x}{NIW belief object.}
+
+\item{data.exposure}{Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)}
+
+\item{data.test}{Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)}
+
+\item{target_category}{The index of the category for which categorization should be shown. (default: `1`)}
+
+\item{logit}{Should the categorization function be plotted in logit (`TRUE`) or probabilities (`FALSE`)?
+(default: `FALSE`)}
+
+\item{xlim, ylim}{Limits for the x- and y-axis.}
+
+\item{resolution}{How many steps along x and y should be calculated? Note that computational
+complexity increases quadratically with resolution. (default: 25)}
 
 \item{facet_rows_by}{Which group variables, if any, should be used for faceting and/or
 animation? (defaults: `NULL`)}
@@ -34,19 +49,7 @@ animation? (defaults: `NULL`)}
 \item{animate_by}{Which group variables, if any, should be used for faceting and/or
 animation? (defaults: `NULL`)}
 
-\item{data.exposure}{Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)}
-
-\item{data.test}{Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)}
-
-\item{target_category}{The index of the category for which categorization should be shown. (default: `1`)}
-
-\item{xlim, ylim}{Limits for the x- and y-axis.}
-
-\item{resolution}{How many steps along x and y should be calculated? Note that computational
-complexity increases quadratically with resolution. (default: 25)}
-
-\item{logit}{Should the categorization function be plotted in logit (`TRUE`) or probabilities (`FALSE`)?
-(default: `FALSE`)}
+\item{animation_follow}{Should the animation follow the data (zoom in and out)? (default: `FALSE`)}
 
 \item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}

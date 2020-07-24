@@ -41,8 +41,8 @@ means mu. \code{S} is the scatter matrix that determines both the covariance of 
 Inverse Wishart distribution over category covariance matrices Sigma.
 
 The expected value of the category mean mu is \code{M}. The expected value of the category covariance matrix Sigma
-is \code{S / (nu - D - 1)}, where \code{D} is the dimension of the multivariate Gaussian category. For details, see
-Murphy (2012, p. 134).
+is \code{S / (nu - D - 1)}, where \code{D} is the dimension of the multivariate Gaussian category. For details,
+\insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
 }
 \description{
 Add MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) to a tibble. Both wide
@@ -60,7 +60,7 @@ stored separately (`nest=TRUE`).
 TBD
 }
 \references{
-Murphy, K. P. (2012). Machine learning: a probabilistic perspective. MIT press.
+\insertRef{murphy2012}{MVBeliefUpdatr}
 }
 \seealso{
 TBD
