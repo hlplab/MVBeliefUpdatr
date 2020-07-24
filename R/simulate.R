@@ -215,7 +215,8 @@ update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #' prior kappa, prior nu, x_N and, of course, the sample mean (x_mean) and sum of squares (x_S) of the observations.
 #'
 #' A number of different updating schemes are supported, including supervised updating based on labeled data and
-#' unsupervised updating based on unlabeled data.
+#' unsupervised updating based on unlabeled data. The unsupervised updating rules were originally presented in
+#' \insertCite{yan:jaeger2018;textual}{MVBeliefUpdatr}
 #' \itemize{
 #'   \item "no-updating" doesn't update the prior. Combined with keep_history = T, this allows the creation of baseline
 #'   against which to compare the updated beliefs. This option is likely most useful when used as part of a call to
@@ -225,6 +226,10 @@ update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #'   \item "nolabel-criterion" implements a winner-takes-all update based on the prior beliefs. The input is attributed
 #'   to the category with the highest posterior probability (calculated based on the prior beliefs), and this category
 #'   is updated using the "label-certain" method.
+#'   \item "nolabel-posterior" implements fully Bayesian unsupervised update based on the prior beliefs. The input
+#'   is distributed across all categories based on their posterior probability under the prior beliefs.
+#'   \item "nolabel-uniform" implements unsupervised updating under maximal uninformed uncertainty. The input is attributed
+#'   to equal parts to all categories.
 #' }
 #' This functionality could be extended with additional proposals. Please feel free to suggest additional features.
 #'
@@ -258,7 +263,7 @@ update_NIW_belief_by_sufficient_statistics = function(
 ) {
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
   assert_NIW_belief(prior)
-  assert_that(all(is_scalar_double(x_N), x_N >= 0), msg = "x_N must be >= 0.")
+  assert_that(all(is_scalar_numeric(x_N), x_N >= 0), msg = "x_N must be >= 0.")
   assert_that(method %in% c("no-updating", "label-certain", "nolabel-criterion"),
               msg = paste0(method, "is not an acceptable updating method. See details section of help page."))
   if (method %nin% c("no-updating", "label-certain"))

@@ -59,7 +59,8 @@ and nu will be incremented by the number of observations (x_N). The prior M and 
 prior kappa, prior nu, x_N and, of course, the sample mean (x_mean) and sum of squares (x_S) of the observations.
 
 A number of different updating schemes are supported, including supervised updating based on labeled data and
-unsupervised updating based on unlabeled data.
+unsupervised updating based on unlabeled data. The unsupervised updating rules were originally presented in
+\insertCite{yan:jaeger2018;textual}{MVBeliefUpdatr}
 \itemize{
   \item "no-updating" doesn't update the prior. Combined with keep_history = T, this allows the creation of baseline
   against which to compare the updated beliefs. This option is likely most useful when used as part of a call to
@@ -69,6 +70,10 @@ unsupervised updating based on unlabeled data.
   \item "nolabel-criterion" implements a winner-takes-all update based on the prior beliefs. The input is attributed
   to the category with the highest posterior probability (calculated based on the prior beliefs), and this category
   is updated using the "label-certain" method.
+  \item "nolabel-posterior" implements fully Bayesian unsupervised update based on the prior beliefs. The input
+  is distributed across all categories based on their posterior probability under the prior beliefs.
+  \item "nolabel-uniform" implements unsupervised updating under maximal uninformed uncertainty. The input is attributed
+  to equal parts to all categories.
 }
 This functionality could be extended with additional proposals. Please feel free to suggest additional features.
 }
