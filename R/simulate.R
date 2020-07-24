@@ -291,12 +291,10 @@ update_NIW_belief_by_sufficient_statistics = function(
           method == "nolabel-posterior" ~ "proportional",
           T ~ NA_character_
         )
-        message("get_categorization_from_NIW_belief still needs to be written. simplify = F is meant to return a vector of of
-                posterior probabilities. the function should also have an option 'sampling' which allows to sample based on luce's
-                choice rule. if simplify = T only the label of the category that is chosen will be displayed. incompatible with
-                decision_rule = 'proportional'")
-        x_Ns = as.list(get_categorization_from_NIW_belief(x = x_mean, belief = prior, decision_rule = decision_rule,
-                                                  simplify = F) * x_N)
+        x_Ns = as.list(get_categorization_from_NIW_belief(
+          x = x_mean, belief = prior,
+          decision_rule = decision_rule,
+          simplify = F) * x_N)
       }
 
   # Handle noise
@@ -313,8 +311,8 @@ update_NIW_belief_by_sufficient_statistics = function(
   prior %<>%
     mutate(
       M = pmap(.l = list(kappa, M, x_Ns, x_mean), update_NIW_belief_M),
-      kappa = map2(kappa, x_Ns, update_NIW_belief_kappa),
-      nu = map2(nu, x_Ns, update_NIW_belief_nu),
+      kappa = unlist(map2(kappa, x_Ns, update_NIW_belief_kappa)),
+      nu = unlist(map2(nu, x_Ns, update_NIW_belief_nu)),
       S = pmap(.l = list(kappa, M, S, x_Ns, x_mean, x_S), update_NIW_belief_S))
 
   return(prior)
