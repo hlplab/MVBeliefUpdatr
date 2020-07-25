@@ -73,7 +73,7 @@ check_compatibility_between_NIW_belief_and_data = function(
 #' @param facet_rows_by,facet_cols_by,animate_by Which group variables, if any, should be used for faceting and/or
 #' animation? (defaults: `NULL`)
 #' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
-#' @param xlim,ylim Limits for the x- and y-axis.
+#' @param xlim Limits for the x-axis.
 #' @param resolution How many steps along x and y should be calculated? Note that computational
 #' complexity increases quadratically with resolution. (default: 25)
 #' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
@@ -97,7 +97,7 @@ plot_expected_categories_density1D = function(
   data.exposure = NULL,
   data.test = NULL,
   facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F,
-  xlim, ylim, resolution = 25,
+  xlim, resolution = 25,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
   facet_rows_by = enquo(facet_rows_by)
@@ -128,7 +128,7 @@ plot_expected_categories_density1D = function(
   x %<>%
     mutate(Sigma = map2(S, nu, get_Sigma_from_S)) %>%
     crossing(!! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution)) %>%
-    mutate(density = pmap(list(x, M, Sigma), ~ dnorm))
+    mutate(density = unlist(pmap(.l = list("x" = !! sym(cue.labels[1]), "mean" = unlist(M), "sd" = unlist(Sigma)), .f = dnorm)))
 
   p = ggplot(x,
              aes(

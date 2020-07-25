@@ -14,7 +14,6 @@ plot_expected_categories_density1D(
   animate_by = NULL,
   animation_follow = F,
   xlim,
-  ylim,
   resolution = 25,
   category.ids = NULL,
   category.labels = NULL,
@@ -49,7 +48,7 @@ animation? (defaults: `NULL`)}
 
 \item{animation_follow}{Should the animation follow the data (zoom in and out)? (default: `FALSE`)}
 
-\item{xlim, ylim}{Limits for the x- and y-axis.}
+\item{xlim}{Limits for the x-axis.}
 
 \item{resolution}{How many steps along x and y should be calculated? Note that computational
 complexity increases quadratically with resolution. (default: 25)}

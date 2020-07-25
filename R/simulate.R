@@ -296,7 +296,7 @@ update_NIW_belief_by_sufficient_statistics = function(
 ) {
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
   assert_NIW_belief(prior)
-  assert_that(is_scalar_numeric(x_N) & x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
+  assert_that(length(x_N) == 1 & x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
   assert_that(method %in% c("no-updating",
                             "label-certain",
                             "nolabel-criterion", "nolabel-sampling", "nolabel-proportional",
