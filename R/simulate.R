@@ -181,7 +181,7 @@ make_MV_exposure_data = function(
 
   x = tibble(category = category.labels, n = Ns, mu = mus, Sigma = Sigmas) %>%
     mutate(data = pmap(.l = list(n, mu, Sigma), .f = rmvnorm)) %>%
-    mutate(data = map(data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
+    mutate(data = map(data, ~ .x %>% as_tibble() %>% rename_all(~ cue.labels))) %>%
     unnest(data)
 
   if (randomize.order)
