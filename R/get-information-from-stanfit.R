@@ -96,7 +96,7 @@ get_group_levels = function(fit, indices = NULL) {
 #' @return A constructor function, a list of constructor functions, or `NULL`. If a specific constructor
 #' function is requested but not found, a warning is shown.
 #'
-#' @seealso \code{\link[tidybayes]{recover_types}}, \code{\link{get_original_levels}}
+#' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_original_levels}}
 #' @keywords TBD
 #' @examples
 #' TBD
