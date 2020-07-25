@@ -91,6 +91,21 @@ ellipse.pmap = function(x, centre, level, ...)
   ellipse(x = x, centre = centre, level = level)
 
 
+add_test_data_to_1D_plot = function(data, cue.labels) {
+  data[[cue.labels[2]]] = 0
+  add_test_data_to_2D_plot(data, cue.labels)
+}
+
+add_exposure_data_to_1D_plot = function(
+  data,
+  cue.labels,
+  category.labels,
+  category.colors
+) {
+  data[[cue.labels[2]]] = 0
+  add_exposure_data_to_2D_plot(data, cue.labels, category.labels, category.colors)
+}
+
 add_test_data_to_2D_plot = function(data, cue.labels) {
   list(
     geom_point(
@@ -122,5 +137,31 @@ add_exposure_data_to_2D_plot = function(
                        breaks = category.labels,
                        labels = category.labels,
                        values = category.colors))
+}
+
+
+facet_or_animate = function(p, facet_rows_by, facet_cols_by, animate_by, animation_follow) {
+  facet_rows_by = enquo(facet_rows_by)
+  facet_cols_by = enquo(facet_cols_by)
+  animate_by = enquo(animate_by)
+
+  if (!quo_is_null(facet_rows_by) | !quo_is_null(facet_cols_by))
+    p = p + facet_grid(
+      rows = vars(!! facet_rows_by),
+      cols = vars(!! facet_cols_by),
+      labeller = label_both)
+  if (!quo_is_null(animate_by)) {
+    message("Preparing for rendering. This might take a moment.\n")
+    p = p +
+      labs(title = paste0(as_name(animate_by), ": {closest_state}")) +
+      transition_states(!! animate_by,
+                        transition_length = 1,
+                        state_length = 1) +
+      { if (animation_follow) view_follow() } +
+      enter_fade() +
+      exit_fade()
+  }
+
+  return(p)
 }
 

@@ -94,7 +94,7 @@ were originally presented in \insertCite{yan:jaeger2018;textual}{MVBeliefUpdatr}
   "nolabel-criterion" and "nolabel-proportional, it is \emph{deterministic}. Unlike any of these methods, it completely ignores
   the knowledge listeners have (i.e., the prior).
 }
-\strong{Note that category priors are currently assumed to be uniform.} This affects the categorization of the input
+\strong{Note that category priors---p(category)---are currently assumed to be uniform.} This affects the categorization of the input
 based on the NIW prior and thus the way that the input observations are distributed across the categories during
 unsupervised updating.
 Please feel free to suggest additional features.
