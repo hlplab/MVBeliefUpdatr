@@ -154,6 +154,6 @@ get_categorization_from_NIW_belief = function(
   if (simplify) {
     assert_that(decision_rule  %in% c("criterion", "sampling"),
                 msg = "For simplify = T, decision rule must be either criterion or sampling.")
-    return(belief$category[which(p) == 1])
+    return(belief$category[which(p == 1)])
   } else return(p)
 }
