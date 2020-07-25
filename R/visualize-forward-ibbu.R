@@ -51,6 +51,107 @@ check_compatibility_between_NIW_belief_and_data = function(
 }
 
 
+
+
+#' Plot expected univariate (1D) categories
+#'
+#' Plot univariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
+#' category statistics of all categories. This includes the M (the mean of category means \eqn{\mu}), S (the scattermatrix),
+#' kappa (the strength of the belief in M) and nu (the strength of the belief in S). For the univariate case, M and S are
+#' scalars \insertCite{@see @murphy2012 p. 136}{MVBeliefUpdatr}.
+#'
+#' It is possible to hand more than one NIW belief to this function, and to facet or animate by variables that uniquely
+#' identify the different beliefs. For example, one can plot
+#' different priors for different talkers (grouping by talker), or different posteriors for different exposure conditions
+#' (grouping by exposure condition), the incremental updating of NIW beliefs (grouping by observations), or any combinations
+#' of these.
+#'
+#' @param x NIW belief object.
+#' @param levels Levels of the confidence ellipses. (default: .5, .66, .8, .9., and .95)
+#' @param data.exposure Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)
+#' @param data.test Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)
+#' @param facet_rows_by,facet_cols_by,animate_by Which group variables, if any, should be used for faceting and/or
+#' animation? (defaults: `NULL`)
+#' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
+#' @param xlim,ylim Limits for the x- and y-axis.
+#' @param resolution How many steps along x and y should be calculated? Note that computational
+#' complexity increases quadratically with resolution. (default: 25)
+#' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
+#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
+#' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
+#' @param category.colors Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
+#' @param category.linetypes Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
+#' Currently being ignored.
+#'
+#' @return ggplot object.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @references \insertRef{murphy2012}{MVBeliefUpdatr}
+#' @examples
+#' TBD
+#' @rdname plot_expected_categories
+#' @export
+plot_expected_categories_density1D = function(
+  x,
+  data.exposure = NULL,
+  data.test = NULL,
+  facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F,
+  xlim, ylim, resolution = 25,
+  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
+) {
+  facet_rows_by = enquo(facet_rows_by)
+  facet_cols_by = enquo(facet_cols_by)
+  animate_by = enquo(animate_by)
+  x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
+                                                      !! facet_rows_by, !! facet_cols_by, !! animate_by)
+  # Remember groups
+  cue.labels = get_cue_labels_from_NIW_belief(x)
+  assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
+
+  if (is_missing(xlim)) {
+    if (!is.null(data.exposure) & !is.null(data.test))
+      xlim = range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
+        if (!is.null(data.exposure))
+          xlim = range(data.exposure[[cue.labels[1]]]) else
+            if (!is.null(data.test))
+              xlim = range(data.test[[cue.labels[1]]])
+  }
+  assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
+
+  # Setting aes defaults
+  if(is.null(category.ids)) category.ids = levels(x$category)
+  if(is.null(category.labels)) category.labels = levels(x$category)
+  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
+  if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
+
+  x %<>%
+    mutate(Sigma = map2(S, nu, get_Sigma_from_S)) %>%
+    crossing(!! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution)) %>%
+    mutate(density = pmap(list(x, M, Sigma), ~ dnorm))
+
+  p = ggplot(x,
+             aes(
+               x = .data[[cue.labels[1]]],
+               y = .data$density,
+               color = .data$category)) +
+    geom_line(mapping = aes(group = .data$category)) +
+    { if (!is.null(data.test))
+      add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
+    { if (!is.null(data.exposure))
+      add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels, category.labels = category.labels, category.colors) } +
+    scale_x_continuous(cue.labels[1]) +
+    scale_y_continuous("Density") +
+    scale_color_manual("Category",
+                      breaks = category.ids,
+                      labels = category.labels,
+                      values = category.colors) +
+    theme_bw()
+
+  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !!animate_by, animation_follow)
+  return(p)
+}
+
 #' Plot expected bivariate (2D) categories
 #'
 #' Plot bivariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
@@ -83,8 +184,8 @@ check_compatibility_between_NIW_belief_and_data = function(
 #' @keywords TBD
 #' @examples
 #' TBD
+#' @rdname plot_expected_categories
 #' @export
-#'
 plot_expected_categories_contour2D = function(
   x,
   levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
@@ -140,23 +241,7 @@ plot_expected_categories_contour2D = function(
                            breaks = round(1 - levels, 2)) +
     theme_bw()
 
-  if (!quo_is_null(facet_rows_by) | !quo_is_null(facet_cols_by))
-    p = p + facet_grid(
-      rows = vars(!! facet_rows_by),
-      cols = vars(!! facet_cols_by),
-      labeller = label_both)
-  if (!quo_is_null(animate_by)) {
-    message("Preparing for rendering. This might take a moment.\n")
-    p = p +
-      labs(title = paste0(as_name(animate_by), ": {closest_state}")) +
-      transition_states(!! animate_by,
-                        transition_length = 1,
-                        state_length = 1) +
-      { if (animation_follow) view_follow() } +
-      enter_fade() +
-      exit_fade()
-  }
-
+  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !!animate_by, animation_follow)
   return(p)
 }
 
@@ -232,21 +317,6 @@ plot_expected_categorization_function_2D = function(
           !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! animate_by,
                                                      .add = TRUE)
 
-    # d %<>%
-  #   cbind(get_posterior_predictives_from_NIW_beliefs(d, x, wide = T, log = T, grouping.var = groups(x)))
-  #
-  # # TO BE DONE: handle case that grouping var might be part OF THE OUTPUT <------------------------- CONTINUE HERE
-  # log_p = d %>%
-  #   select(starts_with("lpp."))
-  #
-  # d %<>%
-  #   mutate(p_target =
-  #            exp(
-  #              log_p[,target_category] + log(priors[target_category]) -
-  #                log(rowSums(exp(log_p) * priors))) *
-  #            # Assuming a uniform (unbiased) lapse rate:
-  #            (1 - lapse_rate) + lapse_rate / n.cat)
-
   d = crossing(
     !! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution),
     !! sym(cue.labels[2]) := seq(min(ylim), max(ylim), length.out = resolution)
@@ -294,22 +364,6 @@ plot_expected_categorization_function_2D = function(
                          midpoint = if (logit) 0 else .5) +
     theme_bw()
 
-  if (!quo_is_null(facet_rows_by) | !quo_is_null(facet_cols_by))
-    p = p + facet_grid(
-      rows = vars(!! facet_rows_by),
-      cols = vars(!! facet_cols_by),
-      labeller = label_both)
-  if (!quo_is_null(animate_by)) {
-    message("Preparing for rendering. This might take a moment.\n")
-    p = p +
-      labs(title = paste0(as_name(animate_by), ": {closest_state}")) +
-      transition_states(!! animate_by,
-                        transition_length = 1,
-                        state_length = 1) +
-      { if (animation_follow) view_follow() } +
-      enter_fade() +
-      exit_fade()
-  }
-
+  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !!animate_by, animation_follow)
   return(p)
 }
