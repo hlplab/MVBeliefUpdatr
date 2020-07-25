@@ -300,7 +300,7 @@ update_NIW_belief_by_sufficient_statistics = function(
   assert_that(method %in% c("no-updating",
                             "label-certain",
                             "nolabel-criterion", "nolabel-sampling", "nolabel-proportional",
-                            "nolabel-uniform", ),
+                            "nolabel-uniform"),
               msg = paste(method, "is not an acceptable updating method. See details section of help page."))
   if (method %nin% c("no-updating", "label-certain"))
     assert_that(x_N <= 1,
