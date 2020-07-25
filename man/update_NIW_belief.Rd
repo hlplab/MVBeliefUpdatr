@@ -64,7 +64,7 @@ unsupervised updating based on unlabeled data. The unsupervised updating rules w
 \itemize{
   \item "no-updating" doesn't update the prior. Combined with keep_history = T, this allows the creation of baseline
   against which to compare the updated beliefs. This option is likely most useful when used as part of a call to
-  \code{\link{update_NIW_beliefs}}.
+  \code{\link{update_NIW_beliefs_incrementally}}.
   \item "label-certain" assumes that the label is provided and known to the observer with 100% certainty, resulting
   in fully Bayesian supervised belief-updating.
   \item "nolabel-criterion" implements a winner-takes-all update based on the prior beliefs. The input is attributed

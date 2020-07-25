@@ -2,10 +2,21 @@
 % Please edit documentation in R/simulate.R
 \name{update_NIW_belief_kappa}
 \alias{update_NIW_belief_kappa}
+\alias{update_NIW_belief_nu}
+\alias{update_NIW_belief_M}
+\alias{update_NIW_belief_S}
 \title{Update parameters of NIW prior beliefs about multivariate Gaussian category.}
 \usage{
 update_NIW_belief_kappa(kappa_0, x_N)
+
+update_NIW_belief_nu(nu_0, x_N)
+
+update_NIW_belief_M(kappa_0, M_0, x_N, x_mean)
+
+update_NIW_belief_S(kappa_0, M_0, S_0, x_N, x_mean, x_S)
 }
 \description{
 Returns updated/posterior M, S, kappa, or nu based on \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
+These functions are called, for example, by \code{\link{update_NIW_belief_by_sufficient_statistics}},
+\code{\link{update_NIW_belief_by_one_observation}}, and \code{\link{update_NIW_beliefs_incrementally}}.
 }

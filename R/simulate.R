@@ -41,7 +41,7 @@ example_NIW_prior = function(example = 1) {
 #' Make NIW prior from data.
 #'
 #' Constructs an NIW_belief object, representing Normal-Inverse Wishart (NIW) parameters for all categories found in
-#' the data. This object can be used as a prior for functions like \code{\link{update_NIW_beliefs}}.
+#' the data. This object can be used as a prior for functions like \code{\link{update_NIW_beliefs_incrementally}}.
 #'
 #' Currently, \code{make_NIW_prior_from_data()} does not infer kappa or nu, nor does it fit hierarchical data. Rather
 #' the function simply estimates the category mean and covariance matrix from the sample (\code{data}), assumes them
@@ -194,12 +194,20 @@ make_MV_exposure_data = function(
 #' Update parameters of NIW prior beliefs about multivariate Gaussian category.
 #'
 #' Returns updated/posterior M, S, kappa, or nu based on \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
+#' These functions are called, for example, by \code{\link{update_NIW_belief_by_sufficient_statistics}},
+#' \code{\link{update_NIW_belief_by_one_observation}}, and \code{\link{update_NIW_beliefs_incrementally}}.
 #'
 #' @rdname update_NIW_parameters
 #' @export
 update_NIW_belief_kappa = function(kappa_0, x_N) { kappa_0 + x_N }
+#' @rdname update_NIW_parameters
+#' @export
 update_NIW_belief_nu = function(nu_0, x_N) { nu_0 + x_N }
+#' @rdname update_NIW_parameters
+#' @export
 update_NIW_belief_M = function(kappa_0, M_0, x_N, x_mean) { (kappa_0 / (kappa_0 + x_N)) * M_0 + x_N / (kappa_0 + x_N) * x_mean }
+#' @rdname update_NIW_parameters
+#' @export
 update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - M_0) %*% t(x_mean - M_0) }
 
 
@@ -220,7 +228,7 @@ update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #' \itemize{
 #'   \item "no-updating" doesn't update the prior. Combined with keep_history = T, this allows the creation of baseline
 #'   against which to compare the updated beliefs. This option is likely most useful when used as part of a call to
-#'   \code{\link{update_NIW_beliefs}}.
+#'   \code{\link{update_NIW_beliefs_incrementally}}.
 #'   \item "label-certain" assumes that the label is provided and known to the observer with 100% certainty, resulting
 #'   in fully Bayesian supervised belief-updating.
 #'   \item "nolabel-criterion" implements a winner-takes-all update based on the prior beliefs. The input is attributed
@@ -349,11 +357,11 @@ update_NIW_belief_by_one_observation = function(
 #' extracted from the prior object.
 #' @param exposure.order Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 #' exposure data is assumed to be in the order in which it should be presented.
-#' @param add_noise Determines whether multivariate Gaussian noise is added to the input. See \code{\link{update_NIW_belief}}.
-#' (default: `NULL`)
-#' @param method Which updating method should be used? See \code{\link{update_NIW_belief}}. (default: "supervised-certain").
+#' @param add_noise Determines whether multivariate Gaussian noise is added to the input. See \code{
+#' \link{update_NIW_belief_by_sufficient_statistics}}. (default: `NULL`)
+#' @param method Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics}}.
 #' The lenght of this argument should either be 1 (in which case it is recycled for each observation) or the same as
-#' the number of rows in \code{expsure}.
+#' the number of rows in \code{expsure}. (default: "label-certain").
 #' @param keep.update_history Should the history of the belief-updating be stored and returned? If so, the output is
 #' tibble with the one set of NIW beliefs for each exposure observation. This is useful, for example, if one wants to
 #' visualize the changes in the category parameters, posterior predictive, categorization function, or alike across time.
@@ -370,7 +378,7 @@ update_NIW_belief_by_one_observation = function(
 #' TBD
 #' @export
 #'
-update_NIW_beliefs <- function(
+update_NIW_beliefs_incrementally <- function(
   prior,
   exposure,
   category = "category",
