@@ -262,8 +262,9 @@ update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #'
 #' @return An NIW_belief object.
 #'
-#' @seealso TBD
-#' @keywords TBD
+#' @seealso \code{\link{update_NIW_belief_kappa}}, \code{\link{update_NIW_belief_nu}}, \code{\link{update_NIW_belief_M}},
+#' \code{\link{update_NIW_belief_S}}, all of which are called by \code{update_NIW_belief_by_sufficient_statistics}.
+#' @keywords belief-updating NIW Normal-Inverse Wishart
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #' @examples
 #' TBD
@@ -373,8 +374,8 @@ update_NIW_belief_by_one_observation = function(
 #'
 #' @return An NIW_belief object.
 #'
-#' @seealso TBD
-#' @keywords TBD
+#' @seealso \code{\link{update_NIW_belief_by_one_observation}}, which is called by \code{update_NIW_beliefs_incrementally}
+#' @keywords belief-updating NIW Normal-Inverse Wishart
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #' @examples
 #' TBD

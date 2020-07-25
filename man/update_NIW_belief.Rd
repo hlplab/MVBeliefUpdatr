@@ -87,6 +87,10 @@ TBD
 \insertRef{murphy2012}{MVBeliefUpdatr}
 }
 \seealso{
-TBD
+\code{\link{update_NIW_belief_kappa}}, \code{\link{update_NIW_belief_nu}}, \code{\link{update_NIW_belief_M}},
+\code{\link{update_NIW_belief_S}}, all of which are called by \code{update_NIW_belief_by_sufficient_statistics}.
 }
-\keyword{TBD}
+\keyword{NIW}
+\keyword{Normal-Inverse}
+\keyword{Wishart}
+\keyword{belief-updating}

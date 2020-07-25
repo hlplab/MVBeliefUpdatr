@@ -65,6 +65,9 @@ TBD
 \insertRef{murphy2012}{MVBeliefUpdatr}
 }
 \seealso{
-TBD
+\code{\link{update_NIW_belief_by_one_observation}}, which is called by \code{update_NIW_beliefs_incrementally}
 }
-\keyword{TBD}
+\keyword{NIW}
+\keyword{Normal-Inverse}
+\keyword{Wishart}
+\keyword{belief-updating}
