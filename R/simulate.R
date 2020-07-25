@@ -197,6 +197,8 @@ make_MV_exposure_data = function(
 #' These functions are called, for example, by \code{\link{update_NIW_belief_by_sufficient_statistics}},
 #' \code{\link{update_NIW_belief_by_one_observation}}, and \code{\link{update_NIW_beliefs_incrementally}}.
 #'
+#' @return Depending on the updated parameter, a numeric scalar (kappa, nu), vector (M) or square matrix (S).
+#'
 #' @rdname update_NIW_parameters
 #' @export
 update_NIW_belief_kappa = function(kappa_0, x_N) { kappa_0 + x_N }
@@ -258,7 +260,7 @@ update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #' column must be present in the NIW_belief object specified as the priors argument. (default: `NULL`)
 #' @param method Which updating method should be used? See details. (default: "supervised-certain")
 #'
-#' @return A tibble.
+#' @return An NIW_belief object.
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -369,7 +371,7 @@ update_NIW_belief_by_one_observation = function(
 #' @param keep.exposure_data Should the input data be included in the output? If `FALSE` then only the category and cue
 #' columns will be kept. If `TRUE` then all columns will be kept. (default: `FALSE`)
 #'
-#' @return A tibble.
+#' @return An NIW_belief object.
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -377,7 +379,6 @@ update_NIW_belief_by_one_observation = function(
 #' @examples
 #' TBD
 #' @export
-#'
 update_NIW_beliefs_incrementally <- function(
   prior,
   exposure,

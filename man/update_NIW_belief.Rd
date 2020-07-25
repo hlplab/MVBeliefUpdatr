@@ -46,7 +46,7 @@ column must be present in the NIW_belief object specified as the priors argument
 \item{x}{A single observation.}
 }
 \value{
-A tibble.
+An NIW_belief object.
 }
 \description{
 Returns updated/posterior beliefs about the Gaussian categories based on conjugate NIW prior.

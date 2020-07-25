@@ -45,7 +45,7 @@ visualize the changes in the category parameters, posterior predictive, categori
 columns will be kept. If `TRUE` then all columns will be kept. (default: `FALSE`)}
 }
 \value{
-A tibble.
+An NIW_belief object.
 }
 \description{
 Returns updated/posterior beliefs about the Gaussian categories based on conjugate NIW prior.
