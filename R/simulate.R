@@ -232,14 +232,32 @@ update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #'   against which to compare the updated beliefs. This option is likely most useful when used as part of a call to
 #'   \code{\link{update_NIW_beliefs_incrementally}}.
 #'   \item "label-certain" assumes that the label is provided and known to the observer with 100% certainty, resulting
-#'   in fully Bayesian supervised belief-updating.
-#'   \item "nolabel-criterion" implements a winner-takes-all update based on the prior beliefs. The input is attributed
-#'   to the category with the highest posterior probability (calculated based on the prior beliefs), and this category
-#'   is updated using the "label-certain" method.
-#'   \item "nolabel-posterior" implements fully Bayesian unsupervised update based on the prior beliefs. The input
-#'   is distributed across all categories based on their posterior probability under the prior beliefs.
-#'   \item "nolabel-uniform" implements unsupervised updating under maximal uninformed uncertainty. The input is attributed
-#'   to equal parts to all categories.
+#'   in fully Bayesian supervised belief-updating. This update method is \emph{not order sensitive}. Under this update
+#'   method, the order of a batch of observations does not affect the final posterior belief after all observations
+#'   have been made (it does, of course, effect the beliefs held in the interim). This reflects the "exchangeability"
+#'   assumption of Bayesian belief-updating under the assumption that the observations are drawn from a stationary
+#'   random process.
+#'   \item "nolabel-criterion" implements a winner-takes-all update based on the prior beliefs. The
+#'   posterior probability of all categories under the prior is calculated, and only the category with the
+#'   highest posterior probabilty is updated (see decision_rule = "criterion" in \code{\link{get_categorization_from_NIW_belief}}).
+#'   The update for this category proceed the same ways as under the "label-certain" method. Method "nolabel-criterion" is
+#'   thus \emph{order sensitive}, but deterministic (i.e., it yields the same result on each repeated run), provided
+#'   there is no noise (specifically, no noise = "sample").
+#'   \item "nolabel-sampling" implements another winner-takes-all update based on the prior beliefs. The
+#'   posterior probability of all categories under the prior is calculated. Then a single category is \emph{sampled}
+#'   based on this posterior (see decision_rule = "sampling" in \code{\link{get_categorization_from_NIW_belief}}), and only this
+#'   sampled category is  updated with the observation.
+#'   Like "nolabel-criterion", this updating method is \emph{order sensitive}. Unlike "nolabel-criterion", this method had a
+#'   random element and thus does \emph{not replicate the same result on each run}.
+#'   \item "nolabel-proportional" captures the uncertainty about the category label (and is this sense fully Bayesian). The
+#'   posterior probability of all categories under the prior is calculated. The input is then distributed across all categories
+#'   based on their posterior probability under the prior beliefs. That is, \emph{all categories are updated}, but to different
+#'   degrees. Like "nolabel-criterion" and "nolabel-sampling", this updating method is \emph{order sensitive}. Like "nolabel-criterion",
+#'   it is \emph{deterministic}.
+#'   \item "nolabel-uniform" implements unsupervised updating under maximal \emph{uninformed} uncertainty. The input is attributed
+#'   to equal parts to all categories. Like all the "nolabel-*" methods, this updating method is \emph{order sensitive}. Like
+#'   "nolabel-criterion" and "nolabel-proportional, it is \emph{deterministic}. Unlike any of these methods, it completely ignores
+#'   the knowledge listeners have (i.e., the prior).
 #' }
 #' \strong{Note that category priors are currently assumed to be uniform.} This affects the categorization of the input
 #' based on the NIW prior and thus the way that the input observations are distributed across the categories during
@@ -278,7 +296,10 @@ update_NIW_belief_by_sufficient_statistics = function(
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
   assert_NIW_belief(prior)
   assert_that(is_scalar_numeric(x_N) & x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
-  assert_that(method %in% c("no-updating", "label-certain", "nolabel-criterion", "nolabel-uniform", "nolabel-posterior"),
+  assert_that(method %in% c("no-updating",
+                            "label-certain",
+                            "nolabel-criterion", "nolabel-sampling", "nolabel-proportional",
+                            "nolabel-uniform", ),
               msg = paste(method, "is not an acceptable updating method. See details section of help page."))
   if (method %nin% c("no-updating", "label-certain"))
     assert_that(x_N <= 1,
@@ -296,15 +317,11 @@ update_NIW_belief_by_sufficient_statistics = function(
   # Determine how observation should be distributed across categories
   if (method == "no-updating") return(prior) else
     if (method == "label-certain") x_Ns[[which(prior$category == x_category)]] = x_N else
-      if (method == "nolabel-uniform") x_Ns = as.list(1 / length(prior$category) * x_N) else {
-        decision_rule = case_when(
-          method == "nolabel-criterion" ~ "criterion",
-          method == "nolabel-posterior" ~ "proportional",
-          T ~ NA_character_
-        )
+      if (method == "nolabel-uniform") x_Ns = as.list(1 / length(prior$category) * x_N) else
+        if (method %in% c("nolabel-criterion", "nolabel-sampling", "nolabel-proportional")) {
         x_Ns = as.list(get_categorization_from_NIW_belief(
           x = x_mean, belief = prior,
-          decision_rule = decision_rule,
+          decision_rule = gsub("nolabel-", "", method),
           simplify = F) * x_N)
       }
 

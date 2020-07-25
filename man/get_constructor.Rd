@@ -31,6 +31,6 @@ Gets the tidybayes constructor function from the stanfit object. `get_category_c
 TBD
 }
 \seealso{
-\code{\link[tidybayes]{recover_types}}, \code{\link{get_original_levels}}
+\code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_original_levels}}
 }
 \keyword{TBD}
