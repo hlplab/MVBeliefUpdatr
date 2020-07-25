@@ -84,7 +84,8 @@ unsupervised updating based on unlabeled data. The unsupervised updating rules w
   Like "nolabel-criterion", this updating method is \emph{order sensitive}. Unlike "nolabel-criterion", this method had a
   random element and thus does \emph{not replicate the same result on each run}.
   \item "nolabel-proportional" captures the uncertainty about the category label (and is this sense fully Bayesian). The
-  posterior probability of all categories under the prior is calculated. The input is then distributed across all categories
+  posterior probability of all categories under the prior is calculated (see decision_rule = "proportional" in
+  \code{\link{get_categorization_from_NIW_belief}}). The input is then distributed across all categories
   based on their posterior probability under the prior beliefs. That is, \emph{all categories are updated}, but to different
   degrees. Like "nolabel-criterion" and "nolabel-sampling", this updating method is \emph{order sensitive}. Like "nolabel-criterion",
   it is \emph{deterministic}.
