@@ -1,7 +1,8 @@
 IMPORTANT
 
-+ Look at brms::make_standata and brms::stan_data to see how brms makes and attaches data to brms.fit objects. Make corresponding functions standata and make_standata!
++ make plot that checks assumptions of NIW updating: category distribution and covariance across talkers.
 
++ Look at brms::make_standata and brms::stan_data to see how brms makes and attaches data to brms.fit objects. Make corresponding functions standata and make_standata!
 + then figure out to add information about input to that new class
 ++ add exposure mean in more accessible format. Update get_exposure_mean to read in that mean
 ++ add exposure covariance (not uncentered squares) in accessible format. Updated get_expsoure_covariance to read in the information
@@ -24,6 +25,8 @@ CATCH UP
 
 LESS IMPORTANT
 + change "IBBU" parameters to "NIW" through documentation.
++ make plot of NIW_belief parameters (standard plotting function)
++ make NIW_belief and NIW_beliefs classes? think about how they should be related.
 
 + Rename variable names in .stan program to appropriately use M_0 and M_n (rather than mu_0 and mu_n) as well as S_0 and S_n (rather than sigma_0 and sigma_n). Then change add_ibbu_draws() function to refer to those parameters. This will reduce confusion. ADD_IBBU_DRAWS HAS BEEN UPDATED TO *RETURN* Ms AND Ss, BUT THE .STAN PROGRAM HAS NOT YET BEEN CHANGED AND ADD_IBBU_DRAWS STILL EXPECTS THE *INPUT* TO BE MU AND SIGMA.
 

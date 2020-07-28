@@ -4,7 +4,10 @@
 \alias{is.NIW_belief}
 \alias{is.NIW_belief_w_lapse}
 \alias{is.NIW_belief_w_bias}
-\title{Is this a tibble of NIW beliefs?}
+\alias{is.NIW_beliefs}
+\alias{is.NIW_beliefs_w_lapse}
+\alias{is.NIW_beliefs_w_bias}
+\title{Is this an NIW belief object?}
 \usage{
 is.NIW_belief(
   x,
@@ -17,6 +20,18 @@ is.NIW_belief(
 is.NIW_belief_w_lapse(x, category = "category", is.long = T, with.bias = F)
 
 is.NIW_belief_w_bias(x, category = "category", is.long = T)
+
+is.NIW_beliefs(
+  x,
+  category = "category",
+  is.long = T,
+  with.lapse = if (with.bias) T else F,
+  with.bias = F
+)
+
+is.NIW_beliefs_w_lapse(x, category = "category", is.long = T, with.bias = F)
+
+is.NIW_beliefs_w_bias(x, category = "category", is.long = T)
 }
 \arguments{
 \item{x}{Object to be checked.}
@@ -26,13 +41,15 @@ is.NIW_belief_w_bias(x, category = "category", is.long = T)
 \item{is.long}{Is this check assessing whether the belief is in long format (`TRUE`) or wide format (`FALSE`)?
 (default: `TRUE`)}
 
-\item{w}{}
+\item{with.lapse}{Does this belief have a lapse rate? (default: `FALSE`)}
+
+\item{with.bias}{Does this belief have a bias? (default: `FALSE`)}
 }
 \value{
 A logical.
 }
 \description{
-Check whether \code{x} is a tibble of NIW beliefs. Optionally, one can also check whether a lapse rate
+Check whether \code{x} is an NIW belief/set of NIW beliefs. Optionally, one can also check whether a lapse rate
 and bias is part of the belief.
 }
 \examples{

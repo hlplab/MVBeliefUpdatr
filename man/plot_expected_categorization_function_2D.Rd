@@ -24,7 +24,7 @@ plot_expected_categorization_function_2D(
 )
 }
 \arguments{
-\item{x}{NIW belief object.}
+\item{x}{An \code{\link{NIW_belief}} or \code{\link{NIW_beliefs}} object.}
 
 \item{data.exposure}{Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)}
 

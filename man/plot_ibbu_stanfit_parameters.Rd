@@ -29,6 +29,9 @@ The default labels each categorization function based on whether it is showing p
 and by its group ID.}
 
 \item{group.colors}{Vector of fill colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)}
+
+\item{panel_scaling}{Should the relative scaling be calculated separately for each panel? If not the scaling is calculated
+globally. (default: `FALSE`)}
 }
 \value{
 ggplot object.
