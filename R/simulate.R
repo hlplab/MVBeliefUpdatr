@@ -260,9 +260,15 @@ update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #'   "nolabel-criterion" and "nolabel-proportional, it is \emph{deterministic}. Unlike any of these methods, it completely ignores
 #'   the knowledge listeners have (i.e., the prior).
 #' }
-#' \strong{Note that category priors---p(category)---are currently assumed to be uniform.} This affects the categorization of the input
+#' \strong{Please consider the following important limitations of these functions:}
+#' \itemize{
+#'   \item the category priors---p(category)---are currently assumed to be uniform. This affects the categorization of the input
 #' based on the NIW prior and thus the way that the input observations are distributed across the categories during
 #' unsupervised updating.
+#'   \item the updating models introduced here treat the cue distributions of the different categories as \emph{independent} of
+#'   each other. That is, the updating does not consider knowledge about, for example, the covariance of the category means, although
+#'   there is evidence that listeners have knowledge of this covariance and draw on it during categorization and adaptation.
+#' }
 #' Please feel free to suggest additional features.
 #'
 #' @param prior An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
