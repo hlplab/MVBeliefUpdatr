@@ -229,9 +229,9 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
 get_test_counts <- function(test, cues, category, response, group, verbose = F) {
   test_counts <- test %>%
     as_tibble() %>%
-    group_by(!! sym(group),
-             !!! syms(cues),
+    group_by(!!! syms(cues),
              !! sym(response)) %>%
+    { if (!is.null(group)) group_by(., !! sym(group), .add = T) } %>%
     tally() %>%
     pivot_wider(
       names_from = !! response,
@@ -419,14 +419,17 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     verbose = verbose)
 
   assert_that(all(levels(exposure[[category]]) == levels(test[[response]])),
-              msg = paste("category column", category, "in exposure and response colum", response, "must be factors
+              msg = paste("category variable", category, "in exposure and response colum", response, "must be factors
               with the same levels in the same order in. Either the levels do not match, or they are not in the same
               order."))
   if (!is.null(group))
-    assert_that(all(levels(exposure[[group]]) == levels(test[[group]])),
-                msg = paste("group column", category, "must be a factor with the same levels in the same order in
-                          the exposure and test data. Either the levels do not match, or they are not in the same
-                          order."))
+    assert_that(all(levels(exposure[[group]]) %in% levels(test[[group]])),
+                msg = paste("All levels of the group variable", group, "found in exposure must also be present in test."))
+  if (!all(levels(test[[group]]) %in% levels(exposure[[group]])))
+    message(paste("Not all levels of group variable", group, "that are present in test were found in exposure. Creating
+                  0 exposure data for those groups."))
+  exposure %<>%
+    mutate_at(group, factor(levels = levels(test[[group]])))
 
   test_counts <- get_test_counts(
     test = test,
