@@ -182,10 +182,6 @@ untransform_cues = function(data, cues,
 
 check_exposure_test_data <- function(data, cues, category, response, group, which.data = "the", verbose = F) {
   assert_that(is_tibble(data) | is.data.frame(data))
-  assert_that(!is.null(cues))
-  assert_that(!is.null(category))
-  assert_that(!is.null(response))
-
   assert_that(all(is_character(cues)),
               msg = "cues must be a column name or vector of column names.")
   assert_that(cues %in% names(data),
