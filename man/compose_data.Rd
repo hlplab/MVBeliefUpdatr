@@ -8,29 +8,39 @@
 compose_data_to_infer_prior_kappanu_via_conjugate_ibbu_w_sufficient_stats()
 
 compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats(
-  training,
+  exposure,
   test,
   cues,
+  category = "category",
+  response = "response",
   group,
-  category,
-  response,
   center.observations = T,
   scale.observations = T,
   pca.observations = F,
   pca.cutoff = 0.95,
   tau_scale,
   L_omega_scale,
-  debug
+  verbose = F
 )
 }
 \arguments{
+\item{exposure}{`tibble` or `data.frame` with the exposure data. Each row should be an observation of a category,
+and contain information about the category label, the cue values of the observation, and optionally grouping variables.}
+
 \item{test}{`tibble` or `data.frame` with the test data. Each row should be an observation, and contain information
 about the cue values of the test stimulus and the participant's response.}
 
-\item{group}{Column that contains information about which observations form a group. This could be individual
+\item{cues}{Names of columns with cue values.}
+
+\item{category}{Name of column that contains the category label for the exposure data. Can be `NULL` for unsupervised updating
+(not yet implemented). (default: "category")}
+
+\item{response}{Name of column that contains participants' responses for the test data. (default: "response")}
+
+\item{group}{Name of column that contains information about which observations form a group. This could be individual
 subjects or conditions in an experiment. The latter is more efficient, but should only be used if exposure is
 identical for every individual within the group. Test does not have to be identical for every individual within
-the same group. For example, one could group multiple groups of subjects that have received the same exposure
+the same group. For example, one can group multiple groups of subjects that have received the same exposure
 but were tested on different test tokens.}
 
 \item{center.observations}{Should the data be centered? (default: `TRUE`)}
@@ -42,11 +52,6 @@ but were tested on different test tokens.}
 \item{pca.cutoff}{Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 `pca.observation = FALSE`}
-
-\item{exposure}{`tibble` or `data.frame` with the exposure data. Each row should be an observation of a category,
-and contain information about the category label, the cue values of the observation, and optionally grouping variables.}
-
-\item{cue.labels}{Vector of characters with names of cue variables.}
 }
 \value{
 A list that is an \code{mvg_ibbu_input}.

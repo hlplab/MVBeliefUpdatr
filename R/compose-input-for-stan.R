@@ -1,9 +1,13 @@
 #' Transform and untransform cues by applying or undoing PCA, centering, and/or scaling.
 #'
-#' If the `transform` argument
+#' If the `transform.parameters` argument
 #' is specified, the transforms in that object will be applied. This can be useful when the goal is to transform one
-#' data set (e.g., test data) based on the statistics of the another data set (e.g.., training data). If no `transform`
-#' is specified, then the transformations specified by the `center`, `scale`, and `pca` flags will be applied.
+#' data set (e.g., test data) based on the statistics of the another data set (e.g.., training data). If no
+#' `transform.parameters` are specified, then the transformations specified by the `center`, `scale`, and `pca`
+#' flags will be applied. The transform and untransform functions can also return \emph{functions} that perform their
+#' actions for the specific cues. This can be helpful if one wants to store those functions. For example, the
+#' transform function can return both the transform and untransform functions necessary to perform the specified
+#' centering, scaling, and/or pca \emph{and} to undo those transformations.
 #'
 #' @param data `tibble` or `data.frame`.
 #' @param cues Vector of characters with names of cue variables.
@@ -175,6 +179,190 @@ untransform_cues = function(data, cues,
 }
 
 
+
+check_exposure_test_data <- function(data, cues, category, response, group, which.data = "the") {
+  assert_that(is_tibble(exposure) | is.data.frame(exposure))
+  assert_that(all(is_character(cues)),
+              msg = "cues must be a column name or vector of column names.")
+  assert_that(cues %in% names(data),
+              msg = paste("Cue column(s)", cues[which(cues %nin% names(data))], "not found in", which.data, "data." ))
+
+  if(!null(category)) {
+    assert_that(is_scalar_character(category),
+                msg = "category must be a column name.")
+    assert_that(category %in% names(data),
+                msg = paste("Category column", category, "not found in", which.data, "data."))
+
+    data %<>%
+      mutate_at(category, as.factor)
+  }
+
+  if (!is.null(response)) {
+    assert_that(is_scalar_character(response),
+                msg = "response must be a column name.")
+    assert_that(response %in% names(data),
+                msg = paste0("Response column", response, "not found in", which.data, "data."))
+
+    data %<>%
+      mutate_at(response, as.factor)
+  }
+
+  if (!is.null(group)) {
+    assert_that(group %in% names(data),
+                msg = paste0("Group column", group, "not found in", which.data,"data."))
+
+    data %<>%
+      mutate_at(group, as.factor)
+  }
+
+  if (verbose){
+    print("In exposure_test_data():")
+    print (data)
+  }
+
+
+  return(data)
+}
+
+
+
+get_test_counts <- function(training, test, cue, category, response, group, verbose) {
+  test_counts <- test %>%
+    as_tibble() %>%
+    group_by(!!! rlang::syms(group),
+             !!! rlang::syms(cue),
+             !! rlang::sym(response)) %>%
+    tally() %>%
+    pivot_wider(
+      names_from = !! response,
+      values_from = n,
+      values_fill = 0
+    ) %>%
+    ungroup()
+
+  if (verbose) {
+    print("In test_counts():")
+    print(test_counts)
+  }
+
+  return(test_counts)
+}
+
+
+
+#' Get sufficient statistics from a data set
+#'
+#' Get sufficient statistics from data. Calculates the means and covariance matrices for the specified cues for
+#' any combination of groups (optional) and categories, and returns them as a list.
+#'
+#' @param data `tibble` or `data.frame` with the data. Each row should be an observation of a category,
+#' and contain information about the category label, the cue values of the observation, and optionally grouping variables.
+#' @param test `tibble` or `data.frame` with the test data. Each row should be an observation, and contain information
+#' about the cue values of the test stimulus and the participant's response.
+#' @param cues Names of columns with cue values.
+#' @param category Name of column that contains the category label for the exposure data. Can be `NULL` for unsupervised updating
+#' (not yet implemented). (default: "category")
+#' @param group Name of column that contains information about which observations form a group. This could be individual
+#' subjects or conditions in an experiment. The latter is more efficient, but should only be used if exposure is
+#' identical for every individual within the group. Test does not have to be identical for every individual within
+#' the same group. For example, one can group multiple groups of subjects that have received the same exposure
+#' but were tested on different test tokens.
+#'
+#' @return A list.
+#'
+#' @seealso
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+get_sufficient_statistics_from_data <- function(exposure, cues, category, group, verbose = F, ...) {
+  exposure = check_exposure_test_data(exposure, cues, category, NULL, group, verbose)
+
+  if (length(cues) > 1) {
+    # Multivariate observations
+    exposure_ss <- exposure %>%
+      as_tibble() %>%
+      group_by(!!! rlang::syms(groupings)) %>%
+      summarise(
+        N = length(!! sym(cues[1])),
+        x_mean = list(colMeans(cbind(!!! rlang::syms(cues)))),
+        x_ss = list(get_sum_of_uncentered_squares(cbind(!!! rlang::syms(cues)), verbose = verbose))
+      )
+
+    if (verbose) {
+      print("In get_sufficient_statistics_from_data(), multivariate sum-of-uncentered-squares matrix:")
+      print(exposure_ss)
+    }
+
+
+    ## -------------------------------------------------------------------------------
+    # This is intended to map the elements of the tibble into arrays of the required
+    # dimensionality. THERE PROBABLY IS A MUCH MORE CONCISE AND PERHAPS MORE EFFICIENT
+    # WAY TO DO THIS. CHECK BACK.
+    #
+    # For helpful concise info on tibbles, see
+    #   https://cran.r-project.org/web/packages/tibble/vignettes/tibble.html
+    ## -------------------------------------------------------------------------------
+    cats = levels(exposure[[groupings[[1]]]])
+    subjs = levels(exposure[[groupings[[2]]]])
+    n_cat = length(cats)
+    n_subj = length(subjs)
+    n_cues = length(cues)
+
+    N = array(dim = c(n_cat,n_subj))
+    x_mean = array(dim = c(n_cat,n_subj,n_cues))
+    x_ss = array(dim = c(n_cat,n_subj,n_cues,n_cues))
+
+    for (i in 1:n_cat) {
+      for (j in 1:n_subj) {
+        temp.exposure_ss = exposure_ss %>%
+          ungroup() %>%
+          filter(!! rlang::sym(groupings[[1]]) == cats[i] &
+                   !! rlang::sym(groupings[[2]]) == subjs[j])
+
+        if (nrow(temp.exposure_ss) > 0) {
+          N[i,j] = temp.exposure_ss$N[[1]]
+          x_mean[i,j,] = temp.exposure_ss$x_mean[[1]]
+          x_ss[i,j,,] = temp.exposure_ss$x_ss[[1]]
+        } else {
+          N[i,j] = 0
+          x_mean[i,j,] = rep(0, length(cues))
+          x_ss[i,j,,] = diag(length(cues))
+        }
+      }
+    }
+
+    exposure_ss = list(N = N, x_mean = x_mean, x_ss = x_ss)
+  } else {
+    # Univariate observations
+    exposure_ss <-
+      exposure %>%
+      group_by(!!! rlang::syms(groupings)) %>%
+      summarise_at(cues, .funs=funs(...))
+
+    if (verbose) {
+      print("In get_sufficient_statistics_from_data(), univariate sum-of-squares matrix (prior to map application):")
+      print(exposure_ss)
+    }
+
+    stats <- names(list(...))
+
+    exposure_ss <- map(stats, ~ reshape2::acast(exposure_ss, as.list(groupings), value.var=.x)) %>%
+      set_names(stats)
+  }
+
+
+  if (debug) {
+    print("In get_sufficient_statistics_from_data(), sum-of-squares matrix (uncentered for multivariate data, centered for univariate data):")
+    print(exposure_ss)
+  }
+
+  return(exposure_ss)
+}
+
+
+
+
 #' Compose data for input to RStan
 #'
 #' Take exposure and test data as input, and prepare the data for input into an MVBeliefUpdatr Stan program.
@@ -183,11 +371,14 @@ untransform_cues = function(data, cues,
 #' and contain information about the category label, the cue values of the observation, and optionally grouping variables.
 #' @param test `tibble` or `data.frame` with the test data. Each row should be an observation, and contain information
 #' about the cue values of the test stimulus and the participant's response.
-#' @param cue.labels Vector of characters with names of cue variables.
-#' @param group Column that contains information about which observations form a group. This could be individual
+#' @param cues Names of columns with cue values.
+#' @param category Name of column that contains the category label for the exposure data. Can be `NULL` for unsupervised updating
+#' (not yet implemented). (default: "category")
+#' @param response Name of column that contains participants' responses for the test data. (default: "response")
+#' @param group Name of column that contains information about which observations form a group. This could be individual
 #' subjects or conditions in an experiment. The latter is more efficient, but should only be used if exposure is
 #' identical for every individual within the group. Test does not have to be identical for every individual within
-#' the same group. For example, one could group multiple groups of subjects that have received the same exposure
+#' the same group. For example, one can group multiple groups of subjects that have received the same exposure
 #' but were tested on different test tokens.
 #' @param center.observations Should the data be centered? (default: `TRUE`)
 #' @param scale.observations Should the data be standardized? (default: `TRUE`)
@@ -216,100 +407,91 @@ compose_data_to_infer_prior_kappanu_via_conjugate_ibbu_w_sufficient_stats = func
   # see also tidybayes::compose_data
 }
 
+
 #' @rdname compose_data
 #' @export
 compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
-  training, test,
-  cues, group, category, response,
+  exposure, test,
+  cues, category = "category", response = "response", group,
   center.observations = T, scale.observations = T, pca.observations = F, pca.cutoff = .95,
   tau_scale, L_omega_scale,
-  debug
+  verbose = F
 ) {
-  # in composing the data and fitting the model make sure that the model inherits
-  # variable names and values for e.g., the categories and cues, so that they can
-  # can be used in spread_draws and alike.
   error("This function is not yet implemented.")
+  exposure <- check_exposure_test_data(exposure, cues, category, NULL, group, verbose)
+  test <- check_exposure_test_data(test, cues, NULL, response, group, verbose)
 
-  # Make sure to hand through for the the test data, too, for which group / condition
-  # it was collected. SPECIFCIALLY, ANNOTATE Y_TEST WITH THE GROUP CHARACTER LABELS.
+  assert_that(all(levels(exposure[[category]]) == levels(test[[response]])),
+              msg = paste("category column", category, "in exposure and response colum", response, "must be factors
+              with the same levels in the same order in. Either the levels do not match, or they are not in the same
+              order."))
+  if (!is.null(group))
+    assert_that(all(levels(exposure[[group]]) == levels(test[[group]])),
+                msg = paste("group column", category, "must be a factor with the same levels in the same order in
+                          the exposure and test data. Either the levels do not match, or they are not in the same
+                          order."))
 
-  # see also tidybayes::compose_data
-    training <- check_training_data(training, category, group, debug)
-    test_counts <- test_counts(training, test, cue, category, response, group, debug)
+  test_counts <- get_test_counts(training, test, cue, category, response, group, verbose)
 
-    if (center.observations | scale.observations) {
-      means.training = training %>% ungroup() %>% select(cue) %>% summarise_at(cue, .funs = mean, na.rm = T)
-      sds.training = training %>% ungroup() %>% select(cue) %>% summarise_at(cue, .funs = sd, na.rm = T)
+  if (length(cues) > 1) {
+    data_list <- training %>%
+      get_sufficient_statistics_from_data(
+        list(category, group), cues = cues,
+        verbose = verbose,
+        x_mean = colMeans, N = length, x_ss = sum_uncentered_squares) %>%
+      within({
+        M <- dim(x_mean)[1]
+        L <- dim(x_mean)[2]
+        K <- length(cues)
 
-      ## -----------------------------------------------------------------------
-      # There must be a more elegant way to subtract the training means
-      ##  -----------------------------------------------------------------------
-      for (i in cue) {
-        # Note i here is an element of cue (i.e., a character)
-        training[[i]] = training[[i]] - means.training[[i]]
-        test_counts[[i]] = test_counts[[i]] - means.training[[i]]
+        m <- dim(xbar)[1]
+        l <- dim(xbar)[2]
 
-        if (scale.observations) {
-          training[[i]] = training[[i]] / sds.training[[i]]
-          test_counts[[i]] = test_counts[[i]] / sds.training[[i]]
-        }
-      }
-    }
+        x_test <- test_counts[[cues]]
+        y_test <- as.numeric(test_counts[[group]])
+        z_test_counts <-
+          test_counts %>%
+          select(.dots = levels(test[[response]])) %>%
+          as.matrix()
+        N_test <- nrow(x_test)
 
-    ## Category-by-subject/group matrices of sufficient stats
-    if (useMultivariateUpdating) {
-      # Multivariate input
-      data_list <- training %>%
-        training_ss_matrix(list(category, group), cue = cue,
-                           useMultivariateUpdating = useMultivariateUpdating, debug = debug,
-                           x_mean = colMeans, N = length, x_ss = sum_uncentered_squares) %>%
-        within({
-          M <- dim(x_mean)[1]
-          L <- dim(x_mean)[2]
-          K <- length(cue)
+        tau_scale <- tau_scale
+        L_omega_scale <- L_omega_scale
+      })
+  } else {
+    message("For univariate input, beliefupdatr is run with legacy parameter names. This might change in
+              the future.")
+    data_list <- training %>%
+      get_sufficient_statistics_from_data(
+        list(category, group), cues = cues,
+        verbose = verbose,
+        xbar = mean, n = length, xsd = sd) %>%
+      within({
+        m <- dim(xbar)[1]
+        l <- dim(xbar)[2]
 
-          x_test <- cbind(test_counts[,cue])
-          y_test <- as.numeric(test_counts[[group]])
-          z_test_counts <-
-            test_counts %>%
-            select(.dots=levels(training[[category]])) %>%
-            as.matrix()
+        m <- dim(xbar)[1]
+        l <- dim(xbar)[2]
 
-          N_test <- nrow(x_test)
+        x_test <- test_counts[[cues]]
+        y_test <- as.numeric(test_counts[[group]])
+        z_test_counts <-
+          test_counts %>%
+          select(.dots = levels(test[[response]])) %>%
+          as.matrix()
+        n_test <- length(x_test)
 
-          tau_scale <- tau_scale
-          L_omega_scale <- L_omega_scale
+        mu_0_sd <- 0
+        sigma_0_sd <- 0
+      })
+  }
 
-        })
-    } else {
-      # Univariate input
-      data_list <- training %>%
-        training_ss_matrix(list(category, group), cue = cue,
-                           useMultivariateUpdating = useMultivariateUpdating, debug = debug,
-                           xbar = mean, n = length, xsd = sd) %>%
-        within({
-          m <- dim(xbar)[1]
-          l <- dim(xbar)[2]
+  if (verbose) {
+    print("In compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats():")
+    print(data_list)
+  }
 
-          x_test <- test_counts[[cue]]
-          y_test <- as.numeric(test_counts[[group]])
-          z_test_counts <-
-            test_counts %>%
-            select(.dots=levels(training[[category]])) %>%
-            as.matrix()
-
-          n_test <- length(x_test)
-          mu_0_sd <- 0
-          sigma_0_sd <- 0
-        })
-    }
-
-    if (debug) {
-      print("In prepare_data_conj_suff_stats_infer_prior():")
-      print(data_list)
-    }
-
-    return(data_list)
+  return(data_list)
 }
 
 
