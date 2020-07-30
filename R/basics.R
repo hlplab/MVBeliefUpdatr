@@ -87,3 +87,183 @@ get_sum_of_uncentered_squares <- function(data, variables = NULL, verbose = F) {
 
   return(m)
 }
+
+
+
+#' Transform and untransform cues by applying or undoing PCA, centering, and/or scaling.
+#'
+#' If the `transform.parameters` argument
+#' is specified, the transforms in that object will be applied. This can be useful when the goal is to transform one
+#' data set (e.g., test data) based on the statistics of the another data set (e.g., exposure data). If no
+#' `transform.parameters` are specified, then the transformations specified by the `center`, `scale`, and `pca`
+#' flags will be applied. The transform and untransform functions can also return \emph{functions} that perform their
+#' actions for the specific cues. This can be helpful if one wants to store those functions. For example, the
+#' transform function can return both the transform and untransform functions necessary to perform the specified
+#' centering, scaling, and/or pca \emph{and} to undo those transformations.
+#'
+#' @param data `tibble` or `data.frame`.
+#' @param cues Vector of characters with names of cue variables.
+#' @param center,uncenter Should the data be (un)centered? (default: `TRUE` unless `pca = TRUE`)
+#' @param scale,unscale Should the data be (un)standardized? (default: `TRUE` unless `pca = TRUE`)
+#' @param pca,unpca Should the data be transformed into/back from orthogonal principal components? If `TRUE`
+#' then \code{center} and \code{scale} are default to `FALSE`. If PCA is applied, it is applied after
+#' centering and/or scaling. (default: `FALSE`)
+#' @param transform.parameters List of transforms (default: `NULL`)
+#' @param return.transformed.data,return.transformed.data Should the (un)transformed data be returned? (default: `TRUE`)
+#' @param return.transform.parameters Should the list of transforms be returned? (default: `FALSE`)
+#' @param return.transform.function,return.transform.function Should a function that applies the (un)transform be
+#' returned? (default: `FALSE`)
+#'
+#' @return By default a \code{data.frame}. If `return.transform.parameters = TRUE`, a list of parameters. If
+#' `return.transform.function = TRUE` a function. If more than one of these flags is `TRUE` then a list in which
+#' the data element has name "data", the transform parameters have name "transform.parameters" and the transform
+#' function has the name "transform.function".
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname transform_cues
+#' @export
+#'
+transform_cues = function(data, cues,
+                          center =  if (pca) F else T, scale = if (pca) F else T, pca = F,
+                          transform.parameters = NULL,
+                          return.transformed.data = T, return.transform.parameters = F,
+                          return.transform.function = F, return.untransform.function = F
+) {
+  assert_that(is.data.frame(data) | is_tibble(data))
+  assert_that(is.null(transform.parameters) | is.list(transform.parameters))
+
+  if (is.null(transform.parameters)) {
+    transform.parameters = list()
+
+    if (center) {
+      transform.parameters[["center"]] = data %>%
+        select(!!! rlang::syms(cues)) %>%
+        summarise_all(mean)
+    }
+
+    if (scale) {
+      transform.parameters[["scale"]] = data %>%
+        select(!!! rlang::syms(cues)) %>%
+        summarise_all(sd)
+    }
+
+    if (pca) {
+      pca <- data %>%
+        select(!!! rlang::syms(cues)) %>%
+        prcomp(center = center, scale. = scale)
+      transform.parameters[["pca"]] = pca
+    }
+  }
+
+  if (center) {
+    newcues = data %>%
+      select(!!! rlang::syms(cues)) %>%
+      sweep(2, as.numeric(transform.parameters[["center"]]), FUN = "-")
+
+    data %<>%
+      select(-all_of(cues)) %>%
+      cbind(newcues)
+  }
+
+  if (scale) {
+    newcues = data %>%
+      select(!!! rlang::syms(cues)) %>%
+      sweep(2, as.numeric(transform.parameters[["scale"]]), FUN = "/")
+
+    data %<>%
+      select(-all_of(cues)) %>%
+      cbind(newcues)
+  }
+
+  if (pca) {
+    data %<>%
+      cbind(predict(transform.parameters[["pca"]], data))
+  }
+
+
+  transform.function = if (!return.transform.function) NULL else {
+    function(data,
+             center = center, scale = scale, pca = pca) {
+      cues = cues
+
+      transform_cues(data, cues, center = center, scale = scale, pca = pca,
+                     transform.parameters = transform.parameters,
+                     return.transformed.data = T, return.transform.parameters = F, return.transform.function = F)
+
+    }
+  }
+
+  untransform.function = if (!return.untransform.function) NULL else {
+    untransform_cues(data, cues, uncenter = center, unscale = scale, unpca = pca,
+                     transform.parameters = transform.parameters,
+                     return.untransformed.data = F, return.untransform.function = T)
+  }
+
+  if (return.transformed.data & !return.transform.parameters & !return.transform.function & !return.untransform.function) return(data) else
+    if (!return.transformed.data & return.transform.parameters & !return.transform.function & !return.untransform.function) return(transform.parameters) else
+      if (!return.transformed.data & !return.transform.parameters & return.transform.function & !return.untransform.function) return(transform.function) else
+        if (!return.transformed.data & !return.transform.parameters & !return.transform.function & return.untransform.function) return(untransform.function) else
+          return(list(data = data, transform.parameters = transform.parameters, transform.function = transform.function, untransform.function = untransform.function))
+}
+
+
+#' @rdname transform_cues
+#' @export
+untransform_cues = function(data, cues,
+                            uncenter = NULL, unscale = NULL, unpca = NULL,
+                            transform.parameters = NULL,
+                            return.untransformed.data = T, return.untransform.function = F
+) {
+  assert_that(is.data.frame(data) | is_tibble(data))
+  assert_that(is.list(transform.parameters))
+
+  # By default untransform all transformations available in transform object
+  if (is.null(unpca)) pca = !is.null(transform.parameters[["pca"]])
+  if (is.null(uncenter)) center = !is.null(transform.parameters[["center"]])
+  if (is.null(unscale)) scale = !is.null(transform.parameters[["center"]])
+
+  if (unpca) {
+    stop("PCA untransform not yet implemented!")
+    data %<>%
+      cbind(predict(transform.parameters[["pca"]], data))
+  }
+
+  if (unscale) {
+    newcues = data %>%
+      select(!!! rlang::syms(cues)) %>%
+      sweep(2, as.numeric(transform.parameters[["scale"]]), FUN = "*")
+
+    data %<>%
+      select(-all_of(cues)) %>%
+      cbind(newcues)
+  }
+
+  if (uncenter) {
+    newcues = data %>%
+      select(!!! rlang::syms(cues)) %>%
+      sweep(2, as.numeric(transform.parameters[["center"]]), FUN = "+")
+
+    data %<>%
+      select(-all_of(cues)) %>%
+      cbind(newcues)
+  }
+
+  untransform.function = if (!return.transform.function) NULL else {
+    function(data,
+             uncenter = uncenter, unscale = unscale, unpca = unpca) {
+      cues = cues
+
+      untransform_cues(data, cues, uncenter = uncenter, unscale = unscale, unpca = unpca,
+                       transform.parameters = transform.parameters,
+                       return.untransformed.data = T, return.untransform.function = F)
+
+    }
+  }
+
+  if (return.untransformed.data & !return.untransform.function) return(data) else
+    if (!return.untransformed.data & return.untransform.function) return(untransform.function) else
+      return(list(data = data, untransform.function = untransform.function))
+}
