@@ -18,7 +18,7 @@ infer_prior_beliefs <- function(
   cues, category, response, group, group.unique,
   center.observations = TRUE, scale.observations = TRUE, pca.observations = FALSE, pca.cutoff = 1,
   tau_scale = 10, L_omega_scale = 1,
-  useMultivariateUpdating = if(length(cue) > 1) TRUE else FALSE,
+  useMultivariateUpdating = if(length(cues) > 1) TRUE else FALSE,
   sample = TRUE, verbose = FALSE,
   ...) {
   data_list <- compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats(
@@ -29,7 +29,6 @@ infer_prior_beliefs <- function(
       response = response,
       group = group,
       group.unique = group.unique,
-
       center.observations = center.observations,
       scale.observations = scale.observations,
       pca.observations = pca.observations,
