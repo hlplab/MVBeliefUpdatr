@@ -21,7 +21,7 @@ infer_prior_beliefs <- function(
   useMultivariateUpdating = if(length(cue) > 1) TRUE else FALSE,
   sample = TRUE, verbose = FALSE,
   ...) {
-  data_list <- prepare_data_conj_suff_stats_infer_prior(
+  data_list <- compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats(
       exposure = exposure,
       test = test,
       cues = cues,
