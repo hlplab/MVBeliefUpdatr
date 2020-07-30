@@ -187,7 +187,7 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
   assert_that(cues %in% names(data),
               msg = paste("Cue column(s)", cues[which(cues %nin% names(data))], "not found in", which.data, "data." ))
 
-  if(!null(category)) {
+  if(!is.null(category)) {
     assert_that(is_scalar_character(category),
                 msg = "category must be a column name.")
     assert_that(category %in% names(data),
