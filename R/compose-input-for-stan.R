@@ -365,10 +365,9 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       })
   }
 
-
-  # dimnames(data_list$z_test_counts) <- list(
-  #   test_counts %>% transmute(names = paste(!! syms(cues), sep = ",")) %>% pull(names),
-  #   levels(test[[response]]))
+  dimnames(data_list$z_test_counts) <- list(
+    test_counts %>% transmute(names = paste(!!! syms(cues), sep = ",")) %>% pull(names),
+    levels(test[[response]]))
   attr(data_list$y_test, which <- "levels") = levels(test[[group]])
 
   if (verbose) {
