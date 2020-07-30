@@ -226,7 +226,7 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
 
 
 
-get_test_counts <- function(training, test, cues, category, response, group, verbose) {
+get_test_counts <- function(test, cues, category, response, group, verbose = F) {
   test_counts <- test %>%
     as_tibble() %>%
     group_by(!! sym(group),
@@ -394,21 +394,6 @@ get_sufficient_statistics_from_data <- function(exposure, cues, category, group,
 #' TBD
 #' @rdname compose_data
 #' @export
-compose_data_to_infer_prior_kappanu_via_conjugate_ibbu_w_sufficient_stats = function() {
-  # in composing the data and fitting the model make sure that the model inherits
-  # variable names and values for e.g., the categories and cues, so that they can
-  # can be used in spread_draws and alike.
-  message("This function is not doing anything yet.")
-
-  # Make sure to hand through for the the test data, too, for which group / condition
-  # it was collected. SPECIFCIALLY, ANNOTATE Y_TEST WITH THE GROUP CHARACTER LABELS.
-
-  # see also tidybayes::compose_data
-}
-
-
-#' @rdname compose_data
-#' @export
 compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   exposure, test,
   cues, category = "category", response = "response", group = NULL,
@@ -443,7 +428,13 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
                           the exposure and test data. Either the levels do not match, or they are not in the same
                           order."))
 
-  test_counts <- get_test_counts(training, test, cues, category, response, group, verbose)
+  test_counts <- get_test_counts(
+    test = test,
+    cues = cues,
+    category = category,
+    response = response,
+    group = group,
+    verbose = verbose)
 
   if (length(cues) > 1) {
     data_list <- training %>%
@@ -520,3 +511,18 @@ attach_stanfit_input_data = function(stanfit, input) {
   return(stanfit)
 }
 
+
+
+#' @rdname compose_data
+#' @export
+compose_data_to_infer_prior_kappanu_via_conjugate_ibbu_w_sufficient_stats = function() {
+  # in composing the data and fitting the model make sure that the model inherits
+  # variable names and values for e.g., the categories and cues, so that they can
+  # can be used in spread_draws and alike.
+  message("This function is not doing anything yet.")
+
+  # Make sure to hand through for the the test data, too, for which group / condition
+  # it was collected. SPECIFCIALLY, ANNOTATE Y_TEST WITH THE GROUP CHARACTER LABELS.
+
+  # see also tidybayes::compose_data
+}
