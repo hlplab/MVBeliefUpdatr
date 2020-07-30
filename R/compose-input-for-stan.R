@@ -294,7 +294,6 @@ get_sufficient_statistics_from_data <- function(exposure, cues, category, group,
       print(exposure_ss)
     }
 
-
     ## -------------------------------------------------------------------------------
     # This is intended to map the elements of the tibble into arrays of the required
     # dimensionality. THERE PROBABLY IS A MUCH MORE CONCISE AND PERHAPS MORE EFFICIENT
@@ -389,7 +388,7 @@ get_sufficient_statistics_from_data <- function(exposure, cues, category, group,
 #'
 #' @return A list that is an \code{mvg_ibbu_input}.
 #'
-#' @seealso \code{link{is.mvg_ibbu_input}}
+#' @seealso \code{\link{is.mvg_ibbu_input}}
 #' @keywords TBD
 #' @examples
 #' TBD
@@ -417,7 +416,6 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   tau_scale, L_omega_scale,
   verbose = F
 ) {
-  error("This function is not yet implemented.")
   exposure <- check_exposure_test_data(exposure, cues, category, NULL, group, verbose)
   test <- check_exposure_test_data(test, cues, NULL, response, group, verbose)
 

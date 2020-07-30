@@ -63,6 +63,6 @@ Take exposure and test data as input, and prepare the data for input into an MVB
 TBD
 }
 \seealso{
-\code{link{is.mvg_ibbu_input}}
+\code{\link{is.mvg_ibbu_input}}
 }
 \keyword{TBD}
