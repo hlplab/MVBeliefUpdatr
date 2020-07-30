@@ -4,6 +4,12 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
               msg = "cues must be a column name or vector of column names.")
   assert_that(all(cues %in% names(data)),
               msg = paste("Cue column(s)", cues[which(cues %nin% names(data))], "not found in", which.data, "data." ))
+  assert_that(group %in% names(data),
+              msg = paste("Group column", group, "not found in", which.data,"data."))
+
+  data %<>%
+    drop_na(cues, group) %>%
+    mutate_at(group, as.factor)
 
   if(!is.null(category)) {
     assert_that(is_scalar_character(category),
@@ -12,7 +18,8 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
                 msg = paste("Category column", category, "not found in", which.data, "data."))
 
     data %<>%
-      mutate_at(category, as.factor)
+      mutate_at(category, as.factor) %>%
+      drop_na(category)
   }
 
   if (!is.null(response)) {
@@ -22,22 +29,14 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
                 msg = paste("Response column", response, "not found in", which.data, "data."))
 
     data %<>%
-      mutate_at(response, as.factor)
-  }
-
-  if (!is.null(group)) {
-    assert_that(group %in% names(data),
-                msg = paste("Group column", group, "not found in", which.data,"data."))
-
-    data %<>%
-      mutate_at(group, as.factor)
+      mutate_at(response, as.factor) %>%
+      drop_na(response)
   }
 
   if (verbose){
     print("In check_exposure_test_data():")
     print (data)
   }
-
 
   return(data)
 }
@@ -47,9 +46,10 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
 get_test_counts <- function(test, cues, category, response, group, verbose = F) {
   test_counts <- test %>%
     as_tibble() %>%
-    group_by(!!! syms(cues),
-             !! sym(response)) %>%
-    { if (!is.null(group)) group_by(., !! sym(group), .add = T) } %>%
+    group_by(
+      !!! syms(cues),
+      !! sym(response),
+      !! sym(group)) %>%
     tally() %>%
     pivot_wider(
       names_from = !! response,
@@ -104,8 +104,7 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
 
   data_ss <- data %>%
     as_tibble() %>%
-    group_by(!!! sym(category)) %>%
-    { if (!is.null(group)) group_by(., !! sym(group), .add = T) }
+    group_by(!!! sym(category), !! sym(group))
 
   if (length(cues) > 1) {
     # Multivariate observations
@@ -165,7 +164,7 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
   } else {
     # Univariate observations
     data_ss %<>%
-      summarise_at(cues, .funs=funs(...))
+      summarise_at(cues, .funs = list(...))
 
     if (verbose) {
       print("In get_sufficient_statistics_from_data(), univariate sum-of-squares matrix (prior to map application):")
@@ -195,19 +194,25 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
 #'
 #' Take exposure and test data as input, and prepare the data for input into an MVBeliefUpdatr Stan program.
 #'
+#' It is important to use \code{group} to identify individuals that had a specific exposure (or no exposure at all)
+#' and specific test trials. You should \emph{not} use \code{group} to identify exposure conditions. Setting \code{group} to an exposure condition
+#' results in an exposure that concatenates the exposure observations from all subjects in that condition. Instead, use
+#' \code{group.unique} to identify groups with identical exposure. This will correctly use only one unique instance of the
+#' observations that any level of \code{group} receives during exposure.
+#'
 #' @param exposure `tibble` or `data.frame` with the exposure data. Each row should be an observation of a category,
 #' and contain information about the category label, the cue values of the observation, and optionally grouping variables.
 #' @param test `tibble` or `data.frame` with the test data. Each row should be an observation, and contain information
 #' about the cue values of the test stimulus and the participant's response.
-#' @param cues Names of columns with cue values.
-#' @param category Name of column that contains the category label for the exposure data. Can be `NULL` for unsupervised updating
+#' @param cues Names of columns with cue values. Must exist in both exposure and test data.
+#' @param category Name of column in exposure data that contains the category label. Can be `NULL` for unsupervised updating
 #' (not yet implemented). (default: "category")
-#' @param response Name of column that contains participants' responses for the test data. (default: "response")
-#' @param group Name of column that contains information about which observations form a group. This could be individual
-#' subjects or conditions in an experiment. The latter is more efficient, but should only be used if exposure is
-#' identical for every individual within the group. Test does not have to be identical for every individual within
-#' the same group. For example, one can group multiple groups of subjects that have received the same exposure
-#' but were tested on different test tokens.
+#' @param response Name of column in test data that contains participants' responses. (default: "response")
+#' @param group Name of column that contains information about which observations form a group. Typically, this is
+#' a variable identifying subjects/participants. Must exist in both exposure and test data. (default: "group")
+#' @param group.unique Name of column that uniquely identifies each group with identical exposure. This could be a
+#' variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
+#' substantially more efficient if many groups share the same exposure.
 #' @param center.observations Should the data be centered? (default: `TRUE`)
 #' @param scale.observations Should the data be standardized? (default: `TRUE`)
 #' @param pca.observations Should the data be transformed into orthogonal principal components? (default: `FALSE`)
@@ -227,7 +232,7 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
 #' @export
 compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   exposure, test,
-  cues, category = "category", response = "response", group = NULL,
+  cues, category = "category", response = "response", group = "group", group.unique,
   center.observations = T, scale.observations = T, pca.observations = F, pca.cutoff = 1,
   tau_scale = 0, L_omega_scale = 0,
   verbose = F
@@ -240,6 +245,27 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     group = group,
     which.data = "exposure",
     verbose = verbose)
+
+  if (!missing(group.unique)) {
+    assert_that(group.unique %in% names(exposure),
+                msg = paste("Column for group.unique ", group.unique, "not found in exposure data."))
+    message(paste0("The argument group.unique was specified (", group.unique, ")."))
+    message("Collapsing *exposure* observations to unique values of group.unique by discarding the data from
+            all but the first group member. This means that each unique exposure condition will only be counted
+            once. All test observations are still counted, but aggregated for each unique value of group.unique.")
+
+    exposure %<>%
+      mutate_at(group.unique, as.factor) %>%
+      group_by(!! sym(group.unique), !! sym(category), !!! syms(cues)) %>%
+      filter(!! sym(group) == unique(!! sym(group))[1]) %>%
+      ungroup()
+
+    group = group.unique
+  }
+
+  exposure %<>%
+    select(c(group, cue, category))
+
   test <- check_exposure_test_data(
     data = test,
     cues = cues,
@@ -247,18 +273,18 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     response = response,
     group = group,
     which.data = "test",
-    verbose = verbose)
+    verbose = verbose) %>%
+    select(c(group, cue, response))
 
   assert_that(all(levels(exposure[[category]]) == levels(test[[response]])),
               msg = paste("category variable", category, "in exposure and response colum", response, "must be factors
               with the same levels in the same order in. Either the levels do not match, or they are not in the same
               order."))
-  if (!is.null(group))
-    assert_that(all(levels(exposure[[group]]) %in% levels(test[[group]])),
-                msg = paste("All levels of the group variable", group, "found in exposure must also be present in test."))
+  assert_that(all(levels(exposure[[group]]) %in% levels(test[[group]])),
+              msg = paste("All levels of the grouping variable", group, "found in exposure must also be present in test."))
   if (!all(levels(test[[group]]) %in% levels(exposure[[group]])))
-    message(paste("Not all levels of group variable", group, "that are present in test were found in exposure. Creating
-                  0 exposure data for those groups."))
+    message(paste("Not all levels of the grouping variable", group, "that are present in test were found in exposure.
+    Creating 0 exposure data for those groups."))
   exposure %<>%
     mutate_at(group, ~ factor(.x, levels = levels(test[[group]])))
 
@@ -340,7 +366,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   }
 
   dimnames(data_list$z_test_counts) <- list(
-    test_counts %>% transmute(names = paste(!!! syms(cues), sep = ",")) %>% pull(names),
+    test_counts %>% transmute(names = paste(!! syms(cues), sep = ",")) %>% pull(names),
     levels(test[[response]]))
   attr(data_list$y_test, which <- "levels") = levels(test[[group]])
 
@@ -361,23 +387,10 @@ attach_stanfit_input_data = function(stanfit, input) {
               msg = "input is not an acceptable input data.")
 
   message("Currently this function is only checking whether input is a list. Use at your own risk.")
-  stanfit@input = input
+  stanfit@input_data = input
 
   return(stanfit)
 }
 
 
 
-#' @rdname compose_data
-#' @export
-compose_data_to_infer_prior_kappanu_via_conjugate_ibbu_w_sufficient_stats = function() {
-  # in composing the data and fitting the model make sure that the model inherits
-  # variable names and values for e.g., the categories and cues, so that they can
-  # can be used in spread_draws and alike.
-  message("This function is not doing anything yet.")
-
-  # Make sure to hand through for the the test data, too, for which group / condition
-  # it was collected. SPECIFCIALLY, ANNOTATE Y_TEST WITH THE GROUP CHARACTER LABELS.
-
-  # see also tidybayes::compose_data
-}

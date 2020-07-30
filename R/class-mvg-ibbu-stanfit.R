@@ -4,7 +4,7 @@ new_stanfit_class_name = "mvg_ibbu_stanfit"
 acceptable_stan_codes = c("dev_conj_id_lapsing_sufficient_stats_fit_mv")
 
 setClass(new_stanfit_class_name,
-         slots = c(input = "list"),
+         slots = c(input_data = "list", labels = "list"),
          contains = "stanfit",
          package = "MVBeliefUpdatr")
 
@@ -48,7 +48,6 @@ as.mvg_ibbu_stanfit = function(stanfit, input) {
 #' @examples
 #' TBD
 #' @export
-#'
 is.mvg_ibbu_stanfit = function(x) {
   if (all(c(new_stanfit_class_name, "stanfit")  %in% class(x)))
     return(TRUE) else return(FALSE)

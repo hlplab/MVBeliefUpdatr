@@ -2,7 +2,6 @@ IMPORTANT
 
 + make plot that checks assumptions of NIW updating: category distribution and covariance across talkers.
 
-+ Look at brms::make_standata and brms::stan_data to see how brms makes and attaches data to brms.fit objects. Make corresponding functions standata and make_standata!
 + then figure out to add information about input to that new class
 ++ add exposure mean in more accessible format. Update get_exposure_mean to read in that mean
 ++ add exposure covariance (not uncentered squares) in accessible format. Updated get_expsoure_covariance to read in the information
@@ -10,9 +9,6 @@ IMPORTANT
 ++ add information about groups and categories (number and order of levels)
 +++ update get_category_levels(), get_group_level(), and get_original_levels().
 +++ Test that everything still works
-++ add information about centering, standardization, and PCA to the object
-++ write functions to back-transform cues into original space
-++ add option to back-transform cues to plotting functions.
 
 
 EFFICIENCY IMPROVEMENTS
