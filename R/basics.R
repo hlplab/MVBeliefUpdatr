@@ -64,7 +64,7 @@ cov2tau = function(v) {
 #' @examples
 #' TBD
 #' @export
-get_sum_of_uncentered_squares <- function(data, variables, verbose = F) {
+get_sum_of_uncentered_squares <- function(data, variables = NULL, verbose = F) {
   assert_that(is.tibble(data) | is.data.frame(data) | is.matrix(data))
   if (is.tibble(data) | is.data.frame(data))
     assert_that(variables %in% data,

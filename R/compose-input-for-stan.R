@@ -275,12 +275,18 @@ get_test_counts <- function(test, cues, category, response, group, verbose = F) 
 #' @examples
 #' TBD
 #' @export
-get_sufficient_statistics_from_data <- function(exposure, cues, category, group, verbose = F, ...) {
-  exposure = check_exposure_test_data(exposure, cues, category, NULL, group, verbose)
+get_sufficient_statistics_from_data <- function(data, cues, category, group, verbose = F, ...) {
+  data = check_exposure_test_data(
+    data = data,
+    cues = cues,
+    category = category,
+    response = NULL,
+    group = group,
+    verbose = verbose)
 
   if (length(cues) > 1) {
     # Multivariate observations
-    exposure_ss <- exposure %>%
+    data_ss <- data %>%
       as_tibble() %>%
       group_by(!!! rlang::syms(groupings)) %>%
       summarise(
@@ -291,7 +297,7 @@ get_sufficient_statistics_from_data <- function(exposure, cues, category, group,
 
     if (verbose) {
       print("In get_sufficient_statistics_from_data(), multivariate sum-of-uncentered-squares matrix:")
-      print(exposure_ss)
+      print(data_ss)
     }
 
     ## -------------------------------------------------------------------------------
@@ -302,8 +308,8 @@ get_sufficient_statistics_from_data <- function(exposure, cues, category, group,
     # For helpful concise info on tibbles, see
     #   https://cran.r-project.org/web/packages/tibble/vignettes/tibble.html
     ## -------------------------------------------------------------------------------
-    cats = levels(exposure[[groupings[[1]]]])
-    subjs = levels(exposure[[groupings[[2]]]])
+    cats = levels(data[[groupings[[1]]]])
+    subjs = levels(data[[groupings[[2]]]])
     n_cat = length(cats)
     n_subj = length(subjs)
     n_cues = length(cues)
@@ -314,15 +320,15 @@ get_sufficient_statistics_from_data <- function(exposure, cues, category, group,
 
     for (i in 1:n_cat) {
       for (j in 1:n_subj) {
-        temp.exposure_ss = exposure_ss %>%
+        temp.data_ss = data_ss %>%
           ungroup() %>%
           filter(!! rlang::sym(groupings[[1]]) == cats[i] &
                    !! rlang::sym(groupings[[2]]) == subjs[j])
 
-        if (nrow(temp.exposure_ss) > 0) {
-          N[i,j] = temp.exposure_ss$N[[1]]
-          x_mean[i,j,] = temp.exposure_ss$x_mean[[1]]
-          x_ss[i,j,,] = temp.exposure_ss$x_ss[[1]]
+        if (nrow(temp.data_ss) > 0) {
+          N[i,j] = temp.data_ss$N[[1]]
+          x_mean[i,j,] = temp.data_ss$x_mean[[1]]
+          x_ss[i,j,,] = temp.data_ss$x_ss[[1]]
         } else {
           N[i,j] = 0
           x_mean[i,j,] = rep(0, length(cues))
@@ -331,32 +337,33 @@ get_sufficient_statistics_from_data <- function(exposure, cues, category, group,
       }
     }
 
-    exposure_ss = list(N = N, x_mean = x_mean, x_ss = x_ss)
+    data_ss = list(N = N, x_mean = x_mean, x_ss = x_ss)
   } else {
     # Univariate observations
-    exposure_ss <-
-      exposure %>%
+    data_ss <-
+      data %>%
       group_by(!!! rlang::syms(groupings)) %>%
       summarise_at(cues, .funs=funs(...))
 
     if (verbose) {
       print("In get_sufficient_statistics_from_data(), univariate sum-of-squares matrix (prior to map application):")
-      print(exposure_ss)
+      print(data_ss)
     }
 
     stats <- names(list(...))
 
-    exposure_ss <- map(stats, ~ reshape2::acast(exposure_ss, as.list(groupings), value.var=.x)) %>%
+    data_ss <- map(stats, ~ reshape2::acast(data_ss, as.list(groupings), value.var=.x)) %>%
       set_names(stats)
   }
 
 
   if (debug) {
-    print("In get_sufficient_statistics_from_data(), sum-of-squares matrix (uncentered for multivariate data, centered for univariate data):")
-    print(exposure_ss)
+    print("In get_sufficient_statistics_from_data(), sum-of-squares matrix (uncentered for multivariate data,
+          centered for univariate data):")
+    print(data_ss)
   }
 
-  return(exposure_ss)
+  return(data_ss)
 }
 
 
