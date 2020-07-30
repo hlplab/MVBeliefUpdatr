@@ -57,10 +57,14 @@ the data element has name "data", the transform parameters have name "transform.
 function has the name "transform.function".
 }
 \description{
-If the `transform` argument
+If the `transform.parameters` argument
 is specified, the transforms in that object will be applied. This can be useful when the goal is to transform one
-data set (e.g., test data) based on the statistics of the another data set (e.g.., training data). If no `transform`
-is specified, then the transformations specified by the `center`, `scale`, and `pca` flags will be applied.
+data set (e.g., test data) based on the statistics of the another data set (e.g.., training data). If no
+`transform.parameters` are specified, then the transformations specified by the `center`, `scale`, and `pca`
+flags will be applied. The transform and untransform functions can also return \emph{functions} that perform their
+actions for the specific cues. This can be helpful if one wants to store those functions. For example, the
+transform function can return both the transform and untransform functions necessary to perform the specified
+centering, scaling, and/or pca \emph{and} to undo those transformations.
 }
 \examples{
 TBD
