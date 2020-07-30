@@ -264,7 +264,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   }
 
   exposure %<>%
-    select(c(group, cue, category))
+    select(c(group, cues, category))
 
   test <- check_exposure_test_data(
     data = test,
@@ -274,7 +274,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     group = group,
     which.data = "test",
     verbose = verbose) %>%
-    select(c(group, cue, response))
+    select(c(group, cues, response))
 
   assert_that(all(levels(exposure[[category]]) == levels(test[[response]])),
               msg = paste("category variable", category, "in exposure and response colum", response, "must be factors
