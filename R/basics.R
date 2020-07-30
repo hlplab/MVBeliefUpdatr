@@ -47,48 +47,6 @@ cov2tau = function(v) {
   sqrt(diag(v))
 }
 
-#' Get sum of uncentered squares
-#'
-#' Get sum of uncentered squares. This quantity is a sufficient statistic for, for example, multivariate Gaussian
-#' belief-updating under an Normal-Inverse-Wishart prior.
-#'
-#' @param data A `tibble`, `data.frame`, or `matrix`. If data is a `tibble` or `data.frame`, the columns for
-#' specified variables are extracted and (together) converted into a matrix with as many colums as there are
-#' variables.
-#' @param variables Only required if data is not already a `matrix`.
-#'
-#' @return A matrix.
-#'
-#' @seealso
-#' @keywords TBD
-#' @examples
-#' TBD
-#' @export
-get_sum_of_uncentered_squares <- function(data, variables = NULL, verbose = F) {
-  assert_that(is.tibble(data) | is.data.frame(data) | is.matrix(data))
-  if (is.tibble(data) | is.data.frame(data))
-    assert_that(variables %in% data,
-                msg = paste("Variable column(s)", variables[which(variables %nin% names(data))], "not found in data."))
-
-  data.matrix = if (is_tibble(data) | is.data.frame(data))
-    data[[variables]] %>%
-      as.matrix() else data
-
-  k = dim(data.matrix)[2]
-  m = matrix(ncol = k, nrow = k)
-
-  for (i in 1:k) {
-    m[i,i] = sum(data.matrix[,i]**2)
-    if (i < k) for (j in (i + 1):k) {
-      m[j,i] = sum(data.matrix[,i] * data.matrix[,j])
-      m[i,j] = m[j,i]
-    }
-  }
-
-  return(m)
-}
-
-
 
 #' Transform and untransform cues by applying or undoing PCA, centering, and/or scaling.
 #'
@@ -271,3 +229,46 @@ untransform_cues = function(data, cues,
     if (!return.untransformed.data & return.untransform.function) return(untransform.function) else
       return(list(data = data, untransform.function = untransform.function))
 }
+
+
+#' Get sum of uncentered squares
+#'
+#' Get sum of uncentered squares. This quantity is a sufficient statistic for, for example, multivariate Gaussian
+#' belief-updating under an Normal-Inverse-Wishart prior.
+#'
+#' @param data A `tibble`, `data.frame`, or `matrix`. If data is a `tibble` or `data.frame`, the columns for
+#' specified variables are extracted and (together) converted into a matrix with as many colums as there are
+#' variables.
+#' @param variables Only required if data is not already a `matrix`.
+#'
+#' @return A matrix.
+#'
+#' @seealso
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+get_sum_of_uncentered_squares <- function(data, variables = NULL, verbose = F) {
+  assert_that(is_tibble(data) | is.data.frame(data) | is.matrix(data))
+  if (is_tibble(data) | is.data.frame(data))
+    assert_that(variables %in% data,
+                msg = paste("Variable column(s)", variables[which(variables %nin% names(data))], "not found in data."))
+
+  data.matrix = if (is_tibble(data) | is.data.frame(data))
+    data[[variables]] %>%
+    as.matrix() else data
+
+  k = dim(data.matrix)[2]
+  m = matrix(ncol = k, nrow = k)
+
+  for (i in 1:k) {
+    m[i,i] = sum(data.matrix[,i]**2)
+    if (i < k) for (j in (i + 1):k) {
+      m[j,i] = sum(data.matrix[,i] * data.matrix[,j])
+      m[i,j] = m[j,i]
+    }
+  }
+
+  return(m)
+}
+

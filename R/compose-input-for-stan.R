@@ -2,7 +2,7 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
   assert_that(is_tibble(data) | is.data.frame(data))
   assert_that(all(is_character(cues)),
               msg = "cues must be a column name or vector of column names.")
-  assert_that(cues %in% names(data),
+  assert_that(all(cues %in% names(data)),
               msg = paste("Cue column(s)", cues[which(cues %nin% names(data))], "not found in", which.data, "data." ))
 
   if(!is.null(category)) {
@@ -34,7 +34,7 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
   }
 
   if (verbose){
-    print("In exposure_test_data():")
+    print("In check_exposure_test_data():")
     print (data)
   }
 
@@ -102,15 +102,18 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
     group = group,
     verbose = verbose)
 
+  data_ss <- data %>%
+    as_tibble() %>%
+    group_by(!!! sym(category)) %>%
+    { if (!is.null(group)) group_by(., !! sym(group), .add = T) }
+
   if (length(cues) > 1) {
     # Multivariate observations
-    data_ss <- data %>%
-      as_tibble() %>%
-      group_by(!!! rlang::syms(groupings)) %>%
+    data_ss %<>%
       summarise(
         N = length(!! sym(cues[1])),
-        x_mean = list(colMeans(cbind(!!! rlang::syms(cues)))),
-        x_ss = list(get_sum_of_uncentered_squares(cbind(!!! rlang::syms(cues)), verbose = verbose))
+        x_mean = list(colMeans(cbind(!!! syms(cues)))),
+        x_ss = list(get_sum_of_uncentered_squares(cbind(!!! syms(cues)), verbose = verbose))
       )
 
     if (verbose) {
@@ -126,10 +129,10 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
     # For helpful concise info on tibbles, see
     #   https://cran.r-project.org/web/packages/tibble/vignettes/tibble.html
     ## -------------------------------------------------------------------------------
-    cats = levels(data[[groupings[[1]]]])
-    subjs = levels(data[[groupings[[2]]]])
+    cats = levels(data[[category]])
+    groups = levels(data[[group]])
     n_cat = length(cats)
-    n_subj = length(subjs)
+    n_subj = length(groups)
     n_cues = length(cues)
 
     N = array(dim = c(n_cat,n_subj))
@@ -140,8 +143,8 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
       for (j in 1:n_subj) {
         temp.data_ss = data_ss %>%
           ungroup() %>%
-          filter(!! rlang::sym(groupings[[1]]) == cats[i] &
-                   !! rlang::sym(groupings[[2]]) == subjs[j])
+          filter(!! rlang::sym(category) == cats[i] &
+                   !! rlang::sym(group) == groups[j])
 
         if (nrow(temp.data_ss) > 0) {
           N[i,j] = temp.data_ss$N[[1]]
@@ -155,12 +158,14 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
       }
     }
 
+    dimnames(N) = list(cats, groups)
+    dimnames(x_mean) = list(cats, groups, cues)
+    dimnames(x_ss) = list(cats, groups, cues, cues)
+
     data_ss = list(N = N, x_mean = x_mean, x_ss = x_ss)
   } else {
     # Univariate observations
-    data_ss <-
-      data %>%
-      group_by(!!! rlang::syms(groupings)) %>%
+    data_ss %<>%
       summarise_at(cues, .funs=funs(...))
 
     if (verbose) {
@@ -170,12 +175,12 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
 
     stats <- names(list(...))
 
-    data_ss <- map(stats, ~ reshape2::acast(data_ss, as.list(groupings), value.var=.x)) %>%
+    data_ss <- map(stats, ~ reshape2::acast(data_ss, as.list(c(category, group)), value.var=.x)) %>%
       set_names(stats)
   }
 
 
-  if (debug) {
+  if (verbose) {
     print("In get_sufficient_statistics_from_data(), sum-of-squares matrix (uncentered for multivariate data,
           centered for univariate data):")
     print(data_ss)
@@ -210,6 +215,8 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
 #' @param pca.cutoff Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 #' components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 #' `pca.observation = FALSE`. (default: 1)
+#' @param tau_scale,L_omega_scale Scale for the Cauchy prior for standard deviations of the covariance matrix of mu_0 and
+#' scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to ignore. (default: 0)
 #'
 #' @return A list that is an \code{mvg_ibbu_input}.
 #'
@@ -223,7 +230,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   exposure, test,
   cues, category = "category", response = "response", group = NULL,
   center.observations = T, scale.observations = T, pca.observations = F, pca.cutoff = 1,
-  tau_scale, L_omega_scale,
+  tau_scale = 0, L_omega_scale = 0,
   verbose = F
 ) {
   exposure <- check_exposure_test_data(
@@ -267,20 +274,13 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       return.transform.parameters = T,
       return.transform.function = T)
 
-  s = summary(transform[["transform.parameteres"]][["pca"]])$importance
-  cues = colnames(s)[1:min(which(s["Cumulative Proportion",] > pca.cutoff))]
+  if (pca) {
+    s = summary(transform[["transform.parameters"]][["pca"]])$importance
+    cues = colnames(s)[1:min(which(s["Cumulative Proportion",] > pca.cutoff))]
+  }
 
   exposure = transform[["data"]]
   test = transform[["transform.function"]](test)
-
-  # transform_cues(
-  #   data = test,
-  #   cues = cues,
-  #   center = center.observations,
-  #   scale = scale.observations,
-  #   pca = pca.observations,
-  #   transform.parameters = transform[["transform.data"]]
-  #   return.transformed.data = T)
 
   test_counts <- get_test_counts(
     test = test,
@@ -290,19 +290,22 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     group = group,
     verbose = verbose)
 
+  print(exposure)
+  print(test_counts)
+
   if (length(cues) > 1) {
     data_list <- exposure %>%
       get_sufficient_statistics_from_data(
-        list(category, group), cues = cues,
+        cues = cues, category = category, group = group,
         verbose = verbose,
+        # The part below currently is ignored by get_sufficient_statistics_from_data. If the same syntax as for univariate input could
+        # also work for multivariate input to get_sufficient_statistics_from_data that would be more
+        # elegant.
         x_mean = colMeans, N = length, x_ss = get_sum_of_uncentered_squares) %>%
       within({
         M <- dim(x_mean)[1]
         L <- dim(x_mean)[2]
         K <- length(cues)
-
-        m <- dim(xbar)[1]
-        l <- dim(xbar)[2]
 
         x_test <- test_counts[[cues]]
         y_test <- as.numeric(test_counts[[group]])
@@ -320,13 +323,10 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
               the future.")
     data_list <- exposure %>%
       get_sufficient_statistics_from_data(
-        list(category, group), cues = cues,
+        cues = cues, category = category, group = group,
         verbose = verbose,
         xbar = mean, n = length, xsd = sd) %>%
       within({
-        m <- dim(xbar)[1]
-        l <- dim(xbar)[2]
-
         m <- dim(xbar)[1]
         l <- dim(xbar)[2]
 
