@@ -4,9 +4,6 @@
 \alias{is.NIW_belief}
 \alias{is.NIW_belief_w_lapse}
 \alias{is.NIW_belief_w_bias}
-\alias{is.NIW_beliefs}
-\alias{is.NIW_beliefs_w_lapse}
-\alias{is.NIW_beliefs_w_bias}
 \title{Is this an NIW belief object?}
 \usage{
 is.NIW_belief(
@@ -20,18 +17,6 @@ is.NIW_belief(
 is.NIW_belief_w_lapse(x, category = "category", is.long = T, with.bias = F)
 
 is.NIW_belief_w_bias(x, category = "category", is.long = T)
-
-is.NIW_beliefs(
-  x,
-  category = "category",
-  is.long = T,
-  with.lapse = if (with.bias) T else F,
-  with.bias = F
-)
-
-is.NIW_beliefs_w_lapse(x, category = "category", is.long = T, with.bias = F)
-
-is.NIW_beliefs_w_bias(x, category = "category", is.long = T)
 }
 \arguments{
 \item{x}{Object to be checked.}

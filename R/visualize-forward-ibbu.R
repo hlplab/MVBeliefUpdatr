@@ -53,6 +53,144 @@ check_compatibility_between_NIW_belief_and_data = function(
 
 
 
+
+
+
+#' Plot NIW belief or NIW beliefs object.
+#'
+#' Plot the parameters of an NIW_belief or NIW_beliefs object.
+#'
+#' @param x An \code{\link{NIW_belief}} or \code{\link{NIW_beliefs}} object.
+#' @param group.colors Vector of fill colors of same length as the number of unique groups in the NIW_belief(s) object, or
+#' `NULL` to use defaults. (default: `NULL`)
+#' @param facet_rows_by,facet_cols_by,animate_by Which group variables, if any, should be used for faceting and/or
+#' animation? (defaults: `NULL`)
+#' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
+#'
+#' @return ggplot object.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+#'
+plot_NIW_belief_parameters = function(
+  x,
+  group.colors = NULL,
+  facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F
+) {
+  error("This function is not yet implemented.")
+  # If n.draws is specified, get the IDs of the specific (randomly drawn n.draws) samples
+  if (!is.null(n.draws)) draws = get_random_draw_indices(fit, n.draws)
+
+  d.pars = fit %>%
+    add_ibbu_stanfit_draws(
+      which = which,
+      draws = if (!is.null(n.draws)) draws else NULL,
+      nest = F)
+
+  if (is.null(group.colors)) group.colors = get_default_colors("group", length(get_groups(x)))
+
+  # p.M = x %>%
+  #   select(.draw, group, category, cue, M) %>%
+  #   distinct() %T>%
+  #   { get_limits(., "M") ->> x.limits } %>%
+  #   ggplot(aes(
+  #     y = fct_rev(.data$category),
+  #     x = .data$M,
+  #     fill = .data$group)) +
+  #   ggridges::geom_density_ridges(alpha = .5, color = NA,
+  #                                 panel_scaling = panel_scaling, scale = .95,
+  #                                 stat = "density", aes(height = ..density..),
+  #                                 # trim in order to increase resolution and avoid misleading
+  #                                 # overlap with zero for S matrix; if not trimmed, density range
+  #                                 # is estimated for the entire data in each plot
+  #                                 trim = T) +
+  #   geom_vline(xintercept = 0, color = "darkgray") +
+  #   scale_x_continuous("Mean of category means") +
+  #   scale_y_discrete("Category", expand = c(0,0)) +
+  #   scale_fill_manual(
+  #     "Group",
+  #     breaks = group.ids,
+  #     labels = group.labels,
+  #     values = group.colors
+  #   ) +
+  #   coord_cartesian(xlim = x.limits, default = T) +
+  #   facet_grid(~ .data$cue) +
+  #   theme_bw() + theme(legend.position = "right")
+  # legend = cowplot::get_legend(p.M)
+  #
+  # p.M = p.M + theme(legend.position = "none")
+  # p.S = suppressMessages(
+  #   p.M %+%
+  #     (d.pars %>%
+  #        select(.draw, group, category, cue, cue2, S) %>%
+  #        distinct() %T>%
+  #        { get_limits(., "S") ->> x.limits }) +
+  #     aes(x = .data$S) +
+  #     scale_x_continuous("Scatter matrix",
+  #                        breaks = inv_symlog(
+  #                          seq(
+  #                            ceiling(symlog(min(x.limits))),
+  #                            floor(symlog(max(x.limits))),
+  #                          ))
+  #     ) +
+  #     coord_trans(x = "symlog", xlim = x.limits) +
+  #     facet_grid(.data$cue2 ~ .data$cue))
+  #
+  # p.KN = suppressWarnings(
+  #   suppressMessages(
+  #     p.M %+%
+  #       (d.pars %>%
+  #          select(.draw, group, category, kappa, nu) %>%
+  #          distinct() %>%
+  #          gather(key = "key", value = "value", -c(.draw, group, category)) %T>%
+  #          { get_limits(., "value", min = 1) ->> x.limits } ) +
+  #       aes(x = .data$value) +
+  #       scale_x_continuous("Pseudocounts",
+  #                          breaks = 10^(
+  #                            seq(
+  #                              ceiling(log10(min(x.limits))),
+  #                              floor(log10(max(x.limits)))
+  #                            ))) +
+  #       scale_y_discrete("", expand = c(0,0)) +
+  #       coord_trans(x = "log10", xlim = x.limits) +
+  #       facet_grid(~ .data$key)))
+  #
+  # p.LR =
+  #   d.pars %>%
+  #   select(.draw, lapse_rate) %>%
+  #   distinct() %T>%
+  #   { get_limits(., "lapse_rate") ->> x.limits } %>%
+  #   ggplot(aes(x = .data$lapse_rate)) +
+  #   geom_density(color = NA, fill = "darkgray", alpha = .5,
+  #                stat = "density") +
+  #   scale_x_continuous("Lapse rate")  +
+  #   scale_y_discrete("") +
+  #   scale_fill_manual(
+  #     "Group",
+  #     breaks = group.ids,
+  #     labels = group.labels,
+  #     values = group.colors
+  #   ) +
+  #   coord_cartesian(xlim = x.limits) +
+  #   theme_bw() + theme(legend.position = "none")
+  #
+  # K = length(unique(d.pars$cue))
+  # p = suppressWarnings(cowplot::plot_grid(
+  #   cowplot::plot_grid(plotlist = list(p.M, p.KN), nrow = 1, rel_widths = c(K,2)),
+  #   cowplot::plot_grid(plotlist = list(
+  #     p.S,
+  #     cowplot::plot_grid(plotlist = list(legend, p.LR),
+  #                        nrow = 2, rel_heights = c(.5, .5))),
+  #     nrow = 1, rel_widths = c(K,1)),
+  #   rel_heights = c(1.5, K), nrow = 2, axis = "lrtb"))
+  # return(p)
+}
+
+
+
 #' Plot expected univariate (1D) categories
 #'
 #' Plot univariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
@@ -66,7 +204,7 @@ check_compatibility_between_NIW_belief_and_data = function(
 #' (grouping by exposure condition), the incremental updating of NIW beliefs (grouping by observations), or any combinations
 #' of these.
 #'
-#' @param x NIW belief object.
+#' @param x An \code{\link{NIW_belief}} or \code{\link{NIW_beliefs}} object.
 #' @param levels Levels of the confidence ellipses. (default: .5, .66, .8, .9., and .95)
 #' @param data.exposure Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)
 #' @param data.test Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)
@@ -164,7 +302,7 @@ plot_expected_categories_density1D = function(
 #' (grouping by exposure condition), the incremental updating of NIW beliefs (grouping by observations), or any combinations
 #' of these.
 #'
-#' @param x NIW belief object.
+#' @param x An \code{\link{NIW_belief}} or \code{\link{NIW_beliefs}} object.
 #' @param levels Levels of the confidence ellipses. (default: .5, .66, .8, .9., and .95)
 #' @param data.exposure Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)
 #' @param data.test Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)
