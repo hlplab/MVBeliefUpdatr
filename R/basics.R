@@ -151,10 +151,10 @@ transform_cues = function(data, cues,
     }
 
     if (pca) {
-      pca <- data %>%
+      PCA <- data %>%
         select(!!! rlang::syms(cues)) %>%
         prcomp(center = center, scale. = scale)
-      transform.parameters[["pca"]] = pca
+      transform.parameters[["pca"]] = PCA
     }
   }
 
