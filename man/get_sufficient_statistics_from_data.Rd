@@ -5,7 +5,7 @@
 \title{Get sufficient statistics from a data set}
 \usage{
 get_sufficient_statistics_from_data(
-  exposure,
+  data,
   cues,
   category,
   group,
@@ -14,6 +14,9 @@ get_sufficient_statistics_from_data(
 )
 }
 \arguments{
+\item{data}{`tibble` or `data.frame` with the data. Each row should be an observation of a category,
+and contain information about the category label, the cue values of the observation, and optionally grouping variables.}
+
 \item{cues}{Names of columns with cue values.}
 
 \item{category}{Name of column that contains the category label for the exposure data. Can be `NULL` for unsupervised updating
@@ -24,9 +27,6 @@ subjects or conditions in an experiment. The latter is more efficient, but shoul
 identical for every individual within the group. Test does not have to be identical for every individual within
 the same group. For example, one can group multiple groups of subjects that have received the same exposure
 but were tested on different test tokens.}
-
-\item{data}{`tibble` or `data.frame` with the data. Each row should be an observation of a category,
-and contain information about the category label, the cue values of the observation, and optionally grouping variables.}
 
 \item{test}{`tibble` or `data.frame` with the test data. Each row should be an observation, and contain information
 about the cue values of the test stimulus and the participant's response.}

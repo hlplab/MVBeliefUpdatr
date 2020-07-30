@@ -4,7 +4,7 @@
 \alias{get_sum_of_uncentered_squares}
 \title{Get sum of uncentered squares}
 \usage{
-get_sum_of_uncentered_squares(data, variables, verbose = F)
+get_sum_of_uncentered_squares(data, variables = NULL, verbose = F)
 }
 \arguments{
 \item{data}{A `tibble`, `data.frame`, or `matrix`. If data is a `tibble` or `data.frame`, the columns for
