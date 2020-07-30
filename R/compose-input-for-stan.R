@@ -161,7 +161,6 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
     dimnames(N) = list(cats, groups)
     dimnames(x_mean) = list(cats, groups, cues)
     dimnames(x_ss) = list(cats, groups, cues, cues)
-
     data_ss = list(N = N, x_mean = x_mean, x_ss = x_ss)
   } else {
     # Univariate observations
@@ -274,7 +273,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       return.transform.parameters = T,
       return.transform.function = T)
 
-  if (pca) {
+  if (pca.observations) {
     s = summary(transform[["transform.parameters"]][["pca"]])$importance
     cues = colnames(s)[1:min(which(s["Cumulative Proportion",] > pca.cutoff))]
   }
@@ -290,9 +289,6 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     group = group,
     verbose = verbose)
 
-  print(exposure)
-  print(test_counts)
-
   if (length(cues) > 1) {
     data_list <- exposure %>%
       get_sufficient_statistics_from_data(
@@ -307,7 +303,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
         L <- dim(x_mean)[2]
         K <- length(cues)
 
-        x_test <- test_counts[[cues]]
+        x_test <- test_counts %>% select(cues)
         y_test <- as.numeric(test_counts[[group]])
         z_test_counts <-
           test_counts %>%
@@ -342,6 +338,11 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
         sigma_0_sd <- 0
       })
   }
+
+  dimnames(data_list$z_test_counts) <- list(
+    test_counts %>% transmute(names = paste(!!! syms(cues), sep = ",")) %>% pull(names),
+    levels(test[[response]]))
+  attr(data_list$y_test, which <- "levels") = levels(test[[group]])
 
   if (verbose) {
     print("In compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats():")
