@@ -201,7 +201,7 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
     assert_that(is_scalar_character(response),
                 msg = "response must be a column name.")
     assert_that(response %in% names(data),
-                msg = paste0("Response column", response, "not found in", which.data, "data."))
+                msg = paste("Response column", response, "not found in", which.data, "data."))
 
     data %<>%
       mutate_at(response, as.factor)
@@ -209,7 +209,7 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
 
   if (!is.null(group)) {
     assert_that(group %in% names(data),
-                msg = paste0("Group column", group, "not found in", which.data,"data."))
+                msg = paste("Group column", group, "not found in", which.data,"data."))
 
     data %<>%
       mutate_at(group, as.factor)
@@ -230,7 +230,7 @@ get_test_counts <- function(training, test, cue, category, response, group, verb
   test_counts <- test %>%
     as_tibble() %>%
     group_by(!!! rlang::syms(group),
-             !!! rlang::syms(cue),
+             !!! rlang::syms(cues),
              !! rlang::sym(response)) %>%
     tally() %>%
     pivot_wider(
@@ -411,7 +411,7 @@ compose_data_to_infer_prior_kappanu_via_conjugate_ibbu_w_sufficient_stats = func
 #' @export
 compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   exposure, test,
-  cues, category = "category", response = "response", group,
+  cues, category = "category", response = "response", group = NULL,
   center.observations = T, scale.observations = T, pca.observations = F, pca.cutoff = .95,
   tau_scale, L_omega_scale,
   verbose = F
