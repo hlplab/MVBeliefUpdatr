@@ -10,6 +10,7 @@ make_MV_exposure_data(
   Sigmas,
   category.labels = NULL,
   cue.labels = NULL,
+  belief = NULL,
   randomize.order = F,
   keep.input_parameters = F
 )
@@ -24,6 +25,9 @@ Gaussian.}
 (default) then Gaussians will be numbered from 1:N.}
 
 \item{cue.labels}{Character vector of cue names. If \code{NULL} (default) then the cues will be numbered cue1, cue2, ...}
+
+\item{belief}{Alternatively to providing mus, sigma, category, and cue labels, one can also specify an \code{\link{NIW_belief}}
+object, which contains all that information.}
 
 \item{randomize.order}{Should the order of the data be randomized? (default: FALSE) This won't affect the final outcome of
 NIW belief updating, but it will change the incremental updates (and thus, for example, visualizations of the update process).}
