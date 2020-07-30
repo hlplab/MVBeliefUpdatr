@@ -226,12 +226,12 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
 
 
 
-get_test_counts <- function(training, test, cue, category, response, group, verbose) {
+get_test_counts <- function(training, test, cues, category, response, group, verbose) {
   test_counts <- test %>%
     as_tibble() %>%
-    group_by(!!! rlang::syms(group),
-             !!! rlang::syms(cues),
-             !! rlang::sym(response)) %>%
+    group_by(!! sym(group),
+             !!! syms(cues),
+             !! sym(response)) %>%
     tally() %>%
     pivot_wider(
       names_from = !! response,
@@ -443,7 +443,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
                           the exposure and test data. Either the levels do not match, or they are not in the same
                           order."))
 
-  test_counts <- get_test_counts(training, test, cue, category, response, group, verbose)
+  test_counts <- get_test_counts(training, test, cues, category, response, group, verbose)
 
   if (length(cues) > 1) {
     data_list <- training %>%
