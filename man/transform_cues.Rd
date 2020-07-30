@@ -12,7 +12,7 @@ transform_cues(
   return.transform = F,
   center = T,
   scale = T,
-  PCA = F
+  pca = F
 )
 
 untransform_cues(
@@ -21,7 +21,7 @@ untransform_cues(
   transform = NULL,
   center = NULL,
   scale = NULL,
-  PCA = NULL
+  pca = NULL
 )
 }
 \arguments{
@@ -37,7 +37,7 @@ untransform_cues(
 
 \item{scale}{Should the data be standardized? (default: `TRUE`)}
 
-\item{PCA}{Should the data be transformed into orthogonal principal components? (default: `FALSE`)}
+\item{pca}{Should the data be transformed into orthogonal principal components? (default: `FALSE`)}
 }
 \value{
 Data frame, unless `return.transform = T`. In that case, a list with two elements (`data` and `transform`).
@@ -46,7 +46,7 @@ Data frame, unless `return.transform = T`. In that case, a list with two element
 If the `transform` argument
 is specified, the transforms in that object will be applied. This can be useful when the goal is to transform one
 data set (e.g., test data) based on the statistics of the another data set (e.g.., training data). If no `transform`
-is specified, then the transformations specified by the `center`, `scale`, and `PCA` flags will be applied.
+is specified, then the transformations specified by the `center`, `scale`, and `pca` flags will be applied.
 }
 \examples{
 TBD
