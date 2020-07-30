@@ -429,7 +429,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     message(paste("Not all levels of group variable", group, "that are present in test were found in exposure. Creating
                   0 exposure data for those groups."))
   exposure %<>%
-    mutate_at(group, factor(levels = levels(test[[group]])))
+    mutate_at(group, ~ factor(.x, levels = levels(test[[group]])))
 
   test_counts <- get_test_counts(
     test = test,
