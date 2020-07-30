@@ -180,8 +180,12 @@ untransform_cues = function(data, cues,
 
 
 
-check_exposure_test_data <- function(data, cues, category, response, group, which.data = "the") {
+check_exposure_test_data <- function(data, cues, category, response, group, which.data = "the", verbose = F) {
   assert_that(is_tibble(data) | is.data.frame(data))
+  assert_that(!is.null(cues))
+  assert_that(!is.null(category))
+  assert_that(!is.null(response))
+
   assert_that(all(is_character(cues)),
               msg = "cues must be a column name or vector of column names.")
   assert_that(cues %in% names(data),
@@ -416,8 +420,22 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   tau_scale, L_omega_scale,
   verbose = F
 ) {
-  exposure <- check_exposure_test_data(exposure, cues, category, NULL, group, verbose)
-  test <- check_exposure_test_data(test, cues, NULL, response, group, verbose)
+  exposure <- check_exposure_test_data(
+    data = exposure,
+    cues = cues,
+    category = category,
+    response = NULL,
+    group = group,
+    which.data = "exposure",
+    verbose = verbose)
+  test <- check_exposure_test_data(
+    data = test,
+    cues = cues,
+    category = NULL,
+    response = response,
+    group = group,
+    which.data = "test",
+    verbose = verbose)
 
   assert_that(all(levels(exposure[[category]]) == levels(test[[response]])),
               msg = paste("category column", category, "in exposure and response colum", response, "must be factors
