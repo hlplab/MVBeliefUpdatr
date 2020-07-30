@@ -1,6 +1,6 @@
 #' Infer prior beliefs based on adaptation behavior
 #'
-#' This function takes exposure and test data, the names of the cue, category, and response columns (and
+#' This function takes exposure and test data, the names of the cues, category, and response columns (and
 #' optionally group and/or block columns), and uses
 #' stan to draw samples from the prior beliefs that match the behavior.
 #'
@@ -38,6 +38,7 @@ infer_prior_beliefs <- function(
       verbose = verbose)
 
   message("Add compilation only options as in brms. and add in the data")
+  message("store untransform function, too!")
 
   if (sample) {
     if (useMultivariateUpdating) {

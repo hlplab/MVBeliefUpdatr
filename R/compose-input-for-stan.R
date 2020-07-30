@@ -301,7 +301,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 
   if (pca.observations) {
     s = summary(transform[["transform.parameters"]][["pca"]])$importance
-    cues = colnames(s)[1:min(which(s["Cumulative Proportion",] > pca.cutoff))]
+    cues = colnames(s)[1:min(which(s["Cumulative Proportion",] >= pca.cutoff))]
   }
 
   exposure = transform[["data"]]
