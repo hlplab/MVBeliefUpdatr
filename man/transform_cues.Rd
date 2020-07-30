@@ -8,20 +8,25 @@
 transform_cues(
   data,
   cues,
-  transform = NULL,
-  return.transform = F,
-  center = T,
-  scale = T,
-  pca = F
+  center = if (pca) F else T,
+  scale = if (pca) F else T,
+  pca = F,
+  transform.parameters = NULL,
+  return.transformed.data = T,
+  return.transform.parameters = F,
+  return.transform.function = F,
+  return.untransform.function = F
 )
 
 untransform_cues(
   data,
   cues,
-  transform = NULL,
-  center = NULL,
-  scale = NULL,
-  pca = NULL
+  uncenter = NULL,
+  unscale = NULL,
+  unpca = NULL,
+  transform.parameters = NULL,
+  return.untransformed.data = T,
+  return.untransform.function = F
 )
 }
 \arguments{
@@ -29,18 +34,27 @@ untransform_cues(
 
 \item{cues}{Vector of characters with names of cue variables.}
 
-\item{transform}{List of transforms (default: `NULL`)}
+\item{center, uncenter}{Should the data be (un)centered? (default: `TRUE` unless `pca = TRUE`)}
 
-\item{return.transform}{Should the list of transforms be returned along with the data? (default: `FALSE`)}
+\item{scale, unscale}{Should the data be (un)standardized? (default: `TRUE` unless `pca = TRUE`)}
 
-\item{center}{Should the data be centered? (default: `TRUE`)}
+\item{pca, unpca}{Should the data be transformed into/back from orthogonal principal components? If `TRUE` then \code{center} and
+\code{scale} are default to `FALSE`. (default: `FALSE`)}
 
-\item{scale}{Should the data be standardized? (default: `TRUE`)}
+\item{transform.parameters}{List of transforms (default: `NULL`)}
 
-\item{pca}{Should the data be transformed into orthogonal principal components? (default: `FALSE`)}
+\item{return.transformed.data, return.transformed.data}{Should the (un)transformed data be returned? (default: `TRUE`)}
+
+\item{return.transform.parameters}{Should the list of transforms be returned? (default: `FALSE`)}
+
+\item{return.transform.function, return.transform.function}{Should a function that applies the (un)transform be
+returned? (default: `FALSE`)}
 }
 \value{
-Data frame, unless `return.transform = T`. In that case, a list with two elements (`data` and `transform`).
+By default a \code{data.frame}. If `return.transform.parameters = TRUE`, a list of parameters. If
+`return.transform.function = TRUE` a function. If more than one of these flags is `TRUE` then a list in which
+the data element has name "data", the transform parameters have name "transform.parameters" and the transform
+function has the name "transform.function".
 }
 \description{
 If the `transform` argument
