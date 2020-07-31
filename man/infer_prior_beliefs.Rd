@@ -18,7 +18,7 @@ infer_prior_beliefs(
   pca.cutoff = 1,
   tau_scale = 10,
   L_omega_scale = 1,
-  useMultivariateUpdating = if (length(cue) > 1) TRUE else FALSE,
+  useMultivariateUpdating = if (length(cues) > 1) TRUE else FALSE,
   sample = TRUE,
   verbose = FALSE,
   ...
@@ -69,7 +69,7 @@ scale for the LKJ prior for the correlations of the covariance matrix of mu_0. S
 A \code{mvg_ibbu_stanfit} object with the fitted stan model.
 }
 \description{
-This function takes exposure and test data, the names of the cue, category, and response columns (and
+This function takes exposure and test data, the names of the cues, category, and response columns (and
 optionally group and/or block columns), and uses
 stan to draw samples from the prior beliefs that match the behavior.
 }

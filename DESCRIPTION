@@ -17,4 +17,5 @@ Requires:
     ggplot2, gganimate, viridis, ggridges, cowplot, Rdpack (>= 0.7)
 RdMacros: Rdpack
 Suggests: 
-    testthat (>= 2.1.0)
+    testthat (>= 2.1.0),
+    covr

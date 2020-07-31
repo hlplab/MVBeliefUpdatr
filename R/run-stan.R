@@ -39,10 +39,11 @@ infer_prior_beliefs <- function(
 
   message("Add compilation only options as in brms. and add in the data")
   message("store untransform function, too!")
+  message("use :::stanmodels as Dave did.")
 
   if (sample) {
     if (useMultivariateUpdating) {
-      fit <- rstan::stan(file = '../stancode/Updating_mvg_NIW_uninformativePriors_SufficientStats_wLapse',
+      fit <- rstan::stan(file = '../exec/Updating_mvg_NIW_uninformativePriors_SufficientStats_wLapse',
                          data = data_list, ...)
     } else {
       fit <- rstan::sampling(beliefupdatr:::stanmodels[['conj_id_lapsing_sufficient_stats_fit']],
