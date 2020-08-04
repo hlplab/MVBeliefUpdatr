@@ -37,15 +37,15 @@ infer_prior_beliefs <- function(
       L_omega_scale = L_omega_scale,
       verbose = verbose)
 
-  message("Add compilation only options as in brms. and add in the data")
+  message("and add in the data")
   message("store untransform function, too!")
 
   if (sample) {
     if (useMultivariateUpdating) {
-      fit <- rstan::stan(stanmodels[['NIWUpdatingUninformativePriorsSufficientStatsLapsing']],
+      fit <- sampling(MVBeliefUpdatr:::stanmodels[['mvg_conj_uninformative_priors_sufficient_stats_lapse']],
                          data = data_list, ...)
     } else {
-      fit <- rstan::sampling(beliefupdatr:::stanmodels[['conj_id_lapsing_sufficient_stats_fit']],
+      fit <- sampling(beliefupdatr:::stanmodels[['conj_id_lapsing_sufficient_stats_fit']],
                              data = data_list, ...)
     }
   }

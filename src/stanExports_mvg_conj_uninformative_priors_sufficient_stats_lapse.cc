@@ -2,12 +2,12 @@
 
 #include <Rcpp.h>
 using namespace Rcpp ;
-#include "stanExports_NIWUpdatingUninformativePriorsSufficientStatsLapsing.h"
+#include "stanExports_mvg_conj_uninformative_priors_sufficient_stats_lapse.h"
 
-RCPP_MODULE(stan_fit4NIWUpdatingUninformativePriorsSufficientStatsLapsing_mod) {
+RCPP_MODULE(stan_fit4mvg_conj_uninformative_priors_sufficient_stats_lapse_mod) {
 
 
-    class_<rstan::stan_fit<stan_model, boost::random::ecuyer1988> >("model_NIWUpdatingUninformativePriorsSufficientStatsLapsing")
+    class_<rstan::stan_fit<stan_model, boost::random::ecuyer1988> >("model_mvg_conj_uninformative_priors_sufficient_stats_lapse")
 
     .constructor<SEXP,SEXP,SEXP>()
 
