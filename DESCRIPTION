@@ -18,7 +18,7 @@ Suggests:
     covr
 Biarch: true
 Depends: 
-    R (>= 3.4.0)
+    R (>= 3.5.0)
 Imports: 
     methods,
     Rcpp (>= 0.12.0),
