@@ -16,9 +16,7 @@
 #' @keywords TBD
 #' @examples
 #' TBD
-#' @rdname is_NIW_belief
 #' @export
-#'
 is.NIW_belief = function(x, category = "category", is.long = T, with.lapse = if (with.bias) T else F, with.bias = F) {
   assert_that(all(is.flag(is.long), is.flag(with.lapse), is.flag(with.bias)))
 
@@ -59,36 +57,16 @@ is.NIW_belief = function(x, category = "category", is.long = T, with.lapse = if 
   return(TRUE)
 }
 
-#' @rdname is_NIW_belief
+#' @describeIn is.NIW_belief Also checks whether the belief has a lapse term.
 #' @export
 is.NIW_belief_w_lapse = function(x, category = "category", is.long = T, with.bias = F) {
   is.NIW_belief(x, category = category, is.long = is.long, with.lapse = T, with.bias = with.bias)
 }
 
-#' @rdname is_NIW_belief
+#' @describeIn is.NIW_belief Also checks whether the belief has a bias term.
 #' @export
 is.NIW_belief_w_bias = function(x, category = "category", is.long = T) {
   is.NIW_belief(x, category = category, is.long = is.long, with.lapse = T, with.bias = T)
 }
 
 
-#' #' @rdname is_NIW_belief
-#' #' @export
-#' #'
-#' is.NIW_beliefs = function(x, category = "category", is.long = T, with.lapse = if (with.bias) T else F, with.bias = F) {
-#'   # add groups argument. check whether there are groups (for all beliefS functions)
-#'   # when a belief is made, make sure that the groups are also specified
-#' }
-#'
-#'
-#' #' @rdname is_NIW_belief
-#' #' @export
-#' is.NIW_beliefs_w_lapse = function(x, category = "category", is.long = T, with.bias = F) {
-#'   is.NIW_beliefs(x, category = category, is.long = is.long, with.lapse = T, with.bias = with.bias)
-#' }
-#'
-#' #' @rdname is_NIW_belief
-#' #' @export
-#' is.NIW_beliefs_w_bias = function(x, category = "category", is.long = T) {
-#'   is.NIW_beliefs(x, category = category, is.long = is.long, with.lapse = T, with.bias = T)
-#' }

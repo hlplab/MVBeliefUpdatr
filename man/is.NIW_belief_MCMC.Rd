@@ -25,6 +25,13 @@ A logical.
 Check whether \code{x} is a tibble of post-warmup draws of parameters obtained from incremental
 conjugate Bayesian belief-updating (IBBU) over a Normal-Inverse-Wishart (NIW) prior.
 }
+\section{Functions}{
+\itemize{
+\item \code{is.NIW_belief_w_lapse_MCMC}: Also checks whether x has a lapse term.
+
+\item \code{is.NIW_belief_w_bias_MCMC}: Also checks whether x has a bias term.
+}}
+
 \examples{
 TBD
 }

@@ -74,7 +74,6 @@ check_compatibility_between_NIW_belief_and_data = function(
 #' @examples
 #' TBD
 #' @export
-#'
 plot_NIW_belief_parameters = function(
   x,
   group.colors = NULL,

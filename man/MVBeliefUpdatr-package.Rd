@@ -6,8 +6,31 @@
 \alias{MVBeliefUpdatr-package}
 \title{MVBeliefUpdatr: Fitting, Summarizing, and Visualizing of Multivariate Gaussian Belief-Updating}
 \description{
-This package provides a number of convenience functions to interact with Stan through rstan, in order to infer prior beliefs about the cue distributions of an arbitrary number of (independent) multivariate Gaussian categories based on categorization responses during a `test phase' following category-labeled inputs during the `exposure phase'. Functions are provided to (1) prepare data as input for the stan program that implements the multivariate Bayesian belief-updating, (2) to summarize and visualize the prior and posterior beliefs represented by the resulting fit, and (3) to generate behavioral test data under a known ground truth (e.g., in order to test the functions for (1) and (2), or simply in order to simulate the consequences of incremental Bayesian belief-updating. The package incorporates code from Dave Kleinschmidt's BeliefUpdatr and Shaorong Yan's modeling of unsupervised adaptation (Yan and Jaeger, 2018).
+A package to model incremental Bayesian belief-updating for multivariate Gaussian categories.
 }
+\section{Overview}{
+
+This package provides a number of convenience functions model incremental Bayesian belief-updating for multivariate
+Gaussian categories. This includes conjugate belief-updating from a Normal-Inverse-Wishart (NIW) prior based on exposure
+data. Users can specify priors manually or based on existing data, prepare exposure data, update NIW beliefs under a
+variety of assumptions (noise-free, noise added, etc.) both for labeled and unlabeled exposure data. Expected categories,
+categorization functions, and categorizations under various decisions rules (e.g., criterion, proportional matching,
+sampling) can be obtained and visualized.
+
+Additionally, the package provides a number of Stan programs that try to \emph{infer} NIW priors for multiple categories
+from behavioral test responses. These functions use participants' categorization responses during test and, for example,
+the sufficient statistics of the exposure data to infer a posterior distribution of the parameters of NIW priors for each
+category. Users can either infer the strength of prior beliefs given a specified m and S parameter, or infer all four NIW
+parameters together, although the latter requires test responses from multiple different exposure conditions.
+Functions are provided to interact with stan through rstan, to (1) prepare data as input for the stan program
+that implements the multivariate Bayesian belief-updating, and to (2) to summarize and visualize the prior and posterior
+beliefs represented by the resulting fit.
+
+The belief-updating formulas are taken from Murphy (2012). The package incorporates code
+from Dave Kleinschmidt's BeliefUpdatr (Kleinschmidt and Jaeger, 2011, 2012, 2015, 2016) and Shaorong Yan's modeling of
+unsupervised adaptation (Yan and Jaeger, 2018).
+}
+
 \section{Package options}{
  TBD
 }

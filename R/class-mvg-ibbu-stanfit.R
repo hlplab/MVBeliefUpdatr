@@ -3,7 +3,11 @@
 new_stanfit_class_name = "mvg_ibbu_stanfit"
 acceptable_stan_codes = c("dev_conj_id_lapsing_sufficient_stats_fit_mv")
 
-setClass(new_stanfit_class_name,
+#' An S4 class for stanfit objects that use one of the mvg_ibbu stan programs.
+#'
+#' @slot input_data A list
+#' @slot labels A list
+mvg_ibbu_stanfit <- setClass(new_stanfit_class_name,
          slots = c(input_data = "list", labels = "list"),
          contains = "stanfit",
          package = "MVBeliefUpdatr")
@@ -65,9 +69,7 @@ is.mvg_ibbu_stanfit = function(x) {
 #' @keywords TBD
 #' @examples
 #' TBD
-#' @rdname is.NIW_belief_MCMC
 #' @export
-#'
 is.NIW_belief_MCMC = function(x, is.nested = T, is.long = T, with.lapse = if (with.bias) T else F, with.bias = F) {
   if(
     all(
@@ -79,13 +81,13 @@ is.NIW_belief_MCMC = function(x, is.nested = T, is.long = T, with.lapse = if (wi
   ) return(T) else return(F)
 }
 
-#' @rdname is.NIW_belief_MCMC
+#' @describeIn is.NIW_belief_MCMC Also checks whether x has a lapse term.
 #' @export
 is.NIW_belief_w_lapse_MCMC = function(x, is.nested = T, is.long = T, with.bias = F) {
   is.NIW_belief_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.bias = with.bias)
 }
 
-#' @rdname is.NIW_belief_MCMC
+#' @describeIn is.NIW_belief_MCMC Also checks whether x has a bias term.
 #' @export
 is.NIW_belief_w_bias_MCMC = function(x, is.nested = T, is.long = T) {
   is.NIW_belief_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.bias = T)
@@ -103,7 +105,6 @@ is.NIW_belief_w_bias_MCMC = function(x, is.nested = T, is.long = T) {
 #' @examples
 #' TBD
 #' @export
-#'
 is.mvg_ibbu_input = function(x) {
   message("Test of mvg_ibbu_input class not yet implemented. Always returning T.")
 
