@@ -12,7 +12,7 @@ License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
-Requires:
+Depends:
     tidybayes, av, assertthat, rlang, purrr, dplyr, mvtnorm, rstan, transformr, Hmisc, ellipse, forcats, foreach, tibble, tidyselect, tidyr, magrittr, 
     ggplot2, gganimate, viridis, ggridges, cowplot, Rdpack (>= 0.7)
 RdMacros: Rdpack
