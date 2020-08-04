@@ -104,7 +104,7 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
 
   data_ss <- data %>%
     as_tibble() %>%
-    group_by(!!! sym(category), !! sym(group))
+    group_by(!! sym(category), !! sym(group))
 
   if (length(cues) > 1) {
     # Multivariate observations
