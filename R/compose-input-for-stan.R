@@ -223,8 +223,11 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
 #' @param pca.cutoff Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 #' components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 #' `pca.observation = FALSE`. (default: 1)
-#' @param tau_scale,L_omega_scale Scale for the Cauchy prior for standard deviations of the covariance matrix of mu_0 and
-#' scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to ignore. (default: 0)
+#' @param m_0,S_0 Optionally, prior mean of means (m_0) and prior scatter matrix (S_0). If provided, these parameters
+#' won't be fitted.
+#' @param tau_scale,L_omega_scale Optionally, scale for the Cauchy prior for standard deviations of the covariance
+#' matrix of mu_0 and scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
+#' ignore. (default: 0)
 #'
 #' @return A list that is an \code{mvg_ibbu_input}.
 #'
@@ -313,7 +316,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     assert_that(l >= 1, msg = "Specified pca.cutoff does not yield to any PCA component being included. Increase the
                 pca.cutoff value.")
     if (length(cues) > l)
-      message(paste("Given the specified pca.cutoff, only the first", l, "principal components will be used as cues."))
+      message(paste("Given the specified pca.cutoff, only the first", l, "principal component(s) will be used as cues."))
     cues = colnames(s)[1:l]
   }
 

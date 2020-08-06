@@ -7,6 +7,7 @@
 infer_prior_beliefs(
   exposure,
   test,
+  data_list = NULL,
   cues,
   category,
   response,
@@ -16,12 +17,14 @@ infer_prior_beliefs(
   scale.observations = TRUE,
   pca.observations = FALSE,
   pca.cutoff = 1,
-  tau_scale = 10,
-  L_omega_scale = 1,
-  useMultivariateUpdating = NULL,
+  m_0 = NULL,
+  S_0 = NULL,
+  tau_scale = 0,
+  L_omega_scale = 0,
+  use_multivariate_updating = NULL,
   sample = TRUE,
-  verbose = FALSE,
   model = NULL,
+  verbose = FALSE,
   ...
 )
 }
@@ -56,13 +59,27 @@ substantially more efficient if many groups share the same exposure.}
 components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 `pca.observation = FALSE`. (default: 1)}
 
-\item{tau_scale}{Scale for the Cauchy prior for standard deviations of the covariance matrix of mu_0 and
-scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to ignore. (default: 0)}
+\item{m_0}{Optionally, prior mean of means (m_0) and prior scatter matrix (S_0). If provided, these parameters
+won't be fitted.}
 
-\item{L_omega_scale}{Scale for the Cauchy prior for standard deviations of the covariance matrix of mu_0 and
-scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to ignore. (default: 0)}
+\item{S_0}{Optionally, prior mean of means (m_0) and prior scatter matrix (S_0). If provided, these parameters
+won't be fitted.}
+
+\item{tau_scale}{Optionally, scale for the Cauchy prior for standard deviations of the covariance
+matrix of mu_0 and scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
+ignore. (default: 0)}
+
+\item{L_omega_scale}{Optionally, scale for the Cauchy prior for standard deviations of the covariance
+matrix of mu_0 and scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
+ignore. (default: 0)}
+
+\item{use_multivariate_updating}{Should multivariate updating be used? By default this option will be
+selecting if the relevant cues (after transformations, including PCA, if selected) have more than 1
+dimension.}
 
 \item{sample}{Should the model be fit and sampled from?}
+
+\item{model}{Name of stanmodel that should be used. Overrides any default selection.}
 
 \item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}}
 }
