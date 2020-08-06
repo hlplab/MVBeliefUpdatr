@@ -302,7 +302,10 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 
   if (pca.observations) {
     s = summary(transform[["transform.parameters"]][["pca"]])$importance
-    cues = colnames(s)[1:min(which(s["Cumulative Proportion",] >= pca.cutoff))]
+    l = min(which(s["Cumulative Proportion",] >= pca.cutoff))
+    if (length(cues) > l)
+      message(paste("Given the specified pca.cutoff, only the first", l, "principal components will be used as cues."))
+    cues = colnames(s)[1:l]
   }
 
   exposure = transform[["data"]]

@@ -86,7 +86,7 @@ cov2tau = function(v) {
 #' @export
 #'
 transform_cues = function(data, cues,
-                          center =  if (pca) F else T, scale = if (pca) F else T, pca = F,
+                          center =  T, scale = if (pca) F else T, pca = F,
                           transform.parameters = NULL,
                           return.transformed.data = T, return.transform.parameters = F,
                           return.transform.function = F, return.untransform.function = F
@@ -112,7 +112,7 @@ transform_cues = function(data, cues,
     if (pca) {
       PCA <- data %>%
         select(!!! rlang::syms(cues)) %>%
-        prcomp(center = center, scale. = scale)
+        prcomp(center = F, scale. = F)
       transform.parameters[["pca"]] = PCA
     }
   }
@@ -192,9 +192,20 @@ untransform_cues = function(data, cues,
   if (is.null(unscale)) scale = !is.null(transform.parameters[["center"]])
 
   if (unpca) {
-    warning("PCA untransform not yet implemented!")
+    pca = transform.parameters[["pca"]]
+
+    # Since we're uncentering and unscaling separately, the following is not needed:
+    # https://stackoverflow.com/questions/29783790/how-to-reverse-pca-in-prcomp-to-get-original-data
+    # t(t(pca$x %*% t(pca$rotation)) + pca$center)
+    # If pca$scale is TRUE you will also need to re-scale
+    # t(t(pca$x %*% t(pca$rotation)) * pca$scale + pca$center)
+    newcues = data %>%
+      select(!!! rlang::syms(cues)) %>%
+      { . %*% t(pca$rotation) }
+
     data %<>%
-      cbind(predict(transform.parameters[["pca"]], data))
+      select(-all_of(cues)) %>%
+      cbind(newcues)
   }
 
   if (unscale) {
