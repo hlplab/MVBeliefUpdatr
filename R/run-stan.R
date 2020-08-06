@@ -67,7 +67,7 @@ infer_prior_beliefs <- function(
                          data = data_list, ...)
     } else {
       message("There might be an issue with the compose_data function for univariate models. look into it.")
-      fit <- sampling(beliefupdatr:::stanmodels[['conj_id_lapsing_sufficient_stats_fit']],
+      fit <- sampling(MVBeliefUpdatr:::stanmodels[['uvg_conj_uninformative_priors_sufficient_stats_lapse']],
                              data = data_list, ...)
     }
   }

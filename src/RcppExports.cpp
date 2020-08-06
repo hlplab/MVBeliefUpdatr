@@ -9,10 +9,12 @@ using namespace Rcpp;
 
 RcppExport SEXP _rcpp_module_boot_stan_fit4mvg_conj_sufficient_stats_lapse_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4mvg_conj_uninformative_priors_sufficient_stats_lapse_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4uvg_conj_uninformative_priors_sufficient_stats_lapse_mod();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_stan_fit4mvg_conj_sufficient_stats_lapse_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4mvg_conj_sufficient_stats_lapse_mod, 0},
     {"_rcpp_module_boot_stan_fit4mvg_conj_uninformative_priors_sufficient_stats_lapse_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4mvg_conj_uninformative_priors_sufficient_stats_lapse_mod, 0},
+    {"_rcpp_module_boot_stan_fit4uvg_conj_uninformative_priors_sufficient_stats_lapse_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4uvg_conj_uninformative_priors_sufficient_stats_lapse_mod, 0},
     {NULL, NULL, 0}
 };
 
