@@ -234,6 +234,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   exposure, test,
   cues, category = "category", response = "response", group = "group", group.unique,
   center.observations = T, scale.observations = T, pca.observations = F, pca.cutoff = 1,
+  m_0 = NULL, S_0 = NULL,
   tau_scale = 0, L_omega_scale = 0,
   verbose = F
 ) {
@@ -336,6 +337,11 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
           select(.dots = levels(test[[response]])) %>%
           as.matrix()
         N_test <- nrow(x_test)
+
+        m_0_known = if (is.null(m_0)) 0 else 1
+        S_0_known = if (is.null(S_0)) 0 else 1
+        m_0_data = if (is.null(m_0)) numeric(0) else m_0
+        S_0_data = if (is.null(S_0)) numeric(0) else S_0
 
         tau_scale <- tau_scale
         L_omega_scale <- L_omega_scale
