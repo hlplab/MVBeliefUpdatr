@@ -29,10 +29,11 @@ mvg_ibbu_stanfit <- setClass(new_stanfit_class_name,
 as.mvg_ibbu_stanfit = function(stanfit, input, transform = NULL) {
   assert_that(class(stanfit) == "stanfit",
               msg = paste0("Only stanfit objects can be converted into ", class_name, " objects."))
-  assert_that(stanfit@stanmodel@model_name %in% names(MVBeliefUpdatr:::stanmodels),
-              msg = paste("stanfit object was not created by one of the accepted stancodes:\n\t",
+  print(stanfit@model_name)
+  assert_that(stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels),
+              msg = paste0("stanfit object was not created by one of the accepted stancodes:\n\t",
                            paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),
-                           "\n(you can get the name of your model from your_stanfit@stanmodel@model_name)."))
+                           "\n(you can get the name of your model from your_stanfit@model_name)."))
 
   class(stanfit) <- new_stanfit_class_name
   stanfit %<>%
@@ -57,8 +58,7 @@ as.mvg_ibbu_stanfit = function(stanfit, input, transform = NULL) {
 #' TBD
 #' @export
 is.mvg_ibbu_stanfit = function(x) {
-  print(class(x))
-  if (all(c(new_stanfit_class_name, "stanfit")  %in% class(x)))
+  if (all(class(x) %in% c("stanfit", new_stanfit_class_name)))
     return(TRUE) else return(FALSE)
 }
 
