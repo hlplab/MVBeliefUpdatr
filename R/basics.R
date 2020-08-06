@@ -192,16 +192,16 @@ untransform_cues = function(data, cues,
   if (is.null(unscale)) scale = !is.null(transform.parameters[["center"]])
 
   if (unpca) {
-    pca = transform.parameters[["pca"]]
-
     # Since we're uncentering and unscaling separately, the following is not needed:
     # https://stackoverflow.com/questions/29783790/how-to-reverse-pca-in-prcomp-to-get-original-data
+    # pca = transform.parameters[["pca"]]
     # t(t(pca$x %*% t(pca$rotation)) + pca$center)
     # If pca$scale is TRUE you will also need to re-scale
     # t(t(pca$x %*% t(pca$rotation)) * pca$scale + pca$center)
     newcues = data %>%
       select(!!! rlang::syms(cues)) %>%
-      { . %*% t(pca$rotation) }
+      as.matrix() %>%
+      { . %*% t(transform.parameters[["pca"]]$rotation) }
 
     data %<>%
       select(-all_of(cues)) %>%

@@ -238,6 +238,9 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   tau_scale = 0, L_omega_scale = 0,
   verbose = F
 ) {
+  if (pca.observations)
+    assert_that(between(pca.cutoff, 0, 1),
+                msg = "pca.cutoff must be between 0 and 1.")
   exposure <- check_exposure_test_data(
     data = exposure,
     cues = cues,
@@ -250,10 +253,9 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   if (!missing(group.unique)) {
     assert_that(group.unique %in% names(exposure),
                 msg = paste("Column for group.unique ", group.unique, "not found in exposure data."))
-    message(paste0("The argument group.unique was specified (", group.unique, ")."))
-    message("Collapsing *exposure* observations to unique values of group.unique by discarding the data from
-            all but the first group member. This means that each unique exposure condition will only be counted
-            once. All test observations are still counted, but aggregated for each unique value of group.unique.")
+    message(paste0("Collapsing *exposure* observations to unique values of group.unique (", group.unique, ") by
+    discarding the data from all but the first group member. This means that each unique exposure condition will
+    only be counted once. All test observations are still counted, but aggregated for each unique value of group.unique."))
 
     exposure %<>%
       mutate_at(group.unique, as.factor) %>%
@@ -303,6 +305,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   if (pca.observations) {
     s = summary(transform[["transform.parameters"]][["pca"]])$importance
     l = min(which(s["Cumulative Proportion",] >= pca.cutoff))
+    assert_that(l >= 1, msg = "Specified pca.cutoff does not yield to any PCA component being included. Increase the
+                pca.cutoff value.")
     if (length(cues) > l)
       message(paste("Given the specified pca.cutoff, only the first", l, "principal components will be used as cues."))
     cues = colnames(s)[1:l]

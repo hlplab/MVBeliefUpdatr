@@ -48,13 +48,15 @@ infer_prior_beliefs <- function(
       center = center.observations,
       scale = scale.observations,
       pca = pca.observations,
+      return.transformed.data = F,
+      return.transform.parameters = F,
       return.transform.function = T,
       return.untransform.function = T)
 
   if (is.null(useMultivariateUpdating))
     useMultivariateUpdating = if (is.null(data_list$K)) FALSE else TRUE
-  message("and add in the data")
-  message("store untransform function, too!")
+  message("change to keep samples only from relevant parameters.")
+  message("change the add_ibbu_stanfit_draws based on the new parameter names.")
 
   if (sample) {
     if (!is.null(model)) {
