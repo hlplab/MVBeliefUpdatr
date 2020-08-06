@@ -198,10 +198,10 @@ public:
             current_statement_begin__ = 42;
             num_params_r__ += 1;
             current_statement_begin__ = 43;
-            validate_non_negative_index("mu_0", "m", m);
+            validate_non_negative_index("m_0", "m", m);
             num_params_r__ += (1 * m);
             current_statement_begin__ = 44;
-            validate_non_negative_index("sigma_0", "m", m);
+            validate_non_negative_index("S_0", "m", m);
             num_params_r__ += (1 * m);
             current_statement_begin__ = 45;
             num_params_r__ += 1;
@@ -249,43 +249,43 @@ public:
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable nu_0: ") + e.what()), current_statement_begin__, prog_reader__());
         }
         current_statement_begin__ = 43;
-        if (!(context__.contains_r("mu_0")))
-            stan::lang::rethrow_located(std::runtime_error(std::string("Variable mu_0 missing")), current_statement_begin__, prog_reader__());
-        vals_r__ = context__.vals_r("mu_0");
+        if (!(context__.contains_r("m_0")))
+            stan::lang::rethrow_located(std::runtime_error(std::string("Variable m_0 missing")), current_statement_begin__, prog_reader__());
+        vals_r__ = context__.vals_r("m_0");
         pos__ = 0U;
-        validate_non_negative_index("mu_0", "m", m);
-        context__.validate_dims("parameter initialization", "mu_0", "double", context__.to_vec(m));
-        std::vector<double> mu_0(m, double(0));
-        size_t mu_0_k_0_max__ = m;
-        for (size_t k_0__ = 0; k_0__ < mu_0_k_0_max__; ++k_0__) {
-            mu_0[k_0__] = vals_r__[pos__++];
+        validate_non_negative_index("m_0", "m", m);
+        context__.validate_dims("parameter initialization", "m_0", "double", context__.to_vec(m));
+        std::vector<double> m_0(m, double(0));
+        size_t m_0_k_0_max__ = m;
+        for (size_t k_0__ = 0; k_0__ < m_0_k_0_max__; ++k_0__) {
+            m_0[k_0__] = vals_r__[pos__++];
         }
-        size_t mu_0_i_0_max__ = m;
-        for (size_t i_0__ = 0; i_0__ < mu_0_i_0_max__; ++i_0__) {
+        size_t m_0_i_0_max__ = m;
+        for (size_t i_0__ = 0; i_0__ < m_0_i_0_max__; ++i_0__) {
             try {
-                writer__.scalar_unconstrain(mu_0[i_0__]);
+                writer__.scalar_unconstrain(m_0[i_0__]);
             } catch (const std::exception& e) {
-                stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable mu_0: ") + e.what()), current_statement_begin__, prog_reader__());
+                stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable m_0: ") + e.what()), current_statement_begin__, prog_reader__());
             }
         }
         current_statement_begin__ = 44;
-        if (!(context__.contains_r("sigma_0")))
-            stan::lang::rethrow_located(std::runtime_error(std::string("Variable sigma_0 missing")), current_statement_begin__, prog_reader__());
-        vals_r__ = context__.vals_r("sigma_0");
+        if (!(context__.contains_r("S_0")))
+            stan::lang::rethrow_located(std::runtime_error(std::string("Variable S_0 missing")), current_statement_begin__, prog_reader__());
+        vals_r__ = context__.vals_r("S_0");
         pos__ = 0U;
-        validate_non_negative_index("sigma_0", "m", m);
-        context__.validate_dims("parameter initialization", "sigma_0", "double", context__.to_vec(m));
-        std::vector<double> sigma_0(m, double(0));
-        size_t sigma_0_k_0_max__ = m;
-        for (size_t k_0__ = 0; k_0__ < sigma_0_k_0_max__; ++k_0__) {
-            sigma_0[k_0__] = vals_r__[pos__++];
+        validate_non_negative_index("S_0", "m", m);
+        context__.validate_dims("parameter initialization", "S_0", "double", context__.to_vec(m));
+        std::vector<double> S_0(m, double(0));
+        size_t S_0_k_0_max__ = m;
+        for (size_t k_0__ = 0; k_0__ < S_0_k_0_max__; ++k_0__) {
+            S_0[k_0__] = vals_r__[pos__++];
         }
-        size_t sigma_0_i_0_max__ = m;
-        for (size_t i_0__ = 0; i_0__ < sigma_0_i_0_max__; ++i_0__) {
+        size_t S_0_i_0_max__ = m;
+        for (size_t i_0__ = 0; i_0__ < S_0_i_0_max__; ++i_0__) {
             try {
-                writer__.scalar_lb_unconstrain(0, sigma_0[i_0__]);
+                writer__.scalar_lb_unconstrain(0, S_0[i_0__]);
             } catch (const std::exception& e) {
-                stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable sigma_0: ") + e.what()), current_statement_begin__, prog_reader__());
+                stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable S_0: ") + e.what()), current_statement_begin__, prog_reader__());
             }
         }
         current_statement_begin__ = 45;
@@ -341,24 +341,24 @@ public:
             else
                 nu_0 = in__.scalar_lb_constrain(0);
             current_statement_begin__ = 43;
-            std::vector<local_scalar_t__> mu_0;
-            size_t mu_0_d_0_max__ = m;
-            mu_0.reserve(mu_0_d_0_max__);
-            for (size_t d_0__ = 0; d_0__ < mu_0_d_0_max__; ++d_0__) {
+            std::vector<local_scalar_t__> m_0;
+            size_t m_0_d_0_max__ = m;
+            m_0.reserve(m_0_d_0_max__);
+            for (size_t d_0__ = 0; d_0__ < m_0_d_0_max__; ++d_0__) {
                 if (jacobian__)
-                    mu_0.push_back(in__.scalar_constrain(lp__));
+                    m_0.push_back(in__.scalar_constrain(lp__));
                 else
-                    mu_0.push_back(in__.scalar_constrain());
+                    m_0.push_back(in__.scalar_constrain());
             }
             current_statement_begin__ = 44;
-            std::vector<local_scalar_t__> sigma_0;
-            size_t sigma_0_d_0_max__ = m;
-            sigma_0.reserve(sigma_0_d_0_max__);
-            for (size_t d_0__ = 0; d_0__ < sigma_0_d_0_max__; ++d_0__) {
+            std::vector<local_scalar_t__> S_0;
+            size_t S_0_d_0_max__ = m;
+            S_0.reserve(S_0_d_0_max__);
+            for (size_t d_0__ = 0; d_0__ < S_0_d_0_max__; ++d_0__) {
                 if (jacobian__)
-                    sigma_0.push_back(in__.scalar_lb_constrain(0, lp__));
+                    S_0.push_back(in__.scalar_lb_constrain(0, lp__));
                 else
-                    sigma_0.push_back(in__.scalar_lb_constrain(0));
+                    S_0.push_back(in__.scalar_lb_constrain(0));
             }
             current_statement_begin__ = 45;
             local_scalar_t__ lapse_rate;
@@ -369,11 +369,11 @@ public:
                 lapse_rate = in__.scalar_lub_constrain(0, 1);
             // transformed parameters
             current_statement_begin__ = 50;
-            validate_non_negative_index("mu_n", "m", m);
-            validate_non_negative_index("mu_n", "l", l);
-            std::vector<std::vector<local_scalar_t__> > mu_n(m, std::vector<local_scalar_t__>(l, local_scalar_t__(0)));
-            stan::math::initialize(mu_n, DUMMY_VAR__);
-            stan::math::fill(mu_n, DUMMY_VAR__);
+            validate_non_negative_index("m_n", "m", m);
+            validate_non_negative_index("m_n", "l", l);
+            std::vector<std::vector<local_scalar_t__> > m_n(m, std::vector<local_scalar_t__>(l, local_scalar_t__(0)));
+            stan::math::initialize(m_n, DUMMY_VAR__);
+            stan::math::fill(m_n, DUMMY_VAR__);
             current_statement_begin__ = 51;
             validate_non_negative_index("kappa_n", "m", m);
             validate_non_negative_index("kappa_n", "l", l);
@@ -381,11 +381,11 @@ public:
             stan::math::initialize(kappa_n, DUMMY_VAR__);
             stan::math::fill(kappa_n, DUMMY_VAR__);
             current_statement_begin__ = 52;
-            validate_non_negative_index("sigma_n", "m", m);
-            validate_non_negative_index("sigma_n", "l", l);
-            std::vector<std::vector<local_scalar_t__> > sigma_n(m, std::vector<local_scalar_t__>(l, local_scalar_t__(0)));
-            stan::math::initialize(sigma_n, DUMMY_VAR__);
-            stan::math::fill(sigma_n, DUMMY_VAR__);
+            validate_non_negative_index("S_n", "m", m);
+            validate_non_negative_index("S_n", "l", l);
+            std::vector<std::vector<local_scalar_t__> > S_n(m, std::vector<local_scalar_t__>(l, local_scalar_t__(0)));
+            stan::math::initialize(S_n, DUMMY_VAR__);
+            stan::math::fill(S_n, DUMMY_VAR__);
             current_statement_begin__ = 53;
             validate_non_negative_index("nu_n", "m", m);
             validate_non_negative_index("nu_n", "l", l);
@@ -426,19 +426,19 @@ public:
                                 (nu_0 + get_base1(n, cat, group, "n", 1)), 
                                 "assigning variable nu_n");
                     current_statement_begin__ = 64;
-                    stan::model::assign(mu_n, 
+                    stan::model::assign(m_n, 
                                 stan::model::cons_list(stan::model::index_uni(cat), stan::model::cons_list(stan::model::index_uni(group), stan::model::nil_index_list())), 
-                                (((get_base1(mu_0, cat, "mu_0", 1) * kappa_0) + (get_base1(xbar, cat, group, "xbar", 1) * get_base1(n, cat, group, "n", 1))) / get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2)), 
-                                "assigning variable mu_n");
+                                (((get_base1(m_0, cat, "m_0", 1) * kappa_0) + (get_base1(xbar, cat, group, "xbar", 1) * get_base1(n, cat, group, "n", 1))) / get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2)), 
+                                "assigning variable m_n");
                     current_statement_begin__ = 65;
-                    stan::model::assign(sigma_n, 
+                    stan::model::assign(S_n, 
                                 stan::model::cons_list(stan::model::index_uni(cat), stan::model::cons_list(stan::model::index_uni(group), stan::model::nil_index_list())), 
-                                stan::math::sqrt(((((nu_0 * pow(get_base1(sigma_0, cat, "sigma_0", 1), 2)) + get_base1(ss, cat, group, "ss", 1)) + (((get_base1(n, cat, group, "n", 1) * kappa_0) / get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2)) * pow((get_base1(mu_0, cat, "mu_0", 1) - get_base1(xbar, cat, group, "xbar", 1)), 2))) / get_base1(get_base1(nu_n, cat, "nu_n", 1), group, "nu_n", 2))), 
-                                "assigning variable sigma_n");
+                                stan::math::sqrt(((((nu_0 * pow(get_base1(S_0, cat, "S_0", 1), 2)) + get_base1(ss, cat, group, "ss", 1)) + (((get_base1(n, cat, group, "n", 1) * kappa_0) / get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2)) * pow((get_base1(m_0, cat, "m_0", 1) - get_base1(xbar, cat, group, "xbar", 1)), 2))) / get_base1(get_base1(nu_n, cat, "nu_n", 1), group, "nu_n", 2))), 
+                                "assigning variable S_n");
                     current_statement_begin__ = 71;
                     stan::model::assign(t_scale, 
                                 stan::model::cons_list(stan::model::index_uni(cat), stan::model::cons_list(stan::model::index_uni(group), stan::model::nil_index_list())), 
-                                (get_base1(get_base1(sigma_n, cat, "sigma_n", 1), group, "sigma_n", 2) * stan::math::sqrt(((get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2) + 1) / get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2)))), 
+                                (get_base1(get_base1(S_n, cat, "S_n", 1), group, "S_n", 2) * stan::math::sqrt(((get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2) + 1) / get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2)))), 
                                 "assigning variable t_scale");
                 }
             }
@@ -456,7 +456,7 @@ public:
                     current_statement_begin__ = 81;
                     stan::model::assign(log_p_test_conj, 
                                 stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(cat), stan::model::nil_index_list())), 
-                                student_t_log(get_base1(x_test, j, "x_test", 1), get_base1(get_base1(nu_n, cat, "nu_n", 1), group, "nu_n", 2), get_base1(get_base1(mu_n, cat, "mu_n", 1), group, "mu_n", 2), get_base1(get_base1(t_scale, cat, "t_scale", 1), group, "t_scale", 2)), 
+                                student_t_log(get_base1(x_test, j, "x_test", 1), get_base1(get_base1(nu_n, cat, "nu_n", 1), group, "nu_n", 2), get_base1(get_base1(m_n, cat, "m_n", 1), group, "m_n", 2), get_base1(get_base1(t_scale, cat, "t_scale", 1), group, "t_scale", 2)), 
                                 "assigning variable log_p_test_conj");
                 }
                 current_statement_begin__ = 87;
@@ -470,14 +470,14 @@ public:
             const char* function__ = "validate transformed params";
             (void) function__;  // dummy to suppress unused var warning
             current_statement_begin__ = 50;
-            size_t mu_n_k_0_max__ = m;
-            size_t mu_n_k_1_max__ = l;
-            for (size_t k_0__ = 0; k_0__ < mu_n_k_0_max__; ++k_0__) {
-                for (size_t k_1__ = 0; k_1__ < mu_n_k_1_max__; ++k_1__) {
-                    if (stan::math::is_uninitialized(mu_n[k_0__][k_1__])) {
+            size_t m_n_k_0_max__ = m;
+            size_t m_n_k_1_max__ = l;
+            for (size_t k_0__ = 0; k_0__ < m_n_k_0_max__; ++k_0__) {
+                for (size_t k_1__ = 0; k_1__ < m_n_k_1_max__; ++k_1__) {
+                    if (stan::math::is_uninitialized(m_n[k_0__][k_1__])) {
                         std::stringstream msg__;
-                        msg__ << "Undefined transformed parameter: mu_n" << "[" << k_0__ << "]" << "[" << k_1__ << "]";
-                        stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable mu_n: ") + msg__.str()), current_statement_begin__, prog_reader__());
+                        msg__ << "Undefined transformed parameter: m_n" << "[" << k_0__ << "]" << "[" << k_1__ << "]";
+                        stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable m_n: ") + msg__.str()), current_statement_begin__, prog_reader__());
                     }
                 }
             }
@@ -501,22 +501,22 @@ public:
                 }
             }
             current_statement_begin__ = 52;
-            size_t sigma_n_k_0_max__ = m;
-            size_t sigma_n_k_1_max__ = l;
-            for (size_t k_0__ = 0; k_0__ < sigma_n_k_0_max__; ++k_0__) {
-                for (size_t k_1__ = 0; k_1__ < sigma_n_k_1_max__; ++k_1__) {
-                    if (stan::math::is_uninitialized(sigma_n[k_0__][k_1__])) {
+            size_t S_n_k_0_max__ = m;
+            size_t S_n_k_1_max__ = l;
+            for (size_t k_0__ = 0; k_0__ < S_n_k_0_max__; ++k_0__) {
+                for (size_t k_1__ = 0; k_1__ < S_n_k_1_max__; ++k_1__) {
+                    if (stan::math::is_uninitialized(S_n[k_0__][k_1__])) {
                         std::stringstream msg__;
-                        msg__ << "Undefined transformed parameter: sigma_n" << "[" << k_0__ << "]" << "[" << k_1__ << "]";
-                        stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable sigma_n: ") + msg__.str()), current_statement_begin__, prog_reader__());
+                        msg__ << "Undefined transformed parameter: S_n" << "[" << k_0__ << "]" << "[" << k_1__ << "]";
+                        stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable S_n: ") + msg__.str()), current_statement_begin__, prog_reader__());
                     }
                 }
             }
-            size_t sigma_n_i_0_max__ = m;
-            size_t sigma_n_i_1_max__ = l;
-            for (size_t i_0__ = 0; i_0__ < sigma_n_i_0_max__; ++i_0__) {
-                for (size_t i_1__ = 0; i_1__ < sigma_n_i_1_max__; ++i_1__) {
-                    check_greater_or_equal(function__, "sigma_n[i_0__][i_1__]", sigma_n[i_0__][i_1__], 0);
+            size_t S_n_i_0_max__ = m;
+            size_t S_n_i_1_max__ = l;
+            for (size_t i_0__ = 0; i_0__ < S_n_i_0_max__; ++i_0__) {
+                for (size_t i_1__ = 0; i_1__ < S_n_i_1_max__; ++i_1__) {
+                    check_greater_or_equal(function__, "S_n[i_0__][i_1__]", S_n[i_0__][i_1__], 0);
                 }
             }
             current_statement_begin__ = 53;
@@ -599,9 +599,9 @@ public:
             current_statement_begin__ = 98;
             lp_accum__.add(normal_log<propto__>(nu_0, 0, (n_each * 4)));
             current_statement_begin__ = 100;
-            lp_accum__.add(normal_log<propto__>(mu_0, 0, 100));
+            lp_accum__.add(normal_log<propto__>(m_0, 0, 100));
             current_statement_begin__ = 101;
-            lp_accum__.add(uniform_log<propto__>(sigma_0, 0, 100));
+            lp_accum__.add(uniform_log<propto__>(S_0, 0, 100));
             current_statement_begin__ = 103;
             for (int i = 1; i <= n_test; ++i) {
                 current_statement_begin__ = 104;
@@ -630,12 +630,12 @@ public:
         names__.resize(0);
         names__.push_back("kappa_0");
         names__.push_back("nu_0");
-        names__.push_back("mu_0");
-        names__.push_back("sigma_0");
+        names__.push_back("m_0");
+        names__.push_back("S_0");
         names__.push_back("lapse_rate");
-        names__.push_back("mu_n");
+        names__.push_back("m_n");
         names__.push_back("kappa_n");
-        names__.push_back("sigma_n");
+        names__.push_back("S_n");
         names__.push_back("nu_n");
         names__.push_back("t_scale");
         names__.push_back("p_test_conj");
@@ -703,25 +703,25 @@ public:
         vars__.push_back(kappa_0);
         double nu_0 = in__.scalar_lb_constrain(0);
         vars__.push_back(nu_0);
-        std::vector<double> mu_0;
-        size_t mu_0_d_0_max__ = m;
-        mu_0.reserve(mu_0_d_0_max__);
-        for (size_t d_0__ = 0; d_0__ < mu_0_d_0_max__; ++d_0__) {
-            mu_0.push_back(in__.scalar_constrain());
+        std::vector<double> m_0;
+        size_t m_0_d_0_max__ = m;
+        m_0.reserve(m_0_d_0_max__);
+        for (size_t d_0__ = 0; d_0__ < m_0_d_0_max__; ++d_0__) {
+            m_0.push_back(in__.scalar_constrain());
         }
-        size_t mu_0_k_0_max__ = m;
-        for (size_t k_0__ = 0; k_0__ < mu_0_k_0_max__; ++k_0__) {
-            vars__.push_back(mu_0[k_0__]);
+        size_t m_0_k_0_max__ = m;
+        for (size_t k_0__ = 0; k_0__ < m_0_k_0_max__; ++k_0__) {
+            vars__.push_back(m_0[k_0__]);
         }
-        std::vector<double> sigma_0;
-        size_t sigma_0_d_0_max__ = m;
-        sigma_0.reserve(sigma_0_d_0_max__);
-        for (size_t d_0__ = 0; d_0__ < sigma_0_d_0_max__; ++d_0__) {
-            sigma_0.push_back(in__.scalar_lb_constrain(0));
+        std::vector<double> S_0;
+        size_t S_0_d_0_max__ = m;
+        S_0.reserve(S_0_d_0_max__);
+        for (size_t d_0__ = 0; d_0__ < S_0_d_0_max__; ++d_0__) {
+            S_0.push_back(in__.scalar_lb_constrain(0));
         }
-        size_t sigma_0_k_0_max__ = m;
-        for (size_t k_0__ = 0; k_0__ < sigma_0_k_0_max__; ++k_0__) {
-            vars__.push_back(sigma_0[k_0__]);
+        size_t S_0_k_0_max__ = m;
+        for (size_t k_0__ = 0; k_0__ < S_0_k_0_max__; ++k_0__) {
+            vars__.push_back(S_0[k_0__]);
         }
         double lapse_rate = in__.scalar_lub_constrain(0, 1);
         vars__.push_back(lapse_rate);
@@ -734,11 +734,11 @@ public:
         try {
             // declare and define transformed parameters
             current_statement_begin__ = 50;
-            validate_non_negative_index("mu_n", "m", m);
-            validate_non_negative_index("mu_n", "l", l);
-            std::vector<std::vector<double> > mu_n(m, std::vector<double>(l, double(0)));
-            stan::math::initialize(mu_n, DUMMY_VAR__);
-            stan::math::fill(mu_n, DUMMY_VAR__);
+            validate_non_negative_index("m_n", "m", m);
+            validate_non_negative_index("m_n", "l", l);
+            std::vector<std::vector<double> > m_n(m, std::vector<double>(l, double(0)));
+            stan::math::initialize(m_n, DUMMY_VAR__);
+            stan::math::fill(m_n, DUMMY_VAR__);
             current_statement_begin__ = 51;
             validate_non_negative_index("kappa_n", "m", m);
             validate_non_negative_index("kappa_n", "l", l);
@@ -746,11 +746,11 @@ public:
             stan::math::initialize(kappa_n, DUMMY_VAR__);
             stan::math::fill(kappa_n, DUMMY_VAR__);
             current_statement_begin__ = 52;
-            validate_non_negative_index("sigma_n", "m", m);
-            validate_non_negative_index("sigma_n", "l", l);
-            std::vector<std::vector<double> > sigma_n(m, std::vector<double>(l, double(0)));
-            stan::math::initialize(sigma_n, DUMMY_VAR__);
-            stan::math::fill(sigma_n, DUMMY_VAR__);
+            validate_non_negative_index("S_n", "m", m);
+            validate_non_negative_index("S_n", "l", l);
+            std::vector<std::vector<double> > S_n(m, std::vector<double>(l, double(0)));
+            stan::math::initialize(S_n, DUMMY_VAR__);
+            stan::math::fill(S_n, DUMMY_VAR__);
             current_statement_begin__ = 53;
             validate_non_negative_index("nu_n", "m", m);
             validate_non_negative_index("nu_n", "l", l);
@@ -791,19 +791,19 @@ public:
                                 (nu_0 + get_base1(n, cat, group, "n", 1)), 
                                 "assigning variable nu_n");
                     current_statement_begin__ = 64;
-                    stan::model::assign(mu_n, 
+                    stan::model::assign(m_n, 
                                 stan::model::cons_list(stan::model::index_uni(cat), stan::model::cons_list(stan::model::index_uni(group), stan::model::nil_index_list())), 
-                                (((get_base1(mu_0, cat, "mu_0", 1) * kappa_0) + (get_base1(xbar, cat, group, "xbar", 1) * get_base1(n, cat, group, "n", 1))) / get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2)), 
-                                "assigning variable mu_n");
+                                (((get_base1(m_0, cat, "m_0", 1) * kappa_0) + (get_base1(xbar, cat, group, "xbar", 1) * get_base1(n, cat, group, "n", 1))) / get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2)), 
+                                "assigning variable m_n");
                     current_statement_begin__ = 65;
-                    stan::model::assign(sigma_n, 
+                    stan::model::assign(S_n, 
                                 stan::model::cons_list(stan::model::index_uni(cat), stan::model::cons_list(stan::model::index_uni(group), stan::model::nil_index_list())), 
-                                stan::math::sqrt(((((nu_0 * pow(get_base1(sigma_0, cat, "sigma_0", 1), 2)) + get_base1(ss, cat, group, "ss", 1)) + (((get_base1(n, cat, group, "n", 1) * kappa_0) / get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2)) * pow((get_base1(mu_0, cat, "mu_0", 1) - get_base1(xbar, cat, group, "xbar", 1)), 2))) / get_base1(get_base1(nu_n, cat, "nu_n", 1), group, "nu_n", 2))), 
-                                "assigning variable sigma_n");
+                                stan::math::sqrt(((((nu_0 * pow(get_base1(S_0, cat, "S_0", 1), 2)) + get_base1(ss, cat, group, "ss", 1)) + (((get_base1(n, cat, group, "n", 1) * kappa_0) / get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2)) * pow((get_base1(m_0, cat, "m_0", 1) - get_base1(xbar, cat, group, "xbar", 1)), 2))) / get_base1(get_base1(nu_n, cat, "nu_n", 1), group, "nu_n", 2))), 
+                                "assigning variable S_n");
                     current_statement_begin__ = 71;
                     stan::model::assign(t_scale, 
                                 stan::model::cons_list(stan::model::index_uni(cat), stan::model::cons_list(stan::model::index_uni(group), stan::model::nil_index_list())), 
-                                (get_base1(get_base1(sigma_n, cat, "sigma_n", 1), group, "sigma_n", 2) * stan::math::sqrt(((get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2) + 1) / get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2)))), 
+                                (get_base1(get_base1(S_n, cat, "S_n", 1), group, "S_n", 2) * stan::math::sqrt(((get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2) + 1) / get_base1(get_base1(kappa_n, cat, "kappa_n", 1), group, "kappa_n", 2)))), 
                                 "assigning variable t_scale");
                 }
             }
@@ -821,7 +821,7 @@ public:
                     current_statement_begin__ = 81;
                     stan::model::assign(log_p_test_conj, 
                                 stan::model::cons_list(stan::model::index_uni(j), stan::model::cons_list(stan::model::index_uni(cat), stan::model::nil_index_list())), 
-                                student_t_log(get_base1(x_test, j, "x_test", 1), get_base1(get_base1(nu_n, cat, "nu_n", 1), group, "nu_n", 2), get_base1(get_base1(mu_n, cat, "mu_n", 1), group, "mu_n", 2), get_base1(get_base1(t_scale, cat, "t_scale", 1), group, "t_scale", 2)), 
+                                student_t_log(get_base1(x_test, j, "x_test", 1), get_base1(get_base1(nu_n, cat, "nu_n", 1), group, "nu_n", 2), get_base1(get_base1(m_n, cat, "m_n", 1), group, "m_n", 2), get_base1(get_base1(t_scale, cat, "t_scale", 1), group, "t_scale", 2)), 
                                 "assigning variable log_p_test_conj");
                 }
                 current_statement_begin__ = 87;
@@ -844,11 +844,11 @@ public:
                 }
             }
             current_statement_begin__ = 52;
-            size_t sigma_n_i_0_max__ = m;
-            size_t sigma_n_i_1_max__ = l;
-            for (size_t i_0__ = 0; i_0__ < sigma_n_i_0_max__; ++i_0__) {
-                for (size_t i_1__ = 0; i_1__ < sigma_n_i_1_max__; ++i_1__) {
-                    check_greater_or_equal(function__, "sigma_n[i_0__][i_1__]", sigma_n[i_0__][i_1__], 0);
+            size_t S_n_i_0_max__ = m;
+            size_t S_n_i_1_max__ = l;
+            for (size_t i_0__ = 0; i_0__ < S_n_i_0_max__; ++i_0__) {
+                for (size_t i_1__ = 0; i_1__ < S_n_i_1_max__; ++i_1__) {
+                    check_greater_or_equal(function__, "S_n[i_0__][i_1__]", S_n[i_0__][i_1__], 0);
                 }
             }
             current_statement_begin__ = 53;
@@ -874,11 +874,11 @@ public:
             }
             // write transformed parameters
             if (include_tparams__) {
-                size_t mu_n_k_0_max__ = m;
-                size_t mu_n_k_1_max__ = l;
-                for (size_t k_1__ = 0; k_1__ < mu_n_k_1_max__; ++k_1__) {
-                    for (size_t k_0__ = 0; k_0__ < mu_n_k_0_max__; ++k_0__) {
-                        vars__.push_back(mu_n[k_0__][k_1__]);
+                size_t m_n_k_0_max__ = m;
+                size_t m_n_k_1_max__ = l;
+                for (size_t k_1__ = 0; k_1__ < m_n_k_1_max__; ++k_1__) {
+                    for (size_t k_0__ = 0; k_0__ < m_n_k_0_max__; ++k_0__) {
+                        vars__.push_back(m_n[k_0__][k_1__]);
                     }
                 }
                 size_t kappa_n_k_0_max__ = m;
@@ -888,11 +888,11 @@ public:
                         vars__.push_back(kappa_n[k_0__][k_1__]);
                     }
                 }
-                size_t sigma_n_k_0_max__ = m;
-                size_t sigma_n_k_1_max__ = l;
-                for (size_t k_1__ = 0; k_1__ < sigma_n_k_1_max__; ++k_1__) {
-                    for (size_t k_0__ = 0; k_0__ < sigma_n_k_0_max__; ++k_0__) {
-                        vars__.push_back(sigma_n[k_0__][k_1__]);
+                size_t S_n_k_0_max__ = m;
+                size_t S_n_k_1_max__ = l;
+                for (size_t k_1__ = 0; k_1__ < S_n_k_1_max__; ++k_1__) {
+                    for (size_t k_0__ = 0; k_0__ < S_n_k_0_max__; ++k_0__) {
+                        vars__.push_back(S_n[k_0__][k_1__]);
                     }
                 }
                 size_t nu_n_k_0_max__ = m;
@@ -961,16 +961,16 @@ public:
         param_name_stream__.str(std::string());
         param_name_stream__ << "nu_0";
         param_names__.push_back(param_name_stream__.str());
-        size_t mu_0_k_0_max__ = m;
-        for (size_t k_0__ = 0; k_0__ < mu_0_k_0_max__; ++k_0__) {
+        size_t m_0_k_0_max__ = m;
+        for (size_t k_0__ = 0; k_0__ < m_0_k_0_max__; ++k_0__) {
             param_name_stream__.str(std::string());
-            param_name_stream__ << "mu_0" << '.' << k_0__ + 1;
+            param_name_stream__ << "m_0" << '.' << k_0__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
-        size_t sigma_0_k_0_max__ = m;
-        for (size_t k_0__ = 0; k_0__ < sigma_0_k_0_max__; ++k_0__) {
+        size_t S_0_k_0_max__ = m;
+        for (size_t k_0__ = 0; k_0__ < S_0_k_0_max__; ++k_0__) {
             param_name_stream__.str(std::string());
-            param_name_stream__ << "sigma_0" << '.' << k_0__ + 1;
+            param_name_stream__ << "S_0" << '.' << k_0__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
         param_name_stream__.str(std::string());
@@ -978,12 +978,12 @@ public:
         param_names__.push_back(param_name_stream__.str());
         if (!include_gqs__ && !include_tparams__) return;
         if (include_tparams__) {
-            size_t mu_n_k_0_max__ = m;
-            size_t mu_n_k_1_max__ = l;
-            for (size_t k_1__ = 0; k_1__ < mu_n_k_1_max__; ++k_1__) {
-                for (size_t k_0__ = 0; k_0__ < mu_n_k_0_max__; ++k_0__) {
+            size_t m_n_k_0_max__ = m;
+            size_t m_n_k_1_max__ = l;
+            for (size_t k_1__ = 0; k_1__ < m_n_k_1_max__; ++k_1__) {
+                for (size_t k_0__ = 0; k_0__ < m_n_k_0_max__; ++k_0__) {
                     param_name_stream__.str(std::string());
-                    param_name_stream__ << "mu_n" << '.' << k_0__ + 1 << '.' << k_1__ + 1;
+                    param_name_stream__ << "m_n" << '.' << k_0__ + 1 << '.' << k_1__ + 1;
                     param_names__.push_back(param_name_stream__.str());
                 }
             }
@@ -996,12 +996,12 @@ public:
                     param_names__.push_back(param_name_stream__.str());
                 }
             }
-            size_t sigma_n_k_0_max__ = m;
-            size_t sigma_n_k_1_max__ = l;
-            for (size_t k_1__ = 0; k_1__ < sigma_n_k_1_max__; ++k_1__) {
-                for (size_t k_0__ = 0; k_0__ < sigma_n_k_0_max__; ++k_0__) {
+            size_t S_n_k_0_max__ = m;
+            size_t S_n_k_1_max__ = l;
+            for (size_t k_1__ = 0; k_1__ < S_n_k_1_max__; ++k_1__) {
+                for (size_t k_0__ = 0; k_0__ < S_n_k_0_max__; ++k_0__) {
                     param_name_stream__.str(std::string());
-                    param_name_stream__ << "sigma_n" << '.' << k_0__ + 1 << '.' << k_1__ + 1;
+                    param_name_stream__ << "S_n" << '.' << k_0__ + 1 << '.' << k_1__ + 1;
                     param_names__.push_back(param_name_stream__.str());
                 }
             }
@@ -1054,16 +1054,16 @@ public:
         param_name_stream__.str(std::string());
         param_name_stream__ << "nu_0";
         param_names__.push_back(param_name_stream__.str());
-        size_t mu_0_k_0_max__ = m;
-        for (size_t k_0__ = 0; k_0__ < mu_0_k_0_max__; ++k_0__) {
+        size_t m_0_k_0_max__ = m;
+        for (size_t k_0__ = 0; k_0__ < m_0_k_0_max__; ++k_0__) {
             param_name_stream__.str(std::string());
-            param_name_stream__ << "mu_0" << '.' << k_0__ + 1;
+            param_name_stream__ << "m_0" << '.' << k_0__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
-        size_t sigma_0_k_0_max__ = m;
-        for (size_t k_0__ = 0; k_0__ < sigma_0_k_0_max__; ++k_0__) {
+        size_t S_0_k_0_max__ = m;
+        for (size_t k_0__ = 0; k_0__ < S_0_k_0_max__; ++k_0__) {
             param_name_stream__.str(std::string());
-            param_name_stream__ << "sigma_0" << '.' << k_0__ + 1;
+            param_name_stream__ << "S_0" << '.' << k_0__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
         param_name_stream__.str(std::string());
@@ -1071,12 +1071,12 @@ public:
         param_names__.push_back(param_name_stream__.str());
         if (!include_gqs__ && !include_tparams__) return;
         if (include_tparams__) {
-            size_t mu_n_k_0_max__ = m;
-            size_t mu_n_k_1_max__ = l;
-            for (size_t k_1__ = 0; k_1__ < mu_n_k_1_max__; ++k_1__) {
-                for (size_t k_0__ = 0; k_0__ < mu_n_k_0_max__; ++k_0__) {
+            size_t m_n_k_0_max__ = m;
+            size_t m_n_k_1_max__ = l;
+            for (size_t k_1__ = 0; k_1__ < m_n_k_1_max__; ++k_1__) {
+                for (size_t k_0__ = 0; k_0__ < m_n_k_0_max__; ++k_0__) {
                     param_name_stream__.str(std::string());
-                    param_name_stream__ << "mu_n" << '.' << k_0__ + 1 << '.' << k_1__ + 1;
+                    param_name_stream__ << "m_n" << '.' << k_0__ + 1 << '.' << k_1__ + 1;
                     param_names__.push_back(param_name_stream__.str());
                 }
             }
@@ -1089,12 +1089,12 @@ public:
                     param_names__.push_back(param_name_stream__.str());
                 }
             }
-            size_t sigma_n_k_0_max__ = m;
-            size_t sigma_n_k_1_max__ = l;
-            for (size_t k_1__ = 0; k_1__ < sigma_n_k_1_max__; ++k_1__) {
-                for (size_t k_0__ = 0; k_0__ < sigma_n_k_0_max__; ++k_0__) {
+            size_t S_n_k_0_max__ = m;
+            size_t S_n_k_1_max__ = l;
+            for (size_t k_1__ = 0; k_1__ < S_n_k_1_max__; ++k_1__) {
+                for (size_t k_0__ = 0; k_0__ < S_n_k_0_max__; ++k_0__) {
                     param_name_stream__.str(std::string());
-                    param_name_stream__ << "sigma_n" << '.' << k_0__ + 1 << '.' << k_1__ + 1;
+                    param_name_stream__ << "S_n" << '.' << k_0__ + 1 << '.' << k_1__ + 1;
                     param_names__.push_back(param_name_stream__.str());
                 }
             }

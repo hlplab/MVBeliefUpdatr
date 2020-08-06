@@ -1,3 +1,5 @@
+#' @importFrom reshape2 acast
+
 check_exposure_test_data <- function(data, cues, category, response, group, which.data = "the", verbose = F) {
   assert_that(is_tibble(data) | is.data.frame(data))
   assert_that(all(is_character(cues)),
@@ -173,10 +175,15 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
 
     stats <- names(list(...))
 
-    data_ss <- map(stats, ~ reshape2::acast(data_ss, as.list(c(category, group)), value.var=.x)) %>%
+    data_ss <- map(stats, ~ acast(data_ss, as.list(c(category, group)),
+                                  value.var = .x,
+                                  drop = F,
+                                  fill = 0)) %>%
       set_names(stats)
   }
 
+  data_ss %<>%
+    ungroup()
 
   if (verbose) {
     print("In get_sufficient_statistics_from_data(), sum-of-squares matrix (uncentered for multivariate data,
@@ -241,6 +248,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   if (pca.observations)
     assert_that(between(pca.cutoff, 0, 1),
                 msg = "pca.cutoff must be between 0 and 1.")
+
   exposure <- check_exposure_test_data(
     data = exposure,
     cues = cues,

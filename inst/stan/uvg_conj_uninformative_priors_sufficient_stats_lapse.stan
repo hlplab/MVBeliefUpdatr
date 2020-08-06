@@ -40,16 +40,16 @@ parameters {
   // these are all shared across groups (same prior beliefs):
   real<lower=0> kappa_0;        // prior pseudocount for mean
   real<lower=0> nu_0;           // prior pseudocount for sd
-  real mu_0[m];                 // prior expected mean
-  real<lower=0> sigma_0[m];     // prior expected standard deviation
+  real m_0[m];                 // prior expected mean
+  real<lower=0> S_0[m];     // prior expected standard deviation
   real<lower=0, upper=1> lapse_rate;
 }
 
 transformed parameters {
   // updated beliefs depend on input/group
-  real mu_n[m,l];                 // updated expected mean
+  real m_n[m,l];                 // updated expected mean
   real<lower=0> kappa_n[m,l];     // updated mean pseudocount
-  real<lower=0> sigma_n[m,l];     // updated expected sd
+  real<lower=0> S_n[m,l];     // updated expected sd
   real<lower=0> nu_n[m,l];        // updated sd pseudocount
   real<lower=0> t_scale[m,l];     // scale parameter of predictive t distribution
   simplex[m] p_test_conj[n_test];
@@ -61,14 +61,14 @@ transformed parameters {
     for (group in 1:l) {
       kappa_n[cat,group] = kappa_0 + n[cat,group];
       nu_n[cat,group] = nu_0 + n[cat,group];
-      mu_n[cat,group] = (mu_0[cat] * kappa_0 + xbar[cat,group] * n[cat,group]) / kappa_n[cat,group];
-      sigma_n[cat,group] = sqrt((nu_0*sigma_0[cat]^2 +
+      m_n[cat,group] = (m_0[cat] * kappa_0 + xbar[cat,group] * n[cat,group]) / kappa_n[cat,group];
+      S_n[cat,group] = sqrt((nu_0*S_0[cat]^2 +
                                  ss[cat,group] +
                                  (n[cat,group]*kappa_0)/(kappa_n[cat,group]) *
-                                   (mu_0[cat] - xbar[cat,group])^2
+                                   (m_0[cat] - xbar[cat,group])^2
                                  ) /
                                 nu_n[cat,group]);
-      t_scale[cat,group] = sigma_n[cat,group] * sqrt((kappa_n[cat,group] + 1) / kappa_n[cat,group]);
+      t_scale[cat,group] = S_n[cat,group] * sqrt((kappa_n[cat,group] + 1) / kappa_n[cat,group]);
     }
   }
 
@@ -80,7 +80,7 @@ transformed parameters {
     for (cat in 1:m) {
       log_p_test_conj[j,cat] = student_t_lpdf(x_test[j] |
                                               nu_n[cat,group],
-                                              mu_n[cat,group],
+                                              m_n[cat,group],
                                               t_scale[cat,group]);
     }
     // normalize and store actual probs in simplex
@@ -97,8 +97,8 @@ model {
   kappa_0 ~ normal(0, n_each*4);
   nu_0 ~ normal(0, n_each*4);
 
-  mu_0 ~ normal(0, 100);
-  sigma_0 ~ uniform(0, 100);
+  m_0 ~ normal(0, 100);
+  S_0 ~ uniform(0, 100);
 
   for (i in 1:n_test) {
     z_test_counts[i] ~ multinomial(p_test_conj[i] * (1-lapse_rate) + lapsing_probs);
