@@ -1,11 +1,10 @@
-#' @import rstan
-
 new_stanfit_class_name = "mvg_ibbu_stanfit"
 
 #' An S4 class for stanfit objects that use one of the mvg_ibbu stan programs.
 #'
 #' @slot input_data A list
 #' @slot labels A list
+#' @export
 mvg_ibbu_stanfit <- setClass(new_stanfit_class_name,
          slots = c(input_data = "list", transforms = "list", labels = "list"),
          contains = "stanfit",
@@ -27,13 +26,13 @@ mvg_ibbu_stanfit <- setClass(new_stanfit_class_name,
 #' @examples
 #' TBD
 #' @export
-#'
 as.mvg_ibbu_stanfit = function(stanfit, input, transform = NULL) {
   assert_that(class(stanfit) == "stanfit",
               msg = paste0("Only stanfit objects can be converted into ", class_name, " objects."))
   assert_that(stanfit@stanmodel@model_name %in% names(MVBeliefUpdatr:::stanmodels),
-              msg = paste0("stanfit object was not created by one of the accepted stancodes: code is ",
-                           stanfit@stanmodel@model_name, " but would have to be one of ", names(MVBeliefUpdatr:::stanmodels)))
+              msg = paste("stanfit object was not created by one of the accepted stancodes:\n\t",
+                           paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),
+                           "\n(you can get the name of your model from your_stanfit@stanmodel@model_name)."))
 
   class(stanfit) <- new_stanfit_class_name
   stanfit %<>%
@@ -58,6 +57,7 @@ as.mvg_ibbu_stanfit = function(stanfit, input, transform = NULL) {
 #' TBD
 #' @export
 is.mvg_ibbu_stanfit = function(x) {
+  print(class(x))
   if (all(c(new_stanfit_class_name, "stanfit")  %in% class(x)))
     return(TRUE) else return(FALSE)
 }
