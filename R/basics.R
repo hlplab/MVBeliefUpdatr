@@ -192,7 +192,7 @@ untransform_cues = function(data, cues,
   if (is.null(unscale)) scale = !is.null(transform.parameters[["center"]])
 
   if (unpca) {
-    stop("PCA untransform not yet implemented!")
+    warning("PCA untransform not yet implemented!")
     data %<>%
       cbind(predict(transform.parameters[["pca"]], data))
   }
@@ -217,7 +217,7 @@ untransform_cues = function(data, cues,
       cbind(newcues)
   }
 
-  untransform.function = if (!return.transform.function) NULL else {
+  untransform.function = if (!return.untransform.function) NULL else {
     function(data) {
       cues = cues
       uncenter = uncenter
