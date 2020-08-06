@@ -6,7 +6,7 @@ new_stanfit_class_name = "mvg_ibbu_stanfit"
 #' @slot labels A list
 #' @export
 mvg_ibbu_stanfit <- setClass(new_stanfit_class_name,
-         slots = c(input_data = "list", transforms = "list", labels = "list"),
+         slots = c(input_data = "list", transform_functions = "list", labels = "list"),
          contains = "stanfit",
          package = "MVBeliefUpdatr")
 
@@ -29,7 +29,6 @@ mvg_ibbu_stanfit <- setClass(new_stanfit_class_name,
 as.mvg_ibbu_stanfit = function(stanfit, input, transform = NULL) {
   assert_that(class(stanfit) == "stanfit",
               msg = paste0("Only stanfit objects can be converted into ", class_name, " objects."))
-  print(stanfit@model_name)
   assert_that(stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels),
               msg = paste0("stanfit object was not created by one of the accepted stancodes:\n\t",
                            paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),

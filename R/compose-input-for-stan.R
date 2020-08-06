@@ -403,10 +403,10 @@ attach_stanfit_input_data = function(stanfit, input) {
   return(stanfit)
 }
 
-attach_stanfit_transform = function(stanfit, transform) {
+attach_stanfit_transform = function(stanfit, transform_functions) {
   assert_that(is.mvg_ibbu_stanfit(stanfit),
               msg = paste0("stanfit must be of class ", new_stanfit_class_name))
-  stanfit@transform = transform
+  stanfit@transform_functions = transform_functions
 
   return(stanfit)
 }
