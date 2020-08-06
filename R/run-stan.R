@@ -18,9 +18,13 @@ infer_prior_beliefs <- function(
   cues, category, response, group, group.unique,
   center.observations = TRUE, scale.observations = TRUE, pca.observations = FALSE, pca.cutoff = 1,
   tau_scale = 10, L_omega_scale = 1,
-  useMultivariateUpdating = if(length(cues) > 1) TRUE else FALSE,
-  sample = TRUE, verbose = FALSE,
+  useMultivariateUpdating = NULL,
+  sample = TRUE, verbose = FALSE, model = NULL,
   ...) {
+  if (!is.null(model)) assert_that(!is.null(stanmodels[[model]]),
+                                   msg = paste("The specified stanmodel does not exist. Allowable models include:",
+                                               names(MVBeliefUpdatr:::stanmodels)))
+
   data_list <- compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats(
       exposure = exposure,
       test = test,
@@ -37,11 +41,26 @@ infer_prior_beliefs <- function(
       L_omega_scale = L_omega_scale,
       verbose = verbose)
 
+  transform <-
+    transform_cues(
+      data = exposure,
+      cues = cues,
+      center = center.observations,
+      scale = scale.observations,
+      pca = pca.observations,
+      return.transform.function = T,
+      return.untransform.function = T)
+
+  if (is.null(useMultivariateUpdating))
+    useMultivariateUpdating = if (is.null(data_list$K)) FALSE else TRUE
   message("and add in the data")
   message("store untransform function, too!")
 
   if (sample) {
-    if (useMultivariateUpdating) {
+    if (!is.null(model)) {
+      fit <- sampling(MVBeliefUpdatr:::stanmodels[[model]],
+                      data = data_list, ...)
+    } else if (useMultivariateUpdating) {
       fit <- sampling(MVBeliefUpdatr:::stanmodels[['mvg_conj_uninformative_priors_sufficient_stats_lapse']],
                          data = data_list, ...)
     } else {
@@ -51,8 +70,7 @@ infer_prior_beliefs <- function(
     }
   }
 
-  fit %<>%
-    as.mvg_ibbu_stanfit(data_list)
+  if (!is.null(fit)) fit %<>% as.mvg_ibbu_stanfit(data_list, transform)
 
   return(fit)
 }

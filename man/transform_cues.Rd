@@ -48,14 +48,15 @@ centering and/or scaling. (default: `FALSE`)}
 
 \item{return.transform.parameters}{Should the list of transforms be returned? (default: `FALSE`)}
 
-\item{return.transform.function, return.transform.function}{Should a function that applies the (un)transform be
+\item{return.transform.function, return.untransform.function}{Should a function that applies the (un)transform be
 returned? (default: `FALSE`)}
 }
 \value{
 By default a \code{data.frame}. If `return.transform.parameters = TRUE`, a list of parameters. If
-`return.transform.function = TRUE` a function. If more than one of these flags is `TRUE` then a list in which
-the data element has name "data", the transform parameters have name "transform.parameters" and the transform
-function has the name "transform.function".
+`return.transform.function = TRUE` or `return.untransform.function = TRUE` a function. If more than one of
+these flags is `TRUE` then a list in which
+the data element has name "data", the transform parameters have name "transform.parameters" and the (un)transform
+function(s) have the name "(un)transform.function".
 }
 \description{
 If the `transform.parameters` argument

@@ -385,12 +385,17 @@ attach_stanfit_input_data = function(stanfit, input) {
               msg = paste0("stanfit must be of class ", new_stanfit_class_name))
   assert_that(is.mvg_ibbu_input(input),
               msg = "input is not an acceptable input data.")
-
-  message("Currently this function is only checking whether input is a list. Use at your own risk.")
   stanfit@input_data = input
 
   return(stanfit)
 }
 
+attach_stanfit_transform = function(stanfit, transform) {
+  assert_that(is.mvg_ibbu_stanfit(stanfit),
+              msg = paste0("stanfit must be of class ", new_stanfit_class_name))
+  stanfit@transform = transform
+
+  return(stanfit)
+}
 
 

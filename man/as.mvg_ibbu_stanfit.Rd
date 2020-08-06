@@ -4,13 +4,16 @@
 \alias{as.mvg_ibbu_stanfit}
 \title{Make an mvg_ibbu_stanfit}
 \usage{
-as.mvg_ibbu_stanfit(stanfit, input)
+as.mvg_ibbu_stanfit(stanfit, input, transform = NULL)
 }
 \arguments{
 \item{stanfit}{stanfit object}
 
 \item{input}{Input for a call to rstan prepared for one of the acceptable
 stan programs. See \code{\link{compose_data}}.}
+
+\item{transform}{Optionally, a list of transform (and corresponding untransform) functions that were
+applied to the cues prior while creating the input.}
 }
 \value{
 An mvg_ibbu_stanfit object

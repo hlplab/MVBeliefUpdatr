@@ -18,9 +18,10 @@ infer_prior_beliefs(
   pca.cutoff = 1,
   tau_scale = 10,
   L_omega_scale = 1,
-  useMultivariateUpdating = if (length(cues) > 1) TRUE else FALSE,
+  useMultivariateUpdating = NULL,
   sample = TRUE,
   verbose = FALSE,
+  model = NULL,
   ...
 )
 }

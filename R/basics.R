@@ -69,13 +69,14 @@ cov2tau = function(v) {
 #' @param transform.parameters List of transforms (default: `NULL`)
 #' @param return.transformed.data,return.transformed.data Should the (un)transformed data be returned? (default: `TRUE`)
 #' @param return.transform.parameters Should the list of transforms be returned? (default: `FALSE`)
-#' @param return.transform.function,return.transform.function Should a function that applies the (un)transform be
+#' @param return.transform.function,return.untransform.function Should a function that applies the (un)transform be
 #' returned? (default: `FALSE`)
 #'
 #' @return By default a \code{data.frame}. If `return.transform.parameters = TRUE`, a list of parameters. If
-#' `return.transform.function = TRUE` a function. If more than one of these flags is `TRUE` then a list in which
-#' the data element has name "data", the transform parameters have name "transform.parameters" and the transform
-#' function has the name "transform.function".
+#' `return.transform.function = TRUE` or `return.untransform.function = TRUE` a function. If more than one of
+#' these flags is `TRUE` then a list in which
+#' the data element has name "data", the transform parameters have name "transform.parameters" and the (un)transform
+#' function(s) have the name "(un)transform.function".
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -166,7 +167,12 @@ transform_cues = function(data, cues,
     if (!return.transformed.data & return.transform.parameters & !return.transform.function & !return.untransform.function) return(transform.parameters) else
       if (!return.transformed.data & !return.transform.parameters & return.transform.function & !return.untransform.function) return(transform.function) else
         if (!return.transformed.data & !return.transform.parameters & !return.transform.function & return.untransform.function) return(untransform.function) else
-          return(list(data = data, transform.parameters = transform.parameters, transform.function = transform.function, untransform.function = untransform.function))
+          return(
+            list(
+              data = if (return.transformed.data) data else NULL,
+              transform.parameters = if (return.transform.parameters) transform.parameters else NULL,
+              transform.function = if (return.transform.function) transform.function else NULL,
+              untransform.function = if (return.untransform.function) untransform.function else NULL))
 }
 
 

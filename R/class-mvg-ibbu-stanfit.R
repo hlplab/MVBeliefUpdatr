@@ -7,7 +7,7 @@ new_stanfit_class_name = "mvg_ibbu_stanfit"
 #' @slot input_data A list
 #' @slot labels A list
 mvg_ibbu_stanfit <- setClass(new_stanfit_class_name,
-         slots = c(input_data = "list", labels = "list"),
+         slots = c(input_data = "list", transforms = "list", labels = "list"),
          contains = "stanfit",
          package = "MVBeliefUpdatr")
 
@@ -18,6 +18,8 @@ mvg_ibbu_stanfit <- setClass(new_stanfit_class_name,
 #' @param stanfit stanfit object
 #' @param input Input for a call to rstan prepared for one of the acceptable
 #' stan programs. See \code{\link{compose_data}}.
+#' @param transform Optionally, a list of transform (and corresponding untransform) functions that were
+#' applied to the cues prior while creating the input.
 #'
 #' @return An mvg_ibbu_stanfit object
 #'
@@ -26,7 +28,7 @@ mvg_ibbu_stanfit <- setClass(new_stanfit_class_name,
 #' TBD
 #' @export
 #'
-as.mvg_ibbu_stanfit = function(stanfit, input) {
+as.mvg_ibbu_stanfit = function(stanfit, input, transform = NULL) {
   assert_that(class(stanfit) == "stanfit",
               msg = paste0("Only stanfit objects can be converted into ", class_name, " objects."))
   assert_that(stanfit@stanmodel@model_name %in% names(MVBeliefUpdatr:::stanmodels),
@@ -36,6 +38,10 @@ as.mvg_ibbu_stanfit = function(stanfit, input) {
   class(stanfit) <- new_stanfit_class_name
   stanfit %<>%
     attach_stanfit_input_data(input)
+
+  if (!is.null(transform))
+    stanfit %<>%
+    attach_stanfit_transform(transform)
 
   return(stanfit)
 }
