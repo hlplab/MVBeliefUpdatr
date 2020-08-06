@@ -1,7 +1,6 @@
 #' @import rstan
 
 new_stanfit_class_name = "mvg_ibbu_stanfit"
-acceptable_stan_codes = c("dev_conj_id_lapsing_sufficient_stats_fit_mv")
 
 #' An S4 class for stanfit objects that use one of the mvg_ibbu stan programs.
 #'
@@ -30,9 +29,9 @@ mvg_ibbu_stanfit <- setClass(new_stanfit_class_name,
 as.mvg_ibbu_stanfit = function(stanfit, input) {
   assert_that(class(stanfit) == "stanfit",
               msg = paste0("Only stanfit objects can be converted into ", class_name, " objects."))
-  assert_that(stanfit@stanmodel@model_name %in% acceptable_stan_codes,
+  assert_that(stanfit@stanmodel@model_name %in% names(MVBeliefUpdatr:::stanmodels),
               msg = paste0("stanfit object was not created by one of the accepted stancodes: code is ",
-                           stanfit@stanmodel@model_name, " but would have to be one of ", acceptable_stan_codes))
+                           stanfit@stanmodel@model_name, " but would have to be one of ", names(MVBeliefUpdatr:::stanmodels)))
 
   class(stanfit) <- new_stanfit_class_name
   stanfit %<>%

@@ -1,6 +1,8 @@
 IMPORTANT
 
 + make plot that checks assumptions of NIW updating: category distribution and covariance across talkers.
++ make plot visualizing S for univariate, bivariate, and trivariate (see Murphy 2012, p. 127). add to the description that samples of category can be obtain by a variant of plot_expected_category. (see next point)
++ make a function plot_category() that does all the plotting of the category. only keep the stuff about getting expected category in the original plot_expected_category, and add options to plot mode, instead of mean, and to take samples from the distribution.
 
 + then figure out to add information about input to that new class
 ++ add exposure mean in more accessible format. Update get_exposure_mean to read in that mean
