@@ -182,9 +182,6 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
       set_names(stats)
   }
 
-  data_ss %<>%
-    ungroup()
-
   if (verbose) {
     print("In get_sufficient_statistics_from_data(), sum-of-squares matrix (uncentered for multivariate data,
           centered for univariate data):")
