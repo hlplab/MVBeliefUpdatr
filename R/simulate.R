@@ -59,8 +59,9 @@ example_NIW_prior = function(example = 1) {
 #' of the second group variable; etc. (default: NULL)
 #' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param cues Name(s) of variables in \code{data} that contain the cue information.
-#' @param kappa The strength of the beliefs over the category mean (pseudocounts).
-#' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts).
+#' @param kappa The strength of the beliefs over the category mean (pseudocounts). (default: same as nu)
+#' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
+#' cues + 2)
 #' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
 #' @param Sigma_noise Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be
 #' ignored if `NULL`. (default: NULL)
@@ -80,8 +81,8 @@ make_NIW_prior_from_data = function(
   groups = NULL,
   category = "category",
   cues,
-  kappa = NA,
-  nu = NA,
+  kappa = nu,
+  nu = length(cues) + 2,
   lapse_rate = NA_real_,
   Sigma_noise = NULL,
   keep.category_parameters = F
@@ -92,7 +93,7 @@ make_NIW_prior_from_data = function(
   assert_that(all(is.character(cues) | is_symbol(cues), length(cues) > 0))
   assert_that(all(is.numeric(kappa), is.numeric(nu), !is.na(kappa), !is.na(nu)))
   assert_that(nu > length(cues) + 1,
-              msg = "nu must be larger than D (dimensionality of cues) + 1.")
+              msg = paste0("nu must be larger than dimensionality of cues + 1 (>", length(cues) + 1, ")."))
 
   if (is.character(groups)) groups = syms(groups)
   if (is.character(category)) category = sym(category)
@@ -118,6 +119,8 @@ make_NIW_prior_from_data = function(
                    ~ list(reduce(.x, `+`) / length(.x)))
   }
 
+  message("S is set based on average observed covariance matrix in sample. It might be safer to fit an Inverse-Wishart distribution
+          to the entire set of covariance matrices.")
   data %<>%
     mutate(
       !! category := factor(!! category),

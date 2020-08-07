@@ -9,8 +9,8 @@ make_NIW_prior_from_data(
   groups = NULL,
   category = "category",
   cues,
-  kappa = NA,
-  nu = NA,
+  kappa = nu,
+  nu = length(cues) + 2,
   lapse_rate = NA_real_,
   Sigma_noise = NULL,
   keep.category_parameters = F
@@ -31,9 +31,10 @@ of the second group variable; etc. (default: NULL)}
 
 \item{cues}{Name(s) of variables in \code{data} that contain the cue information.}
 
-\item{kappa}{The strength of the beliefs over the category mean (pseudocounts).}
+\item{kappa}{The strength of the beliefs over the category mean (pseudocounts). (default: same as nu)}
 
-\item{nu}{The strength of the beliefs over the category covariance matrix (pseudocounts).}
+\item{nu}{The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
+cues + 2)}
 
 \item{lapse_rate}{Optionally specify a lapse rate. (default: \code{NA})}
 

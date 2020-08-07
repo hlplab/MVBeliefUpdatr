@@ -96,6 +96,7 @@ transform_cues = function(data, cues,
 
   if (is.null(transform.parameters)) {
     transform.parameters = list()
+    transform.parameters[["cue.labels"]] = cues
 
     if (center) {
       transform.parameters[["center"]] = data %>%
@@ -112,7 +113,7 @@ transform_cues = function(data, cues,
     if (pca) {
       PCA <- data %>%
         select(!!! rlang::syms(cues)) %>%
-        prcomp(center = F, scale. = F)
+        prcomp(center = center, scale. = scale)
       transform.parameters[["pca"]] = PCA
     }
   }
@@ -187,9 +188,9 @@ untransform_cues = function(data, cues,
   assert_that(is.list(transform.parameters))
 
   # By default untransform all transformations available in transform object
-  if (is.null(unpca)) pca = !is.null(transform.parameters[["pca"]])
-  if (is.null(uncenter)) center = !is.null(transform.parameters[["center"]])
-  if (is.null(unscale)) scale = !is.null(transform.parameters[["center"]])
+  if (is.null(unpca)) unpca = !is.null(transform.parameters[["pca"]])
+  if (is.null(uncenter)) uncenter = !is.null(transform.parameters[["center"]])
+  if (is.null(unscale)) unscale = !is.null(transform.parameters[["scale"]])
 
   if (unpca) {
     # Since we're uncentering and unscaling separately, the following is not needed:
@@ -206,6 +207,10 @@ untransform_cues = function(data, cues,
     data %<>%
       select(-all_of(cues)) %>%
       cbind(newcues)
+
+    data %<>%
+      rename_at(cues, ~ transform.parameters[["cue.labels"]])
+    cues = transform.parameters[["cue.labels"]]
   }
 
   if (unscale) {
