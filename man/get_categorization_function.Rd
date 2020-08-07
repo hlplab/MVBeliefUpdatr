@@ -8,13 +8,13 @@
 \title{Get categorization function}
 \usage{
 get_categorization_function(
-  Ms,
+  ms,
   Ss,
   kappas,
   nus,
   lapse_rate,
   priors = rep(1/n.cat, n.cat),
-  n.cat = length(Ms),
+  n.cat = length(ms),
   logit = FALSE
 )
 
@@ -23,7 +23,7 @@ get_categorization_function_from_NIW_belief(x, ...)
 get_categorization_function_from_grouped_ibbu_stanfit_draws(fit, ...)
 }
 \arguments{
-\item{Ms}{List of IBBU-inferred means describing the multivariate normal distribution over category means.}
+\item{ms}{List of IBBU-inferred means describing the multivariate normal distribution over category means.}
 
 \item{Ss}{List of IBBU-inferred scatter matrices describing the inverse Wishart distribution over category
 covariance matrices.}
@@ -42,13 +42,13 @@ covariance matrices.}
 }
 \value{
 A function that takes as input cue values and returns posterior probabilities of the first category,
-based on the posterior predictive of the cues given the (IBBU-derived parameters for the) categories' M, S,
+based on the posterior predictive of the cues given the (IBBU-derived parameters for the) categories' m, S,
 kappa, nu, and prior, as well as the lapse rate.
 }
 \description{
 Returns a categorization function for the first category, based on a set of parameters for the Normal-inverse-wishart (NIW)
-distribtuion. Ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
-element of Ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
+distribtuion. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
+element of ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
 }
 \examples{
 TBD

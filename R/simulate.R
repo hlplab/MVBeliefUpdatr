@@ -14,7 +14,7 @@ example_NIW_prior = function(example = 1) {
       category = c("A", "B"),
       kappa = 10,
       nu = 30,
-      M = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
+      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
       S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
                matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
       lapse_rate = .05
@@ -27,7 +27,7 @@ example_NIW_prior = function(example = 1) {
       category = c("A", "B"),
       kappa = 10,
       nu = 30,
-      M = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
+      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
       S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
                matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
       lapse_rate = .05,
@@ -45,8 +45,8 @@ example_NIW_prior = function(example = 1) {
 #'
 #' Currently, \code{make_NIW_prior_from_data()} does not infer kappa or nu, nor does it fit hierarchical data. Rather
 #' the function simply estimates the category mean and covariance matrix from the sample (\code{data}), assumes them
-#' to be the expected category mean (mu) and covariance (Sigma), and derives the M and S parameters
-#' of the NIW from mu and Sigma based on the user-provided kappa and nu. That means M = mu and S = Sigma * (nu - D -1),
+#' to be the expected category mean (mu) and covariance (Sigma), and derives the m and S parameters
+#' of the NIW from mu and Sigma based on the user-provided kappa and nu. That means m = mu and S = Sigma * (nu - D -1),
 #' where D is the dimensionality of the data.
 #'
 #' @param data The tibble or data.frame from which to construct the prior.
@@ -64,7 +64,7 @@ example_NIW_prior = function(example = 1) {
 #' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
 #' @param Sigma_noise Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be
 #' ignored if `NULL`. (default: NULL)
-#' @param keep.category_parameters Should categories' mu and Sigma be included in the output (in addition to M
+#' @param keep.category_parameters Should categories' mu and Sigma be included in the output (in addition to m
 #' and S of the prior)? (default: FALSE)
 #'
 #' @return A tibble that is an NIW_belief object.
@@ -123,7 +123,7 @@ make_NIW_prior_from_data = function(
       !! category := factor(!! category),
       kappa = kappa,
       nu = nu,
-      M = mu,
+      m = mu,
       S = map2(Sigma, nu, get_S_from_Sigma),
       lapse_rate = lapse_rate) %>%
     { if (!is.null(Sigma_noise)) mutate(., Sigma_noise = list(Sigma_noise)) else . } %>%
@@ -178,7 +178,7 @@ make_MV_exposure_data = function(
 
     return(make_MV_exposure_data(
       Ns = Ns,
-      mus = belief$M,
+      mus = belief$m,
       Sigmas = map2(belief$S, belief$nu, get_Sigma_from_S),
       category.labels = get_category_labels_from_NIW_belief(belief),
       cue.labels = get_cue_labels_from_NIW_belief(belief),
@@ -209,11 +209,11 @@ make_MV_exposure_data = function(
 
 #' Update parameters of NIW prior beliefs about multivariate Gaussian category.
 #'
-#' Returns updated/posterior M, S, kappa, or nu based on \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
+#' Returns updated/posterior m, S, kappa, or nu based on \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
 #' These functions are called, for example, by \code{\link{update_NIW_belief_by_sufficient_statistics}},
 #' \code{\link{update_NIW_belief_by_one_observation}}, and \code{\link{update_NIW_beliefs_incrementally}}.
 #'
-#' @return Depending on the updated parameter, a numeric scalar (kappa, nu), vector (M) or square matrix (S).
+#' @return Depending on the updated parameter, a numeric scalar (kappa, nu), vector (m) or square matrix (S).
 #'
 #' @rdname update_NIW_parameters
 #' @export
@@ -223,10 +223,10 @@ update_NIW_belief_kappa = function(kappa_0, x_N) { kappa_0 + x_N }
 update_NIW_belief_nu = function(nu_0, x_N) { nu_0 + x_N }
 #' @rdname update_NIW_parameters
 #' @export
-update_NIW_belief_M = function(kappa_0, M_0, x_N, x_mean) { (kappa_0 / (kappa_0 + x_N)) * M_0 + x_N / (kappa_0 + x_N) * x_mean }
+update_NIW_belief_m = function(kappa_0, m_0, x_N, x_mean) { (kappa_0 / (kappa_0 + x_N)) * m_0 + x_N / (kappa_0 + x_N) * x_mean }
 #' @rdname update_NIW_parameters
 #' @export
-update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - M_0) %*% t(x_mean - M_0) }
+update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_S) { S_0 + x_S + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - m_0) %*% t(x_mean - m_0) }
 
 
 
@@ -237,7 +237,7 @@ update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #' The priors for the categories are specified through the \code{priors} argument, an
 #' \code{\link[=is.NIW_belief]{NIW_belief}} object. Which category is updated is determined by x_category.
 #' Updating proceeds as in \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}. The prior kappa
-#' and nu will be incremented by the number of observations (x_N). The prior M and S will be updated based on the
+#' and nu will be incremented by the number of observations (x_N). The prior m and S will be updated based on the
 #' prior kappa, prior nu, x_N and, of course, the sample mean (x_mean) and sum of squares (x_S) of the observations.
 #'
 #' A number of different updating schemes are supported, including supervised updating based on labeled data and
@@ -256,7 +256,7 @@ update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #'   \item "nolabel-criterion" implements a winner-takes-all update based on the prior beliefs. The
 #'   posterior probability of all categories under the prior is calculated, and only the category with the
 #'   highest posterior probabilty is updated (see decision_rule = "criterion" in \code{\link{get_categorization_from_NIW_belief}}).
-#'   The update for this category proceed the same ways as under the "label-certain" method. Method "nolabel-criterion" is
+#'   The update for this category proceed the same ways as under the "label-certain" method. method "nolabel-criterion" is
 #'   thus \emph{order sensitive}, but deterministic (i.e., it yields the same result on each repeated run), provided
 #'   there is no noise (specifically, no noise = "sample").
 #'   \item "nolabel-sampling" implements another winner-takes-all update based on the prior beliefs. The
@@ -290,7 +290,7 @@ update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #' @param prior An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
 #' @param x_category Character. The label of the category that is to be updated.
 #' @param x A single observation.
-#' @param x_mean Mean of the observations.
+#' @param x_mean mean of the observations.
 #' @param x_S Centered sum of squares matrix of the observations.
 #' @param x_N Number of observations that went into the mean and sum of squares matrix.
 #' @param add_noise Determines whether multivariate Gaussian noise is added to the input.
@@ -303,7 +303,7 @@ update_NIW_belief_S = function(kappa_0, M_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #'
 #' @return An NIW_belief object.
 #'
-#' @seealso \code{\link{update_NIW_belief_kappa}}, \code{\link{update_NIW_belief_nu}}, \code{\link{update_NIW_belief_M}},
+#' @seealso \code{\link{update_NIW_belief_kappa}}, \code{\link{update_NIW_belief_nu}}, \code{\link{update_NIW_belief_m}},
 #' \code{\link{update_NIW_belief_S}}, all of which are called by \code{update_NIW_belief_by_sufficient_statistics}.
 #' @keywords belief-updating NIW Normal-Inverse Wishart
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
@@ -361,10 +361,10 @@ update_NIW_belief_by_sufficient_statistics = function(
   x_S = list(x_S)
   prior %<>%
     mutate(
-      M = pmap(.l = list(kappa, M, x_Ns, x_mean), update_NIW_belief_M),
+      m = pmap(.l = list(kappa, m, x_Ns, x_mean), update_NIW_belief_m),
       kappa = unlist(map2(kappa, x_Ns, update_NIW_belief_kappa)),
       nu = unlist(map2(nu, x_Ns, update_NIW_belief_nu)),
-      S = pmap(.l = list(kappa, M, S, x_Ns, x_mean, x_S), update_NIW_belief_S))
+      S = pmap(.l = list(kappa, m, S, x_Ns, x_mean, x_S), update_NIW_belief_S))
 
   return(prior)
 }
@@ -390,7 +390,7 @@ update_NIW_belief_by_one_observation = function(
 #' of the same format as the posterior draws stored in an MV IBBU stanfit object. Each row of the tibble specifies
 #' the prior for one category (specified in the \code{category} column). The four parameters of the NIW are the
 #' pseudocounts indicating the strength of the prior beliefs into the mean (\code{kappa}) and covariance (\code{
-#' nu}), as well as the prior mean of means (\code{M}, same as \code{M_0} in Murphy, 2012) and the prior scatter
+#' nu}), as well as the prior mean of means (\code{m}, same as \code{m_0} in Murphy, 2012) and the prior scatter
 #' matrix (\code{S}, same as \code{S_0} in Murphy, 2012).
 #'
 #' @param prior An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
@@ -424,7 +424,7 @@ update_NIW_beliefs_incrementally <- function(
   prior,
   exposure,
   category = "category",
-  cues = names(prior$M[[1]]),
+  cues = names(prior$m[[1]]),
   exposure.order = NULL,
   add_noise = NULL,
   method = "label-certain",

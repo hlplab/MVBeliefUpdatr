@@ -35,12 +35,12 @@ be stored in a separate cell? (default: `TRUE`)}
 }
 \value{
 tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
-(\code{kappa, nu, M, S, lapse_rate}). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
-into the mean and covariance matrix, respectively. \code{M} is the mean of the multivariate normal distribution over category
+(\code{kappa, nu, m, S, lapse_rate}). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
+into the mean and covariance matrix, respectively. \code{m} is the mean of the multivariate normal distribution over category
 means mu. \code{S} is the scatter matrix that determines both the covariance of the category means mu, and the
 Inverse Wishart distribution over category covariance matrices Sigma.
 
-The expected value of the category mean mu is \code{M}. The expected value of the category covariance matrix Sigma
+The expected value of the category mean mu is \code{m}. The expected value of the category covariance matrix Sigma
 is \code{S / (nu - D - 1)}, where \code{D} is the dimension of the multivariate Gaussian category. For details,
 \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
 }

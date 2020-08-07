@@ -5,13 +5,13 @@ NULL
 
 #' Get posterior predictive
 #'
-#' Get posterior predictive of observations x given the NIW parameters M, S, kappa, and nu. This is
+#' Get posterior predictive of observations x given the NIW parameters m, S, kappa, and nu. This is
 #' a multivariate Student-T distribution \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
 #'
 #' @param x Observations. Can be a vector with k elements for a single observation or a matrix with k
 #' columns and n rows, in which case each row of the matrix is taken to be one observation. If x is a
 #' tibble with k columns or a list of vectors of length k, it is reduced into a matrix with k columns.
-#' @param M The mean of the multivariate Normal distribution of the category mean mu. Should be a
+#' @param m The mean of the multivariate Normal distribution of the category mean mu. Should be a
 #' matrix or vector of length k.
 #' @param S The scatter matrix of the inverse-Wishart distribution over the category covariance
 #' matrix Sigma. Should be a square k x k matrix.
@@ -26,16 +26,16 @@ NULL
 #' TBD
 #' @rdname get_posterior_predictive
 #' @export
-get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
+get_posterior_predictive = function(x, m, S, kappa, nu, log = T) {
   # mvtnorm::dmvt now expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
-  assert_that(all(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x), is.vector(M) | is.matrix(M), is.matrix(S)))
+  assert_that(all(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x), is.vector(m) | is.matrix(m), is.matrix(S)))
   # do not reorder these conditionals (go from more to less specific)
   if (is_tibble(x)) x %<>% as.matrix() else
     if (is.list(x)) x %<>% reduce(rbind) else
       if (is.vector(x)) x %<>% matrix(nrow = 1)
 
-  if (is.matrix(M)) M = as.vector(M)
+  if (is.matrix(m)) m = as.vector(m)
 
   assert_that(all(is.number(kappa), is.number(nu)))
   assert_that(is.flag(log))
@@ -45,13 +45,13 @@ get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
               Normal.")
   assert_that(dim(S)[2] == D,
               msg = "S is not a square matrix, and thus not a Scatter matrix")
-  assert_that(length(M) == dim(x)[2],
-              msg = paste("M and input are not of compatible dimensions. M is of length", length(M), "but input has", dim(x)[2], "columns."))
-  assert_that(length(M) == D,
-              msg = "S and M are not of compatible dimensions.")
+  assert_that(length(m) == dim(x)[2],
+              msg = paste("m and input are not of compatible dimensions. m is of length", length(m), "but input has", dim(x)[2], "columns."))
+  assert_that(length(m) == D,
+              msg = "S and m are not of compatible dimensions.")
 
   dmvt(x,
-       delta = M,
+       delta = m,
        sigma = S * (kappa + 1) / (kappa * (nu - D + 1)),
        df = nu - D + 1,
        log = log)
@@ -61,10 +61,10 @@ get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
 #' Get categorization function
 #'
 #' Returns a categorization function for the first category, based on a set of parameters for the Normal-inverse-wishart (NIW)
-#' distribtuion. Ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
-#' element of Ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
+#' distribtuion. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
+#' element of ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
 #'
-#' @param Ms List of IBBU-inferred means describing the multivariate normal distribution over category means.
+#' @param ms List of IBBU-inferred means describing the multivariate normal distribution over category means.
 #' @param Ss List of IBBU-inferred scatter matrices describing the inverse Wishart distribution over category
 #' covariance matrices.
 #' @param kappas List of IBBU-inferred kappas describing the strength of the beliefs into the distribution over catgory means.
@@ -75,7 +75,7 @@ get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
 #' @param logit Should the function that is returned return log-odds (TRUE) or probabilities (FALSE)? (default: TRUE)
 #'
 #' @return A function that takes as input cue values and returns posterior probabilities of the first category,
-#' based on the posterior predictive of the cues given the (IBBU-derived parameters for the) categories' M, S,
+#' based on the posterior predictive of the cues given the (IBBU-derived parameters for the) categories' m, S,
 #' kappa, nu, and prior, as well as the lapse rate.
 #'
 #' @seealso TBD
@@ -85,20 +85,20 @@ get_posterior_predictive = function(x, M, S, kappa, nu, log = T) {
 #' @rdname get_categorization_function
 #' @export
 get_categorization_function = function(
-  Ms, Ss, kappas, nus, lapse_rate,
+  ms, Ss, kappas, nus, lapse_rate,
   priors = rep(1 / n.cat, n.cat),
-  n.cat = length(Ms),
+  n.cat = length(ms),
   logit = FALSE
 ) {
-  assert_that(are_equal(length(Ms), length(Ss)),
-              are_equal(length(Ms), length(priors)),
-              are_equal(length(Ms), length(kappas)),
-              are_equal(length(Ms), length(nus)),
-              msg = "The number of Ms, Ss, kappas, nus, and priors must be identical.")
+  assert_that(are_equal(length(ms), length(Ss)),
+              are_equal(length(ms), length(priors)),
+              are_equal(length(ms), length(kappas)),
+              are_equal(length(ms), length(nus)),
+              msg = "The number of ms, Ss, kappas, nus, and priors must be identical.")
   assert_that(all(between(lapse_rate, 0, 1)))
 
   # Get dimensions of multivariate category
-  D = length(Ms[[1]])
+  D = length(ms[[1]])
   assert_that(nus[[1]] >= D,
               msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
 
@@ -108,7 +108,7 @@ get_categorization_function = function(
       ncol = n.cat
     )
     for (cat in 1:n.cat) {
-      log_p[, cat] = get_posterior_predictive(x, Ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T)
+      log_p[, cat] = get_posterior_predictive(x, ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T)
     }
 
     p_target =
@@ -129,8 +129,8 @@ get_categorization_function = function(
 
 #' @rdname get_posterior_predictive
 #' @export
-get_posterior_predictive.pmap = function(x, M, S, kappa, nu, ...) {
-  get_posterior_predictive(x, M, S, kappa, nu, log = F)
+get_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
+  get_posterior_predictive(x, m, S, kappa, nu, log = F)
 }
 
 

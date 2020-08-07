@@ -6,9 +6,9 @@
 \alias{get_posterior_predictive_from_NIW_belief}
 \title{Get posterior predictive}
 \usage{
-get_posterior_predictive(x, M, S, kappa, nu, log = T)
+get_posterior_predictive(x, m, S, kappa, nu, log = T)
 
-get_posterior_predictive.pmap(x, M, S, kappa, nu, ...)
+get_posterior_predictive.pmap(x, m, S, kappa, nu, ...)
 
 get_posterior_predictive_from_NIW_belief(
   x,
@@ -24,7 +24,7 @@ get_posterior_predictive_from_NIW_belief(
 columns and n rows, in which case each row of the matrix is taken to be one observation. If x is a
 tibble with k columns or a list of vectors of length k, it is reduced into a matrix with k columns.}
 
-\item{M}{The mean of the multivariate Normal distribution of the category mean mu. Should be a
+\item{m}{The mean of the multivariate Normal distribution of the category mean mu. Should be a
 matrix or vector of length k.}
 
 \item{S}{The scatter matrix of the inverse-Wishart distribution over the category covariance
@@ -37,7 +37,7 @@ matrix Sigma. Should be a square k x k matrix.}
 \item{log}{Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)}
 }
 \description{
-Get posterior predictive of observations x given the NIW parameters M, S, kappa, and nu. This is
+Get posterior predictive of observations x given the NIW parameters m, S, kappa, and nu. This is
 a multivariate Student-T distribution \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
 }
 \examples{

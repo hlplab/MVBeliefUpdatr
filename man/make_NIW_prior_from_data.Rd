@@ -40,7 +40,7 @@ of the second group variable; etc. (default: NULL)}
 \item{Sigma_noise}{Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be
 ignored if `NULL`. (default: NULL)}
 
-\item{keep.category_parameters}{Should categories' mu and Sigma be included in the output (in addition to M
+\item{keep.category_parameters}{Should categories' mu and Sigma be included in the output (in addition to m
 and S of the prior)? (default: FALSE)}
 }
 \value{
@@ -53,8 +53,8 @@ the data. This object can be used as a prior for functions like \code{\link{upda
 \details{
 Currently, \code{make_NIW_prior_from_data()} does not infer kappa or nu, nor does it fit hierarchical data. Rather
 the function simply estimates the category mean and covariance matrix from the sample (\code{data}), assumes them
-to be the expected category mean (mu) and covariance (Sigma), and derives the M and S parameters
-of the NIW from mu and Sigma based on the user-provided kappa and nu. That means M = mu and S = Sigma * (nu - D -1),
+to be the expected category mean (mu) and covariance (Sigma), and derives the m and S parameters
+of the NIW from mu and Sigma based on the user-provided kappa and nu. That means m = mu and S = Sigma * (nu - D -1),
 where D is the dimensionality of the data.
 }
 \examples{

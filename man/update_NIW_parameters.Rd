@@ -3,7 +3,7 @@
 \name{update_NIW_belief_kappa}
 \alias{update_NIW_belief_kappa}
 \alias{update_NIW_belief_nu}
-\alias{update_NIW_belief_M}
+\alias{update_NIW_belief_m}
 \alias{update_NIW_belief_S}
 \title{Update parameters of NIW prior beliefs about multivariate Gaussian category.}
 \usage{
@@ -11,15 +11,15 @@ update_NIW_belief_kappa(kappa_0, x_N)
 
 update_NIW_belief_nu(nu_0, x_N)
 
-update_NIW_belief_M(kappa_0, M_0, x_N, x_mean)
+update_NIW_belief_m(kappa_0, m_0, x_N, x_mean)
 
-update_NIW_belief_S(kappa_0, M_0, S_0, x_N, x_mean, x_S)
+update_NIW_belief_S(kappa_0, m_0, S_0, x_N, x_mean, x_S)
 }
 \value{
-Depending on the updated parameter, a numeric scalar (kappa, nu), vector (M) or square matrix (S).
+Depending on the updated parameter, a numeric scalar (kappa, nu), vector (m) or square matrix (S).
 }
 \description{
-Returns updated/posterior M, S, kappa, or nu based on \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
+Returns updated/posterior m, S, kappa, or nu based on \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
 These functions are called, for example, by \code{\link{update_NIW_belief_by_sufficient_statistics}},
 \code{\link{update_NIW_belief_by_one_observation}}, and \code{\link{update_NIW_beliefs_incrementally}}.
 }

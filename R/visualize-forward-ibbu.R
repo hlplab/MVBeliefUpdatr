@@ -91,101 +91,7 @@ plot_NIW_belief_parameters = function(
 
   if (is.null(group.colors)) group.colors = get_default_colors("group", length(get_groups(x)))
 
-  # p.M = x %>%
-  #   select(.draw, group, category, cue, M) %>%
-  #   distinct() %T>%
-  #   { get_limits(., "M") ->> x.limits } %>%
-  #   ggplot(aes(
-  #     y = fct_rev(.data$category),
-  #     x = .data$M,
-  #     fill = .data$group)) +
-  #   ggridges::geom_density_ridges(alpha = .5, color = NA,
-  #                                 panel_scaling = panel_scaling, scale = .95,
-  #                                 stat = "density", aes(height = ..density..),
-  #                                 # trim in order to increase resolution and avoid misleading
-  #                                 # overlap with zero for S matrix; if not trimmed, density range
-  #                                 # is estimated for the entire data in each plot
-  #                                 trim = T) +
-  #   geom_vline(xintercept = 0, color = "darkgray") +
-  #   scale_x_continuous("Mean of category means") +
-  #   scale_y_discrete("Category", expand = c(0,0)) +
-  #   scale_fill_manual(
-  #     "Group",
-  #     breaks = group.ids,
-  #     labels = group.labels,
-  #     values = group.colors
-  #   ) +
-  #   coord_cartesian(xlim = x.limits, default = T) +
-  #   facet_grid(~ .data$cue) +
-  #   theme_bw() + theme(legend.position = "right")
-  # legend = cowplot::get_legend(p.M)
-  #
-  # p.M = p.M + theme(legend.position = "none")
-  # p.S = suppressMessages(
-  #   p.M %+%
-  #     (d.pars %>%
-  #        select(.draw, group, category, cue, cue2, S) %>%
-  #        distinct() %T>%
-  #        { get_limits(., "S") ->> x.limits }) +
-  #     aes(x = .data$S) +
-  #     scale_x_continuous("Scatter matrix",
-  #                        breaks = inv_symlog(
-  #                          seq(
-  #                            ceiling(symlog(min(x.limits))),
-  #                            floor(symlog(max(x.limits))),
-  #                          ))
-  #     ) +
-  #     coord_trans(x = "symlog", xlim = x.limits) +
-  #     facet_grid(.data$cue2 ~ .data$cue))
-  #
-  # p.KN = suppressWarnings(
-  #   suppressMessages(
-  #     p.M %+%
-  #       (d.pars %>%
-  #          select(.draw, group, category, kappa, nu) %>%
-  #          distinct() %>%
-  #          gather(key = "key", value = "value", -c(.draw, group, category)) %T>%
-  #          { get_limits(., "value", min = 1) ->> x.limits } ) +
-  #       aes(x = .data$value) +
-  #       scale_x_continuous("Pseudocounts",
-  #                          breaks = 10^(
-  #                            seq(
-  #                              ceiling(log10(min(x.limits))),
-  #                              floor(log10(max(x.limits)))
-  #                            ))) +
-  #       scale_y_discrete("", expand = c(0,0)) +
-  #       coord_trans(x = "log10", xlim = x.limits) +
-  #       facet_grid(~ .data$key)))
-  #
-  # p.LR =
-  #   d.pars %>%
-  #   select(.draw, lapse_rate) %>%
-  #   distinct() %T>%
-  #   { get_limits(., "lapse_rate") ->> x.limits } %>%
-  #   ggplot(aes(x = .data$lapse_rate)) +
-  #   geom_density(color = NA, fill = "darkgray", alpha = .5,
-  #                stat = "density") +
-  #   scale_x_continuous("Lapse rate")  +
-  #   scale_y_discrete("") +
-  #   scale_fill_manual(
-  #     "Group",
-  #     breaks = group.ids,
-  #     labels = group.labels,
-  #     values = group.colors
-  #   ) +
-  #   coord_cartesian(xlim = x.limits) +
-  #   theme_bw() + theme(legend.position = "none")
-  #
-  # K = length(unique(d.pars$cue))
-  # p = suppressWarnings(cowplot::plot_grid(
-  #   cowplot::plot_grid(plotlist = list(p.M, p.KN), nrow = 1, rel_widths = c(K,2)),
-  #   cowplot::plot_grid(plotlist = list(
-  #     p.S,
-  #     cowplot::plot_grid(plotlist = list(legend, p.LR),
-  #                        nrow = 2, rel_heights = c(.5, .5))),
-  #     nrow = 1, rel_widths = c(K,1)),
-  #   rel_heights = c(1.5, K), nrow = 2, axis = "lrtb"))
-  # return(p)
+
 }
 
 
@@ -193,8 +99,8 @@ plot_NIW_belief_parameters = function(
 #' Plot expected univariate (1D) categories
 #'
 #' Plot univariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
-#' category statistics of all categories. This includes the M (the mean of category means \eqn{\mu}), S (the scattermatrix),
-#' kappa (the strength of the belief in M) and nu (the strength of the belief in S). For the univariate case, M and S are
+#' category statistics of all categories. This includes the m (the mean of category means \eqn{\mu}), S (the scattermatrix),
+#' kappa (the strength of the belief in m) and nu (the strength of the belief in S). For the univariate case, m and S are
 #' scalars \insertCite{@see @murphy2012 p. 136}{MVBeliefUpdatr}.
 #'
 #' It is possible to hand more than one NIW belief to this function, and to facet or animate by variables that uniquely
@@ -265,7 +171,7 @@ plot_expected_categories_density1D = function(
   x %<>%
     mutate(Sigma = map2(S, nu, get_Sigma_from_S)) %>%
     crossing(!! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution)) %>%
-    mutate(density = unlist(pmap(.l = list("x" = !! sym(cue.labels[1]), "mean" = unlist(M), "sd" = unlist(Sigma)), .f = dnorm)))
+    mutate(density = unlist(pmap(.l = list("x" = !! sym(cue.labels[1]), "mean" = unlist(m), "sd" = unlist(Sigma)), .f = dnorm)))
 
   p = ggplot(x,
              aes(
@@ -292,8 +198,8 @@ plot_expected_categories_density1D = function(
 #' Plot expected bivariate (2D) categories
 #'
 #' Plot bivariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
-#' category statistics of all categories. This includes the M (the mean of category means \eqn{\mu}), S (the scattermatrix),
-#' kappa (the strength of the belief in M) and nu (the strength of the belief in S).
+#' category statistics of all categories. This includes the m (the mean of category means \eqn{\mu}), S (the scattermatrix),
+#' kappa (the strength of the belief in m) and nu (the strength of the belief in S).
 #'
 #' It is possible to hand more than one NIW belief to this function, and to facet or animate by variables that uniquely
 #' identify the different beliefs. For example, one can plot
@@ -349,11 +255,11 @@ plot_expected_categories_contour2D = function(
   x %<>%
     mutate(Sigma = map2(S, nu, get_Sigma_from_S)) %>%
     crossing(level = levels) %>%
-    mutate(ellipse = pmap(.l = list(Sigma, M, level), ellipse.pmap)) %>%
+    mutate(ellipse = pmap(.l = list(Sigma, m, level), ellipse.pmap)) %>%
     # This step is necessary since unnest() can't yet unnest lists of matrices
     # (bug was reported and added as milestone, 11/2019)
     mutate(ellipse = map(ellipse, as_tibble)) %>%
-    select(-c(kappa, nu, M, S, Sigma, lapse_rate)) %>%
+    select(-c(kappa, nu, m, S, Sigma, lapse_rate)) %>%
     unnest(ellipse)
 
   p = ggplot(x,

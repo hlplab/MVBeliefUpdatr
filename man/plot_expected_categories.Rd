@@ -72,13 +72,13 @@ ggplot object.
 }
 \description{
 Plot univariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
-category statistics of all categories. This includes the M (the mean of category means \eqn{\mu}), S (the scattermatrix),
-kappa (the strength of the belief in M) and nu (the strength of the belief in S). For the univariate case, M and S are
+category statistics of all categories. This includes the m (the mean of category means \eqn{\mu}), S (the scattermatrix),
+kappa (the strength of the belief in m) and nu (the strength of the belief in S). For the univariate case, m and S are
 scalars \insertCite{@see @murphy2012 p. 136}{MVBeliefUpdatr}.
 
 Plot bivariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
-category statistics of all categories. This includes the M (the mean of category means \eqn{\mu}), S (the scattermatrix),
-kappa (the strength of the belief in M) and nu (the strength of the belief in S).
+category statistics of all categories. This includes the m (the mean of category means \eqn{\mu}), S (the scattermatrix),
+kappa (the strength of the belief in m) and nu (the strength of the belief in S).
 }
 \details{
 It is possible to hand more than one NIW belief to this function, and to facet or animate by variables that uniquely

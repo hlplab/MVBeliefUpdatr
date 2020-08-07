@@ -226,7 +226,7 @@ get_ibbu_stanfit_exposure_Sigma = function(x, category, group) {
 #' @export
 get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...) {
   get_categorization_function(
-    Ms = fit$M,
+    ms = fit$m,
     Ss = fit$S,
     kappas = fit$kappa,
     nus = fit$nu,
@@ -285,12 +285,12 @@ get_ibbu_stanfit_input = function(x) {
 #' @param group Name of the group variable. (default: "group")
 #'
 #' @return tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
-#' (\code{kappa, nu, M, S, lapse_rate}). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
-#' into the mean and covariance matrix, respectively. \code{M} is the mean of the multivariate normal distribution over category
+#' (\code{kappa, nu, m, S, lapse_rate}). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
+#' into the mean and covariance matrix, respectively. \code{m} is the mean of the multivariate normal distribution over category
 #' means mu. \code{S} is the scatter matrix that determines both the covariance of the category means mu, and the
 #' Inverse Wishart distribution over category covariance matrices Sigma.
 #'
-#' The expected value of the category mean mu is \code{M}. The expected value of the category covariance matrix Sigma
+#' The expected value of the category mean mu is \code{m}. The expected value of the category covariance matrix Sigma
 #' is \code{S / (nu - D - 1)}, where \code{D} is the dimension of the multivariate Gaussian category. For details,
 #' \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
 #'
@@ -339,20 +339,20 @@ add_ibbu_stanfit_draws = function(
     postfix = if (which == "prior") "_0" else "_n"
     kappa = paste0("kappa", postfix)
     nu = paste0("nu", postfix)
-    M = paste0("mu", postfix)
-    S = paste0("sigma", postfix)
+    m = paste0("m", postfix)
+    S = paste0("S", postfix)
 
     # Variables by which parameters are indexed
     pars.index = if (which == "prior") category else c(category, group)
 
-    # Should M and S be nested?
+    # Should m and S be nested?
     if (!nest) {
       if (which == "prior")
         d.pars = fit %>%
           spread_draws(
             !! rlang::sym(kappa),
             !! rlang::sym(nu),
-            (!! rlang::sym(M))[!!! rlang::syms(pars.index), cue],
+            (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
             (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
             lapse_rate,
             n = draws
@@ -362,18 +362,19 @@ add_ibbu_stanfit_draws = function(
           spread_draws(
             (!! rlang::sym(kappa))[!!! rlang::syms(pars.index)],
             (!! rlang::sym(nu))[!!! rlang::syms(pars.index)],
-            (!! rlang::sym(M))[!!! rlang::syms(pars.index), cue],
+            (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
             (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
             lapse_rate,
             n = draws
           )
 
-      message("Currently mv_ibbu_stanfits have mu_{0,n} and sigma_{0,n} as parameter names. These are actually M_{0,n} and S_{0,n}.\n
-              add_ibbu_stanfit_draws() renames these parameters to M and S.")
-      # See also naming of parameters at beginning of this else block (no other part of the code needs to change.)
-      d.pars %<>%
-        rename(M = !! rlang::sym(M), S = !! rlang::sym(S)) %>%
-        rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .))
+      if (any(c("mu_0", "mu_n", "sigma_0", "sigma_n") %in% names(d.pars))) {
+        message("This seems to be an old model. Some of the NIX/NIW parameters are called mu_* or sigma_*. Renaming
+                them to m and S.")
+        d.pars %<>%
+          rename(m = !! rlang::sym(m), S = !! rlang::sym(S)) %>%
+          rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .))
+      }
 
     # If nesting is the goal:
     } else {
@@ -418,25 +419,25 @@ add_ibbu_stanfit_draws = function(
             ) else . } %>%
           ungroup()
         ) %>%
-        # Join in M
+        # Join in m
         left_join(
           fit %>%
-            tidybayes::spread_draws((!! rlang::sym(M))[!!! rlang::syms(pars.index), cue]) %>%
+            tidybayes::spread_draws((!! rlang::sym(m))[!!! rlang::syms(pars.index), cue]) %>%
             { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
             { if (summarize)
               group_by(., !!! rlang::syms(pars.index), cue) %>%
-                # Obtain expected mean of category mean, M_0 or M_N
-                dplyr::summarise(., !! rlang::sym(M) := mean(!! rlang::sym(M))
+                # Obtain expected mean of category mean, m_0 or m_N
+                dplyr::summarise(., !! rlang::sym(m) := mean(!! rlang::sym(m))
                 ) %>%
                 mutate(.,
                        .chain = "all", .iteration = "all", .draw = "all"
                 ) else . } %>%
             group_by(.chain, .iteration, .draw, !!! rlang::syms(pars.index)) %>%
-            summarise(M = list(
-              matrix((!! rlang::sym(M)),
+            summarise(m = list(
+              matrix((!! rlang::sym(m)),
                      dimnames = list(unique(cue), NULL),
                      byrow = T,
-                     nrow = length((!! rlang::sym(M))))))
+                     nrow = length((!! rlang::sym(m))))))
         ) %>%
         # Join in S
         left_join(
@@ -467,7 +468,7 @@ add_ibbu_stanfit_draws = function(
     d.pars %<>% select(.chain, .iteration, .draw,
                        !! rlang::sym(group), !! rlang::sym(category),
                        # Using starts_with in order to capture case in which variables are *not* nested
-                       starts_with("kappa"), starts_with("nu"), starts_with("M"), starts_with("S"),
+                       starts_with("kappa"), starts_with("nu"), starts_with("m"), starts_with("S"),
                        lapse_rate)
 
     # Clean-up
@@ -478,9 +479,9 @@ add_ibbu_stanfit_draws = function(
 
     if (wide) {
       if (which == "prior")
-        d.pars %<>% gather(variable, value, c(M, S))
+        d.pars %<>% gather(variable, value, c(m, S))
       else
-        d.pars %<>% gather(variable, value, c(kappa, nu, M, S))
+        d.pars %<>% gather(variable, value, c(kappa, nu, m, S))
 
       d.pars %<>%
         unite(temp, !!! rlang::syms(pars.index), variable) %>%
@@ -500,10 +501,10 @@ add_ibbu_stanfit_draws = function(
 #' Returns the expected value of posterior marginal distribution over category means mu and/or
 #' category covariance matrix Sigma, marginalized over all MCMC samples.
 #'
-#' Each MCMC samples' expected value for the category mean \code{E[mu] = M_n}
+#' Each MCMC samples' expected value for the category mean \code{E[mu] = m_n}
 #' (i.e, the posterior/updated mean of the multivariate Normal over category means \code{mu}).
 #' Marginalizing across all MCMC samples (representing uncertainty in the true value of
-#' \code{M_n}), we get \code{E[E[mu]] = mean(M_n)}.
+#' \code{m_n}), we get \code{E[E[mu]] = mean(m_n)}.
 #'
 #' Each MCMC samples' expected value for the category covariance matrix
 #' \code{E[Sigma] = S_n / (nu_n - D - 1)}, where \code{S_n} is the posterior/updated scatter matrix,
@@ -549,7 +550,7 @@ get_expected_category_statistic = function(x, category = NULL, group = NULL,
     mutate(Sigma = map2(S, nu, get_Sigma_from_S)) %>%
     group_by(group, category) %>%
     summarise(
-      mu.mean = list(M %>% reduce(`+`) / length(M)),
+      mu.mean = list(m %>% reduce(`+`) / length(m)),
       Sigma.mean = list(Sigma %>% reduce(`+`) / length(Sigma))) %>%
     select(group, category, !!! rlang::syms(paste0(statistic, ".mean")))
 

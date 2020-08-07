@@ -39,11 +39,11 @@ plot_expected_ibbu_stanfit_categories_density2D(
 using `geom_point()`.}
 
 \item{type}{Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
-faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{M}) and \code{Sigma}
+faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}
 (based on the NIW parameters \code{S} and \code{nu}) at each MCMC draw, and then averages over
 all MCMC draws. The plotted categories represent those means of the expected \code{mu} and \code{Sigma}. The
 density plot instead calculates the posterior predictive for each MCMC draw (i.e, the multivariate Student-T
-density based on the NIW parameters \code{M, S, kappa, nu}), and then averages those densities. Since this is
+density based on the NIW parameters \code{m, S, kappa, nu}), and then averages those densities. Since this is
 done for *all* points defined by the data.grid this can be rather computationally expensive and slow.}
 
 \item{levels}{Used only if `type` is `"contour"`. levels The cumulative probability levels that should be plotted (using

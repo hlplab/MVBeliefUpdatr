@@ -16,6 +16,6 @@ indices, or `NULL` if all cue labels should be returned. (default: `NULL`)}
 A character vector.
 }
 \description{
-Returns the cue labels for the specified indices extracted from the M column of the NIW belief MCMC object.
+Returns the cue labels for the specified indices extracted from the m column of the NIW belief MCMC object.
 If no indices are provided, then all cue labels are returned.
 }

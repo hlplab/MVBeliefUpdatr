@@ -38,7 +38,7 @@ is.NIW_belief = function(x, category = "category", is.long = T, with.lapse = if 
 
   if (
     any(
-      any(c("kappa", "nu", "M", "S") %nin% names(x)),
+      any(c("kappa", "nu", "m", "S") %nin% names(x)),
       with.lapse & "lapse_rate" %nin% names(x),
       with.bias & "bias" %nin% names(x)
     )
@@ -47,12 +47,12 @@ is.NIW_belief = function(x, category = "category", is.long = T, with.lapse = if 
   # Check that category is a factor only after everything else is checked.
   if (any(!is.factor(get(category, x)))) return(FALSE)
 
-  # Check that M and S contain the cue names and that those cue names match.
-  names_M = names(x$M[[1]])
+  # Check that m and S contain the cue names and that those cue names match.
+  names_m = names(x$m[[1]])
   names_S = dimnames(x$S[[1]])
   if (!all(
     names_S[[1]] == names_S[[2]],
-    names_S[[1]] == names_M)) return(FALSE)
+    names_S[[1]] == names_m)) return(FALSE)
 
   return(TRUE)
 }

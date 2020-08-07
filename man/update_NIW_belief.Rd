@@ -28,7 +28,7 @@ update_NIW_belief_by_one_observation(
 
 \item{x_category}{Character. The label of the category that is to be updated.}
 
-\item{x_mean}{Mean of the observations.}
+\item{x_mean}{mean of the observations.}
 
 \item{x_S}{Centered sum of squares matrix of the observations.}
 
@@ -55,7 +55,7 @@ Returns updated/posterior beliefs about the Gaussian categories based on conjuga
 The priors for the categories are specified through the \code{priors} argument, an
 \code{\link[=is.NIW_belief]{NIW_belief}} object. Which category is updated is determined by x_category.
 Updating proceeds as in \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}. The prior kappa
-and nu will be incremented by the number of observations (x_N). The prior M and S will be updated based on the
+and nu will be incremented by the number of observations (x_N). The prior m and S will be updated based on the
 prior kappa, prior nu, x_N and, of course, the sample mean (x_mean) and sum of squares (x_S) of the observations.
 
 A number of different updating schemes are supported, including supervised updating based on labeled data and
@@ -74,7 +74,7 @@ were originally presented in \insertCite{yan:jaeger2018;textual}{MVBeliefUpdatr}
   \item "nolabel-criterion" implements a winner-takes-all update based on the prior beliefs. The
   posterior probability of all categories under the prior is calculated, and only the category with the
   highest posterior probabilty is updated (see decision_rule = "criterion" in \code{\link{get_categorization_from_NIW_belief}}).
-  The update for this category proceed the same ways as under the "label-certain" method. Method "nolabel-criterion" is
+  The update for this category proceed the same ways as under the "label-certain" method. method "nolabel-criterion" is
   thus \emph{order sensitive}, but deterministic (i.e., it yields the same result on each repeated run), provided
   there is no noise (specifically, no noise = "sample").
   \item "nolabel-sampling" implements another winner-takes-all update based on the prior beliefs. The
@@ -112,7 +112,7 @@ TBD
 \insertRef{murphy2012}{MVBeliefUpdatr}
 }
 \seealso{
-\code{\link{update_NIW_belief_kappa}}, \code{\link{update_NIW_belief_nu}}, \code{\link{update_NIW_belief_M}},
+\code{\link{update_NIW_belief_kappa}}, \code{\link{update_NIW_belief_nu}}, \code{\link{update_NIW_belief_m}},
 \code{\link{update_NIW_belief_S}}, all of which are called by \code{update_NIW_belief_by_sufficient_statistics}.
 }
 \keyword{NIW}

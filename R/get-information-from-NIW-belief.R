@@ -6,7 +6,7 @@
 #'
 #' @export
 get_cue_labels_from_NIW_belief = function(x) {
-  return(names(x$M[[1]]))
+  return(names(x$m[[1]]))
 }
 
 
@@ -49,7 +49,7 @@ get_posterior_predictive_from_NIW_belief = function(
 
     get_posterior_predictive(
       x = x,
-      M = b$M[[1]], S = b$S[[1]], kappa = b$kappa[[1]], nu = b$nu[[1]], log = log) %>%
+      m = b$m[[1]], S = b$S[[1]], kappa = b$kappa[[1]], nu = b$nu[[1]], log = log) %>%
       as_tibble() %>%
       rename_all(~ if (log) "lpp" else "pp") %>%
       mutate(!! sym(category) := c)
@@ -111,7 +111,7 @@ get_posterior_predictives_from_NIW_beliefs = function(
 #' @export
 get_categorization_function_from_NIW_belief = function(x, ...) {
   get_categorization_function(
-    Ms = x$M,
+    ms = x$m,
     Ss = x$S,
     kappas = x$kappa,
     nus = x$nu,

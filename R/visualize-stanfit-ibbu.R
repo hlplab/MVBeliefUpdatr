@@ -61,13 +61,13 @@ plot_ibbu_stanfit_parameters = function(
     if(is.null(group.colors)) group.colors = c("darkgray", get_default_colors("group", length(group.ids) - 1))
   }
 
-  p.M = d.pars %>%
-    select(.draw, group, category, cue, M) %>%
+  p.m = d.pars %>%
+    select(.draw, group, category, cue, m) %>%
     distinct() %T>%
-    { get_limits(., "M") ->> x.limits } %>%
+    { get_limits(., "m") ->> x.limits } %>%
     ggplot(aes(
       y = fct_rev(.data$category),
-      x = .data$M,
+      x = .data$m,
       fill = .data$group)) +
     ggridges::geom_density_ridges(alpha = .5, color = NA,
                                   panel_scaling = panel_scaling, scale = .95,
@@ -88,11 +88,11 @@ plot_ibbu_stanfit_parameters = function(
     coord_cartesian(xlim = x.limits, default = T) +
     facet_grid(~ .data$cue) +
     theme_bw() + theme(legend.position = "right")
-  legend = cowplot::get_legend(p.M)
+  legend = cowplot::get_legend(p.m)
 
-  p.M = p.M + theme(legend.position = "none")
+  p.m = p.m + theme(legend.position = "none")
   p.S = suppressMessages(
-    p.M %+%
+    p.m %+%
       (d.pars %>%
          select(.draw, group, category, cue, cue2, S) %>%
          distinct() %T>%
@@ -110,7 +110,7 @@ plot_ibbu_stanfit_parameters = function(
 
   p.KN = suppressWarnings(
     suppressMessages(
-      p.M %+%
+      p.m %+%
         (d.pars %>%
            select(.draw, group, category, kappa, nu) %>%
            distinct() %>%
@@ -148,7 +148,7 @@ plot_ibbu_stanfit_parameters = function(
 
   K = length(unique(d.pars$cue))
   p = suppressWarnings(cowplot::plot_grid(
-    cowplot::plot_grid(plotlist = list(p.M, p.KN), nrow = 1, rel_widths = c(K,2)),
+    cowplot::plot_grid(plotlist = list(p.m, p.KN), nrow = 1, rel_widths = c(K,2)),
     cowplot::plot_grid(plotlist = list(
       p.S,
       cowplot::plot_grid(plotlist = list(legend, p.LR),
@@ -432,11 +432,11 @@ plot_ibbu_stanfit_test_categorization = function(
 #' @param fit.input Optionally, the input to the mv-ibbu-stanfit object, in which case the test tokens will also be plotted,
 #' using `geom_point()`.
 #' @param type Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
-#' faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{M}) and \code{Sigma}
+#' faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}
 #' (based on the NIW parameters \code{S} and \code{nu}) at each MCMC draw, and then averages over
 #' all MCMC draws. The plotted categories represent those means of the expected \code{mu} and \code{Sigma}. The
 #' density plot instead calculates the posterior predictive for each MCMC draw (i.e, the multivariate Student-T
-#' density based on the NIW parameters \code{M, S, kappa, nu}), and then averages those densities. Since this is
+#' density based on the NIW parameters \code{m, S, kappa, nu}), and then averages those densities. Since this is
 #' done for *all* points defined by the data.grid this can be rather computationally expensive and slow.
 #' @param plot.test,plot.exposure Should the test and/or exposure stimuli be plotted? (default: `TRUE` for `plot.test`,
 #' `FALSE` for `plot.exposure`) The test items are plotted as black points. The exposure mean is plotted as point,
@@ -612,7 +612,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
   if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
-  cue.names = row.names(d$M[[1]])
+  cue.names = row.names(d$m[[1]])
   d %<>%
     crossing(
       cue1 = seq(min(xlim), max(xlim), length.out = resolution),

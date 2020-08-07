@@ -133,15 +133,15 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
     cats = levels(data[[category]])
     groups = levels(data[[group]])
     n_cat = length(cats)
-    n_subj = length(groups)
+    n_group = length(groups)
     n_cues = length(cues)
 
-    N = array(dim = c(n_cat,n_subj))
-    x_mean = array(dim = c(n_cat,n_subj,n_cues))
-    x_ss = array(dim = c(n_cat,n_subj,n_cues,n_cues))
+    N = array(dim = c(n_cat,n_group))
+    x_mean = array(dim = c(n_cat,n_group,n_cues))
+    x_ss = array(dim = c(n_cat,n_group,n_cues,n_cues))
 
     for (i in 1:n_cat) {
-      for (j in 1:n_subj) {
+      for (j in 1:n_group) {
         temp.data_ss = data_ss %>%
           ungroup() %>%
           filter(!! rlang::sym(category) == cats[i] &

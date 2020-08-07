@@ -8,7 +8,7 @@ update_NIW_beliefs_incrementally(
   prior,
   exposure,
   category = "category",
-  cues = names(prior$M[[1]]),
+  cues = names(prior$m[[1]]),
   exposure.order = NULL,
   add_noise = NULL,
   method = "label-certain",
@@ -55,7 +55,7 @@ The priors for the categories are specified through the \code{priors} argument. 
 of the same format as the posterior draws stored in an MV IBBU stanfit object. Each row of the tibble specifies
 the prior for one category (specified in the \code{category} column). The four parameters of the NIW are the
 pseudocounts indicating the strength of the prior beliefs into the mean (\code{kappa}) and covariance (\code{
-nu}), as well as the prior mean of means (\code{M}, same as \code{M_0} in Murphy, 2012) and the prior scatter
+nu}), as well as the prior mean of means (\code{m}, same as \code{m_0} in Murphy, 2012) and the prior scatter
 matrix (\code{S}, same as \code{S_0} in Murphy, 2012).
 }
 \examples{

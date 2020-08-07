@@ -39,10 +39,10 @@ Returns the expected value of posterior marginal distribution over category mean
 category covariance matrix Sigma, marginalized over all MCMC samples.
 }
 \details{
-Each MCMC samples' expected value for the category mean \code{E[mu] = M_n}
+Each MCMC samples' expected value for the category mean \code{E[mu] = m_n}
 (i.e, the posterior/updated mean of the multivariate Normal over category means \code{mu}).
 Marginalizing across all MCMC samples (representing uncertainty in the true value of
-\code{M_n}), we get \code{E[E[mu]] = mean(M_n)}.
+\code{m_n}), we get \code{E[E[mu]] = mean(m_n)}.
 
 Each MCMC samples' expected value for the category covariance matrix
 \code{E[Sigma] = S_n / (nu_n - D - 1)}, where \code{S_n} is the posterior/updated scatter matrix,
