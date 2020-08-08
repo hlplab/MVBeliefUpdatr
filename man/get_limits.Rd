@@ -7,7 +7,7 @@
 get_limits(data, measure, hdi.prob = 0.99, min = NULL, max = NULL)
 }
 \arguments{
-\item{data}{A `tibble`` or `data.frame` that contains `measure`.}
+\item{data}{A `tibble` or `data.frame` that contains a `measure`.}
 
 \item{measure}{Name of variable in `data` for which limits are sought.}
 

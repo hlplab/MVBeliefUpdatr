@@ -366,7 +366,6 @@ plot_expected_categorization_function_2D = function(
   )
 
   x %<>%
-    group_by(Gender, observation.n) %>%
     nest() %>%
     mutate(f = map(data, get_categorization_function_from_NIW_belief, logit = logit)) %>%
     # Join in vectored cues

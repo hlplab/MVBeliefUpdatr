@@ -60,11 +60,34 @@ get_default_colors = function(var, n) {
   return(c)
 }
 
+
+#' Get plot limits.
+#'
+#' Get x and y limits from a ggplot.
+#'
+#' @param plot A `ggplot` object.
+#'
+#' @return List with elements x and y, each of which is a vector of two values..
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#'
+#' @export
+get_plot_limits = function(plot) {
+  list(x = ggplot_build(plot)$layout$panel_scales_x[[1]]$range$range,
+       y = ggplot_build(obj)$layout$panel_scales_y[[1]]$range$range)
+}
+
+
+
+
 #' Get suitable limits for coordinate system based on the MCMC samples of a variable.
 #'
 #' Useful for, for example, plotting of distribution.
 #'
-#' @param data A `tibble`` or `data.frame` that contains `measure`.
+#' @param data A `tibble` or `data.frame` that contains a `measure`.
 #' @param measure Name of variable in `data` for which limits are sought.
 #' @param hdi.prob Proportion of MCMC samples that are within the limits.
 #' @param min,max If min or max are specified, then those limits are returned instead of the HDI-based limits.
@@ -77,7 +100,6 @@ get_default_colors = function(var, n) {
 #' TBD
 #'
 #' @export
-#'
 get_limits = function(data, measure, hdi.prob = .99, min = NULL, max = NULL) {
   data %>%
     mean_hdi((!! rlang::sym(measure)), .width = hdi.prob) %>%

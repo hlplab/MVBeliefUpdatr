@@ -119,8 +119,7 @@ make_NIW_prior_from_data = function(
                    ~ list(reduce(.x, `+`) / length(.x)))
   }
 
-  message("S is set based on average observed covariance matrix in sample. It might be safer to fit an Inverse-Wishart distribution
-          to the entire set of covariance matrices.")
+  message("S is set based on average observed covariance matrix in sample. It might be safer to fit an Inverse-Wishart distribution to the entire set of covariance matrices.")
   data %<>%
     mutate(
       !! category := factor(!! category),
