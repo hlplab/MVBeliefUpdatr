@@ -2,6 +2,8 @@
 
 check_exposure_test_data <- function(data, cues, category, response, group, which.data = "the", verbose = F) {
   assert_that(is_tibble(data) | is.data.frame(data))
+  assert_that(nrow(data),
+              msg = paste("There must be at least one observation in", which.data, "data. Found", nrow(data), "observations."))
   assert_that(all(is_character(cues)),
               msg = "cues must be a column name or vector of column names.")
   assert_that(all(cues %in% names(data)),
