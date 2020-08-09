@@ -85,10 +85,10 @@ infer_prior_beliefs <- function(
   fit %<>%
     recover_types(
       crossing(
-        category = names(z_test_counts),
-        group = attr(data_list$y_test, "levels"),
-        cue = names(data_list$x_test),
-        cue2 = names(data_list$x_test)
+        category = factor(names(z_test_counts), levels = names(z_test_counts)),
+        group = factor(attr(data_list$y_test, "levels"), levels = attr(data_list$y_test, "levels")),
+        cue = factor(names(data_list$x_test), levels = names(data_list$x_test)),
+        cue2 = cue
       )
     )
 

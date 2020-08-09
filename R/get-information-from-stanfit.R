@@ -297,7 +297,6 @@ get_ibbu_stanfit_input = function(x) {
 #' @examples
 #' TBD
 #' @export
-#'
 add_ibbu_stanfit_draws = function(
   fit,
   which = "posterior",

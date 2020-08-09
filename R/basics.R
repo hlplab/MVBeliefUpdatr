@@ -110,7 +110,7 @@ make_vector_column = function(data, cols, vector_col) {
 #' @rdname transform_cues
 #' @export
 transform_cues = function(data, cues,
-                          center =  T, scale = if (pca) F else T, pca = F,
+                          center =  if (pca) T else F, scale = F, pca = F,
                           transform.parameters = NULL,
                           return.transformed.data = T, return.transform.parameters = F,
                           return.transform.function = F, return.untransform.function = F

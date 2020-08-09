@@ -8,8 +8,8 @@
 transform_cues(
   data,
   cues,
-  center = T,
-  scale = if (pca) F else T,
+  center = if (pca) T else F,
+  scale = F,
   pca = F,
   transform.parameters = NULL,
   return.transformed.data = T,
