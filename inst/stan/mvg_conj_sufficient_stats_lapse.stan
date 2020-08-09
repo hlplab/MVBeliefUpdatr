@@ -35,7 +35,7 @@ data {
   int<lower=0, upper=1> m_0_known;
   int<lower=0, upper=1> S_0_known;
   vector[m_0_known ? K : 0] m_0_data[m_0_known ? M : 0];        // optional: user provided m_0 (prior mean of means)
-  cov_matrix[m_0_known ? K : 0] S_0_data[S_0_known ? M : 0];    // optional: user provided S_0 (prior scatter matrix of mean)
+  cov_matrix[S_0_known ? K : 0] S_0_data[S_0_known ? M : 0];    // optional: user provided S_0 (prior scatter matrix of mean)
 
   /* For now, this script assumes that the observations (cue vectors) are centered. The prior
      mean of m_0 is set to 0. Same for the prior location parameter for the cauchy prior over

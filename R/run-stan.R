@@ -81,7 +81,8 @@ infer_prior_beliefs <- function(
     }
   }
 
-  if (!is.null(fit)) fit %<>% as.NIW_ibbu_stanfit(data_list, transform)
+  if (is.null(fit)) stop("Sampling failed.")
+  fit %<>% as.NIW_ibbu_stanfit(data_list, transform)
   fit %<>%
     recover_types(
       crossing(

@@ -559,7 +559,7 @@ get_expected_category_statistic = function(x, category = NULL, group = NULL,
   return(x)
 }
 
-#' @rdname str(iistic
+#' @rdname get_expected_category_statistic
 #' @export
 get_expected_mu = function(x, category, group) {
   return(get_expected_category_statistic(x, category, group, statistic = "mu"))

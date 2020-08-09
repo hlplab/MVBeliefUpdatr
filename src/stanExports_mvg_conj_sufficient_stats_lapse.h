@@ -241,15 +241,15 @@ public:
                 }
             }
             current_statement_begin__ = 38;
-            validate_non_negative_index("S_0_data", "(m_0_known ? K : 0 )", (m_0_known ? K : 0 ));
-            validate_non_negative_index("S_0_data", "(m_0_known ? K : 0 )", (m_0_known ? K : 0 ));
+            validate_non_negative_index("S_0_data", "(S_0_known ? K : 0 )", (S_0_known ? K : 0 ));
+            validate_non_negative_index("S_0_data", "(S_0_known ? K : 0 )", (S_0_known ? K : 0 ));
             validate_non_negative_index("S_0_data", "(S_0_known ? M : 0 )", (S_0_known ? M : 0 ));
-            context__.validate_dims("data initialization", "S_0_data", "matrix_d", context__.to_vec((S_0_known ? M : 0 ),(m_0_known ? K : 0 ),(m_0_known ? K : 0 )));
-            S_0_data = std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> >((S_0_known ? M : 0 ), Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>((m_0_known ? K : 0 ), (m_0_known ? K : 0 )));
+            context__.validate_dims("data initialization", "S_0_data", "matrix_d", context__.to_vec((S_0_known ? M : 0 ),(S_0_known ? K : 0 ),(S_0_known ? K : 0 )));
+            S_0_data = std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> >((S_0_known ? M : 0 ), Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>((S_0_known ? K : 0 ), (S_0_known ? K : 0 )));
             vals_r__ = context__.vals_r("S_0_data");
             pos__ = 0;
-            size_t S_0_data_j_2_max__ = (m_0_known ? K : 0 );
-            size_t S_0_data_j_1_max__ = (m_0_known ? K : 0 );
+            size_t S_0_data_j_2_max__ = (S_0_known ? K : 0 );
+            size_t S_0_data_j_1_max__ = (S_0_known ? K : 0 );
             size_t S_0_data_k_0_max__ = (S_0_known ? M : 0 );
             for (size_t j_2__ = 0; j_2__ < S_0_data_j_2_max__; ++j_2__) {
                 for (size_t j_1__ = 0; j_1__ < S_0_data_j_1_max__; ++j_1__) {
