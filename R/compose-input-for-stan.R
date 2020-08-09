@@ -2,18 +2,18 @@
 
 check_exposure_test_data <- function(data, cues, category, response, group, which.data = "the", verbose = F) {
   assert_that(is_tibble(data) | is.data.frame(data))
-  assert_that(nrow(data),
-              msg = paste("There must be at least one observation in", which.data, "data. Found", nrow(data), "observations."))
   assert_that(all(is_character(cues)),
               msg = "cues must be a column name or vector of column names.")
   assert_that(all(cues %in% names(data)),
-              msg = paste("Cue column(s)", cues[which(cues %nin% names(data))], "not found in", which.data, "data." ))
+              msg = paste("Cue column(s)", paste(cues[which(cues %nin% names(data))], collapse = ","), "not found in", which.data, "data." ))
   assert_that(group %in% names(data),
               msg = paste("Group column", group, "not found in", which.data,"data."))
 
   data %<>%
     drop_na(cues, group) %>%
     mutate_at(group, as.factor)
+  assert_that(nrow(data),
+              msg = paste("There must be at least one observation in", which.data, "data. Found", nrow(data), "observations."))
 
   if(!is.null(category)) {
     assert_that(is_scalar_character(category),
