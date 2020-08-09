@@ -452,7 +452,7 @@ update_NIW_beliefs_incrementally <- function(
   # Prepare exposure data
   exposure %<>%
     { if (!is.null(exposure.order)) arrange(., !! sym(exposure.order)) else . } %>%
-    mutate(cues = pmap(.l = list(!!! syms(cues)), .f = ~ c(...)))
+    make_vector_column(cues, "cues")
 
   if (keep.update_history)
     prior %<>%

@@ -12,9 +12,9 @@
 #' @param model Name of stanmodel that should be used. Overrides any default selection.
 #' @param ... Additional parameters are passed to \code{\link[rstan]{sampling}}
 #'
-#' @return A \code{mvg_ibbu_stanfit} object with the fitted stan model.
+#' @return \code{NIW_ibbu_stanfit} object with the fitted stan model.
 #'
-#' @seealso \code{\link{is.mvg_ibbu_stanfit}} for information about mvg_ibbu_stanfit objects,
+#' @seealso \code{\link{is.NIW_ibbu_stanfit}} for information about NIW_ibbu_stanfit objects,
 #' \code{\link{add_ibbu_stanfit_draws}} to draw samples from the stanfit.
 #' @export
 infer_prior_beliefs <- function(
@@ -82,7 +82,7 @@ infer_prior_beliefs <- function(
     }
   }
 
-  if (!is.null(fit)) fit %<>% as.mvg_ibbu_stanfit(data_list, transform)
+  if (!is.null(fit)) fit %<>% as.NIW_ibbu_stanfit(data_list, transform)
 
   return(fit)
 }

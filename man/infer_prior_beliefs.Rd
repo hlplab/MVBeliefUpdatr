@@ -84,7 +84,7 @@ dimension.}
 \item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}}
 }
 \value{
-A \code{mvg_ibbu_stanfit} object with the fitted stan model.
+\code{NIW_ibbu_stanfit} object with the fitted stan model.
 }
 \description{
 This function takes exposure and test data, the names of the cues, category, and response columns (and
@@ -92,6 +92,6 @@ optionally group and/or block columns), and uses
 stan to draw samples from the prior beliefs that match the behavior.
 }
 \seealso{
-\code{\link{is.mvg_ibbu_stanfit}} for information about mvg_ibbu_stanfit objects,
+\code{\link{is.NIW_ibbu_stanfit}} for information about NIW_ibbu_stanfit objects,
 \code{\link{add_ibbu_stanfit_draws}} to draw samples from the stanfit.
 }

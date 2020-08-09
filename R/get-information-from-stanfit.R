@@ -103,7 +103,7 @@ get_group_levels = function(fit, indices = NULL) {
 #' @rdname get_constructor
 #' @export
 get_constructor = function(fit, variable = c("category", "group")) {
-  assert_that(is.mv_ibbu_stanfit(fit))
+  assert_NIW_ibbu_stanfit(fit)
   if (is.null(variable)) return(attr(fit, "tidybayes_constructors"))
 
   assert_that(variable %in% c("category", "group"), msg = "Variable name must be one of category or group.")
@@ -195,7 +195,7 @@ get_category_statistic = function(x, grouping.vars = NULL,
 #' @export
 get_ibbu_stanfit_exposure_category_statistic = function(x, category = NULL, group = NULL,
                                   statistic = c("mu", "Sigma")) {
-  assert_that(is.mv_ibbu_input(x) | is.mv_ibbu_stanfit(x))
+  assert_that(is.NIW_ibbu_input(x) | is.NIW_ibbu_stanfit(x))
   stop("get_ibbu_stanfit_exposure_statistics not yet implemented!")
 
   x = get_ibbu_stanfit_input(x)
@@ -251,9 +251,9 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #' @rdname get_ibbu_input
 #' @export
 get_ibbu_stanfit_input = function(x) {
-  assert_that(is.mv_ibbu_input(x) | is.mv_ibbu_stanfit(x))
+  assert_that(is.NIW_ibbu_input(x) | is.NIW_ibbu_stanfit(x))
 
-  if (is.mv_ibbu_input(x)) return(x) else {
+  if (is.NIW_ibbu_input(x)) return(x) else {
     stop("Extraction of input data from MV IBBU stanfit not yet implemented!")
   }
 
@@ -333,7 +333,7 @@ add_ibbu_stanfit_draws = function(
 
     return(d.pars)
   } else {
-    assert_that(is.mv_ibbu_stanfit(fit))
+    assert_NIW_ibbu_stanfit(fit)
 
     # Parameters' names depend on whether prior or posterior is to be extracted.
     postfix = if (which == "prior") "_0" else "_n"
@@ -536,8 +536,8 @@ add_ibbu_stanfit_draws = function(
 get_expected_category_statistic = function(x, category = NULL, group = NULL,
                                            statistic = c("mu", "Sigma")) {
   assert_that(all(statistic %in% c("mu", "Sigma")))
-  assert_that(is.mv_ibbu_stanfit(x) | is.NIW_belief_MCMC(x, is.nested = T, is.long = T))
-  if (is.mv_ibbu_stanfit(x))
+  assert_that(is.NIW_ibbu_stanfit(x) | is.NIW_belief_MCMC(x, is.nested = T, is.long = T))
+  if (is.NIW_ibbu_stanfit(x))
     x = add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T)
 
   assert_that(any(is.null(category), is.character(category), is.numeric(category)))

@@ -210,7 +210,7 @@ plot_ibbu_stanfit_test_categorization = function(
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
   sort.by = "prior"
 ) {
-  assert_that(is.mvg_ibbu_stanfit(fit))
+  assert_NIW_ibbu_stanfit(fit)
   assert_that(!is.null(fit.input))
   assert_that(is.flag(summarize))
   assert_that(is.null(n.draws) | is.count(n.draws))
@@ -494,7 +494,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
   plot.test = T, plot.exposure = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
-  assert_that(is.mvg_ibbu_stanfit(x) | is.NIW_belief_MCMC(x))
+  assert_that(is.NIW_ibbu_stanfit(x) | is.NIW_belief_MCMC(x))
   assert_that(!all(is.null(fit.input), plot.test))
 
   d = get_expected_category_statistic(x)
@@ -598,10 +598,10 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   xlim, ylim, resolution = 25
 ) {
-  assert_that(is.mvg_ibbu_stanfit(x) | is.NIW_belief_MCMC(x))
+  assert_that(is.NIW_ibbu_stanfit(x) | is.NIW_belief_MCMC(x))
   assert_that(!all(is.null(fit.input), plot.test))
 
-  if (is.mvg_ibbu_stanfit(x))
+  if (is.NIW_ibbu_stanfit(x))
     d = add_ibbu_stanfit_draws(x, which = which, wide = F, nest = T)
   else
     d = x

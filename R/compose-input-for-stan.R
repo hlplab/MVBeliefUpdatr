@@ -2,40 +2,28 @@
 
 check_exposure_test_data <- function(data, cues, category, response, group, which.data = "the", verbose = F) {
   assert_that(is_tibble(data) | is.data.frame(data))
-  assert_that(all(is_character(cues)),
-              msg = "cues must be a column name or vector of column names.")
-  assert_that(all(cues %in% names(data)),
-              msg = paste("Cue column(s)", paste(cues[which(cues %nin% names(data))], collapse = ","), "not found in", which.data, "data." ))
-  assert_that(group %in% names(data),
-              msg = paste("Group column", group, "not found in", which.data,"data."))
+  assert_cols_in_data(data, cues, which.data, scalar = F)
+  assert_cols_in_data(data, group, which.data, scalar = T)
 
   data %<>%
     drop_na(cues, group) %>%
     mutate_at(group, as.factor)
-  assert_that(nrow(data),
-              msg = paste("There must be at least one observation in", which.data, "data. Found", nrow(data), "observations."))
 
   if(!is.null(category)) {
-    assert_that(is_scalar_character(category),
-                msg = "category must be a column name.")
-    assert_that(category %in% names(data),
-                msg = paste("Category column", category, "not found in", which.data, "data."))
-
+    assert_cols_in_data(data, category, which.data, scalar = T)
     data %<>%
       mutate_at(category, as.factor) %>%
       drop_na(category)
   }
 
   if (!is.null(response)) {
-    assert_that(is_scalar_character(response),
-                msg = "response must be a column name.")
-    assert_that(response %in% names(data),
-                msg = paste("Response column", response, "not found in", which.data, "data."))
-
+    assert_cols_in_data(data, response, which.data, scalar = T)
     data %<>%
       mutate_at(response, as.factor) %>%
       drop_na(response)
   }
+  assert_that(nrow(data) > 0,
+              msg = paste("There must be at least one observation in", which.data, "data."))
 
   if (verbose){
     print("In check_exposure_test_data():")
@@ -231,9 +219,9 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
 #' matrix of mu_0 and scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
 #' ignore. (default: 0)
 #'
-#' @return A list that is an \code{mvg_ibbu_input}.
+#' @return A list that is an \code{NIW_ibbu_input}.
 #'
-#' @seealso \code{\link{is.mvg_ibbu_input}}
+#' @seealso \code{\link{is.NIW_ibbu_input}}
 #' @keywords TBD
 #' @examples
 #' TBD
@@ -404,9 +392,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 
 
 attach_stanfit_input_data = function(stanfit, input) {
-  assert_that(is.mvg_ibbu_stanfit(stanfit),
-              msg = paste0("stanfit must be of class ", new_stanfit_class_name))
-  assert_that(is.mvg_ibbu_input(input),
+  assert_NIW_ibbu_stanfit(stanfit)
+  assert_that(is.NIW_ibbu_input(input),
               msg = "input is not an acceptable input data.")
   stanfit@input_data = input
 
@@ -414,8 +401,7 @@ attach_stanfit_input_data = function(stanfit, input) {
 }
 
 attach_stanfit_transform = function(stanfit, transform_functions) {
-  assert_that(is.mvg_ibbu_stanfit(stanfit),
-              msg = paste0("stanfit must be of class ", new_stanfit_class_name))
+  assert_NIW_ibbu_stanfit(stanfit)
   stanfit@transform_functions = transform_functions
 
   return(stanfit)

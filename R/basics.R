@@ -48,6 +48,31 @@ cov2tau = function(v) {
 }
 
 
+
+#' Combine a number of columns into a new vector column
+#'
+#' Combine a number of columns into a new column in which each cell is the vector of values from the original columns.
+#'
+#' @param data `tibble` or `data.frame`.
+#' @param cols Vector of characters with names of variables to combine.
+#' @param vector_col Name of new column of vectors.
+#'
+#' @return Same as \code{data}.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+make_vector_column = function(data, cols, vector_col) {
+  data %<>%
+    mutate(!! sym(vector_col) := pmap(.l = list(!!! syms(cols)), .f = ~ c(...)))
+
+  return(data)
+}
+
+
+
 #' Transform and untransform cues by applying or undoing PCA, centering, and/or scaling.
 #'
 #' If the `transform.parameters` argument
@@ -84,7 +109,6 @@ cov2tau = function(v) {
 #' TBD
 #' @rdname transform_cues
 #' @export
-#'
 transform_cues = function(data, cues,
                           center =  T, scale = if (pca) F else T, pca = F,
                           transform.parameters = NULL,

@@ -1,5 +1,8 @@
 IMPORTANT
 
+
++ consider making NIW_MCMC and NIW_belief one class. or at least the former is a subclass of the latter?
+
 + make make_mvg_IO function and visualizations that are the same as NIW belief plotting functions
 ++ consider using dave's cross-validating functions. Talk with xin about how to best do that.
 ++ include a function that can categorize data from one group on beliefs of other group.
