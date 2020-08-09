@@ -11,7 +11,8 @@ is.NIW_belief(
   category = "category",
   is.long = T,
   with.lapse = if (with.bias) T else F,
-  with.bias = F
+  with.bias = F,
+  verbose = F
 )
 
 is.NIW_belief_w_lapse(x, category = "category", is.long = T, with.bias = F)

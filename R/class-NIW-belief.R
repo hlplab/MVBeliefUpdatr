@@ -17,21 +17,21 @@
 #' @examples
 #' TBD
 #' @export
-is.NIW_belief = function(x, category = "category", is.long = T, with.lapse = if (with.bias) T else F, with.bias = F) {
+is.NIW_belief = function(x, category = "category", is.long = T, with.lapse = if (with.bias) T else F, with.bias = F, verbose = F) {
   assert_that(all(is.flag(is.long), is.flag(with.lapse), is.flag(with.bias)))
 
   if (
     any(
-      !is.long == T,
-      all(!is_tibble(x), is.data.frame(x))
+      !is.long,
+      all(!is_tibble(x), !is.data.frame(x))
     )
   ) {
-    message("Currently only NIW beliefs in long format can be recognized.")
+    if (verbose) message("Currently only NIW beliefs in long format can be recognized.")
     return(FALSE)
   }
 
   if (category %nin% names(x)) {
-    message("Column category not found. Did you use another name for this column? You can use the category
+    if (verbose) message("Column category not found. Did you use another name for this column? You can use the category
             argument to specify the name of that column.")
     return(FALSE)
   }

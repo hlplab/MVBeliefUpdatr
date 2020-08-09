@@ -429,8 +429,7 @@ plot_ibbu_stanfit_test_categorization = function(
 #' computational demands and speed.
 #'
 #' @param fit mv-ibbu-stanfit object.
-#' @param fit.input Optionally, the input to the mv-ibbu-stanfit object, in which case the test tokens will also be plotted,
-#' using `geom_point()`.
+#' @param fit.input Optionally, the input to the NIW_ibbu_stanfit object.
 #' @param type Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
 #' faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}
 #' (based on the NIW parameters \code{S} and \code{nu}) at each MCMC draw, and then averages over
@@ -494,9 +493,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
   plot.test = T, plot.exposure = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
-  assert_that(is.NIW_ibbu_stanfit(x) | is.NIW_belief_MCMC(x))
+  if (is.null(fit.input)) fit.input = x@input_data
   assert_that(!all(is.null(fit.input), plot.test))
-
   d = get_expected_category_statistic(x)
 
   # Setting aes defaults
@@ -598,6 +596,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   xlim, ylim, resolution = 25
 ) {
+  if (is.null(fit.input)) fit.input = x@input_data
   assert_that(is.NIW_ibbu_stanfit(x) | is.NIW_belief_MCMC(x))
   assert_that(!all(is.null(fit.input), plot.test))
 

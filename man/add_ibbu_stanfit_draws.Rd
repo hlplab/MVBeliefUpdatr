@@ -47,10 +47,7 @@ is \code{S / (nu - D - 1)}, where \code{D} is the dimension of the multivariate 
 \description{
 Add MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) to a tibble. Both wide
 (`wide=TRUE`) or long format (`wide=FALSE`) can be chosen as output. By default all post-warmup draws are
-returned, but if `summarize=TRUE` then just the mean of each parameter is returned instead. Users can
-optionally provide a data frame with the unique values of the `group`, `category`, and cue variables (`cue`, `cue2`;
-for example through \code{\link[tidyr]{crossing}}). If provided, this information will be used to recover
-the types in the stanfit object, adding it to the resulting tibble with MCMC draws.
+returned, but if `summarize=TRUE` then just the mean of each parameter is returned instead.
 }
 \details{
 By default, the category means and scatter matrices are nested, rather than each of their elements being

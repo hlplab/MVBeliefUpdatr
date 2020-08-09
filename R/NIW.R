@@ -85,7 +85,8 @@ get_posterior_predictive = function(x, m, S, kappa, nu, log = T) {
 #' @rdname get_categorization_function
 #' @export
 get_categorization_function = function(
-  ms, Ss, kappas, nus, lapse_rate,
+  ms, Ss, kappas, nus,
+  lapse_rate = NULL, bias = NULL,
   priors = rep(1 / n.cat, n.cat),
   n.cat = length(ms),
   logit = FALSE
@@ -95,7 +96,9 @@ get_categorization_function = function(
               are_equal(length(ms), length(kappas)),
               are_equal(length(ms), length(nus)),
               msg = "The number of ms, Ss, kappas, nus, and priors must be identical.")
-  assert_that(all(between(lapse_rate, 0, 1)))
+  if (!is.null(lapse_rate)) assert_that(all(between(lapse_rate, 0, 1))) else lapse_rate = rep(0, n.cat)
+  if (!is.null(bias)) assert_that(all(between(bias, 0, 1), sum(bias) == lapse_rate[1]),
+                                  msg = "biases must sum up to lapse rate.") else bias = lapse_rate / n.cat
 
   # Get dimensions of multivariate category
   D = length(ms[[1]])
@@ -115,8 +118,7 @@ get_categorization_function = function(
       exp(
         log_p[,target_category] + log(priors[target_category]) -
           log(rowSums(exp(log_p) * priors))) *
-      # Assuming a uniform (unbiased) lapse rate:
-      (1 - lapse_rate) + lapse_rate / n.cat
+      (1 - lapse_rate[target_category]) + bias[target_category]
 
     if (logit)
       return(qlogis(p_target))

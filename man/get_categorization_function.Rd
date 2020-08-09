@@ -12,7 +12,8 @@ get_categorization_function(
   Ss,
   kappas,
   nus,
-  lapse_rate,
+  lapse_rate = NULL,
+  bias = NULL,
   priors = rep(1/n.cat, n.cat),
   n.cat = length(ms),
   logit = FALSE

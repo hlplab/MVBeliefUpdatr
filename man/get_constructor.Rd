@@ -6,7 +6,7 @@
 \alias{get_group_constructor}
 \title{Get tidybayes constructor from IBBU stanfit}
 \usage{
-get_constructor(fit, variable = c("category", "group"))
+get_constructor(fit, variable = NULL)
 
 get_category_constructor(fit)
 

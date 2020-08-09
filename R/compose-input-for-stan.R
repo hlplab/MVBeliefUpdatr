@@ -350,8 +350,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 
         m_0_known = if (is.null(m_0)) 0 else 1
         S_0_known = if (is.null(S_0)) 0 else 1
-        m_0_data = if (is.null(m_0)) numeric(0) else m_0 # array(dim=c(0,length(cues)))
-        S_0_data = if (is.null(S_0)) numeric(0) else S_0 # array(dim=c(0,length(cues),length(cues)))
+        m_0_data = if (is.null(m_0)) array(numeric(), dim = c(0,0)) else m_0
+        S_0_data = if (is.null(S_0)) array(numeric(), dim = c(0,0,0)) else S_0
 
         tau_scale <- tau_scale
         L_omega_scale <- L_omega_scale

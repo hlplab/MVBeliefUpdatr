@@ -2,7 +2,6 @@
 % Please edit documentation in R/get-information-from-stanfit.R
 \name{get_expected_category_statistic}
 \alias{get_expected_category_statistic}
-\alias{get_expected_mu}
 \alias{get_expected_sigma}
 \title{Get expected category mean mu or covariance matrix sigma}
 \usage{
@@ -12,8 +11,6 @@ get_expected_category_statistic(
   group = NULL,
   statistic = c("mu", "Sigma")
 )
-
-get_expected_mu(x, category, group)
 
 get_expected_sigma(x, category, group)
 }

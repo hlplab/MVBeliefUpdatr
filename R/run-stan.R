@@ -66,7 +66,6 @@ infer_prior_beliefs <- function(
   if (is.null(use_multivariate_updating))
     use_multivariate_updating = if (is.null(data_list$K)) FALSE else TRUE
   message("change to keep samples only from relevant parameters.")
-  message("change the add_ibbu_stanfit_draws based on the new parameter names.")
 
   if (sample) {
     if (!is.null(model)) {
@@ -83,6 +82,15 @@ infer_prior_beliefs <- function(
   }
 
   if (!is.null(fit)) fit %<>% as.NIW_ibbu_stanfit(data_list, transform)
+  fit %<>%
+    recover_types(
+      crossing(
+        category = names(z_test_counts),
+        group = attr(data_list$y_test, "levels"),
+        cue = names(data_list$x_test),
+        cue2 = names(data_list$x_test)
+      )
+    )
 
   return(fit)
 }
