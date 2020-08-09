@@ -2,8 +2,9 @@ new_stanfit_class_name = "NIW_ibbu_stanfit"
 
 #' An S4 class for stanfit objects that use one of the NIW_ibbu stan programs.
 #'
-#' @slot input_data A list
-#' @slot labels A list
+#' @slot input_data list containing the data handed to rstan through \code{compose_data} function.
+#' @slot transform_functions list containing elements transform.function and untransform.function.
+#' @slot labels list
 #' @export
 NIW_ibbu_stanfit <- setClass(new_stanfit_class_name,
          slots = c(input_data = "list", transform_functions = "list", labels = "list"),

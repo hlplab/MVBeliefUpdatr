@@ -16,4 +16,6 @@ assert_cols_in_data = function(data, cols, which.data = "the", scalar = T) {
               msg = paste0(paste(cols, collapse = ","), "must be column name or vector of column names."))
   assert_that(all(cols %in% names(data)),
               msg = paste("Column(s)", paste(cues[which(cols %nin% names(data))], collapse = ","), "not found in", which.data, "data." ))
+  if (nrow(drop_na(data, cols)) == 0)
+    warning(paste("The column(s)", paste(cols, collapse = ", "), "are present in", which.data, "data, but all values are NAs."))
 }
