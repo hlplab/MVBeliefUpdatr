@@ -11,8 +11,10 @@ An S4 class for stanfit objects that use one of the NIW_ibbu stan programs.
 \section{Slots}{
 
 \describe{
-\item{\code{input_data}}{A list}
+\item{\code{input_data}}{list containing the data handed to rstan through \code{compose_data} function.}
 
-\item{\code{labels}}{A list}
+\item{\code{transform_functions}}{list containing elements transform.function and untransform.function.}
+
+\item{\code{labels}}{list}
 }}
 
