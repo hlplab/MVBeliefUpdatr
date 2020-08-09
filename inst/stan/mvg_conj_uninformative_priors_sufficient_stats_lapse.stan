@@ -35,10 +35,10 @@ data {
   int z_test_counts[N_test,M];  // responses for test trials
 
   /* For now, this script assumes that the observations (cue vectors) are centered. The prior
-     mean of mu_0 is set to 0. Same for the prior location parameter for the cauchy prior over
-     the variance of mu_0 */
-  real<lower=0> tau_scale;      // scale of cauchy prior for variances of mu_0 (set to zero to ignore)
-  real<lower=0> L_omega_scale;  // scale of LKJ prior for correlation of variance of mu_0 (set to zero to ignore)
+     mean of m_0 is set to 0. Same for the prior location parameter for the cauchy prior over
+     the variance of m_0 */
+  real<lower=0> tau_scale;      // scale of cauchy prior for variances of m_0 (set to zero to ignore)
+  real<lower=0> L_omega_scale;  // scale of LKJ prior for correlation of variance of m_0 (set to zero to ignore)
 }
 
 transformed data {
@@ -52,12 +52,12 @@ parameters {
   real<lower=K> kappa_0;                // prior pseudocount for mean
   real<lower=K> nu_0;                   // prior pseudocount for sd
 
-  vector[K] mu_0[M];                    // prior expected mean
-  vector<lower=0>[K] mu_0_tau;          // prior variances of mu_0
-  cholesky_factor_corr[K] mu_0_L_omega; // prior correlations of variances of mu_0
+  vector[K] m_0[M];                    // prior expected mean
+  vector<lower=0>[K] m_0_tau;          // prior variances of m_0
+  cholesky_factor_corr[K] m_0_L_omega; // prior correlations of variances of m_0
 
-  vector<lower=0>[K] tau_0[M];          // prior variances of sigma_0
-  cholesky_factor_corr[K] L_omega_0[M]; // prior correlations of variances of sigma_0
+  vector<lower=0>[K] tau_0[M];          // prior variances of S_0
+  cholesky_factor_corr[K] L_omega_0[M]; // prior correlations of variances of S_0
 
   real<lower=0, upper=1> lapse_rate;
 }
@@ -66,9 +66,9 @@ transformed parameters {
   // updated beliefs depend on input/subject
   real<lower=K> kappa_n[M,L];           // updated mean pseudocount
   real<lower=K> nu_n[M,L];              // updated sd pseudocount
-  vector[K] mu_n[M,L];                  // updated expected mean
-  cov_matrix[K] sigma_0[M];             // prior expected covariance matrix
-  cov_matrix[K] sigma_n[M,L];           // updated expected scatter matrix
+  vector[K] m_n[M,L];                  // updated expected mean
+  cov_matrix[K] S_0[M];             // prior expected covariance matrix
+  cov_matrix[K] S_n[M,L];           // updated expected scatter matrix
   cov_matrix[K] t_scale[M,L];           // scale matrix of predictive t distribution
 
   simplex[M] p_test_conj[N_test];
@@ -77,26 +77,26 @@ transformed parameters {
   // update NIW parameters according to conjugate updating rules are taken from
   // Murphy (2007, p. 136)
   for (cat in 1:M) {
-    // Get sigma_0 from its components: correlation matrix and vector of standard deviations
-    sigma_0[cat] = quad_form_diag(multiply_lower_tri_self_transpose(L_omega_0[cat]), tau_0[cat]);
+    // Get S_0 from its components: correlation matrix and vector of standard deviations
+    S_0[cat] = quad_form_diag(multiply_lower_tri_self_transpose(L_omega_0[cat]), tau_0[cat]);
     for (subj in 1:L) {
       if (N[cat,subj] > 0 ) {
         kappa_n[cat,subj] = kappa_0 + N[cat,subj];
         nu_n[cat,subj] = nu_0 + N[cat,subj];
-        mu_n[cat,subj] = (kappa_0 * mu_0[cat] + N[cat,subj] * x_mean[cat,subj]) /
+        m_n[cat,subj] = (kappa_0 * m_0[cat] + N[cat,subj] * x_mean[cat,subj]) /
                           kappa_n[cat,subj];
-        sigma_n[cat,subj] = sigma_0[cat] +
+        S_n[cat,subj] = S_0[cat] +
                             x_ss[cat,subj] +
-                            kappa_0 * mu_0[cat] * mu_0[cat]' -
-                            kappa_n[cat,subj] * mu_n[cat,subj] * mu_n[cat,subj]';
+                            kappa_0 * m_0[cat] * m_0[cat]' -
+                            kappa_n[cat,subj] * m_n[cat,subj] * m_n[cat,subj]';
       } else {
         kappa_n[cat,subj] = kappa_0;
         nu_n[cat,subj] = nu_0;
-        mu_n[cat,subj] = mu_0[cat];
-        sigma_n[cat,subj] = sigma_0[cat];
+        m_n[cat,subj] = m_0[cat];
+        S_n[cat,subj] = S_0[cat];
       }
 
-      t_scale[cat,subj] = sigma_n[cat,subj] * (kappa_n[cat,subj] + 1) /
+      t_scale[cat,subj] = S_n[cat,subj] * (kappa_n[cat,subj] + 1) /
                                               (kappa_n[cat,subj] * (nu_n[cat,subj] - K + 1));
     }
   }
@@ -109,7 +109,7 @@ transformed parameters {
     for (cat in 1:M) {
       log_p_test_conj[j,cat] = multi_student_t_lpdf(x_test[j] |
                                               nu_n[cat,subj] - K + 1,
-                                              mu_n[cat,subj],
+                                              m_n[cat,subj],
                                               t_scale[cat,subj]);
     }
     // normalize and store actual probs in simplex
@@ -128,14 +128,14 @@ model {
   kappa_0 ~ normal(0, sigma_kappanu);
   nu_0 ~ normal(0, sigma_kappanu);
 
-  /* Specifying prior for mu_0:
-     - If no scale for variances (tau) of mu_0 is user-specified use weakly regularizing
+  /* Specifying prior for m_0:
+     - If no scale for variances (tau) of m_0 is user-specified use weakly regularizing
        scale (5) for variances of mean.
-     - If no scale for LKJ prior over correlation matrix of mu_0 is user-specified use
+     - If no scale for LKJ prior over correlation matrix of m_0 is user-specified use
        scale 1 to set uniform prior over correlation matrices. */
-  mu_0_tau ~ cauchy(0, tau_scale > 0 ? tau_scale : 5);
-  mu_0_L_omega ~ lkj_corr_cholesky(L_omega_scale > 0 ? L_omega_scale : 1);
-  mu_0 ~ multi_normal_cholesky(rep_vector(0, K), diag_pre_multiply(mu_0_tau, mu_0_L_omega));
+  m_0_tau ~ cauchy(0, tau_scale > 0 ? tau_scale : 5);
+  m_0_L_omega ~ lkj_corr_cholesky(L_omega_scale > 0 ? L_omega_scale : 1);
+  m_0 ~ multi_normal_cholesky(rep_vector(0, K), diag_pre_multiply(m_0_tau, m_0_L_omega));
 
   for (cat in 1:M) {
     tau_0[cat] ~ cauchy(0, tau_scale > 0 ? tau_scale : 10);
@@ -149,9 +149,9 @@ model {
 }
 
 generated quantities {
-  matrix[K,K] mu_0_cor;
-  matrix[K,K] mu_0_cov;
+  matrix[K,K] m_0_cor;
+  matrix[K,K] m_0_cov;
 
-  mu_0_cor = multiply_lower_tri_self_transpose(mu_0_L_omega);
-  mu_0_cov = quad_form_diag(mu_0_cor, mu_0_tau);
+  m_0_cor = multiply_lower_tri_self_transpose(m_0_L_omega);
+  m_0_cov = quad_form_diag(m_0_cor, m_0_tau);
 }
