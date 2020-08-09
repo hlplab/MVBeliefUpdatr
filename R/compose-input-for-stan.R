@@ -86,6 +86,11 @@ get_test_counts <- function(test, cues, category, response, group, verbose = F) 
 #' TBD
 #' @export
 get_sufficient_statistics_from_data <- function(data, cues, category, group, verbose = F, ...) {
+  if (verbose) {
+    print("In get_sufficient_statistics_from_data(), input data is:")
+    print(data)
+  }
+
   data = check_exposure_test_data(
     data = data,
     cues = cues,
@@ -122,15 +127,15 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
     ## -------------------------------------------------------------------------------
     cats = levels(data[[category]])
     groups = levels(data[[group]])
-    n_cat = length(cats)
+    n_category = length(cats)
     n_group = length(groups)
     n_cues = length(cues)
 
-    N = array(dim = c(n_cat,n_group))
-    x_mean = array(dim = c(n_cat,n_group,n_cues))
-    x_ss = array(dim = c(n_cat,n_group,n_cues,n_cues))
+    N = array(dim = c(n_category,n_group))
+    x_mean = array(dim = c(n_category,n_group,n_cues))
+    x_ss = array(dim = c(n_category,n_group,n_cues,n_cues))
 
-    for (i in 1:n_cat) {
+    for (i in 1:n_category) {
       for (j in 1:n_group) {
         temp.data_ss = data_ss %>%
           ungroup() %>%
@@ -345,8 +350,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 
         m_0_known = if (is.null(m_0)) 0 else 1
         S_0_known = if (is.null(S_0)) 0 else 1
-        m_0_data = if (is.null(m_0)) numeric(0) else m_0
-        S_0_data = if (is.null(S_0)) numeric(0) else S_0
+        m_0_data = if (is.null(m_0)) numeric(0) else m_0 # array(dim=c(0,length(cues)))
+        S_0_data = if (is.null(S_0)) numeric(0) else S_0 # array(dim=c(0,length(cues),length(cues)))
 
         tau_scale <- tau_scale
         L_omega_scale <- L_omega_scale
