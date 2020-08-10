@@ -1,30 +1,41 @@
 IMPORTANT
 
-+ make function that take stanfit as input and extracts prior in NIW_belief format.
-+ consider making NIW_MCMC and NIW_belief one class. or at least the former is a subclass of the latter?
++ GENERAL
+++ consider making NIW_MCMC and NIW_belief one class. or at least the former is a subclass of the latter?
+++ make NIW_belief and NIW_beliefs classes? think about how they should be related.
 
-+ make make_mvg_IO function and visualizations that are the same as NIW belief plotting functions
-++ consider using dave's cross-validating functions. Talk with xin about how to best do that.
-++ include a function that can categorize data from one group on beliefs of other group.
-
-+ make a function plot_category() that does all the plotting of the category. only keep the stuff about getting expected category in the original plot_expected_category, and add options to plot mode, instead of mean, and to take ***samples*** from the distribution. using a function that allows sampling from NIW will be important.
-
-+ make plot that checks assumptions of NIW updating: category distribution and covariance across talkers.
-
-+ make plot visualizing m and S for univariate, bivariate, and trivariate (see Murphy 2012, p. 127). add to the description that samples of category can be obtain by a variant of plot_expected_category. (see next point)
-
-+ change plot_expected_categorization to show the category label in the legend (instead of category id.)
-+ then figure out to add information about input to that new class
-++ add exposure mean in more accessible format. Update get_exposure_mean to read in that mean
-++ add exposure covariance (not uncentered squares) in accessible format. Updated get_expsoure_covariance to read in the information
-+++ test whether plot_expected_categories_2D works with plot.exposure = T after those two steps.
-++ add information about groups and categories (number and order of levels)
+++ add ability to add noise to data (new variables cues_noisy) independent of the update function.
 +++ update get_category_levels(), get_group_level(), and get_original_levels().
 
-+ expand update_beliefs to handle multiple exposure groups.
-+ add "more X-like" "more y-like" to x-axis of test_categorization plots
 
-+ add ability to add noise to data (new variables cues_noisy) independent of the update function.
++ NIW_BELIEF RELATED FUNCTIONS
+++ expand update_beliefs to handle multiple exposure groups.
+
+
++ IBBU_STANFIT RELATED FUNCTIONS
+++ make function that take stanfit as input and extracts prior in NIW_belief format.
+
+
++ MAKE NEW IO FUNCTIONS AND KEEP THEM GENERAL ENOUGH TO USE THEM IN MORE COMPLEX FUNCTIONS
+++ consider using dave's cross-validating functions. Talk with xin about how to best do that.
+++ make a function plot_category() that does all the plotting of the category. only keep the stuff about getting expected category in the original plot_expected_category, and add options to plot mode, instead of mean, and to take ***samples*** from the distribution. using a function that allows sampling from NIW will be important.
+++ include a function that can categorize data from one group on beliefs of other group.
+++ add plots for category means and (log) SDs and correlations in more accessible format. Update get_exposure_mean to read in that mean
+++ add exposure covariance (not uncentered squares) in accessible format. Updated get_expsoure_covariance to read in the information
+
+
+
++ NIW_BELIEF RELATED PLOTTING
+++ make plot that checks assumptions of NIW updating: category distribution and covariance across talkers.
+++ make plot visualizing m and S for univariate, bivariate, and trivariate (see Murphy 2012, p. 127). add to the description that samples of category can be obtain by a variant of plot_expected_category. (see next point)
+++ make plot of NIW_belief parameters (standard plotting function)
+
+
++ NIW_IBBU_STANFIT RELATED PLOTTING
+++++ add "more X-like" "more y-like" to x-axis of test_categorization plots
+
+
+
 
 
 EFFICIENCY IMPROVEMENTS
@@ -35,12 +46,7 @@ CATCH UP
 + implement tests for NIW functions
 
 
-LESS IMPORTANT
-+ change "IBBU" parameters to "NIW" through documentation.
-+ make plot of NIW_belief parameters (standard plotting function)
-+ make NIW_belief and NIW_beliefs classes? think about how they should be related.
 
-+ Rename variable names in .stan program to appropriately use M_0 and M_n (rather than mu_0 and mu_n) as well as S_0 and S_n (rather than sigma_0 and sigma_n). Then change add_ibbu_draws() function to refer to those parameters. This will reduce confusion. ADD_IBBU_DRAWS HAS BEEN UPDATED TO *RETURN* Ms AND Ss, BUT THE .STAN PROGRAM HAS NOT YET BEEN CHANGED AND ADD_IBBU_DRAWS STILL EXPECTS THE *INPUT* TO BE MU AND SIGMA.
 
 
 
@@ -50,7 +56,11 @@ LESS IMPORTANT
 
 
 DONE:
-
++++ test whether plot_expected_categories_2D works with plot.exposure = T after those two steps.
+++ add information about groups and categories (number and order of levels)
++ then figure out to add information about input to that new class
++ Rename variable names in .stan program to appropriately use M_0 and M_n (rather than mu_0 and mu_n) as well as S_0 and S_n (rather than sigma_0 and sigma_n). Then change add_ibbu_draws() function to refer to those parameters. This will reduce confusion. ADD_IBBU_DRAWS HAS BEEN UPDATED TO *RETURN* Ms AND Ss, BUT THE .STAN PROGRAM HAS NOT YET BEEN CHANGED AND ADD_IBBU_DRAWS STILL EXPECTS THE *INPUT* TO BE MU AND SIGMA.
++ change plot_expected_categorization to show the category label in the legend (instead of category id.)
 + figure out how to make class so that the new class is ADDED to stanfit class and inherits from it.
 + Implement class for mv_ibbu stanfits. See class.R
 ++ Test that add_ibbu_draws still works on the new object class.
