@@ -22,7 +22,7 @@ IMPORTANT
 +++ update get_category_levels(), get_group_level(), and get_original_levels().
 
 + expand update_beliefs to handle multiple exposure groups.
-
++ add "more X-like" "more y-like" to x-axis of test_categorization plots
 
 + add ability to add noise to data (new variables cues_noisy) independent of the update function.
 

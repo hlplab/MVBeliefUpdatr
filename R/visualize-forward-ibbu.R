@@ -182,7 +182,8 @@ plot_expected_categories_density1D = function(
     { if (!is.null(data.test))
       add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
-      add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels, category.labels = category.labels, category.colors) } +
+      add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
+                                   category.ids = category.ids, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous("Density") +
     scale_color_manual("Category",
@@ -272,7 +273,8 @@ plot_expected_categories_contour2D = function(
     { if (!is.null(data.test))
       add_test_data_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
-      add_exposure_data_to_2D_plot(data = data.exposure, cue.labels = cue.labels, category.labels = category.labels, category.colors) } +
+      add_exposure_data_to_2D_plot(data = data.exposure, cue.labels = cue.labels,
+                                   category.ids = category.ids, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
     scale_fill_manual("Category",
@@ -395,15 +397,17 @@ plot_expected_categorization_function_2D = function(
     { if (!is.null(data.test))
       add_test_data_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
-      add_exposure_data_to_2D_plot(data = data.exposure, cue.labels = cue.labels, category.labels = category.labels, category.colors) } +
+      add_exposure_data_to_2D_plot(data = data.exposure, cue.labels = cue.labels,
+                                   category.ids = category.ids, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
     # For now think about two colors and categories
-    scale_fill_gradient2(paste0("P(resp = ", target_category, ")"),
+    scale_fill_gradient2(paste0("P(resp = ", category.labels[target_category], ")"),
                          low = category.colors[1],
                          mid = "white",
                          high = category.colors[2],
                          midpoint = if (logit) 0 else .5) +
+    coord_cartesian(xlim = xlim, ylim = ylim) +
     theme_bw()
 
   p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !!animate_by, animation_follow)

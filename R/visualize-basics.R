@@ -121,11 +121,12 @@ add_test_data_to_1D_plot = function(data, cue.labels) {
 add_exposure_data_to_1D_plot = function(
   data,
   cue.labels,
+  category.ids,
   category.labels,
   category.colors
 ) {
   data[[cue.labels[2]]] = 0
-  add_exposure_data_to_2D_plot(data, cue.labels, category.labels, category.colors)
+  add_exposure_data_to_2D_plot(data, cue.labels, category.ids, category.labels, category.colors)
 }
 
 add_test_data_to_2D_plot = function(data, cue.labels) {
@@ -142,6 +143,7 @@ add_test_data_to_2D_plot = function(data, cue.labels) {
 add_exposure_data_to_2D_plot = function(
   data,
   cue.labels,
+  category,ids,
   category.labels,
   category.colors
 ) {
@@ -156,7 +158,7 @@ add_exposure_data_to_2D_plot = function(
       size = 3, alpha = .9),
     scale_shape("Category"),
     scale_color_manual("Category",
-                       breaks = category.labels,
+                       breaks = category.ids,
                        labels = category.labels,
                        values = category.colors))
 }
