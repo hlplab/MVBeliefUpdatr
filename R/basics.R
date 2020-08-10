@@ -48,6 +48,11 @@ cov2tau = function(v) {
 }
 
 
+make_named_vector = function(x, names) {
+  x = as.vector(x)
+  names(x) = names
+  return(x)
+}
 
 #' Combine a number of columns into a new vector column
 #'
@@ -64,9 +69,17 @@ cov2tau = function(v) {
 #' @examples
 #' TBD
 #' @export
-make_vector_column = function(data, cols, vector_col) {
+make_vector_column = function(data, cols, vector_col, transmute = F) {
+  # CHECK: expand to also handle quo input. (each instance of cols then needs to change)
+  # then make_NIW_prior_from... can use this function
   data %<>%
-    mutate(!! sym(vector_col) := pmap(.l = list(!!! syms(cols)), .f = ~ c(...)))
+    mutate(!! sym(vector_col) := pmap(.l = list(!!! syms(cols)),
+                                      .f = function(...) {
+                                        x = c(...)
+                                        names(x) = cols
+                                        return(x)
+                                      })) %>%
+    { if (transmute) select(., vector_col) else . }
 
   return(data)
 }

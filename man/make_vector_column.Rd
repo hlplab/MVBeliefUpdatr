@@ -4,7 +4,7 @@
 \alias{make_vector_column}
 \title{Combine a number of columns into a new vector column}
 \usage{
-make_vector_column(data, cols, vector_col)
+make_vector_column(data, cols, vector_col, transmute = F)
 }
 \arguments{
 \item{data}{`tibble` or `data.frame`.}

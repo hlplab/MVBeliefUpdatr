@@ -34,7 +34,6 @@ get_posterior_predictive = function(x, m, S, kappa, nu, log = T) {
   if (is_tibble(x)) x %<>% as.matrix() else
     if (is.list(x)) x %<>% reduce(rbind) else
       if (is.vector(x)) x %<>% matrix(nrow = 1)
-
   if (is.matrix(m)) m = as.vector(m)
 
   assert_that(all(is.number(kappa), is.number(nu)))

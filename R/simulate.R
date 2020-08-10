@@ -341,8 +341,8 @@ update_NIW_belief_by_sufficient_statistics = function(
   x_Ns = as.list(rep(0, length(prior$category)))
   # Determine how observation should be distributed across categories
   if (method == "no-updating") return(prior) else
-    if (method == "label-certain") x_Ns[[which(prior$category == x_category)]] = x_N else
-      if (method == "nolabel-uniform") x_Ns = as.list(1 / length(prior$category) * x_N) else
+    if (method == "label-certain") x_Ns[[which(prior$category == x_category)]] <- x_N else
+      if (method == "nolabel-uniform") x_Ns <- as.list(1 / length(prior$category) * x_N) else
         if (method %in% c("nolabel-criterion", "nolabel-sampling", "nolabel-proportional")) {
         x_Ns = as.list(get_categorization_from_NIW_belief(
           x = x_mean, belief = prior,
@@ -405,7 +405,7 @@ update_NIW_belief_by_one_observation = function(
 #' @param add_noise Determines whether multivariate Gaussian noise is added to the input. See \code{
 #' \link{update_NIW_belief_by_sufficient_statistics}}. (default: `NULL`)
 #' @param method Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics}}.
-#' The lenght of this argument should either be 1 (in which case it is recycled for each observation) or the same as
+#' The length of this argument should either be 1 (in which case it is recycled for each observation) or the same as
 #' the number of rows in \code{expsure}. (default: "label-certain").
 #' @param keep.update_history Should the history of the belief-updating be stored and returned? If so, the output is
 #' tibble with the one set of NIW beliefs for each exposure observation. This is useful, for example, if one wants to
@@ -426,7 +426,7 @@ update_NIW_beliefs_incrementally <- function(
   prior,
   exposure,
   category = "category",
-  cues = names(prior$m[[1]]),
+  cues = get_cue_labels_from_NIW_belief(prior),
   exposure.order = NULL,
   add_noise = NULL,
   method = "label-certain",
@@ -464,7 +464,7 @@ update_NIW_beliefs_incrementally <- function(
       update_NIW_belief_by_one_observation(
         prior = posterior,
         x = unlist(exposure[i, "cues"]),
-        x_category = exposure[i,]$category,
+        x_category = exposure[i,][[category]],
         add_noise = add_noise,
         method = method[i])
 

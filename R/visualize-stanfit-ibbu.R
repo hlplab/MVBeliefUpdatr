@@ -200,7 +200,7 @@ plot_ibbu_stanfit_parameters = function(
 #'
 plot_ibbu_stanfit_test_categorization = function(
   fit,
-  fit.input,
+  fit.input = NULL,
   which = "both",
   summarize = T,
   n.draws = NULL,
@@ -211,7 +211,7 @@ plot_ibbu_stanfit_test_categorization = function(
   sort.by = "prior"
 ) {
   assert_NIW_ibbu_stanfit(fit)
-  assert_that(!is.null(fit.input))
+  if (is.null(fit.input)) fit.input = fit@input_data
   assert_that(is.flag(summarize))
   assert_that(is.null(n.draws) | is.count(n.draws))
   assert_that(is.null(confidence.intervals) |
@@ -280,6 +280,7 @@ plot_ibbu_stanfit_test_categorization = function(
   #   nest(cues = x, tokens = token)
   test_data = fit.input$x_test %>%
     distinct() %>%
+    # CHECK: Could be replaced by make_vector_column
     transmute(x = pmap(.l = list(!!! syms(cue.labels)), .f = ~ c(...))) %>%
     nest(cues = x) %>%
     crossing(group = levels(d.pars$group))
@@ -395,13 +396,10 @@ plot_ibbu_stanfit_test_categorization = function(
 
     # Place information about confidence intervals on plot.
     p = p +
-      annotate(geom = "text",
-               x = mean(as.numeric(as.character(d.pars$token)), na.rm = T),
-               y = 1,
-               label = paste0((confidence.intervals[4]-confidence.intervals[1]) * 100,
+      ggtitle(paste0((confidence.intervals[4]-confidence.intervals[1]) * 100,
                               "% and ",
                               (confidence.intervals[3]-confidence.intervals[2]) * 100,
-                              "% CIs based on ",
+                              "% CIs\nbased on ",
                               n.draws,
                               " posterior samples.")
       )

@@ -8,7 +8,7 @@ update_NIW_beliefs_incrementally(
   prior,
   exposure,
   category = "category",
-  cues = names(prior$m[[1]]),
+  cues = get_cue_labels_from_NIW_belief(prior),
   exposure.order = NULL,
   add_noise = NULL,
   method = "label-certain",
@@ -33,7 +33,7 @@ exposure data is assumed to be in the order in which it should be presented.}
 \link{update_NIW_belief_by_sufficient_statistics}}. (default: `NULL`)}
 
 \item{method}{Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics}}.
-The lenght of this argument should either be 1 (in which case it is recycled for each observation) or the same as
+The length of this argument should either be 1 (in which case it is recycled for each observation) or the same as
 the number of rows in \code{expsure}. (default: "label-certain").}
 
 \item{keep.update_history}{Should the history of the belief-updating be stored and returned? If so, the output is

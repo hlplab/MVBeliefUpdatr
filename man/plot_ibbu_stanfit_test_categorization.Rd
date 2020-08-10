@@ -6,7 +6,7 @@
 \usage{
 plot_ibbu_stanfit_test_categorization(
   fit,
-  fit.input,
+  fit.input = NULL,
   which = "both",
   summarize = T,
   n.draws = NULL,

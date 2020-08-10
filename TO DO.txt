@@ -1,6 +1,6 @@
 IMPORTANT
 
-
++ make function that take stanfit as input and extracts prior in NIW_belief format.
 + consider making NIW_MCMC and NIW_belief one class. or at least the former is a subclass of the latter?
 
 + make make_mvg_IO function and visualizations that are the same as NIW belief plotting functions
@@ -14,13 +14,14 @@ IMPORTANT
 + make plot visualizing m and S for univariate, bivariate, and trivariate (see Murphy 2012, p. 127). add to the description that samples of category can be obtain by a variant of plot_expected_category. (see next point)
 
 + change plot_expected_categorization to show the category label in the legend (instead of category id.)
-
 + then figure out to add information about input to that new class
 ++ add exposure mean in more accessible format. Update get_exposure_mean to read in that mean
 ++ add exposure covariance (not uncentered squares) in accessible format. Updated get_expsoure_covariance to read in the information
 +++ test whether plot_expected_categories_2D works with plot.exposure = T after those two steps.
 ++ add information about groups and categories (number and order of levels)
 +++ update get_category_levels(), get_group_level(), and get_original_levels().
+
++ expand update_beliefs to handle multiple exposure groups.
 
 
 + add ability to add noise to data (new variables cues_noisy) independent of the update function.

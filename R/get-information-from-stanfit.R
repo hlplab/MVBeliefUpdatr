@@ -364,13 +364,8 @@ add_ibbu_stanfit_draws = function(
             n = draws
           )
 
-      if (any(c("mu_0", "mu_n", "sigma_0", "sigma_n") %in% names(d.pars))) {
-        message("This seems to be an old model. Some of the NIX/NIW parameters are called mu_* or sigma_*. Renaming
-                them to m and S.")
-        d.pars %<>%
-          rename(m = !! rlang::sym(m), S = !! rlang::sym(S)) %>%
-          rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .))
-      }
+      d.pars %<>%
+        rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .))
 
     # If nesting is the goal:
     } else {
@@ -378,23 +373,23 @@ add_ibbu_stanfit_draws = function(
       if (which == "prior") {
         kappa_nu =
           fit %>%
-          tidybayes::spread_draws(
-            !! rlang::sym(kappa),
-            !! rlang::sym(nu)
+          spread_draws(
+            !! sym(kappa),
+            !! sym(nu)
           )
       } else {
         kappa_nu =
           fit %>%
-          tidybayes::spread_draws(
-            (!! rlang::sym(kappa))[!!! rlang::syms(pars.index)],
-            (!! rlang::sym(nu))[!!! rlang::syms(pars.index)]
+          spread_draws(
+            (!! sym(kappa))[!!! syms(pars.index)],
+            (!! sym(nu))[!!! syms(pars.index)]
           ) %>%
-          group_by(!!! rlang::syms(pars.index))
+          group_by(!!! syms(pars.index))
       }
 
       # Get lapse rate and join it with kappa and nu.
       d.pars = fit %>%
-        tidybayes::spread_draws(lapse_rate) %>%
+        spread_draws(lapse_rate) %>%
         { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
         { if (summarize)
           dplyr::summarise(.,
@@ -404,8 +399,8 @@ add_ibbu_stanfit_draws = function(
         left_join(kappa_nu %>%
         { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
           rename(
-            kappa = !! rlang::sym(kappa),
-            nu = !! rlang::sym(nu)
+            kappa = !! sym(kappa),
+            nu = !! sym(nu)
           ) %>%
           { if (summarize)
             dplyr::summarise(.,
@@ -418,43 +413,39 @@ add_ibbu_stanfit_draws = function(
         # Join in m
         left_join(
           fit %>%
-            tidybayes::spread_draws((!! rlang::sym(m))[!!! rlang::syms(pars.index), cue]) %>%
+            spread_draws((!! sym(m))[!!! syms(pars.index), cue]) %>%
             { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
             { if (summarize)
-              group_by(., !!! rlang::syms(pars.index), cue) %>%
+              group_by(., !!! syms(pars.index), cue) %>%
                 # Obtain expected mean of category mean, m_0 or m_N
-                dplyr::summarise(., !! rlang::sym(m) := mean(!! rlang::sym(m))
+                dplyr::summarise(., !! sym(m) := mean(!! sym(m))
                 ) %>%
                 mutate(.,
                        .chain = "all", .iteration = "all", .draw = "all"
                 ) else . } %>%
-            group_by(.chain, .iteration, .draw, !!! rlang::syms(pars.index)) %>%
-            summarise(m = list(
-              matrix((!! rlang::sym(m)),
-                     dimnames = list(unique(cue), NULL),
-                     byrow = T,
-                     nrow = length((!! rlang::sym(m))))))
+            group_by(.chain, .iteration, .draw, !!! syms(pars.index)) %>%
+            summarise(m = list(make_named_vector(!! sym(m), unique(cue))))
         ) %>%
         # Join in S
         left_join(
           fit %>%
-            tidybayes::spread_draws((!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2]) %>%
+            spread_draws((!! sym(S))[!!! syms(pars.index), cue, cue2]) %>%
             { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
             { if (summarize)
-              group_by(., !!! rlang::syms(pars.index), cue, cue2) %>%
+              group_by(., !!! syms(pars.index), cue, cue2) %>%
                 # Obtain expected scatter matrix S_0, or S_N
-                dplyr::summarise(., !! rlang::sym(S) := mean(!! rlang::sym(S))
+                dplyr::summarise(., !! sym(S) := mean(!! sym(S))
                 ) %>%
                 mutate(.,
                        .chain = "all", .iteration = "all", .draw = "all"
                 ) else . } %>%
-            group_by(.chain, .iteration, .draw, !!! rlang::syms(pars.index)) %>%
+            group_by(.chain, .iteration, .draw, !!! syms(pars.index)) %>%
             summarise(S =
                         list(
-                          matrix((!! rlang::sym(S)),
+                          matrix((!! sym(S)),
                                  dimnames = list(unique(cue), unique(cue2)),
                                  byrow = T,
-                                 nrow = sqrt(length((!! rlang::sym(S)))))))
+                                 nrow = sqrt(length((!! sym(S)))))))
         )
     }
 
