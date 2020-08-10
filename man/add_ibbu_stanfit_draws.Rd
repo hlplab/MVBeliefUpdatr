@@ -2,7 +2,7 @@
 % Please edit documentation in R/get-information-from-stanfit.R
 \name{add_ibbu_stanfit_draws}
 \alias{add_ibbu_stanfit_draws}
-\title{Add MCMC draws of IBBU parameters to a tibble.}
+\title{Add MCMC draws from an NIW IBBU stanfit to a tibble.}
 \usage{
 add_ibbu_stanfit_draws(
   fit,
@@ -16,7 +16,7 @@ add_ibbu_stanfit_draws(
 )
 }
 \arguments{
-\item{fit}{mv-ibbu-stanfit object.}
+\item{fit}{\code{\link{NIW_ibbu_stanfit}} object.}
 
 \item{which}{Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)}
 

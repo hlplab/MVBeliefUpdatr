@@ -39,7 +39,62 @@ get_random_draw_indices = function(fit, n.draws)
 }
 
 
-#' Get or restore the original group or category levels.
+
+#' Get the input data from an NIW IBBU stanfit.
+#'
+#' Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
+#' object.
+#'
+#' @param fit \code{\link{NIW_ibbu_stanfit}} object.
+#'
+#' @return A list with element names and structures determined by the type of stanfit model.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname get_ibbu_input
+#' @export
+get_ibbu_stanfit_input = function(fit) {
+  assert_that(is.NIW_ibbu_input(x) | is.NIW_ibbu_stanfit(x))
+
+  if (is.NIW_ibbu_input(x)) return(x) else {
+    stop("Extraction of input data from MV IBBU stanfit not yet implemented!")
+  }
+
+  return(x)
+}
+
+
+#' Get the test data from an NIW IBBU stanfit.
+#'
+#' Returns the test data used during the creation of the \code{\link[rstan]{stanfit}}.
+#' object.
+#'
+#' @param x \code{\link{NIW_ibbu_stanfit}} object.
+#'
+#' @return A \code{tibble} in which each row is a test token. Columns include the cues
+#' and the response counts (one column per category) for all test tokens and all groups.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+get_test_data_from_NIW_ibbu_stanfit = function(fit) {
+  data = fit@input_data
+  data[["x_test"]] %>%
+    cbind(data[["z_test_counts"]]) %>%
+    mutate(
+      group.id = data[["y_test"]],
+      group = factor(attr(data[["y_test"]], "levels")[group.id],
+                     levels = attr(data[["y_test"]], "levels")))
+}
+
+
+
+
+#' Get or restore the original group or category levels from an NIW IBBU stanfit.
 #'
 #' Checks if information is available about the original values and order of the factor levels
 #' for the category variable (for which beliefs about means and covariances are inferred) or
@@ -47,7 +102,7 @@ get_random_draw_indices = function(fit, n.draws)
 #' that information is returned. `get_category_levels()` and `get_group_levels()` are
 #' convenience functions, calling `get_original_levels()`.
 #'
-#' @param fit mv_ibbu_stanfit object.
+#' @param fit \code{\link{NIW_ibbu_stanfit}} object.
 #' @param variable Either "category" or "group".
 #' @param indeces A vector of category or group indices that should be turned into the original
 #' category levels, or `NULL` if only the unique levels in their original order (as vector of characters)
@@ -83,13 +138,13 @@ get_group_levels = function(fit, indices = NULL) {
 }
 
 
-#' Get tidybayes constructor from IBBU stanfit
+#' Get tidybayes constructor from an NIW IBBU stanfit.
 #'
 #' Gets the tidybayes constructor function from the stanfit object. `get_category_constructor()` and
 #' `get_group_constructor()` are convenience functions, calling `get_constructor()`. See \code{
 #' \link[tidybayes]{recover_types}}. If variable is
 #'
-#' @param fit mv_ibbu_stanfit object.
+#' @param fit \code{\link{NIW_ibbu_stanfit}} object.
 #' @param variable Either "category" or "group". If set to `NULL` then a list of all constructors is
 #' returned. That list is `NULL` if not tidybayes constructors are found in fit. (default: c("category", "group"))
 #'
@@ -137,10 +192,10 @@ get_group_constructor = function(fit) {
 
 #' Get category mean mu or covariance matrix sigma from an NIW belief MCMC object.
 #'
-#' Returns the category means mu and/or category covariance matrix Sigma for the exposure data from an IBBU
-#' stanfit or NIW belief MCMC object.
+#' Returns the category means mu and/or category covariance matrix Sigma for the exposure data from an NIW
+#' IBBU stanfit or NIW belief MCMC object.
 #'
-#' @param x An mv_ibbu_stanfit or NIW belief MCMC object.
+#' @param x \code{\link{NIW_ibbu_stanfit}} or NIW belief MCMC object.
 #' @param category Character vector with categories (or category) for which category statistics are to be
 #' returned.  If `NULL` then all categories are included. (default: `NULL`)
 #' @param group Character vector with groups (or group) for which category statistics are to be
@@ -170,12 +225,12 @@ get_category_statistic = function(x, grouping.vars = NULL,
 }
 
 
-#' Get category mean mu or covariance matrix sigma of exposure data for IBBU
+#' Get category mean mu or covariance matrix sigma of exposure data from NIW IBBU stanfit.
 #'
 #' Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
-#' Bayesian belief-updating (IBBU) model from an IBBU stanfit or NIW belief MCMC object.
+#' Bayesian belief-updating (IBBU) model from an NIW IBBU stanfit or NIW belief MCMC object.
 #'
-#' @param x An mv_ibbu_stanfit or NIW belief MCMC object.
+#' @param x \code{\link{NIW_ibbu_stanfit}} or NIW belief MCMC object.
 #' @param category Character vector with categories (or category) for which category statistics are to be
 #' returned.  If `NULL` then all categories are included. (default: `NULL`)
 #' @param group Character vector with groups (or group) for which category statistics are to be
@@ -235,34 +290,8 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
   )
 }
 
-#' Get the input data from an MV IBBU stanfit object.
-#'
-#' Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
-#' object.
-#'
-#' @param x An mv_ibbu_stanfit object.
-#'
-#' @return A list with element names and structure determined by the type of MV IBBU model.
-#'
-#' @seealso TBD
-#' @keywords TBD
-#' @examples
-#' TBD
-#' @rdname get_ibbu_input
-#' @export
-get_ibbu_stanfit_input = function(x) {
-  assert_that(is.NIW_ibbu_input(x) | is.NIW_ibbu_stanfit(x))
 
-  if (is.NIW_ibbu_input(x)) return(x) else {
-    stop("Extraction of input data from MV IBBU stanfit not yet implemented!")
-  }
-
-  return(x)
-}
-
-
-
-#' Add MCMC draws of IBBU parameters to a tibble.
+#' Add MCMC draws from an NIW IBBU stanfit to a tibble.
 #'
 #' Add MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) to a tibble. Both wide
 #' (`wide=TRUE`) or long format (`wide=FALSE`) can be chosen as output. By default all post-warmup draws are
@@ -271,7 +300,7 @@ get_ibbu_stanfit_input = function(x) {
 #' By default, the category means and scatter matrices are nested, rather than each of their elements being
 #' stored separately (`nest=TRUE`).
 #'
-#' @param fit mv-ibbu-stanfit object.
+#' @param fit \code{\link{NIW_ibbu_stanfit}} object.
 #' @param which Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)
 #' @param draws Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)

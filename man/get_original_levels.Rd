@@ -4,7 +4,7 @@
 \alias{get_original_levels}
 \alias{get_category_levels}
 \alias{get_group_levels}
-\title{Get or restore the original group or category levels.}
+\title{Get or restore the original group or category levels from an NIW IBBU stanfit.}
 \usage{
 get_original_levels(fit, variable = c("category", "group"), indices = NULL)
 
@@ -13,7 +13,7 @@ get_category_levels(fit, indices = NULL)
 get_group_levels(fit, indices = NULL)
 }
 \arguments{
-\item{fit}{mv_ibbu_stanfit object.}
+\item{fit}{\code{\link{NIW_ibbu_stanfit}} object.}
 
 \item{variable}{Either "category" or "group".}
 

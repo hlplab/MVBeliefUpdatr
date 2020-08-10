@@ -4,7 +4,7 @@
 \alias{get_ibbu_stanfit_exposure_category_statistic}
 \alias{get_ibbu_stanfit_exposure_mean}
 \alias{get_ibbu_stanfit_exposure_Sigma}
-\title{Get category mean mu or covariance matrix sigma of exposure data for IBBU}
+\title{Get category mean mu or covariance matrix sigma of exposure data from NIW IBBU stanfit.}
 \usage{
 get_ibbu_stanfit_exposure_category_statistic(
   x,
@@ -18,7 +18,7 @@ get_ibbu_stanfit_exposure_mean(x, category, group)
 get_ibbu_stanfit_exposure_Sigma(x, category, group)
 }
 \arguments{
-\item{x}{An mv_ibbu_stanfit or NIW belief MCMC object.}
+\item{x}{\code{\link{NIW_ibbu_stanfit}} or NIW belief MCMC object.}
 
 \item{category}{Character vector with categories (or category) for which category statistics are to be
 returned.  If `NULL` then all categories are included. (default: `NULL`)}
@@ -36,7 +36,7 @@ of group and category.
 }
 \description{
 Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
-Bayesian belief-updating (IBBU) model from an IBBU stanfit or NIW belief MCMC object.
+Bayesian belief-updating (IBBU) model from an NIW IBBU stanfit or NIW belief MCMC object.
 }
 \examples{
 TBD

@@ -143,7 +143,7 @@ add_test_data_to_2D_plot = function(data, cue.labels) {
 add_exposure_data_to_2D_plot = function(
   data,
   cue.labels,
-  category,ids,
+  category.ids,
   category.labels,
   category.colors
 ) {

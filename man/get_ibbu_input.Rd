@@ -2,15 +2,15 @@
 % Please edit documentation in R/get-information-from-stanfit.R
 \name{get_ibbu_stanfit_input}
 \alias{get_ibbu_stanfit_input}
-\title{Get the input data from an MV IBBU stanfit object.}
+\title{Get the input data from an NIW IBBU stanfit.}
 \usage{
-get_ibbu_stanfit_input(x)
+get_ibbu_stanfit_input(fit)
 }
 \arguments{
-\item{x}{An mv_ibbu_stanfit object.}
+\item{fit}{\code{\link{NIW_ibbu_stanfit}} object.}
 }
 \value{
-A list with element names and structure determined by the type of MV IBBU model.
+A list with element names and structures determined by the type of stanfit model.
 }
 \description{
 Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}

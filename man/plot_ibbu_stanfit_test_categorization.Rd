@@ -6,7 +6,7 @@
 \usage{
 plot_ibbu_stanfit_test_categorization(
   fit,
-  fit.input = NULL,
+  data.test = NULL,
   which = "both",
   summarize = T,
   n.draws = NULL,
@@ -21,9 +21,10 @@ plot_ibbu_stanfit_test_categorization(
 )
 }
 \arguments{
-\item{fit}{mv-ibbu-stanfit object.}
+\item{fit}{\code{\link{NIW_ibbu_stanfit}} object.}
 
-\item{fit.input}{Input to the mv-ibbu-stanfit object.}
+\item{data.test}{Optionally, a \code{tibble} or \code{data.frame} with test data.
+If `NULL` the input will be extracted from fit. (default: `NULL`).}
 
 \item{which}{Should categorization for the prior, posterior, or both be plotted? (default: `"both"`)}
 
@@ -40,8 +41,7 @@ unique categorization function be plotted for each MCMC draw (`FALSE`)? (default
 
 \item{panel.group}{Should the groups be plotted in separate panels? (default: `FALSE`)}
 
-\item{group.ids}{Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
-to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}
+\item{group.ids}{Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)}
 
 \item{group.labels}{Vector of group labels of same length as `group.ids` or `NULL` to use defaults. (default: `NULL`)
 The default labels each categorization function based on whether it is showing prior or posterior categorization,
@@ -58,7 +58,15 @@ from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if n
 ggplot object.
 }
 \description{
-Plot both prior and posterior categorization functions, as well as their confidence intervals.
+Categorize test tokens by prior and/or posterior beliefs, and plot the resulting categorization function along
+a one-dimensional continuum (regardless of the dimensionality of the cue space in which categorization takes
+place). This provides the type of categorization plot typical for, for example, perceptual recalibration or
+phonetic tuning studies.
+}
+\details{
+Tokens are sorted based on the increasing probability of a \code{target_category} response for the condition
+(\code{group}, e.g., prior or a specific exposure group) specified in \code{sort.by}. By default both the mean
+categorization and confidence intervals are plotted.
 If `summarize=TRUE`, the function marginalizes over all posterior samples. The number of samples
 is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
 samples will be used. If `summarize=FALSE`, separate categorization plots for all n.draws

@@ -440,14 +440,22 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 
 #' Plot prior and posterior categorization of test tokens.
 #'
-#' Plot both prior and posterior categorization functions, as well as their confidence intervals.
+#' Categorize test tokens by prior and/or posterior beliefs, and plot the resulting categorization function along
+#' a one-dimensional continuum (regardless of the dimensionality of the cue space in which categorization takes
+#' place). This provides the type of categorization plot typical for, for example, perceptual recalibration or
+#' phonetic tuning studies.
+#'
+#' Tokens are sorted based on the increasing probability of a \code{target_category} response for the condition
+#' (\code{group}, e.g., prior or a specific exposure group) specified in \code{sort.by}. By default both the mean
+#' categorization and confidence intervals are plotted.
 #' If `summarize=TRUE`, the function marginalizes over all posterior samples. The number of samples
 #' is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
 #' samples will be used. If `summarize=FALSE`, separate categorization plots for all n.draws
 #' individual samples will be plotted in separate panels.
 #'
-#' @param fit mv-ibbu-stanfit object.
-#' @param fit.input Input to the mv-ibbu-stanfit object.
+#' @param fit \code{\link{NIW_ibbu_stanfit}} object.
+#' @param data.test Optionally, a \code{tibble} or \code{data.frame} with test data.
+#' If `NULL` the input will be extracted from fit. (default: `NULL`).
 #' @param which Should categorization for the prior, posterior, or both be plotted? (default: `"both"`)
 #' @param summarize Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
 #' unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)
@@ -457,8 +465,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' (default: `c(.66, .95)`)
 #' @param target_category The index of the category for which categorization should be shown. (default: `1`)
 #' @param panel.group Should the groups be plotted in separate panels? (default: `FALSE`)
-#' @param group.ids Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
-#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
+#' @param group.ids Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)
 #' @param group.labels Vector of group labels of same length as `group.ids` or `NULL` to use defaults. (default: `NULL`)
 #' The default labels each categorization function based on whether it is showing prior or posterior categorization,
 #' and by its group ID.
@@ -474,10 +481,9 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' @examples
 #' TBD
 #' @export
-#'
 plot_ibbu_stanfit_test_categorization = function(
   fit,
-  fit.input = NULL,
+  data.test = NULL,
   which = "both",
   summarize = T,
   n.draws = NULL,
@@ -488,7 +494,9 @@ plot_ibbu_stanfit_test_categorization = function(
   sort.by = "prior"
 ) {
   assert_NIW_ibbu_stanfit(fit)
-  if (is.null(fit.input)) fit.input = fit@input_data
+  if (is.null(data.test)) {
+    data.test = get_test_data_from_NIW_ibbu_stanfit(fit)
+  }
   assert_that(is.flag(summarize))
   assert_that(is.null(n.draws) | is.count(n.draws))
   assert_that(is.null(confidence.intervals) |
@@ -548,15 +556,7 @@ plot_ibbu_stanfit_test_categorization = function(
   # Prepare test_data
   message("Using IBBU stanfit input to extract information about test data.")
   cue.labels = get_cue_labels(d.pars)
-  # If one wants to extract different test data for each group
-  # test_data = fit.input$x_test %>%
-  #   cbind("group" = fit.input$y_test) %>%
-  #   mutate(group = get_group_constructor(ibbu.fit)(group)) %>%
-  #   group_by(group) %>%
-  #   transmute(x = pmap(.l = list(!!! syms(cues)), .f = ~ c(...))) %>%
-  #   mutate(token = 1:length(x)) %>%
-  #   nest(cues = x, tokens = token)
-  test_data = fit.input$x_test %>%
+  test_data = data.test %>%
     distinct() %>%
     # CHECK: Could be replaced by make_vector_column
     transmute(x = pmap(.l = list(!!! syms(cue.labels)), .f = ~ c(...))) %>%
