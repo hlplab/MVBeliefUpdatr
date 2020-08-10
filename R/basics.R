@@ -122,51 +122,51 @@ transform_cues = function(data, cues,
     transform.parameters = list()
     transform.parameters[["cue.labels"]] = cues
 
-    if (center) {
-      transform.parameters[["center"]] = data %>%
-        select(!!! rlang::syms(cues)) %>%
-        summarise_all(mean)
-    }
-
-    if (scale) {
-      transform.parameters[["scale"]] = data %>%
-        select(!!! rlang::syms(cues)) %>%
-        summarise_all(sd)
-    }
-
     if (pca) {
-      PCA <- data %>%
+      transform.parameters[["pca"]] = data %>%
         select(!!! rlang::syms(cues)) %>%
-        prcomp(center = center, scale. = scale)
-      transform.parameters[["pca"]] = PCA
+        prcomp(center = center, scale. = scale, retx = F)
+    } else {
+      if (center) {
+        transform.parameters[["center"]] = data %>%
+          select(!!! rlang::syms(cues)) %>%
+          summarise_all(mean)
+      }
+
+      if (scale) {
+        transform.parameters[["scale"]] = data %>%
+          select(!!! rlang::syms(cues)) %>%
+          summarise_all(sd)
+      }
     }
   }
 
-  if (center) {
-    newcues = data %>%
-      select(!!! rlang::syms(cues)) %>%
-      sweep(2, as.numeric(transform.parameters[["center"]]), FUN = "-")
+  if (return.transformed.data) {
+    if (!is.null(transform.parameters[["pca"]])) {
+      data %<>%
+        cbind(predict(transform.parameters[["pca"]], data))
+    } else {
+      if (!is.null(transform.parameters[["center"]])) {
+        newcues = data %>%
+          select(!!! rlang::syms(cues)) %>%
+          sweep(2, as.numeric(transform.parameters[["center"]]), FUN = "-")
 
-    data %<>%
-      select(-all_of(cues)) %>%
-      cbind(newcues)
+        data %<>%
+          select(-all_of(cues)) %>%
+          cbind(newcues)
+      }
+
+      if (!is.null(transform.parameters[["scale"]])) {
+        newcues = data %>%
+          select(!!! rlang::syms(cues)) %>%
+          sweep(2, as.numeric(transform.parameters[["scale"]]), FUN = "/")
+
+        data %<>%
+          select(-all_of(cues)) %>%
+          cbind(newcues)
+      }
+    }
   }
-
-  if (scale) {
-    newcues = data %>%
-      select(!!! rlang::syms(cues)) %>%
-      sweep(2, as.numeric(transform.parameters[["scale"]]), FUN = "/")
-
-    data %<>%
-      select(-all_of(cues)) %>%
-      cbind(newcues)
-  }
-
-  if (pca) {
-    data %<>%
-      cbind(predict(transform.parameters[["pca"]], data))
-  }
-
 
   transform.function = if (!return.transform.function) NULL else {
     function(data) {
@@ -177,7 +177,8 @@ transform_cues = function(data, cues,
 
       transform_cues(data, cues, center = center, scale = scale, pca = pca,
                      transform.parameters = transform.parameters,
-                     return.transformed.data = T, return.transform.parameters = F, return.transform.function = F)
+                     return.transformed.data = T, return.transform.parameters = F,
+                     return.transform.function = F, return.untransform.function = F)
 
     }
   }
@@ -217,16 +218,15 @@ untransform_cues = function(data, cues,
   if (is.null(unscale)) unscale = !is.null(transform.parameters[["scale"]])
 
   if (unpca) {
-    # Since we're uncentering and unscaling separately, the following is not needed:
     # https://stackoverflow.com/questions/29783790/how-to-reverse-pca-in-prcomp-to-get-original-data
-    # pca = transform.parameters[["pca"]]
-    # t(t(pca$x %*% t(pca$rotation)) + pca$center)
-    # If pca$scale is TRUE you will also need to re-scale
-    # t(t(pca$x %*% t(pca$rotation)) * pca$scale + pca$center)
     newcues = data %>%
       select(!!! rlang::syms(cues)) %>%
       as.matrix() %>%
-      { . %*% t(transform.parameters[["pca"]]$rotation) }
+      { . %*% t(transform.parameters[["pca"]]$rotation) } %>%
+      { if (unscale & uncenter)
+        t(t(.) * transform.parameters[["pca"]]$scale + transform.parameters[["pca"]]$center) else
+          if (unscale) t(t(.) * transform.parameters[["pca"]]$scale) else
+            if (uncenter) t(t(.) + transform.parameters[["pca"]]$center) }
 
     data %<>%
       select(-all_of(cues)) %>%
@@ -235,26 +235,26 @@ untransform_cues = function(data, cues,
     data %<>%
       rename_at(cues, ~ transform.parameters[["cue.labels"]])
     cues = transform.parameters[["cue.labels"]]
-  }
+  } else {
+    if (unscale) {
+      newcues = data %>%
+        select(!!! rlang::syms(cues)) %>%
+        sweep(2, as.numeric(transform.parameters[["scale"]]), FUN = "*")
 
-  if (unscale) {
-    newcues = data %>%
-      select(!!! rlang::syms(cues)) %>%
-      sweep(2, as.numeric(transform.parameters[["scale"]]), FUN = "*")
+      data %<>%
+        select(-all_of(cues)) %>%
+        cbind(newcues)
+    }
 
-    data %<>%
-      select(-all_of(cues)) %>%
-      cbind(newcues)
-  }
+    if (uncenter) {
+      newcues = data %>%
+        select(!!! rlang::syms(cues)) %>%
+        sweep(2, as.numeric(transform.parameters[["center"]]), FUN = "+")
 
-  if (uncenter) {
-    newcues = data %>%
-      select(!!! rlang::syms(cues)) %>%
-      sweep(2, as.numeric(transform.parameters[["center"]]), FUN = "+")
-
-    data %<>%
-      select(-all_of(cues)) %>%
-      cbind(newcues)
+      data %<>%
+        select(-all_of(cues)) %>%
+        cbind(newcues)
+    }
   }
 
   untransform.function = if (!return.untransform.function) NULL else {
