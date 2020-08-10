@@ -17,7 +17,8 @@ get_cue_labels = function(x, indices = NULL) {
   message("This function can probably be integrated with get_original_levels(), which should be renamed.")
   assert_that(is.NIW_belief_MCMC(x))
 
-  names = rownames(x$m[[1]])
+  names = names(x$m[[1]])
+  if (is.null(names)) rownames(x$S[[1]])
 
   if (is.null(indices)) return(names) else return(names(indices))
 }
