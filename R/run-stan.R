@@ -6,6 +6,12 @@
 #'
 #' @inheritParams compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats
 #' @param sample Should the model be fit and sampled from?
+#' @param file Either NULL or a character string. In the latter case, the fitted model object is saved
+#' via saveRDS in a file named after the string supplied in file. The .rds extension is added automatically.
+#' If the file already exists, the model from that file will be loaded and returned instead of refitting the model.
+#' As existing files won't be overwritten, you have to manually remove the file in order to refit and save the
+#' model under an existing file name. The file name is stored in the NIW_ibbu_stanfit object for later usage.
+#' (default `NULL`)
 #' @param use_multivariate_updating Should multivariate updating be used? By default this option will be
 #' selecting if the relevant cues (after transformations, including PCA, if selected) have more than 1
 #' dimension.
@@ -23,9 +29,15 @@ infer_prior_beliefs <- function(
   center.observations = TRUE, scale.observations = TRUE, pca.observations = FALSE, pca.cutoff = 1,
   m_0 = NULL, S_0 = NULL,
   tau_scale = 0, L_omega_scale = 0,
+  sample = TRUE, file = NULL, model = NULL, verbose = FALSE,
   use_multivariate_updating = NULL,
-  sample = TRUE, model = NULL, verbose = FALSE,
   ...) {
+  if (!is.null(file)) {
+    x <- read_NIW_ibbu_stanfit(file)
+    if (!is.null(x)) {
+      return(x)
+    }
+  }
   if (!is.null(model)) assert_that(!is.null(stanmodels[[model]]),
                                    msg = paste("The specified stanmodel does not exist. Allowable models include:",
                                                names(MVBeliefUpdatr:::stanmodels)))
@@ -92,6 +104,10 @@ infer_prior_beliefs <- function(
         cue2 = cue
       )
     )
+
+  if (!is.null(file)) {
+    write_NIW_ibbu_stanfit(fit, file)
+  }
 
   return(fit)
 }

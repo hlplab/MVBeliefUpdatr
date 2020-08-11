@@ -21,10 +21,11 @@ infer_prior_beliefs(
   S_0 = NULL,
   tau_scale = 0,
   L_omega_scale = 0,
-  use_multivariate_updating = NULL,
   sample = TRUE,
+  file = NULL,
   model = NULL,
   verbose = FALSE,
+  use_multivariate_updating = NULL,
   ...
 )
 }
@@ -73,13 +74,20 @@ ignore. (default: 0)}
 matrix of mu_0 and scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
 ignore. (default: 0)}
 
+\item{sample}{Should the model be fit and sampled from?}
+
+\item{file}{Either NULL or a character string. In the latter case, the fitted model object is saved
+via saveRDS in a file named after the string supplied in file. The .rds extension is added automatically.
+If the file already exists, the model from that file will be loaded and returned instead of refitting the model.
+As existing files won't be overwritten, you have to manually remove the file in order to refit and save the
+model under an existing file name. The file name is stored in the NIW_ibbu_stanfit object for later usage.
+(default `NULL`)}
+
+\item{model}{Name of stanmodel that should be used. Overrides any default selection.}
+
 \item{use_multivariate_updating}{Should multivariate updating be used? By default this option will be
 selecting if the relevant cues (after transformations, including PCA, if selected) have more than 1
 dimension.}
-
-\item{sample}{Should the model be fit and sampled from?}
-
-\item{model}{Name of stanmodel that should be used. Overrides any default selection.}
 
 \item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}}
 }
