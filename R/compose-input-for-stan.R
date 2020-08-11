@@ -218,8 +218,15 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
 #' @param pca.cutoff Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 #' components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 #' `pca.observation = FALSE`. (default: 1)
-#' @param m_0,S_0 Optionally, prior mean of means (m_0) and prior scatter matrix (S_0). If provided, these parameters
-#' won't be fitted.
+#' @param m_0,S_0 Optionally, prior mean of means (m_0) and/or prior scatter matrix (S_0). These parameters could be
+#' estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_NIW_prior_from_data}}
+#' for a convenient way to do so). To aspects should be kept in mind, however. First, an \emph{inferred} scatter
+#' matrix include variability from perceptual and/or environmental noise, \emph{in addition} to the motor noise that
+#' is reflected in production data. Second, the prior scatter matrix has an implicit nu associated with it, so that
+#' the nu inferred by \code{\link{infer_prior_beliefs}} is best thought of as a multiple of the implicit nu used
+#' during the creation of the scatter matrix S_0. For that reason, we recommend the use of nu = D + 2 in the call to
+#' \code{\link{make_NIW_prior_from_data}} (the default), since the S_0 obtained that way is identical to the category
+#' covariance matrix Sigma.
 #' @param tau_scale,L_omega_scale Optionally, scale for the Cauchy prior for standard deviations of the covariance
 #' matrix of mu_0 and scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
 #' ignore. (default: 0)
