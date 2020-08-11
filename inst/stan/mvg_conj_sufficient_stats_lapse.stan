@@ -91,7 +91,7 @@ transformed parameters {
   // update NIW parameters according to conjugate updating rules are taken from
   // Murphy (2007, p. 136)
   for (cat in 1:M) {
-    if (!m_0_known) {
+    if (!S_0_known) {
       // Get S_0 from its components: correlation matrix and vector of standard deviations
       S_0[cat] = quad_form_diag(multiply_lower_tri_self_transpose(L_omega_0_param[cat]), tau_0_param[cat]);
     }

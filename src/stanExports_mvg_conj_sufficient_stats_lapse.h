@@ -651,7 +651,7 @@ public:
             current_statement_begin__ = 93;
             for (int cat = 1; cat <= M; ++cat) {
                 current_statement_begin__ = 94;
-                if (as_bool(logical_negation(m_0_known))) {
+                if (as_bool(logical_negation(S_0_known))) {
                     current_statement_begin__ = 96;
                     stan::model::assign(S_0, 
                                 stan::model::cons_list(stan::model::index_uni(cat), stan::model::nil_index_list()), 
@@ -1218,7 +1218,7 @@ public:
             current_statement_begin__ = 93;
             for (int cat = 1; cat <= M; ++cat) {
                 current_statement_begin__ = 94;
-                if (as_bool(logical_negation(m_0_known))) {
+                if (as_bool(logical_negation(S_0_known))) {
                     current_statement_begin__ = 96;
                     stan::model::assign(S_0, 
                                 stan::model::cons_list(stan::model::index_uni(cat), stan::model::nil_index_list()), 
