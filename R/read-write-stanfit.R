@@ -14,7 +14,7 @@ read_NIW_ibbu_stanfit = function(file) {
   if (file.exists(file))
     fit = readRDS(file) else
       if (str_sub(file, - 4, - 1) %nin% c(".rds", ".RDS", ".Rds"))
-        fit = read_NIW_ibbu_stanfit(paste0(file, ".rds")) else
+        return(read_NIW_ibbu_stanfit(paste0(file, ".rds"))) else
           return(NULL)
 
   if (is.NIW_ibbu_stanfit(fit))
