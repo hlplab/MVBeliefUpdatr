@@ -346,13 +346,15 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     if (is.list(m_0)) {
       temp = array(dim = c(n.cats, n.cues))
       for (i in 1:length(m_0)) temp[i,] = m_0[[i]]
-      m_0 = temp }}
+      m_0 = temp
+      rm(temp) }}
 
   if (is.null(S_0)) S_0 = array(numeric(), dim = c(0,0,0)) else {
     if (is.list(S_0)) {
       temp = array(dim = c(n.cats, n.cues, n.cues))
       for (i in 1:length(S_0)) temp[i,,] = S_0[[i]]
-      S_0 = temp }}
+      S_0 = temp
+      rm(temp) }}
 
   if (length(cues) > 1) {
     data_list <- exposure %>%
