@@ -1,6 +1,7 @@
 IMPORTANT
 
 + GENERAL
+++ consider switching from assertthat to assertive
 ++ consider making NIW_MCMC and NIW_belief one class. or at least the former is a subclass of the latter?
 ++ make NIW_belief and NIW_beliefs classes? think about how they should be related.
 

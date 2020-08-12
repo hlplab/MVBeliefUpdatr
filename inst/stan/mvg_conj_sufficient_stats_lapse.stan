@@ -53,7 +53,7 @@ transformed data {
 parameters {
   // these are all shared across groups (same prior beliefs):
   real<lower=K> kappa_0;                  // prior pseudocount for category mu
-  real<lower=K> nu_0;                     // prior pseudocount for category Sigma
+  real<lower=K + 1> nu_0;                 // prior pseudocount for category Sigma
 
   vector[K] m_0_param[m_0_known ? 0 : M]; // prior mean of means
   vector<lower=0>[K] m_0_tau;             // prior variances of m_0 <------- is this really needed?

@@ -352,7 +352,7 @@ public:
         double nu_0(0);
         nu_0 = vals_r__[pos__++];
         try {
-            writer__.scalar_lb_unconstrain(K, nu_0);
+            writer__.scalar_lb_unconstrain((K + 1), nu_0);
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable nu_0: ") + e.what()), current_statement_begin__, prog_reader__());
         }
@@ -519,9 +519,9 @@ public:
             local_scalar_t__ nu_0;
             (void) nu_0;  // dummy to suppress unused var warning
             if (jacobian__)
-                nu_0 = in__.scalar_lb_constrain(K, lp__);
+                nu_0 = in__.scalar_lb_constrain((K + 1), lp__);
             else
-                nu_0 = in__.scalar_lb_constrain(K);
+                nu_0 = in__.scalar_lb_constrain((K + 1));
             current_statement_begin__ = 58;
             std::vector<Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> > m_0_param;
             size_t m_0_param_d_0_max__ = (m_0_known ? 0 : M );
@@ -1074,7 +1074,7 @@ public:
         // read-transform, write parameters
         double kappa_0 = in__.scalar_lb_constrain(K);
         vars__.push_back(kappa_0);
-        double nu_0 = in__.scalar_lb_constrain(K);
+        double nu_0 = in__.scalar_lb_constrain((K + 1));
         vars__.push_back(nu_0);
         std::vector<Eigen::Matrix<double, Eigen::Dynamic, 1> > m_0_param;
         size_t m_0_param_d_0_max__ = (m_0_known ? 0 : M );
