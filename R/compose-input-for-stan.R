@@ -218,7 +218,10 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
 #' @param pca.cutoff Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 #' components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 #' `pca.observation = FALSE`. (default: 1)
-#' @param m_0,S_0 Optionally, prior mean of means (m_0) and/or prior scatter matrix (S_0). These parameters could be
+#' @param m_0,S_0 Optionally, prior means (m_0) and/or prior scatter matrices (S_0) for all categories. Each should be
+#' a list, with
+#' each element being the mean/scatter matrix for a specific category. Elements should be ordered in the same order as
+#' the levels of the category variable in \code{exposure} and \code{test}. The means and scatter matrices could be
 #' estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_NIW_prior_from_data}}
 #' for a convenient way to do so). To aspects should be kept in mind, however. First, an \emph{inferred} scatter
 #' matrix include variability from perceptual and/or environmental noise, \emph{in addition} to the motor noise that
@@ -247,6 +250,10 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   tau_scale = 0, L_omega_scale = 0,
   verbose = F
 ) {
+  if (!is.null(m_0)) assert_that(is.list(m_0) | is.array(m_0))
+  if (!is.null(S_0)) assert_that(is.list(S_0) | is.array(S_0))
+  message("Add assertions about m_0 and S_0 dimensions")
+
   if (pca.observations)
     assert_that(between(pca.cutoff, 0, 1),
                 msg = "pca.cutoff must be between 0 and 1.")
@@ -333,6 +340,20 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     group = group,
     verbose = verbose)
 
+  n.cats = nlevels(exposure[[category]])
+  n.cues = length(cues)
+  if (is.null(m_0)) m_0 = array(numeric(), dim = c(0,0)) else {
+    if (is.list(m_0)) {
+      temp = array(dim = c(n.cats, n.cues))
+      for (i in 1:length(m_0)) temp[i,] = m_0[[i]]
+      m_0 = temp }}
+
+  if (is.null(S_0)) S_0 = array(numeric(), dim = c(0,0,0)) else {
+    if (is.list(S_0)) {
+      temp = array(dim = c(n.cats, n.cues, n.cues))
+      for (i in 1:length(S_0)) temp[i,,] = S_0[[i]]
+      S_0 = temp }}
+
   if (length(cues) > 1) {
     data_list <- exposure %>%
       get_sufficient_statistics_from_data(
@@ -357,8 +378,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 
         m_0_known = if (is.null(m_0)) 0 else 1
         S_0_known = if (is.null(S_0)) 0 else 1
-        m_0_data = if (is.null(m_0)) array(numeric(), dim = c(0,0)) else m_0
-        S_0_data = if (is.null(S_0)) array(numeric(), dim = c(0,0,0)) else S_0
+        m_0_data = m_0
+        S_0_data = S_0
 
         tau_scale <- tau_scale
         L_omega_scale <- L_omega_scale

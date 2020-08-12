@@ -91,7 +91,6 @@ infer_prior_beliefs <- function(
       fit <- sampling(MVBeliefUpdatr:::stanmodels[['uvg_conj_uninformative_priors_sufficient_stats_lapse']],
                              data = data_list, ...)
     }
-  }
 
   if (is.null(fit)) stop("Sampling failed.")
   fit %<>% as.NIW_ibbu_stanfit(data_list, transform)
@@ -104,6 +103,7 @@ infer_prior_beliefs <- function(
         cue2 = cue
       )
     )
+  }
 
   if (!is.null(file)) {
     write_NIW_ibbu_stanfit(fit, file)

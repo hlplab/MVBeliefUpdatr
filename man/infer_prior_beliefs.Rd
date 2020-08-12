@@ -60,7 +60,10 @@ substantially more efficient if many groups share the same exposure.}
 components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 `pca.observation = FALSE`. (default: 1)}
 
-\item{m_0}{Optionally, prior mean of means (m_0) and/or prior scatter matrix (S_0). These parameters could be
+\item{m_0}{Optionally, prior means (m_0) and/or prior scatter matrices (S_0) for all categories. Each should be
+a list, with
+each element being the mean/scatter matrix for a specific category. Elements should be ordered in the same order as
+the levels of the category variable in \code{exposure} and \code{test}. The means and scatter matrices could be
 estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_NIW_prior_from_data}}
 for a convenient way to do so). To aspects should be kept in mind, however. First, an \emph{inferred} scatter
 matrix include variability from perceptual and/or environmental noise, \emph{in addition} to the motor noise that
@@ -70,7 +73,10 @@ during the creation of the scatter matrix S_0. For that reason, we recommend the
 \code{\link{make_NIW_prior_from_data}} (the default), since the S_0 obtained that way is identical to the category
 covariance matrix Sigma.}
 
-\item{S_0}{Optionally, prior mean of means (m_0) and/or prior scatter matrix (S_0). These parameters could be
+\item{S_0}{Optionally, prior means (m_0) and/or prior scatter matrices (S_0) for all categories. Each should be
+a list, with
+each element being the mean/scatter matrix for a specific category. Elements should be ordered in the same order as
+the levels of the category variable in \code{exposure} and \code{test}. The means and scatter matrices could be
 estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_NIW_prior_from_data}}
 for a convenient way to do so). To aspects should be kept in mind, however. First, an \emph{inferred} scatter
 matrix include variability from perceptual and/or environmental noise, \emph{in addition} to the motor noise that
