@@ -342,18 +342,26 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 
   n.cats = nlevels(exposure[[category]])
   n.cues = length(cues)
-  if (is.null(m_0)) m_0 = array(numeric(), dim = c(0,0)) else {
+  if (is.null(m_0)) {
+    m_0 = array(numeric(), dim = c(0,0))
+    m_0_known = 0
+  } else {
     if (is.list(m_0)) {
       temp = array(dim = c(n.cats, n.cues))
       for (i in 1:length(m_0)) temp[i,] = m_0[[i]]
       m_0 = temp
+      m_0_known = 1
       rm(temp) }}
 
-  if (is.null(S_0)) S_0 = array(numeric(), dim = c(0,0,0)) else {
+  if (is.null(S_0)) {
+    S_0 = array(numeric(), dim = c(0,0,0))
+    S_0_known = 0
+  } else {
     if (is.list(S_0)) {
       temp = array(dim = c(n.cats, n.cues, n.cues))
       for (i in 1:length(S_0)) temp[i,,] = S_0[[i]]
       S_0 = temp
+      S_0_known = 1
       rm(temp) }}
 
   if (length(cues) > 1) {
@@ -378,8 +386,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
           as.matrix()
         N_test <- nrow(x_test)
 
-        m_0_known = if (is.null(m_0)) 0 else 1
-        S_0_known = if (is.null(S_0)) 0 else 1
+        m_0_known = m_0_known
+        S_0_known = S_0_known
         m_0_data = m_0
         S_0_data = S_0
 
