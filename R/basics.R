@@ -104,6 +104,8 @@ make_vector_column = function(data, cols, vector_col, transmute = F) {
 #' @param pca,unpca Should the data be transformed into/back from orthogonal principal components? If `TRUE`
 #' then \code{center} and \code{scale} are default to `FALSE`. If PCA is applied, it is applied after
 #' centering and/or scaling. (default: `FALSE`)
+#' @param attach Should the transformed cues be attached to \code{data} or should just the transformed cues be
+#' returned? (default: `TRUE`)
 #' @param transform.parameters List of transforms (default: `NULL`)
 #' @param return.transformed.data,return.transformed.data Should the (un)transformed data be returned? (default: `TRUE`)
 #' @param return.transform.parameters Should the list of transforms be returned? (default: `FALSE`)
@@ -124,12 +126,15 @@ make_vector_column = function(data, cols, vector_col, transmute = F) {
 #' @export
 transform_cues = function(data, cues,
                           center =  if (pca) T else F, scale = F, pca = F,
+                          attach = T,
                           transform.parameters = NULL,
                           return.transformed.data = T, return.transform.parameters = F,
                           return.transform.function = F, return.untransform.function = F
 ) {
   assert_that(is.data.frame(data) | is_tibble(data))
   assert_that(is.null(transform.parameters) | is.list(transform.parameters))
+  old_data = data
+  groups = if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
 
   if (is.null(transform.parameters)) {
     transform.parameters = list()
@@ -137,19 +142,19 @@ transform_cues = function(data, cues,
 
     if (pca) {
       transform.parameters[["pca"]] = data %>%
-        select(!!! rlang::syms(cues)) %>%
+        select(all_of(cues)) %>%
         prcomp(center = center, scale. = scale, retx = F)
     } else {
       if (center) {
         transform.parameters[["center"]] = data %>%
-          select(!!! rlang::syms(cues)) %>%
-          summarise_all(mean)
+          select(all_of(cues)) %>%
+          summarise_all(list(mean = mean))
       }
 
       if (scale) {
         transform.parameters[["scale"]] = data %>%
-          select(!!! rlang::syms(cues)) %>%
-          summarise_all(sd)
+          select(all_of(cues)) %>%
+          summarise_all(list(sd = sd))
       }
     }
   }
@@ -157,26 +162,29 @@ transform_cues = function(data, cues,
   if (return.transformed.data) {
     if (!is.null(transform.parameters[["pca"]])) {
       data %<>%
-        cbind(predict(transform.parameters[["pca"]], data))
+        predict(transform.parameters[["pca"]], .) %>%
+        as_tibble()
     } else {
       if (!is.null(transform.parameters[["center"]])) {
-        newcues = data %>%
-          select(!!! rlang::syms(cues)) %>%
-          sweep(2, as.numeric(transform.parameters[["center"]]), FUN = "-")
-
         data %<>%
-          select(-all_of(cues)) %>%
-          cbind(newcues)
+          ungroup() %>%
+          select(cues) %>%
+          { . - (data %>%
+                   left_join(transform.parameters[["center"]], by = groups) %>%
+                   ungroup() %>%
+                   select(all_of(paste0(cues, "_mean"))))
+          }
       }
 
       if (!is.null(transform.parameters[["scale"]])) {
-        newcues = data %>%
-          select(!!! rlang::syms(cues)) %>%
-          sweep(2, as.numeric(transform.parameters[["scale"]]), FUN = "/")
-
         data %<>%
-          select(-all_of(cues)) %>%
-          cbind(newcues)
+          ungroup() %>%
+          select(cues) %>%
+          { . / (data %>%
+                   left_join(transform.parameters[["scale"]], by = groups) %>%
+                   ungroup() %>%
+                   select(all_of(paste0(cues, "_sd"))))
+          }
       }
     }
   }
@@ -202,6 +210,15 @@ transform_cues = function(data, cues,
                      return.untransformed.data = F, return.untransform.function = T)
   }
 
+  if (!identical(groups, character())) data %<>% group_by(!! sym(groups))
+  if (attach) {
+    data %<>%
+      cbind(
+        old_data %>%
+          select(-intersect(names(old_data), names(data))),
+        .)
+  }
+
   if (return.transformed.data & !return.transform.parameters & !return.transform.function & !return.untransform.function) return(data) else
     if (!return.transformed.data & return.transform.parameters & !return.transform.function & !return.untransform.function) return(transform.parameters) else
       if (!return.transformed.data & !return.transform.parameters & return.transform.function & !return.untransform.function) return(transform.function) else
@@ -223,7 +240,8 @@ untransform_cues = function(data, cues,
                             return.untransformed.data = T, return.untransform.function = F
 ) {
   assert_that(is.data.frame(data) | is_tibble(data))
-  assert_that(is.list(transform.parameters))
+  assert_that(!is.null(transform.parameters) & is.list(transform.parameters),
+              msg = "Must provide transform parameters.")
 
   # By default untransform all transformations available in transform object
   if (is.null(unpca)) unpca = !is.null(transform.parameters[["pca"]])
@@ -250,23 +268,25 @@ untransform_cues = function(data, cues,
     cues = transform.parameters[["cue.labels"]]
   } else {
     if (unscale) {
-      newcues = data %>%
-        select(!!! rlang::syms(cues)) %>%
-        sweep(2, as.numeric(transform.parameters[["scale"]]), FUN = "*")
-
       data %<>%
-        select(-all_of(cues)) %>%
-        cbind(newcues)
+        ungroup() %>%
+        select(cues) %>%
+        { . * (data %>%
+                 left_join(transform.parameters[["scale"]], by = groups) %>%
+                 ungroup() %>%
+                 select(all_of(paste0(cues, "_sd"))))
+        }
     }
 
     if (uncenter) {
-      newcues = data %>%
-        select(!!! rlang::syms(cues)) %>%
-        sweep(2, as.numeric(transform.parameters[["center"]]), FUN = "+")
-
       data %<>%
-        select(-all_of(cues)) %>%
-        cbind(newcues)
+        ungroup() %>%
+        select(cues) %>%
+        { . + (data %>%
+                 left_join(transform.parameters[["center"]], by = groups) %>%
+                 ungroup() %>%
+                 select(all_of(paste0(cues, "_mean"))))
+        }
     }
   }
 

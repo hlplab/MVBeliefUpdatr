@@ -11,6 +11,7 @@ transform_cues(
   center = if (pca) T else F,
   scale = F,
   pca = F,
+  attach = T,
   transform.parameters = NULL,
   return.transformed.data = T,
   return.transform.parameters = F,
@@ -41,6 +42,9 @@ untransform_cues(
 \item{pca, unpca}{Should the data be transformed into/back from orthogonal principal components? If `TRUE`
 then \code{center} and \code{scale} are default to `FALSE`. If PCA is applied, it is applied after
 centering and/or scaling. (default: `FALSE`)}
+
+\item{attach}{Should the transformed cues be attached to \code{data} or should just the transformed cues be
+returned? (default: `TRUE`)}
 
 \item{transform.parameters}{List of transforms (default: `NULL`)}
 
