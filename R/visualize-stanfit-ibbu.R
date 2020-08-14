@@ -654,6 +654,7 @@ plot_ibbu_stanfit_test_categorization = function(
           x = as.numeric(.data$token),
           ymin = .data$y.outer.min,
           ymax = .data$y.outer.max,
+          shape = .data$group,
           fill = .data$group),
         color = NA, alpha = .1
       ) +
@@ -670,6 +671,11 @@ plot_ibbu_stanfit_test_categorization = function(
         breaks = group.ids,
         labels = group.labels,
         values = group.colors
+      ) +
+      scale_shape_discrete(
+        "Group",
+        breaks = group.ids,
+        labels = group.labels
       )
 
     # Place information about confidence intervals on plot.

@@ -10,7 +10,7 @@ get_original_levels(fit, variable = c("category", "group"), indices = NULL)
 
 get_category_levels(fit, indices = NULL)
 
-get_group_levels(fit, indices = NULL)
+get_group_levels(fit, indices = NULL, include_prior = F)
 }
 \arguments{
 \item{fit}{\code{\link{NIW_ibbu_stanfit}} object.}

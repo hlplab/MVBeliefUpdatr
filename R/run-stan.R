@@ -33,9 +33,9 @@ infer_prior_beliefs <- function(
   use_multivariate_updating = NULL,
   ...) {
   if (!is.null(file)) {
-    x <- read_NIW_ibbu_stanfit(file)
-    if (!is.null(x)) {
-      return(x)
+    fit <- read_NIW_ibbu_stanfit(file)
+    if (!is.null(fit)) {
+      return(fit)
     }
   }
   if (!is.null(model)) assert_that(!is.null(stanmodels[[model]]),
@@ -84,7 +84,7 @@ infer_prior_beliefs <- function(
       fit <- sampling(MVBeliefUpdatr:::stanmodels[[model]],
                       data = data_list, ...)
     } else if (use_multivariate_updating) {
-      fit <- sampling(MVBeliefUpdatr:::stanmodels[['mvg_conj_uninformative_priors_sufficient_stats_lapse']],
+      fit <- sampling(MVBeliefUpdatr:::stanmodels[['mvg_conj_sufficient_stats_lapse']],
                          data = data_list, ...)
     } else {
       message("There might be an issue with the compose_data function for univariate models. look into it.")
@@ -105,7 +105,7 @@ infer_prior_beliefs <- function(
     )
   }
 
-  if (!is.null(file)) {
+  if (!is.null(fit) & !is.null(file)) {
     write_NIW_ibbu_stanfit(fit, file)
   }
 

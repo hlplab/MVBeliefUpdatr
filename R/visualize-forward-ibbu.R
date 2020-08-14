@@ -20,19 +20,19 @@ check_compatibility_between_NIW_belief_and_data = function(
 
   if (!quo_is_null(facet_rows_by)) {
     assert_that(all(as_name(facet_rows_by) %in% names(x)),
-                msg = paste(as_name(facet_rows_by), " not found in x."))
+                msg = paste(as_name(facet_rows_by), "not found in NIW_belief (x)."))
     assert_that(!all(!is.null(data.exposure), as_name(facet_rows_by) %nin% names(data.exposure)),
                 msg = "Can't plot exposure data: when facet_rows_by is specified, it must be present in the exposure data.")
   }
   if (!quo_is_null(facet_cols_by)) {
     assert_that(all(as_name(facet_cols_by) %in% names(x)),
-                msg = paste(as_name(facet_cols_by), " not found in x."))
+                msg = paste(as_name(facet_cols_by), "not found in NIW_belief (x)."))
     assert_that(!all(!is.null(data.exposure), as_name(facet_cols_by) %nin% names(data.exposure)),
                 msg = "Can't plot exposure data: when facet_cols_by is specified, it must be present in the exposure data.")
   }
   if (!quo_is_null(animate_by)) {
     assert_that(all(as_name(animate_by) %in% names(x)),
-                msg = paste(as_name(animate_by), " not found in x."))
+                msg = paste(as_name(animate_by), "not found in NIW_belief (x)."))
     assert_that(!all(!is.null(data.exposure), as_name(animate_by) %nin% names(data.exposure)),
                 msg = "Can't plot exposure data: when animate_by is specified, it must be present in the exposure data.")
   }

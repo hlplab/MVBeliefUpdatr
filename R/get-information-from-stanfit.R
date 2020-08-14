@@ -133,8 +133,11 @@ get_category_levels = function(fit, indices = NULL) {
 
 #' @rdname get_original_levels
 #' @export
-get_group_levels = function(fit, indices = NULL) {
-  return(get_original_levels(fit, "group", indices))
+get_group_levels = function(fit, indices = NULL, include_prior = F) {
+  groups = get_original_levels(fit, "group", indices)
+  if (include_prior) groups = append(groups, "prior")
+
+  return(groups)
 }
 
 
