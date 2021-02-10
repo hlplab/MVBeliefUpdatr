@@ -315,11 +315,12 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #' @export
 update_NIW_belief_by_sufficient_statistics = function(
   prior, x_category, x_mean, x_S, x_N,
+  category = "category",
   add_noise = NULL,
   method = "label-certain"
 ) {
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
-  assert_NIW_belief(prior)
+  assert_NIW_belief(prior, category = category)
   assert_that(length(x_N) == 1 & x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
   assert_that(method %in% c("no-updating",
                             "label-certain",
@@ -376,10 +377,12 @@ update_NIW_belief_by_sufficient_statistics = function(
 #' @export
 update_NIW_belief_by_one_observation = function(
   prior, x_category, x,
+  category = "category",
   add_noise = NULL,
   method = "label-certain"
 ) {
   update_NIW_belief_by_sufficient_statistics(prior, x_category = x_category, x_mean = x, x_S = 0L, x_N = 1L,
+                                             category = category,
                                              add_noise = add_noise, method = method)
 }
 
@@ -433,7 +436,7 @@ update_NIW_beliefs_incrementally <- function(
   keep.update_history = TRUE,
   keep.exposure_data = FALSE
 ){
-  assert_NIW_belief(prior)
+  assert_NIW_belief(prior, category = category)
   assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
   assert_that(all(is.flag(keep.update_history), is.flag(keep.exposure_data)))
   assert_that(any(is.null(exposure.order), exposure.order %in% names(exposure)),
@@ -465,6 +468,7 @@ update_NIW_beliefs_incrementally <- function(
         prior = posterior,
         x = unlist(exposure[i, "cues"]),
         x_category = exposure[i,][[category]],
+        category = category,
         add_noise = add_noise,
         method = method[i])
 

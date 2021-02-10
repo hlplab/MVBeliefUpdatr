@@ -42,6 +42,7 @@ Imports:
     Rdpack (>= 0.7),
     reshape2,
     rlang,
+    scales,
     stringr,
     transformr,
     tibble,
