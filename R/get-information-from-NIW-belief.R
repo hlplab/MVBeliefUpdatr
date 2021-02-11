@@ -55,7 +55,7 @@ get_posterior_predictive_from_NIW_belief = function(
       mutate(!! sym(category) := c)
   }
 
-  pp = reduce(pp, rbind)
+  pp %<>% reduce(rbind)
   if (wide)
     pp %<>%
     pivot_wider(
@@ -101,7 +101,7 @@ get_posterior_predictives_from_NIW_beliefs = function(
         mutate(!! sym(grouping.var) := i)
     }
 
-    pp = reduce(pp, rbind)
+    pp %<>% reduce(rbind)
     return(pp)
   }
 }

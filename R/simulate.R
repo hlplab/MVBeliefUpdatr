@@ -450,7 +450,7 @@ update_NIW_beliefs_incrementally <- function(
   # Number of dimensions/cues
   D = length(cues)
   if (any(prior$nu <= D + 1))
-    message(paste0("Prior for at least one category had nu smaller than allowed (is ", D, "; should be >", D+1, ").\n"))
+    message(paste0("Prior for at least one category had nu smaller than allowed (is ", min(prior$nu), "; should be >", D+1, ").\n"))
 
   # Prepare exposure data
   exposure %<>%
