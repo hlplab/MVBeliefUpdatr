@@ -130,7 +130,7 @@ get_categorization_function_from_NIW_belief = function(x, ...) {
 #' @param belief An \code{\link[=is.NIW_belief]{NIW_belief}} object.
 #' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
 #' @param simplify Should the output be simplified, and just the label of the selected category be returned? This
-#' option is only availale for the criterion and sampling decision rules. (default: `FALSE`)
+#' option is only available for the criterion and sampling decision rules. (default: `FALSE`)
 #'
 #' @return Either a vector of posterior probabilities of the same length as the number of categories in the NIW
 #' belief object, or a character indicating the chosen category (if simplify = `TRUE`).

@@ -1,14 +1,12 @@
-#' Is this an NIW belief object?
+#' Is this a Normal-Inverse-Wishart (NIW) belief?
 #'
-#' Check whether \code{x} is an NIW belief/set of NIW beliefs. Optionally, one can also check whether a lapse rate
-#' and bias is part of the belief.
+#' Check whether \code{x} is a Normal-Inverse-Wishard (NIW) belief/set of NIW beliefs. An NIW belief describes a distribution of
+#' \link[=is.MVG]{multivariate Gaussian categories}.
 #'
 #' @param x Object to be checked.
 #' @param category Name of the category variable. (default: "category")
 #' @param is.long Is this check assessing whether the belief is in long format (`TRUE`) or wide format (`FALSE`)?
 #' (default: `TRUE`)
-#' @param with.lapse Does this belief have a lapse rate? (default: `FALSE`)
-#' @param with.bias Does this belief have a bias? (default: `FALSE`)
 #'
 #' @return A logical.
 #'
@@ -17,8 +15,8 @@
 #' @examples
 #' TBD
 #' @export
-is.NIW_belief = function(x, category = "category", is.long = T, with.lapse = if (with.bias) T else F, with.bias = F, verbose = F) {
-  assert_that(all(is.flag(is.long), is.flag(with.lapse), is.flag(with.bias)))
+is.NIW_belief = function(x, category = "category", is.long = T, verbose = F) {
+  assert_that(is.flag(is.long))
 
   if (
     any(
@@ -31,18 +29,15 @@ is.NIW_belief = function(x, category = "category", is.long = T, with.lapse = if 
   }
 
   if (category %nin% names(x)) {
-    if (verbose) message("Column category not found. Did you use another name for this column? You can use the category
+    if (verbose) message("x is missing a category column. Did you use another name for this column? You can use the category
             argument to specify the name of that column.")
     return(FALSE)
   }
 
-  if (
-    any(
-      any(c("kappa", "nu", "m", "S") %nin% names(x)),
-      with.lapse & "lapse_rate" %nin% names(x),
-      with.bias & "bias" %nin% names(x)
-    )
-  ) return(FALSE)
+  if (any(c("kappa", "nu", "m", "S") %nin% names(x))) {
+    if (verbose) message("x is missing at least one of kappa, nu, m, or S.")
+    return(FALSE)
+  }
 
   # Check that category is a factor only after everything else is checked.
   if (any(!is.factor(get(category, x)))) return(FALSE)
@@ -52,21 +47,11 @@ is.NIW_belief = function(x, category = "category", is.long = T, with.lapse = if 
   names_S = dimnames(x$S[[1]])
   if (!all(
     names_S[[1]] == names_S[[2]],
-    names_S[[1]] == names_m)) return(FALSE)
+    names_S[[1]] == names_m)) {
+    if (verbose) message("Names of cue dimensions do not match between m and S.")
+    return(FALSE)
+  }
 
   return(TRUE)
 }
-
-#' @describeIn is.NIW_belief Also checks whether the belief has a lapse term.
-#' @export
-is.NIW_belief_w_lapse = function(x, category = "category", is.long = T, with.bias = F) {
-  is.NIW_belief(x, category = category, is.long = is.long, with.lapse = T, with.bias = with.bias)
-}
-
-#' @describeIn is.NIW_belief Also checks whether the belief has a bias term.
-#' @export
-is.NIW_belief_w_bias = function(x, category = "category", is.long = T) {
-  is.NIW_belief(x, category = category, is.long = is.long, with.lapse = T, with.bias = T)
-}
-
 
