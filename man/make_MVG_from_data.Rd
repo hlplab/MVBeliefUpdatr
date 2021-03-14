@@ -3,42 +3,37 @@
 \name{make_MVG_from_data}
 \alias{make_MVG_from_data}
 \alias{make_MVG_ideal_observer_from_data}
-\title{Make multivariate Gaussian(s) from data.}
+\title{Make multivariate Gaussian ideal observer(s) from data.}
 \usage{
 make_MVG_from_data(
   data,
-  groups = NULL,
+  group = NULL,
   category = "category",
   cues,
-  keep.category_parameters = F,
   verbose = F
 )
 
 make_MVG_ideal_observer_from_data(
   data,
-  groups = NULL,
+  group = NULL,
   category = "category",
   cues,
   prior = NA_real_,
   lapse_rate = NA_real_,
   bias = NA_real_,
   Sigma_noise = NULL,
-  keep.category_parameters = F,
   verbose = F
 )
 }
 \arguments{
-\item{data}{The tibble or data.frame from which to construct the prior.}
+\item{data}{The tibble or data.frame from which to construct the MVG or MVG ideal observer object.}
 
-\item{groups}{Optionally, a group variable can be specified. If group is not NULL, one set of multivariate
-Gaussian categories will be derived for each level of group. (default: NULL)}
+\item{group}{Optionally, one or more grouping variables can be specified. If group is not NULL, one MVG or
+ideal observers will be derived for each level of \code{group}. (default: NULL)}
 
 \item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
 
 \item{cues}{Name(s) of variables in \code{data} that contain the cue information.}
-
-\item{keep.category_parameters}{Should categories' mu and Sigma be included in the output (in addition to m
-and S of the prior)? (default: FALSE)}
 
 \item{verbose}{If true provides more information. (default: FALSE)}
 
@@ -49,10 +44,11 @@ prior over all categories).}
 
 \item{bias}{Optionally specify a response bias. (default: \code{NA})}
 
-\item{Sigma_noise}{Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be}
+\item{Sigma_noise}{Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be
+ignored if NULL. (default: NULL)}
 }
 \value{
-A tibble that is an MVG object.
+A tibble that is an MVG or MVG ideal observer object.
 }
 \description{
 Constructs an \code{\link[=is.MVG]{MVG}} or \code{\link[=is.MVG_ideal_observer]{MVG_ideal_observer}} object with category

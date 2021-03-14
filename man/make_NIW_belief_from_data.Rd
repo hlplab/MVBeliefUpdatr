@@ -3,28 +3,41 @@
 \name{make_NIW_belief_from_data}
 \alias{make_NIW_belief_from_data}
 \alias{make_NIW_prior_from_data}
+\alias{make_NIW_ideal_adaptor_from_data}
 \title{Make NIW belief from data.}
 \usage{
 make_NIW_belief_from_data(
   data,
-  groups = NULL,
+  group = NULL,
   category = "category",
   cues,
   kappa = nu,
   nu = length(cues) + 2,
-  lapse_rate = NA_real_,
-  Sigma_noise = NULL,
-  keep.category_parameters = F
+  keep.category_parameters = F,
+  verbose = F
 )
 
 make_NIW_prior_from_data(
   data,
-  groups = NULL,
+  group = NULL,
   category = "category",
   cues,
   kappa = nu,
   nu = length(cues) + 2,
+  keep.category_parameters = F,
+  verbose = F
+)
+
+make_NIW_ideal_adaptor_from_data(
+  data,
+  group = NULL,
+  category = "category",
+  cues,
+  kappa = nu,
+  nu = length(cues) + 2,
+  prior = NA_real_,
   lapse_rate = NA_real_,
+  bias = NA_real_,
   Sigma_noise = NULL,
   keep.category_parameters = F
 )
@@ -32,13 +45,8 @@ make_NIW_prior_from_data(
 \arguments{
 \item{data}{The tibble or data.frame from which to construct the prior.}
 
-\item{groups}{Optionally, a group variable can be specified. If group is not NULL, one prior will be derived for
-each level of group. If groups is a vector, then the data will be aggregated in the order of the specified
-grouping variables: the first group variable will be used to obtain a mean and covariance matrix; the next group
-variable will be used to obtain the average of those means and covariance matrices; and so on. For this process
-to have a reasonable outcome, it is important that the group variables are hierarchically organized: the second
-group variable should be a superset of the first group variable; the third group variable should be a superset
-of the second group variable; etc. (default: NULL)}
+\item{group}{Optionally, one or more grouping variables can be specified. If group is not NULL, one NIW_belief or
+ideal adaptor will be derived for each level of \code{group}. (default: NULL)}
 
 \item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
 
@@ -49,21 +57,28 @@ of the second group variable; etc. (default: NULL)}
 \item{nu}{The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
 cues + 2)}
 
-\item{lapse_rate}{Optionally specify a lapse rate. (default: \code{NA})}
-
-\item{Sigma_noise}{Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be
-ignored if `NULL`. (default: NULL)}
-
 \item{keep.category_parameters}{Should categories' mu and Sigma be included in the output (in addition to m
 and S of the prior)? (default: FALSE)}
+
+\item{verbose}{If true provides more information. (default: FALSE)}
+
+\item{prior}{Optionally specify a prior probability for each category (in each group). (default: a uniform
+prior over all categories).}
+
+\item{lapse_rate}{Optionally specify a lapse rate. (default: \code{NA})}
+
+\item{bias}{Optionally specify a response bias. (default: \code{NA})}
+
+\item{Sigma_noise}{Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be
+ignored if NULL. (default: NULL)}
 }
 \value{
-A tibble that is an NIW_belief object.
+A tibble that is an NIW_belief or NIW_ideal_adaptor object.
 }
 \description{
-Constructs an \code{\link[=NIW_belief]{NIW_belief}} object, representing Normal-Inverse Wishart (NIW) parameters
-for all categories found in the data. This object can be used as a prior for functions like
-\code{\link{update_NIW_beliefs_incrementally}}.
+Constructs an \code{\link[=NIW_belief]{NIW_belief}} or \code{\link[=NIW_ideal_adaptor]{NIW_ideal_adaptor}} object,
+representing Normal-Inverse Wishart (NIW) parameters for all categories found in the data. This object can be used
+as a prior for functions like \code{\link{update_NIW_beliefs_incrementally}}.
 }
 \details{
 Currently, \code{make_NIW_prior_from_data()} does not infer kappa or nu, nor does it fit hierarchical data. Rather
