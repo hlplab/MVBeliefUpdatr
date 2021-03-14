@@ -112,12 +112,6 @@ get_limits = function(data, measure, hdi.prob = .99, min = NULL, max = NULL) {
 ellipse.pmap = function(x, centre, level, ...)
   ellipse(x = x, centre = centre, level = level)
 
-
-add_test_data_to_1D_plot = function(data, cue.labels) {
-  data[[cue.labels[2]]] = 0
-  add_test_data_to_2D_plot(data, cue.labels)
-}
-
 add_exposure_data_to_1D_plot = function(
   data,
   cue.labels,
@@ -129,15 +123,9 @@ add_exposure_data_to_1D_plot = function(
   add_exposure_data_to_2D_plot(data, cue.labels, category.ids, category.labels, category.colors)
 }
 
-add_test_data_to_2D_plot = function(data, cue.labels) {
-  list(
-    geom_point(
-      data = data,
-      mapping = aes(
-        x = .data[[cue.labels[1]]],
-        y = .data[[cue.labels[2]]]),
-      inherit.aes = F,
-      color = "black", size = 1))
+add_test_data_to_1D_plot = function(data, cue.labels) {
+  data[[cue.labels[2]]] = 0
+  add_test_data_to_2D_plot(data, cue.labels)
 }
 
 add_exposure_data_to_2D_plot = function(
@@ -165,6 +153,16 @@ add_exposure_data_to_2D_plot = function(
                        values = category.colors))
 }
 
+add_test_data_to_2D_plot = function(data, cue.labels) {
+  list(
+    geom_point(
+      data = data,
+      mapping = aes(
+        x = .data[[cue.labels[1]]],
+        y = .data[[cue.labels[2]]]),
+      inherit.aes = F,
+      color = "black", size = 1))
+}
 
 facet_or_animate = function(p, facet_rows_by, facet_cols_by, animate_by, animation_follow) {
   facet_rows_by = enquo(facet_rows_by)
