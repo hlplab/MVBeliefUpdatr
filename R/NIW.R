@@ -59,7 +59,7 @@ get_posterior_predictive = function(x, m, S, kappa, nu, log = T) {
 
 #' Get categorization function
 #'
-#' Returns a categorization function for the first category, based on a set of parameters for the Normal-inverse-wishart (NIW)
+#' Returns a categorization function for the first category, based on a set of parameters for the Normal-inverse-Wishart (NIW)
 #' distribtuion. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
 #' element of ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
 #'
@@ -69,6 +69,7 @@ get_posterior_predictive = function(x, m, S, kappa, nu, log = T) {
 #' @param kappas List of IBBU-inferred kappas describing the strength of the beliefs into the distribution over catgory means.
 #' @param nus List of IBBU-inferred nus describing the strength of the beliefs into the distribution over catgory covariance matrices.
 #' @param lapse_rate An IBBU-inferred lapse rate for the categorization responses.
+#' @param bias An IBBU-inferred bias for the categorization responses.
 #' @param priors Vector of categories' prior probabilities. (default: uniform prior over categories)
 #' @param n.cat Number of categories. Is inferred from the input, but can be set manually.
 #' @param logit Should the function that is returned return log-odds (TRUE) or probabilities (FALSE)? (default: TRUE)

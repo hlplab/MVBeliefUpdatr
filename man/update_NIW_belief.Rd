@@ -75,19 +75,19 @@ were originally presented in \insertCite{yan:jaeger2018;textual}{MVBeliefUpdatr}
   random process.
   \item "nolabel-criterion" implements a winner-takes-all update based on the prior beliefs. The
   posterior probability of all categories under the prior is calculated, and only the category with the
-  highest posterior probabilty is updated (see decision_rule = "criterion" in \code{\link{get_categorization_from_NIW_belief}}).
+  highest posterior probability is updated (see decision_rule = "criterion" in \code{\link{get_categorization_from_NIW_ideal_adaptor}}).
   The update for this category proceed the same ways as under the "label-certain" method. method "nolabel-criterion" is
   thus \emph{order sensitive}, but deterministic (i.e., it yields the same result on each repeated run), provided
   there is no noise (specifically, no noise = "sample").
   \item "nolabel-sampling" implements another winner-takes-all update based on the prior beliefs. The
   posterior probability of all categories under the prior is calculated. Then a single category is \emph{sampled}
-  based on this posterior (see decision_rule = "sampling" in \code{\link{get_categorization_from_NIW_belief}}), and only this
+  based on this posterior (see decision_rule = "sampling" in \code{\link{get_categorization_from_NIW_ideal_adaptor}}), and only this
   sampled category is  updated with the observation.
   Like "nolabel-criterion", this updating method is \emph{order sensitive}. Unlike "nolabel-criterion", this method had a
   random element and thus does \emph{not replicate the same result on each run}.
   \item "nolabel-proportional" captures the uncertainty about the category label (and is this sense fully Bayesian). The
   posterior probability of all categories under the prior is calculated (see decision_rule = "proportional" in
-  \code{\link{get_categorization_from_NIW_belief}}). The input is then distributed across all categories
+  \code{\link{get_categorization_from_NIW_ideal_adaptor}}). The input is then distributed across all categories
   based on their posterior probability under the prior beliefs. That is, \emph{all categories are updated}, but to different
   degrees. Like "nolabel-criterion" and "nolabel-sampling", this updating method is \emph{order sensitive}. Like "nolabel-criterion",
   it is \emph{deterministic}.

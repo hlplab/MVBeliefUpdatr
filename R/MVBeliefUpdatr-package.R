@@ -35,13 +35,13 @@
 #' The package defines a number of new classes that are essentially tibbles with certain information.
 #' \itemize{
 #'   \item{\code{MVG}:}{one or more multivariate Gaussian categories, by default in long format with one category per row.
-#'   Each row contains the mean $\mu$ and covariance matriax $\Sigma$ of the multivariate Gaussian.}
+#'   Each row contains the mean mu and covariance matrix Sigma of the multivariate Gaussian.}
 #'   \item{\code{MVG_ideal_observer}:}{an ideal observer with multivariate Gaussian categories, by default in long format
 #'   with one category per row. In addition to the Gaussian categories the ideal observer contains the prior probability of
 #'   each category and, optionally, a lapse rate and bias.}
 #'   \item{\code{NIW_belief}:}{one or more Normal-Inverse-Wishart beliefs, by default in long format with one belief per row.
-#'   A Normal-Inverse-Wishart belief specifies *uncertainty* about the about the location (i.e., mean $\mu$) and shape (i.e.,
-#'   covariance matrix $\Sigma$) of a multivariate Gaussian. It does so in a specific way that makes assumptions about the
+#'   A Normal-Inverse-Wishart belief specifies *uncertainty* about the about the location (i.e., mean mu) and shape (i.e.,
+#'   covariance matrix Sigma) of a multivariate Gaussian. It does so in a specific way that makes assumptions about the
 #'   way that the covariance of cues within a category relates to the covariance of the category means across contexts (e.g.,
 #'   talkers). See the documentation for details.}
 #'   \item{\code{NIW_ideal_adaptor}:}{an ideal adaptor with Normal-Inverse-Wishart beliefs, by default in long format with
