@@ -9,3 +9,6 @@ get_Sigma_from_S(S, nu)
 \description{
 Get expected category covariance from Scatter matrix S and pseudocount nu
 }
+\seealso{
+\code{\link{get_S_from_Sigma}}
+}

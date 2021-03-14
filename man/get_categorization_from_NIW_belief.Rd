@@ -14,7 +14,7 @@ get_categorization_from_NIW_belief(x, belief, decision_rule, simplify = F)
 \item{decision_rule}{Must be one of "criterion", "proportional", or "sampling".}
 
 \item{simplify}{Should the output be simplified, and just the label of the selected category be returned? This
-option is only availale for the criterion and sampling decision rules. (default: `FALSE`)}
+option is only available for the criterion and sampling decision rules. (default: `FALSE`)}
 }
 \value{
 Either a vector of posterior probabilities of the same length as the number of categories in the NIW

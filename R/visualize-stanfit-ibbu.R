@@ -338,7 +338,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
   xlim, ylim, resolution = 25
 ) {
   if (is.null(fit.input)) fit.input = x@input_data
-  assert_that(is.NIW_ibbu_stanfit(x) | is.NIW_belief_MCMC(x))
+  assert_that(is.NIW_ibbu_stanfit(x) | is.NIW_ideal_adaptor_MCMC(x))
   assert_that(!all(is.null(fit.input), plot.test))
 
   if (is.NIW_ibbu_stanfit(x))

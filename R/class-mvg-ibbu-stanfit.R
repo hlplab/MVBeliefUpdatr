@@ -63,7 +63,7 @@ is.NIW_ibbu_stanfit = function(x) {
 }
 
 
-#' Is this a tibble of MCMC draws of NIW beliefs?
+#' Is this a tibble of MCMC draws of an NIW ideal adaptor?
 #'
 #' Check whether \code{x} is a tibble of post-warmup draws of parameters obtained from incremental
 #' conjugate Bayesian belief-updating (IBBU) over a Normal-Inverse-Wishart (NIW) prior.
@@ -75,10 +75,10 @@ is.NIW_ibbu_stanfit = function(x) {
 #' @examples
 #' TBD
 #' @export
-is.NIW_belief_MCMC = function(x, is.nested = T, is.long = T, with.lapse = if (with.bias) T else F, with.bias = F) {
+is.NIW_ideal_adaptor_MCMC = function(x, is.nested = T, is.long = T, with.lapse = if (with.bias) T else F, with.bias = F) {
   if(
     all(
-       is.NIW_belief(x, is.long = is.long, category = "category", with.lapse = with.lapse, with.bias = with.bias),
+       is.NIW_ideal_adaptor(x, is.long = is.long, category = "category", with.lapse = with.lapse, with.bias = with.bias),
        all(c(".chain", ".iteration", ".draw",
              "group", "lapse_rate") %in% names(x)),
        xor(is.nested, all(c("cue", "cue2") %in% names(x)))
@@ -86,16 +86,16 @@ is.NIW_belief_MCMC = function(x, is.nested = T, is.long = T, with.lapse = if (wi
   ) return(T) else return(F)
 }
 
-#' @describeIn is.NIW_belief_MCMC Also checks whether x has a lapse term.
+#' @describeIn is.NIW_ideal_adaptor_MCMC Also checks whether x has a lapse term.
 #' @export
-is.NIW_belief_w_lapse_MCMC = function(x, is.nested = T, is.long = T, with.bias = F) {
-  is.NIW_belief_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.bias = with.bias)
+is.NIW_ideal_adaptor_w_lapse_MCMC = function(x, is.nested = T, is.long = T, with.bias = F) {
+  is.NIW_ideal_adaptor_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.bias = with.bias)
 }
 
-#' @describeIn is.NIW_belief_MCMC Also checks whether x has a bias term.
+#' @describeIn is.NIW_ideal_adaptor_MCMC Also checks whether x has a bias term.
 #' @export
-is.NIW_belief_w_bias_MCMC = function(x, is.nested = T, is.long = T) {
-  is.NIW_belief_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.bias = T)
+is.NIW_ideal_adaptor_w_bias_MCMC = function(x, is.nested = T, is.long = T) {
+  is.NIW_ideal_adaptor_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.bias = T)
 }
 
 

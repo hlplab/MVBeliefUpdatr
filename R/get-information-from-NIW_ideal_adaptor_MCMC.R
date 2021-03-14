@@ -15,7 +15,7 @@ NULL
 #' @export
 get_cue_labels = function(x, indices = NULL) {
   message("This function can probably be integrated with get_original_levels(), which should be renamed.")
-  assert_that(is.NIW_belief_MCMC(x))
+  assert_that(is.NIW_ideal_adaptor_MCMC(x))
 
   names = names(x$m[[1]])
   if (is.null(names)) rownames(x$S[[1]])

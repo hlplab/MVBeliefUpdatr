@@ -533,7 +533,7 @@ add_ibbu_stanfit_draws = function(
 #' (representing uncertainty in the true value of \code{S_n}), we get
 #' \code{E[E[Sigma]] = mean(S_n / (nu_n - D - 1))}.
 #'
-#' @param x An mv_ibbu_stanfit or NIW_belief_MCMC object.
+#' @param x An \code{\link[=is.NIW_ibbu_stanfit]{mv_ibbu_stanfit}} or \code{\link[=NIW_ideal_adaptor_MCMC]{NIW_ideal_adaptor_MCMC}} object.
 #' @param category Character vector with categories (or category) for which category statistics are to be
 #' returned.  If `NULL` then all categories are included. (default: `NULL`)
 #' @param group Character vector with groups (or group) for which category statistics are to be
@@ -555,7 +555,7 @@ add_ibbu_stanfit_draws = function(
 get_expected_category_statistic = function(x, category = NULL, group = NULL,
                                            statistic = c("mu", "Sigma")) {
   assert_that(all(statistic %in% c("mu", "Sigma")))
-  assert_that(is.NIW_ibbu_stanfit(x) | is.NIW_belief_MCMC(x, is.nested = T, is.long = T))
+  assert_that(is.NIW_ibbu_stanfit(x) | is.NIW_ideal_adaptor_MCMC(x, is.nested = T, is.long = T))
   if (is.NIW_ibbu_stanfit(x))
     x = add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T)
 
