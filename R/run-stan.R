@@ -10,7 +10,7 @@
 #' via saveRDS in a file named after the string supplied in file. The .rds extension is added automatically.
 #' If the file already exists, the model from that file will be loaded and returned instead of refitting the model.
 #' As existing files won't be overwritten, you have to manually remove the file in order to refit and save the
-#' model under an existing file name. The file name is stored in the NIW_ibbu_stanfit object for later usage.
+#' model under an existing file name. The file name is stored in the NIW_ideal_adaptor_stanfit object for later usage.
 #' (default `NULL`)
 #' @param use_multivariate_updating Should multivariate updating be used? By default this option will be
 #' selecting if the relevant cues (after transformations, including PCA, if selected) have more than 1
@@ -18,9 +18,9 @@
 #' @param model Name of stanmodel that should be used. Overrides any default selection.
 #' @param ... Additional parameters are passed to \code{\link[rstan]{sampling}}
 #'
-#' @return \code{NIW_ibbu_stanfit} object with the fitted stan model.
+#' @return \code{NIW_ideal_adaptor_stanfit} object with the fitted stan model.
 #'
-#' @seealso \code{\link{is.NIW_ibbu_stanfit}} for information about NIW_ibbu_stanfit objects,
+#' @seealso \code{\link{is.NIW_ideal_adaptor_stanfit}} for information about NIW_ideal_adaptor_stanfit objects,
 #' \code{\link{add_ibbu_stanfit_draws}} to draw samples from the stanfit.
 #' @export
 infer_prior_beliefs <- function(
@@ -33,7 +33,7 @@ infer_prior_beliefs <- function(
   use_multivariate_updating = NULL,
   ...) {
   if (!is.null(file)) {
-    fit <- read_NIW_ibbu_stanfit(file)
+    fit <- read_NIW_ideal_adaptor_stanfit(file)
     if (!is.null(fit)) {
       return(fit)
     }
@@ -93,7 +93,7 @@ infer_prior_beliefs <- function(
     }
 
   if (is.null(fit)) stop("Sampling failed.")
-  fit %<>% as.NIW_ibbu_stanfit(data_list, transform)
+  fit %<>% as.NIW_ideal_adaptor_stanfit(data_list, transform)
   fit %<>%
     recover_types(
       crossing(
@@ -106,7 +106,7 @@ infer_prior_beliefs <- function(
   }
 
   if (!is.null(fit) & !is.null(file)) {
-    write_NIW_ibbu_stanfit(fit, file)
+    write_NIW_ideal_adaptor_stanfit(fit, file)
   }
 
   return(fit)

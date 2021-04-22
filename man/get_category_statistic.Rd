@@ -7,7 +7,7 @@
 get_category_statistic(x, grouping.vars = NULL, statistic = c("mu", "Sigma"))
 }
 \arguments{
-\item{x}{\code{\link{NIW_ibbu_stanfit}} or NIW belief MCMC object.}
+\item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} or NIW belief MCMC object.}
 
 \item{statistic}{Which category statistic should be returned? `mu` for category mean or `Sigma` for category
 covariance matrix, or `c("mu", "Sigma")` for both. (default: both)}

@@ -1,27 +1,3 @@
-#' Get cue labels from NIW belief object
-#'
-#' Get the names for all cues from an NIW belief object.
-#'
-#' @param x An NIW belief object.
-#'
-#' @export
-get_cue_labels_from_NIW_belief = function(x) {
-  return(names(x$m[[1]]))
-}
-
-
-#' Get category labels from NIW belief object
-#'
-#' Get the unique labels for all categories from an NIW belief object.
-#'
-#' @param x An NIW belief object.
-#'
-#' @export
-get_category_labels_from_NIW_belief = function(x) {
-  return(levels(x$category))
-}
-
-
 #' @rdname get_posterior_predictive
 #' @export
 get_posterior_predictive_from_NIW_belief = function(

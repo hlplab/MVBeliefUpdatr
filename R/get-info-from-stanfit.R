@@ -40,12 +40,12 @@ get_random_draw_indices = function(fit, n.draws)
 
 
 
-#' Get the input data from an NIW IBBU stanfit.
+#' Get the input data from an NIW ideal adaptor stanfit.
 #'
 #' Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
 #' object.
 #'
-#' @param fit \code{\link{NIW_ibbu_stanfit}} object.
+#' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #'
 #' @return A list with element names and structures determined by the type of stanfit model.
 #'
@@ -56,9 +56,9 @@ get_random_draw_indices = function(fit, n.draws)
 #' @rdname get_ibbu_input
 #' @export
 get_ibbu_stanfit_input = function(fit) {
-  assert_that(is.NIW_ibbu_input(x) | is.NIW_ibbu_stanfit(x))
+  assert_that(is.NIW_ideal_adaptor_input(x) | is.NIW_ideal_adaptor_stanfit(x))
 
-  if (is.NIW_ibbu_input(x)) return(x) else {
+  if (is.NIW_ideal_adaptor_input(x)) return(x) else {
     stop("Extraction of input data from MV IBBU stanfit not yet implemented!")
   }
 
@@ -66,12 +66,12 @@ get_ibbu_stanfit_input = function(fit) {
 }
 
 
-#' Get the test data from an NIW IBBU stanfit.
+#' Get the test data from an NIW ideal adaptor stanfit.
 #'
 #' Returns the test data used during the creation of the \code{\link[rstan]{stanfit}}.
 #' object.
 #'
-#' @param x \code{\link{NIW_ibbu_stanfit}} object.
+#' @param x \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #'
 #' @return A \code{tibble} in which each row is a test token. Columns include the cues
 #' and the response counts (one column per category) for all test tokens and all groups.
@@ -81,7 +81,7 @@ get_ibbu_stanfit_input = function(fit) {
 #' @examples
 #' TBD
 #' @export
-get_test_data_from_NIW_ibbu_stanfit = function(fit) {
+get_test_data_from_NIW_ideal_adaptor_stanfit = function(fit) {
   data = fit@input_data
   data[["x_test"]] %>%
     cbind(data[["z_test_counts"]]) %>%
@@ -94,7 +94,7 @@ get_test_data_from_NIW_ibbu_stanfit = function(fit) {
 
 
 
-#' Get or restore the original group or category levels from an NIW IBBU stanfit.
+#' Get or restore the original group or category levels from an NIW ideal adaptor stanfit.
 #'
 #' Checks if information is available about the original values and order of the factor levels
 #' for the category variable (for which beliefs about means and covariances are inferred) or
@@ -102,7 +102,7 @@ get_test_data_from_NIW_ibbu_stanfit = function(fit) {
 #' that information is returned. `get_category_levels()` and `get_group_levels()` are
 #' convenience functions, calling `get_original_levels()`.
 #'
-#' @param fit \code{\link{NIW_ibbu_stanfit}} object.
+#' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param variable Either "category" or "group".
 #' @param indeces A vector of category or group indices that should be turned into the original
 #' category levels, or `NULL` if only the unique levels in their original order (as vector of characters)
@@ -147,7 +147,7 @@ get_group_levels = function(fit, indices = NULL, include_prior = F) {
 #' `get_group_constructor()` are convenience functions, calling `get_constructor()`. See \code{
 #' \link[tidybayes]{recover_types}}. If variable is
 #'
-#' @param fit \code{\link{NIW_ibbu_stanfit}} object.
+#' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param variable Either "category" or "group". If set to `NULL` then a list of all constructors is
 #' returned. That list is `NULL` if not tidybayes constructors are found in fit. (default: c("category", "group"))
 #'
@@ -161,7 +161,7 @@ get_group_levels = function(fit, indices = NULL, include_prior = F) {
 #' @rdname get_constructor
 #' @export
 get_constructor = function(fit, variable = NULL) {
-  assert_NIW_ibbu_stanfit(fit)
+  assert_NIW_ideal_adaptor_stanfit(fit)
   if (is.null(variable)) return(attr(fit, "tidybayes_constructors"))
 
   assert_that(variable %in% c("category", "group"), msg = "Variable name must be one of category or group.")
@@ -198,7 +198,7 @@ get_group_constructor = function(fit) {
 #' Returns the category means mu and/or category covariance matrix Sigma for the exposure data from an NIW
 #' IBBU stanfit or NIW belief MCMC object.
 #'
-#' @param x \code{\link{NIW_ibbu_stanfit}} or NIW belief MCMC object.
+#' @param x \code{\link{NIW_ideal_adaptor_stanfit}} or NIW belief MCMC object.
 #' @param category Character vector with categories (or category) for which category statistics are to be
 #' returned.  If `NULL` then all categories are included. (default: `NULL`)
 #' @param group Character vector with groups (or group) for which category statistics are to be
@@ -233,7 +233,7 @@ get_category_statistic = function(x, grouping.vars = NULL,
 #' Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
 #' Bayesian belief-updating (IBBU) model from an NIW IBBU stanfit or NIW belief MCMC object.
 #'
-#' @param x \code{\link{NIW_ibbu_stanfit}} or NIW belief MCMC object.
+#' @param x \code{\link{NIW_ideal_adaptor_stanfit}} or NIW belief MCMC object.
 #' @param category Character vector with categories (or category) for which category statistics are to be
 #' returned.  If `NULL` then all categories are included. (default: `NULL`)
 #' @param group Character vector with groups (or group) for which category statistics are to be
@@ -253,7 +253,7 @@ get_category_statistic = function(x, grouping.vars = NULL,
 #' @export
 get_ibbu_stanfit_exposure_category_statistic = function(x, category = NULL, group = NULL,
                                   statistic = c("mu", "Sigma")) {
-  assert_that(is.NIW_ibbu_input(x) | is.NIW_ibbu_stanfit(x))
+  assert_that(is.NIW_ideal_adaptor_input(x) | is.NIW_ideal_adaptor_stanfit(x))
   stop("get_ibbu_stanfit_exposure_statistics not yet implemented!")
 
   x = get_ibbu_stanfit_input(x)
@@ -303,7 +303,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #' By default, the category means and scatter matrices are nested, rather than each of their elements being
 #' stored separately (`nest=TRUE`).
 #'
-#' @param fit \code{\link{NIW_ibbu_stanfit}} object.
+#' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param which Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)
 #' @param draws Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)
@@ -361,7 +361,7 @@ add_ibbu_stanfit_draws = function(
 
     return(d.pars)
   } else {
-    assert_NIW_ibbu_stanfit(fit)
+    assert_NIW_ideal_adaptor_stanfit(fit)
 
     # Parameters' names depend on whether prior or posterior is to be extracted.
     postfix = if (which == "prior") "_0" else "_n"
@@ -533,7 +533,7 @@ add_ibbu_stanfit_draws = function(
 #' (representing uncertainty in the true value of \code{S_n}), we get
 #' \code{E[E[Sigma]] = mean(S_n / (nu_n - D - 1))}.
 #'
-#' @param x An \code{\link[=is.NIW_ibbu_stanfit]{mv_ibbu_stanfit}} or \code{\link[=NIW_ideal_adaptor_MCMC]{NIW_ideal_adaptor_MCMC}} object.
+#' @param x An \code{\link[=is.NIW_ideal_adaptor_stanfit]{mv_ibbu_stanfit}} or \code{\link[=NIW_ideal_adaptor_MCMC]{NIW_ideal_adaptor_MCMC}} object.
 #' @param category Character vector with categories (or category) for which category statistics are to be
 #' returned.  If `NULL` then all categories are included. (default: `NULL`)
 #' @param group Character vector with groups (or group) for which category statistics are to be
@@ -555,8 +555,8 @@ add_ibbu_stanfit_draws = function(
 get_expected_category_statistic = function(x, category = NULL, group = NULL,
                                            statistic = c("mu", "Sigma")) {
   assert_that(all(statistic %in% c("mu", "Sigma")))
-  assert_that(is.NIW_ibbu_stanfit(x) | is.NIW_ideal_adaptor_MCMC(x, is.nested = T, is.long = T))
-  if (is.NIW_ibbu_stanfit(x))
+  assert_that(is.NIW_ideal_adaptor_stanfit(x) | is.NIW_ideal_adaptor_MCMC(x, is.nested = T, is.long = T))
+  if (is.NIW_ideal_adaptor_stanfit(x))
     x = add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T)
 
   assert_that(any(is.null(category), is.character(category), is.numeric(category)))

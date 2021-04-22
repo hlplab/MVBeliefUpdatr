@@ -21,7 +21,7 @@ plot_ibbu_stanfit_test_categorization(
 )
 }
 \arguments{
-\item{fit}{\code{\link{NIW_ibbu_stanfit}} object.}
+\item{fit}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
 
 \item{data.test}{Optionally, a \code{tibble} or \code{data.frame} with test data.
 If `NULL` the input will be extracted from fit. (default: `NULL`).}

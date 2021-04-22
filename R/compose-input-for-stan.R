@@ -234,9 +234,9 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
 #' matrix of mu_0 and scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
 #' ignore. (default: 0)
 #'
-#' @return A list that is an \code{NIW_ibbu_input}.
+#' @return A list that is an \code{NIW_ideal_adaptor_input}.
 #'
-#' @seealso \code{\link{is.NIW_ibbu_input}}
+#' @seealso \code{\link{is.NIW_ideal_adaptor_input}}
 #' @keywords TBD
 #' @examples
 #' TBD
@@ -435,8 +435,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 
 
 attach_stanfit_input_data = function(stanfit, input) {
-  assert_NIW_ibbu_stanfit(stanfit)
-  assert_that(is.NIW_ibbu_input(input),
+  assert_NIW_ideal_adaptor_stanfit(stanfit)
+  assert_that(is.NIW_ideal_adaptor_input(input),
               msg = "input is not an acceptable input data.")
   stanfit@input_data = input
 
@@ -444,7 +444,7 @@ attach_stanfit_input_data = function(stanfit, input) {
 }
 
 attach_stanfit_transform = function(stanfit, transform_functions) {
-  assert_NIW_ibbu_stanfit(stanfit)
+  assert_NIW_ideal_adaptor_stanfit(stanfit)
   stanfit@transform_functions = transform_functions
 
   return(stanfit)

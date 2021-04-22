@@ -37,7 +37,7 @@ check_compatibility_between_NIW_belief_and_data = function(
                 msg = "Can't plot exposure data: when animate_by is specified, it must be present in the exposure data.")
   }
 
-  cue.labels = get_cue_labels_from_NIW_belief(x)
+  cue.labels = get_cue_labels_from_model(x)
   assert_that(!all(!is.null(data.exposure), cue.labels %nin% names(data.exposure)),
               msg = "Can't plot exposure data: cue names in exposure data must match those in the NIW belief object.")
   assert_that(!all(!is.null(data.exposure), "category" %nin% names(data.exposure)),
@@ -149,7 +149,7 @@ plot_expected_categories_density1D = function(
   x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                       !! facet_rows_by, !! facet_cols_by, !! animate_by)
   # Remember groups
-  cue.labels = get_cue_labels_from_NIW_belief(x)
+  cue.labels = get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
 
   if (is_missing(xlim)) {
@@ -244,7 +244,7 @@ plot_expected_categories_contour2D = function(
   x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                       !! facet_rows_by, !! facet_cols_by, !! animate_by)
   # Remember groups
-  cue.labels = get_cue_labels_from_NIW_belief(x)
+  cue.labels = get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
 
   # Setting aes defaults
@@ -329,7 +329,7 @@ plot_expected_categorization_function_2D = function(
   animate_by = enquo(animate_by)
   x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                       !! facet_rows_by, !! facet_cols_by, !! animate_by)
-  cue.labels = get_cue_labels_from_NIW_belief(x)
+  cue.labels = get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
   if (is_missing(xlim)) {
     if (!is.null(data.exposure) & !is.null(data.test))

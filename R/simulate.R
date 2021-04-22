@@ -39,78 +39,6 @@ example_NIW_prior = function(example = 1) {
 
 
 
-#' Make multivariate Gaussian exposure data.
-#'
-#' Returns a tibble of observations drawn from multivariate Gaussians, with one observation per row. Each row
-#' provides the category label and cue values. If \code{keep.parameters = T} then the parameters (\code{N, mean, sigma})
-#' are also returned.
-#'
-#' The input is expected to be lists/vectors of parameters with the n-th element of each list/vector specifying the
-#' category label, number of observations, \code{mu}, and \code{Sigma} of the n-th Gaussian.
-#'
-#' @param Ns Integer vector, with each number specifying the number of observations to be drawn from the corresponding
-#' Gaussian.
-#' @param mus List of mean vectors, each specifying the mean of a multivariate Gaussian.
-#' @param sigmas List of covariance matrices, each specifying the covariance of a multivariate Gaussian.
-#' @param category.labels Character vector of category names, each specifying the category label of a multivariate Gaussian. If \code{NULL}
-#' (default) then Gaussians will be numbered from 1:N.
-#' @param cue.labels Character vector of cue names. If \code{NULL} (default) then the cues will be numbered cue1, cue2, ...
-#' @param belief Alternatively to providing mus, sigma, category, and cue labels, one can also specify an \code{\link{NIW_belief}}
-#' object, which contains all that information.
-#' @param randomize.order Should the order of the data be randomized? (default: FALSE) This won't affect the final outcome of
-#' NIW belief updating, but it will change the incremental updates (and thus, for example, visualizations of the update process).
-#' @param keep.input_parameters Should the parameters handed to this function be included in the output? (default: FALSE)
-#'
-#' @return A tibble.
-#'
-#' @seealso TBD
-#' @keywords TBD
-#' @examples
-#' TBD
-#' @rdname make_MV_exposure_data
-#' @export
-make_MV_exposure_data = function(
-  Ns, mus, Sigmas,
-  category.labels = NULL,
-  cue.labels = NULL,
-  belief = NULL,
-  randomize.order = F,
-  keep.input_parameters = F
-) {
-  if (!is.null(belief)) {
-    assert_NIW_belief(belief)
-
-    return(make_MV_exposure_data(
-      Ns = Ns,
-      mus = belief$m,
-      Sigmas = map2(belief$S, belief$nu, get_Sigma_from_S),
-      category.labels = get_category_labels_from_NIW_belief(belief),
-      cue.labels = get_cue_labels_from_NIW_belief(belief),
-      randomize.order = randomize.order,
-      keep.input_parameters = keep.input_parameters))
-  } else {
-    assert_that(!is.null(mus), !is.null(Sigmas))
-    assert_that(is.null(category.labels) | length(mus) == length(category.labels),
-                msg = "Number of category labels mismatch number of mus.")
-    assert_that(is.null(cue.labels) | length(mus[[1]]) == length(cue.labels),
-                msg = "Number of cue labels mismatches dimensionality of mus.")
-
-    if (is.null(category.labels)) category.labels = 1:length(mus)
-    if (is.null(cue.labels)) cue.labels = paste0("cue", 1:length(mus[[1]]))
-
-    x = tibble(category = category.labels, n = Ns, mu = mus, Sigma = Sigmas) %>%
-      mutate(data = pmap(.l = list(n, mu, Sigma), .f = rmvnorm)) %>%
-      mutate(data = map(data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
-      unnest(data)
-
-    if (randomize.order)
-      x = sample_frac(x, 1)
-
-    if (keep.input_parameters) return(x) else return(x %>% select(category, everything(), -c(n, mu, Sigma)))
-  }
-}
-
-
 #' Update parameters of NIW prior beliefs about multivariate Gaussian category.
 #'
 #' Returns updated/posterior m, S, kappa, or nu based on \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
@@ -331,7 +259,7 @@ update_NIW_beliefs_incrementally <- function(
   prior,
   exposure,
   category = "category",
-  cues = get_cue_labels_from_NIW_belief(prior),
+  cues = get_cue_labels_from_model(prior),
   exposure.order = NULL,
   add_noise = NULL,
   method = "label-certain",

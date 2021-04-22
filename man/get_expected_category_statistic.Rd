@@ -18,7 +18,7 @@ get_expected_mu(x, category, group)
 get_expected_sigma(x, category, group)
 }
 \arguments{
-\item{x}{An \code{\link[=is.NIW_ibbu_stanfit]{mv_ibbu_stanfit}} or \code{\link[=NIW_ideal_adaptor_MCMC]{NIW_ideal_adaptor_MCMC}} object.}
+\item{x}{An \code{\link[=is.NIW_ideal_adaptor_stanfit]{mv_ibbu_stanfit}} or \code{\link[=NIW_ideal_adaptor_MCMC]{NIW_ideal_adaptor_MCMC}} object.}
 
 \item{category}{Character vector with categories (or category) for which category statistics are to be
 returned.  If `NULL` then all categories are included. (default: `NULL`)}

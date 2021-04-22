@@ -72,7 +72,7 @@ matrix of mu_0 and scale for the LKJ prior for the correlations of the covarianc
 ignore. (default: 0)}
 }
 \value{
-A list that is an \code{NIW_ibbu_input}.
+A list that is an \code{NIW_ideal_adaptor_input}.
 }
 \description{
 Take exposure and test data as input, and prepare the data for input into an MVBeliefUpdatr Stan program.
@@ -88,6 +88,6 @@ observations that any level of \code{group} receives during exposure.
 TBD
 }
 \seealso{
-\code{\link{is.NIW_ibbu_input}}
+\code{\link{is.NIW_ideal_adaptor_input}}
 }
 \keyword{TBD}

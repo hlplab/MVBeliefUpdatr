@@ -378,9 +378,89 @@ aggregate_models_by_group_structure = function(
   while(length(group_structure) > 1) {
     group_structure = group_structure[2:length(group_structure)]
     x %<>%
-      group_by(., !!! group_structure, !! category) %>%
-      summarise_at(.,
-                   aggregate_what,
-                   ~ list(reduce(.x, `+`) / length(.x)))
+      group_by(!!! group_structure, !! category) %>%
+      summarise_at(aggregate_what, ~ list(reduce(.x, `+`) / length(.x)))
+  }
+}
+
+
+
+#' Make multivariate Gaussian exposure data.
+#'
+#' Returns a tibble of observations drawn from multivariate Gaussians, with one observation per row. Each row
+#' provides the category label and cue values. If \code{keep.parameters = T} then the parameters (\code{N, mean, sigma})
+#' are also returned.
+#'
+#' The input is expected to be lists/vectors of parameters with the n-th element of each list/vector specifying the
+#' category label, number of observations, \code{mu}, and \code{Sigma} of the n-th Gaussian.
+#'
+#' @param Ns Integer vector, with each number specifying the number of observations to be drawn from the corresponding
+#' Gaussian.
+#' @param mus List of mean vectors, each specifying the mean of a multivariate Gaussian.
+#' @param sigmas List of covariance matrices, each specifying the covariance of a multivariate Gaussian.
+#' @param category.labels Character vector of category names, each specifying the category label of a multivariate Gaussian. If \code{NULL}
+#' (default) then Gaussians will be numbered from 1:N.
+#' @param cue.labels Character vector of cue names. If \code{NULL} (default) then the cues will be numbered cue1, cue2, ...
+#' @param x Alternatively to providing mus, sigma, category, and cue labels, one can also specify an \code{\link{MVG}},
+#' \code{\link{MVG_ideal_observer}}, \code{\link{NIW_belief}}, or \code{\link{NIW_ideal_adaptor}}
+#' object, which contains all information (except for the Ns).
+#' @param randomize.order Should the order of the data be randomized? (default: FALSE) This won't affect the final outcome of
+#' NIW belief updating, but it will change the incremental updates (and thus, for example, visualizations of the update process).
+#' @param keep.input_parameters Should the parameters handed to this function be included in the output? (default: FALSE)
+#'
+#' @return A tibble.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+make_MVG_exposure_data = function(
+  Ns, mus, Sigmas,
+  category.labels = NULL,
+  cue.labels = NULL,
+  x = NULL,
+  randomize.order = F,
+  keep.input_parameters = F
+) {
+  if (!is.null(x)) {
+    if (is.MVG(x) | is.MVG_ideal_observer(x)) {
+      return(make_MVG_exposure_data(
+        Ns = Ns,
+        mus = x$mu,
+        Sigmas = x$Sigma,
+        category.labels = get_category_labels_from_MVG(x),
+        cue.labels = get_cue_labels_from_MVG(x),
+        randomize.order = randomize.order,
+        keep.input_parameters = keep.input_parameters))
+    } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x)) {
+      return(make_MVG_exposure_data(
+        Ns = Ns,
+        mus = x$m,
+        Sigmas = map2(x$S, x$nu, get_Sigma_from_S),
+        category.labels = get_category_labels_from_model(x),
+        cue.labels = get_cue_labels_from_model(x),
+        randomize.order = randomize.order,
+        keep.input_parameters = keep.input_parameters))
+    }
+  } else {
+    assert_that(!is.null(mus), !is.null(Sigmas))
+    assert_that(is.null(category.labels) | length(mus) == length(category.labels),
+                msg = "Number of category labels mismatch number of mus.")
+    assert_that(is.null(cue.labels) | length(mus[[1]]) == length(cue.labels),
+                msg = "Number of cue labels mismatches dimensionality of mus.")
+
+    if (is.null(category.labels)) category.labels = 1:length(mus)
+    if (is.null(cue.labels)) cue.labels = paste0("cue", 1:length(mus[[1]]))
+
+    x = tibble(category = category.labels, n = Ns, mu = mus, Sigma = Sigmas) %>%
+      mutate(data = pmap(.l = list(n, mu, Sigma), .f = rmvnorm)) %>%
+      mutate(data = map(data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
+      unnest(data)
+
+    if (randomize.order)
+      x = sample_frac(x, 1)
+
+    if (keep.input_parameters) return(x) else return(x %>% select(category, everything(), -c(n, mu, Sigma)))
   }
 }

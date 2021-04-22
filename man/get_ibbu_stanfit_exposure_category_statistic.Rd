@@ -18,7 +18,7 @@ get_ibbu_stanfit_exposure_mean(x, category, group)
 get_ibbu_stanfit_exposure_Sigma(x, category, group)
 }
 \arguments{
-\item{x}{\code{\link{NIW_ibbu_stanfit}} or NIW belief MCMC object.}
+\item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} or NIW belief MCMC object.}
 
 \item{category}{Character vector with categories (or category) for which category statistics are to be
 returned.  If `NULL` then all categories are included. (default: `NULL`)}

@@ -16,7 +16,7 @@ add_ibbu_stanfit_draws(
 )
 }
 \arguments{
-\item{fit}{\code{\link{NIW_ibbu_stanfit}} object.}
+\item{fit}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
 
 \item{which}{Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)}
 

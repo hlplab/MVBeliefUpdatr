@@ -35,7 +35,7 @@ plot_expected_ibbu_stanfit_categories_density2D(
 )
 }
 \arguments{
-\item{fit.input}{Optionally, the input to the NIW_ibbu_stanfit object.}
+\item{fit.input}{Optionally, the input to the NIW_ideal_adaptor_stanfit object.}
 
 \item{type}{Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
 faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}

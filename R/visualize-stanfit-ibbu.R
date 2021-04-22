@@ -170,7 +170,7 @@ plot_ibbu_stanfit_parameters = function(
 #' computational demands and speed.
 #'
 #' @param fit mv-ibbu-stanfit object.
-#' @param fit.input Optionally, the input to the NIW_ibbu_stanfit object.
+#' @param fit.input Optionally, the input to the NIW_ideal_adaptor_stanfit object.
 #' @param type Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
 #' faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}
 #' (based on the NIW parameters \code{S} and \code{nu}) at each MCMC draw, and then averages over
@@ -338,10 +338,10 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
   xlim, ylim, resolution = 25
 ) {
   if (is.null(fit.input)) fit.input = x@input_data
-  assert_that(is.NIW_ibbu_stanfit(x) | is.NIW_ideal_adaptor_MCMC(x))
+  assert_that(is.NIW_ideal_adaptor_stanfit(x) | is.NIW_ideal_adaptor_MCMC(x))
   assert_that(!all(is.null(fit.input), plot.test))
 
-  if (is.NIW_ibbu_stanfit(x))
+  if (is.NIW_ideal_adaptor_stanfit(x))
     d = add_ibbu_stanfit_draws(x, which = which, wide = F, nest = T)
   else
     d = x
@@ -453,7 +453,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' samples will be used. If `summarize=FALSE`, separate categorization plots for all n.draws
 #' individual samples will be plotted in separate panels.
 #'
-#' @param fit \code{\link{NIW_ibbu_stanfit}} object.
+#' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param data.test Optionally, a \code{tibble} or \code{data.frame} with test data.
 #' If `NULL` the input will be extracted from fit. (default: `NULL`).
 #' @param which Should categorization for the prior, posterior, or both be plotted? (default: `"both"`)
@@ -493,9 +493,9 @@ plot_ibbu_stanfit_test_categorization = function(
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
   sort.by = "prior"
 ) {
-  assert_NIW_ibbu_stanfit(fit)
+  assert_NIW_ideal_adaptor_stanfit(fit)
   if (is.null(data.test)) {
-    data.test = get_test_data_from_NIW_ibbu_stanfit(fit)
+    data.test = get_test_data_from_NIW_ideal_adaptor_stanfit(fit)
   }
   assert_that(is.flag(summarize))
   assert_that(is.null(n.draws) | is.count(n.draws))

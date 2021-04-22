@@ -3,8 +3,8 @@ assert_NIW_belief = function(x, category = "category") {
               msg = "x must be an NIW_belief object.")
 }
 
-assert_NIW_ibbu_stanfit = function(x) {
-  assert_that(is.NIW_ibbu_stanfit(x),
+assert_NIW_ideal_adaptor_stanfit = function(x) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(x),
               msg = paste0("x must be of class ", new_stanfit_class_name))
 }
 

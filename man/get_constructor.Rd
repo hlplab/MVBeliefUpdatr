@@ -13,7 +13,7 @@ get_category_constructor(fit)
 get_group_constructor(fit)
 }
 \arguments{
-\item{fit}{\code{\link{NIW_ibbu_stanfit}} object.}
+\item{fit}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
 
 \item{variable}{Either "category" or "group". If set to `NULL` then a list of all constructors is
 returned. That list is `NULL` if not tidybayes constructors are found in fit. (default: c("category", "group"))}

@@ -1,19 +1,19 @@
-new_stanfit_class_name = "NIW_ibbu_stanfit"
+new_stanfit_class_name = "NIW_ideal_adaptor_stanfit"
 
-#' An S4 class for stanfit objects that use one of the NIW_ibbu stan programs.
+#' An S4 class for stanfit objects that use one of the NIW_ideal_adaptor stan programs.
 #'
 #' @slot input_data list containing the data handed to rstan through \code{compose_data} function.
 #' @slot transform_functions list containing elements transform.function and untransform.function.
 #' @slot labels list
 #' @export
-NIW_ibbu_stanfit <- setClass(new_stanfit_class_name,
+NIW_ideal_adaptor_stanfit <- setClass(new_stanfit_class_name,
          slots = c(input_data = "list", transform_functions = "list", labels = "list"),
          contains = "stanfit",
          package = "MVBeliefUpdatr")
 
-#' Make an NIW_ibbu_stanfit
+#' Coerce stanfit into NIW_ideal_adaptor_stanfit
 #'
-#' Combines a \code{\link[rstan]{stanfit}} object and its input into an \code{\link{NIW_ibbu_stanfit}} object.
+#' Combines a \code{\link[rstan]{stanfit}} object and its input into an \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #'
 #' @param stanfit stanfit object
 #' @param input Input for a call to rstan prepared for one of the acceptable
@@ -21,13 +21,13 @@ NIW_ibbu_stanfit <- setClass(new_stanfit_class_name,
 #' @param transform Optionally, a list of transform (and corresponding untransform) functions that were
 #' applied to the cues prior while creating the input.
 #'
-#' @return NIW_ibbu_stanfit object
+#' @return NIW_ideal_adaptor_stanfit object
 #'
 #' @seealso \code{\link[rstan]{stanfit}}
 #' @examples
 #' TBD
 #' @export
-as.NIW_ibbu_stanfit = function(stanfit, input, transform = NULL) {
+as.NIW_ideal_adaptor_stanfit = function(stanfit, input, transform = NULL) {
   assert_that(class(stanfit) == "stanfit",
               msg = paste0("Only stanfit objects can be converted into ", class_name, " objects."))
   assert_that(stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels),
@@ -48,7 +48,7 @@ as.NIW_ibbu_stanfit = function(stanfit, input, transform = NULL) {
 
 #' Is this an NIW IBBU stanfit?
 #'
-#' Check whether \code{x} is of class \code{NIW_ibbu_stanfit}.
+#' Check whether \code{x} is of class \code{NIW_ideal_adaptor_stanfit}.
 #'
 #' @return A logical.
 #'
@@ -57,7 +57,7 @@ as.NIW_ibbu_stanfit = function(stanfit, input, transform = NULL) {
 #' @examples
 #' TBD
 #' @export
-is.NIW_ibbu_stanfit = function(x) {
+is.NIW_ideal_adaptor_stanfit = function(x) {
   if (all(class(x) %in% c("stanfit", new_stanfit_class_name)))
     return(TRUE) else return(FALSE)
 }
@@ -101,7 +101,7 @@ is.NIW_ideal_adaptor_w_bias_MCMC = function(x, is.nested = T, is.long = T) {
 
 #' Is this a list of NIW IBBU inputs?
 #'
-#' Check whether \code{x} is of class \code{NIW_ibbu_input}.
+#' Check whether \code{x} is of class \code{NIW_ideal_adaptor_input}.
 #'
 #' @return A logical.
 #'
@@ -110,8 +110,8 @@ is.NIW_ideal_adaptor_w_bias_MCMC = function(x, is.nested = T, is.long = T) {
 #' @examples
 #' TBD
 #' @export
-is.NIW_ibbu_input = function(x) {
-  message("Test of NIW_ibbu_input class not yet implemented. Always returning T.")
+is.NIW_ideal_adaptor_input = function(x) {
+  message("Test of NIW_ideal_adaptor_input class not yet implemented. Always returning T.")
 
   # Proposed names for slides in input object (at least internally / not necessarily handed to stan like this:
   #

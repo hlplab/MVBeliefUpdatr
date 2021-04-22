@@ -2,12 +2,12 @@
 % Please edit documentation in R/get-info-from-stanfit.R
 \name{get_ibbu_stanfit_input}
 \alias{get_ibbu_stanfit_input}
-\title{Get the input data from an NIW IBBU stanfit.}
+\title{Get the input data from an NIW ideal adaptor stanfit.}
 \usage{
 get_ibbu_stanfit_input(fit)
 }
 \arguments{
-\item{fit}{\code{\link{NIW_ibbu_stanfit}} object.}
+\item{fit}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
 }
 \value{
 A list with element names and structures determined by the type of stanfit model.

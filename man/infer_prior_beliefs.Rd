@@ -100,7 +100,7 @@ ignore. (default: 0)}
 via saveRDS in a file named after the string supplied in file. The .rds extension is added automatically.
 If the file already exists, the model from that file will be loaded and returned instead of refitting the model.
 As existing files won't be overwritten, you have to manually remove the file in order to refit and save the
-model under an existing file name. The file name is stored in the NIW_ibbu_stanfit object for later usage.
+model under an existing file name. The file name is stored in the NIW_ideal_adaptor_stanfit object for later usage.
 (default `NULL`)}
 
 \item{model}{Name of stanmodel that should be used. Overrides any default selection.}
@@ -112,7 +112,7 @@ dimension.}
 \item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}}
 }
 \value{
-\code{NIW_ibbu_stanfit} object with the fitted stan model.
+\code{NIW_ideal_adaptor_stanfit} object with the fitted stan model.
 }
 \description{
 This function takes exposure and test data, the names of the cues, category, and response columns (and
@@ -120,6 +120,6 @@ optionally group and/or block columns), and uses
 stan to draw samples from the prior beliefs that match the behavior.
 }
 \seealso{
-\code{\link{is.NIW_ibbu_stanfit}} for information about NIW_ibbu_stanfit objects,
+\code{\link{is.NIW_ideal_adaptor_stanfit}} for information about NIW_ideal_adaptor_stanfit objects,
 \code{\link{add_ibbu_stanfit_draws}} to draw samples from the stanfit.
 }

@@ -8,7 +8,7 @@ update_NIW_beliefs_incrementally(
   prior,
   exposure,
   category = "category",
-  cues = get_cue_labels_from_NIW_belief(prior),
+  cues = get_cue_labels_from_model(prior),
   exposure.order = NULL,
   add_noise = NULL,
   method = "label-certain",
