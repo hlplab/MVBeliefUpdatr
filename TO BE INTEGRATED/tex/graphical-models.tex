@@ -1,0 +1,145 @@
+\documentclass[11pt]{report}
+\usepackage{tikz}
+\usepackage{url}
+\usetikzlibrary{bayesnet}
+\begin{document}
+\begin{figure}
+  \centering
+  \tikz{ %
+    \node[obs] (cue) {$x_i$} ; %
+    \node[det, right=of cue] (category) {$c_i$} ; %
+    \node[latent, above=of cue] (mu) {$\mu_j$} ; %
+    \node[latent, right=of mu] (Sigma) {$\Sigma_j$} ; %
+    \node[const, above=of mu] (m) {$m_j$} ; %
+    \node[const, left=of m] (kappa) {$\kappa_j$} ; %
+    \node[const, above=of Sigma] (nu) {$\nu_j$} ; %
+    \node[const, right=of nu] (S) {$S_j$} ; %
+    \plate[inner sep=0.25cm, xshift=-0.12cm, yshift=0.12cm] {plate1} {(cue) (category)} {N}; %
+    \plate[inner sep=0.25cm, xshift=-0.12cm, yshift=0.12cm] {plate2} {(mu) (Sigma) (kappa) (m) (nu) (S)} {M}; %
+    \edge {category, mu, Sigma} {cue} ; %
+    \edge {Sigma} {mu} ; %
+    \edge {kappa,m} {mu} ; %
+    \edge {nu,S} {Sigma} ; %
+  }
+  \caption{NIW model in boiler plate notation}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \tikz{ %
+    \node[obs] (cue) {$x_i$} ; %
+    \factor[above=of cue] {cuedist} {left:$\mathcal{N}$} {} {}; %
+    \node[det, right=of cuedist] (category) {$c_i$} ; %
+    \node[latent, above=of cuedist] (mu) {$\mu_j$} ; %
+    \node[latent, right=of mu] (Sigma) {$\Sigma_j$} ; %
+    \factor[above=of mu] {mudist} {left:$\mathcal{N}$} {} {}; %
+    \factor[above=of Sigma] {Sigmadist} {left:$\mathcal{W}^{-1}$} {} {}; %
+    \node[const, above=of mudist] (m) {$m_j$} ; %
+    \node[const, left=of m] (kappa) {$\kappa_j$} ; %
+    \node[const, above=of Sigmadist] (nu) {$\nu_j$} ; %
+    \node[const, right=of nu] (S) {$S_j$} ; %
+    \plate[inner sep=0.12cm, xshift=-0.06cm, yshift=0.06cm] {plate1} {(cue) (category) (cuedist)} {N}; %
+    \plate[inner sep=0.12cm, xshift=-0.06cm, yshift=0.06cm] {plate2} {(mu) (Sigma) (mudist) (Sigmadist) (kappa) (m) (nu) (S)} {M}; %
+    \edge {cuedist} {cue} ; %
+    \edge {category} {cuedist} ; %
+    \edge {mu, Sigma} {cuedist} ; %
+    \edge {Sigma} {mu} ; %
+    \edge {kappa,m} {mudist} ; %
+    \edge {nu,S} {Sigmadist} ; %
+    \edge {mudist} {mu} ; %
+    \edge {Sigmadist} {Sigma} ; %
+  }
+  \caption{NIW model in factor graph notation}
+\end{figure}
+
+
+\begin{figure}
+  \centering
+  \tikz{ %
+    % exposure
+    \node[obs] (cue) {$x_n$} ; %
+    \factor[above=of cue] {cuedist} {left:$\mathcal{N}$} {} {}; %
+    \node[det, right=of cuedist] (category) {$c_n$} ; %
+    % category parameters
+    \node[latent, above=of cuedist] (mu) {$\mu_c$} ; %
+    \node[latent, right=of mu] (Sigma) {$\Sigma_c$} ; %
+    \factor[above=of mu] {mudist} {left:$\mathcal{N}$} {} {}; %
+    \factor[above=of Sigma] {Sigmadist} {left:$\mathcal{W}^{-1}$} {} {}; %
+    % hyperparameters
+    \node[det, above=of mudist] (kappa) {$\kappa_{n,c}$} ; %
+    \node[det, left=of kappa] (m) {$m_{n,c}$} ; %
+    \node[det, above=of Sigmadist] (S) {$S_{n,c}$} ; %
+    \node[det, right=of S] (nu) {$\nu_{n,c}$} ; %
+    % prior
+    \factor[above=1 of m] {update_m} {} {} {}; %
+    \factor[above=1.05 of kappa] {update_kappa} {} {} {}; %
+    \factor[above=.9 of S] {update_S} {} {} {}; %
+    \factor[above=1 of nu] {update_nu} {right:update} {} {}; %
+    \node[const, above=of update_m] (prior_m) {$m_{0,c}$} ; %
+    \node[const, above=of update_kappa] (prior_kappa) {$\kappa_{0,c}$} ; %
+    \node[const, above=of update_nu] (prior_nu) {$\nu_{0,c}$} ; %
+    \node[const, above=of update_S] (prior_S) {$S_{0,c}$} ; %
+    % extra nodes to allow connection from cues to updating
+    \node[const, left=1.2 of update_m] (update_extra1) {} ; %
+    \node[const, left=3 of cue] (update_extra2) {} ; %
+    % test
+    \factor[right=of category] {cuedisttest} {left:$\mathcal{N}$} {} {}; %
+    \node[obs, below=of cuedisttest] (cuetest) {$x_k$} ; %
+    \factor[right=of cuetest] {categorytestdist} {above:$Multi$} {} {}; %
+    \node[obs, right=of categorytestdist] (categorytest) {$c_k$} ; %
+    % plates
+    \plate[inner sep=0.12cm, xshift=-0.06cm, yshift=0.06cm] {plate2} {(mu) (Sigma) (mudist) (Sigmadist) (kappa) (m) (nu) (S)} {$\forall c \in categories $}; %
+    \plate[inner sep=0.12cm, xshift=-0.06cm, yshift=0.06cm] {plate1} {(cue) (category) (cuedist) (plate2)} {$\forall n \in exposure\ observation$}; %
+    \plate[inner sep=0.12cm, xshift=-0.06cm, yshift=0.06cm] {plate1} {(cuetest) (categorytest) (cuedisttest)} {L}; %
+    \edge {cuedist} {cue} ; %
+    \edge {category} {cuedist} ; %
+    \edge {mu, Sigma} {cuedist} ; %
+    \edge {Sigma} {mu} ; %
+    \edge {kappa,m} {mudist} ; %
+    \edge {nu,S} {Sigmadist} ; %
+    \edge {mudist} {mu} ; %
+    \edge {Sigmadist} {Sigma} ; %
+    \edge {cuetest} {categorytest} ; %
+    % updating
+    \edge {prior_kappa} {update_kappa} ; %
+    \edge {prior_nu} {update_nu} ; %
+    \edge {prior_kappa, prior_m} {update_m} ; %
+    \edge {prior_kappa, prior_m, prior_S} {update_S} ; %
+    \edge {update_kappa} {kappa} ; %
+    \edge {update_nu} {nu} ; %
+    \edge {update_m} {m} ; %
+    \edge {update_S} {S} ; %
+    \edge[-] {cue} {update_extra2} ; %
+    \edge[-] {update_extra1} {update_extra2} ; %
+    \edge {update_extra1} {update_m} ; %
+    \edge[-] {update_m} {update_kappa} ; %
+    \edge[-] {update_kappa} {update_S} ; %
+    \edge[-] {update_S} {update_nu} ; %
+  }
+  \caption{NIW updating model in factor graph notation NOT YET READY}
+\end{figure}
+
+
+
+This visualizations are derived from a technical report ``Directed Factor Graph Notation for Generative Models'' and the accompanying TikZ macros by Laura Dietz 2010 (\url{http://people.cs.umass.edu/~dietz/}). The technical report is available in this repository as dietz-techreport.pdf. The library is found at \url{https://github.com/jluttine/tikz-bayesnet}.
+
+\begin{thebibliography}{9}
+
+\bibitem{Dietz:2010}
+  Laura Dietz,
+  \emph{Directed Factor Graph Notation for Generative Models}.
+  Technical Report. 2010
+
+% Laura Dietz, Steffen Bickel, Tobias Scheffer.
+% Unsupervised Prediction of Citation Influences.
+% In: Proceedings of International Conference on Machine Learning. 2007
+\bibitem{Dietz:2007}
+  Laura Dietz, Steffen Bickel, Tobias Scheffer,
+  \emph{Unsupervised Prediction of Citation Influences}.
+  In: Proceedings of International Conference on Machine
+  Learning. 2007
+
+
+\end{thebibliography}
+
+\end{document}
