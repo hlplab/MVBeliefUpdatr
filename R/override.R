@@ -12,7 +12,8 @@ rmvnorm = function (n, mean = rep(0, nrow(sigma)), sigma = diag(length(mean)), .
 # Added here to handle the case of univariate categories
 rmvt = function (n, delta = rep(0, nrow(sigma)), sigma = diag(length(mean)), df, ...) {
   if (length(mean) == 1)
-    return(rlst(n = n, df = df, mu = as.vector(delta), sigma = sigma, ...)) else
+    # Using rlst instead of rt since rt is for standardized t distribution (no scale parameter)
+    return(rlst(n = n, df = df, mu = as.vector(delta), sigma = as.vector(sigma^.5), ...)) else
       return(rmvt(n = n, delta = delta, sigma = sigma, df = df, ...))
 }
 
@@ -26,7 +27,8 @@ dmvnorm = function (x, mean = rep(0, nrow(sigma)), sigma = diag(length(mean)), .
 # Added here to handle the case of univariate categories
 dmvt = function (x, delta = rep(0, nrow(sigma)), sigma = diag(length(mean)), df, ...) {
   if (length(mean) == 1)
-    return(dlst(x = x, ncp = as.vector(delta), df = df, ...)) else
-      return(dmvt(x = x, df = df, mu = delta, sigma = sigma, ...))
+    # Using dlst instead of dt since dt is for standardized t distribution (no scale parameter)
+    return(dlst(x = x, df = df, mu = as.vector(delta), sigma = as.vector(sigma^.5), ...)) else
+      return(dmvt(x = x, delta = delta, sigma = sigma, df = df, ...))
 }
 
