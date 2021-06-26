@@ -141,7 +141,9 @@ get_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 #' @seealso \code{\link{get_S_from_Sigma}}
 #' @export
 get_Sigma_from_S = function(S, nu) {
-  return(S / (nu - dim(S)[1] - 1))
+  D = if (is.null(dim(S)[1])) 1 else dim(S)[1]
+
+  return(S / (nu - D - 1))
 }
 
 #' Get Scatter matrix S from expected category covariance Sigma and pseudocount nu
@@ -149,6 +151,8 @@ get_Sigma_from_S = function(S, nu) {
 #' @seealso \code{\link{get_Sigma_from_S}}
 #' @export
 get_S_from_Sigma = function(Sigma, nu) {
-  return(Sigma * (nu - dim(Sigma)[1] - 1))
+  D = if (is.null(dim(Sigma)[1])) 1 else dim(Sigma)[1]
+
+  return(Sigma * (nu - D - 1))
 }
 
