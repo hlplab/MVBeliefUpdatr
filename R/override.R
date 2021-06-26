@@ -3,6 +3,7 @@
 NULL
 
 # Added here to handle the case of univariate categories
+#' @export
 rmvnorm = function (n, mean = rep(0, nrow(sigma)), sigma = diag(length(mean)), ...) {
   if (length(mean) == 1)
     return(rnorm(n = n, mean = as.vector(mean), sd = as.vector(sigma^.5), ...)) else
@@ -10,6 +11,7 @@ rmvnorm = function (n, mean = rep(0, nrow(sigma)), sigma = diag(length(mean)), .
 }
 
 # Added here to handle the case of univariate categories
+#' @export
 rmvt = function (n, delta = rep(0, nrow(sigma)), sigma = diag(length(mean)), df, ...) {
   if (length(mean) == 1)
     # Using rlst instead of rt since rt is for standardized t distribution (no scale parameter)
@@ -18,6 +20,7 @@ rmvt = function (n, delta = rep(0, nrow(sigma)), sigma = diag(length(mean)), df,
 }
 
 # Added here to handle the case of univariate categories
+#' @export
 dmvnorm = function (x, mean = rep(0, nrow(sigma)), sigma = diag(length(mean)), ...) {
   if (length(mean) == 1)
     return(dnorm(x = x, mean = as.vector(mean), sd = as.vector(sigma^.5))) else
