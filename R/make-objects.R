@@ -437,7 +437,7 @@ make_MVG_exposure_data = function(
       return(make_MVG_exposure_data(
         Ns = Ns,
         mus = x$m,
-        Sigmas = map2(x$S, x$nu, get_Sigma_from_S),
+        Sigmas = map2(x$S, x$nu, get_expected_Sigma_from_S),
         category.labels = get_category_labels_from_model(x),
         cue.labels = get_cue_labels_from_model(x),
         randomize.order = randomize.order,

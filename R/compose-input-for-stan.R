@@ -62,7 +62,7 @@ get_test_counts <- function(test, cues, category, response, group, verbose = F) 
 
 #' Get sufficient statistics from a data set
 #'
-#' Get sufficient statistics from data. Calculates the means and covariance matrices for the specified cues for
+#' Get sufficient statistics from data. Calculates the means and sum of squares matrices for the specified cues for
 #' any combination of groups (optional) and categories, and returns them as a list.
 #'
 #' @param data `tibble` or `data.frame` with the data. Each row should be an observation of a category,
@@ -85,9 +85,15 @@ get_test_counts <- function(test, cues, category, response, group, verbose = F) 
 #' @examples
 #' TBD
 #' @export
-get_sufficient_statistics_from_data <- function(data, cues, category, group, verbose = F, ...) {
+get_sufficient_statistics_as_list_of_arrays <- function(
+  data,
+  cues,
+  category,
+  group,
+  check_exposure_test_format = F,
+  verbose = F, ...) {
   if (verbose) {
-    print("In get_sufficient_statistics_from_data(), input data is:")
+    print("In get_sufficient_statistics_as_list_of_arrays(), input data is:")
     print(data)
   }
 
@@ -113,7 +119,7 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
       )
 
     if (verbose) {
-      print("In get_sufficient_statistics_from_data(), multivariate sum-of-uncentered-squares matrix:")
+      print("In get_sufficient_statistics_as_list_of_arrays(), multivariate sum-of-uncentered-squares matrix:")
       print(data_ss)
     }
 
@@ -164,7 +170,7 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
       summarise_at(cues, .funs = list(...))
 
     if (verbose) {
-      print("In get_sufficient_statistics_from_data(), univariate sum-of-squares matrix (prior to map application):")
+      print("In get_sufficient_statistics_as_list_of_arrays(), univariate sum-of-squares matrix (prior to map application):")
       print(data_ss)
     }
 
@@ -178,7 +184,7 @@ get_sufficient_statistics_from_data <- function(data, cues, category, group, ver
   }
 
   if (verbose) {
-    print("In get_sufficient_statistics_from_data(), sum-of-squares matrix (uncentered for multivariate data,
+    print("In get_sufficient_statistics_as_list_of_arrays(), sum-of-squares matrix (uncentered for multivariate data,
           centered for univariate data):")
     print(data_ss)
   }
@@ -366,11 +372,11 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 
   if (length(cues) > 1) {
     data_list <- exposure %>%
-      get_sufficient_statistics_from_data(
+      get_sufficient_statistics_as_list_of_arrays(
         cues = cues, category = category, group = group,
         verbose = verbose,
-        # The part below currently is ignored by get_sufficient_statistics_from_data. If the same syntax as for univariate input could
-        # also work for multivariate input to get_sufficient_statistics_from_data that would be more
+        # The part below currently is ignored by get_sufficient_statistics_as_list_of_arrays. If the same syntax as for univariate input could
+        # also work for multivariate input to get_sufficient_statistics_as_list_of_arrays that would be more
         # elegant.
         x_mean = colMeans, N = length, x_ss = get_sum_of_uncentered_squares) %>%
       within({
@@ -398,7 +404,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     message("For univariate input, beliefupdatr is run with legacy parameter names. This might change in
               the future.")
     data_list <- exposure %>%
-      get_sufficient_statistics_from_data(
+      get_sufficient_statistics_as_list_of_arrays(
         cues = cues, category = category, group = group,
         verbose = verbose,
         xbar = mean, n = length, xsd = sd) %>%

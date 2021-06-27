@@ -566,7 +566,7 @@ get_expected_category_statistic = function(x, category = NULL, group = NULL,
 
   x %<>%
     filter(group %in% !! group, category %in% !! category) %>%
-    mutate(Sigma = map2(S, nu, get_Sigma_from_S)) %>%
+    mutate(Sigma = map2(S, nu, get_expected_Sigma_from_S)) %>%
     group_by(group, category) %>%
     summarise(
       mu.mean = list(m %>% reduce(`+`) / length(m)),

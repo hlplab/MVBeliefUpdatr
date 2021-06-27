@@ -169,7 +169,7 @@ plot_expected_categories_density1D = function(
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   x %<>%
-    mutate(Sigma = map2(S, nu, get_Sigma_from_S)) %>%
+    mutate(Sigma = map2(S, nu, get_expected_Sigma_from_S)) %>%
     crossing(!! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution)) %>%
     mutate(density = unlist(pmap(.l = list("x" = !! sym(cue.labels[1]), "mean" = unlist(m), "sd" = unlist(Sigma)), .f = dnorm)))
 
@@ -254,7 +254,7 @@ plot_expected_categories_contour2D = function(
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   x %<>%
-    mutate(Sigma = map2(S, nu, get_Sigma_from_S)) %>%
+    mutate(Sigma = map2(S, nu, get_expected_Sigma_from_S)) %>%
     crossing(level = levels) %>%
     mutate(ellipse = pmap(.l = list(Sigma, m, level), ellipse.pmap)) %>%
     # This step is necessary since unnest() can't yet unnest lists of matrices

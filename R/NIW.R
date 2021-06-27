@@ -140,7 +140,7 @@ get_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 #'
 #' @seealso \code{\link{get_S_from_Sigma}}
 #' @export
-get_Sigma_from_S = function(S, nu) {
+get_expected_Sigma_from_S = function(S, nu) {
   D = if (is.null(dim(S)[1])) 1 else dim(S)[1]
 
   return(S / (nu - D - 1))
@@ -150,7 +150,7 @@ get_Sigma_from_S = function(S, nu) {
 #'
 #' @seealso \code{\link{get_Sigma_from_S}}
 #' @export
-get_S_from_Sigma = function(Sigma, nu) {
+get_S_from_expected_Sigma = function(Sigma, nu) {
   D = if (is.null(dim(Sigma)[1])) 1 else dim(Sigma)[1]
 
   return(Sigma * (nu - D - 1))
