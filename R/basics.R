@@ -193,7 +193,7 @@ get_sufficient_category_statistics <- function(
         x_N = length(!! sym(cues[1])),
         x_mean = list(colMeans(cbind(!!! syms(cues)))),
         x_ss = list(get_sum_of_uncentered_squares(cbind(!!! syms(cues)), verbose = verbose)),
-        x_cov = list(cov(cbind(!!! syms(cues)), verbose = verbose)))
+        x_cov = list(cov(cbind(!!! syms(cues)))))
   } else {
     # Univariate observations
     data_ss %<>%
