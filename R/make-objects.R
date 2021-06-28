@@ -13,8 +13,13 @@
 #' prior over all categories).
 #' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
 #' @param bias Optionally specify a response bias. (default: \code{NA})
-#' @param Sigma_noise Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be
-#' ignored if NULL. (default: NULL)
+#' @param Sigma_noise Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This
+#' argument will be ignored if NULL. (default: NULL)
+#' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
+#' representation (category variability)? If FALSE, then noise will be considered during categorization decisions
+#' but will not be added to the MVG categories. If TRUE, then noise will also be to the category covariance matrix.
+#' This is typically the desired result since perceptual noise would have shaped the ideal observers representations.
+#' Will be ignored if Sigma_noise is NULL. (default: TRUE)
 #' @param verbose If true provides more information. (default: FALSE)
 #'
 #' @return A tibble that is an MVG or MVG ideal observer object.
@@ -90,10 +95,12 @@ make_MVG_ideal_observer_from_data = function(
   lapse_rate = NA_real_,
   bias = NA_real_,
   Sigma_noise = NULL,
+  add_Sigma_noise_to_category_representation = T,
   verbose = F
 ) {
   data %<>% make_MVG_from_data(group = group, category = category, cues = cues, verbose = verbose)
-  data %<>% lift_MVG_to_ideal_observer(group = group, category = category, prior = prior, lapse_rate = lapse_rate, bias = bias, Sigma_noise = Sigma_noise)
+  data %<>% lift_MVG_to_ideal_observer(group = group, category = category, prior = prior, lapse_rate = lapse_rate, bias = bias,
+                                       Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
 
   if (!is.MVG_ideal_observer(x, category = as_name(category), verbose = verbose))
     warning("Something went wrong. The returned object is not an MVG ideal observer. Try again with verbose = T?")
@@ -126,8 +133,13 @@ make_MVG_ideal_observer_from_data = function(
 #' prior over all categories).
 #' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
 #' @param bias Optionally specify a response bias. (default: \code{NA})
-#' @param Sigma_noise Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be
+#' @param Sigma_noise Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This argument will be
 #' ignored if NULL. (default: NULL)
+#' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
+#' representation (category variability)? If FALSE, then noise will be considered during categorization decisions
+#' but will not be added to the MVG categories. If TRUE, then noise will also be to the category covariance matrix.
+#' This is typically the desired result since perceptual noise would have shaped the ideal observers representations.
+#' Will be ignored if Sigma_noise is NULL. (default: TRUE)
 #' @param verbose If true provides more information. (default: FALSE)
 #' @param keep.category_parameters Should categories' mu and Sigma be included in the output (in addition to m
 #' and S of the prior)? (default: FALSE)
@@ -174,7 +186,8 @@ make_NIW_belief_from_data = function(
       mu = list(colMeans(cbind(!!! cues))), # list(reduce(cues, `+`) / length(cues)),
       Sigma = list(cov(cbind(!!! cues))))
 
-  message("S is set so that the expected category covariance matrix Sigma matches the category covariance in the sample (given nu). It might be safer to fit an Inverse-Wishart distribution to the entire set of covariance matrices.")
+  message("S is set so that the expected category covariance matrix Sigma matches the category covariance in the sample (given nu). ",
+          "It might be safer to fit an Inverse-Wishart distribution to the entire set of covariance matrices.")
   data %<>%
     mutate(
       !! category := factor(!! category),
@@ -208,10 +221,12 @@ make_NIW_ideal_adaptor_from_data = function(
   lapse_rate = NA_real_,
   bias = NA_real_,
   Sigma_noise = NULL,
+  add_Sigma_noise_to_category_representation = T,
   keep.category_parameters = F
 ) {
   data %<>% make_NIW_belief_from_data(group = group, category = category, cues = cues, verbose = verbose)
-  data %<>% lift_NIW_belief_to_NIW_ideal_adaptor(group = group, category = category, prior = prior, lapse_rate = lapse_rate, bias = bias, Sigma_noise = Sigma_noise)
+  data %<>% lift_NIW_belief_to_NIW_ideal_adaptor(group = group, category = category, prior = prior, lapse_rate = lapse_rate, bias = bias,
+                                                 Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
   if (!is.NIW_ideal_adaptor(data, category = as_name(category), verbose = verbose))
@@ -237,8 +252,13 @@ make_NIW_ideal_adaptor_from_data = function(
 #' prior over all categories).
 #' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
 #' @param bias Optionally specify a response bias. (default: \code{NA})
-#' @param Sigma_noise Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be
+#' @param Sigma_noise Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This argument will be
 #' ignored if NULL. (default: NULL)
+#' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
+#' representation (category variability)? If FALSE, then noise will be considered during categorization decisions
+#' but will not be added to the MVG categories. If TRUE, then noise will also be to the category covariance matrix.
+#' This is typically the desired result since perceptual noise would have shaped the ideal observers representations.
+#' Will be ignored if Sigma_noise is NULL. (default: TRUE)
 #' @param verbose If true provides more information. (default: FALSE)
 #' @param keep.category_parameters Should categories' mu and Sigma be included in the output (in addition to m
 #' and S of the prior)? (default: FALSE)
@@ -300,7 +320,8 @@ lift_MVG_to_MVG_ideal_observer = function(
   prior = NA_real_,
   lapse_rate = NA_real_,
   bias = NA_real_,
-  Sigma_noise = NULL
+  Sigma_noise = NULL,
+  add_Sigma_noise_to_category_representation = T
 ) {
   x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, bias = bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
@@ -308,6 +329,10 @@ lift_MVG_to_MVG_ideal_observer = function(
                 msg = "If not NULL, Sigma_noise must be a matrix of the same dimensionality as Sigma.")
     assert_that(all(dimnames(first(x$Sigma_noise)) == dimnames(first(x$Sigma))),
                 msg = "If Sigma_noise is not NULL, the dimnames of Sigma_noise and Sigma must match.")
+
+    if (add_Sigma_noise_to_category_representation)
+      x %<>%
+        mutate(Sigma = map2(Sigma, Sigma_noise, ~ .x + .y))
   }
 
   return(x)
@@ -322,14 +347,19 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   prior = NA_real_,
   lapse_rate = NA_real_,
   bias = NA_real_,
-  Sigma_noise = NULL
+  Sigma_noise = NULL,
+  add_Sigma_noise_to_category_representation = T
 ) {
   x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, bias = bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(first(x$Sigma_noise)) == dim(first(x$S))),
-                msg = "If not NULL, Sigma_noise must be a matrix of the same dimensionality as S.")
+                msg = "If Sigma_noise is not NULL, Sigma_noise must be a matrix of the same dimensionality as S.")
     assert_that(all(dimnames(first(x$Sigma_noise)) == dimnames(first(x$S))),
                 msg = "If Sigma_noise is not NULL, the dimnames of Sigma_noise and S must match.")
+
+    if (add_Sigma_noise_to_category_representation)
+      x %<>%
+      mutate(S = map2(get_Sigma_from_expected_S(S, nu), Sigma_noise, ~ get_expected_S_from_Sigma(.x + .y, nu)))
   }
 
   return(x)

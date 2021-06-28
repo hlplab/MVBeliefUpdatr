@@ -39,6 +39,7 @@ make_NIW_ideal_adaptor_from_data(
   lapse_rate = NA_real_,
   bias = NA_real_,
   Sigma_noise = NULL,
+  add_Sigma_noise_to_category_representation = T,
   keep.category_parameters = F
 )
 }
@@ -69,8 +70,14 @@ prior over all categories).}
 
 \item{bias}{Optionally specify a response bias. (default: \code{NA})}
 
-\item{Sigma_noise}{Optionally specify a (multivariate Gaussian) noise covariance matrix. This argument will be
+\item{Sigma_noise}{Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This argument will be
 ignored if NULL. (default: NULL)}
+
+\item{add_Sigma_noise_to_category_representation}{Should the perceptual noise be added to the category
+representation (category variability)? If FALSE, then noise will be considered during categorization decisions
+but will not be added to the MVG categories. If TRUE, then noise will also be to the category covariance matrix.
+This is typically the desired result since perceptual noise would have shaped the ideal observers representations.
+Will be ignored if Sigma_noise is NULL. (default: TRUE)}
 }
 \value{
 A tibble that is an NIW_belief or NIW_ideal_adaptor object.
