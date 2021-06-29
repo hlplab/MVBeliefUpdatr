@@ -11,7 +11,6 @@ update_NIW_belief_by_sufficient_statistics_of_one_category(
   x_mean,
   x_S,
   x_N,
-  category = "category",
   add_noise = NULL,
   method = "label-certain"
 )
@@ -20,7 +19,6 @@ update_NIW_belief_by_one_observation(
   prior,
   x_category,
   x,
-  category = "category",
   add_noise = NULL,
   method = "label-certain"
 )

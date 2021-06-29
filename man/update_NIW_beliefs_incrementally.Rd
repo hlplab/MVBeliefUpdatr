@@ -7,8 +7,8 @@
 update_NIW_beliefs_incrementally(
   prior,
   exposure,
-  category = "category",
-  cues = get_cue_labels_from_model(prior),
+  exposure.category = "category",
+  exposure.cues = get_cue_labels_from_model(prior),
   exposure.order = NULL,
   add_noise = NULL,
   method = "label-certain",
@@ -21,9 +21,9 @@ update_NIW_beliefs_incrementally(
 
 \item{exposure}{\code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.}
 
-\item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
+\item{exposure.category}{Name of variable in \code{data} that contains the category information. (default: "category")}
 
-\item{cues}{Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
+\item{exposure.cues}{Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
 extracted from the prior object.}
 
 \item{exposure.order}{Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
