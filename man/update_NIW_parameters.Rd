@@ -20,6 +20,6 @@ Depending on the updated parameter, a numeric scalar (kappa, nu), vector (m) or 
 }
 \description{
 Returns updated/posterior m, S, kappa, or nu based on \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
-These functions are called, for example, by \code{\link{update_NIW_belief_by_sufficient_statistics}},
+These functions are called, for example, by \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}},
 \code{\link{update_NIW_belief_by_one_observation}}, and \code{\link{update_NIW_beliefs_incrementally}}.
 }

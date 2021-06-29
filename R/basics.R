@@ -176,7 +176,7 @@ get_sum_of_centered_squares <- function(data, variables = NULL, verbose = F) {
 get_sufficient_category_statistics <- function(
   data,
   cues,
-  category,
+  category = "category",
   groups,
   ...
 ) {

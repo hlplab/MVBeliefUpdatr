@@ -4,7 +4,13 @@
 \alias{get_sufficient_category_statistics}
 \title{Get sufficient statistics from a data set}
 \usage{
-get_sufficient_category_statistics(data, cues, category, groups, ...)
+get_sufficient_category_statistics(
+  data,
+  cues,
+  category = "category",
+  groups,
+  ...
+)
 }
 \arguments{
 \item{data}{`tibble` or `data.frame` with the data. Each row should be an observation of a category,

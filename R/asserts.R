@@ -1,6 +1,19 @@
-assert_NIW_belief = function(x, category = "category") {
-  assert_that(is.NIW_belief(x, category = category),
-              msg = "x must be an NIW_belief object.")
+assert_NIW_belief = function(x, category = "category", strict = F) {
+  if (strict) {
+    assert_that(is.NIW_belief(x, category = category),
+                msg = "x must be an NIW_belief object.")
+  } else {
+    assert_that(
+      any(
+        is.NIW_belief(x, category = category),
+        is.NIW_ideal_adaptor(x, category = category)),
+      msg = "x must be an NIW_belief or NIW_ideal_adaptor object.")
+  }
+}
+
+assert_NIW_ideal_adaptor = function(x, category = "category") {
+  assert_that(is.NIW_ideal_adaptor(x, category = category),
+              msg = "x must be an NIW_ideal_adaptor object.")
 }
 
 assert_NIW_ideal_adaptor_stanfit = function(x) {

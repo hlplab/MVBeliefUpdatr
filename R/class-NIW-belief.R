@@ -40,7 +40,10 @@ is.NIW_belief = function(x, category = "category", is.long = T, verbose = F) {
   }
 
   # Check that category is a factor only after everything else is checked.
-  if (any(!is.factor(get(category, x)))) return(FALSE)
+  if (any(!is.factor(get(category, x)))) {
+    if (verbose) message("category is not a factor.")
+    return(FALSE)
+  }
 
   # Check that m and S contain the cue names and that those cue names match.
   names_m = names(x$m[[1]])

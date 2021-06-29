@@ -30,9 +30,9 @@ extracted from the prior object.}
 exposure data is assumed to be in the order in which it should be presented.}
 
 \item{add_noise}{Determines whether multivariate Gaussian noise is added to the input. See \code{
-\link{update_NIW_belief_by_sufficient_statistics}}. (default: `NULL`)}
+\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}. (default: `NULL`)}
 
-\item{method}{Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics}}.
+\item{method}{Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
 The length of this argument should either be 1 (in which case it is recycled for each observation) or the same as
 the number of rows in \code{expsure}. (default: "label-certain").}
 
