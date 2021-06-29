@@ -42,7 +42,7 @@ example_NIW_prior = function(example = 1) {
 #' Update parameters of NIW prior beliefs about multivariate Gaussian category.
 #'
 #' Returns updated/posterior m, S, kappa, or nu based on \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
-#' These functions are called, for example, by \code{\link{update_NIW_belief_by_sufficient_statistics}},
+#' These functions are called, for example, by \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}},
 #' \code{\link{update_NIW_belief_by_one_observation}}, and \code{\link{update_NIW_beliefs_incrementally}}.
 #'
 #' @return Depending on the updated parameter, a numeric scalar (kappa, nu), vector (m) or square matrix (S).
@@ -136,14 +136,14 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #' @return An NIW_belief object.
 #'
 #' @seealso \code{\link{update_NIW_belief_kappa}}, \code{\link{update_NIW_belief_nu}}, \code{\link{update_NIW_belief_m}},
-#' \code{\link{update_NIW_belief_S}}, all of which are called by \code{update_NIW_belief_by_sufficient_statistics}.
+#' \code{\link{update_NIW_belief_S}}, all of which are called by \code{update_NIW_belief_by_sufficient_statistics_of_one_category}.
 #' @keywords belief-updating NIW Normal-Inverse Wishart
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #' @examples
 #' TBD
 #' @rdname update_NIW_belief
 #' @export
-update_NIW_belief_by_sufficient_statistics = function(
+update_NIW_belief_by_sufficient_statistics_of_one_category = function(
   prior, x_category, x_mean, x_S, x_N,
   category = "category",
   add_noise = NULL,
@@ -211,7 +211,7 @@ update_NIW_belief_by_one_observation = function(
   add_noise = NULL,
   method = "label-certain"
 ) {
-  update_NIW_belief_by_sufficient_statistics(prior, x_category = x_category, x_mean = x, x_S = 0L, x_N = 1L,
+  update_NIW_belief_by_sufficient_statistics_of_one_category(prior, x_category = x_category, x_mean = x, x_S = 0L, x_N = 1L,
                                              category = category,
                                              add_noise = add_noise, method = method)
 }
@@ -236,8 +236,8 @@ update_NIW_belief_by_one_observation = function(
 #' @param exposure.order Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 #' exposure data is assumed to be in the order in which it should be presented.
 #' @param add_noise Determines whether multivariate Gaussian noise is added to the input. See \code{
-#' \link{update_NIW_belief_by_sufficient_statistics}}. (default: `NULL`)
-#' @param method Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics}}.
+#' \link{update_NIW_belief_by_sufficient_statistics_of_one_category}}. (default: `NULL`)
+#' @param method Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
 #' The length of this argument should either be 1 (in which case it is recycled for each observation) or the same as
 #' the number of rows in \code{expsure}. (default: "label-certain").
 #' @param keep.update_history Should the history of the belief-updating be stored and returned? If so, the output is
