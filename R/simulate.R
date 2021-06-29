@@ -269,7 +269,7 @@ update_NIW_beliefs_incrementally <- function(
   assert_that(all(is.flag(keep.update_history), is.flag(keep.exposure_data)))
   assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
   assert_that(exposure.category %in% names(exposure),
-              message = paste0("exposure.category variable not found: ", exposure.category, " must be a column in the exposure data."))
+              msg = paste0("exposure.category variable not found: ", exposure.category, " must be a column in the exposure data."))
   assert_that(any(is.null(exposure.order), exposure.order %in% names(exposure)),
               msg = paste0("exposure.order variable not found: ", exposure.order, " must be a column in the exposure data."))
   assert_that(any(is.null(exposure.order), if (!is.null(exposure.order)) is.numeric(exposure[[exposure.order]]) else T),
