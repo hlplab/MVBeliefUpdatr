@@ -145,12 +145,11 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #' @export
 update_NIW_belief_by_sufficient_statistics_of_one_category = function(
   prior, x_category, x_mean, x_S, x_N,
-  category = "category",
   add_noise = NULL,
   method = "label-certain"
 ) {
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
-  assert_NIW_belief(prior, category = category)
+  assert_NIW_belief(prior)
   assert_that(length(x_N) == 1 & x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
   assert_that(method %in% c("no-updating",
                             "label-certain",
@@ -207,12 +206,10 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
 #' @export
 update_NIW_belief_by_one_observation = function(
   prior, x_category, x,
-  category = "category",
   add_noise = NULL,
   method = "label-certain"
 ) {
   update_NIW_belief_by_sufficient_statistics_of_one_category(prior, x_category = x_category, x_mean = x, x_S = 0L, x_N = 1L,
-                                             category = category,
                                              add_noise = add_noise, method = method)
 }
 
@@ -230,8 +227,8 @@ update_NIW_belief_by_one_observation = function(
 #'
 #' @param prior An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
 #' @param exposure \code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.
-#' @param category Name of variable in \code{data} that contains the category information. (default: "category")
-#' @param cues Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
+#' @param exposure.category Name of variable in \code{data} that contains the category information. (default: "category")
+#' @param exposure.cues Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
 #' extracted from the prior object.
 #' @param exposure.order Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 #' exposure data is assumed to be in the order in which it should be presented.
@@ -258,19 +255,21 @@ update_NIW_belief_by_one_observation = function(
 update_NIW_beliefs_incrementally <- function(
   prior,
   exposure,
-  category = "category",
-  cues = get_cue_labels_from_model(prior),
+  exposure.category = "category",
+  exposure.cues = get_cue_labels_from_model(prior),
   exposure.order = NULL,
   add_noise = NULL,
   method = "label-certain",
   keep.update_history = TRUE,
   keep.exposure_data = FALSE
 ){
+  message("Assuming that category variable in NIW belief/ideal adaptor is called category.")
+
   assert_NIW_belief(prior)
   assert_that(all(is.flag(keep.update_history), is.flag(keep.exposure_data)))
   assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
-  assert_that(category %in% names(exposure),
-              message = paste0("category variable not found: ", category, " must be a column in the exposure data."))
+  assert_that(exposure.category %in% names(exposure),
+              message = paste0("exposure.category variable not found: ", exposure.category, " must be a column in the exposure data."))
   assert_that(any(is.null(exposure.order), exposure.order %in% names(exposure)),
               msg = paste0("exposure.order variable not found: ", exposure.order, " must be a column in the exposure data."))
   assert_that(any(is.null(exposure.order), if (!is.null(exposure.order)) is.numeric(exposure[[exposure.order]]) else T),
@@ -280,14 +279,14 @@ update_NIW_beliefs_incrementally <- function(
   if (length(method) == 1) method = rep(method, nrow(exposure))
 
   # Number of dimensions/cues
-  D = length(cues)
+  D = length(exposure.cues)
   if (any(prior$nu <= D + 1))
     message(paste0("Prior for at least one category had nu smaller than allowed (is ", min(prior$nu), "; should be >", D+1, ").\n"))
 
   # Prepare exposure data
   exposure %<>%
     { if (!is.null(exposure.order)) arrange(., !! sym(exposure.order)) else . } %>%
-    make_vector_column(cues, "cues")
+    make_vector_column(exposure.cues, "cues")
 
   if (keep.update_history)
     prior %<>%
@@ -299,8 +298,7 @@ update_NIW_beliefs_incrementally <- function(
       update_NIW_belief_by_one_observation(
         prior = posterior,
         x = unlist(exposure[i, "cues"]),
-        x_category = exposure[i,][[category]],
-        category = category,
+        x_category = exposure[i,][[exposure.category]],
         add_noise = add_noise,
         method = method[i])
 
