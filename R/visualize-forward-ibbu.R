@@ -10,10 +10,11 @@ check_compatibility_between_NIW_belief_and_data = function(
   x,
   data.exposure,
   data.test,
-  facet_rows_by, facet_cols_by, animate_by
+  facet_rows_by, facet_cols_by, facet_wrap_by, animate_by
 ) {
   facet_rows_by = enquo(facet_rows_by)
   facet_cols_by = enquo(facet_cols_by)
+  facet_wrap_by = enquo(facet_wrap_by)
   animate_by = enquo(animate_by)
 
   assert_that(is.NIW_belief(x))
