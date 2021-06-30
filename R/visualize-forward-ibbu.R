@@ -90,8 +90,6 @@ plot_NIW_belief_parameters = function(
       nest = F)
 
   if (is.null(group.colors)) group.colors = get_default_colors("group", length(get_groups(x)))
-
-
 }
 
 

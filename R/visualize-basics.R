@@ -119,12 +119,14 @@ add_exposure_data_to_1D_plot = function(
   category.labels,
   category.colors
 ) {
-  data[[cue.labels[2]]] = 0
+  cue.labels[2] = "cue2"
+  data %<>% mutate(cue2 = 0)
   add_exposure_data_to_2D_plot(data, cue.labels, category.ids, category.labels, category.colors)
 }
 
 add_test_data_to_1D_plot = function(data, cue.labels) {
-  data[[cue.labels[2]]] = 0
+  cue.labels[2] = "cue2"
+  data %<>% mutate(cue2 = 0)
   add_test_data_to_2D_plot(data, cue.labels)
 }
 
