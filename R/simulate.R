@@ -216,11 +216,25 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
 update_NIW_belief_by_one_observation = function(
   prior, x_category, x,
   add_noise = NULL,
+  add_lapse = NULL,
   method = "label-certain",
   verbose = FALSE
 ) {
-  update_NIW_belief_by_sufficient_statistics_of_one_category(prior, x_category = x_category, x_mean = x, x_S = 0L, x_N = 1L,
-                                             add_noise = add_noise, method = method, verbose = verbose)
+  assert_that(any(is.null(add_lapse), is_scalar_double(add_lapse), is_scalar_character(add_lapse)),
+              msg = "add_lapse must be NULL, a character, or a scalar between 0 or 1.")
+  if (is_scalar_double(add_lapse)) {
+    assert_that(between(add_lapse, 0, 1))
+    lapse_rate = add_lapse
+  } else if (is_scalar_character(add_lapse)) {
+    assert_that(add_lapse == "sample", msg = "If add_lapse is a character, it must be 'sample'.")
+    assert_that(assert_NIW_ideal_adaptor(prior), msg = "If add_lapse = 'sample', prior must be an  ideal adaptor.")
+    lapse_rate = unique(prior$lapse)
+  } else lapse_rate = 0
+
+  if (rbinom(1, 1, lapse_rate))
+    return(prior) else update_NIW_belief_by_sufficient_statistics_of_one_category(
+      prior, x_category = x_category, x_mean = x, x_S = 0L, x_N = 1L,
+      add_noise = add_noise, method = method, verbose = verbose)
 }
 
 
@@ -244,8 +258,9 @@ update_NIW_belief_by_one_observation = function(
 #' exposure data is assumed to be in the order in which it should be presented.
 #' @param add_noise Determines whether multivariate Gaussian noise is added to the input. See \code{
 #' \link{update_NIW_belief_by_sufficient_statistics_of_one_category}}. (default: `NULL`)
-#' @param add_lapse Determines the proportion of trials on which the listener lapses, not updating beliefs. Must be a number
-#' between 0 and 1, or NULL if lapses are to be ignored. (default: `NULL`)
+#' @param add_lapse Determines the proportion of trials on which the listener lapses, not updating beliefs. If add_lapse is
+#' "sample", the lapse rate from the ideal adaptor will be used. If add_lapse is a number between 0 to 1, this will be
+#' interpreted as the lapse rate. If not NULL, the lapse is assumed to be zero. (default: `NULL`)
 #' @param method Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
 #' The length of this argument should either be 1 (in which case it is recycled for each observation) or the same as
 #' the number of rows in \code{expsure}. (default: "label-certain").
@@ -283,10 +298,6 @@ update_NIW_beliefs_incrementally <- function(
   assert_NIW_belief(prior)
   assert_that(any(is.null(add_noise), is_scalar_character(add_noise)),
               msg = "add_noise must be NULL or a scalar character.")
-  assert_that(any(is.null(add_lapse), is_scalar_double(add_lapse)),
-              msg = "add_lapse must be NULL or a scalar double (between 0 or 1).")
-  assert_that(between(add_lapse, 0, 1),
-              msg = "If not NULL, add_noise must be between 0 to 1.")
   assert_that(all(is.flag(keep.update_history), is.flag(keep.exposure_data)))
   assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
   assert_that(exposure.category %in% names(exposure),
@@ -307,9 +318,7 @@ update_NIW_beliefs_incrementally <- function(
   # Prepare exposure data
   exposure %<>%
     { if (!is.null(exposure.order)) arrange(., !! sym(exposure.order)) else . } %>%
-    make_vector_column(exposure.cues, "cues") %>%
-    # Apply lapses
-    { if (!is.null(add_lapse)) mutate(., cues = ifelse(rbinom(nrow(.), 1, add_lapse), NA, cues)) else . }
+    make_vector_column(exposure.cues, "cues")
 
   if (keep.update_history)
     prior %<>%
@@ -323,6 +332,7 @@ update_NIW_beliefs_incrementally <- function(
         x = unlist(exposure[i, "cues"]),
         x_category = exposure[i,][[exposure.category]],
         add_noise = add_noise,
+        add_lapse = add_lapse,
         method = method[i],
         verbose = verbose)
 
