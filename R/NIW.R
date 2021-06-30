@@ -27,9 +27,11 @@ NULL
 #' @rdname get_posterior_predictive
 #' @export
 get_posterior_predictive = function(x, m, S, kappa, nu, log = T) {
-  # mvtnorm::dmvt now expects means to be vectors, and x to be either a vector or a matrix.
+  # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
-  assert_that(all(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x), is.vector(m) | is.matrix(m), is.matrix(S)))
+  assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
+  assert_that(is.vector(m) | is.matrix(m) | is_scalar_double(m))
+  assert_that(is.matrix(S) | is_scalar_double(S))
   # do not reorder these conditionals (go from more to less specific)
   if (is_tibble(x)) x %<>% as.matrix() else
     if (is.list(x)) x %<>% reduce(rbind) %<>% as.matrix(nrow = 1) else
@@ -39,15 +41,22 @@ get_posterior_predictive = function(x, m, S, kappa, nu, log = T) {
   assert_that(all(is.number(kappa), is.number(nu)))
   assert_that(is.flag(log))
   D = dim(S)[1]
-  assert_that(nu >= D,
-              msg = "nu must be at least as large as the number of dimensions of the multivariate
+  if (is_scalar_double(S)) {
+    assert_that(nu >= 1,
+                msg = "nu must be at least as large as the number of dimensions of the multivariate
               Normal.")
-  assert_that(dim(S)[2] == D,
-              msg = "S is not a square matrix, and thus not a Scatter matrix")
-  assert_that(length(m) == dim(x)[2],
-              msg = paste("m and input are not of compatible dimensions. m is of length", length(m), "but input has", dim(x)[2], "columns."))
-  assert_that(length(m) == D,
-              msg = "S and m are not of compatible dimensions.")
+    assert_that(is_scalar_double(m), msg = "S and m are not of compatible dimensions.")
+  } else {
+    assert_that(nu >= D,
+                msg = "nu must be at least as large as the number of dimensions of the multivariate
+              Normal.")
+    assert_that(dim(S)[2] == D,
+                msg = "S is not a square matrix, and thus not a Scatter matrix")
+    assert_that(length(m) == dim(x)[2],
+                msg = paste("m and input are not of compatible dimensions. m is of length", length(m), "but input has", dim(x)[2], "columns."))
+    assert_that(length(m) == D,
+                msg = "S and m are not of compatible dimensions.")
+  }
 
   dmvt(x,
        delta = m,

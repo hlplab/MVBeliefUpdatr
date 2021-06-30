@@ -228,7 +228,7 @@ update_NIW_belief_by_one_observation = function(
   } else if (is_scalar_character(add_lapse)) {
     assert_that(add_lapse == "sample", msg = "If add_lapse is a character, it must be 'sample'.")
     assert_that(assert_NIW_ideal_adaptor(prior), msg = "If add_lapse = 'sample', prior must be an  ideal adaptor.")
-    lapse_rate = unique(prior$lapse)
+    lapse_rate = unique(prior$lapse_rate)
   } else lapse_rate = 0
 
   if (rbinom(1, 1, lapse_rate))
