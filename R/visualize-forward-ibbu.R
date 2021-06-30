@@ -19,22 +19,29 @@ check_compatibility_between_NIW_belief_and_data = function(
   assert_that(is.NIW_belief(x))
 
   if (!quo_is_null(facet_rows_by)) {
+    assert_that(quo_is_null(facet_wrap_by), msg = "Can only specify either facet_wrap_by or facet_rows_by/facet_cols_by.")
     assert_that(all(as_name(facet_rows_by) %in% names(x)),
                 msg = paste(as_name(facet_rows_by), "not found in NIW_belief (x)."))
     assert_that(!all(!is.null(data.exposure), as_name(facet_rows_by) %nin% names(data.exposure)),
-                msg = "Can't plot exposure data: when facet_rows_by is specified, it must be present in the exposure data.")
+                msg = "When facet_rows_by is specified, it must be present in the exposure data.")
   }
   if (!quo_is_null(facet_cols_by)) {
     assert_that(all(as_name(facet_cols_by) %in% names(x)),
                 msg = paste(as_name(facet_cols_by), "not found in NIW_belief (x)."))
     assert_that(!all(!is.null(data.exposure), as_name(facet_cols_by) %nin% names(data.exposure)),
-                msg = "Can't plot exposure data: when facet_cols_by is specified, it must be present in the exposure data.")
+                msg = "When facet_cols_by is specified, it must be present in the exposure data.")
+  }
+  if (!quo_is_null(facet_wrap_by)) {
+    assert_that(all(as_name(facet_wrap_by) %in% names(x)),
+                msg = paste(as_name(facet_wrap_by), "not found in NIW_belief (x)."))
+    assert_that(!all(!is.null(data.exposure), as_name(facet_wrap_by) %nin% names(data.exposure)),
+                msg = "When facet_wrap_by is specified, it must be present in the exposure data.")
   }
   if (!quo_is_null(animate_by)) {
     assert_that(all(as_name(animate_by) %in% names(x)),
                 msg = paste(as_name(animate_by), "not found in NIW_belief (x)."))
     assert_that(!all(!is.null(data.exposure), as_name(animate_by) %nin% names(data.exposure)),
-                msg = "Can't plot exposure data: when animate_by is specified, it must be present in the exposure data.")
+                msg = "When animate_by is specified, it must be present in the exposure data.")
   }
 
   cue.labels = get_cue_labels_from_model(x)
@@ -137,15 +144,16 @@ plot_expected_categories_density1D = function(
   x,
   data.exposure = NULL,
   data.test = NULL,
-  facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F,
+  facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
   xlim, resolution = 25,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
   facet_rows_by = enquo(facet_rows_by)
   facet_cols_by = enquo(facet_cols_by)
+  facet_wrap_by = enquo(facet_wrap_by)
   animate_by = enquo(animate_by)
   x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
-                                                      !! facet_rows_by, !! facet_cols_by, !! animate_by)
+                                                      !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
   # Remember groups
   cue.labels = get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
@@ -190,7 +198,7 @@ plot_expected_categories_density1D = function(
                       values = category.colors) +
     theme_bw()
 
-  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !!animate_by, animation_follow)
+  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
   return(p)
 }
 
@@ -238,6 +246,7 @@ plot_expected_categories_contour2D = function(
 ) {
   facet_rows_by = enquo(facet_rows_by)
   facet_cols_by = enquo(facet_cols_by)
+  facet_wrap_by = enquo(facet_wrap_by)
   animate_by = enquo(animate_by)
   x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                       !! facet_rows_by, !! facet_cols_by, !! animate_by)
@@ -284,7 +293,7 @@ plot_expected_categories_contour2D = function(
                            breaks = round(1 - levels, 2)) +
     theme_bw()
 
-  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !!animate_by, animation_follow)
+  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
   return(p)
 }
 
@@ -324,9 +333,10 @@ plot_expected_categorization_function_2D = function(
 ) {
   facet_rows_by = enquo(facet_rows_by)
   facet_cols_by = enquo(facet_cols_by)
+  facet_wrap_by = enquo(facet_wrap_by)
   animate_by = enquo(animate_by)
   x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
-                                                      !! facet_rows_by, !! facet_cols_by, !! animate_by)
+                                                      !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
   cue.labels = get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
   if (is_missing(xlim)) {
@@ -407,6 +417,6 @@ plot_expected_categorization_function_2D = function(
     coord_cartesian(xlim = xlim, ylim = ylim) +
     theme_bw()
 
-  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !!animate_by, animation_follow)
+  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
   return(p)
 }

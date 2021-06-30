@@ -166,16 +166,23 @@ add_test_data_to_2D_plot = function(data, cue.labels) {
       color = "black", size = 1))
 }
 
-facet_or_animate = function(p, facet_rows_by, facet_cols_by, animate_by, animation_follow) {
+facet_or_animate = function(p, facet_rows_by, facet_cols_by, facet_wrap_by, animate_by, animation_follow) {
   facet_rows_by = enquo(facet_rows_by)
   facet_cols_by = enquo(facet_cols_by)
+  facet_wrap_by = enquo(facet_wrap_by)
   animate_by = enquo(animate_by)
 
-  if (!quo_is_null(facet_rows_by) | !quo_is_null(facet_cols_by))
+  if (!quo_is_null(facet_rows_by) | !quo_is_null(facet_cols_by)) {
     p = p + facet_grid(
       rows = vars(!! facet_rows_by),
       cols = vars(!! facet_cols_by),
       labeller = label_both)
+  } else if (!quo_is_null(facet_wrap_by)) {
+    p = p + facet_wrap(
+      facets = vars(!! facet_wrap_by),
+      labeller = label_both)
+  }
+
   if (!quo_is_null(animate_by)) {
     message("Preparing for rendering. This might take a moment.\n")
     p = p +
