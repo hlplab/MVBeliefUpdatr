@@ -278,7 +278,7 @@ update_NIW_beliefs_incrementally <- function(
   keep.exposure_data = FALSE,
   verbose = FALSE
 ){
-  message("Assuming that category variable in NIW belief/ideal adaptor is called category.")
+  if (verbose) message("Assuming that category variable in NIW belief/ideal adaptor is called category.")
 
   assert_NIW_belief(prior)
   assert_that(any(is.null(add_noise), is_scalar_character(add_noise)),
