@@ -10,6 +10,7 @@ check_compatibility_between_NIW_belief_and_data(
   data.test,
   facet_rows_by,
   facet_cols_by,
+  facet_wrap_by,
   animate_by
 )
 }

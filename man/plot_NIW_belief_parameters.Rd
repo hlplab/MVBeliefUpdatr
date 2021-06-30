@@ -19,7 +19,7 @@ plot_NIW_belief_parameters(
 \item{group.colors}{Vector of fill colors of same length as the number of unique groups in the NIW_belief(s) object, or
 `NULL` to use defaults. (default: `NULL`)}
 
-\item{facet_rows_by, facet_cols_by, animate_by}{Which group variables, if any, should be used for faceting and/or
+\item{facet_rows_by, facet_cols_by, facet_wrap_by, animate_by}{Which group variables, if any, should be used for faceting and/or
 animation? (defaults: `NULL`)}
 
 \item{animation_follow}{Should the animation follow the data (zoom in and out)? (default: `FALSE`)}

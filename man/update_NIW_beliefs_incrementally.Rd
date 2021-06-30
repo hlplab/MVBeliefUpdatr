@@ -34,8 +34,9 @@ exposure data is assumed to be in the order in which it should be presented.}
 \item{add_noise}{Determines whether multivariate Gaussian noise is added to the input. See \code{
 \link{update_NIW_belief_by_sufficient_statistics_of_one_category}}. (default: `NULL`)}
 
-\item{add_lapse}{Determines the proportion of trials on which the listener lapses, not updating beliefs. Must be a number
-between 0 and 1, or NULL if lapses are to be ignored. (default: `NULL`)}
+\item{add_lapse}{Determines the proportion of trials on which the listener lapses, not updating beliefs. If add_lapse is
+"sample", the lapse rate from the ideal adaptor will be used. If add_lapse is a number between 0 to 1, this will be
+interpreted as the lapse rate. If not NULL, the lapse is assumed to be zero. (default: `NULL`)}
 
 \item{method}{Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
 The length of this argument should either be 1 (in which case it is recycled for each observation) or the same as

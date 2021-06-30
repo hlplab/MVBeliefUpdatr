@@ -21,6 +21,7 @@ update_NIW_belief_by_one_observation(
   x_category,
   x,
   add_noise = NULL,
+  add_lapse = NULL,
   method = "label-certain",
   verbose = FALSE
 )

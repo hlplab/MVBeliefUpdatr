@@ -11,6 +11,7 @@ plot_expected_categories_density1D(
   data.test = NULL,
   facet_rows_by = NULL,
   facet_cols_by = NULL,
+  facet_wrap_by = NULL,
   animate_by = NULL,
   animation_follow = F,
   xlim,
@@ -43,7 +44,7 @@ plot_expected_categories_contour2D(
 
 \item{data.test}{Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)}
 
-\item{facet_rows_by, facet_cols_by, animate_by}{Which group variables, if any, should be used for faceting and/or
+\item{facet_rows_by, facet_cols_by, facet_wrap_by, animate_by}{Which group variables, if any, should be used for faceting and/or
 animation? (defaults: `NULL`)}
 
 \item{animation_follow}{Should the animation follow the data (zoom in and out)? (default: `FALSE`)}
@@ -51,7 +52,7 @@ animation? (defaults: `NULL`)}
 \item{xlim}{Limits for the x-axis.}
 
 \item{resolution}{How many steps along x and y should be calculated? Note that computational
-complexity increases quadratically with resolution. (default: 25)}
+complexity increases linearly with resolution. (default: 25)}
 
 \item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}

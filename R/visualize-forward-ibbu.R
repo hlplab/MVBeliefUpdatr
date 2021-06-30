@@ -71,7 +71,7 @@ check_compatibility_between_NIW_belief_and_data = function(
 #' @param x An \code{\link{NIW_belief}} or \code{\link{NIW_beliefs}} object.
 #' @param group.colors Vector of fill colors of same length as the number of unique groups in the NIW_belief(s) object, or
 #' `NULL` to use defaults. (default: `NULL`)
-#' @param facet_rows_by,facet_cols_by,animate_by Which group variables, if any, should be used for faceting and/or
+#' @param facet_rows_by,facet_cols_by,facet_wrap_by,animate_by Which group variables, if any, should be used for faceting and/or
 #' animation? (defaults: `NULL`)
 #' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
 #'
@@ -119,12 +119,12 @@ plot_NIW_belief_parameters = function(
 #' @param levels Levels of the confidence ellipses. (default: .5, .66, .8, .9., and .95)
 #' @param data.exposure Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)
 #' @param data.test Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)
-#' @param facet_rows_by,facet_cols_by,animate_by Which group variables, if any, should be used for faceting and/or
+#' @param facet_rows_by,facet_cols_by,facet_wrap_by,animate_by Which group variables, if any, should be used for faceting and/or
 #' animation? (defaults: `NULL`)
 #' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
 #' @param xlim Limits for the x-axis.
 #' @param resolution How many steps along x and y should be calculated? Note that computational
-#' complexity increases quadratically with resolution. (default: 25)
+#' complexity increases linearly with resolution. (default: 25)
 #' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
@@ -178,7 +178,7 @@ plot_expected_categories_density1D = function(
   x %<>%
     mutate(Sigma = map2(S, nu, get_expected_Sigma_from_S)) %>%
     crossing(!! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution)) %>%
-    mutate(density = unlist(pmap(.l = list("x" = !! sym(cue.labels[1]), "mean" = unlist(m), "sd" = unlist(Sigma)), .f = dnorm)))
+    mutate(density = unlist(pmap(.l = list("x" = !! sym(cue.labels[1]), "mean" = unlist(m), "sd" = unlist(Sigma)^.5), .f = dnorm)))
 
   p = ggplot(x,
              aes(
@@ -219,7 +219,7 @@ plot_expected_categories_density1D = function(
 #' @param levels Levels of the confidence ellipses. (default: .5, .66, .8, .9., and .95)
 #' @param data.exposure Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)
 #' @param data.test Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)
-#' @param facet_rows_by,facet_cols_by,animate_by Which group variables, if any, should be used for faceting and/or
+#' @param facet_rows_by,facet_cols_by,facet_wrap_by,animate_by Which group variables, if any, should be used for faceting and/or
 #' animation? (defaults: `NULL`)
 #' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
 #' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
@@ -250,7 +250,7 @@ plot_expected_categories_contour2D = function(
   facet_wrap_by = enquo(facet_wrap_by)
   animate_by = enquo(animate_by)
   x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
-                                                      !! facet_rows_by, !! facet_cols_by, !! animate_by)
+                                                      !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
   # Remember groups
   cue.labels = get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
@@ -301,6 +301,107 @@ plot_expected_categories_contour2D = function(
 
 
 
+#' Plot expected categorization function for univariate (1D) categories.
+#'
+#' Plot categorization function for univariate Gaussian categories expected given NIW parameters.
+#'
+#' @param target_category The index of the category for which categorization should be shown. (default: `1`)
+#' @param xlim,ylim Limits for the x- and y-axis.
+#' @param resolution How many steps along x and y should be calculated? Note that computational
+#' complexity increases linearly with resolution. (default: 25)
+#' @param logit Should the categorization function be plotted in logit (`TRUE`) or probabilities (`FALSE`)?
+#' (default: `FALSE`)
+#' @inheritParams plot_expected_categories_density1D
+#'
+#' @return ggplot object.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname plot_expected_categorization_function_1D
+#' @export
+#'
+plot_expected_categorization_function_1D = function(
+  x,
+  data.exposure = NULL,
+  data.test = NULL,
+  target_category = 1,
+  logit = F,
+  xlim, resolution = 25,
+  facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
+  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
+) {
+  facet_rows_by = enquo(facet_rows_by)
+  facet_cols_by = enquo(facet_cols_by)
+  facet_wrap_by = enquo(facet_wrap_by)
+  animate_by = enquo(animate_by)
+  x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
+                                                      !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
+  cue.labels = get_cue_labels_from_model(x)
+  assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
+
+  if (is_missing(xlim)) {
+    if (!is.null(data.exposure) & !is.null(data.test))
+      xlim = range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
+        if (!is.null(data.exposure))
+          xlim = range(data.exposure[[cue.labels[1]]]) else
+            if (!is.null(data.test))
+              xlim = range(data.test[[cue.labels[1]]])
+  }
+  assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
+
+  # Setting aes defaults
+  if(is.null(category.ids)) category.ids = levels(x$category)
+  if(is.null(category.labels)) category.labels = levels(x$category)
+  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
+  if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
+
+  if (any(!quo_is_null(facet_rows_by),
+          !quo_is_null(facet_cols_by),
+          !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! animate_by,
+                                                     .add = TRUE)
+
+  d = crossing(!! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution))
+
+  x %<>%
+    nest() %>%
+    mutate(f = map(data, get_categorization_function_from_NIW_belief, logit = logit)) %>%
+    # Join in vectored cues
+    left_join(
+      d %>%
+        transmute(x = pmap(.l = list(!!! syms(cue.labels)), .f = ~ c(...))) %>%
+        nest(cues = everything()),
+      by = character()) %>%
+    mutate(
+      p_cat = invoke_map(.f = f, .x = cues, target_category = target_category),
+      cues = NULL,
+      f = NULL) %>%
+    # Join separate cues back in
+    left_join(d %>% nest(cues = everything()), by = character()) %>%
+    unnest(c(cues, p_cat))
+
+  p = ggplot(x,
+             mapping = aes(
+               x = .data[[cue.labels[1]]],
+               y = if (logit) qlogis(.data$p_cat) else .data$p_cat)) +
+    geom_line() +
+    # geom_contour(
+    #   mapping = aes(z = if (logit) qlogis(.data$p_cat) else .data$p_cat)) +
+    { if (!is.null(data.test))
+      add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
+    { if (!is.null(data.exposure))
+      add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
+                                   category.ids = category.ids, category.labels = category.labels, category.colors) } +
+    scale_x_continuous(cue.labels[1]) +
+    scale_y_continuous(paste0("P(resp = ", category.labels[target_category], ")")) +
+    coord_cartesian(xlim = xlim) +
+    theme_bw()
+
+  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
+  return(p)
+}
+
 #' Plot expected categorization function for bivariate (2D) categories.
 #'
 #' Plot categorization function for bivariate Gaussian categories expected given NIW parameters.
@@ -329,7 +430,7 @@ plot_expected_categorization_function_2D = function(
   target_category = 1,
   logit = F,
   xlim, ylim, resolution = 25,
-  facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F,
+  facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
   facet_rows_by = enquo(facet_rows_by)
@@ -372,8 +473,7 @@ plot_expected_categorization_function_2D = function(
 
   d = crossing(
     !! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution),
-    !! sym(cue.labels[2]) := seq(min(ylim), max(ylim), length.out = resolution)
-  )
+    !! sym(cue.labels[2]) := seq(min(ylim), max(ylim), length.out = resolution))
 
   x %<>%
     nest() %>%
