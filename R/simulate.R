@@ -132,6 +132,7 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #' interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
 #' column must be present in the NIW_belief object specified as the priors argument. (default: `NULL`)
 #' @param method Which updating method should be used? See details. (default: "supervised-certain")
+#' @param verbose Should more informative output be provided?
 #'
 #' @return An NIW_belief object.
 #'
@@ -146,11 +147,19 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 update_NIW_belief_by_sufficient_statistics_of_one_category = function(
   prior, x_category, x_mean, x_S, x_N,
   add_noise = NULL,
-  method = "label-certain"
+  method = "label-certain",
+  verbose = FALSE
 ) {
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
   assert_NIW_belief(prior)
-  assert_that(length(x_N) == 1 & x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
+  assert_that(is_scalar_double(x_N), msg = "x_N must be a scalar double.")
+  assert_that(x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
+  # if there's nothing to update, return prior.
+  if (any(is.na(x_mean), x_N == 0)) {
+    if (verbose) message("Missing observation (x_N == 0 or x_mean is NA). Returning prior as posterior.")
+    return(prior)
+  }
+
   assert_that(method %in% c("no-updating",
                             "label-certain",
                             "nolabel-criterion", "nolabel-sampling", "nolabel-proportional",
@@ -207,10 +216,11 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
 update_NIW_belief_by_one_observation = function(
   prior, x_category, x,
   add_noise = NULL,
-  method = "label-certain"
+  method = "label-certain",
+  verbose = FALSE
 ) {
   update_NIW_belief_by_sufficient_statistics_of_one_category(prior, x_category = x_category, x_mean = x, x_S = 0L, x_N = 1L,
-                                             add_noise = add_noise, method = method)
+                                             add_noise = add_noise, method = method, verbose = verbose)
 }
 
 
@@ -234,6 +244,8 @@ update_NIW_belief_by_one_observation = function(
 #' exposure data is assumed to be in the order in which it should be presented.
 #' @param add_noise Determines whether multivariate Gaussian noise is added to the input. See \code{
 #' \link{update_NIW_belief_by_sufficient_statistics_of_one_category}}. (default: `NULL`)
+#' @param add_lapse Determines the proportion of trials on which the listener lapses, not updating beliefs. Must be a number
+#' between 0 and 1, or NULL if lapses are to be ignored. (default: `NULL`)
 #' @param method Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
 #' The length of this argument should either be 1 (in which case it is recycled for each observation) or the same as
 #' the number of rows in \code{expsure}. (default: "label-certain").
@@ -243,6 +255,7 @@ update_NIW_belief_by_one_observation = function(
 #' (default: `TRUE`)
 #' @param keep.exposure_data Should the input data be included in the output? If `FALSE` then only the category and cue
 #' columns will be kept. If `TRUE` then all columns will be kept. (default: `FALSE`)
+#' @param verbose Should more informative output be provided?
 #'
 #' @return An NIW_belief object.
 #'
@@ -259,13 +272,21 @@ update_NIW_beliefs_incrementally <- function(
   exposure.cues = get_cue_labels_from_model(prior),
   exposure.order = NULL,
   add_noise = NULL,
+  add_lapse = NULL,
   method = "label-certain",
   keep.update_history = TRUE,
-  keep.exposure_data = FALSE
+  keep.exposure_data = FALSE,
+  verbose = FALSE
 ){
   message("Assuming that category variable in NIW belief/ideal adaptor is called category.")
 
   assert_NIW_belief(prior)
+  assert_that(any(is.null(add_noise), is_scalar_character(add_noise)),
+              msg = "add_noise must be NULL or a scalar character.")
+  assert_that(any(is.null(add_lapse), is_scalar_double(add_lapse)),
+              msg = "add_noise must be NULL or a scalar double (between 0 or 1).")
+  assert_that(between(add_lapse, 0, 1),
+              msg = "If not NULL, add_noise must be between 0 to 1.")
   assert_that(all(is.flag(keep.update_history), is.flag(keep.exposure_data)))
   assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
   assert_that(exposure.category %in% names(exposure),
@@ -286,7 +307,9 @@ update_NIW_beliefs_incrementally <- function(
   # Prepare exposure data
   exposure %<>%
     { if (!is.null(exposure.order)) arrange(., !! sym(exposure.order)) else . } %>%
-    make_vector_column(exposure.cues, "cues")
+    make_vector_column(exposure.cues, "cues") %>%
+    # Apply lapses
+    { if (!is.null(add_lapse)) mutate(., cues = ifelse(rbinom(nrow(.), 1, add_lapse), NA, cues)) else . }
 
   if (keep.update_history)
     prior %<>%
@@ -300,7 +323,8 @@ update_NIW_beliefs_incrementally <- function(
         x = unlist(exposure[i, "cues"]),
         x_category = exposure[i,][[exposure.category]],
         add_noise = add_noise,
-        method = method[i])
+        method = method[i],
+        verbose = verbose)
 
     if (keep.update_history) {
       posterior %<>%

@@ -11,9 +11,11 @@ update_NIW_beliefs_incrementally(
   exposure.cues = get_cue_labels_from_model(prior),
   exposure.order = NULL,
   add_noise = NULL,
+  add_lapse = NULL,
   method = "label-certain",
   keep.update_history = TRUE,
-  keep.exposure_data = FALSE
+  keep.exposure_data = FALSE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -32,6 +34,9 @@ exposure data is assumed to be in the order in which it should be presented.}
 \item{add_noise}{Determines whether multivariate Gaussian noise is added to the input. See \code{
 \link{update_NIW_belief_by_sufficient_statistics_of_one_category}}. (default: `NULL`)}
 
+\item{add_lapse}{Determines the proportion of trials on which the listener lapses, not updating beliefs. Must be a number
+between 0 and 1, or NULL if lapses are to be ignored. (default: `NULL`)}
+
 \item{method}{Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
 The length of this argument should either be 1 (in which case it is recycled for each observation) or the same as
 the number of rows in \code{expsure}. (default: "label-certain").}
@@ -43,6 +48,8 @@ visualize the changes in the category parameters, posterior predictive, categori
 
 \item{keep.exposure_data}{Should the input data be included in the output? If `FALSE` then only the category and cue
 columns will be kept. If `TRUE` then all columns will be kept. (default: `FALSE`)}
+
+\item{verbose}{Should more informative output be provided?}
 }
 \value{
 An NIW_belief object.

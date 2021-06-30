@@ -12,7 +12,8 @@ update_NIW_belief_by_sufficient_statistics_of_one_category(
   x_S,
   x_N,
   add_noise = NULL,
-  method = "label-certain"
+  method = "label-certain",
+  verbose = FALSE
 )
 
 update_NIW_belief_by_one_observation(
@@ -20,7 +21,8 @@ update_NIW_belief_by_one_observation(
   x_category,
   x,
   add_noise = NULL,
-  method = "label-certain"
+  method = "label-certain",
+  verbose = FALSE
 )
 }
 \arguments{
@@ -42,6 +44,8 @@ interested in estimating the consequences of noise across individuals. If add_no
 column must be present in the NIW_belief object specified as the priors argument. (default: `NULL`)}
 
 \item{method}{Which updating method should be used? See details. (default: "supervised-certain")}
+
+\item{verbose}{Should more informative output be provided?}
 
 \item{x}{A single observation.}
 }
