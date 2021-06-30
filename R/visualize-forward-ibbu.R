@@ -366,7 +366,7 @@ plot_expected_categorization_function_1D = function(
 
   x %<>%
     nest() %>%
-    mutate(f = map(data, get_categorization_function_from_NIW_belief, logit = logit)) %>%
+    mutate(f = map(data, get_categorization_function_from_NIW_ideal_adaptor, logit = logit)) %>%
     # Join in vectored cues
     left_join(
       d %>%
@@ -477,7 +477,7 @@ plot_expected_categorization_function_2D = function(
 
   x %<>%
     nest() %>%
-    mutate(f = map(data, get_categorization_function_from_NIW_belief, logit = logit)) %>%
+    mutate(f = map(data, get_categorization_function_from_NIW_ideal_adaptor, logit = logit)) %>%
     # Join in vectored cues
     left_join(
       d %>%
