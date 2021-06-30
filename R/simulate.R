@@ -152,7 +152,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
 ) {
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
   assert_NIW_belief(prior)
-  assert_that(is_scalar_double(x_N), msg = "x_N must be a scalar double.")
+  assert_that(all(is.scalar(x_N), is.numeric(x_N)), msg = "x_N must be a scalar numeric.")
   assert_that(x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
   # if there's nothing to update, return prior.
   if (any(is.na(x_mean), x_N == 0)) {
@@ -284,7 +284,7 @@ update_NIW_beliefs_incrementally <- function(
   assert_that(any(is.null(add_noise), is_scalar_character(add_noise)),
               msg = "add_noise must be NULL or a scalar character.")
   assert_that(any(is.null(add_lapse), is_scalar_double(add_lapse)),
-              msg = "add_noise must be NULL or a scalar double (between 0 or 1).")
+              msg = "add_lapse must be NULL or a scalar double (between 0 or 1).")
   assert_that(between(add_lapse, 0, 1),
               msg = "If not NULL, add_noise must be between 0 to 1.")
   assert_that(all(is.flag(keep.update_history), is.flag(keep.exposure_data)))
