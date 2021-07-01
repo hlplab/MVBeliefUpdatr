@@ -365,7 +365,7 @@ plot_expected_categorization_function_1D = function(
   d = crossing(!! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution))
 
   x %<>%
-    nest() %>%
+    nest(data = -group_vars(.)) %>%
     mutate(f = map(data, get_categorization_function_from_NIW_ideal_adaptor, logit = logit)) %>%
     # Join in vectored cues
     left_join(

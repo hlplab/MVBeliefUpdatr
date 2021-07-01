@@ -40,16 +40,16 @@ get_posterior_predictive = function(x, m, S, kappa, nu, log = T) {
 
   assert_that(all(is.number(kappa), is.number(nu)))
   assert_that(is.flag(log))
+
   D = dim(S)[1]
-  if (is_scalar_double(S)) {
-    assert_that(nu >= 1,
-                msg = "nu must be at least as large as the number of dimensions of the multivariate
+  if (is.null(D)) D = 1
+  assert_that(nu >= D,
+              msg = "nu must be at least as large as the number of dimensions of the multivariate
               Normal.")
+
+  if (D == 1) {
     assert_that(is_scalar_double(m), msg = "S and m are not of compatible dimensions.")
   } else {
-    assert_that(nu >= D,
-                msg = "nu must be at least as large as the number of dimensions of the multivariate
-              Normal.")
     assert_that(dim(S)[2] == D,
                 msg = "S is not a square matrix, and thus not a Scatter matrix")
     assert_that(length(m) == dim(x)[2],
@@ -127,7 +127,7 @@ get_categorization_function = function(
       exp(
         log_p[,target_category] + log(priors[target_category]) -
           log(rowSums(exp(log_p) * priors))) *
-      (1 - lapse_rate[target_category]) + bias[target_category]
+      (1 - lapse_rate[target_category]) + bias[target_category] * lapse_rate[target_category]
 
     if (logit)
       return(qlogis(p_target))

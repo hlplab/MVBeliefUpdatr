@@ -42,6 +42,7 @@ dmvnorm <- function (x, mean = rep(0, length(sigma)^.5), sigma = diag(length(mea
 }
 
 # Added here to handle the case of univariate categories
+#' @export
 dmvt <- function (x, delta = rep(0, length(sigma)^.5), sigma = diag(length(mean)), df, ...) {
   if (length(mean) == 1)
     # Using dlst instead of dt since dt is for standardized t distribution (no scale parameter)
