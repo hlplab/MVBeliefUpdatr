@@ -386,8 +386,6 @@ plot_expected_categorization_function_1D = function(
                x = .data[[cue.labels[1]]],
                y = if (logit) qlogis(.data$p_cat) else .data$p_cat)) +
     geom_line() +
-    # geom_contour(
-    #   mapping = aes(z = if (logit) qlogis(.data$p_cat) else .data$p_cat)) +
     { if (!is.null(data.test))
       add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
