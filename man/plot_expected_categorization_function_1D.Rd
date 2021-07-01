@@ -11,10 +11,10 @@ plot_expected_categorization_function_1D(
   target_category = 1,
   logit = F,
   xlim,
-  ylim,
   resolution = 25,
   facet_rows_by = NULL,
   facet_cols_by = NULL,
+  facet_wrap_by = NULL,
   animate_by = NULL,
   animation_follow = F,
   category.ids = NULL,
@@ -44,6 +44,9 @@ complexity increases linearly with resolution. (default: 25)}
 animation? (defaults: `NULL`)}
 
 \item{facet_cols_by}{Which group variables, if any, should be used for faceting and/or
+animation? (defaults: `NULL`)}
+
+\item{facet_wrap_by}{Which group variables, if any, should be used for faceting and/or
 animation? (defaults: `NULL`)}
 
 \item{animate_by}{Which group variables, if any, should be used for faceting and/or

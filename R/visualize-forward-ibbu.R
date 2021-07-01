@@ -330,7 +330,8 @@ plot_expected_categorization_function_1D = function(
   logit = F,
   xlim, resolution = 25,
   facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
-  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
+  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
+  ...
 ) {
   facet_rows_by = enquo(facet_rows_by)
   facet_cols_by = enquo(facet_cols_by)
@@ -359,7 +360,7 @@ plot_expected_categorization_function_1D = function(
 
   if (any(!quo_is_null(facet_rows_by),
           !quo_is_null(facet_cols_by),
-          !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! animate_by,
+          !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by,
                                                      .add = TRUE)
 
   d = crossing(!! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution))
@@ -385,7 +386,7 @@ plot_expected_categorization_function_1D = function(
              mapping = aes(
                x = .data[[cue.labels[1]]],
                y = if (logit) qlogis(.data$p_cat) else .data$p_cat)) +
-    geom_line() +
+    geom_line(...) +
     { if (!is.null(data.test))
       add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
@@ -429,7 +430,8 @@ plot_expected_categorization_function_2D = function(
   logit = F,
   xlim, ylim, resolution = 25,
   facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
-  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
+  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
+  ...
 ) {
   facet_rows_by = enquo(facet_rows_by)
   facet_cols_by = enquo(facet_cols_by)
@@ -490,14 +492,11 @@ plot_expected_categorization_function_2D = function(
     left_join(d %>% nest(cues = everything()), by = character()) %>%
     unnest(c(cues, p_cat))
 
-
   p = ggplot(x,
              mapping = aes(
                x = .data[[cue.labels[1]]],
                y = .data[[cue.labels[2]]])) +
-    geom_raster(
-      mapping = aes(fill = if (logit) qlogis(.data$p_cat) else .data$p_cat),
-      alpha = .5) +
+    geom_raster(mapping = aes(fill = if (logit) qlogis(.data$p_cat) else .data$p_cat), ...) +
     # geom_contour(
     #   mapping = aes(z = if (logit) qlogis(.data$p_cat) else .data$p_cat)) +
     { if (!is.null(data.test))
