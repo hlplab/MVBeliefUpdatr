@@ -21,7 +21,8 @@ plot_expected_categorization_function_2D(
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
-  category.linetypes = NULL
+  category.linetypes = NULL,
+  ...
 )
 }
 \arguments{
