@@ -54,8 +54,6 @@ check_compatibility_between_NIW_belief_and_data = function(
               msg = "Can't plot test data: No test data provided.")
   assert_that(!all(!is.null(data.test), cue.labels %nin% names(data.test)),
               msg = "Can't plot test data: cue names in test data must match those in the NIW belief object.")
-
-  return(x)
 }
 
 
@@ -131,6 +129,7 @@ plot_NIW_belief_parameters = function(
 #' @param category.colors Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 #' @param category.linetypes Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 #' Currently being ignored.
+#' @param ... additional arguments handed to geom_line.
 #'
 #' @return ggplot object.
 #'
@@ -147,14 +146,15 @@ plot_expected_categories_density1D = function(
   data.test = NULL,
   facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
   xlim, resolution = 25,
-  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
+  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
+  ...
 ) {
   facet_rows_by = enquo(facet_rows_by)
   facet_cols_by = enquo(facet_cols_by)
   facet_wrap_by = enquo(facet_wrap_by)
   animate_by = enquo(animate_by)
-  x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
-                                                      !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
+  check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
+                                                  !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
   # Remember groups
   cue.labels = get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
@@ -178,14 +178,27 @@ plot_expected_categories_density1D = function(
   x %<>%
     mutate(Sigma = map2(S, nu, get_expected_Sigma_from_S)) %>%
     crossing(!! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution)) %>%
-    mutate(density = unlist(pmap(.l = list("x" = !! sym(cue.labels[1]), "mean" = unlist(m), "sd" = unlist(Sigma)^.5), .f = dnorm)))
+    mutate(density = unlist(pmap(.l = list("x" = !! sym(cue.labels[1]), "mean" = unlist(m), "sd" = unlist(Sigma)^.5), .f = dnorm))) %>%
+    # Get group structure again, as crossing apparently removes it
+    group_by(!!! syms(group_vars(x)))
+
+  if (any(!quo_is_null(facet_rows_by),
+          !quo_is_null(facet_cols_by),
+          !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by,
+                                                     .add = TRUE)
 
   p = ggplot(x,
              aes(
                x = .data[[cue.labels[1]]],
                y = .data$density,
                color = .data$category)) +
-    geom_line(mapping = aes(group = .data$category)) +
+    geom_line(
+      # Group lines but category *and* all grouping variables handed to the plot
+      mapping = aes(
+        group = interaction(
+          .data$category,
+          !!! syms(group_vars(x)))),
+      ...) +
     { if (!is.null(data.test))
       add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
@@ -228,6 +241,7 @@ plot_expected_categories_density1D = function(
 #' @param category.colors Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 #' @param category.linetypes Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 #' Currently being ignored.
+#' @param ... additional arguments handed to geom_polygon.
 #'
 #' @return ggplot object.
 #'
@@ -243,14 +257,15 @@ plot_expected_categories_contour2D = function(
   data.exposure = NULL,
   data.test = NULL,
   facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F,
-  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
+  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
+  ...
 ) {
   facet_rows_by = enquo(facet_rows_by)
   facet_cols_by = enquo(facet_cols_by)
   facet_wrap_by = enquo(facet_wrap_by)
   animate_by = enquo(animate_by)
-  x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
-                                                      !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
+  check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
+                                                  !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
   # Remember groups
   cue.labels = get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
@@ -269,7 +284,9 @@ plot_expected_categories_contour2D = function(
     # (bug was reported and added as milestone, 11/2019)
     mutate(ellipse = map(ellipse, as_tibble)) %>%
     select(-c(kappa, nu, m, S, Sigma, lapse_rate)) %>%
-    unnest(ellipse)
+    unnest(ellipse) %>%
+    # Get group structure again, as crossing apparently removes it
+    group_by(!!! syms(group_vars(x)))
 
   p = ggplot(x,
              aes(
@@ -277,7 +294,11 @@ plot_expected_categories_contour2D = function(
                y = .data[[cue.labels[2]]],
                fill = .data$category)) +
     geom_polygon(aes(alpha = 1 - .data$level,
-                     group = paste(.data$category, .data$level))) +
+                     group = interaction(
+                       .data$category,
+                       .data$level,
+                       !!! syms(group_vars(x)))),
+                 ...) +
     { if (!is.null(data.test))
       add_test_data_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
@@ -337,8 +358,8 @@ plot_expected_categorization_function_1D = function(
   facet_cols_by = enquo(facet_cols_by)
   facet_wrap_by = enquo(facet_wrap_by)
   animate_by = enquo(animate_by)
-  x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
-                                                      !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
+  check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
+                                                  !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
   cue.labels = get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
 
@@ -437,8 +458,8 @@ plot_expected_categorization_function_2D = function(
   facet_cols_by = enquo(facet_cols_by)
   facet_wrap_by = enquo(facet_wrap_by)
   animate_by = enquo(animate_by)
-  x = check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
-                                                      !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
+  check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
+                                                  !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
   cue.labels = get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
   if (is_missing(xlim)) {

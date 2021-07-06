@@ -19,7 +19,8 @@ plot_expected_categories_density1D(
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
-  category.linetypes = NULL
+  category.linetypes = NULL,
+  ...
 )
 
 plot_expected_categories_contour2D(
@@ -34,7 +35,8 @@ plot_expected_categories_contour2D(
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
-  category.linetypes = NULL
+  category.linetypes = NULL,
+  ...
 )
 }
 \arguments{
@@ -63,6 +65,8 @@ to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to han
 
 \item{category.linetypes}{Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 Currently being ignored.}
+
+\item{...}{additional arguments handed to geom_polygon.}
 
 \item{levels}{Levels of the confidence ellipses. (default: .5, .66, .8, .9., and .95)}
 }

@@ -64,6 +64,8 @@ to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to han
 
 \item{category.linetypes}{Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 Currently being ignored.}
+
+\item{...}{additional arguments handed to geom_polygon.}
 }
 \value{
 ggplot object.
