@@ -1,13 +1,13 @@
 Package: MVBeliefUpdatr
-Title: Fitting, Summarizing, and Visualizing of Multivariate Gaussian Belief-Updating
-Version: 0.0.0.9000
+Title: Fitting, Summarizing, and Visualizing of Multivariate Gaussian Ideal Observers and Adaptors
+Version: 0.0.1.0001
 Authors@R: 
     person(given = "Florian",
            family = "Jaeger",
            role = c("aut", "cre"),
            email = "fjaeger@ur.rochester.edu",
            comment = c(ORCID = "0000-0002-1158-7308"))
-Description: A package to model incremental Bayesian belief-updating for multivariate Gaussian categories. 
+Description: A package to model and visualize incremental Bayesian categorization and belief-updating for multivariate Gaussian categories. 
 License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true

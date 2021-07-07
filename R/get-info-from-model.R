@@ -35,3 +35,20 @@ get_category_labels_from_model = function(x) {
     error("Object not recognized.")
   }
 }
+
+
+#' Get number of categories from likelihood or model
+#'
+#' Get the number of unique category labels from a likelihood (e.g., MVG or NIW_belief) or model (e.g., an MVG ideal observer
+#' or NIW ideal adaptor) object.
+#'
+#' @param x A likelihood or model object.
+#'
+#' @export
+get_nlevels_of_category_labels_from_model = function(x) {
+  if (is.MVG(x) | is.MVG_ideal_observer(x) | is.NIW_belief(x) | is.NIW_ideal_adaptor(x)) {
+    return(length(unique(x$category)))
+  } else {
+    error("Object not recognized.")
+  }
+}

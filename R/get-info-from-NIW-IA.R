@@ -74,7 +74,10 @@ get_categorization_from_NIW_ideal_adaptor = function(
     assert_that(assert_NIW_ideal_adaptor(belief), msg = "If add_lapse = 'sample', belief must be an  ideal adaptor.")
     lapse_rate = unique(belief$lapse_rate)
     lapse_biases = belief$bias
-  } else lapse_rate = 0
+  } else {
+    lapse_rate = 0
+    lapse_biases = rep(0, get_nlevels_of_category_labels_from_model(belief))
+  }
 
   p = get_posterior_predictive_from_NIW_belief(x = x, belief = belief, log = F) %>%
     group_by(category) %>%
@@ -89,7 +92,7 @@ get_categorization_from_NIW_ideal_adaptor = function(
     mutate(pp = ifelse(
       rep(
         rbinom(1, 1, lapse_rate),
-        length(unique(belief$category))),
+        get_nlevels_of_category_labels_from_model(belief)),
       lapse_biases, # substitute lapse probabilities for posterior
       pp))
 
@@ -100,9 +103,9 @@ get_categorization_from_NIW_ideal_adaptor = function(
         pp = ifelse(
           rep(
             sum(pp == max(pp)) > 1,
-            length(unique(belief$category))),
+            get_nlevels_of_category_labels_from_model(belief)),
           pp + runif(
-            length(unique(belief$category)),
+            get_nlevels_of_category_labels_from_model(belief),
             min = 0,
             max = 0),
           pp),
