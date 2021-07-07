@@ -170,24 +170,34 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
                 msg = "For this updating method, only incremental updating (one observations at a time) is implemented.")
   assert_that(any(is.null(add_noise), add_noise %in% c("sample", "marginalize")),
               msg = 'add_noise must be one of "sample" or "marginalize"')
+  assert_that(any(is.null(add_noise), "Sigma_noise" %in% names(prior)),
+              msg = "Can't add noise: argument priors does not have column Sigma_noise.")
   if (!is.null(add_noise))
     assert_that(any(add_noise %in% "marginalize",
                     all(add_noise %in% c("sample"), is_scalar_integerish(x_N), is_weakly_greater_than(x_N, 1))),
               msg = "For noise sampling, x_N must be a positive integer")
-  assert_that(any(is.null(add_noise), "Sigma_noise" %in% names(prior)),
-              msg = "Can't add noise: argument priors does not have column Sigma_noise.")
 
   x_Ns = as.list(rep(0, length(prior$category)))
   # Determine how observation should be distributed across categories
   if (method == "no-updating") return(prior) else
     if (method == "label-certain") x_Ns[[which(prior$category == x_category)]] <- x_N else
       if (method == "nolabel-uniform") x_Ns <- as.list(1 / length(prior$category) * x_N) else
-        if (method %in% c("nolabel-criterion", "nolabel-sampling", "nolabel-proportional")) {
-        x_Ns = as.list(get_categorization_from_NIW_ideal_adaptor(
-          x = x_mean, belief = prior,
-          decision_rule = gsub("nolabel-", "", method),
-          simplify = F) * x_N)
-      }
+        if (method %in% c("nolabel-criterion", "nolabel-proportional")) {
+          x_Ns = get_categorization_from_NIW_ideal_adaptor(
+            x = x_mean, belief = prior,
+            decision_rule = gsub("nolabel-", "", method),
+            simplify = F) %>%
+              pull(response) * x_N %>%
+            as.list()
+        } else if (method %in% c("nolabel-sampling")) {
+          x_Ns = get_categorization_from_NIW_ideal_adaptor(
+            x = x_mean, belief = prior,
+            decision_rule = "proportional",
+            simplify = F) %>%
+              pull(response) %>%
+              rmultinom(1, x_N, .) %>%
+            as.list()
+        }
 
   # Handle noise
   if (is.null(add_noise)) add_noise = ""
@@ -260,7 +270,7 @@ update_NIW_belief_by_one_observation = function(
 #' \link{update_NIW_belief_by_sufficient_statistics_of_one_category}}. (default: `NULL`)
 #' @param add_lapse Determines the proportion of trials on which the listener lapses, not updating beliefs. If add_lapse is
 #' "sample", the lapse rate from the ideal adaptor will be used. If add_lapse is a number between 0 to 1, this will be
-#' interpreted as the lapse rate. If not NULL, the lapse is assumed to be zero. (default: `NULL`)
+#' interpreted as the lapse rate. If NULL, the lapse is assumed to be zero. (default: `NULL`)
 #' @param method Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
 #' The length of this argument should either be 1 (in which case it is recycled for each observation) or the same as
 #' the number of rows in \code{expsure}. (default: "label-certain").

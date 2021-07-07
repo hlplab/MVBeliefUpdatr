@@ -3,6 +3,27 @@
 NULL
 
 
+#' Get expected category covariance from Scatter matrix S and pseudocount nu
+#'
+#' @seealso \code{\link{get_S_from_Sigma}}
+#' @export
+get_expected_Sigma_from_S = function(S, nu) {
+  D = if (is.null(dim(S)[1])) 1 else dim(S)[1]
+
+  return(S / (nu - D - 1))
+}
+
+#' Get Scatter matrix S from expected category covariance Sigma and pseudocount nu
+#'
+#' @seealso \code{\link{get_Sigma_from_S}}
+#' @export
+get_S_from_expected_Sigma = function(Sigma, nu) {
+  D = if (is.null(dim(Sigma)[1])) 1 else dim(Sigma)[1]
+
+  return(Sigma * (nu - D - 1))
+}
+
+
 #' Get posterior predictive
 #'
 #' Get posterior predictive of observations x given the NIW parameters m, S, kappa, and nu. This is
@@ -66,6 +87,13 @@ get_posterior_predictive = function(x, m, S, kappa, nu, log = T) {
 }
 
 
+#' @rdname get_posterior_predictive
+#' @export
+get_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
+  get_posterior_predictive(x, m, S, kappa, nu, log = F)
+}
+
+
 #' Get categorization function
 #'
 #' Returns a categorization function for the first category, based on a set of parameters for the Normal-inverse-Wishart (NIW)
@@ -109,59 +137,33 @@ get_categorization_function = function(
   if (!is.null(bias)) assert_that(all(between(bias, 0, 1), sum(bias) == lapse_rate[1]),
                                   msg = "biases must sum up to lapse rate.") else bias = lapse_rate / n.cat
 
-  # Get dimensions of multivariate category
-  D = length(ms[[1]])
-  assert_that(nus[[1]] >= D,
-              msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
+                                  # Get dimensions of multivariate category
+                                  D = length(ms[[1]])
+                                  assert_that(nus[[1]] >= D,
+                                              msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
 
-  f <- function(x, target_category = 1) {
-    log_p = matrix(
-      nrow = length(x),
-      ncol = n.cat
-    )
-    for (cat in 1:n.cat) {
-      log_p[, cat] = get_posterior_predictive(x, ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T)
-    }
+                                  f <- function(x, target_category = 1) {
+                                    log_p = matrix(
+                                      nrow = length(x),
+                                      ncol = n.cat
+                                    )
+                                    for (cat in 1:n.cat) {
+                                      log_p[, cat] = get_posterior_predictive(x, ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T)
+                                    }
 
-    p_target =
-      exp(
-        log_p[,target_category] + log(priors[target_category]) -
-          log(rowSums(exp(log_p) * priors))) *
-      (1 - lapse_rate[target_category]) + bias[target_category] * lapse_rate[target_category]
+                                    p_target =
+                                      exp(
+                                        log_p[,target_category] + log(priors[target_category]) -
+                                          log(rowSums(exp(log_p) * priors))) *
+                                      (1 - lapse_rate[target_category]) + bias[target_category] * lapse_rate[target_category]
 
-    if (logit)
-      return(qlogis(p_target))
-    else
-      return(p_target)
-  }
+                                    if (logit)
+                                      return(qlogis(p_target))
+                                    else
+                                      return(p_target)
+                                  }
 
-  return(f)
+                                  return(f)
 }
 
-#' @rdname get_posterior_predictive
-#' @export
-get_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
-  get_posterior_predictive(x, m, S, kappa, nu, log = F)
-}
-
-
-#' Get expected category covariance from Scatter matrix S and pseudocount nu
-#'
-#' @seealso \code{\link{get_S_from_Sigma}}
-#' @export
-get_expected_Sigma_from_S = function(S, nu) {
-  D = if (is.null(dim(S)[1])) 1 else dim(S)[1]
-
-  return(S / (nu - D - 1))
-}
-
-#' Get Scatter matrix S from expected category covariance Sigma and pseudocount nu
-#'
-#' @seealso \code{\link{get_Sigma_from_S}}
-#' @export
-get_S_from_expected_Sigma = function(Sigma, nu) {
-  D = if (is.null(dim(Sigma)[1])) 1 else dim(Sigma)[1]
-
-  return(Sigma * (nu - D - 1))
-}
 

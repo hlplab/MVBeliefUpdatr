@@ -8,6 +8,8 @@ get_categorization_from_NIW_ideal_adaptor(
   x,
   belief,
   decision_rule,
+  add_noise = NULL,
+  add_lapse = NULL,
   simplify = F
 )
 }
@@ -17,6 +19,17 @@ get_categorization_from_NIW_ideal_adaptor(
 \item{belief}{An \code{\link[=is.NIW_belief]{NIW_belief}} object.}
 
 \item{decision_rule}{Must be one of "criterion", "proportional", or "sampling".}
+
+\item{add_noise}{Determines whether multivariate Gaussian noise is added to the input.
+If `NULL`, no noise is added during the updating. If "sample" then a sample of
+noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
+that results from convolving the input with noise. This latter option might be helpful, for example, if one is
+interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
+column must be present in the NIW_belief object specified as the priors argument. (default: `NULL`)}
+
+\item{add_lapse}{Determines the proportion of trials on which the listener lapses, not categorizing based on the
+percept. If add_lapse is "sample", the lapse rate and bias from the ideal adaptor will be used. If NULL, the lapse
+is assumed to be zero. (default: `NULL`)}
 
 \item{simplify}{Should the output be simplified, and just the label of the selected category be returned? This
 option is only available for the criterion and sampling decision rules. (default: `FALSE`)}
