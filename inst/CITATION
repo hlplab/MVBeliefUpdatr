@@ -1,0 +1,22 @@
+year <- sub("-.*", "", meta$Date)
+note <- sprintf("R package version %s", meta$Version)
+
+bibentry(bibtype = "Manual",
+         title = "{MVBeliefUpdatr}: Multivariate Bayesian ideal observers and belief-updating.",
+         author = c(person("T. Florian", "Jaeger")),
+         year = year,
+         note = note,
+         url = "https://github.com/hlplab/MVBeliefUpdatr")
+
+bibentry(bibtype = "Article",
+         title = "Robust speech perception: Recognize the familiar, generalize to the
+similar, and adapt to the novel",
+         author = c(
+          person("Dave F.", "Kleinschmidt"),
+          person("T. Florian", "Jaeger")),
+         year = "2015",
+         journal = "Psychological Review",
+         volume = "122",
+         issue = "2",
+         pages = "148–203",
+         url = "http://dx.doi.org/10.1037/a0038695")

@@ -14,7 +14,7 @@ get_categorization_from_NIW_ideal_adaptor(
 )
 }
 \arguments{
-\item{x}{An observation.}
+\item{x}{A vector of observations.}
 
 \item{belief}{An \code{\link[=is.NIW_belief]{NIW_belief}} object.}
 
@@ -35,8 +35,8 @@ is assumed to be zero. (default: `NULL`)}
 option is only available for the criterion and sampling decision rules. (default: `FALSE`)}
 }
 \value{
-Either a vector of posterior probabilities of the same length as the number of categories in the NIW
-belief object, or a character indicating the chosen category (if simplify = `TRUE`).
+Either a tibble of observations with posterior probabilities for each category (in long format), or a
+character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
 }
 \description{
 Categorize a single observation based on an NIW belief. The decision rule can be specified to be either the
