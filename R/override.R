@@ -7,14 +7,14 @@ NULL
 #' @export
 colMeans <- function(x, ...) {
   if (!is.array(x) || length(dim(x)) < 2L)
-    mean(x) else colMeans(x)
+    mean(x) else base::colMeans(x)
 }
 
 # Added here to handle the case of univariate categories
 #' @export
 cov <- function(x, ...) {
   if (!is.array(x) || length(dim(x)) < 2L)
-    var(x) else cov(x)
+    var(x) else stats::cov(x)
 }
 
 #' Overrides stats::rmultinom, reformatting its output. Specifically, the output of stats:rmultinom is transpased, so
