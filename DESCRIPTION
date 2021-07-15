@@ -37,6 +37,7 @@ Imports:
     gganimate,
     ggplot2,
     ggridges,
+    ggforce,
     Hmisc,
     magrittr,
     purrr,

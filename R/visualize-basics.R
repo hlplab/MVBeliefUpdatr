@@ -2,6 +2,7 @@
 #' @importFrom ellipse ellipse
 #' @importFrom tidybayes mean_hdi
 #' @importFrom scales trans_new
+#' @importFrom ggforce stat_ellipse
 NULL
 
 
@@ -198,3 +199,45 @@ facet_or_animate = function(p, facet_rows_by, facet_cols_by, facet_wrap_by, anim
   return(p)
 }
 
+
+#' Plot pairwise cue correlation matrix
+#'
+#' Plots a n x n correlation matrix, using ggforce::facet_matrix, with univariate densities for each category on
+#' the diagonal, scatter plots in the lower triangle and 95% bivariate Gaussian ellipsoids on the upper diagonal.
+#'
+#' @param data A `tibble` or `data.frame` that contains the `cues` and `category`.
+#' @param cues Variables in `data` -containing the cue values that are to be plotted.
+#' @param category Variable in `data` that contains the category information. (currently required)
+#' @param category.colors The colors to be mapped onto the category values.
+#'
+#' @return A ggplot2 plot.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#'
+#' @export
+plot_pairwise_cue_correlation_matrix <- function(
+  data,
+  cues,
+  category = category,
+  category.colors = 1:length(unique(data$category))
+) {
+  cues = enquos(cues)
+  category = enquo(category)
+
+  data %>%
+    ggplot(aes(x = .panel_x, y = .panel_y, colour = !! category, fill = !! category)) +
+    scale_colour_manual(values = category.colors) +
+    scale_fill_manual(values = category.colors) +
+    geom_point(alpha = 0.6, shape = 16, size = 1) +
+    geom_autodensity(alpha = .04, position = "identity") +
+    stat_ellipse(type = "norm") +
+    facet_matrix(
+      vars(!!! cues),
+      layer.diag = 2,
+      layer.upper = 3,
+      grid.y.diag= FALSE) +
+    theme_bw()
+}
