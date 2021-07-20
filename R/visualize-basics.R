@@ -2,7 +2,6 @@
 #' @importFrom ellipse ellipse
 #' @importFrom tidybayes mean_hdi
 #' @importFrom scales trans_new
-#' @importFrom ggforce stat_ellipse
 NULL
 
 
