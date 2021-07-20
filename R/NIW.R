@@ -134,36 +134,36 @@ get_categorization_function = function(
               are_equal(length(ms), length(nus)),
               msg = "The number of ms, Ss, kappas, nus, and priors must be identical.")
   if (!is.null(lapse_rate)) assert_that(all(between(lapse_rate, 0, 1))) else lapse_rate = rep(0, n.cat)
-  if (!is.null(bias)) assert_that(all(between(bias, 0, 1), sum(bias) == lapse_rate[1]),
-                                  msg = "biases must sum up to lapse rate.") else bias = lapse_rate / n.cat
+  if (!is.null(bias)) {
+    assert_that(all(between(bias, 0, 1), sum(bias) == lapse_rate[1]),
+                msg = "biases must sum up to lapse rate.")
+  } else bias <- lapse_rate / n.cat
 
-                                  # Get dimensions of multivariate category
-                                  D = length(ms[[1]])
-                                  assert_that(nus[[1]] >= D,
-                                              msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
+  # Get dimensions of multivariate category
+  D = length(ms[[1]])
+  assert_that(nus[[1]] >= D,
+              msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
 
-                                  f <- function(x, target_category = 1) {
-                                    log_p = matrix(
-                                      nrow = length(x),
-                                      ncol = n.cat
-                                    )
-                                    for (cat in 1:n.cat) {
-                                      log_p[, cat] = get_posterior_predictive(x, ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T)
-                                    }
+  f <- function(x, target_category = 1) {
+    log_p = matrix(
+      nrow = length(x),
+      ncol = n.cat
+    )
+    for (cat in 1:n.cat) {
+      log_p[, cat] = get_posterior_predictive(x, ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T)
+    }
 
-                                    p_target =
-                                      exp(
-                                        log_p[,target_category] + log(priors[target_category]) -
-                                          log(rowSums(exp(log_p) * priors))) *
-                                      (1 - lapse_rate[target_category]) + bias[target_category] * lapse_rate[target_category]
+    p_target <-
+      (1 - lapse_rate[target_category]) * exp(log_p[,target_category] + log(priors[target_category]) - log(rowSums(exp(log_p) * priors))) +
+      lapse_rate[target_category] * bias[target_category]
 
-                                    if (logit)
-                                      return(qlogis(p_target))
-                                    else
-                                      return(p_target)
-                                  }
+    if (logit)
+      return(qlogis(p_target))
+    else
+      return(p_target)
+  }
 
-                                  return(f)
+  return(f)
 }
 
 

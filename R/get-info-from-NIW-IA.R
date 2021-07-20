@@ -7,6 +7,7 @@ get_categorization_function_from_NIW_ideal_adaptor = function(x, ...) {
     kappas = x$kappa,
     nus = x$nu,
     lapse_rate = x$lapse_rate,
+    bias = x$bias,
     ...
   )
 }
