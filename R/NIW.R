@@ -135,8 +135,8 @@ get_categorization_function = function(
               msg = "The number of ms, Ss, kappas, nus, and priors must be identical.")
   if (!is.null(lapse_rate)) assert_that(all(between(lapse_rate, 0, 1))) else lapse_rate = rep(0, n.cat)
   if (!is.null(bias)) {
-    assert_that(all(between(bias, 0, 1), sum(bias) == lapse_rate[1]),
-                msg = "biases must sum up to lapse rate.")
+    assert_that(all(between(bias, 0, 1), sum(bias) == 1),
+                msg = "biases must sum to 1.")
   } else bias <- lapse_rate / n.cat
 
   # Get dimensions of multivariate category
