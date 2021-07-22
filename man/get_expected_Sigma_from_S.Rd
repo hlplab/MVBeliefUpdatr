@@ -2,13 +2,20 @@
 % Please edit documentation in R/NIW.R
 \name{get_expected_Sigma_from_S}
 \alias{get_expected_Sigma_from_S}
+\alias{get_S_from_expected_Sigma}
 \title{Get expected category covariance from Scatter matrix S and pseudocount nu}
 \usage{
 get_expected_Sigma_from_S(S, nu)
+
+get_S_from_expected_Sigma(Sigma, nu)
+}
+\arguments{
+\item{S}{Scatter matrix S.}
+
+\item{nu}{Strength of belief (pseudocount) about Sigma.}
+
+\item{Sigma}{expected category covariance matrix.}
 }
 \description{
-Get expected category covariance from Scatter matrix S and pseudocount nu
-}
-\seealso{
-\code{\link{get_S_from_Sigma}}
+See Murphy (2012, p. 134).
 }
