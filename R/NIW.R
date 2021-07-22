@@ -8,9 +8,12 @@ NULL
 #' @seealso \code{\link{get_S_from_Sigma}}
 #' @export
 get_expected_Sigma_from_S = function(S, nu) {
-  D = if (is.null(dim(S)[1])) 1 else dim(S)[1]
+  Sigma = map2(S, nu, .f = function(S, nu) {
+    D = if (is.null(dim(S)[1])) 1 else dim(S)[1]
+    return(S / (nu - D - 1))
+  })
 
-  return(S / (nu - D - 1))
+  return(Sigma)
 }
 
 #' Get Scatter matrix S from expected category covariance Sigma and pseudocount nu
@@ -18,9 +21,12 @@ get_expected_Sigma_from_S = function(S, nu) {
 #' @seealso \code{\link{get_Sigma_from_S}}
 #' @export
 get_S_from_expected_Sigma = function(Sigma, nu) {
-  D = if (is.null(dim(Sigma)[1])) 1 else dim(Sigma)[1]
+  S = map2(Sigma, nu, .f = function(Sigma, nu) {
+    D = if (is.null(dim(Sigma)[1])) 1 else dim(Sigma)[1]
+    return(Sigma * (nu - D - 1))
+  })
 
-  return(Sigma * (nu - D - 1))
+  return(S)
 }
 
 
