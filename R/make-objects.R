@@ -194,7 +194,7 @@ make_NIW_belief_from_data = function(
       kappa = kappa,
       nu = nu,
       m = mu,
-      S = map2(Sigma, nu, get_S_from_Sigma)) %>%
+      S = get_S_from_expected_Sigma(Sigma, nu)) %>%
     ungroup()
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
@@ -359,7 +359,7 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
 
     if (add_Sigma_noise_to_category_representation)
       x %<>%
-      mutate(S = map2(get_Sigma_from_expected_S(S, nu), Sigma_noise, ~ get_expected_S_from_Sigma(.x + .y, nu)))
+      mutate(S = map2(get_expected_Sigma_from_S(S, nu), Sigma_noise, ~ get_S_from_expected_Sigma(.x + .y, nu)))
   }
 
   return(x)
@@ -467,7 +467,7 @@ make_MVG_exposure_data = function(
       return(make_MVG_exposure_data(
         Ns = Ns,
         mus = x$m,
-        Sigmas = map2(x$S, x$nu, get_expected_Sigma_from_S),
+        Sigmas = get_expected_Sigma_from_S(x$S, x$nu),
         category.labels = get_category_labels_from_model(x),
         cue.labels = get_cue_labels_from_model(x),
         randomize.order = randomize.order,
