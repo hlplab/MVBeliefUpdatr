@@ -54,6 +54,8 @@ check_compatibility_between_NIW_belief_and_data = function(
               msg = "Can't plot test data: No test data provided.")
   assert_that(!all(!is.null(data.test), cue.labels %nin% names(data.test)),
               msg = "Can't plot test data: cue names in test data must match those in the NIW belief object.")
+
+  return(TRUE)
 }
 
 
@@ -384,7 +386,7 @@ plot_expected_categorization_function_1D = function(
           !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by,
                                                      .add = TRUE)
 
-  d = crossing(!! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution))
+  d = crossing(!! sym(cue.labels) := seq(min(xlim), max(xlim), length.out = resolution))
 
   x %<>%
     nest(data = -group_vars(.)) %>%
@@ -403,18 +405,20 @@ plot_expected_categorization_function_1D = function(
     left_join(d %>% nest(cues = everything()), by = character()) %>%
     unnest(c(cues, p_cat))
 
-  p = ggplot(x,
-             mapping = aes(
-               x = .data[[cue.labels[1]]],
-               y = if (logit) qlogis(.data$p_cat) else .data$p_cat)) +
+  p =
+    x %>%
+    mutate(pcat = if (logit) qlogis(p_cat) else p_cat) %>%
+    ggplot(aes(x = !! sym(cue.labels), y = pcat)) +
     geom_line(...) +
     { if (!is.null(data.test))
       add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
       add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
                                    category.ids = category.ids, category.labels = category.labels, category.colors) } +
-    scale_x_continuous(cue.labels[1]) +
-    scale_y_continuous(paste0("p(resp = ", category.labels[target_category], ")")) +
+    scale_x_continuous(name = cue.labels) +
+    scale_y_continuous(name = if (logit)
+      paste0("log-odds(resp = ", category.labels[target_category], ")") else
+        paste0("p(resp = ", category.labels[target_category], ")")) +
     coord_cartesian(xlim = xlim) +
     theme_bw()
 
