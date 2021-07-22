@@ -178,7 +178,7 @@ plot_expected_categories_density1D = function(
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   x %<>%
-    mutate(Sigma = map2(S, nu, get_expected_Sigma_from_S)) %>%
+    mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
     crossing(!! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution)) %>%
     mutate(density = unlist(pmap(.l = list("x" = !! sym(cue.labels[1]), "mean" = unlist(m), "sd" = unlist(Sigma)^.5), .f = dnorm))) %>%
     # Get group structure again, as crossing apparently removes it
@@ -191,7 +191,7 @@ plot_expected_categories_density1D = function(
 
   p = ggplot(x,
              aes(
-               x = .data[[cue.labels[1]]],
+               x = .data[[cue.labels]],
                y = .data$density,
                color = .data$category)) +
     geom_line(
@@ -206,7 +206,7 @@ plot_expected_categories_density1D = function(
     { if (!is.null(data.exposure))
       add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
                                    category.ids = category.ids, category.labels = category.labels, category.colors) } +
-    scale_x_continuous(cue.labels[1]) +
+    scale_x_continuous(cue.labels) +
     scale_y_continuous("Density") +
     scale_color_manual("Category",
                       breaks = category.ids,
@@ -279,7 +279,7 @@ plot_expected_categories_contour2D = function(
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   x %<>%
-    mutate(Sigma = map2(S, nu, get_expected_Sigma_from_S)) %>%
+    mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
     crossing(level = levels) %>%
     mutate(ellipse = pmap(.l = list(Sigma, m, level), ellipse.pmap)) %>%
     # This step is necessary since unnest() can't yet unnest lists of matrices
