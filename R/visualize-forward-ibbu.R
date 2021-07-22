@@ -123,15 +123,13 @@ plot_NIW_belief_parameters = function(
 #' animation? (defaults: `NULL`)
 #' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
 #' @param xlim Limits for the x-axis.
-#' @param resolution How many steps along x and y should be calculated? Note that computational
-#' complexity increases linearly with resolution. (default: 25)
 #' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
 #' @param category.colors Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 #' @param category.linetypes Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 #' Currently being ignored.
-#' @param ... additional arguments handed to geom_line.
+#' @param ... additional arguments to geom_line.
 #'
 #' @return ggplot object.
 #'
@@ -147,7 +145,7 @@ plot_expected_categories_density1D = function(
   data.exposure = NULL,
   data.test = NULL,
   facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
-  xlim, resolution = 25,
+  xlim,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   ...
 ) {
@@ -177,30 +175,31 @@ plot_expected_categories_density1D = function(
   if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
-  x %<>%
-    mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
-    crossing(!! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution)) %>%
-    mutate(density = unlist(pmap(.l = list("x" = !! sym(cue.labels[1]), "mean" = unlist(m), "sd" = unlist(Sigma)^.5), .f = dnorm))) %>%
-    # Get group structure again, as crossing apparently removes it
-    group_by(!!! syms(group_vars(x)))
-
   if (any(!quo_is_null(facet_rows_by),
           !quo_is_null(facet_cols_by),
           !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by,
                                                      .add = TRUE)
 
-  p = ggplot(x,
-             aes(
-               x = .data[[cue.labels]],
-               y = .data$density,
-               color = .data$category)) +
-    geom_line(
-      # Group lines but category *and* all grouping variables handed to the plot
-      mapping = aes(
-        group = interaction(
-          .data$category,
-          !!! syms(group_vars(x)))),
-      ...) +
+  f <-
+    x %>%
+    mutate(
+      mu = get_expected_mu_from_m(m),
+      Sigma = get_expected_Sigma_from_S(S, nu)) %>%
+    with(
+      .,
+      pmap(
+        .l = list(mu, Sigma, category),
+        .f = function(mu, Sigma, category)
+          stat_function(
+            data = tibble(category),
+            mapping = aes(color = category),
+            fun = dnorm,
+            args = list(mean = mu, sd = Sigma^.5),
+            ...)))
+
+  p = ggplot(mapping = aes(color = category)) +
+    xlim = xlim +
+    f +
     { if (!is.null(data.test))
       add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))

@@ -3,7 +3,7 @@
 \name{get_expected_mu_from_m}
 \alias{get_expected_mu_from_m}
 \alias{get_m_from_expected_mu}
-\title{Get expected category mu from m}
+\title{Get expected category mu from mean of means m}
 \usage{
 get_expected_mu_from_m(m)
 
