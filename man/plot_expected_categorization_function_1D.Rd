@@ -11,7 +11,7 @@ plot_expected_categorization_function_1D(
   target_category = 1,
   logit = F,
   xlim,
-  resolution = 25,
+  ylim = NULL,
   facet_rows_by = NULL,
   facet_cols_by = NULL,
   facet_wrap_by = NULL,
@@ -37,9 +37,6 @@ plot_expected_categorization_function_1D(
 (default: `FALSE`)}
 
 \item{xlim, ylim}{Limits for the x- and y-axis.}
-
-\item{resolution}{How many steps along x and y should be calculated? Note that computational
-complexity increases linearly with resolution. (default: 25)}
 
 \item{facet_rows_by}{Which group variables, if any, should be used for faceting and/or
 animation? (defaults: `NULL`)}

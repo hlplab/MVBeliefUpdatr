@@ -15,6 +15,7 @@ plot_expected_categories_density1D(
   animate_by = NULL,
   animation_follow = F,
   xlim,
+  ylim = NULL,
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
@@ -50,7 +51,7 @@ animation? (defaults: `NULL`)}
 
 \item{animation_follow}{Should the animation follow the data (zoom in and out)? (default: `FALSE`)}
 
-\item{xlim}{Limits for the x-axis.}
+\item{xlim, ylim}{Limits for the x- and y-axis.}
 
 \item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}

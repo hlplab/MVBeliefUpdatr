@@ -88,16 +88,87 @@ plot_NIW_belief_parameters = function(
   facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F
 ) {
   error("This function is not yet implemented.")
-  # If n.draws is specified, get the IDs of the specific (randomly drawn n.draws) samples
-  if (!is.null(n.draws)) draws = get_random_draw_indices(fit, n.draws)
 
-  d.pars = fit %>%
-    add_ibbu_stanfit_draws(
-      which = which,
-      draws = if (!is.null(n.draws)) draws else NULL,
-      nest = F)
-
-  if (is.null(group.colors)) group.colors = get_default_colors("group", length(get_groups(x)))
+  # Check out this function from another project:
+  # plot_VOT_NIW_belief_1D <- function(belief, sigma_max = NULL, prior = NULL) {
+  #   mu_sigma <- belief %>%
+  #     mutate(
+  #       mu = get_expected_mu_from_m(m),
+  #       sigma = get_expected_Sigma_from_S(S, nu))
+  #
+  #   if (is.null(sigma_max)) sigma_max = max(mu_sigma$sigma) * 2
+  #   if (!is.null(prior))
+  #     prior.mu_sigma <- prior %>%
+  #       mutate(
+  #         mu = get_expected_mu_from_m(m),
+  #         sigma = get_expected_Sigma_from_S(S, nu))
+  #
+  #   belief %>%
+  #     crossing(
+  #       mu = seq_range(VOT_range, n = VOT_resolution),
+  #       sigma = seq_range(1:sigma_max^.5, n = VOT_resolution)^2) %>%
+  #     { if ("Subject" %in% names(.)) group_by(., Subject) else . } %>%
+  #     # TO DO: Since mu and sigma can probably be vectors this can be made more efficient by first nesting and then unnesting
+  #     # (see what I did for the test_plot function below). The line above this has been in added in anticipation of that
+  #     # change (it's currently not required since the density is obtained line by line).
+  #     mutate(l = unlist(pmap(
+  #       .l = list(mu, m, kappa, sigma, S, nu),
+  #       .f = dnorminvwishart))) %>%
+  #     ggplot(aes(x = mu, y = sigma, color = category, group = category)) +
+  #     { if (is.null(prior))
+  #       list(
+  #         geom_raster(
+  #           data = ~ filter(., category == "/b/"),
+  #           mapping = aes(fill = category, alpha = l),
+  #           interpolate = T),
+  #         geom_raster(
+  #           data = ~ filter(., category == "/p/"),
+  #           mapping = aes(fill = category, alpha = l),
+  #           interpolate = T)) } +
+  #     geom_contour(aes(z = l, color = category), breaks = 10^(-10:-3), size = .5) +
+  #     { if (!is.null(prior))
+  #       geom_contour(
+  #         data = prior %>%
+  #           crossing(
+  #             mu = seq_range(VOT_range, n = VOT_resolution),
+  #             sigma = seq_range(1:sigma_max^.5, n = VOT_resolution)^2) %>%
+  #           mutate(l = unlist(pmap(
+  #             .l = list(mu, m, kappa, sigma, S, nu),
+  #             .f = dnorminvwishart))),
+  #         aes(z = l, color = category), breaks = 10^(-10:-3), size = .5, alpha = .1) } +
+  #     { if (is.null(prior))
+  #       geom_point(
+  #         data = mu_sigma,
+  #         aes(shape = category),
+  #         color = "black") } +
+  #     { if (!is.null(prior))
+  #       list(
+  #         geom_point(
+  #           data = prior.mu_sigma,
+  #           aes(shape = category),
+  #           color = "black",
+  #           alpha = .5),
+  #         geom_segment(
+  #           data =
+  #             mu_sigma %>%
+  #             left_join(
+  #               prior.mu_sigma %>%
+  #                 rename_at(vars(mu, sigma), ~ paste0("prior_", .x)),
+  #               by = "category"),
+  #           aes(x = prior_mu, y = prior_sigma, xend = mu, yend = sigma),
+  #           arrow = arrow(angle = 15, length = unit(0.1, "inches"), ends = "last", type = "closed"),
+  #           color = "black",
+  #           size = .5,
+  #           alpha = .75)) } +
+  #     scale_x_continuous(name = bquote(mu ~ "(msec VOT)")) +
+  #     scale_y_sqrt(name = bquote(sigma^2 ~ "(" ~ msec^2 ~ ")"), limits = c(0, sigma_max)) +
+  #     scale_color_discrete("Category") +
+  #     scale_fill_discrete("Category") +
+  #     scale_shape_discrete("Category") +
+  #     { if (is.null(prior)) scale_alpha_continuous("density", range = c(0,1), guide = "none") } +
+  #     coord_cartesian(expand = 0) +
+  #     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  # }
 }
 
 
@@ -122,7 +193,7 @@ plot_NIW_belief_parameters = function(
 #' @param facet_rows_by,facet_cols_by,facet_wrap_by,animate_by Which group variables, if any, should be used for faceting and/or
 #' animation? (defaults: `NULL`)
 #' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
-#' @param xlim Limits for the x-axis.
+#' @param xlim,ylim Limits for the x- and y-axis.
 #' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
@@ -145,7 +216,7 @@ plot_expected_categories_density1D = function(
   data.exposure = NULL,
   data.test = NULL,
   facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
-  xlim,
+  xlim, ylim = NULL,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   ...
 ) {
@@ -180,33 +251,31 @@ plot_expected_categories_density1D = function(
           !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by,
                                                      .add = TRUE)
 
-  f <-
+  list.stat_functions <-
     x %>%
     mutate(
       mu = get_expected_mu_from_m(m),
       Sigma = get_expected_Sigma_from_S(S, nu)) %>%
-    with(
-      .,
-      pmap(
-        .l = list(mu, Sigma, category),
-        .f = function(mu, Sigma, category)
-          stat_function(
-            data = tibble(category),
-            mapping = aes(color = category),
-            fun = dnorm,
-            args = list(mean = mu, sd = Sigma^.5),
-            ...)))
+    group_by(category, .add = T) %>%
+    group_map(
+      .keep = T,
+      .f = function(.x, .y)
+        stat_function(
+          data = .x,
+          mapping = aes(color = category),
+          fun = dnorm,
+          args = list(mean = .x$mu, sd = .x$Sigma^.5),
+          ...))
 
   p = ggplot(mapping = aes(color = category)) +
-    xlim = xlim +
-    f +
+    list.stat_functions +
     { if (!is.null(data.test))
       add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
       add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
                                    category.ids = category.ids, category.labels = category.labels, category.colors) } +
-    scale_x_continuous(cue.labels) +
-    scale_y_continuous("Density") +
+    scale_x_continuous(cue.labels, limits = xlim) +
+    scale_y_continuous("Density", limits = ylim) +
     scale_color_manual("Category",
                       breaks = category.ids,
                       labels = category.labels,
@@ -329,8 +398,6 @@ plot_expected_categories_contour2D = function(
 #'
 #' @param target_category The index of the category for which categorization should be shown. (default: `1`)
 #' @param xlim,ylim Limits for the x- and y-axis.
-#' @param resolution How many steps along x and y should be calculated? Note that computational
-#' complexity increases linearly with resolution. (default: 25)
 #' @param logit Should the categorization function be plotted in logit (`TRUE`) or probabilities (`FALSE`)?
 #' (default: `FALSE`)
 #' @inheritParams plot_expected_categories_density1D
@@ -350,7 +417,7 @@ plot_expected_categorization_function_1D = function(
   data.test = NULL,
   target_category = 1,
   logit = F,
-  xlim, resolution = 25,
+  xlim, ylim = NULL,
   facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   ...
@@ -385,40 +452,29 @@ plot_expected_categorization_function_1D = function(
           !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by,
                                                      .add = TRUE)
 
-  d = crossing(!! sym(cue.labels) := seq(min(xlim), max(xlim), length.out = resolution))
-
-  x %<>%
-    nest(data = -group_vars(.)) %>%
-    mutate(f = map(data, get_categorization_function_from_NIW_ideal_adaptor, logit = logit)) %>%
-    # Join in vectored cues
-    left_join(
-      d %>%
-        transmute(x = pmap(.l = list(!!! syms(cue.labels)), .f = ~ c(...))) %>%
-        nest(cues = everything()),
-      by = character()) %>%
-    mutate(
-      p_cat = invoke_map(.f = f, .x = cues, target_category = target_category),
-      cues = NULL,
-      f = NULL) %>%
-    # Join separate cues back in
-    left_join(d %>% nest(cues = everything()), by = character()) %>%
-    unnest(c(cues, p_cat))
+  list.stat_functions <-
+    x %>%
+      group_map(
+        .keep = T,
+        .f = function(.x, .y) {
+          cat_function <- get_categorization_function_from_NIW_ideal_adaptor(.x, logit = logit)
+          stat_function(
+            data = .x,
+            fun = cat_function, ...) })
 
   p =
-    x %>%
-    mutate(pcat = if (logit) qlogis(p_cat) else p_cat) %>%
-    ggplot(aes(x = !! sym(cue.labels), y = pcat)) +
-    geom_line(...) +
+    ggplot() +
+    list.stat_functions +
     { if (!is.null(data.test))
       add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
       add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
                                    category.ids = category.ids, category.labels = category.labels, category.colors) } +
-    scale_x_continuous(name = cue.labels) +
+    scale_x_continuous(name = cue.labels, limits = xlim) +
     scale_y_continuous(name = if (logit)
       paste0("log-odds(resp = ", category.labels[target_category], ")") else
         paste0("p(resp = ", category.labels[target_category], ")")) +
-    coord_cartesian(xlim = xlim) +
+    coord_cartesian(ylim = ylim) +
     theme_bw()
 
   p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
