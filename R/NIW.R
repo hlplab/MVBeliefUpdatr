@@ -3,6 +3,27 @@
 NULL
 
 
+#' Get expected category mu from mean of means m
+#'
+#' See Murphy (2012, p. 134).
+#'
+#' @param mu expected category mean mu.
+#' @param m Mean of means m.
+#'
+#' @rdname get_expected_mu_from_m
+#' @export
+get_expected_mu_from_m = function(m) {
+  return(if (all(unlist(map(m, ~ length(.x) == 1)))) unlist(m) else m)
+}
+
+#' Get mean of means from expected category mean mu
+#'
+#' @rdname get_expected_mu_from_m
+#' @export
+get_m_from_expected_mu = function(mu) {
+  return(if (all(unlist(map(mu, ~ length(.x) == 1)))) unlist(mu) else mu)
+}
+
 #' Get expected category covariance from Scatter matrix S and pseudocount nu
 #'
 #' See Murphy (2012, p. 134).
@@ -34,27 +55,6 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
   })
 
   return(S)
-}
-
-#' Get expected category mu from mean of means m
-#'
-#' See Murphy (2012, p. 134).
-#'
-#' @param mu expected category mean mu.
-#' @param m Mean of means m.
-#'
-#' @rdname get_expected_mu_from_m
-#' @export
-get_expected_mu_from_m = function(m) {
-  return(if (all(unlist(map(m, ~ length(.x) == 1)))) unlist(m) else m)
-}
-
-#' Get mean of means from expected category mean mu
-#'
-#' @rdname get_expected_mu_from_m
-#' @export
-get_m_from_expected_mu = function(mu) {
-  return(if (all(unlist(map(mu, ~ length(.x) == 1)))) unlist(mu) else mu)
 }
 
 
