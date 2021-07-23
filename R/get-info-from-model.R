@@ -11,12 +11,17 @@
 #' @export
 get_cue_labels_from_model = function(x) {
   if (is.MVG(x) | is.MVG_ideal_observer(x)) {
-    return(names(x$mu[[1]]))
+    x <- x$mu
   } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x)) {
-    return(names(x$m[[1]]))
+    x <- x$m
   } else {
     error("Object not recognized.")
   }
+
+  x <- names(if (is.list(x)) x[[1]] else if (is.numeric(x)) x[1] else error("No suitable information found."))
+
+  if (is.null(x)) x <- "cue"
+  return(x)
 }
 
 
