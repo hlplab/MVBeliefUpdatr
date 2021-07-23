@@ -173,7 +173,7 @@ plot_NIW_belief_parameters = function(
 
 
 
-#' Plot expected univariate (1D) categories
+#' Plot expected univariate (1D) category likelihoods
 #'
 #' Plot univariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
 #' category statistics of all categories. This includes the m (the mean of category means \eqn{\mu}), S (the scattermatrix),
@@ -194,8 +194,7 @@ plot_NIW_belief_parameters = function(
 #' animation? (defaults: `NULL`)
 #' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
 #' @param xlim,ylim Limits for the x- and y-axis.
-#' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
-#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
+#' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)
 #' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
 #' @param category.colors Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 #' @param category.linetypes Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
@@ -251,7 +250,7 @@ plot_expected_categories_density1D = function(
           !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by,
                                                      .add = TRUE)
 
-  list.stat_functions <-
+  stat_functions <-
     x %>%
     mutate(
       mu = get_expected_mu_from_m(m),
@@ -268,7 +267,7 @@ plot_expected_categories_density1D = function(
           ...))
 
   p = ggplot(mapping = aes(color = category)) +
-    list.stat_functions +
+    stat_functions +
     { if (!is.null(data.test))
       add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
@@ -286,7 +285,98 @@ plot_expected_categories_density1D = function(
   return(p)
 }
 
-#' Plot expected bivariate (2D) categories
+
+#' Plot expected categorization function for univariate (1D) categories.
+#'
+#' Plot categorization function for univariate Gaussian categories expected given NIW parameters.
+#'
+#' @param target_category The index of the category for which categorization should be shown. (default: `1`)
+#' @param xlim,ylim Limits for the x- and y-axis.
+#' @param logit Should the categorization function be plotted in logit (`TRUE`) or probabilities (`FALSE`)?
+#' (default: `FALSE`)
+#' @inheritParams plot_expected_categories_density1D
+#'
+#' @return ggplot object.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname plot_expected_categorization_function_1D
+#' @export
+#'
+plot_expected_categorization_function_1D = function(
+  x,
+  data.exposure = NULL,
+  data.test = NULL,
+  target_category = 1,
+  logit = F,
+  xlim, ylim = NULL,
+  facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
+  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
+  ...
+) {
+  facet_rows_by = enquo(facet_rows_by)
+  facet_cols_by = enquo(facet_cols_by)
+  facet_wrap_by = enquo(facet_wrap_by)
+  animate_by = enquo(animate_by)
+  check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
+                                                  !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
+  cue.labels = get_cue_labels_from_model(x)
+  assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
+
+  if (is_missing(xlim)) {
+    if (!is.null(data.exposure) & !is.null(data.test))
+      xlim = range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
+        if (!is.null(data.exposure))
+          xlim = range(data.exposure[[cue.labels[1]]]) else
+            if (!is.null(data.test))
+              xlim = range(data.test[[cue.labels[1]]])
+  }
+  assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
+
+  # Setting aes defaults
+  if(is.null(category.ids)) category.ids = levels(x$category)
+  if(is.null(category.labels)) category.labels = levels(x$category)
+  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
+  if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
+
+  if (any(!quo_is_null(facet_rows_by),
+          !quo_is_null(facet_cols_by),
+          !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by,
+                                                     .add = TRUE)
+
+  stat_functions <-
+    x %>%
+    group_map(
+      .keep = T,
+      .f = function(.x, .y) {
+        cat_function <- get_categorization_function_from_NIW_ideal_adaptor(.x, logit = logit)
+        stat_function(
+          data = .x,
+          fun = cat_function, ...) })
+
+  p =
+    ggplot() +
+    stat_functions +
+    { if (!is.null(data.test))
+      add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
+    { if (!is.null(data.exposure))
+      add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
+                                   category.ids = category.ids, category.labels = category.labels, category.colors) } +
+    scale_x_continuous(name = cue.labels, limits = xlim) +
+    scale_y_continuous(name = if (logit)
+      paste0("log-odds(resp = ", category.labels[target_category], ")") else
+        paste0("p(resp = ", category.labels[target_category], ")")) +
+    coord_cartesian(ylim = ylim) +
+    theme_bw()
+
+  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
+  return(p)
+}
+
+
+#' Plot expected bivariate (2D) category likelihoods
 #'
 #' Plot bivariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
 #' category statistics of all categories. This includes the m (the mean of category means \eqn{\mu}), S (the scattermatrix),
@@ -305,8 +395,7 @@ plot_expected_categories_density1D = function(
 #' @param facet_rows_by,facet_cols_by,facet_wrap_by,animate_by Which group variables, if any, should be used for faceting and/or
 #' animation? (defaults: `NULL`)
 #' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
-#' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
-#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
+#' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)
 #' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
 #' @param category.colors Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
 #' @param category.linetypes Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
@@ -389,97 +478,6 @@ plot_expected_categories_contour2D = function(
   return(p)
 }
 
-
-
-
-#' Plot expected categorization function for univariate (1D) categories.
-#'
-#' Plot categorization function for univariate Gaussian categories expected given NIW parameters.
-#'
-#' @param target_category The index of the category for which categorization should be shown. (default: `1`)
-#' @param xlim,ylim Limits for the x- and y-axis.
-#' @param logit Should the categorization function be plotted in logit (`TRUE`) or probabilities (`FALSE`)?
-#' (default: `FALSE`)
-#' @inheritParams plot_expected_categories_density1D
-#'
-#' @return ggplot object.
-#'
-#' @seealso TBD
-#' @keywords TBD
-#' @examples
-#' TBD
-#' @rdname plot_expected_categorization_function_1D
-#' @export
-#'
-plot_expected_categorization_function_1D = function(
-  x,
-  data.exposure = NULL,
-  data.test = NULL,
-  target_category = 1,
-  logit = F,
-  xlim, ylim = NULL,
-  facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
-  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
-  ...
-) {
-  facet_rows_by = enquo(facet_rows_by)
-  facet_cols_by = enquo(facet_cols_by)
-  facet_wrap_by = enquo(facet_wrap_by)
-  animate_by = enquo(animate_by)
-  check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
-                                                  !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
-  cue.labels = get_cue_labels_from_model(x)
-  assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
-
-  if (is_missing(xlim)) {
-    if (!is.null(data.exposure) & !is.null(data.test))
-      xlim = range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
-        if (!is.null(data.exposure))
-          xlim = range(data.exposure[[cue.labels[1]]]) else
-            if (!is.null(data.test))
-              xlim = range(data.test[[cue.labels[1]]])
-  }
-  assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
-
-  # Setting aes defaults
-  if(is.null(category.ids)) category.ids = levels(x$category)
-  if(is.null(category.labels)) category.labels = levels(x$category)
-  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
-  if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
-
-  if (any(!quo_is_null(facet_rows_by),
-          !quo_is_null(facet_cols_by),
-          !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by,
-                                                     .add = TRUE)
-
-  list.stat_functions <-
-    x %>%
-      group_map(
-        .keep = T,
-        .f = function(.x, .y) {
-          cat_function <- get_categorization_function_from_NIW_ideal_adaptor(.x, logit = logit)
-          stat_function(
-            data = .x,
-            fun = cat_function, ...) })
-
-  p =
-    ggplot() +
-    list.stat_functions +
-    { if (!is.null(data.test))
-      add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
-    { if (!is.null(data.exposure))
-      add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
-                                   category.ids = category.ids, category.labels = category.labels, category.colors) } +
-    scale_x_continuous(name = cue.labels, limits = xlim) +
-    scale_y_continuous(name = if (logit)
-      paste0("log-odds(resp = ", category.labels[target_category], ")") else
-        paste0("p(resp = ", category.labels[target_category], ")")) +
-    coord_cartesian(ylim = ylim) +
-    theme_bw()
-
-  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
-  return(p)
-}
 
 #' Plot expected categorization function for bivariate (2D) categories.
 #'
