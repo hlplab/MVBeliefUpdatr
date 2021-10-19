@@ -215,7 +215,7 @@ plot_expected_categories_density1D = function(
   data.exposure = NULL,
   data.test = NULL,
   facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
-  xlim, ylim = NULL,
+  xlim, ylim = NULL, x.expand = c(0, 0),
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   ...
 ) {
@@ -273,7 +273,7 @@ plot_expected_categories_density1D = function(
     { if (!is.null(data.exposure))
       add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
                                    category.ids = category.ids, category.labels = category.labels, category.colors) } +
-    scale_x_continuous(cue.labels, limits = xlim) +
+    scale_x_continuous(cue.labels, limits = xlim, expand = x.expand) +
     scale_y_continuous("Density", limits = ylim) +
     scale_color_manual("Category",
                       breaks = category.ids,
@@ -311,7 +311,7 @@ plot_expected_categorization_function_1D = function(
   data.test = NULL,
   target_category = 1,
   logit = F,
-  xlim, ylim = NULL,
+  xlim, ylim = NULL, x.expand = c(0, 0),
   facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   ...
@@ -364,7 +364,7 @@ plot_expected_categorization_function_1D = function(
     { if (!is.null(data.exposure))
       add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
                                    category.ids = category.ids, category.labels = category.labels, category.colors) } +
-    scale_x_continuous(name = cue.labels, limits = xlim) +
+    scale_x_continuous(name = cue.labels, limits = xlim, expand = x.expand) +
     scale_y_continuous(name = if (logit)
       paste0("log-odds(resp = ", category.labels[target_category], ")") else
         paste0("p(resp = ", category.labels[target_category], ")")) +
