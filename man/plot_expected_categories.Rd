@@ -3,7 +3,7 @@
 \name{plot_expected_categories_density1D}
 \alias{plot_expected_categories_density1D}
 \alias{plot_expected_categories_contour2D}
-\title{Plot expected univariate (1D) categories}
+\title{Plot expected univariate (1D) category likelihoods}
 \usage{
 plot_expected_categories_density1D(
   x,
@@ -16,6 +16,7 @@ plot_expected_categories_density1D(
   animation_follow = F,
   xlim,
   ylim = NULL,
+  x.expand = c(0, 0),
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
@@ -53,8 +54,7 @@ animation? (defaults: `NULL`)}
 
 \item{xlim, ylim}{Limits for the x- and y-axis.}
 
-\item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
-to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}
+\item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)}
 
 \item{category.labels}{Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)}
 
