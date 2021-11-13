@@ -13,7 +13,10 @@ NULL
 #' @rdname get_expected_mu_from_m
 #' @export
 get_expected_mu_from_m = function(m) {
-  return(if (all(unlist(map(m, ~ length(.x) == 1)))) unlist(m) else m)
+  if (!is.list(m)) m <- list(m) # in case the input is not a list
+  if (all(unlist(map(m, ~ length(.x) == 1)))) mu <- unlist(m) else mu <- m
+  if (length(mu) == 1) mu <- mu[[1]]
+  return(mu)
 }
 
 #' Get mean of means from expected category mean mu
@@ -21,7 +24,10 @@ get_expected_mu_from_m = function(m) {
 #' @rdname get_expected_mu_from_m
 #' @export
 get_m_from_expected_mu = function(mu) {
-  return(if (all(unlist(map(mu, ~ length(.x) == 1)))) unlist(mu) else mu)
+  if (!is.list(mu)) mu <- list(mu) # in case the input is not a list
+  if (all(unlist(map(mu, ~ length(.x) == 1)))) m <- unlist(mu) else m <- mu
+  if (length(m) == 1) m <- m[[1]]
+  return(m)
 }
 
 #' Get expected category covariance from Scatter matrix S and pseudocount nu
@@ -35,12 +41,19 @@ get_m_from_expected_mu = function(mu) {
 #' @rdname get_expected_Sigma_from_S
 #' @export
 get_expected_Sigma_from_S = function(S, nu) {
+  if (!is.list(S)) {
+    # in case the input is not a list
+    S <- list(S)
+    nu <- list(nu)
+  }
+
   Sigma = map2(S, nu, .f = function(S, nu) {
     D = if (is.null(dim(S)[1])) 1 else dim(S)[1]
     return(S / (nu - D - 1))
   })
 
   if (all(unlist(map(Sigma, ~ length(.x) == 1)))) Sigma <- unlist(Sigma)
+  if (length(Sigma) == 1) Sigma <- Sigma[[1]]
   return(Sigma)
 }
 
@@ -49,11 +62,18 @@ get_expected_Sigma_from_S = function(S, nu) {
 #' @rdname get_expected_Sigma_from_S
 #' @export
 get_S_from_expected_Sigma = function(Sigma, nu) {
+  if (!is.list(Sigma)) {
+    # in case the input is not a list
+    Sigma <- list(Sigma)
+    nu <- list(nu)
+  }
   S = map2(Sigma, nu, .f = function(Sigma, nu) {
     D = if (is.null(dim(Sigma)[1])) 1 else dim(Sigma)[1]
     return(Sigma * (nu - D - 1))
   })
 
+  if (all(unlist(map(S, ~ length(.x) == 1)))) S <- unlist(S)
+  if (length(S) == 1) S <- S[[1]]
   return(S)
 }
 
