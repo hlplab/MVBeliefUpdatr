@@ -63,7 +63,7 @@ get_lapse_rate_from_model <- function(model) {
   if ("lapse_rate" %in% names(model)) {
     lapse_rate <- unique(model$lapse_rate)
 
-    asser_that(length(lapse_rate) == 1,
+    assert_that(length(lapse_rate) == 1,
                msg = "More than one lapse_rate found in model.")
     return(lapse_rate)
   } else return(NA)
@@ -73,7 +73,7 @@ get_lapse_biases_from_model <- function(model) {
   if ("lapse_bias" %in% names(model)) {
     lapse_bias <- model$lapse_bias
 
-    asser_that(sum(lapse_bias) == 1,
+    assert_that(sum(lapse_bias) == 1,
                msg = paste("The lapse_biases do not add up to 1:", sum(lapse_bias)))
     return(lapse_bias)
   } else return(NA)
@@ -84,7 +84,7 @@ get_perceptual_noise_from_model <- function(model) {
   if ("Sigma_noise" %in% names(model)) {
     Sigma_noise <- unique(model$Sigma_noise)
 
-    asser_that(length(Sigma_noise) == 1,
+    assert_that(length(Sigma_noise) == 1,
                msg = "More than one Sigma_noise found in model.")
     return(Sigma_noise)
   } else return(NA)
