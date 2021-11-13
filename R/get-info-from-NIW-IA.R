@@ -80,6 +80,7 @@ get_categorization_from_NIW_ideal_adaptor = function(
     lapse_biases = rep(0, get_nlevels_of_category_labels_from_model(belief))
   }
 
+  if (!is.list(x)) x <- list(x) # in case a single x is handed as argument
   p = get_posterior_predictive_from_NIW_belief(x = x, belief = belief, log = F) %>%
     group_by(category) %>%
     mutate(
