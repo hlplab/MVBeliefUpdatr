@@ -3,20 +3,25 @@
 \name{is.NIW_ideal_adaptor_MCMC}
 \alias{is.NIW_ideal_adaptor_MCMC}
 \alias{is.NIW_ideal_adaptor_w_lapse_MCMC}
-\alias{is.NIW_ideal_adaptor_w_bias_MCMC}
+\alias{is.NIW_ideal_adaptor_w_lapse_bias_MCMC}
 \title{Is this a tibble of MCMC draws of an NIW ideal adaptor?}
 \usage{
 is.NIW_ideal_adaptor_MCMC(
   x,
   is.nested = T,
   is.long = T,
-  with.lapse = if (with.bias) T else F,
-  with.bias = F
+  with.lapse = if (with.lapse_bias) T else F,
+  with.lapse_bias = F
 )
 
-is.NIW_ideal_adaptor_w_lapse_MCMC(x, is.nested = T, is.long = T, with.bias = F)
+is.NIW_ideal_adaptor_w_lapse_MCMC(
+  x,
+  is.nested = T,
+  is.long = T,
+  with.lapse_bias = F
+)
 
-is.NIW_ideal_adaptor_w_bias_MCMC(x, is.nested = T, is.long = T)
+is.NIW_ideal_adaptor_w_lapse_bias_MCMC(x, is.nested = T, is.long = T)
 }
 \value{
 A logical.
@@ -29,7 +34,7 @@ conjugate Bayesian belief-updating (IBBU) over a Normal-Inverse-Wishart (NIW) pr
 \itemize{
 \item \code{is.NIW_ideal_adaptor_w_lapse_MCMC}: Also checks whether x has a lapse term.
 
-\item \code{is.NIW_ideal_adaptor_w_bias_MCMC}: Also checks whether x has a bias term.
+\item \code{is.NIW_ideal_adaptor_w_lapse_bias_MCMC}: Also checks whether x has a lapse bias term.
 }}
 
 \examples{

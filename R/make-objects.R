@@ -12,7 +12,7 @@
 #' @param prior Optionally specify a prior probability for each category (in each group). (default: a uniform
 #' prior over all categories).
 #' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
-#' @param bias Optionally specify a response bias. (default: \code{NA})
+#' @param lapse_bias Optionally specify a lapse bias. (default: \code{NA})
 #' @param Sigma_noise Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This
 #' argument will be ignored if NULL. (default: NULL)
 #' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
@@ -93,13 +93,13 @@ make_MVG_ideal_observer_from_data = function(
   cues,
   prior = NA_real_,
   lapse_rate = NA_real_,
-  bias = NA_real_,
+  lapse_bias = NA_real_,
   Sigma_noise = NULL,
   add_Sigma_noise_to_category_representation = T,
   verbose = F
 ) {
   data %<>% make_MVG_from_data(group = group, category = category, cues = cues, verbose = verbose)
-  data %<>% lift_MVG_to_ideal_observer(group = group, category = category, prior = prior, lapse_rate = lapse_rate, bias = bias,
+  data %<>% lift_MVG_to_ideal_observer(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
                                        Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
 
   if (!is.MVG_ideal_observer(x, category = as_name(category), verbose = verbose))
@@ -132,7 +132,7 @@ make_MVG_ideal_observer_from_data = function(
 #' @param prior Optionally specify a prior probability for each category (in each group). (default: a uniform
 #' prior over all categories).
 #' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
-#' @param bias Optionally specify a response bias. (default: \code{NA})
+#' @param lapse_bias Optionally specify a lapse bias. (default: \code{NA})
 #' @param Sigma_noise Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This argument will be
 #' ignored if NULL. (default: NULL)
 #' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
@@ -219,13 +219,13 @@ make_NIW_ideal_adaptor_from_data = function(
   nu = length(cues) + 2,
   prior = NA_real_,
   lapse_rate = NA_real_,
-  bias = NA_real_,
+  lapse_bias = NA_real_,
   Sigma_noise = NULL,
   add_Sigma_noise_to_category_representation = T,
   keep.category_parameters = F
 ) {
   data %<>% make_NIW_belief_from_data(group = group, category = category, cues = cues, verbose = verbose)
-  data %<>% lift_NIW_belief_to_NIW_ideal_adaptor(group = group, category = category, prior = prior, lapse_rate = lapse_rate, bias = bias,
+  data %<>% lift_NIW_belief_to_NIW_ideal_adaptor(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
                                                  Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
@@ -251,7 +251,7 @@ make_NIW_ideal_adaptor_from_data = function(
 #' @param prior Optionally specify a prior probability for each category (in each group). (default: a uniform
 #' prior over all categories).
 #' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
-#' @param bias Optionally specify a response bias. (default: \code{NA})
+#' @param lapse_bias Optionally specify a lapse bias. (default: \code{NA})
 #' @param Sigma_noise Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This argument will be
 #' ignored if NULL. (default: NULL)
 #' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
@@ -276,13 +276,13 @@ lift_likelihood_to_model = function(
   category = "category",
   prior = NA_real_,
   lapse_rate = NA_real_,
-  bias = NA_real_,
+  lapse_bias = NA_real_,
   Sigma_noise = NULL
 ) {
   if (is.character(group)) group = syms(group)
   if (is.character(category)) category = sym(category)
-  assert_that(all(is.numeric(lapse_rate), is.numeric(bias), is.numeric(prior)),
-              msg = "The category prior, lapse rate, and bias must be numeric.")
+  assert_that(all(is.numeric(lapse_rate), is.numeric(lapse_bias), is.numeric(prior)),
+              msg = "The category prior, lapse rate, and lapse bias must be numeric.")
 
   n.cat = length(unique(x[[!! category]]))
   if (is.na(prior) | is.null(prior)) {
@@ -292,9 +292,9 @@ lift_likelihood_to_model = function(
 
   assert_that(all(
     is.na(lapse_rate) | between(lapse_rate, 0, 1),
-    is.na(bias) | between(bias, 0, 1),
+    is.na(lapse_bias) | between(lapse_bias, 0, 1),
     between(prior, 0, 1)),
-    msg = "If not NA, the category prior, lapse rate, and bias must have values between 0 and 1.")
+    msg = "If not NA, the category prior, lapse rate, and lapse bias must have values between 0 and 1.")
   assert_that(sum(prior) == 1,
               msg = paste0("Priors must add up to 1. (instead: ", sum(prior), ")."))
 
@@ -305,7 +305,7 @@ lift_likelihood_to_model = function(
     mutate(
       prior = prior,
       lapse_rate = lapse_rate,
-      bias = bias,
+      lapse_bias = lapse_bias,
       Sigma_noise = list(Sigma_noise))
 
   return(x)
@@ -319,11 +319,11 @@ lift_MVG_to_MVG_ideal_observer = function(
   category = "category",
   prior = NA_real_,
   lapse_rate = NA_real_,
-  bias = NA_real_,
+  lapse_bias = NA_real_,
   Sigma_noise = NULL,
   add_Sigma_noise_to_category_representation = T
 ) {
-  x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, bias = bias, Sigma_noise = Sigma_noise)
+  x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(first(x$Sigma_noise)) == dim(first(x$Sigma))),
                 msg = "If not NULL, Sigma_noise must be a matrix of the same dimensionality as Sigma.")
@@ -350,7 +350,7 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   Sigma_noise = NULL,
   add_Sigma_noise_to_category_representation = T
 ) {
-  x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, bias = bias, Sigma_noise = Sigma_noise)
+  x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(first(x$Sigma_noise)) == dim(first(x$S))),
                 msg = "If Sigma_noise is not NULL, Sigma_noise must be a matrix of the same dimensionality as S.")
@@ -399,9 +399,9 @@ aggregate_models_by_group_structure = function(
               msg = "aggregate_to_group must be contained in group_structure.")
 
   aggregate_what = case_when(
-    is.NIW_ideal_adaptor(x) ~ c("kappa", "nu", "m", "S", "prior", "lapse_rate", "bias", "Sigma_noise"),
+    is.NIW_ideal_adaptor(x) ~ c("kappa", "nu", "m", "S", "prior", "lapse_rate", "lapse_bias", "Sigma_noise"),
     is.NIW_belief(x) ~ c("kappa", "nu", "m", "S"),
-    is.MVG_ideal_observer(x) ~ c("mu", "Sigma", "prior", "lapse_rate", "bias", "Sigma_noise"),
+    is.MVG_ideal_observer(x) ~ c("mu", "Sigma", "prior", "lapse_rate", "lapse_bias", "Sigma_noise"),
     is.MVG(x) ~ c("mu", "Sigma"),
     T ~ NA_character_)
 

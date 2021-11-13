@@ -13,7 +13,7 @@ get_categorization_function(
   kappas,
   nus,
   lapse_rate = NULL,
-  bias = NULL,
+  lapse_bias = NULL,
   priors = rep(1/n.cat, n.cat),
   n.cat = length(ms),
   logit = FALSE
@@ -35,7 +35,7 @@ covariance matrices.}
 
 \item{lapse_rate}{An IBBU-inferred lapse rate for the categorization responses.}
 
-\item{bias}{An IBBU-inferred bias for the categorization responses.}
+\item{lapse_bias}{An IBBU-inferred bias for the categorization responses.}
 
 \item{priors}{Vector of categories' prior probabilities. (default: uniform prior over categories)}
 

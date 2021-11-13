@@ -12,7 +12,7 @@ lift_likelihood_to_model(
   category = "category",
   prior = NA_real_,
   lapse_rate = NA_real_,
-  bias = NA_real_,
+  lapse_bias = NA_real_,
   Sigma_noise = NULL
 )
 
@@ -22,7 +22,7 @@ lift_MVG_to_MVG_ideal_observer(
   category = "category",
   prior = NA_real_,
   lapse_rate = NA_real_,
-  bias = NA_real_,
+  lapse_bias = NA_real_,
   Sigma_noise = NULL,
   add_Sigma_noise_to_category_representation = T
 )
@@ -51,7 +51,7 @@ prior over all categories).}
 
 \item{lapse_rate}{Optionally specify a lapse rate. (default: \code{NA})}
 
-\item{bias}{Optionally specify a response bias. (default: \code{NA})}
+\item{lapse_bias}{Optionally specify a lapse bias. (default: \code{NA})}
 
 \item{Sigma_noise}{Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This argument will be
 ignored if NULL. (default: NULL)}

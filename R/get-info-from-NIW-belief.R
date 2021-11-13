@@ -19,8 +19,9 @@ get_posterior_predictive_from_NIW_belief = function(
       unique()
   }
 
-  pp = foreach(c = category.label) %do% {
-    b = belief %>%
+  posterior_predictive <- foreach(c = category.label) %do% {
+    b <-
+      belief %>%
       filter(!! sym(category) == c)
 
     get_posterior_predictive(
@@ -31,16 +32,16 @@ get_posterior_predictive_from_NIW_belief = function(
       mutate(!! sym(category) := c)
   }
 
-  pp %<>% reduce(rbind)
+  posterior_predictive %<>% reduce(rbind)
   if (wide)
-    pp %<>%
+    l.posterior_probabilities %<>%
     pivot_wider(
       values_from = if (log) "lpp" else "pp",
       names_from = !! sym(category),
       names_prefix = if (log) "lpp." else "pp.") %>%
     unnest()
 
-  return(pp)
+  return(posterior_predictive)
 }
 
 # If there's a grouping variable extract the pp for each level of that grouping variable
@@ -66,19 +67,20 @@ get_posterior_predictives_from_NIW_beliefs = function(
                 msg = "Grouping variable not found in the NIW belief object.")
 
     foreach (i = unique(x[[grouping.var]])) %do% {
-      pp = get_posterior_predictive_from_NIW_belief(
-        x,
-        belief %>% filter(!! sym(grouping.var) == i),
-        log = log,
-        category = category,
-        category.label = category.label,
-        wide = wide
-      ) %>%
+      posterior_predictive <-
+        get_posterior_predictive_from_NIW_belief(
+          x,
+          belief %>% filter(!! sym(grouping.var) == i),
+          log = log,
+          category = category,
+          category.label = category.label,
+          wide = wide
+        ) %>%
         mutate(!! sym(grouping.var) := i)
     }
 
-    pp %<>% reduce(rbind)
-    return(pp)
+    posterior_predictive %<>% reduce(rbind)
+    return(posterior_predictive)
   }
 }
 

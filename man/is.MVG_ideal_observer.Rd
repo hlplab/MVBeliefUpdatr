@@ -3,7 +3,7 @@
 \name{is.MVG_ideal_observer}
 \alias{is.MVG_ideal_observer}
 \alias{is.MVG_ideal_observer_w_lapse}
-\alias{is.MVG_ideal_observer_w_bias}
+\alias{is.MVG_ideal_observer_w_lapse_bias}
 \title{Is this an ideal observer with multivariate Gaussian (MVG) categories?}
 \usage{
 is.MVG_ideal_observer(
@@ -11,7 +11,7 @@ is.MVG_ideal_observer(
   category = "category",
   is.long = T,
   with.lapse = if (with.bias) T else F,
-  with.bias = F,
+  with.lapse_bias = F,
   verbose = F
 )
 
@@ -19,10 +19,10 @@ is.MVG_ideal_observer_w_lapse(
   x,
   category = "category",
   is.long = T,
-  with.bias = F
+  with.lapse_bias = F
 )
 
-is.MVG_ideal_observer_w_bias(x, category = "category", is.long = T)
+is.MVG_ideal_observer_w_lapse_bias(x, category = "category", is.long = T)
 }
 \arguments{
 \item{x}{Object to be checked.}
@@ -34,20 +34,20 @@ is.MVG_ideal_observer_w_bias(x, category = "category", is.long = T)
 
 \item{with.lapse}{Does this ideal observer have a lapse rate? (default: `FALSE`)}
 
-\item{with.bias}{Does this ideal observer have a bias? (default: `FALSE`)}
+\item{with.lapse_bias}{Does this ideal observer have a lapse bias? (default: `FALSE`)}
 }
 \value{
 A logical.
 }
 \description{
 Check whether \code{x} is an ideal observer with \link[=is.MVG]{multivariate Gaussian (MVG) categories}. Optionally, one can also check whether a lapse rate
-and bias is part of the ideal observer.
+and lapse bias is part of the ideal observer.
 }
 \section{Functions}{
 \itemize{
 \item \code{is.MVG_ideal_observer_w_lapse}: Also checks whether the MVG has a lapse term.
 
-\item \code{is.MVG_ideal_observer_w_bias}: Also checks whether the MVG has a bias term.
+\item \code{is.MVG_ideal_observer_w_lapse_bias}: Also checks whether the MVG has a lapse bias term.
 }}
 
 \examples{

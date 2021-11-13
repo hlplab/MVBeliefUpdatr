@@ -10,8 +10,8 @@ is.NIW_ideal_adaptor(
   x,
   category = "category",
   is.long = T,
-  with.lapse = if (with.bias) T else F,
-  with.bias = F,
+  with.lapse = if (with.lapse_bias) T else F,
+  with.lapse_bias = F,
   verbose = F
 )
 
@@ -19,7 +19,7 @@ is.NIW_ideal_adaptor_w_lapse(
   x,
   category = "category",
   is.long = T,
-  with.bias = F
+  with.lapse_bias = F
 )
 
 is.NIW_ideal_adaptor_w_bias(x, category = "category", is.long = T)
@@ -34,7 +34,7 @@ is.NIW_ideal_adaptor_w_bias(x, category = "category", is.long = T)
 
 \item{with.lapse}{Does this ideal adaptor have a lapse rate? (default: `FALSE`)}
 
-\item{with.bias}{Does this ideal adaptor have a bias? (default: `FALSE`)}
+\item{with.lapse_bias}{Does this ideal adaptor have a lapse bias? (default: `FALSE`)}
 }
 \value{
 A logical.
@@ -43,17 +43,17 @@ A logical.
 Check whether \code{x} is an ideal adaptor with \link[=is.NIW_belief]{Normal-Inverse-Wishard (NIW) beliefs}. An ideal adaptor
 describes a distribution over \link[=is.MVG_ideal_observer]{ideal observers with multivariate Gaussian categories}. In this
 sense, an ideal adaptor describes uncertainty about the true ideal observer. Optionally, one can also check whether a lapse
-rate and bias is part of the ideal adaptor.
+rate and lapse bias is part of the ideal adaptor.
 }
 \details{
-So far, the ideal adaptor is assumed to have perfect certainty about the prior, lapse rate and bias (if present).
+So far, the ideal adaptor is assumed to have perfect certainty about the prior, lapse rate and lapse bias (if present).
 Future implementations might allow uncertainty over these parameters.
 }
 \section{Functions}{
 \itemize{
 \item \code{is.NIW_ideal_adaptor_w_lapse}: Also checks whether the ideal adaptor has a lapse term.
 
-\item \code{is.NIW_ideal_adaptor_w_bias}: Also checks whether the ideal adaptor has a bias term.
+\item \code{is.NIW_ideal_adaptor_w_bias}: Also checks whether the ideal adaptor has a lapse bias term.
 }}
 
 \examples{

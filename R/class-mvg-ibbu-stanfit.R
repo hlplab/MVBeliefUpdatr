@@ -75,10 +75,10 @@ is.NIW_ideal_adaptor_stanfit = function(x) {
 #' @examples
 #' TBD
 #' @export
-is.NIW_ideal_adaptor_MCMC = function(x, is.nested = T, is.long = T, with.lapse = if (with.bias) T else F, with.bias = F) {
+is.NIW_ideal_adaptor_MCMC = function(x, is.nested = T, is.long = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F) {
   if(
     all(
-       is.NIW_ideal_adaptor(x, is.long = is.long, category = "category", with.lapse = with.lapse, with.bias = with.bias),
+       is.NIW_ideal_adaptor(x, is.long = is.long, category = "category", with.lapse = with.lapse, with.lapse_bias = with.lapse_bias),
        all(c(".chain", ".iteration", ".draw",
              "group", "lapse_rate") %in% names(x)),
        xor(is.nested, all(c("cue", "cue2") %in% names(x)))
@@ -88,14 +88,14 @@ is.NIW_ideal_adaptor_MCMC = function(x, is.nested = T, is.long = T, with.lapse =
 
 #' @describeIn is.NIW_ideal_adaptor_MCMC Also checks whether x has a lapse term.
 #' @export
-is.NIW_ideal_adaptor_w_lapse_MCMC = function(x, is.nested = T, is.long = T, with.bias = F) {
-  is.NIW_ideal_adaptor_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.bias = with.bias)
+is.NIW_ideal_adaptor_w_lapse_MCMC = function(x, is.nested = T, is.long = T, with.lapse_bias = F) {
+  is.NIW_ideal_adaptor_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.lapse_bias = with.lapse_bias)
 }
 
-#' @describeIn is.NIW_ideal_adaptor_MCMC Also checks whether x has a bias term.
+#' @describeIn is.NIW_ideal_adaptor_MCMC Also checks whether x has a lapse bias term.
 #' @export
-is.NIW_ideal_adaptor_w_bias_MCMC = function(x, is.nested = T, is.long = T) {
-  is.NIW_ideal_adaptor_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.bias = T)
+is.NIW_ideal_adaptor_w_lapse_bias_MCMC = function(x, is.nested = T, is.long = T) {
+  is.NIW_ideal_adaptor_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.lapse_bias = T)
 }
 
 
