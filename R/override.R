@@ -37,8 +37,8 @@ rmvnorm <- function(n, mean = rep(0, length(sigma)^.5), sigma = diag(length(mean
 
 # Added here to handle the case of univariate categories
 #' @export
-rmvt <- function (n, delta = rep(0, length(sigma)^.5), sigma = diag(length(mean)), df, ...) {
-  if (length(mean) == 1)
+rmvt <- function (n, delta = rep(0, length(sigma)^.5), sigma = diag(length(delta)), df, ...) {
+  if (length(delta) == 1)
     # Using rlst instead of rt since rt is for standardized t distribution (no scale parameter)
     return(rlst(n = n, df = df, mu = as.vector(delta), sigma = as.vector(sigma^.5), ...)) else
       return(mvtnorm::rmvt(n = n, delta = delta, sigma = sigma, df = df, ...))
@@ -54,8 +54,8 @@ dmvnorm <- function (x, mean = rep(0, length(sigma)^.5), sigma = diag(length(mea
 
 # Added here to handle the case of univariate categories
 #' @export
-dmvt <- function (x, delta = rep(0, length(sigma)^.5), sigma = diag(length(mean)), df, ...) {
-  if (length(mean) == 1)
+dmvt <- function (x, delta = rep(0, length(sigma)^.5), sigma = diag(length(delta)), df, ...) {
+  if (length(delta) == 1)
     # Using dlst instead of dt since dt is for standardized t distribution (no scale parameter)
     return(dlst(x = x, df = df, mu = as.vector(delta), sigma = as.vector(sigma^.5), ...)) else
       return(mvtnorm::dmvt(x = x, delta = delta, sigma = sigma, df = df, ...))
