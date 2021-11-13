@@ -30,7 +30,7 @@ rmultinom <- function(n, size, prob) {
 # Added here to handle the case of univariate categories
 #' @export
 rmvnorm <- function(n, mean = rep(0, length(sigma)^.5), sigma = diag(length(mean)), ...) {
-  if (length(mean) == 1)
+  if (is.null(dim(mean)))
     return(rnorm(n = n, mean = as.vector(mean), sd = as.vector(sigma^.5), ...)) else
       return(mvtnorm::rmvnorm(n, mean, sigma, ...))
 }
@@ -38,7 +38,7 @@ rmvnorm <- function(n, mean = rep(0, length(sigma)^.5), sigma = diag(length(mean
 # Added here to handle the case of univariate categories
 #' @export
 rmvt <- function (n, delta = rep(0, length(sigma)^.5), sigma = diag(length(delta)), df, ...) {
-  if (length(delta) == 1)
+  if (is.null(dim(delta)))
     # Using rlst instead of rt since rt is for standardized t distribution (no scale parameter)
     return(rlst(n = n, df = df, mu = as.vector(delta), sigma = as.vector(sigma^.5), ...)) else
       return(mvtnorm::rmvt(n = n, delta = delta, sigma = sigma, df = df, ...))
@@ -47,7 +47,7 @@ rmvt <- function (n, delta = rep(0, length(sigma)^.5), sigma = diag(length(delta
 # Added here to handle the case of univariate categories
 #' @export
 dmvnorm <- function (x, mean = rep(0, length(sigma)^.5), sigma = diag(length(mean)), ...) {
-  if (length(mean) == 1)
+  if (is.null(dim(mean)))
     return(dnorm(x = x, mean = as.vector(mean), sd = as.vector(sigma^.5))) else
       return(mvtnorm::dmvnorm(x = x, mean, sigma, ...))
 }
@@ -55,7 +55,7 @@ dmvnorm <- function (x, mean = rep(0, length(sigma)^.5), sigma = diag(length(mea
 # Added here to handle the case of univariate categories
 #' @export
 dmvt <- function (x, delta = rep(0, length(sigma)^.5), sigma = diag(length(delta)), df, ...) {
-  if (length(delta) == 1)
+  if (is.null(dim(delta)))
     # Using dlst instead of dt since dt is for standardized t distribution (no scale parameter)
     return(dlst(x = x, df = df, mu = as.vector(delta), sigma = as.vector(sigma^.5), ...)) else
       return(mvtnorm::dmvt(x = x, delta = delta, sigma = sigma, df = df, ...))
