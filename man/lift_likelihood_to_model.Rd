@@ -33,7 +33,7 @@ lift_NIW_belief_to_NIW_ideal_adaptor(
   category = "category",
   prior = NA_real_,
   lapse_rate = NA_real_,
-  bias = NA_real_,
+  lapse_bias = NA_real_,
   Sigma_noise = NULL,
   add_Sigma_noise_to_category_representation = T
 )
