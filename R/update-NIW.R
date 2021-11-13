@@ -173,7 +173,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
   if (lapse_treatment == "sample") {
     x_N <- rbinom(1, x_N, get_lapse_rate_from_model(prior))
   } else if (lapse_treatment == "marginalize") {
-    warning("Using lapse_treatment == 'marginalize' for updating of a single observation results in updating by fractions of observations, which might not be wellformed.")
+    warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.")
     x_N <- (1 - get_lapse_rate_from_model(prior)) * x_N
   }
 
@@ -216,10 +216,9 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
 
   # Handle noise
   assert_that(noise_treatment %in% c("no_noise", "sample", "marginalize"))
-  if (noise_treatment == "sample")
-    assert_that(all(is_scalar_integerish(x_N), is_weakly_greater_than(x_N, 1)),
-                msg = "For noise sampling, x_N must be a positive integer")
   if (noise_treatment == "sample") {
+    assert_that(all(is_scalar_integerish(x_N), is_weakly_greater_than(x_N, 1)),
+                msg = "If noise_treatment is 'sample', x_N must be a positive integer.")
     x = rmvnorm(n = x_N, sigma = get_perceptual_noise_from_model(prior))
     x_mean = x_mean + colMeans(x)
     if (x_N > 1) x_S = x_S + cov(x)
