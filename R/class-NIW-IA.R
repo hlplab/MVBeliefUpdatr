@@ -50,6 +50,18 @@ is.NIW_ideal_adaptor = function(x, category = "category", is.long = T, with.laps
     return(FALSE)
   }
 
+  # Check that the lapse rate is constant across categories
+  if (with.lapse & length(unique(x$lapse_rate)) != 1) {
+    if (verbose) message(paste("Lapse rate is not constant across categories: ", paste(x$lapse_rate, collapse = ", ")))
+    return(FALSE)
+  }
+
+  # Check that the lapse bias probabilities add up to 1
+  if (with.lapse_bias & sum(x$lapse_bias) != 1) {
+    if (verbose) message(paste("Lapse bias probabilities in x do not add up to 1: ", sum(x$lapse_bias)))
+    return(FALSE)
+  }
+
   return(TRUE)
 }
 
