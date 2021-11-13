@@ -105,5 +105,5 @@ get_perceptual_noise_from_model <- function(model) {
 
   assert_that(length(Sigma_noise) == 1,
               msg = "More than one Sigma_noise found in model.")
-  return(Sigma_noise)
+  return(Sigma_noise[[1]])
 }
