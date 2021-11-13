@@ -159,7 +159,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
 ) {
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
   assert_NIW_belief(prior)
-  assert_that(all(s_scalar_character(noise_treatment)), s_scalar_character(lapse_treatment))
+  assert_that(all(is_scalar_character(noise_treatment)), is_scalar_character(lapse_treatment))
   if (any(noise_treatment != "no_noise", lapse_treatment != "no_lapses"))
     assert_that(is.NIW_ideal_adaptor(prior),
                 msg = "If noise_treatment is not 'no_noise' or lapse_treatment is not 'no_lapses', x must be an NIW_ideal_adaptor object containing noise and lapse information.")
@@ -374,5 +374,9 @@ update_NIW_ideal_adaptor_incrementally <- function(
 #' @rdname update_NIW_ideal_adaptor_incrementally
 #' @export
 update_NIW_beliefs_incrementally <- function(...){
+  dots <- list(...)
+  assert_that(all(is.null(dots[["noise_treatment"]]), is.null(dots[["lapse_treatment"]])),
+              msg = "NIW beliefs do not have noise or lapse rates. Perhaps you meant to use update_NIW_ideal_adaptor_incrementally()?")
+
   update_NIW_ideal_adaptor_incrementally(..., noise_treatment = "no_noise", lapse_treatement = "no_lapses")
 }
