@@ -85,9 +85,10 @@ get_categorization_from_NIW_ideal_adaptor = function(
     group_by(category) %>%
     mutate(
       observation = 1:length(x),
-      x = x) %>%
+      x = x,
+      prior = belief$prior[category]) %>%
     group_by(observation) %>%
-    mutate(pp = pp / sum(pp))
+    mutate(pp = (pp * prior) / sum(pp * prior))
 
   # Consider lapses
   p %<>%
