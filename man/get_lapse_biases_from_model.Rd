@@ -4,7 +4,7 @@
 \alias{get_lapse_biases_from_model}
 \title{Get lapse bias from model}
 \usage{
-get_lapse_biases_from_model(model)
+get_lapse_biases_from_model(model, categories = model$category)
 }
 \arguments{
 \item{model}{A model object.}

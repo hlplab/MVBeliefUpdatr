@@ -8,8 +8,8 @@ get_categorization_from_NIW_ideal_adaptor(
   x,
   belief,
   decision_rule,
-  noise_treatment = if (decision_rule == "sample") "sample" else "marginalize",
-  lapse_treatment = decision_rule,
+  noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+  lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F
 )
 }
@@ -18,23 +18,23 @@ get_categorization_from_NIW_ideal_adaptor(
 
 \item{decision_rule}{Must be one of "criterion", "proportional", or "sampling".}
 
-\item{lapse_treatment}{Determines how lapses will be treated. Can be "sample" or "marginalize". If "sample", whether
-a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be a lapsing trial the
-lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability will be adjusted
-based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from perceptual model.
-(default: "sample" if decision_rule is "sample"; "marginalize" otherwise).}
+\item{noise_treatment}{Determines how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
+or "marginalize". If "sample", observations are adjusted by samples drawn from the noise distribution before applying
+categorization.If "marginalize" then each observation is transformed into the marginal distribution
+that results from convolving the input with noise. This latter option might be helpful, for example, if one is
+interested in estimating the consequences of noise across individuals. (default: "sample" if decision_rule is
+"sample"; "marginalize" otherwise).}
+
+\item{lapse_treatment}{Determines how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
+If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
+a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
+will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
+perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).}
 
 \item{simplify}{Should the output be simplified, and just the label of the selected category be returned? This
 option is only available for the criterion and sampling decision rules. (default: `FALSE`)}
 
 \item{model}{An \code{\link[=is.NIW_ideal_adaptor]{NIW_ideal_adaptor}} object.}
-
-\item{noise_treatement}{Determines how multivariate Gaussian noise is added to the input. Can be "sample" or
-"marginalize". If "sample", observations are adjusted by samples drawn from the noise distribution before applying
-categorization.If "marginalize" then each observation is transformed into the marginal distribution
-that results from convolving the input with noise. This latter option might be helpful, for example, if one is
-interested in estimating the consequences of noise across individuals. (default: "sample" if decision_rule is
-"sample"; "marginalize" otherwise).}
 }
 \value{
 Either a tibble of observations with posterior probabilities for each category (in long format), or a

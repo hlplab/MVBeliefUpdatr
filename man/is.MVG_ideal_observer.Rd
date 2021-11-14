@@ -10,7 +10,7 @@ is.MVG_ideal_observer(
   x,
   category = "category",
   is.long = T,
-  with.lapse = if (with.bias) T else F,
+  with.lapse = if (with.lapse_bias) T else F,
   with.lapse_bias = F,
   verbose = F
 )
