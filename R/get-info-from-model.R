@@ -59,6 +59,25 @@ get_nlevels_of_category_labels_from_model = function(x) {
 }
 
 
+#' Get priors from model
+#'
+#' @param model A model object.
+#'
+#' @export
+get_priors_from_model <- function(model, categories = model$category) {
+  assert_that("prior" %in% names(model),
+              msg = "No prior found in model.")
+
+  assert_that(sum(model$prior) == 1,
+              msg = paste("The priors do not add up to 1:", sum(prior)))
+
+  prior <- model %>%
+    filter(category %in% categories) %>%
+    pull(prior)
+
+  return(prior)
+}
+
 #' Get lapse rate from model
 #'
 #' @param model A model object.
@@ -80,14 +99,17 @@ get_lapse_rate_from_model <- function(model) {
 #' @param model A model object.
 #'
 #' @export
-get_lapse_biases_from_model <- function(model) {
+get_lapse_biases_from_model <- function(model, categories = model$category) {
   assert_that("lapse_bias" %in% names(model),
               msg = "No lapse_bias found in model.")
 
-  lapse_bias <- model$lapse_bias
-
-  assert_that(sum(lapse_bias) == 1,
+  assert_that(sum(model$lapse_bias) == 1,
               msg = paste("The lapse_biases do not add up to 1:", sum(lapse_bias)))
+
+  lapse_bias <- model %>%
+    filter(category %in% categories) %>%
+    pull(lapse_bias)
+
   return(lapse_bias)
 }
 

@@ -17,7 +17,7 @@
 #' @examples
 #' TBD
 #' @export
-is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lapse = if (with.bias) T else F, with.lapse_bias = F, verbose = F) {
+is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F) {
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
 
   if (!is.MVG(x)) {
@@ -48,7 +48,7 @@ is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lap
 #' @describeIn is.MVG_ideal_observer Also checks whether the MVG has a lapse term.
 #' @export
 is.MVG_ideal_observer_w_lapse = function(x, category = "category", is.long = T, with.lapse_bias = F) {
-  is.MVG_ideal_observer(x, category = category, is.long = is.long, with.lapse = T, with.lapse_bias = with.bias)
+  is.MVG_ideal_observer(x, category = category, is.long = is.long, with.lapse = T, with.lapse_bias = with.lapse_bias)
 }
 
 #' @describeIn is.MVG_ideal_observer Also checks whether the MVG has a lapse bias term.
