@@ -21,17 +21,17 @@ get_categorization_function_from_NIW_ideal_adaptor = function(x, ...) {
 #' @param x A vector of observations.
 #' @param model An \code{\link[=is.NIW_ideal_adaptor]{NIW_ideal_adaptor}} object.
 #' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
-#' @param noise_treatement Determines how multivariate Gaussian noise is added to the input. Can be "sample" or
-#' "marginalize". If "sample", observations are adjusted by samples drawn from the noise distribution before applying
+#' @param noise_treatment Determines how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
+#' or "marginalize". If "sample", observations are adjusted by samples drawn from the noise distribution before applying
 #' categorization.If "marginalize" then each observation is transformed into the marginal distribution
 #' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
 #' interested in estimating the consequences of noise across individuals. (default: "sample" if decision_rule is
 #' "sample"; "marginalize" otherwise).
-#' @param lapse_treatment Determines how lapses will be treated. Can be "sample" or "marginalize". If "sample", whether
-#' a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be a lapsing trial the
-#' lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability will be adjusted
-#' based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from perceptual model.
-#' (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
+#' @param lapse_treatment Determines how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
+#' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
+#' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
+#' will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
+#' perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
 #' @param simplify Should the output be simplified, and just the label of the selected category be returned? This
 #' option is only available for the criterion and sampling decision rules. (default: `FALSE`)
 #'
@@ -56,21 +56,18 @@ get_categorization_from_NIW_ideal_adaptor = function(
   assert_NIW_ideal_adaptor(belief)
   assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
               msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
-  assert_that(any(is.null(noise_treatement), noise_treatement %in% c("sample", "marginalize")),
-              msg = 'noise_treatement must be one of "sample" or "marginalize"')
+  assert_that(any(is.null(noise_treatment), noise_treatment %in% c("sample", "marginalize")),
+              msg = "noise_treatment must be one of 'no_noise', 'sample' or 'marginalize'.")
 
   # How should noise be treated?
-  if (!is.null(noise_treatement)) {
-    if (noise_treatement %in% c("sample"))
-      assert_that(
-        is_weakly_greater_than(length(x), 1),
-        msg = "For noise sampling, x must be of length 1 or longer.")
+  if (noise_treatment == "sample") {
+    assert_that(
+      is_weakly_greater_than(length(x), 1),
+      msg = "For noise sampling, x must be of length 1 or longer.")
 
-    # Handle noise
-    if (noise_treatement == "sample") {
-      x <- x + rmvnorm(n = length(x), sigma = belief$Sigma_noise[[1]])
-    } else if (noise_treatement == "marginalize") message("Method 'marginalize' not yet implemented for noise_treatement.")
-  }
+    x <- x + rmvnorm(n = length(x), sigma = belief$Sigma_noise[[1]])
+  } else if (noise_treatment == "marginalize")
+    message("noise_treatment == 'marginalize' not yet implemented.")
 
   # In case a single x is handed as argument, make sure it's made a list so that the length check below
   # correctly treats it as length 1 (rather than the dimensionality of the one observation).
@@ -86,7 +83,7 @@ get_categorization_from_NIW_ideal_adaptor = function(
     mutate(posterior_probability = (posterior_predictive * prior) / sum(posterior_predictive * prior))
 
   # How should lapses be treated?
-  if (lapse_treatment  %in% c("sampling")) {
+  if (lapse_treatment == "sampling") {
     posterior_probabilities %<>%
       mutate(
         posterior_probability = ifelse(
@@ -95,7 +92,7 @@ get_categorization_from_NIW_ideal_adaptor = function(
             get_nlevels_of_category_labels_from_model(belief)),
           belief$lapse_bias[category],    # substitute lapse probabilities for posterior
           posterior_probability))         # ... or not
-  } else {
+  } else if (lapse_treatment == "marginalize") {
     posterior_probabilities %<>%
       mutate(posterior_probability =  lapse_rate * lapse_bias + (1 - lapse_rate) * posterior_probability)
   }

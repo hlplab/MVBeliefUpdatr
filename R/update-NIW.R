@@ -173,7 +173,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
   if (lapse_treatment == "sample") {
     x_N <- rbinom(1, x_N, get_lapse_rate_from_model(prior))
   } else if (lapse_treatment == "marginalize") {
-    warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.")
+    warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.", call. = FALSE)
     x_N <- (1 - get_lapse_rate_from_model(prior)) * x_N
   }
 
@@ -307,6 +307,8 @@ update_NIW_ideal_adaptor_incrementally <- function(
   verbose = FALSE
 ){
   if (verbose) message("Assuming that category variable in NIW belief/ideal adaptor is called category.")
+  if (lapse_treatment == "marginalize")
+    warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.", call. = FALSE)
 
   assert_NIW_belief(prior)
   assert_that(all(is.flag(keep.update_history), is.flag(keep.exposure_data)))
@@ -338,14 +340,15 @@ update_NIW_ideal_adaptor_incrementally <- function(
   for (i in 1:nrow(exposure)) {
     posterior = if (keep.update_history) prior %>% filter(observation.n == i - 1) else prior
     posterior =
-      update_NIW_belief_by_one_observation(
-        prior = posterior,
-        x = unlist(exposure[i, "cues"]),
-        x_category = exposure[i,][[exposure.category]],
-        noise_treatment = noise_treatment,
-        lapse_treatment = lapse_treatment,
-        method = method[i],
-        verbose = verbose)
+      suppressWarnings(
+        update_NIW_belief_by_one_observation(
+          prior = posterior,
+          x = unlist(exposure[i, "cues"]),
+          x_category = exposure[i,][[exposure.category]],
+          noise_treatment = noise_treatment,
+          lapse_treatment = lapse_treatment,
+          method = method[i],
+          verbose = verbose))
 
     if (keep.update_history) {
       posterior %<>%
@@ -377,5 +380,5 @@ update_NIW_beliefs_incrementally <- function(...){
   assert_that(all(is.null(dots[["noise_treatment"]]), is.null(dots[["lapse_treatment"]])),
               msg = "NIW beliefs do not have noise or lapse rates. Perhaps you meant to use update_NIW_ideal_adaptor_incrementally()?")
 
-  update_NIW_ideal_adaptor_incrementally(..., noise_treatment = "no_noise", lapse_treatement = "no_lapses")
+  update_NIW_ideal_adaptor_incrementally(..., noise_treatment = "no_noise", lapse_treatment = "no_lapses")
 }
