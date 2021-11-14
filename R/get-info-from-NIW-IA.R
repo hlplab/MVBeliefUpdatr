@@ -81,7 +81,9 @@ get_categorization_from_NIW_ideal_adaptor = function(
     mutate(
       observationID = 1:length(x),
       x = x,
-      prior = belief$prior[category]) %>%
+      lapse_rate = get_lapse_rate_from_model(belief),
+      lapse_bias = get_lapse_biases_from_model(belief, categories = category),
+      prior = get_priors_from_model(belief, categories = category)) %>%
     group_by(observationID) %>%
     mutate(posterior_probability = (posterior_predictive * prior) / sum(posterior_predictive * prior))
 
@@ -93,8 +95,8 @@ get_categorization_from_NIW_ideal_adaptor = function(
           rep(
             rbinom(1, 1, lapse_rate),
             get_nlevels_of_category_labels_from_model(belief)),
-          belief$lapse_bias[category],    # substitute lapse probabilities for posterior
-          posterior_probability))         # ... or not
+          lapse_bias,                 # substitute lapse probabilities for posterior
+          posterior_probability))     # ... or not
   } else if (lapse_treatment == "marginalize") {
     posterior_probabilities %<>%
       mutate(posterior_probability =  lapse_rate * lapse_bias + (1 - lapse_rate) * posterior_probability)
