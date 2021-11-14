@@ -71,7 +71,7 @@ get_categorization_from_NIW_ideal_adaptor = function(
       is_weakly_greater_than(length(x), 1),
       msg = "For noise sampling, x must be of length 1 or longer.")
 
-    x <- map(x, ~ rmvnorm(n = length(.x), sigma = belief$Sigma_noise[[1]]))
+    x <- map(x, ~ rmvnorm(n = 1, mean = .x, sigma = belief$Sigma_noise[[1]]))
   } else if (noise_treatment == "marginalize")
     message("noise_treatment == 'marginalize' not yet implemented.")
 
@@ -141,5 +141,5 @@ get_categorization_from_NIW_ideal_adaptor = function(
              rename(response = category) %>%
              ungroup() %>%
              pull(response))
-  } else return(posterior_probability)
+  } else return(posterior_probabilities)
 }
