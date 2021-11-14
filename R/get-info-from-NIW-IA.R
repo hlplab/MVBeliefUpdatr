@@ -48,16 +48,18 @@ get_categorization_from_NIW_ideal_adaptor = function(
   x,
   belief,
   decision_rule,
-  noise_treatment = if (decision_rule == "sample") "sample" else "marginalize",
-  lapse_treatment = decision_rule,
+  noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+  lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F
 ) {
   # TO DO: check dimensionality of x with regard to belief.
   assert_NIW_ideal_adaptor(belief)
   assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
               msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
-  assert_that(any(is.null(noise_treatment), noise_treatment %in% c("sample", "marginalize")),
+  assert_that(any(noise_treatment %in% c("sample", "marginalize")),
               msg = "noise_treatment must be one of 'no_noise', 'sample' or 'marginalize'.")
+  assert_that(any(lapse_treatment %in% c("sample", "marginalize")),
+              msg = "lapse_treatment must be one of 'no_noise', 'sample' or 'marginalize'.")
 
   # How should noise be treated?
   if (noise_treatment == "sample") {
@@ -83,7 +85,7 @@ get_categorization_from_NIW_ideal_adaptor = function(
     mutate(posterior_probability = (posterior_predictive * prior) / sum(posterior_predictive * prior))
 
   # How should lapses be treated?
-  if (lapse_treatment == "sampling") {
+  if (lapse_treatment == "sample") {
     posterior_probabilities %<>%
       mutate(
         posterior_probability = ifelse(
