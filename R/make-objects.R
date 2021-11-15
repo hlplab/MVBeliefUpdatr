@@ -42,14 +42,17 @@ make_MVG_from_data = function(
   assert_that(all(is.character(category) | is_symbol(category), length(category) == 1))
   assert_that(all(is.character(cues) | is_symbol(cues), length(cues) > 0))
 
-  if (is.character(group)) group = syms(group)
-  if (is.character(category)) category = sym(category)
-  if (is.character(cues)) cues = syms(cues)
+  if (is.character(group)) group <- syms(group)
+  if (is.character(category)) category <- sym(category)
+  if (is.character(cues)) {
+    cue_names <- cues
+    cues <- syms(cues)
+  }
 
   assert_that(as_name(category) %in% names(data),
               msg = paste0("Category variable (", as_name(category), ") not found in data."))
-  assert_that(all(as_name(cues) %in% names(data)),
-              msg = paste0("Some cues not found in data: ", setdiff(as_name(cues), intersect(as_name(cues), names(data)))))
+  assert_that(all(cue_names %in% names(data)),
+              msg = paste0("Some cues not found in data: ", setdiff(cue_names, intersect(cue_names, names(data)))))
 
   data %<>%
     select(!! category, !!! cues, !!! group) %>%
