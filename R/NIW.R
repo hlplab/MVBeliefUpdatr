@@ -81,7 +81,7 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' Get posterior predictive
 #'
 #' Get posterior predictive of observations x given the NIW parameters m, S, kappa, and nu. This is
-#' a multivariate Student-T distribution \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
+#' the density of a multivariate Student-T distribution \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
 #'
 #' @param x Observations. Can be a vector with k elements for a single observation or a matrix with k
 #' columns and n rows, in which case each row of the matrix is taken to be one observation. If x is a
