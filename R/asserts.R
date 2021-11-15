@@ -1,3 +1,8 @@
+assert_MVG_ideal_observer = function(x, category = "category") {
+  assert_that(is.MVG_ideal_observer(x, category = category),
+              msg = "x must be an MVG_ideal_observer object.")
+}
+
 assert_NIW_belief = function(x, category = "category", strict = F) {
   if (strict) {
     assert_that(is.NIW_belief(x, category = category),

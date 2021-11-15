@@ -20,7 +20,7 @@
 is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F) {
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
 
-  if (!is.MVG(x)) {
+  if (!is.MVG(x, category = category, verbose = verbose)) {
     if (verbose) message("x does not contain multivariate Gaussian categories.")
     return(FALSE)
   }

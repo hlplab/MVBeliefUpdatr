@@ -27,11 +27,13 @@ is.MVG = function(x, category = "category", is.long = T, verbose = F) {
     return(FALSE)
   }
 
-  if (category %nin% names(x)) {
-    if (verbose) message("x is missing a category column. Did you use another name for this column? You can use the category
-            argument to specify the name of that column.")
-    return(FALSE)
-  }
+  # REMOVED until a better solution is found for category handling since this does lead to problems when working with data frames
+  # that use a different category name.
+  # if (category %nin% names(x)) {
+  #   if (verbose) message("x is missing a category column. Did you use another name for this column? You can use the category
+  #           argument to specify the name of that column.")
+  #   return(FALSE)
+  # }
 
   if (any(c("mu", "Sigma") %nin% names(x))) {
     if (verbose) message("x is missing either mu or Sigma.")
