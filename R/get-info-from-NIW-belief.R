@@ -34,7 +34,7 @@ get_posterior_predictive_from_NIW_belief = function(
 
   posterior_predictive %<>% reduce(rbind)
   if (wide)
-    l.posterior_probabilities %<>%
+    posterior_predictive %<>%
     pivot_wider(
       values_from = if (log) "log_posterior_predictive" else "posterior_predictive",
       names_from = !! sym(category),
