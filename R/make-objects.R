@@ -66,7 +66,7 @@ make_MVG_from_data = function(
       mu = list(colMeans(cbind(!!! cues))),
       Sigma = list(cov(cbind(!!! cues))))
 
-  if (aggregate_into_typical)
+  if (!is.null(group))
     while(length(group) > 1) {
       group = group[2:length(group)]
       data %<>%
