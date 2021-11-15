@@ -38,7 +38,7 @@ matrix Sigma. Should be a square k x k matrix.}
 }
 \description{
 Get posterior predictive of observations x given the NIW parameters m, S, kappa, and nu. This is
-a multivariate Student-T distribution \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
+the density of a multivariate Student-T distribution \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
 }
 \examples{
 TBD
