@@ -52,7 +52,7 @@ make_MVG_from_data = function(
   assert_that(as_name(category) %in% names(data),
               msg = paste0("Category variable (", as_name(category), ") not found in data."))
   assert_that(all(cue_names %in% names(data)),
-              msg = paste0("Some cues not found in data: ", setdiff(cue_names, intersect(cue_names, names(data)))))
+              msg = paste0("Some cues not found in data: ", paste(setdiff(cue_names, intersect(cue_names, names(data))), collapse = ", ")))
 
   data %<>%
     select(!! category, !!! cues, !!! group) %>%
@@ -80,7 +80,6 @@ make_MVG_from_data = function(
       !! category := factor(!! category)) %>%
     ungroup()
 
-  if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
   if (!is.MVG(data, category = as_name(category), verbose = verbose))
     warning("Something went wrong. The returned object is not an MVG. Try again with verbose = T?")
 
@@ -101,11 +100,11 @@ make_MVG_ideal_observer_from_data = function(
   add_Sigma_noise_to_category_representation = T,
   verbose = F
 ) {
-  data %<>% make_MVG_from_data(group = group, category = category, cues = cues, verbose = verbose)
-  data %<>% lift_MVG_to_ideal_observer(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
+  model <- data %>% make_MVG_from_data(group = group, category = category, cues = cues, verbose = verbose)
+  model %<>% lift_MVG_to_MVG_ideal_observer(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
                                        Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
 
-  if (!is.MVG_ideal_observer(x, category = as_name(category), verbose = verbose))
+  if (!is.MVG_ideal_observer(model, category = as_name(category), verbose = verbose))
     warning("Something went wrong. The returned object is not an MVG ideal observer. Try again with verbose = T?")
 
   return(data)
@@ -177,7 +176,7 @@ make_NIW_belief_from_data = function(
   if (is.character(category)) category = sym(category)
   if (is.character(cues)) cues = syms(cues)
 
-  data %<>%
+  model <- data %>%
     select(!! category, !!! cues, !!! group) %>%
     mutate(cues = pmap(list(!!! cues),
                        .f = function(...) {
@@ -191,7 +190,7 @@ make_NIW_belief_from_data = function(
 
   message("S is set so that the expected category covariance matrix Sigma matches the category covariance in the sample (given nu). ",
           "It might be safer to fit an Inverse-Wishart distribution to the entire set of covariance matrices.")
-  data %<>%
+  model %<>%
     mutate(
       !! category := factor(!! category),
       kappa = kappa,
@@ -201,7 +200,7 @@ make_NIW_belief_from_data = function(
     ungroup()
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
-  if (!is.NIW_belief(data, category = as_name(category), verbose = verbose))
+  if (!is.NIW_belief(model, category = as_name(category), verbose = verbose))
     warning("Something went wrong. The returned object is not an NIW belief.")
 
   return(data)
@@ -227,12 +226,12 @@ make_NIW_ideal_adaptor_from_data = function(
   add_Sigma_noise_to_category_representation = T,
   keep.category_parameters = F
 ) {
-  data %<>% make_NIW_belief_from_data(group = group, category = category, cues = cues, verbose = verbose)
-  data %<>% lift_NIW_belief_to_NIW_ideal_adaptor(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
+  model <- data %>% make_NIW_belief_from_data(group = group, category = category, cues = cues, verbose = verbose)
+  model %<>% lift_NIW_belief_to_NIW_ideal_adaptor(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
                                                  Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
-  if (!is.NIW_ideal_adaptor(data, category = as_name(category), verbose = verbose))
+  if (!is.NIW_ideal_adaptor(model, category = as_name(category), verbose = verbose))
     warning("Something went wrong. The returned object is not an NIW ideal adaptor.")
 
   return(data)
@@ -287,8 +286,8 @@ lift_likelihood_to_model = function(
   assert_that(all(is.numeric(lapse_rate), is.numeric(lapse_bias), is.numeric(prior)),
               msg = "The category prior, lapse rate, and lapse bias must be numeric.")
 
-  n.cat = length(unique(x[[!! category]]))
-  if (is.na(prior) | is.null(prior)) {
+  n.cat = length(unique(x %>% pull(!! category)))
+  if (all(is.na(prior) | is.null(prior))) {
     message(paste0("No prior specified. Defaulting to uniform prior over the ", n.cat, " categories found in x."))
     prior = rep(1 / n.cat, n.cat)
   }
