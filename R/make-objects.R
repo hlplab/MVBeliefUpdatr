@@ -80,8 +80,11 @@ make_MVG_from_data = function(
       !! category := factor(!! category)) %>%
     ungroup()
 
-  if (!is.MVG(model, category = as_name(category), verbose = verbose))
+  if (is.null(group) & !is.MVG(model, category = as_name(category), verbose = verbose)) {
     warning("Something went wrong. The returned object is not an MVG. Try again with verbose = T?")
+  } else if (!is.null(group)) {
+    warning("Currently, groups of ideal observers are not checked for internal consistency.")
+  }
 
   return(model)
 }
@@ -104,8 +107,11 @@ make_MVG_ideal_observer_from_data = function(
   model %<>% lift_MVG_to_MVG_ideal_observer(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
                                        Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
 
-  if (!is.MVG_ideal_observer(model, category = as_name(category), verbose = verbose))
+  if (is.null(group) & !is.MVG_ideal_observer(model, category = as_name(category), verbose = verbose)) {
     warning("Something went wrong. The returned object is not an MVG ideal observer. Try again with verbose = T?")
+  } else if (!is.null(group)) {
+    warning("Currently, groups of ideal observers are not checked for internal consistency.")
+  }
 
   return(model)
 }
@@ -304,6 +310,7 @@ lift_likelihood_to_model = function(
               msg = "If not NULL, Sigma_noise must be a matrix.")
 
   x %<>%
+    group_by(!!! group) %>%
     mutate(
       prior = prior,
       lapse_rate = lapse_rate,
