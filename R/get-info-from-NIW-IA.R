@@ -56,9 +56,9 @@ get_categorization_from_NIW_ideal_adaptor = function(
   assert_NIW_ideal_adaptor(belief)
   assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
               msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
-  assert_that(any(noise_treatment %in% c("sample", "marginalize")),
+  assert_that(any(noise_treatment %in% c("no_noise", "sample", "marginalize")),
               msg = "noise_treatment must be one of 'no_noise', 'sample' or 'marginalize'.")
-  assert_that(any(lapse_treatment %in% c("sample", "marginalize")),
+  assert_that(any(lapse_treatment %in% c("no_noise", "sample", "marginalize")),
               msg = "lapse_treatment must be one of 'no_noise', 'sample' or 'marginalize'.")
 
   # In case a single x is handed as argument, make sure it's made a list so that the length check below
