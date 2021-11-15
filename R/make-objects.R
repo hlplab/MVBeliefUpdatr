@@ -54,7 +54,7 @@ make_MVG_from_data = function(
   assert_that(all(cue_names %in% names(data)),
               msg = paste0("Some cues not found in data: ", paste(setdiff(cue_names, intersect(cue_names, names(data))), collapse = ", ")))
 
-  data %<>%
+  model <- data %>%
     select(!! category, !!! cues, !!! group) %>%
     mutate(cues = pmap(list(!!! cues),
                        .f = function(...) {
@@ -69,21 +69,21 @@ make_MVG_from_data = function(
   if (!is.null(group))
     while(length(group) > 1) {
       group = group[2:length(group)]
-      data %<>%
+      model %<>%
         group_by(., !!! group, !! category) %>%
         summarise_at(vars(starts_with(c("mu", "Sigma"))),
                      ~ list(reduce(.x, `+`) / length(.x)))
     }
 
-  data %<>%
+  model %<>%
     mutate(
       !! category := factor(!! category)) %>%
     ungroup()
 
-  if (!is.MVG(data, category = as_name(category), verbose = verbose))
+  if (!is.MVG(model, category = as_name(category), verbose = verbose))
     warning("Something went wrong. The returned object is not an MVG. Try again with verbose = T?")
 
-  return(data)
+  return(model)
 }
 
 #' @export
@@ -107,7 +107,7 @@ make_MVG_ideal_observer_from_data = function(
   if (!is.MVG_ideal_observer(model, category = as_name(category), verbose = verbose))
     warning("Something went wrong. The returned object is not an MVG ideal observer. Try again with verbose = T?")
 
-  return(data)
+  return(model)
 }
 
 
@@ -203,7 +203,7 @@ make_NIW_belief_from_data = function(
   if (!is.NIW_belief(model, category = as_name(category), verbose = verbose))
     warning("Something went wrong. The returned object is not an NIW belief.")
 
-  return(data)
+  return(model)
 }
 
 #' @rdname make_NIW_belief_from_data
@@ -234,7 +234,7 @@ make_NIW_ideal_adaptor_from_data = function(
   if (!is.NIW_ideal_adaptor(model, category = as_name(category), verbose = verbose))
     warning("Something went wrong. The returned object is not an NIW ideal adaptor.")
 
-  return(data)
+  return(model)
 }
 
 
