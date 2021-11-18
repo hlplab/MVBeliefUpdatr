@@ -359,7 +359,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
       cue2 = seq(min(ylim), max(ylim), length.out = resolution)) %>%
     mutate(x = map2(cue1, cue2, ~ c(.x, .y))) %>%
     mutate(
-      density = pmap(., get_NIW_posterior_predictive.pmap(),
+      density = pmap(., get_NIW_posterior_predictive.pmap),
       density = unlist(density)
     ) %>%
     # Marginalize over MCMC draws
