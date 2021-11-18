@@ -110,7 +110,7 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' TBD
 #' @rdname get_NIW_posterior_predictive
 #' @export
-get_posterior_predictive = function(x, m, S, kappa, nu, log = T, noise_treatment = "no_noise", Sigma_noise = NULL) {
+get_NIW_posterior_predictive = function(x, m, S, kappa, nu, log = T, noise_treatment = "no_noise", Sigma_noise = NULL) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
   assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
