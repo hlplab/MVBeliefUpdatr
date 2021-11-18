@@ -2,26 +2,26 @@
 #' @export
 get_posterior_predictive_from_NIW_belief = function(
   x,
-  belief,
+  model,
   log = T,
   category = "category",
   category.label = NULL,
   wide = FALSE
 ) {
-  assert_that(is.NIW_belief(belief))
+  assert_that(is.NIW_belief(model))
   assert_that(any(is.null(category.label) | is.character(category.label)))
 
   if (is.null(category.label)) {
-    belief %<>%
+    model %<>%
       droplevels()
-    category.label = belief %>%
+    category.label = model %>%
       pull(!! sym(category)) %>%
       unique()
   }
 
   posterior_predictive <- foreach(c = category.label) %do% {
     b <-
-      belief %>%
+      model %>%
       filter(!! sym(category) == c)
 
     get_posterior_predictive(
@@ -44,10 +44,10 @@ get_posterior_predictive_from_NIW_belief = function(
   return(posterior_predictive)
 }
 
-# If there's a grouping variable extract the pp for each level of that grouping variable
+# If there's a grouping variable extract the posterior predictive for each level of that grouping variable
 get_posterior_predictives_from_NIW_beliefs = function(
   x,
-  belief,
+  model,
   log = T,
   category = "category",
   category.label = NULL,
@@ -57,7 +57,7 @@ get_posterior_predictives_from_NIW_beliefs = function(
   if (is.null(grouping.var)) {
     return(get_posterior_predictive_from_NIW_belief(
       x,
-      belief,
+      model,
       log = log,
       category = category,
       category.label = category.label,
@@ -70,7 +70,7 @@ get_posterior_predictives_from_NIW_beliefs = function(
       posterior_predictive <-
         get_posterior_predictive_from_NIW_belief(
           x,
-          belief %>% filter(!! sym(grouping.var) == i),
+          model %>% filter(!! sym(grouping.var) == i),
           log = log,
           category = category,
           category.label = category.label,
