@@ -157,8 +157,7 @@ get_NIW_posterior_predictive = function(x, m, S, kappa, nu, log = T, noise_treat
     x <- map(x, ~ rmvnorm(n = 1, mean = .x, sigma = Sigma_noise))
   } else if (noise_treatment == "marginalize") {
     warning("noise_treatment == 'marginalize' is experimental. The math has not yet been verified. Use with caution.")
-    model %<>%
-      mutate(S = get_S_from_expected_Sigma(get_expected_Sigma_from_S(S, nu) + Sigma_noise), nu)
+    S = get_S_from_expected_Sigma(get_expected_Sigma_from_S(S, nu) + Sigma_noise, nu)
   }
 
   dmvt(x,
