@@ -65,16 +65,5 @@ is.NIW_ideal_adaptor = function(x, category = "category", is.long = T, with.laps
   return(TRUE)
 }
 
-#' @describeIn is.NIW_ideal_adaptor Also checks whether the ideal adaptor has a lapse term.
-#' @export
-is.NIW_ideal_adaptor_w_lapse = function(x, category = "category", is.long = T, with.lapse_bias = F) {
-  is.NIW_ideal_adaptor(x, category = category, is.long = is.long, with.lapse = T, with.lapse_bias = with.lapse_bias)
-}
-
-#' @describeIn is.NIW_ideal_adaptor Also checks whether the ideal adaptor has a lapse bias term.
-#' @export
-is.NIW_ideal_adaptor_w_bias = function(x, category = "category", is.long = T) {
-  is.NIW_ideal_adaptor(x, category = category, is.long = is.long, with.lapse = T, with.lapse_bias = T)
-}
 
 

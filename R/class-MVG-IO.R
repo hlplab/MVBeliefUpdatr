@@ -45,16 +45,4 @@ is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lap
   return(TRUE)
 }
 
-#' @describeIn is.MVG_ideal_observer Also checks whether the MVG has a lapse term.
-#' @export
-is.MVG_ideal_observer_w_lapse = function(x, category = "category", is.long = T, with.lapse_bias = F) {
-  is.MVG_ideal_observer(x, category = category, is.long = is.long, with.lapse = T, with.lapse_bias = with.lapse_bias)
-}
-
-#' @describeIn is.MVG_ideal_observer Also checks whether the MVG has a lapse bias term.
-#' @export
-is.MVG_ideal_observer_w_lapse_bias = function(x, category = "category", is.long = T) {
-  is.MVG_ideal_observer(x, category = category, is.long = is.long, with.lapse = T, with.lapse_bias = T)
-}
-
 

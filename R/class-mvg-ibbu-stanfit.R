@@ -86,18 +86,6 @@ is.NIW_ideal_adaptor_MCMC = function(x, is.nested = T, is.long = T, with.lapse =
   ) return(T) else return(F)
 }
 
-#' @describeIn is.NIW_ideal_adaptor_MCMC Also checks whether x has a lapse term.
-#' @export
-is.NIW_ideal_adaptor_w_lapse_MCMC = function(x, is.nested = T, is.long = T, with.lapse_bias = F) {
-  is.NIW_ideal_adaptor_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.lapse_bias = with.lapse_bias)
-}
-
-#' @describeIn is.NIW_ideal_adaptor_MCMC Also checks whether x has a lapse bias term.
-#' @export
-is.NIW_ideal_adaptor_w_lapse_bias_MCMC = function(x, is.nested = T, is.long = T) {
-  is.NIW_ideal_adaptor_MCMC(x, is.nested = is.nested, is.long = is.long, with.lapse = T, with.lapse_bias = T)
-}
-
 
 #' Is this a list of NIW IBBU inputs?
 #'

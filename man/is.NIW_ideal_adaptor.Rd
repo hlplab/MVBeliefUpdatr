@@ -2,8 +2,6 @@
 % Please edit documentation in R/class-NIW-IA.R
 \name{is.NIW_ideal_adaptor}
 \alias{is.NIW_ideal_adaptor}
-\alias{is.NIW_ideal_adaptor_w_lapse}
-\alias{is.NIW_ideal_adaptor_w_bias}
 \title{Is this an ideal adaptor with Normal-Inverse-Wishart (NIW) beliefs?}
 \usage{
 is.NIW_ideal_adaptor(
@@ -14,15 +12,6 @@ is.NIW_ideal_adaptor(
   with.lapse_bias = F,
   verbose = F
 )
-
-is.NIW_ideal_adaptor_w_lapse(
-  x,
-  category = "category",
-  is.long = T,
-  with.lapse_bias = F
-)
-
-is.NIW_ideal_adaptor_w_bias(x, category = "category", is.long = T)
 }
 \arguments{
 \item{x}{Object to be checked.}
@@ -49,13 +38,6 @@ rate and lapse bias is part of the ideal adaptor.
 So far, the ideal adaptor is assumed to have perfect certainty about the prior, lapse rate and lapse bias (if present).
 Future implementations might allow uncertainty over these parameters.
 }
-\section{Functions}{
-\itemize{
-\item \code{is.NIW_ideal_adaptor_w_lapse}: Also checks whether the ideal adaptor has a lapse term.
-
-\item \code{is.NIW_ideal_adaptor_w_bias}: Also checks whether the ideal adaptor has a lapse bias term.
-}}
-
 \examples{
 TBD
 }

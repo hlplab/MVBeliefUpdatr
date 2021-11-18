@@ -316,6 +316,8 @@ plot_expected_categorization_function_1D = function(
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   ...
 ) {
+  message("TO DO: implement noise and lapse rate handling. (already implemented in underling functions. just not integrated into plotting).")
+
   facet_rows_by = enquo(facet_rows_by)
   facet_cols_by = enquo(facet_cols_by)
   facet_wrap_by = enquo(facet_wrap_by)
@@ -511,6 +513,7 @@ plot_expected_categorization_function_2D = function(
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   ...
 ) {
+  message("TO DO: implement noise and lapse rate handling. (already implemented in underling functions. just not integrated into plotting).")
   facet_rows_by = enquo(facet_rows_by)
   facet_cols_by = enquo(facet_cols_by)
   facet_wrap_by = enquo(facet_wrap_by)
