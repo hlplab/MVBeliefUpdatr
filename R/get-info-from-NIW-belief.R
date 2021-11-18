@@ -4,12 +4,15 @@ get_posterior_predictive_from_NIW_belief = function(
   x,
   model,
   log = T,
+  noise_treatment = if (is.NIW_ideal_adaptor(model)) "marginalize" else "no_noise",
   category = "category",
   category.label = NULL,
   wide = FALSE
 ) {
   assert_that(is.NIW_belief(model))
   assert_that(any(is.null(category.label) | is.character(category.label)))
+  assert_that(any(noise_treatment == "no_noise", is.NIW_ideal_adaptor(model)),
+              msg = 'No noise matrix Sigma_noise found. If noise_treatment is not "no_noise", then model must be an NIW_ideal_adaptor.')
 
   if (is.null(category.label)) {
     model %<>%
@@ -24,11 +27,17 @@ get_posterior_predictive_from_NIW_belief = function(
       model %>%
       filter(!! sym(category) == c)
 
-    get_posterior_predictive(
+    get_NIW_posterior_predictive(
       x = x,
-      m = b$m[[1]], S = b$S[[1]], kappa = b$kappa[[1]], nu = b$nu[[1]], log = log) %>%
+      m = b$m[[1]],
+      S = b$S[[1]],
+      kappa = b$kappa[[1]],
+      nu = b$nu[[1]],
+      log = log,
+      noise_treatment = noise_treatment,
+      Sigma_noise = if (noise_treatment == "no_noise") NULL else b$Sigma_noise[[1]]) %>%
       as_tibble() %>%
-      rename_all(~ if (log) "log_posterior_predictive" else "posterior_predictive") %>%
+      rename_with(~ if (log) "log_posterior_predictive" else "posterior_predictive") %>%
       mutate(!! sym(category) := c)
   }
 
@@ -49,6 +58,7 @@ get_posterior_predictives_from_NIW_beliefs = function(
   x,
   model,
   log = T,
+  noise_treatment = if (is.NIW_ideal_adaptor(model)) "marginalize" else "no_noise",
   category = "category",
   category.label = NULL,
   grouping.var,

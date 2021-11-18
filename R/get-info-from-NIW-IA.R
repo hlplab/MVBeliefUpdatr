@@ -21,12 +21,8 @@ get_categorization_function_from_NIW_ideal_adaptor = function(x, ...) {
 #' @param x A vector of observations.
 #' @param model An \code{\link[=is.NIW_ideal_adaptor]{NIW_ideal_adaptor}} object.
 #' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
-#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
-#' or "marginalize". If "no_noise", no noise will be applied. If "sample" or "marginalize", `Sigma_noise` must be a covariance
-#' matrix of appropriate dimensions. If "sample", observations are adjusted by samples drawn from the noise distribution before applying
-#' categorization.If "marginalize" then each observation is transformed into the marginal distribution
-#' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
-#' interested in estimating the consequences of noise across individuals. (default: "sample" if decision_rule is
+#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input.
+#' See \code{\link[=get_NIW_posterior_predictive]{get_NIW_posterior_predictive}}. (default: "sample" if decision_rule is
 #' "sample"; "marginalize" otherwise).
 #' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
 #' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
@@ -57,27 +53,12 @@ get_categorization_from_NIW_ideal_adaptor = function(
   assert_NIW_ideal_adaptor(model)
   assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
               msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
-  assert_that(any(noise_treatment %in% c("no_noise", "sample", "marginalize")),
-              msg = "noise_treatment must be one of 'no_noise', 'sample' or 'marginalize'.")
   assert_that(any(lapse_treatment %in% c("no_noise", "sample", "marginalize")),
               msg = "lapse_treatment must be one of 'no_noise', 'sample' or 'marginalize'.")
 
   # In case a single x is handed as argument, make sure it's made a list so that the length check below
   # correctly treats it as length 1 (rather than the dimensionality of the one observation).
   if (!is.list(x)) x <- list(x)
-
-  # How should noise be treated?
-  if (noise_treatment == "sample") {
-    assert_that(
-      is_weakly_greater_than(length(x), 1),
-      msg = "For noise sampling, x must be of length 1 or longer.")
-
-    x <- map(x, ~ rmvnorm(n = 1, mean = .x, sigma = model$Sigma_noise[[1]]))
-  } else if (noise_treatment == "marginalize") {
-    message("noise_treatment == 'marginalize' not yet implemented.")
-  #     model %<>%
-  #       mutate(Sigma = map2(Sigma, Sigma_noise, ~ .x + .y))
-  # }
 
   posterior_probabilities <-
     get_posterior_predictive_from_NIW_belief(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%

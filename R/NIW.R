@@ -83,7 +83,7 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' Get posterior predictive of observations x given the NIW parameters m, S, kappa, and nu. This is
 #' the density of a multivariate Student-T distribution \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
 #'
-#' @param x Observations. Can be a vector with k elements for a single observation or a matrix with k
+#' @param x Observation(s). Can be a vector with k elements for a single observation or a matrix with k
 #' columns and n rows, in which case each row of the matrix is taken to be one observation. If x is a
 #' tibble with k columns or a list of vectors of length k, it is reduced into a matrix with k columns.
 #' @param m The mean of the multivariate Normal distribution of the category mean mu. Should be a
@@ -93,6 +93,15 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' @param kappa The strength of the beliefs over the category mean (pseudocounts).
 #' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts).
 #' @param log Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)
+#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
+#' or "marginalize". If "no_noise", no noise will be applied. If "sample" or "marginalize", `Sigma_noise` must be a covariance
+#' matrix of appropriate dimensions. If "sample", observations are adjusted by samples drawn from the noise distribution before applying
+#' categorization.If "marginalize" then each observation is transformed into the marginal distribution
+#' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
+#' interested in estimating the consequences of noise across individuals. (default: "no_noise").
+#' @param Sigma_noise Optionally, a covariance matrix describing the perceptual noise to be applied while
+#' calculating the posterior predictive. (default: `NULL`)
+#'
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -101,7 +110,7 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' TBD
 #' @rdname get_posterior_predictive
 #' @export
-get_posterior_predictive = function(x, m, S, kappa, nu, log = T) {
+get_posterior_predictive = function(x, m, S, kappa, nu, log = T, noise_treatment = "no_noise", Sigma_noise = NULL) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
   assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
@@ -115,6 +124,12 @@ get_posterior_predictive = function(x, m, S, kappa, nu, log = T) {
 
   assert_that(all(is.number(kappa), is.number(nu)))
   assert_that(is.flag(log))
+  assert_that(any(noise_treatment %in% c("no_noise", "sample", "marginalize")),
+              msg = "noise_treatment must be one of 'no_noise', 'sample' or 'marginalize'.")
+  if (noise_treatement == "no_noise") {
+    assert_that(all(dim(S) == dim(Sigma_noise)),
+                msg = 'No noise matrix Sigma_noise found. If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions.')
+  }
 
   D = dim(S)[1]
   if (is.null(D)) D = 1
@@ -133,9 +148,22 @@ get_posterior_predictive = function(x, m, S, kappa, nu, log = T) {
                 msg = "S and m are not of compatible dimensions.")
   }
 
+  # How should noise be treated?
+  if (noise_treatment == "sample") {
+    assert_that(
+      is_weakly_greater_than(length(x), 1),
+      msg = "For noise sampling, x must be of length 1 or longer.")
+
+    x <- map(x, ~ rmvnorm(n = 1, mean = .x, sigma = Sigma_noise))
+  } else if (noise_treatment == "marginalize") {
+    warning("noise_treatment == 'marginalize' is experimental. The math has not yet been verified. Use with caution.")
+    model %<>%
+      mutate(S = get_S_from_expected_Sigma(get_expected_Sigma_from_S(S, nu) + Sigma_noise), nu)
+  }
+
   dmvt(x,
        delta = m,
-       sigma = S * (kappa + 1) / (kappa * (nu - D + 1)),
+       sigma = S * ((kappa + 1) / (kappa * (nu - D + 1))),
        df = nu - D + 1,
        log = log)
 }
@@ -143,8 +171,8 @@ get_posterior_predictive = function(x, m, S, kappa, nu, log = T) {
 
 #' @rdname get_posterior_predictive
 #' @export
-get_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
-  get_posterior_predictive(x, m, S, kappa, nu, log = F)
+get_NIW_posterior_predictive.pmap( = function(x, m, S, kappa, nu, ...) {
+  get_NIW_posterior_predictive(x, m, S, kappa, nu, log = F)
 }
 
 
@@ -204,7 +232,7 @@ get_categorization_function = function(
       ncol = n.cat
     )
     for (cat in 1:n.cat) {
-      log_p[, cat] = get_posterior_predictive(x, ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T)
+      log_p[, cat] = get_NIW_posterior_predictive(x, ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T)
     }
 
     p_target <-
