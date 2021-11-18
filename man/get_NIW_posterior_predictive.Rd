@@ -2,25 +2,35 @@
 % Please edit documentation in R/NIW.R, R/get-info-from-NIW-belief.R
 \name{get_posterior_predictive}
 \alias{get_posterior_predictive}
-\alias{get_posterior_predictive.pmap}
+\alias{get_NIW_posterior_predictive.pmap}
 \alias{get_posterior_predictive_from_NIW_belief}
 \title{Get posterior predictive}
 \usage{
-get_posterior_predictive(x, m, S, kappa, nu, log = T)
+get_posterior_predictive(
+  x,
+  m,
+  S,
+  kappa,
+  nu,
+  log = T,
+  noise_treatment = "no_noise",
+  Sigma_noise = NULL
+)
 
-get_posterior_predictive.pmap(x, m, S, kappa, nu, ...)
+get_NIW_posterior_predictive.pmap(x, m, S, kappa, nu, ...)
 
 get_posterior_predictive_from_NIW_belief(
   x,
-  belief,
+  model,
   log = T,
+  noise_treatment = if (is.NIW_ideal_adaptor(model)) "marginalize" else "no_noise",
   category = "category",
   category.label = NULL,
   wide = FALSE
 )
 }
 \arguments{
-\item{x}{Observations. Can be a vector with k elements for a single observation or a matrix with k
+\item{x}{Observation(s). Can be a vector with k elements for a single observation or a matrix with k
 columns and n rows, in which case each row of the matrix is taken to be one observation. If x is a
 tibble with k columns or a list of vectors of length k, it is reduced into a matrix with k columns.}
 
@@ -35,6 +45,16 @@ matrix Sigma. Should be a square k x k matrix.}
 \item{nu}{The strength of the beliefs over the category covariance matrix (pseudocounts).}
 
 \item{log}{Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)}
+
+\item{noise_treatment}{Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
+or "marginalize". If "no_noise", no noise will be applied. If "sample" or "marginalize", `Sigma_noise` must be a covariance
+matrix of appropriate dimensions. If "sample", observations are adjusted by samples drawn from the noise distribution before applying
+categorization.If "marginalize" then each observation is transformed into the marginal distribution
+that results from convolving the input with noise. This latter option might be helpful, for example, if one is
+interested in estimating the consequences of noise across individuals. (default: "no_noise").}
+
+\item{Sigma_noise}{Optionally, a covariance matrix describing the perceptual noise to be applied while
+calculating the posterior predictive. (default: `NULL`)}
 }
 \description{
 Get posterior predictive of observations x given the NIW parameters m, S, kappa, and nu. This is

@@ -1,4 +1,4 @@
-#' @rdname get_posterior_predictive
+#' @rdname get_NIW_posterior_predictive
 #' @export
 get_posterior_predictive_from_NIW_belief = function(
   x,

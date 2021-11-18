@@ -108,7 +108,7 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #' @examples
 #' TBD
-#' @rdname get_posterior_predictive
+#' @rdname get_NIW_posterior_predictive
 #' @export
 get_posterior_predictive = function(x, m, S, kappa, nu, log = T, noise_treatment = "no_noise", Sigma_noise = NULL) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
@@ -169,10 +169,10 @@ get_posterior_predictive = function(x, m, S, kappa, nu, log = T, noise_treatment
 }
 
 
-#' @rdname get_posterior_predictive
+#' @rdname get_NIW_posterior_predictive
 #' @export
-get_NIW_posterior_predictive.pmap( = function(x, m, S, kappa, nu, ...) {
-  get_NIW_posterior_predictive(x, m, S, kappa, nu, log = F)
+get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
+  get_NIW_posterior_predictive(x = x, m = m, S = S, kappa = kappa, nu = nu, ...)
 }
 
 
