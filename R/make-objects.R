@@ -264,9 +264,8 @@ make_NIW_ideal_adaptor_from_data = function(
 #' ignored if NULL. (default: NULL)
 #' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
 #' representation (category variability)? If FALSE, then noise will be considered during categorization decisions
-#' but will not be added to the MVG categories. If TRUE, then noise will also be to the category covariance matrix.
-#' This is typically the desired result since perceptual noise would have shaped the ideal observers representations.
-#' Will be ignored if Sigma_noise is NULL. (default: TRUE)
+#' but will not be added to the covariance matrix of the MVG categories. If TRUE, then noise will also be to the category
+#' covariance matrix. Will be ignored if Sigma_noise is NULL. (default: FALSE)
 #' @param verbose If true provides more information. (default: FALSE)
 #' @param keep.category_parameters Should categories' mu and Sigma be included in the output (in addition to m
 #' and S of the prior)? (default: FALSE)
@@ -330,7 +329,7 @@ lift_MVG_to_MVG_ideal_observer = function(
   lapse_rate = NA_real_,
   lapse_bias = NA_real_,
   Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = T
+  add_Sigma_noise_to_category_representation = F
 ) {
   x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
@@ -357,7 +356,7 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   lapse_rate = NA_real_,
   lapse_bias = NA_real_,
   Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = T
+  add_Sigma_noise_to_category_representation = F
 ) {
   x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
