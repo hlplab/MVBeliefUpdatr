@@ -46,14 +46,14 @@ get_categorization_function_from_NIW_ideal_adaptor = function(x, ...) {
 #'
 get_categorization_from_NIW_ideal_adaptor = function(
   x,
-  belief,
+  model,
   decision_rule,
   noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F
 ) {
-  # TO DO: check dimensionality of x with regard to belief.
-  assert_NIW_ideal_adaptor(belief)
+  # TO DO: check dimensionality of x with regard to model.
+  assert_NIW_ideal_adaptor(model)
   assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
               msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
   assert_that(any(noise_treatment %in% c("no_noise", "sample", "marginalize")),
@@ -71,21 +71,21 @@ get_categorization_from_NIW_ideal_adaptor = function(
       is_weakly_greater_than(length(x), 1),
       msg = "For noise sampling, x must be of length 1 or longer.")
 
-    x <- map(x, ~ rmvnorm(n = 1, mean = .x, sigma = belief$Sigma_noise[[1]]))
+    x <- map(x, ~ rmvnorm(n = 1, mean = .x, sigma = model$Sigma_noise[[1]]))
   } else if (noise_treatment == "marginalize") {
       model %<>%
         mutate(Sigma = map2(Sigma, Sigma_noise, ~ .x + .y))
   }
 
   posterior_probabilities <-
-    get_posterior_predictive_from_NIW_belief(x = x, belief = belief, log = F) %>%
+    get_posterior_predictive_from_NIW_belief(x = x, model = model, log = F) %>%
     group_by(category) %>%
     mutate(
       observationID = 1:length(x),
       x = x,
-      lapse_rate = get_lapse_rate_from_model(belief),
-      lapse_bias = get_lapse_biases_from_model(belief, categories = category),
-      prior = get_priors_from_model(belief, categories = category)) %>%
+      lapse_rate = get_lapse_rate_from_model(model),
+      lapse_bias = get_lapse_biases_from_model(model, categories = category),
+      prior = get_priors_from_model(model, categories = category)) %>%
     group_by(observationID) %>%
     mutate(posterior_probability = (posterior_predictive * prior) / sum(posterior_predictive * prior))
 
@@ -96,7 +96,7 @@ get_categorization_from_NIW_ideal_adaptor = function(
         posterior_probability = ifelse(
           rep(
             rbinom(1, 1, lapse_rate),
-            get_nlevels_of_category_labels_from_model(belief)),
+            get_nlevels_of_category_labels_from_model(model)),
           lapse_bias,                 # substitute lapse probabilities for posterior
           posterior_probability))     # ... or not
   } else if (lapse_treatment == "marginalize") {
@@ -112,9 +112,9 @@ get_categorization_from_NIW_ideal_adaptor = function(
         posterior_probability = ifelse(
           rep(
             sum(posterior_probability == max(posterior_probability)) > 1,
-            get_nlevels_of_category_labels_from_model(belief)),
+            get_nlevels_of_category_labels_from_model(model)),
           posterior_probability + runif(
-            get_nlevels_of_category_labels_from_model(belief),
+            get_nlevels_of_category_labels_from_model(model),
             min = 0,
             max = 0),
           posterior_probability),
