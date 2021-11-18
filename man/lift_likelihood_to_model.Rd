@@ -24,7 +24,7 @@ lift_MVG_to_MVG_ideal_observer(
   lapse_rate = NA_real_,
   lapse_bias = NA_real_,
   Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = T
+  add_Sigma_noise_to_category_representation = F
 )
 
 lift_NIW_belief_to_NIW_ideal_adaptor(
@@ -35,7 +35,7 @@ lift_NIW_belief_to_NIW_ideal_adaptor(
   lapse_rate = NA_real_,
   lapse_bias = NA_real_,
   Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = T
+  add_Sigma_noise_to_category_representation = F
 )
 }
 \arguments{
@@ -58,9 +58,8 @@ ignored if NULL. (default: NULL)}
 
 \item{add_Sigma_noise_to_category_representation}{Should the perceptual noise be added to the category
 representation (category variability)? If FALSE, then noise will be considered during categorization decisions
-but will not be added to the MVG categories. If TRUE, then noise will also be to the category covariance matrix.
-This is typically the desired result since perceptual noise would have shaped the ideal observers representations.
-Will be ignored if Sigma_noise is NULL. (default: TRUE)}
+but will not be added to the covariance matrix of the MVG categories. If TRUE, then noise will also be to the category
+covariance matrix. Will be ignored if Sigma_noise is NULL. (default: FALSE)}
 
 \item{kappa}{The strength of the beliefs over the category mean (pseudocounts). (default: same as nu)}
 
