@@ -126,7 +126,7 @@ get_NIW_posterior_predictive = function(x, m, S, kappa, nu, log = T, noise_treat
   assert_that(is.flag(log))
   assert_that(any(noise_treatment %in% c("no_noise", "sample", "marginalize")),
               msg = "noise_treatment must be one of 'no_noise', 'sample' or 'marginalize'.")
-  if (noise_treatement == "no_noise") {
+  if (noise_treatment == "no_noise") {
     assert_that(all(dim(S) == dim(Sigma_noise)),
                 msg = 'No noise matrix Sigma_noise found. If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions.')
   }
