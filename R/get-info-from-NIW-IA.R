@@ -73,9 +73,10 @@ get_categorization_from_NIW_ideal_adaptor = function(
 
     x <- map(x, ~ rmvnorm(n = 1, mean = .x, sigma = model$Sigma_noise[[1]]))
   } else if (noise_treatment == "marginalize") {
-      model %<>%
-        mutate(Sigma = map2(Sigma, Sigma_noise, ~ .x + .y))
-  }
+    message("noise_treatment == 'marginalize' not yet implemented.")
+  #     model %<>%
+  #       mutate(Sigma = map2(Sigma, Sigma_noise, ~ .x + .y))
+  # }
 
   posterior_probabilities <-
     get_posterior_predictive_from_NIW_belief(x = x, model = model, log = F) %>%
