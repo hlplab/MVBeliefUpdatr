@@ -107,13 +107,14 @@ get_likelihood_from_MVG = function(
 #' @param x A vector of observations.
 #' @param model An \code{\link[=is.MVG_ideal_observer]{MVG_ideal_observer}} object.
 #' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
-#' @param noise_treatment Determines how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
-#' or "marginalize". If "sample", observations are adjusted by samples drawn from the noise distribution before applying
+#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
+#' or "marginalize". If "no_noise", no noise will be applied. If "sample" or "marginalize", `Sigma_noise` must be a covariance
+#' matrix of appropriate dimensions. If "sample", observations are adjusted by samples drawn from the noise distribution before applying
 #' categorization.If "marginalize" then each observation is transformed into the marginal distribution
 #' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
 #' interested in estimating the consequences of noise across individuals. (default: "sample" if decision_rule is
 #' "sample"; "marginalize" otherwise).
-#' @param lapse_treatment Determines how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
+#' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
 #' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
 #' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
 #' will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
