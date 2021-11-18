@@ -158,8 +158,10 @@ get_categorization_from_MVG_ideal_observer = function(
       msg = "For noise sampling, x must be of length 1 or longer.")
 
     x <- map(x, ~ rmvnorm(n = 1, mean = .x, sigma = model$Sigma_noise[[1]]))
-  } else if (noise_treatment == "marginalize")
-    message("noise_treatment == 'marginalize' not yet implemented.")
+  } else if (noise_treatment == "marginalize") {
+    model %<>%
+      mutate(Sigma = map2(Sigma, Sigma_noise, ~ .x + .y))
+  }
 
   posterior_probabilities <-
     get_likelihood_from_MVG(x = x, model = model, log = F) %>%
