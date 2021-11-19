@@ -23,21 +23,21 @@ get_posterior_predictive_from_NIW_belief = function(
   }
 
   posterior_predictive <- foreach(c = category.label) %do% {
-    b <-
+    m <-
       model %>%
       filter(!! sym(category) == c)
 
     get_NIW_posterior_predictive(
       x = x,
-      m = b$m[[1]],
-      S = b$S[[1]],
-      kappa = b$kappa[[1]],
-      nu = b$nu[[1]],
+      m = m$m[[1]],
+      S = m$S[[1]],
+      kappa = m$kappa[[1]],
+      nu = m$nu[[1]],
       log = log,
       noise_treatment = noise_treatment,
-      Sigma_noise = if (noise_treatment == "no_noise") NULL else b$Sigma_noise[[1]]) %>%
+      Sigma_noise = if (noise_treatment == "no_noise") NULL else m$Sigma_noise[[1]]) %>%
       as_tibble() %>%
-      rename_with(~ if (log) "log_posterior_predictive" else "posterior_predictive") %>%
+      rename_with(~ if (log) { "log_posterior_predictive" } else { "posterior_predictive" }) %>%
       mutate(!! sym(category) := c)
   }
 

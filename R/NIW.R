@@ -96,7 +96,7 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
 #' or "marginalize". If "no_noise", no noise will be applied. If "sample" or "marginalize", `Sigma_noise` must be a covariance
 #' matrix of appropriate dimensions. If "sample", observations are adjusted by samples drawn from the noise distribution before applying
-#' categorization.If "marginalize" then each observation is transformed into the marginal distribution
+#' categorization. If "marginalize" then each observation is transformed into the marginal distribution
 #' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
 #' interested in estimating the consequences of noise across individuals. (default: "no_noise").
 #' @param Sigma_noise Optionally, a covariance matrix describing the perceptual noise to be applied while
@@ -126,9 +126,10 @@ get_NIW_posterior_predictive = function(x, m, S, kappa, nu, log = T, noise_treat
   assert_that(is.flag(log))
   assert_that(any(noise_treatment %in% c("no_noise", "sample", "marginalize")),
               msg = "noise_treatment must be one of 'no_noise', 'sample' or 'marginalize'.")
-  if (noise_treatment == "no_noise") {
+  if (noise_treatment != "no_noise") {
+    assert_that(is.positive.definite(Sigma_noise)  | is_scalar_double(Sigma_noise))
     assert_that(all(dim(S) == dim(Sigma_noise)),
-                msg = 'No noise matrix Sigma_noise found. If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions.')
+                msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the scatter matrices S.')
   }
 
   D = dim(S)[1]
