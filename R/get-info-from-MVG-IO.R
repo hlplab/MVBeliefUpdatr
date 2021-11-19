@@ -106,7 +106,7 @@ get_likelihood_from_MVG = function(
       model %>%
       filter(!! sym(category) == c)
 
-    get_likelihood(
+    get_MVG_likelihood(
       x = x,
       mu = m$mu[[1]],
       Sigma = m$Sigma[[1]],
