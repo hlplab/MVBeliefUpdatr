@@ -11,6 +11,7 @@
 #' @importFrom tidyselect starts_with
 #' @importFrom tibble tibble is_tibble
 #' @importFrom rstan sampling
+#' @importFrom LaplacesDemon is.positive.definite
 #' @useDynLib MVBeliefUpdatr, .registration=TRUE
 
 #' @section Overview:

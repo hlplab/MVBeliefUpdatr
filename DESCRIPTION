@@ -39,6 +39,7 @@ Imports:
     ggridges,
     ggforce,
     Hmisc,
+    LaplacesDemon,
     magrittr,
     purrr,
     Rdpack (>= 0.7),

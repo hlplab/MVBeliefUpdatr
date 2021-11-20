@@ -20,12 +20,8 @@ get_categorization_from_MVG_ideal_observer(
 
 \item{decision_rule}{Must be one of "criterion", "proportional", or "sampling".}
 
-\item{noise_treatment}{Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
-or "marginalize". If "no_noise", no noise will be applied. If "sample" or "marginalize", `Sigma_noise` must be a covariance
-matrix of appropriate dimensions. If "sample", observations are adjusted by samples drawn from the noise distribution before applying
-categorization.If "marginalize" then each observation is transformed into the marginal distribution
-that results from convolving the input with noise. This latter option might be helpful, for example, if one is
-interested in estimating the consequences of noise across individuals. (default: "sample" if decision_rule is
+\item{noise_treatment}{Determines whether and how multivariate Gaussian noise is added to the input.
+See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
 "sample"; "marginalize" otherwise).}
 
 \item{lapse_treatment}{Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
