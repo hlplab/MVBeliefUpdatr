@@ -297,6 +297,16 @@ lift_likelihood_to_model = function(
     prior = rep(1 / n.cat, n.cat)
   }
 
+  if (all(is.na(lapse_bias) | is.null(lapse_bias))) {
+    message(paste0("No lapse_bias specified. Defaulting to uniform lapse_bias over the ", n.cat, " categories found in x."))
+    lapse_bias = rep(1 / n.cat, n.cat)
+  }
+
+  if (all(is.na(lapse_rate) | is.null(lapse_rate))) {
+    message(paste0("No lapse_rate specified. Defaulting to lapse_bias of 0."))
+    lapse_rate = 0
+  }
+
   assert_that(all(
     is.na(lapse_rate) | between(lapse_rate, 0, 1),
     is.na(lapse_bias) | between(lapse_bias, 0, 1),
