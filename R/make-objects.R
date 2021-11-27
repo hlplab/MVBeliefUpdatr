@@ -333,9 +333,9 @@ lift_MVG_to_MVG_ideal_observer = function(
 ) {
   x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
-    assert_that(all(dim(first(x$Sigma_noise)) == dim(first(x$Sigma))),
+    assert_that(all(dim(Sigma_noise) == dim(first(x$Sigma))),
                 msg = "If not NULL, Sigma_noise must be a matrix of the same dimensionality as Sigma.")
-    assert_that(all(dimnames(first(x$Sigma_noise)) == dimnames(first(x$Sigma))),
+    assert_that(all(dimnames(Sigma_noise) == dimnames(first(x$Sigma))),
                 msg = "If Sigma_noise is not NULL, the dimnames of Sigma_noise and Sigma must match.")
 
     if (add_Sigma_noise_to_category_representation)
@@ -360,9 +360,9 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
 ) {
   x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
-    assert_that(all(dim(first(x$Sigma_noise)) == dim(first(x$S))),
+    assert_that(all(dim(Sigma_noise) == dim(first(x$S))),
                 msg = "If Sigma_noise is not NULL, Sigma_noise must be a matrix of the same dimensionality as S.")
-    assert_that(all(dimnames(first(x$Sigma_noise)) == dimnames(first(x$S))),
+    assert_that(all(dimnames(Sigma_noise) == dimnames(first(x$S))),
                 msg = "If Sigma_noise is not NULL, the dimnames of Sigma_noise and S must match.")
 
     if (add_Sigma_noise_to_category_representation)
