@@ -219,10 +219,14 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
   if (noise_treatment == "sample") {
     assert_that(all(is_scalar_integerish(x_N), is_weakly_greater_than(x_N, 1)),
                 msg = "If noise_treatment is 'sample', x_N must be a positive integer.")
+    warning("Updating while including noise has not yet been thoroughly tested. If noise is included in perception but not in the prior beliefs, it should be discounted during the updating. This is not yet implemented. You might want to construct the model with the option add_Sigma_noise_to_category_representation = TRUE and use categorization that does not add the noise again noise_treatment = 'no_noise'.")
     x = rmvnorm(n = x_N, sigma = get_perceptual_noise_from_model(prior))
     x_mean = x_mean + colMeans(x)
     if (x_N > 1) x_S = x_S + cov(x)
-  } else if (noise_treatment == "marginalize") x_S = x_S + get_perceptual_noise_from_model(prior)
+  } else if (noise_treatment == "marginalize") {
+    warning("Updating while including noise has not yet been thoroughly tested. If noise is included in perception but not in the prior beliefs, it should be discounted during the updating. This is not yet implemented. You might want to construct the model with the option add_Sigma_noise_to_category_representation = TRUE and use categorization that does not add the noise again noise_treatment = 'no_noise'.")
+    x_S = x_S + get_perceptual_noise_from_model(prior)
+  }
 
   x_mean = list(x_mean)
   x_S = list(x_S)
