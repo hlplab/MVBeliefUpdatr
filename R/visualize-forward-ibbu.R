@@ -471,9 +471,10 @@ plot_expected_categories_contour2D = function(
                       breaks = category.ids,
                       labels = category.labels,
                       values = category.colors) +
-    scale_alpha_continuous("Cumulative\nprobability",
-                           range = c(0, .3),
-                           breaks = round(1 - levels, 2)) +
+    scale_alpha_continuous("Cumulative probability",
+                           range = c(0.05, .5),
+                           breaks = 1 - levels,
+                           labels = round(levels, 2)) +
     theme_bw()
 
   p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
