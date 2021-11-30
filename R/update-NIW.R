@@ -130,7 +130,8 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_S) { S_0 + x_S 
 #' noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
 #' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
 #' interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
-#' column must be present in the NIW_belief object specified as the priors argument. (default: `NULL`)
+#' column must be present in the NIW_belief object specified as the priors argument.
+#' (default: "no_noise" for NIW_beliefs; "sample" for NIW_ideal_adaptors)
 #' @param lapse_treatment Determines whether attentional lapses can occur during which no updating occurs.
 #' Can be "no_lapses", "sample", or "marginalize". If "no_lapses", no lapses occur (even if the ideal adaptor specifies
 #' a non-zero `lapse_rate`), and all observations lead to updating. If "sample" or "marginalize", the lapse rate from '

@@ -31,6 +31,7 @@ plot_expected_categories_contour2D(
   data.test = NULL,
   facet_rows_by = NULL,
   facet_cols_by = NULL,
+  facet_wrap_by = NULL,
   animate_by = NULL,
   animation_follow = F,
   category.ids = NULL,
