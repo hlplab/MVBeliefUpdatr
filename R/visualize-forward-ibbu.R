@@ -417,7 +417,7 @@ plot_expected_categories_contour2D = function(
   levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
   data.exposure = NULL,
   data.test = NULL,
-  facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F,
+  facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   ...
 ) {
