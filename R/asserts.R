@@ -1,28 +1,28 @@
-assert_MVG_ideal_observer = function(x, category = "category") {
-  assert_that(is.MVG_ideal_observer(x, category = category),
+assert_MVG_ideal_observer = function(x, category = "category", verbose = F) {
+  assert_that(is.MVG_ideal_observer(x, category = category, verbose = verbose),
               msg = paste(deparse(substitute(c)), "must be an MVG_ideal_observer object."))
 }
 
-assert_NIW_belief = function(x, category = "category", strict = F) {
+assert_NIW_belief = function(x, category = "category", verbose = F, strict = F) {
   if (strict) {
-    assert_that(is.NIW_belief(x, category = category),
+    assert_that(is.NIW_belief(x, category = category, verbose = verbose),
                 msg = paste(deparse(substitute(c)), "must be an NIW_belief object."))
   } else {
     assert_that(
       any(
-        is.NIW_belief(x, category = category),
-        is.NIW_ideal_adaptor(x, category = category)),
+        is.NIW_belief(x, category = category, verbose = verbose),
+        is.NIW_ideal_adaptor(x, category = category, verbose = verbose)),
       msg = paste(deparse(substitute(x)), "must be an NIW_belief or NIW_ideal_adaptor object."))
   }
 }
 
-assert_NIW_ideal_adaptor = function(x, category = "category") {
-  assert_that(is.NIW_ideal_adaptor(x, category = category),
+assert_NIW_ideal_adaptor = function(x, category = "category", verbose = F) {
+  assert_that(is.NIW_ideal_adaptor(x, category = category, verbose = verbose),
               msg = paste(deparse(substitute(c)), "must be an NIW_ideal_adaptor object."))
 }
 
-assert_NIW_ideal_adaptor_stanfit = function(x) {
-  assert_that(is.NIW_ideal_adaptor_stanfit(x),
+assert_NIW_ideal_adaptor_stanfit = function(x, verbose = F) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(x, verbose = verbose),
               msg = paste(deparse(substitute(c)), "must be of class", new_stanfit_class_name))
 }
 
