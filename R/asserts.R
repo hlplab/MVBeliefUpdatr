@@ -1,29 +1,29 @@
 assert_MVG_ideal_observer = function(x, category = "category") {
   assert_that(is.MVG_ideal_observer(x, category = category),
-              msg = "x must be an MVG_ideal_observer object.")
+              msg = paste(deparse(substitute(c)), "must be an MVG_ideal_observer object."))
 }
 
 assert_NIW_belief = function(x, category = "category", strict = F) {
   if (strict) {
     assert_that(is.NIW_belief(x, category = category),
-                msg = "x must be an NIW_belief object.")
+                msg = paste(deparse(substitute(c)), "must be an NIW_belief object."))
   } else {
     assert_that(
       any(
         is.NIW_belief(x, category = category),
         is.NIW_ideal_adaptor(x, category = category)),
-      msg = "x must be an NIW_belief or NIW_ideal_adaptor object.")
+      msg = paste(deparse(substitute(x)), "must be an NIW_belief or NIW_ideal_adaptor object."))
   }
 }
 
 assert_NIW_ideal_adaptor = function(x, category = "category") {
   assert_that(is.NIW_ideal_adaptor(x, category = category),
-              msg = "x must be an NIW_ideal_adaptor object.")
+              msg = paste(deparse(substitute(c)), "must be an NIW_ideal_adaptor object."))
 }
 
 assert_NIW_ideal_adaptor_stanfit = function(x) {
   assert_that(is.NIW_ideal_adaptor_stanfit(x),
-              msg = paste0("x must be of class ", new_stanfit_class_name))
+              msg = paste(deparse(substitute(c)), "must be of class", new_stanfit_class_name))
 }
 
 assert_cols_in_data = function(data, cols, which.data = "the", scalar = T) {

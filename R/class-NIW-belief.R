@@ -29,13 +29,13 @@ is.NIW_belief = function(x, category = "category", is.long = T, verbose = F) {
   }
 
   if (category %nin% names(x)) {
-    if (verbose) message("x is missing a category column. Did you use another name for this column? You can use the category
-            argument to specify the name of that column.")
+    if (verbose) message(paste(deparse(substitute(x)), "is missing a category column. Did you use another name for this column? You can use the category
+            argument to specify the name of that column."))
     return(FALSE)
   }
 
   if (any(c("kappa", "nu", "m", "S") %nin% names(x))) {
-    if (verbose) message("x is missing at least one of kappa, nu, m, or S.")
+    if (verbose) message(paste(deparse(substitute(x)), "is missing at least one of kappa, nu, m, or S."))
     return(FALSE)
   }
 
