@@ -26,7 +26,7 @@ is.NIW_ideal_adaptor = function(x, category = "category", is.long = T, with.laps
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
 
   if (!is.NIW_belief(x)) {
-    if (verbose) message("x does not contain NIW beliefs.")
+    if (verbose) message(paste(deparse(substitute(x)), "does not contain NIW beliefs."))
     return(FALSE)
   }
 
@@ -37,7 +37,7 @@ is.NIW_ideal_adaptor = function(x, category = "category", is.long = T, with.laps
       with.lapse_bias & "lapse_bias" %nin% names(x)
     )
   ) {
-    if (verbose) message("x is missing prior, lapse rate, or lapse bias.")
+    if (verbose) message(paste(deparse(substitute(x)), " is missing prior, lapse rate, or lapse bias."))
     return(FALSE)
   }
 
@@ -46,19 +46,19 @@ is.NIW_ideal_adaptor = function(x, category = "category", is.long = T, with.laps
 
   # Check that the prior probabilities add up to 1
   if (sum(x$prior) != 1) {
-    if (verbose) message(paste("Prior probabilities in x do not add up to 1: ", sum(x$prior)))
+    if (verbose) message(paste("Prior probabilities in", deparse(substitute(x)), "do not add up to 1: ", sum(x$prior)))
     return(FALSE)
   }
 
   # Check that the lapse rate is constant across categories
   if (with.lapse & length(unique(x$lapse_rate)) != 1) {
-    if (verbose) message(paste("Lapse rate is not constant across categories: ", paste(x$lapse_rate, collapse = ", ")))
+    if (verbose) message(paste("Lapse rates in", deparse(substitute(x)), "are not constant across categories: ", paste(x$lapse_rate, collapse = ", ")))
     return(FALSE)
   }
 
   # Check that the lapse bias probabilities add up to 1
   if (with.lapse_bias & sum(x$lapse_bias) != 1) {
-    if (verbose) message(paste("Lapse bias probabilities in x do not add up to 1: ", sum(x$lapse_bias)))
+    if (verbose) message(paste("Lapse bias probabilities in", deparse(substitute(x)), "do not add up to 1: ", sum(x$lapse_bias)))
     return(FALSE)
   }
 

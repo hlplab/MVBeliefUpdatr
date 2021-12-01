@@ -47,10 +47,11 @@ get_categorization_from_NIW_ideal_adaptor = function(
   decision_rule,
   noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
-  simplify = F
+  simplify = F,
+  verbose = F
 ) {
   # TO DO: check dimensionality of x with regard to model.
-  assert_NIW_ideal_adaptor(model)
+  assert_NIW_ideal_adaptor(model, verbose = verbose)
   assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
               msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
   assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
