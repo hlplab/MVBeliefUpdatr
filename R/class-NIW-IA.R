@@ -1,3 +1,6 @@
+get_expected_columns_for_NIW_ideal_adaptor <- function()
+  c(get_expected_columns_for_NIW_belief(), "prior", "lapse_rate", "lapse_bias", "Sigma_noise")
+
 #' Is this an ideal adaptor with Normal-Inverse-Wishart (NIW) beliefs?
 #'
 #' Check whether \code{x} is an ideal adaptor with \link[=is.NIW_belief]{Normal-Inverse-Wishard (NIW) beliefs}. An ideal adaptor
@@ -41,23 +44,32 @@ is.NIW_ideal_adaptor = function(x, category = "category", is.long = T, with.laps
     return(FALSE)
   }
 
-  # Check that category is a factor only after everything else is checked.
   if (any(!is.factor(get(category, x)))) return(FALSE)
 
+  groups <- setdiff(names(x), get_expected_columns_for_NIW_ideal_adaptor())
+  if (length(group) > 0) {
+    if (verbose) message(paste(deparse(substitute(x)), "has additional columns beyond those expected. Checking whether",
+                               deparse(substitute(x)), "is an NIW_ideal_adaptor within each unique combination of those additional variables."))
+    x %<>%
+      group_by(!!! syms(groups))
+  }
+
   # Check that the prior probabilities add up to 1
-  if (sum(x$prior) != 1) {
+  if (any(x %>% summarise(sum_prior = sum(prior)) %>% pull(sum_prior) != 1)) {
     if (verbose) message(paste("Prior probabilities in", deparse(substitute(x)), "do not add up to 1: ", sum(x$prior)))
     return(FALSE)
   }
 
   # Check that the lapse rate is constant across categories
-  if (with.lapse & length(unique(x$lapse_rate)) != 1) {
+  if (with.lapse &
+      any(x %>% summarise(n_unique_lapse_rates = length(unique(lapse_rate))) %>% pull(n_unique_lapse_rates) != 1)) {
     if (verbose) message(paste("Lapse rates in", deparse(substitute(x)), "are not constant across categories: ", paste(x$lapse_rate, collapse = ", ")))
     return(FALSE)
   }
 
   # Check that the lapse bias probabilities add up to 1
-  if (with.lapse_bias & sum(x$lapse_bias) != 1) {
+  if (with.lapse_bias &
+      any(x %>% summarise(sum_lapse_bias = sum(lapse_bias)) %>% pull(sum_lapse_bias) != 1)) {
     if (verbose) message(paste("Lapse bias probabilities in", deparse(substitute(x)), "do not add up to 1: ", sum(x$lapse_bias)))
     return(FALSE)
   }

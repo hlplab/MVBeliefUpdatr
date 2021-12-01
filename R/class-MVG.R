@@ -1,3 +1,6 @@
+get_expected_columns_for_MVG <- function()
+  c("category", "mu", "Sigma")
+
 #' Is this a set of multivariate Gaussian (MVG) categories?
 #'
 #' Check whether \code{x} is a set of multivariate Gaussian (MVG) categories.
