@@ -10,7 +10,8 @@ get_categorization_from_NIW_ideal_adaptor(
   decision_rule,
   noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
-  simplify = F
+  simplify = F,
+  verbose = F
 )
 }
 \arguments{
