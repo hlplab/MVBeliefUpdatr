@@ -1,8 +1,10 @@
+#' @export
 assert_MVG_ideal_observer = function(x, category = "category", verbose = F) {
   assert_that(is.MVG_ideal_observer(x, category = category, verbose = verbose),
               msg = paste(deparse(substitute(c)), "must be an MVG_ideal_observer object."))
 }
 
+#' @export
 assert_NIW_belief = function(x, category = "category", verbose = F, strict = F) {
   if (strict) {
     assert_that(is.NIW_belief(x, category = category, verbose = verbose),
@@ -16,6 +18,7 @@ assert_NIW_belief = function(x, category = "category", verbose = F, strict = F) 
   }
 }
 
+#' @export
 assert_NIW_ideal_adaptor = function(x, category = "category", verbose = F) {
   assert_that(is.NIW_ideal_adaptor(x, category = category, verbose = verbose),
               msg = paste(deparse(substitute(c)), "must be an NIW_ideal_adaptor object."))
@@ -26,6 +29,7 @@ assert_NIW_ideal_adaptor_stanfit = function(x, verbose = F) {
               msg = paste(deparse(substitute(c)), "must be of class", new_stanfit_class_name))
 }
 
+#' @export
 assert_cols_in_data = function(data, cols, which.data = "the", scalar = T) {
   if (scalar)
     assert_that(all(is_scalar_character(cols)),
