@@ -20,7 +20,7 @@ get_expected_columns_for_MVG_ideal_observer <- function()
 #' @examples
 #' TBD
 #' @export
-is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F) {
+is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
 
@@ -51,7 +51,7 @@ is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lap
   }
 
   # Check that the prior probabilities add up to 1
-  if (any(!all.equal(x %>% summarise(sum_prior = sum(prior)) %>% pull(sum_prior), 1))) {
+  if (any(!between(x %>% summarise(sum_prior = sum(prior)) %>% pull(sum_prior), 1 - tolerance, 1 + tolerance))) {
     if (verbose) message(paste("Prior probabilities in", name_of_x, "do not add up to 1: ", sum(x$prior)))
     return(FALSE)
   }
@@ -65,7 +65,7 @@ is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lap
 
   # Check that the lapse bias probabilities add up to 1
   if (with.lapse_bias &
-      any(!all.equal(x %>% summarise(sum_lapse_bias = sum(lapse_bias)) %>% pull(sum_lapse_bias), 1))) {
+      any(!between(x %>% summarise(sum_lapse_bias = sum(lapse_bias)) %>% pull(sum_lapse_bias), 1 - tolerance, 1 + tolerance))) {
     if (verbose) message(paste("Lapse bias probabilities in", name_of_x, "do not add up to 1: ", sum(x$lapse_bias)))
     return(FALSE)
   }
