@@ -44,8 +44,8 @@ is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lap
 
   groups <- setdiff(names(x), get_expected_columns_for_MVG_ideal_observer())
   if (length(groups) > 0) {
-    if (verbose) message(paste(name_of_x, "has additional columns beyond those expected. Checking whether",
-                               name_of_x, "is an MVG_ideal_observer within each unique combination of those additional variables."))
+    if (verbose) message(paste(name_of_x, "has additional columns beyond those expected:", paste(groups, collapse = ", "),
+                               "Checking whether", name_of_x, "is an MVG_ideal_observer within each unique combination of those additional variables."))
     x %<>%
       group_by(!!! syms(groups))
   }

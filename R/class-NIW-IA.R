@@ -49,8 +49,8 @@ is.NIW_ideal_adaptor = function(x, category = "category", is.long = T, with.laps
 
   groups <- setdiff(names(x), get_expected_columns_for_NIW_ideal_adaptor())
   if (length(groups) > 0) {
-    if (verbose) message(paste(name_of_x, "has additional columns beyond those expected. Checking whether",
-                               name_of_x, "is an NIW_ideal_adaptor within each unique combination of those additional variables."))
+    if (verbose) message(paste(name_of_x, "has additional columns beyond those expected:", paste(groups, collapse = ", "),
+                               "Checking whether", name_of_x, "is an NIW_ideal_adaptor within each unique combination of those additional variables."))
     x %<>%
       group_by(!!! syms(groups))
   }
