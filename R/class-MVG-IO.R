@@ -51,21 +51,21 @@ is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lap
   }
 
   # Check that the prior probabilities add up to 1
-  if (any(x %>% summarise(sum_prior = sum(prior)) %>% pull(sum_prior) != 1)) {
+  if (any(!all.equal(x %>% summarise(sum_prior = sum(prior)) %>% pull(sum_prior), 1))) {
     if (verbose) message(paste("Prior probabilities in", name_of_x, "do not add up to 1: ", sum(x$prior)))
     return(FALSE)
   }
 
   # Check that the lapse rate is constant across categories
   if (with.lapse &
-      any(x %>% summarise(n_unique_lapse_rates = length(unique(lapse_rate))) %>% pull(n_unique_lapse_rates) != 1)) {
+      any(x %>% summarise(n_unique_lapse_rates = length(unique(lapse_rate))) %>% pull(n_unique_lapse_rates) =! 1)) {
     if (verbose) message(paste("Lapse rates in", name_of_x, "are not constant across categories: ", paste(x$lapse_rate, collapse = ", ")))
     return(FALSE)
   }
 
   # Check that the lapse bias probabilities add up to 1
   if (with.lapse_bias &
-      any(x %>% summarise(sum_lapse_bias = sum(lapse_bias)) %>% pull(sum_lapse_bias) != 1)) {
+      any(!all.equal(x %>% summarise(sum_lapse_bias = sum(lapse_bias)) %>% pull(sum_lapse_bias), 1))) {
     if (verbose) message(paste("Lapse bias probabilities in", name_of_x, "do not add up to 1: ", sum(x$lapse_bias)))
     return(FALSE)
   }
