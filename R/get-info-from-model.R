@@ -68,9 +68,6 @@ get_priors_from_model <- function(model, categories = model$category) {
   assert_that("prior" %in% names(model),
               msg = "No prior found in model.")
 
-  assert_that(sum(model$prior) == 1,
-              msg = paste("The priors do not add up to 1:", sum(prior)))
-
   prior <- model %>%
     filter(category %in% categories) %>%
     pull(prior)
