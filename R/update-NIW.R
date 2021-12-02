@@ -159,11 +159,9 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
   verbose = FALSE
 ) {
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
-  assert_NIW_belief(prior)
   assert_that(all(is_scalar_character(noise_treatment)), is_scalar_character(lapse_treatment))
   if (any(noise_treatment != "no_noise", lapse_treatment != "no_lapses"))
-    assert_that(is.NIW_ideal_adaptor(prior),
-                msg = "If noise_treatment is not 'no_noise' or lapse_treatment is not 'no_lapses', x must be an NIW_ideal_adaptor object containing noise and lapse information.")
+    assert_NIW_ideal_adaptor(prior, verbose = verbose) else assert_NIW_belief(prior, verbose = verbose)
 
   assert_that(all(is.scalar(x_N), is.numeric(x_N)), msg = "x_N must be a scalar numeric.")
   assert_that(x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
@@ -315,7 +313,6 @@ update_NIW_ideal_adaptor_incrementally <- function(
   if (lapse_treatment == "marginalize")
     warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.", call. = FALSE)
 
-  assert_NIW_belief(prior)
   assert_that(all(is.flag(keep.update_history), is.flag(keep.exposure_data)))
   assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
   assert_that(exposure.category %in% names(exposure),
