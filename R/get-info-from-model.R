@@ -103,9 +103,6 @@ get_lapse_biases_from_model <- function(model, categories = model$category) {
   assert_that("lapse_bias" %in% names(model),
               msg = "No lapse_bias found in model.")
 
-  assert_that(sum(model$lapse_bias) == 1,
-              msg = paste("The lapse_biases do not add up to 1:", sum(model$lapse_bias)))
-
   lapse_bias <- model %>%
     filter(category %in% categories) %>%
     pull(lapse_bias)
