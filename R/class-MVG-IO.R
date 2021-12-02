@@ -1,5 +1,5 @@
 get_expected_columns_for_MVG_ideal_observer <- function()
-  c(get_expected_columns_for_MVG, "prior", "lapse_rate", "lapse_bias", "Sigma_noise")
+  c(get_expected_columns_for_MVG(), "prior", "lapse_rate", "lapse_bias", "Sigma_noise")
 
 #' Is this an ideal observer with multivariate Gaussian (MVG) categories?
 #'
@@ -21,6 +21,7 @@ get_expected_columns_for_MVG_ideal_observer <- function()
 #' TBD
 #' @export
 is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F) {
+  name_of_x <- deparse(substitute(x))
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
 
   if (!is.MVG(x, category = category, verbose = verbose)) {
@@ -35,7 +36,7 @@ is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lap
       with.lapse_bias & "lapse_bias" %nin% names(x)
     )
   ) {
-    if (verbose) message("x is missing prior, lapse rate, or lapse bias.")
+    if (verbose) message(name_of_x, "is missing prior, lapse rate, or lapse bias.")
     return(FALSE)
   }
 
@@ -43,29 +44,29 @@ is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lap
 
   groups <- setdiff(names(x), get_expected_columns_for_MVG_ideal_observer())
   if (length(groups) > 0) {
-    if (verbose) message(paste(deparse(substitute(x)), "has additional columns beyond those expected. Checking whether",
-                               deparse(substitute(x)), "is an MVG_ideal_observer within each unique combination of those additional variables."))
+    if (verbose) message(paste(name_of_x, "has additional columns beyond those expected. Checking whether",
+                               name_of_x, "is an MVG_ideal_observer within each unique combination of those additional variables."))
     x %<>%
       group_by(!!! syms(groups))
   }
 
   # Check that the prior probabilities add up to 1
   if (any(x %>% summarise(sum_prior = sum(prior)) %>% pull(sum_prior) != 1)) {
-    if (verbose) message(paste("Prior probabilities in", deparse(substitute(x)), "do not add up to 1: ", sum(x$prior)))
+    if (verbose) message(paste("Prior probabilities in", name_of_x, "do not add up to 1: ", sum(x$prior)))
     return(FALSE)
   }
 
   # Check that the lapse rate is constant across categories
   if (with.lapse &
       any(x %>% summarise(n_unique_lapse_rates = length(unique(lapse_rate))) %>% pull(n_unique_lapse_rates) != 1)) {
-    if (verbose) message(paste("Lapse rates in", deparse(substitute(x)), "are not constant across categories: ", paste(x$lapse_rate, collapse = ", ")))
+    if (verbose) message(paste("Lapse rates in", name_of_x, "are not constant across categories: ", paste(x$lapse_rate, collapse = ", ")))
     return(FALSE)
   }
 
   # Check that the lapse bias probabilities add up to 1
   if (with.lapse_bias &
       any(x %>% summarise(sum_lapse_bias = sum(lapse_bias)) %>% pull(sum_lapse_bias) != 1)) {
-    if (verbose) message(paste("Lapse bias probabilities in", deparse(substitute(x)), "do not add up to 1: ", sum(x$lapse_bias)))
+    if (verbose) message(paste("Lapse bias probabilities in", name_of_x, "do not add up to 1: ", sum(x$lapse_bias)))
     return(FALSE)
   }
 
