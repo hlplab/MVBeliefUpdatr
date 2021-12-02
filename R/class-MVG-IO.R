@@ -58,7 +58,7 @@ is.MVG_ideal_observer = function(x, category = "category", is.long = T, with.lap
 
   # Check that the lapse rate is constant across categories
   if (with.lapse &
-      any(x %>% summarise(n_unique_lapse_rates = length(unique(lapse_rate))) %>% pull(n_unique_lapse_rates) =! 1)) {
+      any(x %>% summarise(n_unique_lapse_rates = length(unique(lapse_rate))) %>% pull(n_unique_lapse_rates) != 1)) {
     if (verbose) message(paste("Lapse rates in", name_of_x, "are not constant across categories: ", paste(x$lapse_rate, collapse = ", ")))
     return(FALSE)
   }
