@@ -87,7 +87,7 @@ plot_ibbu_stanfit_parameters = function(
     ) +
     coord_cartesian(xlim = x.limits, default = T) +
     facet_grid(~ .data$cue) +
-    theme_bw() + theme(legend.position = "right")
+    theme(legend.position = "right")
   legend = cowplot::get_legend(p.m)
 
   p.m = p.m + theme(legend.position = "none")
@@ -144,7 +144,7 @@ plot_ibbu_stanfit_parameters = function(
       values = group.colors
     ) +
     coord_cartesian(xlim = x.limits) +
-    theme_bw() + theme(legend.position = "none")
+    theme(legend.position = "none")
 
   K = length(unique(d.pars$cue))
   p = suppressWarnings(cowplot::plot_grid(
@@ -323,8 +323,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
                       values = category.colors) +
     scale_alpha("",
                 range = c(0.1,.9)) +
-    facet_wrap(~ group) +
-    theme_bw()
+    facet_wrap(~ group)
 }
 
 
@@ -430,8 +429,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
                        labels = category.labels,
                        values = category.colors) +
     coord_fixed(xlim = xlim, ylim = ylim, ratio = 1) +
-    facet_wrap(~ .data$group) +
-    theme_bw()
+    facet_wrap(~ .data$group)
 }
 
 
@@ -691,8 +689,7 @@ plot_ibbu_stanfit_test_categorization = function(
 
   p = p +
     geom_point(alpha = .9) +
-    geom_line(size = 1, alpha = .9, aes(x = as.numeric(.data$token))) +
-    theme_bw()
+    geom_line(size = 1, alpha = .9, aes(x = as.numeric(.data$token)))
 
   if (!summarize & panel.group) p = p + facet_grid(group ~ .draw) else
     if (panel.group) p = p + facet_wrap(~ group) else

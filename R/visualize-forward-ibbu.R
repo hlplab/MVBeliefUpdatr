@@ -278,8 +278,7 @@ plot_expected_categories_density1D = function(
     scale_color_manual("Category",
                       breaks = category.ids,
                       labels = category.labels,
-                      values = category.colors) +
-    theme_bw()
+                      values = category.colors)
 
   p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
   return(p)
@@ -370,8 +369,7 @@ plot_expected_categorization_function_1D = function(
     scale_y_continuous(name = if (logit)
       paste0("log-odds(resp = ", category.labels[target_category], ")") else
         paste0("p(resp = ", category.labels[target_category], ")")) +
-    coord_cartesian(ylim = ylim) +
-    theme_bw()
+    coord_cartesian(ylim = ylim)
 
   p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
   return(p)
@@ -474,8 +472,7 @@ plot_expected_categories_contour2D = function(
     scale_alpha_continuous("Cumulative probability",
                            range = c(0.05, .5),
                            breaks = 1 - levels,
-                           labels = round(levels, 2)) +
-    theme_bw()
+                           labels = round(levels, 2))
 
   p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
   return(p)
@@ -594,8 +591,7 @@ plot_expected_categorization_function_2D = function(
                          mid = "white",
                          high = category.colors[2],
                          midpoint = if (logit) 0 else .5) +
-    coord_cartesian(xlim = xlim, ylim = ylim) +
-    theme_bw()
+    coord_cartesian(xlim = xlim, ylim = ylim)
 
   p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
   return(p)

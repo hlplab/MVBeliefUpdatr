@@ -237,6 +237,5 @@ plot_pairwise_cue_correlation_matrix <- function(
       vars(!!! cues),
       layer.diag = 2,
       layer.upper = 3,
-      grid.y.diag= FALSE) +
-    theme_bw()
+      grid.y.diag= FALSE)
 }
