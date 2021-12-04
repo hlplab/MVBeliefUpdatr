@@ -280,10 +280,10 @@ get_ibbu_stanfit_exposure_Sigma = function(x, category, group) {
 
 
 
-#' @rdname get_categorization_function
+#' @rdname get_NIW_categorization_function
 #' @export
 get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...) {
-  get_categorization_function(
+  get_NIW_categorization_function(
     ms = fit$m,
     Ss = fit$S,
     kappas = fit$kappa,

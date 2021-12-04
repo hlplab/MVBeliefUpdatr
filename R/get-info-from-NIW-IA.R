@@ -1,13 +1,13 @@
-#' @rdname get_categorization_function
+#' @rdname get_NIW_categorization_function
 #' @export
-get_categorization_function_from_NIW_ideal_adaptor = function(x, ...) {
-  get_categorization_function(
-    ms = x$m,
-    Ss = x$S,
-    kappas = x$kappa,
-    nus = x$nu,
-    lapse_rate = x$lapse_rate,
-    lapse_bias = x$lapse_bias,
+get_categorization_function_from_NIW_ideal_adaptor = function(model, ...) {
+  get_NIW_categorization_function(
+    ms = model$m,
+    Ss = model$S,
+    kappas = model$kappa,
+    nus = model$nu,
+    lapse_rate = model$lapse_rate,
+    lapse_bias = model$lapse_bias,
     ...
   )
 }

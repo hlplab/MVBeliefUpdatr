@@ -201,12 +201,12 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 #' @keywords TBD
 #' @examples
 #' TBD
-#' @rdname get_categorization_function
+#' @rdname get_NIW_categorization_function
 #' @export
-get_categorization_function = function(
+get_NIW_categorization_function = function(
   ms, Ss, kappas, nus,
-  lapse_rate = NULL, lapse_bias = NULL,
   priors = rep(1 / n.cat, n.cat),
+  lapse_rate = NULL, lapse_bias = NULL,
   n.cat = length(ms),
   logit = FALSE
 ) {
