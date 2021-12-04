@@ -449,9 +449,7 @@ aggregate_models_by_group_structure = function(
 #' @param category.labels Character vector of category names, each specifying the category label of a multivariate Gaussian. If \code{NULL}
 #' (default) then Gaussians will be numbered from 1:N.
 #' @param cue.labels Character vector of cue names. If \code{NULL} (default) then the cues will be numbered cue1, cue2, ...
-#' @param x Alternatively to providing mus, sigma, category, and cue labels, one can also specify an \code{\link{MVG}},
-#' \code{\link{MVG_ideal_observer}}, \code{\link{NIW_belief}}, or \code{\link{NIW_ideal_adaptor}}
-#' object, which contains all information (except for the Ns).
+#' @param model \code{\link{MVG}}, \code{\link{MVG_ideal_observer}}, \code{\link{NIW_belief}}, or \code{\link{NIW_ideal_adaptor}} object.
 #' @param randomize.order Should the order of the data be randomized? (default: FALSE) This won't affect the final outcome of
 #' NIW belief updating, but it will change the incremental updates (and thus, for example, visualizations of the update process).
 #' @param keep.input_parameters Should the parameters handed to this function be included in the output? (default: FALSE)
@@ -463,52 +461,60 @@ aggregate_models_by_group_structure = function(
 #' @examples
 #' TBD
 #' @export
-make_MVG_exposure_data = function(
+make_MVG_data = function(
   Ns, mus, Sigmas,
   category.labels = NULL,
   cue.labels = NULL,
-  x = NULL,
   randomize.order = F,
   keep.input_parameters = F
 ) {
-  if (!is.null(x)) {
-    if (is.MVG(x) | is.MVG_ideal_observer(x)) {
-      return(make_MVG_exposure_data(
-        Ns = Ns,
-        mus = x$mu,
-        Sigmas = x$Sigma,
-        category.labels = get_category_labels_from_MVG(x),
-        cue.labels = get_cue_labels_from_MVG(x),
-        randomize.order = randomize.order,
-        keep.input_parameters = keep.input_parameters))
-    } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x)) {
-      return(make_MVG_exposure_data(
-        Ns = Ns,
-        mus = x$m,
-        Sigmas = get_expected_Sigma_from_S(x$S, x$nu),
-        category.labels = get_category_labels_from_model(x),
-        cue.labels = get_cue_labels_from_model(x),
-        randomize.order = randomize.order,
-        keep.input_parameters = keep.input_parameters))
-    }
-  } else {
-    assert_that(!is.null(mus), !is.null(Sigmas))
-    assert_that(is.null(category.labels) | length(mus) == length(category.labels),
-                msg = "Number of category labels mismatch number of mus.")
-    assert_that(is.null(cue.labels) | length(mus[[1]]) == length(cue.labels),
-                msg = "Number of cue labels mismatches dimensionality of mus.")
+  assert_that(!is.null(mus), !is.null(Sigmas))
+  assert_that(is.null(category.labels) | length(mus) == length(category.labels),
+              msg = "Number of category labels mismatch number of mus.")
+  assert_that(is.null(cue.labels) | length(mus[[1]]) == length(cue.labels),
+              msg = "Number of cue labels mismatches dimensionality of mus.")
 
-    if (is.null(category.labels)) category.labels = 1:length(mus)
-    if (is.null(cue.labels)) cue.labels = paste0("cue", 1:length(mus[[1]]))
+  if (is.null(category.labels)) category.labels = 1:length(mus)
+  if (is.null(cue.labels)) cue.labels = paste0("cue", 1:length(mus[[1]]))
 
-    x = tibble(category = category.labels, n = Ns, mu = mus, Sigma = Sigmas) %>%
-      mutate(data = pmap(.l = list(n, mu, Sigma), .f = rmvnorm)) %>%
-      mutate(data = map(data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
-      unnest(data)
+  x = tibble(category = category.labels, n = Ns, mu = mus, Sigma = Sigmas) %>%
+    mutate(data = pmap(.l = list(n, mu, Sigma), .f = rmvnorm)) %>%
+    mutate(data = map(data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
+    unnest(data)
 
-    if (randomize.order)
-      x = sample_frac(x, 1)
+  if (randomize.order)
+    x = sample_frac(x, 1)
 
-    if (keep.input_parameters) return(x) else return(x %>% select(category, everything(), -c(n, mu, Sigma)))
-  }
+  if (keep.input_parameters) return(x) else return(x %>% select(category, everything(), -c(n, mu, Sigma)))
+}
+
+
+#' @rdname make_MVG_data
+#' @export
+make_MVG_data_from_model = function(
+  Ns,
+  model = NULL,
+  randomize.order = F,
+  keep.input_parameters = F
+) {
+  if (is.MVG(model)) {
+    return(make_MVG_data(
+      Ns = Ns,
+      mus = model$mu,
+      Sigmas = model$Sigma,
+      category.labels = get_category_labels_from_model(model),
+      cue.labels = get_cue_labels_from_MVG(model),
+      randomize.order = randomize.order,
+      keep.input_parameters = keep.input_parameters))
+  } else if (is.NIW_belief(model)) {
+    return(make_MVG_data(
+      Ns = Ns,
+      mus = model$m,
+      Sigmas = get_expected_Sigma_from_S(model$S, model$nu),
+      category.labels = get_category_labels_from_model(model),
+      cue.labels = get_cue_labels_from_model(model),
+      randomize.order = randomize.order,
+      keep.input_parameters = keep.input_parameters))
+  } else
+    message(paste("Unrecognized model class:", class(model)))
 }
