@@ -10,7 +10,8 @@ is.MVG_ideal_observer(
   is.long = T,
   with.lapse = if (with.lapse_bias) T else F,
   with.lapse_bias = F,
-  verbose = F
+  verbose = F,
+  tolerance = 1e-05
 )
 }
 \arguments{
