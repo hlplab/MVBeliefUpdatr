@@ -325,11 +325,6 @@ update_NIW_ideal_adaptor_incrementally <- function(
               msg = paste0("Length of method argument must be either 1 or the number of rows in exposure (", nrow(exposure),")."))
   if (length(method) == 1) method = rep(method, nrow(exposure))
 
-  # Number of dimensions/cues
-  D = length(exposure.cues)
-  if (any(prior$nu <= D + 1))
-    message(paste0("Prior for at least one category had nu smaller than allowed (is ", min(prior$nu), "; should be >", D+1, ").\n"))
-
   # Prepare exposure data
   exposure %<>%
     { if (!is.null(exposure.order)) arrange(., !! sym(exposure.order)) else . } %>%
