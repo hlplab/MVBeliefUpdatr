@@ -221,6 +221,11 @@ get_NIW_categorization_function = function(
                 msg = "biases must sum to 1.")
   } else lapse_biases <- 1 / n.cat
 
+  # Get dimensions of multivariate category
+  D = length(ms[[1]])
+  assert_that(nus[[1]] >= D,
+              msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
+
   f <- function(x, target_category = 1) {
     log_p = matrix(
       nrow = length(x),
