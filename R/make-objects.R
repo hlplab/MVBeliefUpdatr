@@ -383,6 +383,54 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   return(x)
 }
 
+#' Turn an MVG_ideal_observer into an NIW_ideal_adaptor
+#'
+#' Make an ideal adaptor out of an ideal observer, so that the *expected* category mean and category covariance
+#' matrix of the ideal adaptor match the ideal observers category mean and category covariance matrix.
+#'
+#' @param model An MVG_ideal_observer object.
+#' @param group Optionally, a grouping structure can be specified. If group structure is not NULL, one
+#' NIW belief or ideal adaptor will be derived for each level of \code{group_structure}. (default: NULL)
+#' @param category Name of variable in \code{data} that contains the category information. (default: "category")
+#' @param kappa The strength of the beliefs over the category mean (pseudocounts). (default: same as nu)
+#' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
+#' cues + 2)
+#' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
+#' representation (category variability)? If FALSE, then noise will be considered during categorization decisions
+#' but will not be added to the covariance matrix of the MVG categories. If TRUE, then noise will also be to the category
+#' covariance matrix. Will be ignored if Sigma_noise is NULL. (default: FALSE)
+#' @param verbose If true provides more information. (default: FALSE)
+#'
+#' @return A tibble that is an NIW_ideal_adaptor object.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
+  model,
+  group = NULL,
+  category = "category",
+  kappa, nu
+) {
+  assert_that(!is.null(kappa), !is.null(nu),
+              msg = "kappa and nu must be provided.")
+
+  model %<>%
+    rename(m = mu, S = Sigma) %>%
+    mutate(
+      kappa = kappa,
+      nu = nu,
+      S = get_S_from_expected_Sigma(S, nu))
+
+  assert_that(
+    is.NIW_ideal_adaptor(model),
+    msg = "Outcome is not an NIW_ideal_adaptor. Something went wrong.")
+
+  return(model)
+}
+
 #' Aggregate multiple ideal observers/adaptors into an average ('typical') ideal observer/adaptor
 #'
 #' Takes a grouped collection of ideal observers or adaptors (or MVG / NIW_belief objects) and averages them into a single
