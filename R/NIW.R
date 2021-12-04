@@ -176,7 +176,7 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 }
 
 
-#' Get categorization function
+#' Get NIW categorization function
 #'
 #' Returns a categorization function for the first category, based on a set of parameters for the Normal-inverse-Wishart (NIW)
 #' distribtuion. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
@@ -187,9 +187,9 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 #' covariance matrices.
 #' @param kappas List of IBBU-inferred kappas describing the strength of the beliefs into the distribution over catgory means.
 #' @param nus List of IBBU-inferred nus describing the strength of the beliefs into the distribution over catgory covariance matrices.
-#' @param lapse_rate An IBBU-inferred lapse rate for the categorization responses.
-#' @param lapse_bias An IBBU-inferred bias for the categorization responses.
 #' @param priors Vector of categories' prior probabilities. (default: uniform prior over categories)
+#' @param lapse_rate An IBBU-inferred lapse rate for the categorization responses.
+#' @param lapse_biases An IBBU-inferred bias for the categorization responses.
 #' @param n.cat Number of categories. Is inferred from the input, but can be set manually.
 #' @param logit Should the function that is returned return log-odds (TRUE) or probabilities (FALSE)? (default: TRUE)
 #'
@@ -206,7 +206,7 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 get_NIW_categorization_function = function(
   ms, Ss, kappas, nus,
   priors = rep(1 / n.cat, n.cat),
-  lapse_rate = NULL, lapse_bias = NULL,
+  lapse_rate = NULL, lapse_biases = NULL,
   n.cat = length(ms),
   logit = FALSE
 ) {
@@ -216,15 +216,10 @@ get_NIW_categorization_function = function(
               are_equal(length(ms), length(nus)),
               msg = "The number of ms, Ss, kappas, nus, and priors must be identical.")
   if (!is.null(lapse_rate)) assert_that(all(between(lapse_rate, 0, 1))) else lapse_rate = rep(0, n.cat)
-  if (!is.null(lapse_bias)) {
-    assert_that(all(between(lapse_bias, 0, 1), sum(lapse_bias) == 1),
+  if (!is.null(lapse_biases)) {
+    assert_that(all(between(lapse_biases, 0, 1), sum(lapse_biases) == 1),
                 msg = "biases must sum to 1.")
-  } else lapse_bias <- 1 / n.cat
-
-  # Get dimensions of multivariate category
-  D = length(ms[[1]])
-  assert_that(nus[[1]] >= D,
-              msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
+  } else lapse_biases <- 1 / n.cat
 
   f <- function(x, target_category = 1) {
     log_p = matrix(
@@ -237,7 +232,7 @@ get_NIW_categorization_function = function(
 
     p_target <-
       (1 - lapse_rate[target_category]) * exp(log_p[,target_category] + log(priors[target_category]) - log(rowSums(exp(log_p) * priors))) +
-      lapse_rate[target_category] * lapse_bias[target_category]
+      lapse_rate[target_category] * lapse_biases[target_category]
 
     if (logit)
       return(qlogis(p_target))
