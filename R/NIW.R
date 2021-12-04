@@ -178,18 +178,19 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 
 #' Get NIW categorization function
 #'
-#' Returns a categorization function for the first category, based on a set of parameters for the Normal-inverse-Wishart (NIW)
-#' distribtuion. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
+#' Returns a categorization function for the first category, based on a set of parameters for the Normal-Inverse-Wishart (NIW)
+#' distribution. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
 #' element of ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
 #'
 #' @param ms List of IBBU-inferred means describing the multivariate normal distribution over category means.
 #' @param Ss List of IBBU-inferred scatter matrices describing the inverse Wishart distribution over category
 #' covariance matrices.
-#' @param kappas List of IBBU-inferred kappas describing the strength of the beliefs into the distribution over catgory means.
-#' @param nus List of IBBU-inferred nus describing the strength of the beliefs into the distribution over catgory covariance matrices.
+#' @param kappas List of IBBU-inferred kappas describing the strength of the beliefs into the distribution over category means.
+#' @param nus List of IBBU-inferred nus describing the strength of the beliefs into the distribution over category covariance matrices.
 #' @param priors Vector of categories' prior probabilities. (default: uniform prior over categories)
-#' @param lapse_rate An IBBU-inferred lapse rate for the categorization responses.
-#' @param lapse_biases An IBBU-inferred bias for the categorization responses.
+#' @param lapse_rate A lapse rate for the categorization responses.
+#' @param lapse_biases A lapse bias for the categorization responses. (default: uniform prior over categories)
+#' @param Sigma_noise A noise matrix. (default: a 0-matrix)
 #' @param n.cat Number of categories. Is inferred from the input, but can be set manually.
 #' @param logit Should the function that is returned return log-odds (TRUE) or probabilities (FALSE)? (default: TRUE)
 #'
@@ -206,18 +207,26 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 get_NIW_categorization_function = function(
   ms, Ss, kappas, nus,
   priors = rep(1 / n.cat, n.cat),
-  lapse_rate = NULL, lapse_biases = NULL,
+  lapse_rate = NULL,
+  lapse_biases = rep(1 / n.cat, n.cat),
+  Sigma_noise = matrix(
+    0,
+    nrow = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])),
+    ncol = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]]))),
   n.cat = length(ms),
   logit = FALSE
 ) {
+  tolerance = 1e-5
   assert_that(are_equal(length(ms), length(Ss)),
               are_equal(length(ms), length(priors)),
               are_equal(length(ms), length(kappas)),
               are_equal(length(ms), length(nus)),
               msg = "The number of ms, Ss, kappas, nus, and priors must be identical.")
+  assert_that(all(between(priors, 0, 1), between(sum(priors), 1 - tolerance, 1 + tolerance)),
+              msg = "priors must sum to 1.")
   if (!is.null(lapse_rate)) assert_that(all(between(lapse_rate, 0, 1))) else lapse_rate = rep(0, n.cat)
   if (!is.null(lapse_biases)) {
-    assert_that(all(between(lapse_biases, 0, 1), sum(lapse_biases) == 1),
+    assert_that(all(between(lapse_biases, 0, 1), between(sum(lapse_biases), 1 - tolerance, 1 + tolerance)),
                 msg = "biases must sum to 1.")
   } else lapse_biases <- 1 / n.cat
 
