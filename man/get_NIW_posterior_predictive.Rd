@@ -12,9 +12,9 @@ get_NIW_posterior_predictive(
   S,
   kappa,
   nu,
-  log = T,
+  Sigma_noise = NULL,
   noise_treatment = "no_noise",
-  Sigma_noise = NULL
+  log = T
 )
 
 get_NIW_posterior_predictive.pmap(x, m, S, kappa, nu, ...)
@@ -44,7 +44,8 @@ matrix Sigma. Should be a square k x k matrix.}
 
 \item{nu}{The strength of the beliefs over the category covariance matrix (pseudocounts).}
 
-\item{log}{Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)}
+\item{Sigma_noise}{Optionally, a covariance matrix describing the perceptual noise to be applied while
+calculating the posterior predictive. (default: `NULL`)}
 
 \item{noise_treatment}{Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
 or "marginalize". If "no_noise", no noise will be applied. This describes the idealized categorization function if the percept
@@ -54,8 +55,7 @@ categorization. If "marginalize" then each observation is transformed into the m
 that results from convolving the input with noise. This latter option might be helpful, for example, if one is
 interested in estimating the consequences of noise across individuals. (default: "no_noise").}
 
-\item{Sigma_noise}{Optionally, a covariance matrix describing the perceptual noise to be applied while
-calculating the posterior predictive. (default: `NULL`)}
+\item{log}{Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)}
 }
 \description{
 Get posterior predictive of observations x given the NIW parameters m, S, kappa, and nu. This is

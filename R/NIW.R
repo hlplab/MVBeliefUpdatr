@@ -92,7 +92,8 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' matrix Sigma. Should be a square k x k matrix.
 #' @param kappa The strength of the beliefs over the category mean (pseudocounts).
 #' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts).
-#' @param log Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)
+#' @param Sigma_noise Optionally, a covariance matrix describing the perceptual noise to be applied while
+#' calculating the posterior predictive. (default: `NULL`)
 #' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
 #' or "marginalize". If "no_noise", no noise will be applied. This describes the idealized categorization function if the percept
 #' was known. If "sample" or "marginalize", `Sigma_noise` must be a covariance
@@ -100,9 +101,7 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' categorization. If "marginalize" then each observation is transformed into the marginal distribution
 #' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
 #' interested in estimating the consequences of noise across individuals. (default: "no_noise").
-#' @param Sigma_noise Optionally, a covariance matrix describing the perceptual noise to be applied while
-#' calculating the posterior predictive. (default: `NULL`)
-#'
+#' @param log Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -111,7 +110,7 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' TBD
 #' @rdname get_NIW_posterior_predictive
 #' @export
-get_NIW_posterior_predictive = function(x, m, S, kappa, nu, log = T, noise_treatment = "no_noise", Sigma_noise = NULL) {
+get_NIW_posterior_predictive = function(x, m, S, kappa, nu, Sigma_noise = NULL, noise_treatment = "no_noise", log = T) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
   assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
@@ -245,7 +244,7 @@ get_NIW_categorization_function = function(
       ncol = n.cat
     )
     for (cat in 1:n.cat) {
-      log_p[, cat] = get_NIW_posterior_predictive(x, ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T, Sigma_noise = Sigma_noise, noise_treatment = noise_treatment, ...)
+      log_p[, cat] = get_NIW_posterior_predictive(x, ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T, Sigma_noise = Sigma_noise, noise_treatment = noise_treatment)
     }
 
     p_target <-
