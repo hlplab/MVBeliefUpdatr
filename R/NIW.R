@@ -246,7 +246,7 @@ get_NIW_categorization_function = function(
       log_p[, cat] = get_NIW_posterior_predictive(
         x,
         ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]],
-        Sigma_noise = Sigma_noise, noise_treatment = noise_treatment,
+        Sigma_noise = Sigma_noise[[cat]], noise_treatment = noise_treatment,
         log = T)
     }
 
