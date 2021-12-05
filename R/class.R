@@ -11,6 +11,7 @@ get_class <- function(x) {
   return(class)
 }
 
+#' @export
 is.Sigma <- function(x) {
   if (is.matrix(x)) {
     if (is.positive.definite(x)) return(T) else return(F)
