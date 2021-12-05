@@ -104,8 +104,12 @@ make_MVG_ideal_observer_from_data = function(
   verbose = F
 ) {
   model <- data %>% make_MVG_from_data(group = group, category = category, cues = cues, verbose = verbose)
-  model %<>% lift_MVG_to_MVG_ideal_observer(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
-                                       Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
+  model %<>% lift_MVG_to_MVG_ideal_observer(
+    group = group, category = category,
+    prior = prior,
+    lapse_rate = lapse_rate, lapse_bias = lapse_bias,
+    Sigma_noise = Sigma_noise,
+    add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
 
   if (is.null(group) & !is.MVG_ideal_observer(model, category = as_name(category), verbose = verbose)) {
     warning("Something went wrong. The returned object is not an MVG ideal observer. Try again with verbose = T?")
