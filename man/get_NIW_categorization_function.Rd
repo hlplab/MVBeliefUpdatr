@@ -18,8 +18,7 @@ get_NIW_categorization_function(
   Sigma_noise = matrix(0, nrow = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])),
     ncol = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]]))),
   noise_treatment = "no_noise",
-  logit = FALSE,
-  ...
+  logit = FALSE
 )
 
 get_categorization_function_from_NIW_ideal_adaptor(model, ...)
