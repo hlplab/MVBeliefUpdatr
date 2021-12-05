@@ -94,7 +94,8 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts).
 #' @param log Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)
 #' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
-#' or "marginalize". If "no_noise", no noise will be applied. If "sample" or "marginalize", `Sigma_noise` must be a covariance
+#' or "marginalize". If "no_noise", no noise will be applied. This describes the idealized categorization function if the percept
+#' was known. If "sample" or "marginalize", `Sigma_noise` must be a covariance
 #' matrix of appropriate dimensions. If "sample", observations are adjusted by samples drawn from the noise distribution before applying
 #' categorization. If "marginalize" then each observation is transformed into the marginal distribution
 #' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
@@ -182,16 +183,16 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 #' distribution. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
 #' element of ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
 #'
-#' @param ms List of IBBU-inferred means describing the multivariate normal distribution over category means.
-#' @param Ss List of IBBU-inferred scatter matrices describing the inverse Wishart distribution over category
-#' covariance matrices.
-#' @param kappas List of IBBU-inferred kappas describing the strength of the beliefs into the distribution over category means.
-#' @param nus List of IBBU-inferred nus describing the strength of the beliefs into the distribution over category covariance matrices.
+#' @param ms Means of the multivariate normal distributions over category means.
+#' @param Ss Scatter matrices of the inverse Wishart distribution over category covariance matrices.
+#' @param kappas Strength of the beliefs into the distribution over category means.
+#' @param nus Strength of the beliefs into the distribution over category covariance matrices.
 #' @param priors Vector of categories' prior probabilities. (default: uniform prior over categories)
 #' @param lapse_rate A lapse rate for the categorization responses.
-#' @param lapse_biases A lapse bias for the categorization responses. (default: uniform prior over categories)
+#' @param lapse_biases A lapse bias for the categorization responses. (default: uniform bias over categories)
 #' @param Sigma_noise A noise matrix. (default: a 0-matrix)
-#' @param n.cat Number of categories. Is inferred from the input, but can be set manually.
+#' @param noise_treatment How should the noise specified in \code{Sigma_noise} be considered in the categorization function?
+#' For details, see \code{\link{get_NIW_posterior_predictive}} (default: "no_noise")
 #' @param logit Should the function that is returned return log-odds (TRUE) or probabilities (FALSE)? (default: TRUE)
 #'
 #' @return A function that takes as input cue values and returns posterior probabilities of the first category,
@@ -213,7 +214,6 @@ get_NIW_categorization_function = function(
     0,
     nrow = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])),
     ncol = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]]))),
-  n.cat = length(ms),
   noise_treatment = "no_noise",
   logit = FALSE,
   ...
@@ -224,6 +224,8 @@ get_NIW_categorization_function = function(
               are_equal(length(ms), length(kappas)),
               are_equal(length(ms), length(nus)),
               msg = "The number of ms, Ss, kappas, nus, and priors must be identical.")
+  n.cat = length(ms)
+
   assert_that(all(between(priors, 0, 1), between(sum(priors), 1 - tolerance, 1 + tolerance)),
               msg = "priors must sum to 1.")
   if (!is.null(lapse_rate)) assert_that(all(between(lapse_rate, 0, 1))) else lapse_rate = rep(0, n.cat)

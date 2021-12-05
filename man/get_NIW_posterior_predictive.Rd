@@ -47,7 +47,8 @@ matrix Sigma. Should be a square k x k matrix.}
 \item{log}{Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)}
 
 \item{noise_treatment}{Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
-or "marginalize". If "no_noise", no noise will be applied. If "sample" or "marginalize", `Sigma_noise` must be a covariance
+or "marginalize". If "no_noise", no noise will be applied. This describes the idealized categorization function if the percept
+was known. If "sample" or "marginalize", `Sigma_noise` must be a covariance
 matrix of appropriate dimensions. If "sample", observations are adjusted by samples drawn from the noise distribution before applying
 categorization. If "marginalize" then each observation is transformed into the marginal distribution
 that results from convolving the input with noise. This latter option might be helpful, for example, if one is

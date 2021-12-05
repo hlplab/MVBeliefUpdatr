@@ -14,9 +14,12 @@ get_NIW_categorization_function(
   nus,
   priors = rep(1/n.cat, n.cat),
   lapse_rate = NULL,
-  lapse_biases = NULL,
-  n.cat = length(ms),
-  logit = FALSE
+  lapse_biases = rep(1/n.cat, n.cat),
+  Sigma_noise = matrix(0, nrow = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])),
+    ncol = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]]))),
+  noise_treatment = "no_noise",
+  logit = FALSE,
+  ...
 )
 
 get_categorization_function_from_NIW_ideal_adaptor(model, ...)
@@ -24,22 +27,24 @@ get_categorization_function_from_NIW_ideal_adaptor(model, ...)
 get_categorization_function_from_grouped_ibbu_stanfit_draws(fit, ...)
 }
 \arguments{
-\item{ms}{List of IBBU-inferred means describing the multivariate normal distribution over category means.}
+\item{ms}{Means of the multivariate normal distributions over category means.}
 
-\item{Ss}{List of IBBU-inferred scatter matrices describing the inverse Wishart distribution over category
-covariance matrices.}
+\item{Ss}{Scatter matrices of the inverse Wishart distribution over category covariance matrices.}
 
-\item{kappas}{List of IBBU-inferred kappas describing the strength of the beliefs into the distribution over catgory means.}
+\item{kappas}{Strength of the beliefs into the distribution over category means.}
 
-\item{nus}{List of IBBU-inferred nus describing the strength of the beliefs into the distribution over catgory covariance matrices.}
+\item{nus}{Strength of the beliefs into the distribution over category covariance matrices.}
 
 \item{priors}{Vector of categories' prior probabilities. (default: uniform prior over categories)}
 
-\item{lapse_rate}{An IBBU-inferred lapse rate for the categorization responses.}
+\item{lapse_rate}{A lapse rate for the categorization responses.}
 
-\item{lapse_biases}{An IBBU-inferred bias for the categorization responses.}
+\item{lapse_biases}{A lapse bias for the categorization responses. (default: uniform bias over categories)}
 
-\item{n.cat}{Number of categories. Is inferred from the input, but can be set manually.}
+\item{Sigma_noise}{A noise matrix. (default: a 0-matrix)}
+
+\item{noise_treatment}{How should the noise specified in \code{Sigma_noise} be considered in the categorization function?
+For details, see \code{\link{get_NIW_posterior_predictive}} (default: "no_noise")}
 
 \item{logit}{Should the function that is returned return log-odds (TRUE) or probabilities (FALSE)? (default: TRUE)}
 }
@@ -49,8 +54,8 @@ based on the posterior predictive of the cues given the (IBBU-derived parameters
 kappa, nu, and prior, as well as the lapse rate.
 }
 \description{
-Returns a categorization function for the first category, based on a set of parameters for the Normal-inverse-Wishart (NIW)
-distribtuion. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
+Returns a categorization function for the first category, based on a set of parameters for the Normal-Inverse-Wishart (NIW)
+distribution. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
 element of ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
 }
 \examples{
