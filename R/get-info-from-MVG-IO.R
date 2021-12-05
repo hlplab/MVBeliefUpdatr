@@ -30,7 +30,7 @@ get_MVG_likelihood = function(x, mu, Sigma, log = T, noise_treatment = "no_noise
   # in the latter case, each *row* of the matrix is an input.
   assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
   assert_that(is.vector(mu) | is.matrix(mu) | is_scalar_double(mu))
-  assert_that(is.positive.definite(Sigma) | is_scalar_double(Sigma))
+  assert_that(is.Sigma(Sigma))
   # do not reorder these conditionals (go from more to less specific)
   if (is_tibble(x)) x %<>% as.matrix() else
     if (is.list(x)) x %<>% reduce(rbind) %<>% as.matrix(nrow = 1) else
@@ -41,7 +41,7 @@ get_MVG_likelihood = function(x, mu, Sigma, log = T, noise_treatment = "no_noise
   assert_that(any(noise_treatment %in% c("no_noise", "sample", "marginalize")),
               msg = "noise_treatment must be one of 'no_noise', 'sample' or 'marginalize'.")
   if (noise_treatment != "no_noise") {
-    assert_that(is.positive.definite(Sigma_noise)  | is_scalar_double(Sigma_noise))
+    assert_that(is.Sigma(Sigma_noise))
     assert_that(all(dim(Sigma) == dim(Sigma_noise)),
                 msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the category covariance matrices Sigma.')
   }

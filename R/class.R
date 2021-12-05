@@ -10,3 +10,11 @@ get_class <- function(x) {
 
   return(class)
 }
+
+is.Sigma <- function(x) {
+  if (is.matrix(x)) {
+    if (is.positive.definite(x)) return(T) else return(F)
+  } else {
+    if (is_scalar_double(x)) return(T) else return(F)
+  }
+}
