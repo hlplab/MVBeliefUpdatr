@@ -214,6 +214,7 @@ get_NIW_categorization_function = function(
     nrow = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])),
     ncol = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]]))),
   n.cat = length(ms),
+  noise_treatment = "no_noise",
   logit = FALSE,
   ...
 ) {
@@ -242,7 +243,7 @@ get_NIW_categorization_function = function(
       ncol = n.cat
     )
     for (cat in 1:n.cat) {
-      log_p[, cat] = get_NIW_posterior_predictive(x, ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T, Sigma_noise = Sigma_noise, ...)
+      log_p[, cat] = get_NIW_posterior_predictive(x, ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]], log = T, Sigma_noise = Sigma_noise, noise_treatment = noise_treatment, ...)
     }
 
     p_target <-
