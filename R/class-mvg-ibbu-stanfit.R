@@ -57,7 +57,7 @@ as.NIW_ideal_adaptor_stanfit = function(stanfit, input, transform = NULL) {
 #' @examples
 #' TBD
 #' @export
-is.NIW_ideal_adaptor_stanfit = function(x) {
+is.NIW_ideal_adaptor_stanfit = function(x, verbose = F) {
   if (all(class(x) %in% c("stanfit", new_stanfit_class_name)))
     return(TRUE) else return(FALSE)
 }

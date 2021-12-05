@@ -198,14 +198,14 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
       if (method == "nolabel-uniform") x_Ns <- as.list(1 / length(prior$category) * x_N) else
         if (method %in% c("nolabel-criterion", "nolabel-proportional")) {
           x_Ns = get_categorization_from_NIW_ideal_adaptor(
-            x = x_mean, belief = prior,
+            x = x_mean, model = prior,
             decision_rule = gsub("nolabel-", "", method),
             simplify = F) %>%
               pull(response) * x_N %>%
             as.list()
         } else if (method %in% c("nolabel-sampling")) {
           x_Ns = get_categorization_from_NIW_ideal_adaptor(
-            x = x_mean, belief = prior,
+            x = x_mean, model = prior,
             decision_rule = "proportional",
             simplify = F) %>%
               pull(response) %>%
