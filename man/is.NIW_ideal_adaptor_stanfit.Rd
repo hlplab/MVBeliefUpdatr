@@ -4,7 +4,7 @@
 \alias{is.NIW_ideal_adaptor_stanfit}
 \title{Is this an NIW IBBU stanfit?}
 \usage{
-is.NIW_ideal_adaptor_stanfit(x)
+is.NIW_ideal_adaptor_stanfit(x, verbose = F)
 }
 \value{
 A logical.

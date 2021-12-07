@@ -206,9 +206,9 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 #' @export
 get_NIW_categorization_function = function(
   ms, Ss, kappas, nus,
-  priors = rep(1 / n.cat, n.cat),
+  priors = rep(1 / length(ms), length(ms)),
   lapse_rate = NULL,
-  lapse_biases = rep(1 / n.cat, n.cat),
+  lapse_biases = rep(1 / length(ms), length(ms)),
   Sigma_noise = matrix(
     0,
     nrow = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])),

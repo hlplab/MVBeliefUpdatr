@@ -6,9 +6,9 @@ get_categorization_function_from_NIW_ideal_adaptor = function(model, ...) {
     Ss = model$S,
     kappas = model$kappa,
     nus = model$nu,
-    prior = model$prior,
+    priors = model$prior,
     lapse_rate = model$lapse_rate,
-    lapse_bias = model$lapse_bias,
+    lapse_biases = model$lapse_bias,
     Sigma_noise = model$Sigma_noise,
     ...
   )
