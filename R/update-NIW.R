@@ -362,7 +362,7 @@ update_NIW_ideal_adaptor_incrementally <- function(
       rename_with(~ paste0("observation.", .x), !starts_with("observation.n"))
 
     prior %<>%
-      left_join(exposure)
+      left_join(exposure, by = "observation.n")
   }
 
   return(prior)
