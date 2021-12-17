@@ -77,7 +77,7 @@ infer_prior_beliefs <- function(
 
   if (is.null(use_multivariate_updating))
     use_multivariate_updating = if (is.null(data_list$K)) FALSE else TRUE
-  message("change to keep samples only from relevant parameters.")
+  message("message to developer: change to keep samples only from relevant parameters.")
 
   if (sample) {
     if (!is.null(model)) {
@@ -103,7 +103,7 @@ infer_prior_beliefs <- function(
         cue2 = cue
       )
     )
-  }
+  } else fit <- NULL
 
   if (!is.null(fit) & !is.null(file)) {
     write_NIW_ideal_adaptor_stanfit(fit, file)

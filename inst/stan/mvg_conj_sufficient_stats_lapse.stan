@@ -47,6 +47,8 @@ data {
 transformed data {
   real sigma_kappanu;
 
+  /* Scale for the prior of kappa/nu_0. In order to deal with input that does not contain observations
+     (in which case n_each == 0), we set the minimum value for SD to 10. */
   sigma_kappanu = max(N) > 0 ? max(N) * 4 : 10;
 }
 
@@ -138,9 +140,6 @@ model {
 
   lapsing_probs = rep_vector(lapse_rate / M, M);
 
-  /* Need to calculate category probabilities for each test trial. In order to deal with
-     input that does not contain observations (in which case n_each == 0), we set the
-     minimum value for SD to 10 above. */
   kappa_0 ~ normal(0, sigma_kappanu);
   nu_0 ~ normal(0, sigma_kappanu);
 

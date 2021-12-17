@@ -256,9 +256,12 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   tau_scale = 0, L_omega_scale = 0,
   verbose = F
 ) {
+  if ((!center.observations | !scale.observations) & (tau_scale == 0 | L_omega_scale == 0))
+    message("It seems that you neither centered & scaled the cues in the input, nor set the tau_scale and L_omega_scale parameters. This puts the priors assumed in the model on a scale that has no relation to the input. Unless you have manually centered and scaled the cues, this is strongly discouraged.")
+
   if (!is.null(m_0)) assert_that(is.list(m_0) | is.array(m_0))
   if (!is.null(S_0)) assert_that(is.list(S_0) | is.array(S_0))
-  message("Add assertions about m_0 and S_0 dimensions")
+  message("Message to developer: Add assertions about m_0 and S_0 dimensions")
 
   if (pca.observations)
     assert_that(between(pca.cutoff, 0, 1),
@@ -290,7 +293,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   }
 
   exposure %<>%
-    select(c(group, cues, category))
+    select(c(all_of(group), all_of(cues), all_of(category)))
 
   test <- check_exposure_test_data(
     data = test,

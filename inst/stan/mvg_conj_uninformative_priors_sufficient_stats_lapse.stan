@@ -44,6 +44,8 @@ data {
 transformed data {
   real sigma_kappanu;
 
+  /* Scale for the prior of kappa/nu_0. In order to deal with input that does not contain observations
+     (in which case n_each == 0), we set the minimum value for SD to 10. */
   sigma_kappanu = max(N) > 0 ? max(N) * 4 : 10;
 }
 
@@ -122,28 +124,30 @@ model {
 
   lapsing_probs = rep_vector(lapse_rate / M, M);
 
-  /* Need to calculate category probabilities for each test trial. In order to deal with
-     input that does not contain observations (in which case n_each == 0), we set the
-     minimum value for SD to 10. */
   kappa_0 ~ normal(0, sigma_kappanu);
   nu_0 ~ normal(0, sigma_kappanu);
 
   /* Specifying prior for m_0:
      - If no scale for variances (tau) of m_0 is user-specified use weakly regularizing
-       scale (5) for variances of mean.
+       scale (10) for variances of mean.
      - If no scale for LKJ prior over correlation matrix of m_0 is user-specified use
        scale 1 to set uniform prior over correlation matrices. */
-  m_0_tau ~ cauchy(0, tau_scale > 0 ? tau_scale : 5);
+  m_0_tau ~ cauchy(0, tau_scale > 0 ? tau_scale : 10);
   m_0_L_omega ~ lkj_corr_cholesky(L_omega_scale > 0 ? L_omega_scale : 1);
   m_0 ~ multi_normal_cholesky(rep_vector(0, K), diag_pre_multiply(m_0_tau, m_0_L_omega));
 
+  /* Specifying prior for tau_0 and L_omega_0 of each category:
+     - If no scale for variances (tau) of m_0 is user-specified use weakly regularizing
+       scale (10) for variances of mean.
+     - If no scale for LKJ prior over correlation matrix of m_0 is user-specified use
+       scale 1 to set uniform prior over correlation matrices. */
   for (cat in 1:M) {
     tau_0[cat] ~ cauchy(0, tau_scale > 0 ? tau_scale : 10);
     L_omega_0[cat] ~ lkj_corr_cholesky(L_omega_scale > 0 ? L_omega_scale : 1);
   }
 
   for (i in 1:N_test) {
-    z_test_counts[i] ~ multinomial(p_test_conj[i] * (1-lapse_rate) + lapsing_probs);
+    z_test_counts[i] ~ multinomial(p_test_conj[i] * (1 - lapse_rate) + lapsing_probs);
   }
 
 }
