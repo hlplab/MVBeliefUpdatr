@@ -4,7 +4,7 @@
 #' @param fit Stanfit object. (NOT CHECKED YET)
 #' @param pars Names of parameters to be extracted or NULL if all parameters are to be returned. (default: NULL)
 #' @param summarize Should quantiles be calculated (TRUE) or should all draws be returned (FALSE)?
-#' @param n.draws Number of random draws to be return or NULL if all draws are to be returned. (default: NULL)
+#' @param ndraws Number of random draws to be return or NULL if all draws are to be returned. (default: NULL)
 #' @param draws Vector with specific draw(s) to be returned, or NULL if no specific draws are to be returned. (default: NULL)
 #' @param quantiles If summarize is TRUE, quantiles that are calculated; ignored if summarize if FALSE.
 #'
@@ -24,7 +24,7 @@
 add_draws = function(fit,
                      pars = NULL,
                      summarize = if (is.null(draw) & is.null(draw.n)) TRUE else FALSE,
-                     n.draws = NULL,
+                     ndraws = NULL,
                      draws = NULL,
                      qi = if (summarize) c(.025, .5, .975) else NA
 )
@@ -35,14 +35,14 @@ add_draws = function(fit,
               msg = "Argument pars must be be NULL or a vector of characters.")
   if (is.null(pars)) pars = get_params(fit)
 
-  assert_that(is.null(n.draws) | is.count(n.draws),
-              msg = "Argument n.draws must be NULL or a count.")
+  assert_that(is.null(ndraws) | is.count(ndraws),
+              msg = "Argument ndraws must be NULL or a count.")
   assert_that(is.null(draws) |
                 (is.numeric(draws) & all(between(draws, 1, get_number_of_draws(fit)))),
               msg = "Argument draws must be NULL or a vector of positive numbers.")
   assert_that(is.flag(summarize))
-  assert_that(!all(!summarize, is.null(draws), is.null(n.draws)),
-              msg = "If summarize is FALSE, draws or n.draws cannot both be NULL.")
+  assert_that(!all(!summarize, is.null(draws), is.null(ndraws)),
+              msg = "If summarize is FALSE, draws or ndraws cannot both be NULL.")
   assert_that(!summarize | (summarize & is.numeric(qi)),
               msg = "If summarize is TRUE, at least one quantile must be specified.")
 
@@ -52,7 +52,7 @@ add_draws = function(fit,
     dat = as.data.frame(fit, pars = pars)
 
     if (!is.null(draws)) dat %<>% slice(draws)
-    else dat %<>% sample_n(size = n.draws)
+    else dat %<>% sample_n(size = ndraws)
 
     dat %<>%
       t() %>%

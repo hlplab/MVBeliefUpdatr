@@ -26,7 +26,7 @@ fit %>%
   add_ibbu_draws(wide = F, which = "prior", draws = 10) -> f
 unique(f$group)
 
-plot_ibbu_test_categorization(fit, fit.input, n.draws = 500, sort.by = "prior", group.colors = c("darkgray", "blue", "red", "black")) +
+plot_ibbu_test_categorization(fit, fit.input, ndraws = 500, sort.by = "prior", group.colors = c("darkgray", "blue", "red", "black")) +
   theme_bw()
 last_plot() + facet_wrap(~group)
 
@@ -36,7 +36,7 @@ fit = readRDS(file = "../models/TEMP-ibbu_mv_pca_by bias-SS & SH exposure condit
 fit.input = readRDS(file = "../models/TEMP-data_mv_pca_by bias-SS & SH exposure conditions.rds")
 fit %<>%
   recover_types(d) 
-plot_ibbu_test_categorization(fit, fit.input, n.draws = 500, sort.by = "prior", group.colors = c("darkgray", "blue", "red"),
+plot_ibbu_test_categorization(fit, fit.input, ndraws = 500, sort.by = "prior", group.colors = c("darkgray", "blue", "red"),
                               group.ids = c("prior", "SS-BIAS", "SH-BIAS")) +
   theme_bw()
 last_plot() + facet_wrap(~group)

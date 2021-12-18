@@ -49,11 +49,11 @@ get_expected_category_statistic(g, c("s","sh"), c("prior", "Control"), c("mu", "
 
 source("./R/visualize-fit.R")
 group.colors = c("darkgray", "blue", "red", "black")
-plot_ibbu_stanfit_parameters(fit, which = "both", n.draws = 2)
-plot_ibbu_stanfit_parameters(fit, which = "both", n.draws = 5,
+plot_ibbu_stanfit_parameters(fit, which = "both", ndraws = 2)
+plot_ibbu_stanfit_parameters(fit, which = "both", ndraws = 5,
                      group.colors = group.colors)
 plot_ibbu_stanfit_test_categorization(fit, fit.input,
-                              which = "both", summarize = T, n.draws = 10,
+                              which = "both", summarize = T, ndraws = 10,
                               group.colors = group.colors)
 # should throw error:
 # fit %>%

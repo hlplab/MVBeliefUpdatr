@@ -22,6 +22,7 @@ IMPORTANT
 
 
 + IBBU_STANFIT RELATED FUNCTIONS
+++ add_ibbu_plot might be made more efficient by restructuring code so that filtering of draws is necessary only once.
 ++ make function that take stanfit as input and extracts prior in NIW_belief format.
 
 
