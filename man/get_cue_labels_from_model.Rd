@@ -5,10 +5,16 @@
 \title{Functions that are shared across the various types of likelihood and model types.
 Get cue labels from likelihood or model}
 \usage{
-get_cue_labels_from_model(x)
+get_cue_labels_from_model(x, indices = NULL)
 }
 \arguments{
 \item{x}{A likelihood or model object.}
+
+\item{indeces}{A vector of indices that should be turned into the original cue labels corresponding to those
+indices, or `NULL` if all cue labels should be returned. (default: `NULL`)}
+}
+\value{
+A character vector.
 }
 \description{
 Get the names for all cues from a likelihood (e.g., MVG or NIW_belief) or model (e.g., an MVG ideal observer
