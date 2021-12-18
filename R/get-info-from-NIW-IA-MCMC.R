@@ -1,6 +1,6 @@
 NULL
 
-#' Get cue labels from an NIW belief MCMC object
+#' Get cue labels from an NIW belief MCMC object [DEPRECATED: integrated with get_cue_labels_from_model]
 #'
 #' Returns the cue labels for the specified indices extracted from the m column of the NIW belief MCMC object.
 #' If no indices are provided, then all cue labels are returned.
@@ -11,9 +11,9 @@ NULL
 #'
 #' @return A character vector.
 #'
-#' @rdname get_cue_labels
+#' @rdname get_cue_labels_fom_MCMC
 #' @export
-get_cue_labels = function(x, indices = NULL) {
+get_cue_labels_fom_MCMC = function(x, indices = NULL) {
   message("This function can probably be integrated with get_original_levels(), which should be renamed.")
   assert_that(is.NIW_ideal_adaptor_MCMC(x))
 

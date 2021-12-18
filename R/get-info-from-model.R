@@ -7,12 +7,16 @@
 #' or NIW ideal adaptor) object.
 #'
 #' @param x  A likelihood or model object.
+#' @param indeces A vector of indices that should be turned into the original cue labels corresponding to those
+#' indices, or `NULL` if all cue labels should be returned. (default: `NULL`)
+#'
+#' @return A character vector.
 #'
 #' @export
-get_cue_labels_from_model = function(x) {
+get_cue_labels_from_model = function(x, indices = NULL) {
   if (is.MVG(x) | is.MVG_ideal_observer(x)) {
     x <- x$mu
-  } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x)) {
+  } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x) | is.NIW_ideal_adaptor_MCMC(x)) {
     x <- x$m
   } else {
     error("Object not recognized.")
@@ -21,6 +25,7 @@ get_cue_labels_from_model = function(x) {
   x <- names(if (is.list(x)) x[[1]] else if (is.numeric(x)) x[1] else error("No suitable information found."))
 
   if (is.null(x)) x <- "cue"
+  if (is.null(indices)) return(x) else return(x(indices))
   return(x)
 }
 

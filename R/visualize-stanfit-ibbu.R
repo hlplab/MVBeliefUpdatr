@@ -553,7 +553,7 @@ plot_ibbu_stanfit_test_categorization = function(
 
   # Prepare test_data
   message("Using IBBU stanfit input to extract information about test data.")
-  cue.labels = get_cue_labels(d.pars)
+  cue.labels = get_cue_labels_from_model(d.pars)
   test_data = data.test %>%
     distinct() %>%
     # CHECK: Could be replaced by make_vector_column

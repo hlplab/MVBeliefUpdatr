@@ -40,6 +40,8 @@ data {
   /* For now, this script assumes that the observations (cue vectors) are centered. The prior
      mean of m_0 is set to 0. Same for the prior location parameter for the cauchy prior over
      the variance of m_0 */
+  // separate taus for each feature to capture that features can be on separate scales:
+  // vector<lower=0>[K] tau_scales;  // scales of cauchy prior for variances along the K features (set to zero to ignore)
   real<lower=0> tau_scale;      // scale of cauchy prior for variances of m_0 (set to zero to ignore)
   real<lower=0> L_omega_scale;  // scale of LKJ prior for correlation of variance of m_0 (set to zero to ignore)
 }
