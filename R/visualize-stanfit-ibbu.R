@@ -14,7 +14,7 @@ NULL
 #'
 #' @param fit mv-ibbu-stanfit object.
 #' @param which Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)
-#' @param n.draws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
+#' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
 #' @param group.ids Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param group.labels Vector of group labels of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
@@ -35,17 +35,14 @@ NULL
 plot_ibbu_stanfit_parameters = function(
   fit,
   which = "both",
-  n.draws = NULL,
+  ndraws = NULL,
   group.ids = NULL, group.labels = NULL, group.colors = NULL,
   panel_scaling = F
 ) {
-  # If n.draws is specified, get the IDs of the specific (randomly drawn n.draws) samples
-  if (!is.null(n.draws)) draws = get_random_draw_indices(fit, n.draws)
-
   d.pars = fit %>%
     add_ibbu_stanfit_draws(
       which = which,
-      draws = if (!is.null(n.draws)) draws else NULL,
+      draws = ndraws,
       nest = F)
 
   if (is.null(group.ids)) group.ids = levels(d.pars$group)
@@ -184,7 +181,7 @@ plot_ibbu_stanfit_parameters = function(
 #' expected categories.
 #' @param summarize Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
 #' expected categories be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`) Currently being ignored.
-#' @param n.draws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
+#' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
 #' (default: `NULL`) Currently being ignored.
 #' @param levels Used only if `type` is `"contour"`. levels The cumulative probability levels that should be plotted (using
 #' `geom_polygon()`) around the mean. By default the most transparent ellipse still drawn corresponds to .95.
@@ -447,8 +444,8 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' (\code{group}, e.g., prior or a specific exposure group) specified in \code{sort.by}. By default both the mean
 #' categorization and confidence intervals are plotted.
 #' If `summarize=TRUE`, the function marginalizes over all posterior samples. The number of samples
-#' is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
-#' samples will be used. If `summarize=FALSE`, separate categorization plots for all n.draws
+#' is determined by ndraws. If ndraws is NULL, all samples are used. Otherwise ndraws random
+#' samples will be used. If `summarize=FALSE`, separate categorization plots for all ndraws
 #' individual samples will be plotted in separate panels.
 #'
 #' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
@@ -457,7 +454,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' @param which Should categorization for the prior, posterior, or both be plotted? (default: `"both"`)
 #' @param summarize Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
 #' unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)
-#' @param n.draws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
+#' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
 #' (default: `NULL`)
 #' @param confidence.intervals The two confidence intervals that should be plotted (using `geom_ribbon`) around the mean.
 #' (default: `c(.66, .95)`)
@@ -484,7 +481,7 @@ plot_ibbu_stanfit_test_categorization = function(
   data.test = NULL,
   which = "both",
   summarize = T,
-  n.draws = NULL,
+  ndraws = NULL,
   confidence.intervals = c(.66, .95),
   target_category = 1,
   panel.group = FALSE,
@@ -496,7 +493,6 @@ plot_ibbu_stanfit_test_categorization = function(
     data.test = get_test_data_from_NIW_ideal_adaptor_stanfit(fit)
   }
   assert_that(is.flag(summarize))
-  assert_that(is.null(n.draws) | is.count(n.draws))
   assert_that(is.null(confidence.intervals) |
                 all(is.numeric(confidence.intervals),
                     length(confidence.intervals) == 2,
@@ -514,21 +510,18 @@ plot_ibbu_stanfit_test_categorization = function(
   }
   confidence.intervals = sort(confidence.intervals)
 
-  # If n.draws is specified, get the IDs of the specific (randomly drawn n.draws) samples
-  if (!is.null(n.draws)) draws = get_random_draw_indices(fit, n.draws)
-
   # Get prior and posterior parameters
   d.pars =
     add_ibbu_stanfit_draws(fit,
                            which = which,
                            summarize = F,
                            wide = F,
-                           draws = if (!is.null(n.draws)) draws else NULL)
+                           ndraws = ndraws)
 
-  # Now set n.draws to the number of MCMC samples
-  n.draws = if (is.null(n.draws)) get_number_of_draws(fit) else n.draws
-  if (n.draws > 500)
-    message(paste("Marginalizing over", n.draws, "MCMC samples. This might take some time.\n"))
+  # Now set ndraws to the number of MCMC samples
+  ndraws = if (is.null(ndraws)) get_number_of_draws(fit) else ndraws
+  if (ndraws > 500)
+    message(paste("Marginalizing over", ndraws, "MCMC samples. This might take some time.\n"))
 
   # If group.ids are NULL set them to the levels of groups found in the extraction
   # of posteriors from fit
@@ -682,7 +675,7 @@ plot_ibbu_stanfit_test_categorization = function(
                      "% and ",
                      (confidence.intervals[3]-confidence.intervals[2]) * 100,
                      "% CIs\nbased on ",
-                     n.draws,
+                     ndraws,
                      " posterior samples.")
       )
   }

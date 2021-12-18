@@ -21,20 +21,21 @@ get_number_of_draws = function(fit) {
 
 #' Get indices for random MCMC draws from stanfit
 #'
-#' Returns `n.draws` indices for random post-warmup MCMC draws (without replacement) from
+#' Returns `ndraws` indices for random post-warmup MCMC draws (without replacement) from
 #' `fit`.
 #'
 #' @param fit mv_ibbu_stanfit object.
-#' @param n.draws Number of indices to be returned. Can't be larger than total number of
+#' @param ndraws Number of indices to be returned. Can't be larger than total number of
 #' post-warmup samples across all MCMC chains in `fit`.
 #'
 #' @return A numeric vector.
-get_random_draw_indices = function(fit, n.draws)
+get_random_draw_indices = function(fit, ndraws)
 {
   n.all.draws = get_number_of_draws(fit)
-  assert_that(n.draws <= n.all.draws)
+  assert_that(ndraws <= n.all.draws,
+              msg = paste0("Cannot return ", ndraws, " draws because there are only ", n.all.draws, " in the object."))
 
-  draws = sample(1:n.all.draws, size = n.draws)
+  draws = sample(1:n.all.draws, size = ndraws)
   return(draws)
 }
 
@@ -305,6 +306,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #'
 #' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param which Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)
+#' @param ndraws Number of random draws or `NULL` if all draws are to be returned. Only `draws` or `nraws` should be non-zero. (default: `NULL`)
 #' @param draws Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)
 #' @param wide Should all parameters be returned in one row? (default: `FALSE`)
@@ -333,32 +335,43 @@ add_ibbu_stanfit_draws = function(
   fit,
   which = "posterior",
   draws = NULL,
+  ndraws = NULL,
   summarize = FALSE,
   wide = FALSE,
   nest = TRUE,
   category = "category",
   group = "group"
 ) {
-  assert_that(which %in% c("prior", "posterior", "both"))
-  assert_that(any(is.null(draws), all(draws > 0)))
+  assert_that(which %in% c("prior", "posterior", "both"),
+              msg = "which must be one of 'prior', 'posterior', or 'both'.")
+  assert_that(any(is.null(ndraws), is.count(nraws)),
+              msg = "If not NULL, ndraw must be a count.")
+  assert_that(xor(!is.null(draws), !is.null(ndraws)),
+              msg = "Only one of draws and ndraws can be non-NULL.")
+  assert_that(any(is.null(draws), all(draws > 0)),
+              msg = "If not NULL draws, must be a vector of positive integers.")
   assert_that(is.flag(summarize))
   assert_that(is.flag(wide))
   assert_that(!all(wide, !nest),
               msg = "Wide format is currently not implemented without nesting.")
 
+  if (!is.null(ndraws)) draws = get_random_draw_indices(fit, ndraws)
   if (which == "both") {
-    d.prior = add_ibbu_stanfit_draws(fit = fit, which = "prior",
-                             draws = draws,
-                             summarize = summarize, wide = wide, nest = nest)
-    d.posterior = add_ibbu_stanfit_draws(fit = fit, which = "posterior",
-                   draws = draws,
-                   summarize = summarize, wide = wide, nest = nest)
-    d.pars = rbind(d.prior, d.posterior) %>%
+    d.prior <-
+      add_ibbu_stanfit_draws(
+        fit = fit, which = "prior",
+        ndraws = NULL, draws = draws,
+        summarize = summarize, wide = wide, nest = nest)
+    d.posterior <-
+      add_ibbu_stanfit_draws(
+        fit = fit, which = "posterior",
+        ndraws = NULL, draws = draws,
+        summarize = summarize, wide = wide, nest = nest)
+    d.pars <- rbind(d.prior, d.posterior) %>%
       mutate(!! rlang::sym(group) :=
                factor(!! rlang::sym(group),
                       levels = c(with(d.prior, levels(!! rlang::sym(group))),
                                  with(d.posterior, levels(!! rlang::sym(group))))))
-
     return(d.pars)
   } else {
     assert_NIW_ideal_adaptor_stanfit(fit)
@@ -383,8 +396,8 @@ add_ibbu_stanfit_draws = function(
             (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
             (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
             lapse_rate,
-            n = draws
-          )
+            ndraws = ndraws) %>%
+          { if (!is.null(draws)) filter(., .draw %in% draws) else . }
       else
         d.pars = fit %>%
           spread_draws(
@@ -393,8 +406,8 @@ add_ibbu_stanfit_draws = function(
             (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
             (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
             lapse_rate,
-            n = draws
-          )
+            ndraws = ndraws) %>%
+          { if (!is.null(draws)) filter(., .draw %in% draws) else . }
 
       d.pars %<>%
         rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .))
@@ -403,14 +416,14 @@ add_ibbu_stanfit_draws = function(
     } else {
       # Get kappa and nu
       if (which == "prior") {
-        kappa_nu =
+        kappa_nu <-
           fit %>%
           spread_draws(
             !! sym(kappa),
             !! sym(nu)
           )
       } else {
-        kappa_nu =
+        kappa_nu <-
           fit %>%
           spread_draws(
             (!! sym(kappa))[!!! syms(pars.index)],
@@ -420,7 +433,8 @@ add_ibbu_stanfit_draws = function(
       }
 
       # Get lapse rate and join it with kappa and nu.
-      d.pars = fit %>%
+      d.pars <-
+        fit %>%
         spread_draws(lapse_rate) %>%
         { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
         { if (summarize)
