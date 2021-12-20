@@ -218,8 +218,15 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' @param group.unique Name of column that uniquely identifies each group with identical exposure. This could be a
 #' variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
 #' substantially more efficient if many groups share the same exposure.
-#' @param center.observations Should the data be centered? (default: `TRUE`)
-#' @param scale.observations Should the data be standardized? (default: `TRUE`)
+#' @param center.observations Should the data be centered? Centering will not affect the inferred correlation or
+#' covariance matrices but it will affect the absolute position of the inferred means. The relative position of
+#' the inferred means remains unaffected. If `TRUE` and `m_0` is specified, `m_0` will also be centered (`S_0` is not
+#' affected by centering and thus not changed). (default: `TRUE`)
+#' @param scale.observations Should the data be standardized? Scaling will not affect the inferred correlation matrix,
+#' but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
+#' affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
+#' If `TRUE` and `m_0` and `S_0` are specified, `m_0` and `S_0` will also be scaled.
+#' (default: `TRUE`)
 #' @param pca.observations Should the data be transformed into orthogonal principal components? (default: `FALSE`)
 #' @param pca.cutoff Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 #' components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
@@ -236,8 +243,9 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' during the creation of the scatter matrix S_0. For that reason, we recommend the use of nu = D + 2 in the call to
 #' \code{\link{make_NIW_prior_from_data}} (the default), since the S_0 obtained that way is identical to the category
 #' covariance matrix Sigma.
-#' @param tau_scale,L_omega_scale Optionally, scale for the Cauchy prior for standard deviations of the covariance
-#' matrix of mu_0 and scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
+#' @param tau_0_scales Optionally, a vector of scales for the Cauchy priors for each cue's standard deviations. Used in
+#' both the prior for m_0 and the prior for S_0. (default: vector of 5s of length of cues, assumes scaled input)
+#' @param omega_0_eta Optionally, etas the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
 #' ignore. (default: 0)
 #'
 #' @return A list that is an \code{NIW_ideal_adaptor_input}.
@@ -253,7 +261,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   cues, category = "category", response = "response", group = "group", group.unique,
   center.observations = T, scale.observations = T, pca.observations = F, pca.cutoff = 1,
   m_0 = NULL, S_0 = NULL,
-  tau_scale = 0, L_omega_scale = 0,
+  tau_scales = rep(5, length(cues)),
+  L_omega_scale = 0,
   Sigma_noise = NULL,
   verbose = F
 ) {
@@ -330,6 +339,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       return.transform.function = T)
 
   if (pca.observations) {
+    assert_that(all(is.null(m_0), is.null(S_0)),
+                msg = "PCA is not yet implemented when m_0 or S_0 are specified.")
     s = summary(transform[["transform.parameters"]][["pca"]])$importance
     l = min(which(s["Cumulative Proportion",] >= pca.cutoff))
     assert_that(l >= 1, msg = "Specified pca.cutoff does not yield to any PCA component being included. Increase the
@@ -339,8 +350,15 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     cues = colnames(s)[1:l]
   }
 
-  exposure = transform[["data"]]
-  test = transform[["transform.function"]](test)
+  exposure <- transform[["data"]]
+  test <- transform[["transform.function"]](test)
+  m_0 <- map(m_0, ~ transform[["transform.function"]](.x))
+  S_0 <- if (scale.observations) {
+    warning("scaling of S_0 has not yet been tested. Use with caution!")
+    COVinv <- diag(transform[["transform.parameters"]]$scale %>% as.numeric()) %>% solve();
+    S_0 <- COVinv %*% S_0 %*% COVinv;
+  }
+
 
   test_counts <- get_test_counts(
     test = test,
@@ -350,28 +368,28 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     group = group,
     verbose = verbose)
 
-  n.cats = nlevels(exposure[[category]])
-  n.cues = length(cues)
+  n.cats <- nlevels(exposure[[category]])
+  n.cues <- length(cues)
   if (is.null(m_0)) {
-    m_0 = array(numeric(), dim = c(0,0))
-    m_0_known = 0
+    m_0 <- array(numeric(), dim = c(0,0))
+    m_0_known <- 0
   } else {
-    m_0_known = 1
+    m_0_known <- 1
     if (is.list(m_0)) {
-      temp = array(dim = c(n.cats, n.cues))
-      for (i in 1:length(m_0)) temp[i,] = m_0[[i]]
-      m_0 = temp
+      temp <- array(dim = c(n.cats, n.cues))
+      for (i in 1:length(m_0)) temp[i,] <- m_0[[i]]
+      m_0 <- temp
       rm(temp) }}
 
   if (is.null(S_0)) {
-    S_0 = array(numeric(), dim = c(0,0,0))
-    S_0_known = 0
+    S_0 <- array(numeric(), dim = c(0,0,0))
+    S_0_known <- 0
   } else {
-    S_0_known = 1
+    S_0_known <- 1
     if (is.list(S_0)) {
-      temp = array(dim = c(n.cats, n.cues, n.cues))
-      for (i in 1:length(S_0)) temp[i,,] = S_0[[i]]
-      S_0 = temp
+      temp <- array(dim = c(n.cats, n.cues, n.cues))
+      for (i in 1:length(S_0)) temp[i,,] <- S_0[[i]]
+      S_0 <- temp
       rm(temp) }}
 
   if (length(cues) > 1) {
@@ -448,14 +466,14 @@ attach_stanfit_input_data = function(stanfit, input) {
   assert_NIW_ideal_adaptor_stanfit(stanfit)
   assert_that(is.NIW_ideal_adaptor_input(input),
               msg = "input is not an acceptable input data.")
-  stanfit@input_data = input
+  slot(stanfit, "input_data", check = T) <- input
 
   return(stanfit)
 }
 
 attach_stanfit_transform = function(stanfit, transform_functions) {
   assert_NIW_ideal_adaptor_stanfit(stanfit)
-  stanfit@transform_functions = transform_functions
+  slot(stanfit, "transform_functions", check = T) <- transform_functions
 
   return(stanfit)
 }

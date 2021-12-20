@@ -6,6 +6,7 @@ get_class <- function(x) {
       is.NIW_belief(x) ~ "NIW_belief",
       is.MVG_ideal_observer(x) ~ "MVG_ideal_observer",
       is.MVG(x) ~ "MVG",
+      is.NIW_ideal_adaptor_stanfit(x) ~ new_stanfit_class_name,
       T ~ "Unrecognized class")
 
   return(class)

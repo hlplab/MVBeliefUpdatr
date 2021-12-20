@@ -308,6 +308,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #' @param which Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)
 #' @param ndraws Number of random draws or `NULL` if all draws are to be returned. Only `draws` or `nraws` should be non-zero. (default: `NULL`)
 #' @param draws Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)
+#' @param untransform Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)
 #' @param wide Should all parameters be returned in one row? (default: `FALSE`)
 #' @param nest Should the category mean vectors and scatter matrices be nested into one cell each, or should each element
@@ -334,8 +335,9 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 add_ibbu_stanfit_draws = function(
   fit,
   which = "posterior",
-  draws = NULL,
   ndraws = NULL,
+  draws = NULL,
+  untransform = TRUE,
   summarize = FALSE,
   wide = FALSE,
   nest = TRUE,

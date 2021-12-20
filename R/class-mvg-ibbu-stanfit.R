@@ -18,8 +18,8 @@ NIW_ideal_adaptor_stanfit <- setClass(new_stanfit_class_name,
 #' @param stanfit stanfit object
 #' @param input Input for a call to rstan prepared for one of the acceptable
 #' stan programs. See \code{\link{compose_data}}.
-#' @param transform Optionally, a list of transform (and corresponding untransform) functions that were
-#' applied to the cues prior while creating the input.
+#' @param transform_functions Optionally, a list of transform (and corresponding untransform) functions of the
+#' type returned by \code{\link[transform_cues]{transform_cues}}.
 #'
 #' @return NIW_ideal_adaptor_stanfit object
 #'
@@ -27,21 +27,18 @@ NIW_ideal_adaptor_stanfit <- setClass(new_stanfit_class_name,
 #' @examples
 #' TBD
 #' @export
-as.NIW_ideal_adaptor_stanfit = function(stanfit, input, transform = NULL) {
-  assert_that(class(stanfit) == "stanfit",
-              msg = paste0("Only stanfit objects can be converted into ", class_name, " objects."))
+as.NIW_ideal_adaptor_stanfit = function(stanfit, input_data, transform_functions = NULL) {
+  assert_that(class(stanfit) %in% c("stanfit", "NIW_ideal_adaptor_stanfit"),
+              msg = paste0("Only stanfit and NIW_ideal_adaptor_stanfit objects can be converted into ", new_stanfit_class_name, " objects."))
   assert_that(stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels),
               msg = paste0("stanfit object was not created by one of the accepted stancodes:\n\t",
                            paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),
                            "\n(you can get the name of your model from your_stanfit@model_name)."))
 
   class(stanfit) <- new_stanfit_class_name
-  stanfit %<>%
-    attach_stanfit_input_data(input)
+  stanfit %<>% attach_stanfit_input_data(input_data)
 
-  if (!is.null(transform))
-    stanfit %<>%
-    attach_stanfit_transform(transform)
+  if (!is.null(transform_functions)) stanfit %<>% attach_stanfit_transform(transform_functions)
 
   return(stanfit)
 }
