@@ -306,7 +306,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #'
 #' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param which Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)
-#' @param ndraws Number of random draws or `NULL` if all draws are to be returned. Only `draws` or `nraws` should be non-zero. (default: `NULL`)
+#' @param ndraws Number of random draws or `NULL` if all draws are to be returned. Only `draws` or `ndraws` should be non-zero. (default: `NULL`)
 #' @param draws Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)
 #' @param untransform Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)
@@ -346,7 +346,7 @@ add_ibbu_stanfit_draws = function(
 ) {
   assert_that(which %in% c("prior", "posterior", "both"),
               msg = "which must be one of 'prior', 'posterior', or 'both'.")
-  assert_that(any(is.null(ndraws), is.count(nraws)),
+  assert_that(any(is.null(ndraws), is.count(ndraws)),
               msg = "If not NULL, ndraw must be a count.")
   assert_that(xor(!is.null(draws), !is.null(ndraws)),
               msg = "Only one of draws and ndraws can be non-NULL.")
