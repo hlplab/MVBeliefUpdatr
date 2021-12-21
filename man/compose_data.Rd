@@ -45,9 +45,16 @@ a variable identifying subjects/participants. Must exist in both exposure and te
 variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
 substantially more efficient if many groups share the same exposure.}
 
-\item{center.observations}{Should the data be centered? (default: `TRUE`)}
+\item{center.observations}{Should the data be centered? Centering will not affect the inferred correlation or
+covariance matrices but it will affect the absolute position of the inferred means. The relative position of
+the inferred means remains unaffected. If `TRUE` and `m_0` is specified, `m_0` will also be centered (`S_0` is not
+affected by centering and thus not changed). (default: `TRUE`)}
 
-\item{scale.observations}{Should the data be standardized? (default: `TRUE`)}
+\item{scale.observations}{Should the data be standardized? Scaling will not affect the inferred correlation matrix,
+but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
+affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
+If `TRUE` and `m_0` and `S_0` are specified, `m_0` and `S_0` will also be scaled.
+(default: `TRUE`)}
 
 \item{pca.observations}{Should the data be transformed into orthogonal principal components? (default: `FALSE`)}
 
@@ -68,8 +75,10 @@ during the creation of the scatter matrix S_0. For that reason, we recommend the
 \code{\link{make_NIW_prior_from_data}} (the default), since the S_0 obtained that way is identical to the category
 covariance matrix Sigma.}
 
-\item{tau_scale, L_omega_scale}{Optionally, scale for the Cauchy prior for standard deviations of the covariance
-matrix of mu_0 and scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
+\item{tau_0_scales}{Optionally, a vector of scales for the Cauchy priors for each cue's standard deviations. Used in
+both the prior for m_0 and the prior for S_0. (default: vector of 5s of length of cues, assumes scaled input)}
+
+\item{omega_0_eta}{Optionally, etas the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
 ignore. (default: 0)}
 }
 \value{

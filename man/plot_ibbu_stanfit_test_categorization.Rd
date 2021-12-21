@@ -9,7 +9,7 @@ plot_ibbu_stanfit_test_categorization(
   data.test = NULL,
   which = "both",
   summarize = T,
-  n.draws = NULL,
+  ndraws = NULL,
   confidence.intervals = c(0.66, 0.95),
   target_category = 1,
   panel.group = FALSE,
@@ -31,7 +31,7 @@ If `NULL` the input will be extracted from fit. (default: `NULL`).}
 \item{summarize}{Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
 unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)}
 
-\item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
+\item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
 (default: `NULL`)}
 
 \item{confidence.intervals}{The two confidence intervals that should be plotted (using `geom_ribbon`) around the mean.
@@ -68,8 +68,8 @@ Tokens are sorted based on the increasing probability of a \code{target_category
 (\code{group}, e.g., prior or a specific exposure group) specified in \code{sort.by}. By default both the mean
 categorization and confidence intervals are plotted.
 If `summarize=TRUE`, the function marginalizes over all posterior samples. The number of samples
-is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
-samples will be used. If `summarize=FALSE`, separate categorization plots for all n.draws
+is determined by ndraws. If ndraws is NULL, all samples are used. Otherwise ndraws random
+samples will be used. If `summarize=FALSE`, separate categorization plots for all ndraws
 individual samples will be plotted in separate panels.
 }
 \examples{

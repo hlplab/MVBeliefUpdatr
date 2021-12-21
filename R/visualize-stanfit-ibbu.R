@@ -42,7 +42,7 @@ plot_ibbu_stanfit_parameters = function(
   d.pars = fit %>%
     add_ibbu_stanfit_draws(
       which = which,
-      draws = ndraws,
+      ndraws = ndraws,
       nest = F)
 
   if (is.null(group.ids)) group.ids = levels(d.pars$group)

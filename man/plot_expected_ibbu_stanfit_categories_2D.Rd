@@ -73,7 +73,7 @@ complexity increases quadratically with resolution. (default: 25)}
 \item{summarize}{Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
 expected categories be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`) Currently being ignored.}
 
-\item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
+\item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
 (default: `NULL`) Currently being ignored.}
 
 \item{data.grid.xlim, data.grid.ylim, data.grid.resolution}{Used only if `type` is `"density"`. Limits for x- and y-axis as

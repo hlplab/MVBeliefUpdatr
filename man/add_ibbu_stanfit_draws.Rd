@@ -7,7 +7,9 @@
 add_ibbu_stanfit_draws(
   fit,
   which = "posterior",
+  ndraws = NULL,
   draws = NULL,
+  untransform = TRUE,
   summarize = FALSE,
   wide = FALSE,
   nest = TRUE,
@@ -20,7 +22,11 @@ add_ibbu_stanfit_draws(
 
 \item{which}{Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)}
 
+\item{ndraws}{Number of random draws or `NULL` if all draws are to be returned. Only `draws` or `ndraws` should be non-zero. (default: `NULL`)}
+
 \item{draws}{Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)}
+
+\item{untransform}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
 
 \item{summarize}{Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)}
 

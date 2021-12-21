@@ -7,7 +7,7 @@
 plot_ibbu_stanfit_parameters(
   fit,
   which = "both",
-  n.draws = NULL,
+  ndraws = NULL,
   group.ids = NULL,
   group.labels = NULL,
   group.colors = NULL,
@@ -19,7 +19,7 @@ plot_ibbu_stanfit_parameters(
 
 \item{which}{Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)}
 
-\item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
+\item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
 
 \item{group.ids}{Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}

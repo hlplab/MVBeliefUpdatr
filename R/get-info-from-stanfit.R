@@ -348,7 +348,7 @@ add_ibbu_stanfit_draws = function(
               msg = "which must be one of 'prior', 'posterior', or 'both'.")
   assert_that(any(is.null(ndraws), is.count(ndraws)),
               msg = "If not NULL, ndraw must be a count.")
-  assert_that(xor(!is.null(draws), !is.null(ndraws)),
+  assert_that(any(all(is.null(draws), is.null(ndraws)), xor(!is.null(draws), !is.null(ndraws))),
               msg = "Only one of draws and ndraws can be non-NULL.")
   assert_that(any(is.null(draws), all(draws > 0)),
               msg = "If not NULL draws, must be a vector of positive integers.")
