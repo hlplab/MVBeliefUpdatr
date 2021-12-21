@@ -193,8 +193,6 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 }
 
 
-
-
 #' Compose data for input to RStan
 #'
 #' Take exposure and test data as input, and prepare the data for input into an MVBeliefUpdatr Stan program.
@@ -350,14 +348,11 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     cues = colnames(s)[1:l]
   }
 
+  # Transform data
   exposure <- transform[["data"]]
   test <- transform[["transform.function"]](test)
-  m_0 <- map(m_0, ~ transform[["transform.function"]](.x))
-  S_0 <- if (scale.observations) {
-    warning("scaling of S_0 has not yet been tested. Use with caution!")
-    COVinv <- diag(transform[["transform.parameters"]]$scale %>% as.numeric()) %>% solve();
-    S_0 <- COVinv %*% S_0 %*% COVinv;
-  }
+  if (!is.null(m_0)) m_0 <- map(m_0, ~ transform_cue_mean(mu = .x, transform))
+  if (!is.null(S_0) & scale.observations) S_0 <- map(S_0, ~ transform_cue_cov(Sigma = .x, transform))
 
 
   test_counts <- get_test_counts(
@@ -459,7 +454,6 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 
   return(data_list)
 }
-
 
 
 attach_stanfit_input_data = function(stanfit, input) {
