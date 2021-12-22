@@ -354,7 +354,6 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   if (!is.null(m_0)) m_0 <- map(m_0, ~ transform_cue_mean(mu = .x, transform))
   if (!is.null(S_0) & scale.observations) S_0 <- map(S_0, ~ transform_cue_cov(Sigma = .x, transform))
 
-
   test_counts <- get_test_counts(
     test = test,
     cues = cues,
