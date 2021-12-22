@@ -6,10 +6,16 @@ new_stanfit_class_name = "NIW_ideal_adaptor_stanfit"
 #' @slot transform_functions list containing elements transform.function and untransform.function.
 #' @slot labels list
 #' @export
-NIW_ideal_adaptor_stanfit <- setClass(new_stanfit_class_name,
-         slots = c(input_data = "list", transform_functions = "list", labels = "list"),
-         contains = "stanfit",
-         package = "MVBeliefUpdatr")
+NIW_ideal_adaptor_stanfit <-
+  setClass(
+    new_stanfit_class_name,
+    slots = c(input_data = "list", transform_functions = "list", labels = "list"),
+    contains = "stanfit",
+    package = "MVBeliefUpdatr")
+
+# Call class constructor function
+NIW_ideal_adaptor_stanfit
+
 
 #' Coerce stanfit into NIW_ideal_adaptor_stanfit
 #'
@@ -27,7 +33,7 @@ NIW_ideal_adaptor_stanfit <- setClass(new_stanfit_class_name,
 #' @examples
 #' TBD
 #' @export
-as.NIW_ideal_adaptor_stanfit = function(stanfit, input_data, transform_functions = NULL) {
+as.NIW_ideal_adaptor_stanfit <- function(stanfit, input_data, transform_functions = NULL) {
   assert_that(class(stanfit) %in% c("stanfit", "NIW_ideal_adaptor_stanfit"),
               msg = paste0("Only stanfit and NIW_ideal_adaptor_stanfit objects can be converted into ", new_stanfit_class_name, " objects."))
   assert_that(stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels),
@@ -54,7 +60,7 @@ as.NIW_ideal_adaptor_stanfit = function(stanfit, input_data, transform_functions
 #' @examples
 #' TBD
 #' @export
-is.NIW_ideal_adaptor_stanfit = function(x, verbose = F) {
+is.NIW_ideal_adaptor_stanfit <- function(x, verbose = F) {
   if (all(class(x) %in% c("stanfit", new_stanfit_class_name)))
     return(TRUE) else return(FALSE)
 }
@@ -72,7 +78,7 @@ is.NIW_ideal_adaptor_stanfit = function(x, verbose = F) {
 #' @examples
 #' TBD
 #' @export
-is.NIW_ideal_adaptor_MCMC = function(x, is.nested = T, is.long = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F) {
+is.NIW_ideal_adaptor_MCMC <- function(x, is.nested = T, is.long = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F) {
   if(
     all(
        is.NIW_ideal_adaptor(x, is.long = is.long, category = "category", with.lapse = with.lapse, with.lapse_bias = with.lapse_bias),
@@ -95,7 +101,7 @@ is.NIW_ideal_adaptor_MCMC = function(x, is.nested = T, is.long = T, with.lapse =
 #' @examples
 #' TBD
 #' @export
-is.NIW_ideal_adaptor_input = function(x) {
+is.NIW_ideal_adaptor_input <- function(x) {
   message("Test of NIW_ideal_adaptor_input class not yet implemented. Always returning T.")
 
   # Proposed names for slides in input object (at least internally / not necessarily handed to stan like this:
