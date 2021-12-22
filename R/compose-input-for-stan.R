@@ -44,7 +44,7 @@ get_test_counts <- function(test, cues, category, response, group, verbose = F) 
       !! sym(group)) %>%
     tally() %>%
     pivot_wider(
-      names_from = !! response,
+      names_from = !! sym(response),
       values_from = n,
       values_fill = 0
     ) %>%
@@ -275,14 +275,15 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     assert_that(between(pca.cutoff, 0, 1),
                 msg = "pca.cutoff must be between 0 and 1.")
 
-  exposure <- check_exposure_test_data(
-    data = exposure,
-    cues = cues,
-    category = category,
-    response = NULL,
-    group = group,
-    which.data = "exposure",
-    verbose = verbose)
+  exposure <-
+    check_exposure_test_data(
+      data = exposure,
+      cues = cues,
+      category = category,
+      response = NULL,
+      group = group,
+      which.data = "exposure",
+      verbose = verbose)
 
   if (!missing(group.unique)) {
     assert_that(group.unique %in% names(exposure),
@@ -303,20 +304,19 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   exposure %<>%
     select(c(all_of(group), all_of(cues), all_of(category)))
 
-  test <- check_exposure_test_data(
-    data = test,
-    cues = cues,
-    category = NULL,
-    response = response,
-    group = group,
-    which.data = "test",
-    verbose = verbose) %>%
+  test <-
+    check_exposure_test_data(
+      data = test,
+      cues = cues,
+      category = NULL,
+      response = response,
+      group = group,
+      which.data = "test",
+      verbose = verbose) %>%
     select(c(group, cues, response))
 
   assert_that(all(levels(exposure[[category]]) == levels(test[[response]])),
-              msg = paste("category variable", category, "in exposure and response colum", response, "must be factors
-              with the same levels in the same order in. Either the levels do not match, or they are not in the same
-              order."))
+              msg = paste("category variable", category, "in exposure data and response variable", response, " in test data must be factors with the same levels in the same order. Either the levels do not match, or they are not in the same order."))
   assert_that(all(levels(exposure[[group]]) %in% levels(test[[group]])),
               msg = paste("All levels of the grouping variable", group, "found in exposure must also be present in test."))
   if (!all(levels(test[[group]]) %in% levels(exposure[[group]])))
