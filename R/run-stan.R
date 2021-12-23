@@ -95,6 +95,28 @@ infer_prior_beliefs <- function(
   message("message to developer: change to keep samples only from relevant parameters.")
 
   if (sample) {
+    pars <- c()
+    if (!is.null(m_0)) {
+      pars <- c(pars)
+
+      # m_0_tau[1]              8.5e+307     NaN     Inf  9.0e+306  4.4e+307  7.8e+307  1.2e+308  1.8e+308   NaN  NaN
+      # m_0_tau[2]              1.0e+308     NaN     Inf  9.8e+306  6.5e+307  1.1e+308  1.5e+308  1.8e+308   NaN  NaN
+      # m_0_L_omega[1,1]         1.0e+00     NaN 0.0e+00   1.0e+00   1.0e+00   1.0e+00   1.0e+00   1.0e+00   NaN  NaN
+      # m_0_L_omega[1,2]         0.0e+00     NaN 0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   NaN  NaN
+      # m_0_L_omega[2,1]        -5.0e-02 9.0e-02 2.0e-01  -3.0e-01  -1.9e-01  -8.0e-02   3.0e-02   5.9e-01     4  1.9
+      # m_0_L_omega[2,2]         9.8e-01 1.0e-02 4.0e-02   8.1e-01   9.8e-01   9.9e-01   1.0e+00   1.0e+00    13  1.3
+      # tau_0_param[1,1]         7.2e+01 4.8e+01 6.8e+01   3.0e+01   3.2e+01   3.4e+01   7.2e+01   2.0e+02     2 24.5
+      # tau_0_param[1,2]         4.7e+01 1.8e+01 2.6e+01   2.8e+01   3.2e+01   3.4e+01   4.9e+01   9.6e+01     2 14.6
+      # tau_0_param[2,1]         2.7e+01 5.7e+00 8.1e+00   1.3e+01   2.4e+01   3.0e+01   3.3e+01   3.6e+01     2  7.2
+      # tau_0_param[2,2]         6.6e+01 2.0e+01 2.9e+01   1.6e+01   4.9e+01   7.7e+01   8.9e+01   9.6e+01     2 12.9
+      # m_0[1,1]                 8.9e-01 0.0e+00 0.0e+00   8.9e-01   8.9e-01   8.9e-01   8.9e-01   8.9e-01     2  1.0
+      # m_0[1,2]                 9.1e+00 0.0e+00 0.0e+00   9.1e+00   9.1e+00   9.1e+00   9.1e+00   9.1e+00     2  1.0
+      # m_0[2,1]                 3.4e+00 0.0e+00 0.0e+00   3.4e+00   3.4e+00   3.4e+00   3.4e+00   3.4e+00     2  1.0
+      # m_0[2,2]                 9.3e+00     NaN 0.0e+00   9.3e+00   9.3e+00   9.3e+00   9.3e+00   9.3e+00   NaN  1.0
+
+
+    }
+
     if (!is.null(model)) {
       fit <- sampling(MVBeliefUpdatr:::stanmodels[[model]],
                       data = data_list, ...)
