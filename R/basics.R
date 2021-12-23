@@ -255,26 +255,29 @@ transform_cues = function(data, cues,
 ) {
   assert_that(is.data.frame(data) | is_tibble(data))
   assert_that(is.null(transform.parameters) | is.list(transform.parameters))
-  old_data = data
-  groups = if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
+  old_data <- data
+  groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
 
   if (is.null(transform.parameters)) {
     transform.parameters = list()
-    transform.parameters[["cue.labels"]] = cues
+    transform.parameters[["cue.labels"]] <- cues
 
     if (pca) {
-      transform.parameters[["pca"]] = data %>%
+      transform.parameters[["pca"]] <-
+        data %>%
         select(all_of(cues)) %>%
         prcomp(center = center, scale. = scale, retx = F)
     } else {
       if (center) {
-        transform.parameters[["center"]] = data %>%
+        transform.parameters[["center"]] <-
+          data %>%
           select(all_of(cues)) %>%
           summarise_all(list(mean = mean))
       }
 
       if (scale) {
-        transform.parameters[["scale"]] = data %>%
+        transform.parameters[["scale"]] <-
+          data %>%
           select(all_of(cues)) %>%
           summarise_all(list(sd = sd))
       }
@@ -364,6 +367,7 @@ untransform_cues = function(data, cues,
   assert_that(is.data.frame(data) | is_tibble(data))
   assert_that(!is.null(transform.parameters) & is.list(transform.parameters),
               msg = "Must provide transform parameters.")
+  groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
 
   # By default untransform all transformations available in transform object
   if (is.null(unpca)) unpca = !is.null(transform.parameters[["pca"]])

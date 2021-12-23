@@ -31,7 +31,7 @@
 #' @export
 infer_prior_beliefs <- function(
   exposure, test,
-  cues, category, response, group, group.unique,
+  cues, category, response, group, group.unique = NULL,
   center.observations = TRUE, scale.observations = TRUE, pca.observations = FALSE, pca.cutoff = 1,
   m_0 = NULL, S_0 = NULL,
   tau_scale = 0, L_omega_scale = 0,

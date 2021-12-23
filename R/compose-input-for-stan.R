@@ -200,7 +200,9 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #'
 #' It is important to use \code{group} to identify individuals that had a specific exposure (or no exposure at all)
 #' and specific test trials. You should \emph{not} use \code{group} to identify exposure conditions. Setting \code{group} to an exposure condition
-#' results in an exposure that concatenates the exposure observations from all subjects in that condition. Instead, use
+#' results in an exposure that concatenates the exposure observations from all subjects in that condition. Typically, this
+#' is not what users intend, as it models exposure to the combination of exposure tokens across all subjects, rather than
+#' exposure to one set of those exposure tokens. To achieve this intended outcome, use
 #' \code{group.unique} to identify groups with identical exposure. This will correctly use only one unique instance of the
 #' observations that any level of \code{group} receives during exposure.
 #'
@@ -216,7 +218,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' a variable identifying subjects/participants. Must exist in both exposure and test data. (default: "group")
 #' @param group.unique Name of column that uniquely identifies each group with identical exposure. This could be a
 #' variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
-#' substantially more efficient if many groups share the same exposure.
+#' substantially more efficient if many groups share the same exposure. To ignore, set to `NULL`. (default: `NULL`)
 #' @param center.observations Should the data be centered? Centering will not affect the inferred correlation or
 #' covariance matrices but it will affect the absolute position of the inferred means. The relative position of
 #' the inferred means remains unaffected. If `TRUE` and `m_0` is specified, `m_0` will also be centered (`S_0` is not
@@ -257,7 +259,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' @export
 compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   exposure, test,
-  cues, category = "category", response = "response", group = "group", group.unique,
+  cues, category = "category", response = "response", group = "group", group.unique = NULL,
   center.observations = T, scale.observations = T, pca.observations = F, pca.cutoff = 1,
   m_0 = NULL, S_0 = NULL,
   tau_scale = 0, # rep(5, length(cues)),
@@ -266,7 +268,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   verbose = F
 ) {
   if ((!center.observations | !scale.observations) & (tau_scale == 0 | L_omega_scale == 0))
-    message("It seems that you neither centered & scaled the cues in the input, nor set the tau_scale and L_omega_scale parameters. This puts the priors assumed in the model on a scale that has no relation to the input. Unless you have manually centered and scaled the cues, this is strongly discouraged.")
+    message("The tau_scale and L_omega_scale parameters are not specified (using defaults). Since you also did not ask for the input to be centered *and* scaled, this puts the priors assumed in the model on a scale that has no relation to the input. Unless you have manually centered and scaled the cues, this is strongly discouraged.")
 
   if (!is.null(m_0)) assert_that(is.list(m_0) | is.array(m_0))
   if (!is.null(S_0)) assert_that(is.list(S_0) | is.array(S_0))
@@ -286,7 +288,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       which.data = "exposure",
       verbose = verbose)
 
-  if (!missing(group.unique)) {
+  if (!is.null(group.unique)) {
     assert_that(group.unique %in% names(exposure),
                 msg = paste("Column for group.unique ", group.unique, "not found in exposure data."))
     message(paste0("Collapsing *exposure* observations to unique values of group.unique (", group.unique, ") by
@@ -296,13 +298,14 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     exposure %<>%
       mutate_at(group.unique, as.factor) %>%
       group_by(!! sym(group.unique), !! sym(category), !!! syms(cues)) %>%
-      filter(!! sym(group) == unique(!! sym(group))[1]) %>%
-      ungroup()
+      filter(!! sym(group) == unique(!! sym(group))[1])
 
     group = group.unique
   }
 
   exposure %<>%
+    # Make sure data is ungrouped so that transform_cues works correctly.
+    ungroup() %>%
     select(c(all_of(group), all_of(cues), all_of(category)))
 
   test <-
