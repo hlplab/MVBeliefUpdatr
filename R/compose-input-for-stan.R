@@ -358,7 +358,6 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   test_counts <- get_test_counts(
     test = test,
     cues = cues,
-    category = category,
     response = response,
     group = group,
     verbose = verbose)
