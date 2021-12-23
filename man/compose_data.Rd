@@ -11,7 +11,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats(
   category = "category",
   response = "response",
   group = "group",
-  group.unique,
+  group.unique = NULL,
   center.observations = T,
   scale.observations = T,
   pca.observations = F,
@@ -43,7 +43,7 @@ a variable identifying subjects/participants. Must exist in both exposure and te
 
 \item{group.unique}{Name of column that uniquely identifies each group with identical exposure. This could be a
 variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
-substantially more efficient if many groups share the same exposure.}
+substantially more efficient if many groups share the same exposure. To ignore, set to `NULL`. (default: `NULL`)}
 
 \item{center.observations}{Should the data be centered? Centering will not affect the inferred correlation or
 covariance matrices but it will affect the absolute position of the inferred means. The relative position of
@@ -90,7 +90,9 @@ Take exposure and test data as input, and prepare the data for input into an MVB
 \details{
 It is important to use \code{group} to identify individuals that had a specific exposure (or no exposure at all)
 and specific test trials. You should \emph{not} use \code{group} to identify exposure conditions. Setting \code{group} to an exposure condition
-results in an exposure that concatenates the exposure observations from all subjects in that condition. Instead, use
+results in an exposure that concatenates the exposure observations from all subjects in that condition. Typically, this
+is not what users intend, as it models exposure to the combination of exposure tokens across all subjects, rather than
+exposure to one set of those exposure tokens. To achieve this intended outcome, use
 \code{group.unique} to identify groups with identical exposure. This will correctly use only one unique instance of the
 observations that any level of \code{group} receives during exposure.
 }

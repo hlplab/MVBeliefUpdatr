@@ -436,6 +436,8 @@ untransform_cues = function(data, cues,
 }
 
 
+#' @rdname transform_cues
+#' @export
 transform_cue_mean <- function(mu, transform) {
   if (!is.null(transform[["transform.parameters"]]$center)) {
     mean <- transform[["transform.parameters"]]$center %>% as.numeric()
@@ -450,6 +452,8 @@ transform_cue_mean <- function(mu, transform) {
   return(mu)
 }
 
+#' @rdname transform_cues
+#' @export
 untransform_cue_mean <- function(mu, transform) {
   if (!is.null(transform[["transform.parameters"]]$scale)) {
     taus <- transform[["transform.parameters"]]$scale %>% as.numeric()
@@ -464,6 +468,8 @@ untransform_cue_mean <- function(mu, transform) {
   return(mu)
 }
 
+#' @rdname transform_cues
+#' @export
 transform_cue_cov <- function(Sigma, transform) {
   warning("scaling of cov has not yet been tested. Use with caution!")
 
@@ -475,6 +481,8 @@ transform_cue_cov <- function(Sigma, transform) {
   return(Sigma)
 }
 
+#' @rdname transform_cues
+#' @export
 untransform_cue_cov <- function(Sigma, transform) {
   warning("scaling of cov has not yet been tested. Use with caution!")
 

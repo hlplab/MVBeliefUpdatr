@@ -11,7 +11,7 @@ infer_prior_beliefs(
   category,
   response,
   group,
-  group.unique,
+  group.unique = NULL,
   center.observations = TRUE,
   scale.observations = TRUE,
   pca.observations = FALSE,
@@ -49,7 +49,7 @@ a variable identifying subjects/participants. Must exist in both exposure and te
 
 \item{group.unique}{Name of column that uniquely identifies each group with identical exposure. This could be a
 variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
-substantially more efficient if many groups share the same exposure.}
+substantially more efficient if many groups share the same exposure. To ignore, set to `NULL`. (default: `NULL`)}
 
 \item{center.observations}{Should the data be centered? Centering will not affect the inferred correlation or
 covariance matrices but it will affect the absolute position of the inferred means. The relative position of
