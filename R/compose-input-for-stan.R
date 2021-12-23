@@ -1,5 +1,6 @@
 #' @importFrom reshape2 acast
 
+#' @export
 check_exposure_test_data <- function(data, cues, category, response, group, which.data = "the", verbose = F) {
   assert_that(is_tibble(data) | is.data.frame(data))
   assert_cols_in_data(data, cues, which.data, scalar = F)
@@ -34,9 +35,10 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
 }
 
 
-
-get_test_counts <- function(test, cues, category, response, group, verbose = F) {
-  test_counts <- test %>%
+#' @export
+get_test_counts <- function(test, cues, response, group, verbose = F) {
+  test_counts <-
+    test %>%
     as_tibble() %>%
     group_by(
       !!! syms(cues),
@@ -44,14 +46,13 @@ get_test_counts <- function(test, cues, category, response, group, verbose = F) 
       !! sym(group)) %>%
     tally() %>%
     pivot_wider(
-      names_from = !! sym(response),
+      names_from = !! response,
       values_from = n,
-      values_fill = 0
-    ) %>%
+      values_fill = 0) %>%
     ungroup()
 
   if (verbose) {
-    print("In test_counts():")
+    print("In get_test_counts():")
     print(test_counts)
   }
 
@@ -313,7 +314,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       group = group,
       which.data = "test",
       verbose = verbose) %>%
-    select(c(group, cues, response))
+    select(c(!! group, !!! cues, !! response))
 
   assert_that(all(levels(exposure[[category]]) == levels(test[[response]])),
               msg = paste("category variable", category, "in exposure data and response variable", response, " in test data must be factors with the same levels in the same order. Either the levels do not match, or they are not in the same order."))
