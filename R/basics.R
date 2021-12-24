@@ -435,63 +435,117 @@ untransform_cues = function(data, cues,
       return(list(data = data, untransform.function = untransform.function))
 }
 
-
-#' @rdname transform_cues
+#' Transform and untransform category means and covariance matrices of a model
+#'
+#' Applies the transformation specified in \code{transform} object (e.g., centering, scaling, PCA) to the category
+#' mean(s) and/or covariance(s) in the model.
+#'
+#' @param model A model with columns that specify category means (mu or m) and covariance information (Sigma or S).
+#' @param m A single category mean or alike.
+#' @param S A single covariance matrix or alike.
+#' @param transform A transform object of the type returned by \code{\link{transform_cues}}.
+#'
+#' @return A model, category mean, or covariance matrix of the same type as the input.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname transform_model
 #' @export
-transform_cue_mean <- function(mu, transform) {
-  if (!is.null(transform[["transform.parameters"]]$center)) {
-    mean <- transform[["transform.parameters"]]$center %>% as.numeric()
-    mu <- mu - mean
+transform_model <- function(model, transform) {
+  if (is.MVG(model) | is.MVG_ideal_observer(model)) {
+    m = "mu"
+    S = "Sigma"
+  } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model) | is.NIW_ideal_adaptor_MCMC(model)) {
+    m = "m"
+    S = "S"
+  } else {
+    stop("Model type not recognized.")
   }
 
-  if (!is.null(transform[["transform.parameters"]]$scale)) {
-    taus <- transform[["transform.parameters"]]$scale %>% as.numeric()
-    mu <- mu / taus
-  }
-
-  return(mu)
+  model %>%
+    mutate(
+      !! sym(m) := map(!! sym(m), ~ transform_category_mean(.x, transform)),
+      !! sym(S) := map(!! sym(S), ~ transform_category_cov(.x, transform)))
 }
 
-#' @rdname transform_cues
+#' @rdname transform_model
 #' @export
-untransform_cue_mean <- function(mu, transform) {
-  if (!is.null(transform[["transform.parameters"]]$scale)) {
-    taus <- transform[["transform.parameters"]]$scale %>% as.numeric()
-    mu <- mu * taus
+untransform_model <- function(model, transform) {
+  if (is.MVG(model) | is.MVG_ideal_observer(model)) {
+    m = "mu"
+    S = "Sigma"
+  } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model) | is.NIW_ideal_adaptor_MCMC(model)) {
+    m = "m"
+    S = "S"
+  } else {
+    stop("Model type not recognized.")
   }
 
-  if (!is.null(transform[["transform.parameters"]]$center)) {
-    mean <- transform[["transform.parameters"]]$center %>% as.numeric()
-    mu <- mu + mean
-  }
-
-  return(mu)
+  model %>%
+    mutate(
+      !! sym(m) := map(!! sym(m), ~ untransform_category_mean(.x, transform)),
+      !! sym(S) := map(!! sym(S), ~ untransform_category_cov(.x, transform)))
 }
 
-#' @rdname transform_cues
+#' @rdname transform_model
 #' @export
-transform_cue_cov <- function(Sigma, transform) {
-  warning("scaling of cov has not yet been tested. Use with caution!")
+transform_category_mean <- function(m, transform) {
+  if (!is.null(transform[["transform.parameters"]])) transform <- transform[["transform.parameters"]]
+  if (!is.null(transform$center)) {
+    mean <- transform$center %>% as.numeric()
+    m <- m - mean
+  }
 
-  if (!is.null(transform[["transform.parameters"]]$scale)) {
-    taus <- transform[["transform.parameters"]]$scale %>% as.numeric()
+  if (!is.null(transform$scale)) {
+    taus <- transform$scale %>% as.numeric()
+    m <- m / taus
+  }
+
+  return(m)
+}
+
+#' @rdname transform_model
+#' @export
+untransform_category_mean <- function(m, transform) {
+  if (!is.null(transform[["transform.parameters"]])) transform <- transform[["transform.parameters"]]
+  if (!is.null(transform$scale)) {
+    taus <- transform$scale %>% as.numeric()
+    m <- m * taus
+  }
+
+  if (!is.null(transform$center)) {
+    mean <- transform$center %>% as.numeric()
+    m <- m + mean
+  }
+
+  return(m)
+}
+
+#' @rdname transform_model
+#' @export
+transform_category_cov <- function(S, transform) {
+  if (!is.null(transform[["transform.parameters"]])) transform <- transform[["transform.parameters"]]
+  if (!is.null(transform$scale)) {
+    taus <- transform$scale %>% as.numeric()
     COVinv <- diag(taus) %>% solve()
-    Sigma <- COVinv %*% Sigma %*% COVinv
+    S <- COVinv %*% S %*% COVinv
   }
-  return(Sigma)
+  return(S)
 }
 
-#' @rdname transform_cues
+#' @rdname transform_model
 #' @export
-untransform_cue_cov <- function(Sigma, transform) {
-  warning("scaling of cov has not yet been tested. Use with caution!")
-
-  if (!is.null(transform[["transform.parameters"]]$scale)) {
-    taus <- transform[["transform.parameters"]]$scale %>% as.numeric()
+untransform_category_cov <- function(S, transform) {
+  if (!is.null(transform[["transform.parameters"]])) transform <- transform[["transform.parameters"]]
+  if (!is.null(transform$scale)) {
+    taus <- transform$scale %>% as.numeric()
     COV <- diag(taus)
-    Sigma <- COV %*% Sigma %*% COV
+
+    S <- COV %*% S %*% COV
   }
-  return(Sigma)
+  return(S)
 }
 
 

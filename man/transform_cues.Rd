@@ -3,10 +3,6 @@
 \name{transform_cues}
 \alias{transform_cues}
 \alias{untransform_cues}
-\alias{transform_cue_mean}
-\alias{untransform_cue_mean}
-\alias{transform_cue_cov}
-\alias{untransform_cue_cov}
 \title{Transform and untransform cues by applying or undoing PCA, centering, and/or scaling.}
 \usage{
 transform_cues(
@@ -33,14 +29,6 @@ untransform_cues(
   return.untransformed.data = T,
   return.untransform.function = F
 )
-
-transform_cue_mean(mu, transform)
-
-untransform_cue_mean(mu, transform)
-
-transform_cue_cov(Sigma, transform)
-
-untransform_cue_cov(Sigma, transform)
 }
 \arguments{
 \item{data}{`tibble` or `data.frame`.}
