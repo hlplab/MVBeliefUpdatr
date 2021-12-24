@@ -16,6 +16,7 @@ infer_prior_beliefs(
   scale.observations = TRUE,
   pca.observations = FALSE,
   pca.cutoff = 1,
+  untransform_fit = TRUE,
   m_0 = NULL,
   S_0 = NULL,
   tau_scale = 0,
@@ -68,6 +69,9 @@ If `TRUE` and `m_0` and `S_0` are specified, `m_0` and `S_0` will also be scaled
 components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 `pca.observation = FALSE`. (default: 1)}
 
+\item{untransform_fit}{Logical flag indicating whether the MCMC samples of the model should be transformed back
+into the original cue space by applying the untransform function. (default: `TRUE`)}
+
 \item{m_0}{Optionally, prior means (m_0) and/or prior scatter matrices (S_0) for all categories. Each should be
 a list, with
 each element being the mean/scatter matrix for a specific category. Elements should be ordered in the same order as
@@ -118,9 +122,6 @@ selecting if the relevant cues (after transformations, including PCA, if selecte
 dimension.}
 
 \item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}}
-
-\item{untransform_fit}{Logical flag indicating whether the MCMC samples of the model should be transformed back
-into the original cue space by applying the untransform function. (default: `TRUE`)}
 }
 \value{
 \code{NIW_ideal_adaptor_stanfit} object with the fitted stan model.
