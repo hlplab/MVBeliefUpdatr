@@ -34,7 +34,7 @@ NIW_ideal_adaptor_stanfit
 #' @examples
 #' TBD
 #' @export
-as.NIW_ideal_adaptor_stanfit <- function(stanfit, input_data, transform_functions = NULL) {
+as.NIW_ideal_adaptor_stanfit <- function(stanfit, input_data, transform_information = NULL) {
   assert_that(class(stanfit) %in% c("stanfit", "NIW_ideal_adaptor_stanfit"),
               msg = paste0("Only stanfit and NIW_ideal_adaptor_stanfit objects can be converted into ", new_stanfit_class_name, " objects."))
   assert_that(stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels),
