@@ -506,6 +506,11 @@ add_ibbu_stanfit_draws = function(
                        starts_with("kappa"), starts_with("nu"), starts_with("m"), starts_with("S"),
                        lapse_rate)
 
+    if (untransform) {
+      d.pars %<>%
+        untransform_model(transform = fit@transform_information)
+    }
+
     # Clean-up
     d.pars %<>%
       ungroup() %>%
