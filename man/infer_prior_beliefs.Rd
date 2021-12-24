@@ -21,7 +21,7 @@ infer_prior_beliefs(
   tau_scale = 0,
   L_omega_scale = 0,
   data_list = NULL,
-  transform_functions = NULL,
+  transform_information = NULL,
   sample = TRUE,
   file = NULL,
   model = NULL,
@@ -97,8 +97,8 @@ covariance matrix Sigma.}
 \item{data_list}{A list of the type that would be returned by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.
 This list can be provided instead of the individual inputs that are handed to \code{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}.}
 
-\item{transform_functions}{Optionally, a list of transform (and corresponding untransform) functions of the
-type returned by \code{\link[transform_cues]{transform_cues}}. These functions
+\item{transform_information}{Optionally, a list of transform paramters, transform function, and corresponding untransform
+function of the type returned by \code{\link[transform_cues]{transform_cues}}. These functions
 will be attached to the \code{NIW_ideal_adaptor_stanfit} object. This object will override any transform
 information that is created by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.}
 
@@ -118,6 +118,9 @@ selecting if the relevant cues (after transformations, including PCA, if selecte
 dimension.}
 
 \item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}}
+
+\item{untransform_fit}{Logical flag indicating whether the MCMC samples of the model should be transformed back
+into the original cue space by applying the untransform function. (default: `TRUE`)}
 }
 \value{
 \code{NIW_ideal_adaptor_stanfit} object with the fitted stan model.

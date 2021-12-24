@@ -13,7 +13,8 @@ An S4 class for stanfit objects that use one of the NIW_ideal_adaptor stan progr
 \describe{
 \item{\code{input_data}}{list containing the data handed to rstan through \code{compose_data} function.}
 
-\item{\code{transform_functions}}{list containing elements transform.function and untransform.function.}
+\item{\code{transform_information}}{list containing elements transform.parameters, transform.function, and
+untransform.function.}
 
 \item{\code{labels}}{list}
 }}

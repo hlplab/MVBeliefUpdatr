@@ -355,8 +355,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   # Transform data
   exposure <- transform[["data"]]
   test <- transform[["transform.function"]](test)
-  if (!is.null(m_0)) m_0 <- map(m_0, ~ transform_cue_mean(mu = .x, transform))
-  if (!is.null(S_0) & scale.observations) S_0 <- map(S_0, ~ transform_cue_cov(Sigma = .x, transform))
+  if (!is.null(m_0)) m_0 <- map(m_0, ~ transform_category_mean(m = .x, transform))
+  if (!is.null(S_0) & scale.observations) S_0 <- map(S_0, ~ transform_category_cov(S = .x, transform))
 
   test_counts <- get_test_counts(
     test = test,
@@ -467,9 +467,9 @@ attach_stanfit_input_data = function(stanfit, input) {
   return(stanfit)
 }
 
-attach_stanfit_transform = function(stanfit, transform_functions) {
+attach_stanfit_transform = function(stanfit, transform_information) {
   assert_NIW_ideal_adaptor_stanfit(stanfit)
-  slot(stanfit, "transform_functions", check = T) <- transform_functions
+  slot(stanfit, "transform_information", check = T) <- transform_information
 
   return(stanfit)
 }

@@ -7,10 +7,12 @@
 #' @inheritParams compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats
 #' @param data_list A list of the type that would be returned by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.
 #' This list can be provided instead of the individual inputs that are handed to \code{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}.
-#' @param transform_functions Optionally, a list of transform (and corresponding untransform) functions of the
-#' type returned by \code{\link[transform_cues]{transform_cues}}. These functions
+#' @param transform_information Optionally, a list of transform paramters, transform function, and corresponding untransform
+#' function of the type returned by \code{\link[transform_cues]{transform_cues}}. These functions
 #' will be attached to the \code{NIW_ideal_adaptor_stanfit} object. This object will override any transform
 #' information that is created by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.
+#' @param untransform_fit Logical flag indicating whether the MCMC samples of the model should be transformed back
+#' into the original cue space by applying the untransform function. (default: `TRUE`)
 #' @param sample Should the model be fit and sampled from?
 #' @param file Either NULL or a character string. In the latter case, the fitted model object is saved
 #' via saveRDS in a file named after the string supplied in file. The .rds extension is added automatically.
@@ -35,7 +37,7 @@ infer_prior_beliefs <- function(
   center.observations = TRUE, scale.observations = TRUE, pca.observations = FALSE, pca.cutoff = 1,
   m_0 = NULL, S_0 = NULL,
   tau_scale = 0, L_omega_scale = 0,
-  data_list = NULL, transform_functions = NULL,
+  data_list = NULL, transform_information = NULL,
   sample = TRUE, file = NULL, model = NULL, use_multivariate_updating = NULL,
   verbose = FALSE,
   ...) {
@@ -49,10 +51,10 @@ infer_prior_beliefs <- function(
     assert_that(!is.null(stanmodels[[model]]),
                 msg = paste("The specified stanmodel does not exist. Allowable models include:", names(MVBeliefUpdatr:::stanmodels)))
   }
-  if (!is.null(transform_functions)) {
-    assert_that(is.list(transform_functions))
-    assert_that(all(c("transform.function", "untransform.function") %in% names(transform_functions)),
-                msg = "If not NULL, transform functions must be a list that contains both a transform and an untransform function.")
+  if (!is.null(transform_information)) {
+    assert_that(is.list(transform_information))
+    assert_that(all(c("transform.function", "untransform.function") %in% names(transform_information)),
+                msg = "If not NULL, transform_information must be a list that contains both a transform and an untransform function.")
   }
 
   if (is.null(data_list)) {
@@ -75,8 +77,8 @@ infer_prior_beliefs <- function(
         L_omega_scale = L_omega_scale,
         verbose = verbose)
 
-    if (is.null(transform_functions)) {
-      transform_functions <-
+    if (is.null(transform_information)) {
+      transform_information <-
         transform_cues(
           data = exposure,
           cues = cues,
@@ -84,7 +86,7 @@ infer_prior_beliefs <- function(
           scale = scale.observations,
           pca = pca.observations,
           return.transformed.data = F,
-          return.transform.parameters = F,
+          return.transform.parameters = T,
           return.transform.function = T,
           return.untransform.function = T)
     }
@@ -130,17 +132,19 @@ infer_prior_beliefs <- function(
     }
 
     if (is.null(fit)) stop("Sampling failed.")
-    fit %<>% as.NIW_ideal_adaptor_stanfit(input_data = data_list, transform_functions = transform_functions)
+    fit %<>% as.NIW_ideal_adaptor_stanfit(input_data = data_list, transform_information = transform_information)
     fit %<>%
       recover_types(
         crossing(
           category = factor(colnames(data_list$z_test_counts), levels = colnames(data_list$z_test_counts)),
           group = factor(attr(data_list$y_test, "levels"), levels = attr(data_list$y_test, "levels")),
           cue = factor(names(data_list$x_test), levels = names(data_list$x_test)),
-          cue2 = cue
-        )
-      )
+          cue2 = cue))
   } else fit <- NULL
+
+  if (untransform_fit) {
+    message("untransform_fit has not yet been implemented. Returning unchanged fit.")
+  }
 
   if (!is.null(fit) & !is.null(file)) {
     write_NIW_ideal_adaptor_stanfit(fit, file)

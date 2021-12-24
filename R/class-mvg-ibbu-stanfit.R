@@ -3,13 +3,14 @@ new_stanfit_class_name = "NIW_ideal_adaptor_stanfit"
 #' An S4 class for stanfit objects that use one of the NIW_ideal_adaptor stan programs.
 #'
 #' @slot input_data list containing the data handed to rstan through \code{compose_data} function.
-#' @slot transform_functions list containing elements transform.function and untransform.function.
+#' @slot transform_information list containing elements transform.parameters, transform.function, and
+#' untransform.function.
 #' @slot labels list
 #' @export
 NIW_ideal_adaptor_stanfit <-
   setClass(
     new_stanfit_class_name,
-    slots = c(input_data = "list", transform_functions = "list", labels = "list"),
+    slots = c(input_data = "list", transform_information = "list", labels = "list"),
     contains = "stanfit",
     package = "MVBeliefUpdatr")
 
@@ -24,8 +25,8 @@ NIW_ideal_adaptor_stanfit
 #' @param stanfit stanfit object
 #' @param input Input for a call to rstan prepared for one of the acceptable
 #' stan programs. See \code{\link{compose_data}}.
-#' @param transform_functions Optionally, a list of transform (and corresponding untransform) functions of the
-#' type returned by \code{\link[transform_cues]{transform_cues}}.
+#' @param transform_information Optionally, a list of transform parameters, transform function, and corresponding untransform
+#' function of the type returned by \code{\link[transform_cues]{transform_cues}}.
 #'
 #' @return NIW_ideal_adaptor_stanfit object
 #'
@@ -44,7 +45,7 @@ as.NIW_ideal_adaptor_stanfit <- function(stanfit, input_data, transform_function
   class(stanfit) <- new_stanfit_class_name
   stanfit %<>% attach_stanfit_input_data(input_data)
 
-  if (!is.null(transform_functions)) stanfit %<>% attach_stanfit_transform(transform_functions)
+  if (!is.null(transform_information)) stanfit %<>% attach_stanfit_transform(transform_information)
 
   return(stanfit)
 }
@@ -104,10 +105,10 @@ is.NIW_ideal_adaptor_MCMC <- function(x, is.nested = T, is.long = T, with.lapse 
 is.NIW_ideal_adaptor_input <- function(x) {
   message("Test of NIW_ideal_adaptor_input class not yet implemented. Always returning T.")
 
-  # Proposed names for slides in input object (at least internally / not necessarily handed to stan like this:
+  # Proposed names for slots in input object (at least internally / not necessarily handed to stan like this:
   #
   #   exposure_N (N)
-  #   exposure_cue_mean (x_mean)
+  #   exposure_category_mean (x_mean)
   #   exposure_cue_ss (x_ss)
   #   test_N (N_test)
   #   test_cue (x_test)
