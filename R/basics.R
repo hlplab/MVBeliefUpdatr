@@ -54,6 +54,11 @@ make_named_vector = function(x, names) {
   return(x)
 }
 
+make_named_square_matrix = function(x, names) {
+  x = matrix(x, nrow = sqrt(length(x)), dimnames = list(names, names))
+  return(x)
+}
+
 #' Combine a number of columns into a new vector column
 #'
 #' Combine a number of columns into a new column in which each cell is the vector of values from the original columns.
@@ -70,8 +75,8 @@ make_named_vector = function(x, names) {
 #' TBD
 #' @export
 make_vector_column = function(data, cols, vector_col, transmute = F) {
-  # CHECK: expand to also handle quo input. (each instance of cols then needs to change)
-  # then make_NIW_prior_from... can use this function
+  # CHECK: expand to also handle quo input. (each instance of calls then needs to change)
+  # then make_NIW_prior_from...  use this function
   data %<>%
     mutate(!! sym(vector_col) := pmap(.l = list(!!! syms(cols)),
                                       .f = function(...) {
