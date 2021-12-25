@@ -141,10 +141,10 @@ get_perceptual_noise_from_model <- function(model) {
 #' @rdname nest_model
 #' @export
 nest_cue_information_in_model <- function(model) {
-  if (is.MVG(x) | is.MVG_ideal_observer(x)) {
+  if (is.MVG(model) | is.MVG_ideal_observer(model)) {
     m <- "mu"
     S <- "Sigma"
-  } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x) | is.NIW_ideal_adaptor_MCMC(x)) {
+  } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model) | is.NIW_ideal_adaptor_MCMC(model)) {
     m <- "m"
     S <- "S"
   } else {
@@ -164,10 +164,10 @@ nest_cue_information_in_model <- function(model) {
 #' @rdname nest_model
 #' @export
 unnest_cue_information_in_model <- function(model) {
-  if (is.MVG(x) | is.MVG_ideal_observer(x)) {
+  if (is.MVG(model) | is.MVG_ideal_observer(model)) {
     m <- "mu"
     S <- "Sigma"
-  } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x) | is.NIW_ideal_adaptor_MCMC(x)) {
+  } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model) | is.NIW_ideal_adaptor_MCMC(model)) {
     m <- "m"
     S <- "S"
   } else {

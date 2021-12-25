@@ -17,15 +17,10 @@ get_expected_columns_for_MVG <- function()
 #' @examples
 #' TBD
 #' @export
-is.MVG = function(x, category = "category", is.long = T, verbose = F) {
+is.MVG <- function(x, category = "category", is.long = T, verbose = F) {
   assert_that(is.flag(is.long))
 
-  if (
-    any(
-      !is.long,
-      all(!is_tibble(x), !is.data.frame(x))
-    )
-  ) {
+  if (any(!is.long, all(!is_tibble(x), !is.data.frame(x)))) {
     if (verbose) message("Currently only MVGs in long format can be recognized.")
     return(FALSE)
   }
