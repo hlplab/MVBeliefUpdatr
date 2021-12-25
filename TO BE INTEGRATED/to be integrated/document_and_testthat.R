@@ -41,11 +41,11 @@ fit %>%
 
 
 source("./R/NIW.R")
-get_expected_mu(g, "sh", "prior")
-get_expected_sigma(g, "sh", "prior")
-get_expected_sigma(g, c("s","sh"), c("prior", "control"))
-get_expected_sigma(g, c("s","sh"), c("prior", "Control"))
-get_expected_category_statistic(g, c("s","sh"), c("prior", "Control"), c("mu", "Sigma"))
+get_expected_mu_from_stanfit(g, "sh", "prior")
+get_expected_sigma_from_stanfit(g, "sh", "prior")
+get_expected_sigma_from_stanfit(g, c("s","sh"), c("prior", "control"))
+get_expected_sigma_from_stanfit(g, c("s","sh"), c("prior", "Control"))
+get_expected_category_statistic_from_stanfit(g, c("s","sh"), c("prior", "Control"), c("mu", "Sigma"))
 
 source("./R/visualize-fit.R")
 group.colors = c("darkgray", "blue", "red", "black")
@@ -61,7 +61,7 @@ plot_ibbu_stanfit_test_categorization(fit, fit.input,
 # plot_expected_ibbu_stanfit_categories_2D(f)
 fit %>%
   add_ibbu_stanfit_draws(wide = F, which = "both", draws = c(10, 5), nest = T) -> g
-get_expected_category_statistic(g)
+get_expected_category_statistic_from_stanfit(g)
 plot_expected_ibbu_stanfit_categories_2D(g, type = "contour")
 # should throw error since not fit.input is provided:
 # plot_expected_ibbu_stanfit_categories_2D(g, type = "contour", plot.test = T)

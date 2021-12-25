@@ -6,14 +6,14 @@
 \alias{plot_expected_ibbu_stanfit_categories_density2D}
 \title{Plot expected bivariate (2D) categories from MV IBBU stanfit.}
 \usage{
-plot_expected_ibbu_stanfit_categories_2D(x, fit.input = NULL, type, ...)
+plot_expected_ibbu_stanfit_categories_2D(x, type, ...)
 
 plot_expected_ibbu_stanfit_categories_contour2D(
   x,
-  fit.input = NULL,
   levels = plogis(seq(-15, qlogis(0.95), length.out = 20)),
   plot.test = T,
   plot.exposure = F,
+  untransform_cues = TRUE,
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
@@ -22,9 +22,9 @@ plot_expected_ibbu_stanfit_categories_contour2D(
 
 plot_expected_ibbu_stanfit_categories_density2D(
   x,
-  fit.input = NULL,
   plot.test = T,
   plot.exposure = F,
+  untransform_cues = TRUE,
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
@@ -35,8 +35,6 @@ plot_expected_ibbu_stanfit_categories_density2D(
 )
 }
 \arguments{
-\item{fit.input}{Optionally, the input to the NIW_ideal_adaptor_stanfit object.}
-
 \item{type}{Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
 faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}
 (based on the NIW parameters \code{S} and \code{nu}) at each MCMC draw, and then averages over
@@ -52,6 +50,8 @@ done for *all* points defined by the data.grid this can be rather computationall
 `FALSE` for `plot.exposure`) The test items are plotted as black points. The exposure mean is plotted as point,
 and the .95 interval of cue distributions during exposure are plotted as dashed ellipse in the same color as the
 expected categories.}
+
+\item{untransform_cues}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
 
 \item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}

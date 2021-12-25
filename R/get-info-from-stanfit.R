@@ -40,6 +40,37 @@ get_random_draw_indices = function(fit, ndraws)
 }
 
 
+#' Get the transform/untransform fucntion from an NIW ideal adaptor stanfit.
+#'
+#' Returns the transform/untransform function handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
+#' object.
+#'
+#' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#'
+#' @return A function.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname get_transform_function_from_stanfit
+#' @export
+get_transform_function_from_stanfit = function(fit) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(fit))
+
+  return(fit@tranform_information@transform.function)
+}
+
+#' @rdname get_transform_function_from_stanfit
+#' @export
+get_untransform_function_from_stanfit = function(fit) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(fit))
+
+  return(fit@tranform_information@untransform.function)
+}
+
+
+
 
 #' Get the input data from an NIW ideal adaptor stanfit.
 #'
@@ -56,14 +87,10 @@ get_random_draw_indices = function(fit, ndraws)
 #' TBD
 #' @rdname get_ibbu_input
 #' @export
-get_ibbu_stanfit_input = function(fit) {
-  assert_that(is.NIW_ideal_adaptor_input(x) | is.NIW_ideal_adaptor_stanfit(x))
+get_input_from_stanfit = function(fit) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(fit))
 
-  if (is.NIW_ideal_adaptor_input(x)) return(x) else {
-    stop("Extraction of input data from MV IBBU stanfit not yet implemented!")
-  }
-
-  return(x)
+  return(fit@input_data)
 }
 
 
@@ -82,7 +109,7 @@ get_ibbu_stanfit_input = function(fit) {
 #' @examples
 #' TBD
 #' @export
-get_test_data_from_NIW_ideal_adaptor_stanfit = function(fit) {
+get_test_data_from_stanfit = function(fit) {
   data = fit@input_data
   data[["x_test"]] %>%
     cbind(data[["z_test_counts"]]) %>%
@@ -192,14 +219,25 @@ get_group_constructor = function(fit) {
 }
 
 
-
-
-#' Get category mean mu or covariance matrix sigma from an NIW belief MCMC object.
+#' Get expected category mean mu or covariance matrix sigma
 #'
-#' Returns the category means mu and/or category covariance matrix Sigma for the exposure data from an NIW
-#' IBBU stanfit or NIW belief MCMC object.
+#' Returns the expected value of posterior marginal distribution over category means mu and/or
+#' category covariance matrix Sigma, marginalized over all MCMC samples.
 #'
-#' @param x \code{\link{NIW_ideal_adaptor_stanfit}} or NIW belief MCMC object.
+#' Each MCMC samples' expected value for the category mean \code{E[mu] = m_n}
+#' (i.e, the posterior/updated mean of the multivariate Normal over category means \code{mu}).
+#' Marginalizing across all MCMC samples (representing uncertainty in the true value of
+#' \code{m_n}), we get \code{E[E[mu]] = mean(m_n)}.
+#'
+#' Each MCMC samples' expected value for the category covariance matrix
+#' \code{E[Sigma] = S_n / (nu_n - D - 1)}, where \code{S_n} is the posterior/updated scatter matrix,
+#' \code{nu_n} is the posterior/updated pseudocount representing the strength of the posterior/updated
+#' beliefs over category covariance matrices sigma (i.e., the inverse-Wishart), and \code{D} is
+#' the dimension of the multivariate Normal. Marginalizing across all MCMC samples
+#' (representing uncertainty in the true value of \code{S_n}), we get
+#' \code{E[E[Sigma]] = mean(S_n / (nu_n - D - 1))}.
+#'
+#' @param x An \code{\link[=is.NIW_ideal_adaptor_stanfit]{mv_ibbu_stanfit}} or \code{\link[=NIW_ideal_adaptor_MCMC]{NIW_ideal_adaptor_MCMC}} object.
 #' @param category Character vector with categories (or category) for which category statistics are to be
 #' returned.  If `NULL` then all categories are included. (default: `NULL`)
 #' @param group Character vector with groups (or group) for which category statistics are to be
@@ -207,25 +245,57 @@ get_group_constructor = function(fit) {
 #' @param statistic Which category statistic should be returned? `mu` for category mean or `Sigma` for category
 #' covariance matrix, or `c("mu", "Sigma")` for both. (default: both)
 #'
+#' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
+#' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
+#' of group and category.
+#'
 #' @seealso TBD
 #' @keywords TBD
+#' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #' @examples
 #' TBD
-#' @rdname get_category_statistic
+#' @rdname get_expected_category_statistic_from_stanfit
 #' @export
-get_category_statistic = function(x, grouping.vars = NULL,
-                                  statistic = c("mu", "Sigma")) {
+get_expected_category_statistic_from_stanfit = function(x, category = NULL, group = NULL,
+                                           statistic = c("mu", "Sigma")) {
   assert_that(all(statistic %in% c("mu", "Sigma")))
-  stop("get_category_statistics not yet implemented!")
+  assert_that(is.NIW_ideal_adaptor_stanfit(x) | is.NIW_ideal_adaptor_MCMC(x, is.nested = T, is.long = T))
+  if (is.NIW_ideal_adaptor_stanfit(x))
+    x = add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T)
 
-  # More here ######################################
-  # Make general so as to extract mu and sigma for any combination of grouping variables
-  # Catch case when grouping variables are not specified (NULL)
+  assert_that(any(is.null(category), is.character(category), is.numeric(category)))
+  assert_that(any(is.null(group), is.character(group), is.numeric(group)))
+  if (is.null(category)) category = unique(x$category)
+  if (is.null(group)) group = unique(x$group)
 
-  # FIX FIX FIX FIX If just one category and group was requested, just return that object, rather
+  x %<>%
+    filter(group %in% !! group, category %in% !! category) %>%
+    mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
+    group_by(group, category) %>%
+    summarise(
+      mu.mean = list(m %>% reduce(`+`) / length(m)),
+      Sigma.mean = list(Sigma %>% reduce(`+`) / length(Sigma))) %>%
+    select(group, category, !!! rlang::syms(paste0(statistic, ".mean")))
+
+  if (!all(sort(unique(as.character(x$group))) == sort(as.character(group))))
+    warning("Not all groups were found in x.")
+
+  # If just one category and group was requested, just return that object, rather
   # than the tibble
   if (nrow(x) == 1) x = x[,paste0(statistic, ".mean")][[1]][[1]]
   return(x)
+}
+
+#' @rdname get_expected_category_statistic_from_stanfit
+#' @export
+get_expected_mu_from_stanfit = function(x, category, group) {
+  return(get_expected_category_statistic_from_stanfit(x, category, group, statistic = "mu"))
+}
+
+#' @rdname get_expected_category_statistic_from_stanfit
+#' @export
+get_expected_sigma_from_stanfit = function(x, category, group) {
+  return(get_expected_category_statistic_from_stanfit(x, category, group, statistic = "Sigma"))
 }
 
 
@@ -257,8 +327,7 @@ get_ibbu_stanfit_exposure_category_statistic = function(x, category = NULL, grou
   assert_that(is.NIW_ideal_adaptor_input(x) | is.NIW_ideal_adaptor_stanfit(x))
   stop("get_ibbu_stanfit_exposure_statistics not yet implemented!")
 
-  x = get_ibbu_stanfit_input(x)
-
+  x = get_input_from_stanfit(x)
   # More here. ######################################
   # filter out group "prior"
   # deal with cases for which there is no exposure data
@@ -308,7 +377,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #' @param which Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)
 #' @param ndraws Number of random draws or `NULL` if all draws are to be returned. Only `draws` or `ndraws` should be non-zero. (default: `NULL`)
 #' @param draws Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)
-#' @param untransform Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
+#' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)
 #' @param wide Should all parameters be returned in one row? (default: `FALSE`)
 #' @param nest Should the category mean vectors and scatter matrices be nested into one cell each, or should each element
@@ -337,7 +406,7 @@ add_ibbu_stanfit_draws = function(
   which = "posterior",
   ndraws = NULL,
   draws = NULL,
-  untransform = TRUE,
+  untransform_cues = TRUE,
   summarize = FALSE,
   wide = FALSE,
   nest = TRUE,
@@ -506,7 +575,7 @@ add_ibbu_stanfit_draws = function(
                        starts_with("kappa"), starts_with("nu"), starts_with("m"), starts_with("S"),
                        lapse_rate)
 
-    if (untransform) {
+    if (untransform_cues) {
       d.pars %<>%
         untransform_model(transform = fit@transform_information)
     }
@@ -536,81 +605,4 @@ add_ibbu_stanfit_draws = function(
 
 
 
-#' Get expected category mean mu or covariance matrix sigma
-#'
-#' Returns the expected value of posterior marginal distribution over category means mu and/or
-#' category covariance matrix Sigma, marginalized over all MCMC samples.
-#'
-#' Each MCMC samples' expected value for the category mean \code{E[mu] = m_n}
-#' (i.e, the posterior/updated mean of the multivariate Normal over category means \code{mu}).
-#' Marginalizing across all MCMC samples (representing uncertainty in the true value of
-#' \code{m_n}), we get \code{E[E[mu]] = mean(m_n)}.
-#'
-#' Each MCMC samples' expected value for the category covariance matrix
-#' \code{E[Sigma] = S_n / (nu_n - D - 1)}, where \code{S_n} is the posterior/updated scatter matrix,
-#' \code{nu_n} is the posterior/updated pseudocount representing the strength of the posterior/updated
-#' beliefs over category covariance matrices sigma (i.e., the inverse-Wishart), and \code{D} is
-#' the dimension of the multivariate Normal. Marginalizing across all MCMC samples
-#' (representing uncertainty in the true value of \code{S_n}), we get
-#' \code{E[E[Sigma]] = mean(S_n / (nu_n - D - 1))}.
-#'
-#' @param x An \code{\link[=is.NIW_ideal_adaptor_stanfit]{mv_ibbu_stanfit}} or \code{\link[=NIW_ideal_adaptor_MCMC]{NIW_ideal_adaptor_MCMC}} object.
-#' @param category Character vector with categories (or category) for which category statistics are to be
-#' returned.  If `NULL` then all categories are included. (default: `NULL`)
-#' @param group Character vector with groups (or group) for which category statistics are to be
-#' returned. If `NULL` then all groups are included. (default: `NULL`)
-#' @param statistic Which category statistic should be returned? `mu` for category mean or `Sigma` for category
-#' covariance matrix, or `c("mu", "Sigma")` for both. (default: both)
-#'
-#' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
-#' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
-#' of group and category.
-#'
-#' @seealso TBD
-#' @keywords TBD
-#' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @examples
-#' TBD
-#' @rdname get_expected_category_statistic
-#' @export
-get_expected_category_statistic = function(x, category = NULL, group = NULL,
-                                           statistic = c("mu", "Sigma")) {
-  assert_that(all(statistic %in% c("mu", "Sigma")))
-  assert_that(is.NIW_ideal_adaptor_stanfit(x) | is.NIW_ideal_adaptor_MCMC(x, is.nested = T, is.long = T))
-  if (is.NIW_ideal_adaptor_stanfit(x))
-    x = add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T)
 
-  assert_that(any(is.null(category), is.character(category), is.numeric(category)))
-  assert_that(any(is.null(group), is.character(group), is.numeric(group)))
-  if (is.null(category)) category = unique(x$category)
-  if (is.null(group)) group = unique(x$group)
-
-  x %<>%
-    filter(group %in% !! group, category %in% !! category) %>%
-    mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
-    group_by(group, category) %>%
-    summarise(
-      mu.mean = list(m %>% reduce(`+`) / length(m)),
-      Sigma.mean = list(Sigma %>% reduce(`+`) / length(Sigma))) %>%
-    select(group, category, !!! rlang::syms(paste0(statistic, ".mean")))
-
-  if (!all(sort(unique(as.character(x$group))) == sort(as.character(group))))
-    warning("Not all groups were found in x.")
-
-  # If just one category and group was requested, just return that object, rather
-  # than the tibble
-  if (nrow(x) == 1) x = x[,paste0(statistic, ".mean")][[1]][[1]]
-  return(x)
-}
-
-#' @rdname get_expected_category_statistic
-#' @export
-get_expected_mu = function(x, category, group) {
-  return(get_expected_category_statistic(x, category, group, statistic = "mu"))
-}
-
-#' @rdname get_expected_category_statistic
-#' @export
-get_expected_sigma = function(x, category, group) {
-  return(get_expected_category_statistic(x, category, group, statistic = "Sigma"))
-}

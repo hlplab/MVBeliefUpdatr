@@ -9,7 +9,7 @@ add_ibbu_stanfit_draws(
   which = "posterior",
   ndraws = NULL,
   draws = NULL,
-  untransform = TRUE,
+  untransform_cues = TRUE,
   summarize = FALSE,
   wide = FALSE,
   nest = TRUE,
@@ -26,7 +26,7 @@ add_ibbu_stanfit_draws(
 
 \item{draws}{Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)}
 
-\item{untransform}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
+\item{untransform_cues}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
 
 \item{summarize}{Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)}
 

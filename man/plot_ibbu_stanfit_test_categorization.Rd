@@ -10,6 +10,7 @@ plot_ibbu_stanfit_test_categorization(
   which = "both",
   summarize = T,
   ndraws = NULL,
+  untransform_cues = TRUE,
   confidence.intervals = c(0.66, 0.95),
   target_category = 1,
   panel.group = FALSE,

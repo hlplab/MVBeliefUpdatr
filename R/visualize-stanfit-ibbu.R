@@ -15,6 +15,7 @@ NULL
 #' @param fit mv-ibbu-stanfit object.
 #' @param which Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
+#' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
 #' @param group.ids Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 #' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
 #' @param group.labels Vector of group labels of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
@@ -36,6 +37,7 @@ plot_ibbu_stanfit_parameters = function(
   fit,
   which = "both",
   ndraws = NULL,
+  untransform_cues = TRUE,
   group.ids = NULL, group.labels = NULL, group.colors = NULL,
   panel_scaling = F
 ) {
@@ -43,6 +45,7 @@ plot_ibbu_stanfit_parameters = function(
     add_ibbu_stanfit_draws(
       which = which,
       ndraws = ndraws,
+      untransform_cues = untransform_cues,
       nest = F)
 
   if (is.null(group.ids)) group.ids = levels(d.pars$group)
@@ -167,7 +170,6 @@ plot_ibbu_stanfit_parameters = function(
 #' computational demands and speed.
 #'
 #' @param fit mv-ibbu-stanfit object.
-#' @param fit.input Optionally, the input to the NIW_ideal_adaptor_stanfit object.
 #' @param type Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
 #' faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}
 #' (based on the NIW parameters \code{S} and \code{nu}) at each MCMC draw, and then averages over
@@ -183,6 +185,7 @@ plot_ibbu_stanfit_parameters = function(
 #' expected categories be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`) Currently being ignored.
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
 #' (default: `NULL`) Currently being ignored.
+#' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
 #' @param levels Used only if `type` is `"contour"`. levels The cumulative probability levels that should be plotted (using
 #' `geom_polygon()`) around the mean. By default the most transparent ellipse still drawn corresponds to .95.
 #' @param xlim,ylim For density plots. Limits for the x- and y-axis.
@@ -210,15 +213,14 @@ plot_ibbu_stanfit_parameters = function(
 #' @export
 plot_expected_ibbu_stanfit_categories_2D = function(
   x,
-  fit.input = NULL,
   type,
   ...
 ) {
   assert_that(all(type %in% c("contour", "density"), length(type) == 1))
   if (type == "contour")
-    plot_expected_ibbu_stanfit_categories_contour2D(x = x, fit.input = fit.input, ...)
+    plot_expected_ibbu_stanfit_categories_contour2D(x = x, ...)
   else {
-    plot_expected_ibbu_stanfit_categories_density2D(x = x, fit.input = fit.input, ...)
+    plot_expected_ibbu_stanfit_categories_density2D(x = x, ...)
   }
 }
 
@@ -226,14 +228,14 @@ plot_expected_ibbu_stanfit_categories_2D = function(
 #' @export
 plot_expected_ibbu_stanfit_categories_contour2D = function(
   x,
-  fit.input = NULL, # should change in the future
   levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
   plot.test = T, plot.exposure = F,
+  untransform_cues = TRUE,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
-  if (is.null(fit.input)) fit.input = x@input_data
+  fit.input = get_input_from_stanfit(fit)
   assert_that(!all(is.null(fit.input), plot.test))
-  d = get_expected_category_statistic(x)
+  d = get_expected_category_statistic_from_stanfit(x, untransform_cues = untransform_cues)
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(d$category)
@@ -277,9 +279,11 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     # Optionally plot exposure data
     { if (plot.exposure)
       geom_point(
-        data = get_ibbu_stanfit_exposure_mean(fit.input,
-                                 category = levels(d$category),
-                                 group = levels(d$group)) %>%
+        data =
+          get_ibbu_stanfit_exposure_mean(
+            fit.input,
+            category = levels(d$category),
+            group = levels(d$group)) %>%
           rename_at(cue.names,
                     function(x) paste0("cue", which(x == cue.names))),
         mapping = aes(
@@ -328,8 +332,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
 #' @export
 plot_expected_ibbu_stanfit_categories_density2D = function(
   x,
-  fit.input = NULL, # should change in the future
   plot.test = T, plot.exposure = F,
+  untransform_cues = TRUE,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   xlim, ylim, resolution = 25
 ) {
@@ -338,7 +342,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
   assert_that(!all(is.null(fit.input), plot.test))
 
   if (is.NIW_ideal_adaptor_stanfit(x))
-    d = add_ibbu_stanfit_draws(x, which = which, wide = F, nest = T)
+    d = add_ibbu_stanfit_draws(x, which = which, wide = F, nest = T, untransform_cues = untransform_cues)
   else
     d = x
 
@@ -385,8 +389,8 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
     { if (plot.exposure)
       geom_point(
         data = get_ibbu_stanfit_exposure_mean(fit.input,
-                                 category = levels(d$category),
-                                 group = levels(d$group)) %>%
+                                              category = levels(d$category),
+                                              group = levels(d$group)) %>%
           rename_at(cue.names,
                     function(x) paste0("cue", which(x == cue.names))),
         mapping = aes(
@@ -394,18 +398,15 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
           y = .data$cue2,
           shape = .data$category,
           color = .data$category),
-        inherit.aes = F, size = 2
-      ) +
+        inherit.aes = F, size = 2) +
         geom_path(
           data = crossing(
             group = levels(d$group),
             category = levels(d$category),
-            level = .95
-          ) %>%
+            level = .95) %>%
             mutate(
               x = map2(category, group, get_ibbu_stanfit_exposure_sigma(fit.input, .x, .y)),
-              centre = map2(category, group, get_ibbu_stanfit_exposure_mean(fit.input, .x, .y))
-            ) %>%
+              centre = map2(category, group, get_ibbu_stanfit_exposure_mean(fit.input, .x, .y))) %>%
             mutate(ellipse = pmap(., ellipse.pmap)) %>%
             mutate(ellipse = map(ellipse, as_tibble)) %>%
             unnest(ellipse) %>%
@@ -482,6 +483,7 @@ plot_ibbu_stanfit_test_categorization = function(
   which = "both",
   summarize = T,
   ndraws = NULL,
+  untransform_cues = TRUE,
   confidence.intervals = c(.66, .95),
   target_category = 1,
   panel.group = FALSE,
@@ -490,7 +492,7 @@ plot_ibbu_stanfit_test_categorization = function(
 ) {
   assert_NIW_ideal_adaptor_stanfit(fit)
   if (is.null(data.test)) {
-    data.test = get_test_data_from_NIW_ideal_adaptor_stanfit(fit)
+    data.test = get_test_data_from_stanfit(fit)
   }
   assert_that(is.flag(summarize))
   assert_that(is.null(confidence.intervals) |
@@ -512,11 +514,13 @@ plot_ibbu_stanfit_test_categorization = function(
 
   # Get prior and posterior parameters
   d.pars =
-    add_ibbu_stanfit_draws(fit,
-                           which = which,
-                           summarize = F,
-                           wide = F,
-                           ndraws = ndraws)
+    add_ibbu_stanfit_draws(
+      fit,
+      which = which,
+      summarize = F,
+      wide = F,
+      ndraws = ndraws,
+      untransform_cues = untransform_cues)
 
   # Now set ndraws to the number of MCMC samples
   ndraws = if (is.null(ndraws)) get_number_of_draws(fit) else ndraws
@@ -549,6 +553,7 @@ plot_ibbu_stanfit_test_categorization = function(
   cue.labels = get_cue_labels_from_model(d.pars)
   test_data = data.test %>%
     distinct() %>%
+    { if (untransform_cues) get_untransform_function_from_stanfit(fit)(.) else . } %>%
     # CHECK: Could be replaced by make_vector_column
     transmute(x = pmap(.l = list(!!! syms(cue.labels)), .f = ~ c(...))) %>%
     nest(cues = x) %>%
