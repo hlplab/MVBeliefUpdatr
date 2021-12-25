@@ -484,7 +484,7 @@ add_ibbu_stanfit_draws = function(
       { if (summarize) {
         group_by(., !!! syms(pars.index), cue, cue2) %>%
           summarise_at(., vars(kappa, nu, m, S, lapse_rate), mean) %>%
-          mutate_at(., vars(.chain, .iteration. .draw), ~ "all")
+          mutate_at(., vars(.chain, .iteration, .draw), ~ "all")
       } else . } %>%
       # If group is prior, then add the group variable with value "prior" to d.pars first.
       { if (which == "prior") mutate(., (!! rlang::sym(group)) := "prior") else . } %>%
