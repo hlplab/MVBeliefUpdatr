@@ -128,3 +128,63 @@ get_perceptual_noise_from_model <- function(model) {
               msg = "More than one Sigma_noise found in model.")
   return(Sigma_noise[[1]])
 }
+
+
+#' Nest/unnest the cue information in a model
+#'
+#' Take the centrality (e.g., mu or m) and scatter parameters (e.g., Sigma or S) of the model and nest them
+#' into vector/matrix form or unnest them. The unnested format introduces two cue columns 'cue' and 'cue2',
+#' which indicate the cue label for the cue value in the mu/m and Sigma/S columns.
+#'
+#' @param model A model object.
+#'
+#' @rdname nest_model
+#' @export
+nest_cue_information_in_model <- function(model) {
+  if (is.MVG(x) | is.MVG_ideal_observer(x)) {
+    m <- "mu"
+    S <- "Sigma"
+  } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x) | is.NIW_ideal_adaptor_MCMC(x)) {
+    m <- "m"
+    S <- "S"
+  } else {
+    error("Object not recognized.")
+  }
+
+  assert_that(all(c("cue", "cue2") %in% names(model)),
+              msg = "cue and cue2 columns not found. There is nothing to nest.")
+  model %>%
+    group_by(across(-c(cue, cue2, !! sym(m), !! sym(S)))) %>%
+    arrange(cue, cue2, .by_group = T) %>%
+    summarise(
+      !! sym(m) := list(make_named_vector(unique(!! sym(m)), unique(cue))),
+      !! sym(S) := list(make_named_square_matrix(!! sym(S), unique(cue))))
+}
+
+#' @rdname nest_model
+#' @export
+unnest_cue_information_in_model <- function(model) {
+  if (is.MVG(x) | is.MVG_ideal_observer(x)) {
+    m <- "mu"
+    S <- "Sigma"
+  } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x) | is.NIW_ideal_adaptor_MCMC(x)) {
+    m <- "m"
+    S <- "S"
+  } else {
+    error("Object not recognized.")
+  }
+
+  assert_that(all(c("cue", "cue2") %nin% names(model)),
+              msg = "Cannot create cue and cue2 columns since they already exist in the model.")
+
+  cue.labels <- get_cue_labels_from_model(model)
+
+  model %>%
+    unnest(c(!! sym(m), !! sym(S))) %>%
+    mutate(cue = cue.labels) %>%
+    group_by(across(-c(!! sym(S)))) %>%
+    transmute(!! sym(cue.labels[1]) := (!! sym(S))[,1], !! sym(cue.labels[2]) := (!! sym(S))[,2]) %>%
+    pivot_longer(cols = cue.labels, values_to = S, names_to = "cue2") %>%
+    ungroup() %>%
+    select(cue, cue2, everything())
+}
