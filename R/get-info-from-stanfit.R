@@ -457,127 +457,52 @@ add_ibbu_stanfit_draws = function(
     # Variables by which parameters are indexed
     pars.index = if (which == "prior") category else c(category, group)
 
-    # Should m and S be nested?
-    if (!nest) {
-      if (which == "prior")
-        d.pars = fit %>%
-          spread_draws(
-            !! rlang::sym(kappa),
-            !! rlang::sym(nu),
-            (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
-            (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
-            lapse_rate,
-            ndraws = ndraws) %>%
-          { if (!is.null(draws)) filter(., .draw %in% draws) else . }
-      else
-        d.pars = fit %>%
-          spread_draws(
-            (!! rlang::sym(kappa))[!!! rlang::syms(pars.index)],
-            (!! rlang::sym(nu))[!!! rlang::syms(pars.index)],
-            (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
-            (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
-            lapse_rate,
-            ndraws = ndraws) %>%
-          { if (!is.null(draws)) filter(., .draw %in% draws) else . }
+    # Get non-nested draws
+    if (which == "prior")
+      d.pars = fit %>%
+      spread_draws(
+        !! rlang::sym(kappa),
+        !! rlang::sym(nu),
+        (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
+        (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
+        lapse_rate,
+        ndraws = ndraws) %>%
+      { if (!is.null(draws)) filter(., .draw %in% draws) else . }
+    else
+      d.pars = fit %>%
+      spread_draws(
+        (!! rlang::sym(kappa))[!!! rlang::syms(pars.index)],
+        (!! rlang::sym(nu))[!!! rlang::syms(pars.index)],
+        (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
+        (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
+        lapse_rate,
+        ndraws = ndraws) %>%
+      { if (!is.null(draws)) filter(., .draw %in% draws) else . }
 
-      d.pars %<>%
-        rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .))
-
-    # If nesting is the goal:
-    } else {
-      # Get kappa and nu
-      if (which == "prior") {
-        kappa_nu <-
-          fit %>%
-          spread_draws(
-            !! sym(kappa),
-            !! sym(nu)
-          )
-      } else {
-        kappa_nu <-
-          fit %>%
-          spread_draws(
-            (!! sym(kappa))[!!! syms(pars.index)],
-            (!! sym(nu))[!!! syms(pars.index)]
-          ) %>%
-          group_by(!!! syms(pars.index))
-      }
-
-      # Get lapse rate and join it with kappa and nu.
-      d.pars <-
-        fit %>%
-        spread_draws(lapse_rate) %>%
-        { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
-        { if (summarize)
-          dplyr::summarise(.,
-                           .chain = "all", .iteration = "all", .draw = "all",
-                           lapse_rate = mean(lapse_rate)
-          ) else . } %>%
-        left_join(kappa_nu %>%
-        { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
-          rename(
-            kappa = !! sym(kappa),
-            nu = !! sym(nu)
-          ) %>%
-          { if (summarize)
-            dplyr::summarise(.,
-                             .chain = "all", .iteration = "all", .draw = "all",
-                             kappa = mean(kappa),
-                             nu = mean(nu)
-            ) else . } %>%
-          ungroup()
-        ) %>%
-        # Join in m
-        left_join(
-          fit %>%
-            spread_draws((!! sym(m))[!!! syms(pars.index), cue]) %>%
-            { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
-            { if (summarize)
-              group_by(., !!! syms(pars.index), cue) %>%
-                # Obtain expected mean of category mean, m_0 or m_N
-                dplyr::summarise(., !! sym(m) := mean(!! sym(m))
-                ) %>%
-                mutate(.,
-                       .chain = "all", .iteration = "all", .draw = "all"
-                ) else . } %>%
-            group_by(.chain, .iteration, .draw, !!! syms(pars.index)) %>%
-            summarise(m = list(make_named_vector(!! sym(m), unique(cue))))
-        ) %>%
-        # Join in S
-        left_join(
-          fit %>%
-            spread_draws((!! sym(S))[!!! syms(pars.index), cue, cue2]) %>%
-            { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
-            { if (summarize)
-              group_by(., !!! syms(pars.index), cue, cue2) %>%
-                # Obtain expected scatter matrix S_0, or S_N
-                dplyr::summarise(., !! sym(S) := mean(!! sym(S))
-                ) %>%
-                mutate(.,
-                       .chain = "all", .iteration = "all", .draw = "all"
-                ) else . } %>%
-            group_by(.chain, .iteration, .draw, !!! syms(pars.index)) %>%
-            summarise(S =
-                        list(
-                          matrix((!! sym(S)),
-                                 dimnames = list(unique(cue), unique(cue2)),
-                                 byrow = T,
-                                 nrow = sqrt(length((!! sym(S)))))))
-        )
-    }
-
-    # Make sure order of variables is identical for prior or posterior (facilitates processing of the
-    # output of this function). If group is prior, then add that variable to d.pars first.
-    if (which == "prior") d.pars %<>% mutate((!! rlang::sym(group)) := "prior")
-    d.pars %<>% select(.chain, .iteration, .draw,
-                       !! rlang::sym(group), !! rlang::sym(category),
-                       # Using starts_with in order to capture case in which variables are *not* nested
-                       starts_with("kappa"), starts_with("nu"), starts_with("m"), starts_with("S"),
-                       lapse_rate)
+    d.pars %<>%
+      rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .)) %>%
+      { if (summarize) {
+        group_by(., !!! syms(pars.index), cue, cue2) %>%
+          summarise_at(., vars(kappa, nu, m, S, lapse_rate), mean) %>%
+          mutate_at(., vars(.chain, .iteration. .draw), ~ "all")
+      } else . } %>%
+      # If group is prior, then add the group variable with value "prior" to d.pars first.
+      { if (which == "prior") mutate(., (!! rlang::sym(group)) := "prior") else . } %>%
+      # Make sure order of variables is identical for prior or posterior (facilitates processing
+      # of the output of this function).
+      select(.chain, .iteration, .draw,
+             !! rlang::sym(group), !! rlang::sym(category),
+             kappa, nu, m, S, lapse_rate)
 
     if (untransform_cues) {
       d.pars %<>%
+        nest_cue_information_in_model() %>%
         untransform_model(transform = fit@transform_information)
+
+      if (!nest) d.pars %<>% unnest_cue_information_in_model()
+    } else if (nest) {
+      d.pars %<>%
+        nest_cue_information_in_model()
     }
 
     # Clean-up
