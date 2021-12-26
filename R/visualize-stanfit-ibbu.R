@@ -109,7 +109,7 @@ plot_ibbu_stanfit_parameters = function(
             floor(symlog(max(x.limits)))))) +
       coord_trans(x = "symlog") +
       facet_grid(.data$cue2 ~ .data$cue, scales = "free_x")) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    theme(panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
 
   p.KN <- suppressWarnings(
     suppressMessages(
@@ -120,16 +120,16 @@ plot_ibbu_stanfit_parameters = function(
            gather(key = "key", value = "value", -c(.draw, group, category)) %T>%
            { get_limits(., "value", min = 1) ->> x.limits } ) +
         aes(x = .data$value) +
-        scale_x_continuous("Pseudocounts",
-                           breaks = 10^(
-                             seq(
-                               ceiling(log10(min(x.limits))),
-                               floor(log10(max(x.limits)))
-                             ))) +
+        scale_x_continuous(
+          "Pseudocounts",
+          breaks = 10^(
+            seq(
+              ceiling(log10(min(x.limits))),
+              floor(log10(max(x.limits)))))) +
         scale_y_discrete("", expand = expansion(mult = c(0 , 0.1))) +
         coord_trans(x = "log10") +
         facet_grid(~ .data$key, scales = "free_x"))) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    theme(panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
 
   p.LR <-
     d.pars %>%
@@ -152,7 +152,7 @@ plot_ibbu_stanfit_parameters = function(
 
   K <- length(unique(d.pars$cue))
   p <- suppressWarnings(cowplot::plot_grid(
-    cowplot::plot_grid(plotlist = list(p.m, p.KN), nrow = 1, rel_widths = c(K,2)),
+    cowplot::plot_grid(plotlist = list(p.m, p.KN), nrow = 1, rel_widths = c(K, 2), axis = "btlr", align = "hv"),
     cowplot::plot_grid(plotlist = list(
       p.S,
       cowplot::plot_grid(plotlist = list(legend, p.LR),
