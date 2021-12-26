@@ -53,25 +53,26 @@ get_random_draw_indices = function(fit, ndraws)
 #' @keywords TBD
 #' @examples
 #' TBD
-#' @rdname get_transform_function_from_stanfit
-#' @export
-get_transform_function_from_stanfit <- function(model) {
-  return(get_transform_information_from_stanfit(model)$transform.function)
-}
-
-#' @rdname get_transform_function_from_stanfit
-#' @export
-get_untransform_function_from_stanfit <- function(model) {
-  return(get_transform_information_from_stanfit(model)$untransform.function)
-}
-
-#' @rdname get_transform_function_from_stanfit
+#' @rdname get_transform_information_from_stanfit
 #' @export
 get_transform_information_from_stanfit <- function(model) {
   assert_that(is.NIW_ideal_adaptor_stanfit(model))
 
   return(model@transform_information)
 }
+
+#' @rdname get_transform_information_from_stanfit
+#' @export
+get_transform_function_from_stanfit <- function(model) {
+  return(get_transform_information_from_stanfit(model)$transform.function)
+}
+
+#' @rdname get_transform_information_from_stanfit
+#' @export
+get_untransform_function_from_stanfit <- function(model) {
+  return(get_transform_information_from_stanfit(model)$untransform.function)
+}
+
 
 
 #' Get the input data from an NIW ideal adaptor stanfit.
@@ -284,13 +285,13 @@ get_expected_category_statistic_from_stanfit = function(
 
   x %<>%
     filter(group %in% !! group, category %in% !! category) %>%
+    { if (untransform_cues) untransform_model(., transform_information) else . } %>%
     mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
     group_by(group, category) %>%
     summarise(
       mu.mean = list(m %>% reduce(`+`) / length(m)),
       Sigma.mean = list(Sigma %>% reduce(`+`) / length(Sigma))) %>%
-    select(group, category, !!! rlang::syms(paste0(statistic, ".mean"))) %>%
-    { if (untransform_cues) untransform_model(., get_transform_information_from_stanfit(x)) else . }
+    select(group, category, !!! rlang::syms(paste0(statistic, ".mean")))
 
   if (!all(sort(unique(as.character(x$group))) == sort(as.character(group))))
     warning("Not all groups were found in x.")
