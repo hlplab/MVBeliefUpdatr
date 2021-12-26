@@ -18,7 +18,8 @@ plot_ibbu_stanfit_test_categorization(
   group.labels = NULL,
   group.colors = NULL,
   group.linetypes = NULL,
-  sort.by = "prior"
+  sort_by = "prior",
+  all_test_locations = TRUE
 )
 }
 \arguments{
@@ -54,6 +55,9 @@ and by its group ID.}
 
 \item{sort_by}{Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
 from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired.}
+
+\item{all_test_locations}{Should predictions be shown for all combinations of test locations and group, or should only
+combinations be shown that actually occurred in the data? (default: `TRUE`)}
 }
 \value{
 ggplot object.
@@ -66,7 +70,7 @@ phonetic tuning studies.
 }
 \details{
 Tokens are sorted based on the increasing probability of a \code{target_category} response for the condition
-(\code{group}, e.g., prior or a specific exposure group) specified in \code{sort.by}. By default both the mean
+(\code{group}, e.g., prior or a specific exposure group) specified in \code{sort_by}. By default both the mean
 categorization and confidence intervals are plotted.
 If `summarize=TRUE`, the function marginalizes over all posterior samples. The number of samples
 is determined by ndraws. If ndraws is NULL, all samples are used. Otherwise ndraws random

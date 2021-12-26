@@ -25,6 +25,7 @@ untransform_cues(
   uncenter = NULL,
   unscale = NULL,
   unpca = NULL,
+  attach = T,
   transform.parameters = NULL,
   return.untransformed.data = T,
   return.untransform.function = F

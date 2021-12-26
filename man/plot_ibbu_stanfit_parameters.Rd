@@ -45,6 +45,7 @@ prior and/or posterior beliefs.
 }
 \examples{
 TBD
+
 }
 \seealso{
 TBD

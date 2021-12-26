@@ -4,14 +4,17 @@
 \alias{get_limits}
 \title{Get suitable limits for coordinate system based on the MCMC samples of a variable.}
 \usage{
-get_limits(data, measure, hdi.prob = 0.99, min = NULL, max = NULL)
+get_limits(data, measure, by = NULL, hdi.prob = 0.99, min = NULL, max = NULL)
 }
 \arguments{
 \item{data}{A `tibble` or `data.frame` that contains a `measure`.}
 
 \item{measure}{Name of variable in `data` for which limits are sought.}
 
-\item{hdi.prob}{Proportion of MCMC samples that are within the limits.}
+\item{by}{Optionally, a grouping variable. If not NULL, limits will be returned for each level of this
+variable. (default: `NULL`)}
+
+\item{hdi.prob}{Proportion of MCMC samples that are within the limits. (default: .99)}
 
 \item{min, max}{If min or max are specified, then those limits are returned instead of the HDI-based limits.}
 }
