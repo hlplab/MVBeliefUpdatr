@@ -244,7 +244,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   d %<>%
-    rename(model = Sigma.mean, centre = mu.mean) %>%
+    rename(x = Sigma.mean, centre = mu.mean) %>%
     crossing(level = levels) %>%
     mutate(ellipse = pmap(., ellipse.pmap)) %>%
     # This step is necessary since unnest() can't yet unnest lists of matrices
