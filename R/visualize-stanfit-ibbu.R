@@ -31,8 +31,9 @@ NULL
 #' @keywords TBD
 #' @examples
 #' TBD
-#' @export
 #'
+#' @rdname plot_ibbu_stanfit_parameters
+#' @export
 plot_ibbu_stanfit_parameters = function(
   model,
   which = "both",
@@ -41,7 +42,8 @@ plot_ibbu_stanfit_parameters = function(
   group.ids = NULL, group.labels = NULL, group.colors = NULL,
   panel_scaling = F
 ) {
-  d.pars = model %>%
+  d.pars <-
+    model %>%
     add_ibbu_stanfit_draws(
       which = which,
       ndraws = ndraws,
@@ -61,7 +63,7 @@ plot_ibbu_stanfit_parameters = function(
     if(is.null(group.colors)) group.colors = c("darkgray", get_default_colors("group", length(group.ids) - 1))
   }
 
-  p.m = d.pars %>%
+  p.m <- d.pars %>%
     select(.draw, group, category, cue, m) %>%
     distinct() %T>%
     { get_limits(., "m") ->> x.limits } %>%
@@ -78,37 +80,36 @@ plot_ibbu_stanfit_parameters = function(
                                   trim = T) +
     geom_vline(xintercept = 0, color = "darkgray") +
     scale_x_continuous("Mean of category means") +
-    scale_y_discrete("Category", expand = c(0,0)) +
+    scale_y_discrete("Category", expand = expansion(mult = c(0 , 0.1))) +
     scale_fill_manual(
       "Group",
       breaks = group.ids,
       labels = group.labels,
-      values = group.colors
-    ) +
+      values = group.colors) +
     coord_cartesian(xlim = x.limits, default = T) +
     facet_grid(~ .data$cue) +
-    theme(legend.position = "right")
+    theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
   legend = cowplot::get_legend(p.m)
 
-  p.m = p.m + theme(legend.position = "none")
-  p.S = suppressMessages(
+  p.m <- p.m + theme(legend.position = "none")
+  p.S <- suppressMessages(
     p.m %+%
       (d.pars %>%
          select(.draw, group, category, cue, cue2, S) %>%
          distinct() %T>%
          { get_limits(., "S") ->> x.limits }) +
       aes(x = .data$S) +
-      scale_x_continuous("Scatter matrix",
-                         breaks = inv_symlog(
-                           seq(
-                             ceiling(symlog(min(x.limits))),
-                             floor(symlog(max(x.limits))),
-                           ))
-      ) +
+      scale_x_continuous(
+        "Scatter matrix",
+        breaks = inv_symlog(
+          seq(
+            ceiling(symlog(min(x.limits))),
+            floor(symlog(max(x.limits)))))) +
       coord_trans(x = "symlog", xlim = x.limits) +
-      facet_grid(.data$cue2 ~ .data$cue))
+      facet_grid(.data$cue2 ~ .data$cue)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-  p.KN = suppressWarnings(
+  p.KN <- suppressWarnings(
     suppressMessages(
       p.m %+%
         (d.pars %>%
@@ -123,11 +124,12 @@ plot_ibbu_stanfit_parameters = function(
                                ceiling(log10(min(x.limits))),
                                floor(log10(max(x.limits)))
                              ))) +
-        scale_y_discrete("", expand = c(0,0)) +
+        scale_y_discrete("", expand = expansion(mult = c(0 , 0.1))) +
         coord_trans(x = "log10", xlim = x.limits) +
-        facet_grid(~ .data$key)))
+        facet_grid(~ .data$key))) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-  p.LR =
+  p.LR <-
     d.pars %>%
     select(.draw, lapse_rate) %>%
     distinct() %T>%
@@ -136,7 +138,7 @@ plot_ibbu_stanfit_parameters = function(
     geom_density(color = NA, fill = "darkgray", alpha = .5,
                  stat = "density") +
     scale_x_continuous("Lapse rate")  +
-    scale_y_discrete("") +
+    scale_y_discrete("", expand = expansion(mult = c(0 , 0.1))) +
     scale_fill_manual(
       "Group",
       breaks = group.ids,
@@ -146,8 +148,8 @@ plot_ibbu_stanfit_parameters = function(
     coord_cartesian(xlim = x.limits) +
     theme(legend.position = "none")
 
-  K = length(unique(d.pars$cue))
-  p = suppressWarnings(cowplot::plot_grid(
+  K <- length(unique(d.pars$cue))
+  p <- suppressWarnings(cowplot::plot_grid(
     cowplot::plot_grid(plotlist = list(p.m, p.KN), nrow = 1, rel_widths = c(K,2)),
     cowplot::plot_grid(plotlist = list(
       p.S,
@@ -157,8 +159,6 @@ plot_ibbu_stanfit_parameters = function(
     rel_heights = c(1.5, K), nrow = 2, axis = "lrtb"))
   return(p)
 }
-
-
 
 
 

@@ -451,6 +451,7 @@ add_ibbu_stanfit_draws = function(
   category = "category",
   group = "group"
 ) {
+  assert_NIW_ideal_adaptor_stanfit(fit)
   assert_that(which %in% c("prior", "posterior", "both"),
               msg = "which must be one of 'prior', 'posterior', or 'both'.")
   assert_that(any(is.null(ndraws), is.count(ndraws)),
