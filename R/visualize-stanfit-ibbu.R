@@ -461,10 +461,12 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' and by its group ID.
 #' @param group.colors Vector of colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
 #' @param group.linetypes Vector of linetypes of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
+#' @param all_test_locations Should predictions be shown for all combinations of test locations and group, or should only
+#' combinations be shown that actually occurred in the data? (default: `FALSE`)
+#' @param plot_in_cue_space Should predictions be plotted in the cue space? If not, test tokens are essentially treated
+#' as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)
 #' @param sort_by Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
 #' from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired.
-#' @param all_test_locations Should predictions be shown for all combinations of test locations and group, or should only
-#' combinations be shown that actually occurred in the data? (default: `TRUE`)
 #'
 #' @return ggplot object.
 #'
@@ -472,6 +474,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' @keywords TBD
 #' @examples
 #' TBD
+#' @rdname plot_ibbu_stanfit_test_categorization
 #' @export
 plot_ibbu_stanfit_test_categorization = function(
   model,
@@ -484,7 +487,8 @@ plot_ibbu_stanfit_test_categorization = function(
   target_category = 1,
   panel.group = FALSE,
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
-  sort_by = "prior", all_test_locations = TRUE
+  all_test_locations = TRUE, plot_in_cue_space = FALSE,
+  sort_by = "prior"
 ) {
   assert_NIW_ideal_adaptor_stanfit(model)
   if (is.null(data.test)) data.test = get_test_data_from_stanfit(model)
@@ -597,103 +601,121 @@ plot_ibbu_stanfit_test_categorization = function(
     ungroup() %>%
     select(-c(x, f))
 
-  # If sort_by is specified, sort levels of x-axis by that group.
-  if (!is.null(sort_by)) {
-    sort.levels = d.pars %>%
-      filter(group == sort_by) %>%
-      group_by(token.cues) %>%
-      summarise(p_cat = mean(p_cat)) %>%
-      arrange(p_cat) %>% pull(token.cues)
-
-    d.pars %<>%
-      mutate(
-        token.cues = factor(token.cues,
-                            levels = sort.levels),
-        token = factor(as.numeric(token.cues), levels = 1:length(levels(token.cues))))
-  }
-
   if (is.null(get_category_levels_from_stanfit(model)))
     category1 = "category 1" else category1 = get_category_levels_from_stanfit(model, 1)
 
-  p <-
-    d.pars %>%
-    ungroup() %>%
-    mutate(group = factor(group, levels = group.ids)) %>%
-    ggplot(aes(
-      x = .data$token,
-      y = .data$p_cat,
-      color = .data$group,
-      linetype = .data$group)) +
-    scale_x_discrete("Test token",
-                     breaks = levels(.data$token),
-                     labels = paste0(levels(.data$token), "\n",
-                                     levels(.data$token.cues))) +
-    scale_y_continuous(
-      paste0("Predicted proportion of ", category1, "-responses"),
-      limits = c(0,1)
-    ) +
-    scale_color_manual(
-      "Group",
-      breaks = group.ids,
-      labels = group.labels,
-      values = group.colors
-    ) +
-    scale_linetype_manual(
-      "Group",
-      breaks = group.ids,
-      labels = group.labels,
-      values = group.linetypes
-    )
+  if (plot_in_cue_space) {
+    if (length(get_cue_levels_from_stanfit(model)) > 2) stop("plot_in_cue_space = T not yet implemented for more than two cues.")
 
-  if (summarize & !is.null(confidence.intervals)) {
-    p <- p +
-      geom_ribbon(
+    p <-
+      d.pars %>%
+      mutate(group = factor(group, levels = group.ids)) %>%
+      ggplot(
         aes(
-          x = as.numeric(.data$token),
-          ymin = .data$y.outer.min,
-          ymax = .data$y.outer.max,
-          shape = .data$group,
-          fill = .data$group),
-        color = NA, alpha = .1
-      ) +
-      geom_ribbon(
-        aes(
-          x = as.numeric(.data$token),
-          ymin = .data$y.inner.min,
-          ymax = .data$y.inner.max,
-          fill = .data$group),
-        color = NA, alpha = .3
-      ) +
-      scale_fill_manual(
+        x = .data$cue1,
+        y = .data$cue2,
+        fill = .data$p_cat)) +
+      geom_raster() +
+      scale_x_continuous(cue.labels[1]) +
+      scale_y_continuous(cue.labels[2]) +
+      scale_fill_gradient2(
+        paste0("Predicted proportion of ", category1, "-responses"),
+        mid = .5,
+        limits = c(0,1))
+
+  } else {
+    # If sort_by is specified, sort levels of x-axis by that group.
+    if (!is.null(sort_by)) {
+      sort.levels <- d.pars %>%
+        filter(group == sort_by) %>%
+        group_by(token.cues) %>%
+        summarise(p_cat = mean(p_cat)) %>%
+        arrange(p_cat) %>% pull(token.cues)
+
+      d.pars %<>%
+        mutate(
+          token.cues = factor(token.cues,
+                              levels = sort.levels),
+          token = factor(as.numeric(token.cues), levels = 1:length(levels(token.cues))))
+    }
+
+    p <-
+      d.pars %>%
+      mutate(group = factor(group, levels = group.ids)) %>%
+      ggplot(aes(
+        x = .data$token,
+        y = .data$p_cat,
+        color = .data$group,
+        linetype = .data$group)) +
+      scale_x_discrete("Test token",
+                       breaks = levels(.data$token),
+                       labels = paste0(levels(.data$token), "\n",
+                                       levels(.data$token.cues))) +
+      scale_y_continuous(
+        paste0("Predicted proportion of ", category1, "-responses"),
+        limits = c(0,1)) +
+      scale_color_manual(
         "Group",
         breaks = group.ids,
         labels = group.labels,
-        values = group.colors
-      ) +
-      scale_shape_discrete(
+        values = group.colors) +
+      scale_linetype_manual(
         "Group",
         breaks = group.ids,
-        labels = group.labels
-      )
+        labels = group.labels,
+        values = group.linetypes)
 
-    # Place information about confidence intervals on plot.
+    if (summarize & !is.null(confidence.intervals)) {
+      p <- p +
+        geom_ribbon(
+          aes(
+            x = as.numeric(.data$token),
+            ymin = .data$y.outer.min,
+            ymax = .data$y.outer.max,
+            shape = .data$group,
+            fill = .data$group),
+          color = NA, alpha = .1) +
+        geom_ribbon(
+          aes(
+            x = as.numeric(.data$token),
+            ymin = .data$y.inner.min,
+            ymax = .data$y.inner.max,
+            fill = .data$group),
+          color = NA, alpha = .3) +
+        scale_fill_manual(
+          "Group",
+          breaks = group.ids,
+          labels = group.labels,
+          values = group.colors) +
+        scale_shape_discrete(
+          "Group",
+          breaks = group.ids,
+          labels = group.labels)
+
+      # Place information about confidence intervals on plot.
+      p <- p +
+        ggtitle(paste0((confidence.intervals[4]-confidence.intervals[1]) * 100,
+                       "% and ",
+                       (confidence.intervals[3]-confidence.intervals[2]) * 100,
+                       "% CIs\nbased on ",
+                       ndraws,
+                       " posterior samples.")
+        )
+    }
+
     p <- p +
-      ggtitle(paste0((confidence.intervals[4]-confidence.intervals[1]) * 100,
-                     "% and ",
-                     (confidence.intervals[3]-confidence.intervals[2]) * 100,
-                     "% CIs\nbased on ",
-                     ndraws,
-                     " posterior samples.")
-      )
+      geom_point(alpha = .9) +
+      geom_line(size = 1, alpha = .9, aes(x = as.numeric(.data$token)))
   }
-
-  p <- p +
-    geom_point(alpha = .9) +
-    geom_line(size = 1, alpha = .9, aes(x = as.numeric(.data$token)))
-
   if (!summarize & panel.group) p = p + facet_grid(group ~ .draw) else
     if (panel.group) p = p + facet_wrap(~ group) else
       if (!summarize) p = p + facet_wrap(~ .draw)
 
   return(p)
+}
+
+#' @rdname plot_ibbu_stanfit_test_categorization
+#' @export
+plot_ibbu_stanfit_test_categorization_2D = function(...) {
+  plot_ibbu_stanfit_test_categorization(type = "2D", ...)
 }

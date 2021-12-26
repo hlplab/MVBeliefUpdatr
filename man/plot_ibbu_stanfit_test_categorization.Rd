@@ -2,6 +2,7 @@
 % Please edit documentation in R/visualize-stanfit-ibbu.R
 \name{plot_ibbu_stanfit_test_categorization}
 \alias{plot_ibbu_stanfit_test_categorization}
+\alias{plot_ibbu_stanfit_test_categorization_2D}
 \title{Plot prior and posterior categorization of test tokens.}
 \usage{
 plot_ibbu_stanfit_test_categorization(
@@ -18,9 +19,12 @@ plot_ibbu_stanfit_test_categorization(
   group.labels = NULL,
   group.colors = NULL,
   group.linetypes = NULL,
-  sort_by = "prior",
-  all_test_locations = TRUE
+  all_test_locations = TRUE,
+  plot_in_cue_space = FALSE,
+  sort_by = "prior"
 )
+
+plot_ibbu_stanfit_test_categorization_2D(...)
 }
 \arguments{
 \item{model}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
@@ -53,11 +57,14 @@ and by its group ID.}
 
 \item{group.linetypes}{Vector of linetypes of same length as group.ids or `NULL` to use defaults. (default: `NULL`)}
 
+\item{all_test_locations}{Should predictions be shown for all combinations of test locations and group, or should only
+combinations be shown that actually occurred in the data? (default: `FALSE`)}
+
+\item{plot_in_cue_space}{Should predictions be plotted in the cue space? If not, test tokens are essentially treated
+as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)}
+
 \item{sort_by}{Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
 from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired.}
-
-\item{all_test_locations}{Should predictions be shown for all combinations of test locations and group, or should only
-combinations be shown that actually occurred in the data? (default: `TRUE`)}
 }
 \value{
 ggplot object.
