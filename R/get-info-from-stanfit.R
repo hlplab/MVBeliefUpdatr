@@ -471,11 +471,13 @@ add_ibbu_stanfit_draws = function(
       add_ibbu_stanfit_draws(
         fit = fit, which = "prior",
         ndraws = NULL, draws = draws,
+        untransform_cues = untransform_cues,
         summarize = summarize, wide = wide, nest = nest)
     d.posterior <-
       add_ibbu_stanfit_draws(
         fit = fit, which = "posterior",
         ndraws = NULL, draws = draws,
+        untransform_cues = untransform_cues,
         summarize = summarize, wide = wide, nest = nest)
     d.pars <- rbind(d.prior, d.posterior) %>%
       mutate(!! rlang::sym(group) :=
