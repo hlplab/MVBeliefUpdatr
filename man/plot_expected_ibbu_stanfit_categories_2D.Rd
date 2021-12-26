@@ -6,10 +6,10 @@
 \alias{plot_expected_ibbu_stanfit_categories_density2D}
 \title{Plot expected bivariate (2D) categories from MV IBBU stanfit.}
 \usage{
-plot_expected_ibbu_stanfit_categories_2D(x, type, ...)
+plot_expected_ibbu_stanfit_categories_2D(model, type, ...)
 
 plot_expected_ibbu_stanfit_categories_contour2D(
-  x,
+  model,
   levels = plogis(seq(-15, qlogis(0.95), length.out = 20)),
   plot.test = T,
   plot.exposure = F,
@@ -21,7 +21,7 @@ plot_expected_ibbu_stanfit_categories_contour2D(
 )
 
 plot_expected_ibbu_stanfit_categories_density2D(
-  x,
+  model,
   plot.test = T,
   plot.exposure = F,
   untransform_cues = TRUE,
@@ -35,6 +35,8 @@ plot_expected_ibbu_stanfit_categories_density2D(
 )
 }
 \arguments{
+\item{model}{mv-ibbu-stanfit object.}
+
 \item{type}{Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
 faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}
 (based on the NIW parameters \code{S} and \code{nu}) at each MCMC draw, and then averages over
@@ -67,8 +69,6 @@ Currently being ignored.}
 
 \item{resolution}{For density plots. How many steps along x and y should be calculated? Note that computational
 complexity increases quadratically with resolution. (default: 25)}
-
-\item{fit}{mv-ibbu-stanfit object.}
 
 \item{summarize}{Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
 expected categories be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`) Currently being ignored.}

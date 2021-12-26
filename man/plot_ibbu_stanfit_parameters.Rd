@@ -5,7 +5,7 @@
 \title{Plot distribution of IBBU parameters.}
 \usage{
 plot_ibbu_stanfit_parameters(
-  fit,
+  model,
   which = "both",
   ndraws = NULL,
   untransform_cues = TRUE,
@@ -16,7 +16,7 @@ plot_ibbu_stanfit_parameters(
 )
 }
 \arguments{
-\item{fit}{mv-ibbu-stanfit object.}
+\item{model}{mv-ibbu-stanfit object.}
 
 \item{which}{Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)}
 

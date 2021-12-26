@@ -12,7 +12,7 @@ NULL
 #' Plot distribution of post-warmup MCMC samples for all parameters representing the
 #' prior and/or posterior beliefs.
 #'
-#' @param fit mv-ibbu-stanfit object.
+#' @param model mv-ibbu-stanfit object.
 #' @param which Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
 #' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
@@ -34,14 +34,14 @@ NULL
 #' @export
 #'
 plot_ibbu_stanfit_parameters = function(
-  fit,
+  model,
   which = "both",
   ndraws = NULL,
   untransform_cues = TRUE,
   group.ids = NULL, group.labels = NULL, group.colors = NULL,
   panel_scaling = F
 ) {
-  d.pars = fit %>%
+  d.pars = model %>%
     add_ibbu_stanfit_draws(
       which = which,
       ndraws = ndraws,
@@ -169,7 +169,7 @@ plot_ibbu_stanfit_parameters = function(
 #' by the (post-warmup) MCMC samples. Two methods are available (specified by `type`), which differ in their
 #' computational demands and speed.
 #'
-#' @param fit mv-ibbu-stanfit object.
+#' @param model mv-ibbu-stanfit object.
 #' @param type Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
 #' faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}
 #' (based on the NIW parameters \code{S} and \code{nu}) at each MCMC draw, and then averages over
@@ -212,30 +212,30 @@ plot_ibbu_stanfit_parameters = function(
 #' @rdname plot_expected_ibbu_stanfit_categories_2D
 #' @export
 plot_expected_ibbu_stanfit_categories_2D = function(
-  x,
+  model,
   type,
   ...
 ) {
   assert_that(all(type %in% c("contour", "density"), length(type) == 1))
   if (type == "contour")
-    plot_expected_ibbu_stanfit_categories_contour2D(x = x, ...)
+    plot_expected_ibbu_stanfit_categories_contour2D(model = model, ...)
   else {
-    plot_expected_ibbu_stanfit_categories_density2D(x = x, ...)
+    plot_expected_ibbu_stanfit_categories_density2D(model = model, ...)
   }
 }
 
 #' @rdname plot_expected_ibbu_stanfit_categories_2D
 #' @export
 plot_expected_ibbu_stanfit_categories_contour2D = function(
-  x,
+  model,
   levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
   plot.test = T, plot.exposure = F,
   untransform_cues = TRUE,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
-  fit.input = get_input_from_stanfit(fit)
+  fit.input = get_input_from_stanfit(model)
   assert_that(!all(is.null(fit.input), plot.test))
-  d = get_expected_category_statistic_from_stanfit(x, untransform_cues = untransform_cues)
+  d = get_expected_category_statistic_from_stanfit(model, untransform_cues = untransform_cues)
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(d$category)
@@ -244,7 +244,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   d %<>%
-    rename(x = Sigma.mean, centre = mu.mean) %>%
+    rename(model = Sigma.mean, centre = mu.mean) %>%
     crossing(level = levels) %>%
     mutate(ellipse = pmap(., ellipse.pmap)) %>%
     # This step is necessary since unnest() can't yet unnest lists of matrices
@@ -331,20 +331,20 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
 #' @rdname plot_expected_ibbu_stanfit_categories_2D
 #' @export
 plot_expected_ibbu_stanfit_categories_density2D = function(
-  x,
+  model,
   plot.test = T, plot.exposure = F,
   untransform_cues = TRUE,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   xlim, ylim, resolution = 25
 ) {
-  if (is.null(fit.input)) fit.input = x@input_data
-  assert_that(is.NIW_ideal_adaptor_stanfit(x) | is.NIW_ideal_adaptor_MCMC(x))
+  fit.input = get_input_from_stanfit(model)
+  assert_that(is.NIW_ideal_adaptor_stanfit(model) | is.NIW_ideal_adaptor_MCMC(model))
   assert_that(!all(is.null(fit.input), plot.test))
 
-  if (is.NIW_ideal_adaptor_stanfit(x))
-    d = add_ibbu_stanfit_draws(x, which = which, wide = F, nest = T, untransform_cues = untransform_cues)
+  if (is.NIW_ideal_adaptor_stanfit(model))
+    d = add_ibbu_stanfit_draws(model, which = which, wide = F, nest = T, untransform_cues = untransform_cues)
   else
-    d = x
+    d = model
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(d$category)
@@ -449,7 +449,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' samples will be used. If `summarize=FALSE`, separate categorization plots for all ndraws
 #' individual samples will be plotted in separate panels.
 #'
-#' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param model \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param data.test Optionally, a \code{tibble} or \code{data.frame} with test data.
 #' If `NULL` the input will be extracted from fit. (default: `NULL`).
 #' @param which Should categorization for the prior, posterior, or both be plotted? (default: `"both"`)
@@ -478,7 +478,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' TBD
 #' @export
 plot_ibbu_stanfit_test_categorization = function(
-  fit,
+  model,
   data.test = NULL,
   which = "both",
   summarize = T,
@@ -490,9 +490,9 @@ plot_ibbu_stanfit_test_categorization = function(
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
   sort.by = "prior"
 ) {
-  assert_NIW_ideal_adaptor_stanfit(fit)
+  assert_NIW_ideal_adaptor_stanfit(model)
   if (is.null(data.test)) {
-    data.test = get_test_data_from_stanfit(fit)
+    data.test = get_test_data_from_stanfit(model)
   }
   assert_that(is.flag(summarize))
   assert_that(is.null(confidence.intervals) |
@@ -515,7 +515,7 @@ plot_ibbu_stanfit_test_categorization = function(
   # Get prior and posterior parameters
   d.pars =
     add_ibbu_stanfit_draws(
-      fit,
+      model,
       which = which,
       summarize = F,
       wide = F,
@@ -523,12 +523,12 @@ plot_ibbu_stanfit_test_categorization = function(
       untransform_cues = untransform_cues)
 
   # Now set ndraws to the number of MCMC samples
-  ndraws = if (is.null(ndraws)) get_number_of_draws(fit) else ndraws
+  ndraws = if (is.null(ndraws)) get_number_of_draws(model) else ndraws
   if (ndraws > 500)
     message(paste("Marginalizing over", ndraws, "MCMC samples. This might take some time.\n"))
 
   # If group.ids are NULL set them to the levels of groups found in the extraction
-  # of posteriors from fit
+  # of posteriors from model
   if (is.null(group.ids))  group.ids = levels(d.pars$group)
   assert_that(all(group.ids %in% unique(d.pars$group)),
               msg = "Some group.ids were not found in the stanfit object.")
@@ -553,7 +553,7 @@ plot_ibbu_stanfit_test_categorization = function(
   cue.labels = get_cue_labels_from_model(d.pars)
   test_data = data.test %>%
     distinct() %>%
-    { if (untransform_cues) get_untransform_function_from_stanfit(fit)(.) else . } %>%
+    { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
     # CHECK: Could be replaced by make_vector_column
     transmute(x = pmap(.l = list(!!! syms(cue.labels)), .f = ~ c(...))) %>%
     nest(cues = x) %>%
@@ -611,8 +611,8 @@ plot_ibbu_stanfit_test_categorization = function(
         token = factor(as.numeric(token.cues), levels = 1:length(levels(token.cues))))
   }
 
-  if (is.null(get_category_levels(fit)))
-    category1 = "category 1" else category1 = get_category_levels(fit, 1)
+  if (is.null(get_category_levels(model)))
+    category1 = "category 1" else category1 = get_category_levels(model, 1)
 
   p = d.pars %>%
     ungroup() %>%

@@ -5,7 +5,7 @@
 \title{Plot prior and posterior categorization of test tokens.}
 \usage{
 plot_ibbu_stanfit_test_categorization(
-  fit,
+  model,
   data.test = NULL,
   which = "both",
   summarize = T,
@@ -22,7 +22,7 @@ plot_ibbu_stanfit_test_categorization(
 )
 }
 \arguments{
-\item{fit}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
+\item{model}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
 
 \item{data.test}{Optionally, a \code{tibble} or \code{data.frame} with test data.
 If `NULL` the input will be extracted from fit. (default: `NULL`).}
