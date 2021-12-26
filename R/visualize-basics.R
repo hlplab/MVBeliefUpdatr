@@ -89,7 +89,9 @@ get_plot_limits = function(plot) {
 #'
 #' @param data A `tibble` or `data.frame` that contains a `measure`.
 #' @param measure Name of variable in `data` for which limits are sought.
-#' @param hdi.prob Proportion of MCMC samples that are within the limits.
+#' @param by Optionally, a grouping variable. If not NULL, limits will be returned for each level of this
+#' variable. (default: `NULL`)
+#' @param hdi.prob Proportion of MCMC samples that are within the limits. (default: .99)
 #' @param min,max If min or max are specified, then those limits are returned instead of the HDI-based limits.
 #'
 #' @return Vector with two values.
@@ -100,10 +102,11 @@ get_plot_limits = function(plot) {
 #' TBD
 #'
 #' @export
-get_limits = function(data, measure, hdi.prob = .99, min = NULL, max = NULL) {
+get_limits = function(data, measure, by = NULL, hdi.prob = .99, min = NULL, max = NULL) {
   data %>%
     mean_hdi((!! rlang::sym(measure)), .width = hdi.prob) %>%
     ungroup() %>%
+    { if (!is.null(by)) group_by(., by) else . } %>%
     summarise(.lower = if (!is.null(min)) min else min(.lower),
               .upper = if (!is.null(max)) max else max(.upper)) %>%
     as.numeric()
