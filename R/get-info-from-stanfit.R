@@ -339,15 +339,13 @@ get_expected_category_statistic_from_stanfit = function(
   untransform_cues = T
 ) {
   assert_that(all(statistic %in% c("mu", "Sigma")))
-  if (untransform_cues) {
-    assert_that(is.NIW_ideal_adaptor_stanfit(x))
-    transform_information <- get_transform_information_from_stanfit(x)
-  } else {
-    assert_that(is.NIW_ideal_adaptor_stanfit(x) | is.NIW_ideal_adaptor_MCMC(x, is.nested = T, is.long = T))
-  }
-
   if (is.NIW_ideal_adaptor_stanfit(x)) {
-    x = add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T)
+    x = add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T, untransform_cues = untransform_cues)
+  } else if (is.NIW_ideal_adaptor_MCMC(x)) {
+    assert_that(is.NIW_ideal_adaptor_MCMC(x, is.nested = T, is.long = T),
+                msg = "If x is an NIW_ideal_adaptor_MCMC object, it must be in nested long format.")
+    assert_that(!untransform_cues,
+                msg = "If untransform_cues = T, then x must be an NIW_ideal_adaptor_stanfit object.")
   }
 
   assert_that(any(is.null(category), is.character(category), is.numeric(category)))
@@ -357,7 +355,6 @@ get_expected_category_statistic_from_stanfit = function(
 
   x %<>%
     filter(group %in% !! group, category %in% !! category) %>%
-    { if (untransform_cues) untransform_model(., transform_information) else . } %>%
     mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
     group_by(group, category) %>%
     summarise(
