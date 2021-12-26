@@ -8,6 +8,7 @@ is.NIW_ideal_adaptor(
   x,
   category = "category",
   is.long = T,
+  with.prior = T,
   with.lapse = if (with.lapse_bias) T else F,
   with.lapse_bias = F,
   verbose = F,

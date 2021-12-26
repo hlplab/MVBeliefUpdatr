@@ -97,6 +97,56 @@ get_input_from_stanfit = function(fit) {
 }
 
 
+#' Get category sample mean or covariance matrix of exposure data from NIW IBBU stanfit.
+#'
+#' Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
+#' Bayesian belief-updating (IBBU) model from an NIW IBBU stanfit or NIW belief MCMC object.
+#'
+#' @param x \code{\link{NIW_ideal_adaptor_stanfit}} or NIW belief MCMC object.
+#' @param category Character vector with categories (or category) for which category statistics are to be
+#' returned.  If `NULL` then all categories are included. (default: `NULL`)
+#' @param group Character vector with groups (or group) for which category statistics are to be
+#' returned. If `NULL` then all groups are included. (default: `NULL`)
+#' @param statistic Which category statistic should be returned? `mu` for category mean or `Sigma` for category
+#' covariance matrix, or `c("mu", "Sigma")` for both. (default: both)
+#'
+#' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
+#' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
+#' of group and category.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname get_exposure_statistic_from_stanfit
+#' @export
+get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
+                                               statistic = c("mu", "Sigma")) {
+  assert_that(is.NIW_ideal_adaptor_input(x) | is.NIW_ideal_adaptor_stanfit(x))
+  stop("get_ibbu_stanfit_exposure_statistics not yet implemented!")
+
+  x = get_input_from_stanfit(x)
+  # More here. ######################################
+  # filter out group "prior"
+  # deal with cases for which there is no exposure data
+  # Assume that all cues are used
+
+  return("ERROR")
+}
+
+#' @rdname get_exposure_statistic_from_stanfit
+#' @export
+get_exposure_mean_from_stanfit = function(x, category, group) {
+  return(get_exposure_statistic_from_stanfit(x, category, group, statistic = "mu"))
+}
+
+#' @rdname get_exposure_statistic_from_stanfit
+#' @export
+get_exposure_sd_from_stanfit = function(x, category, group) {
+  return(get_exposure_statistic_from_stanfit(x, category, group, statistic = "Sigma"))
+}
+
+
 #' Get the test data from an NIW ideal adaptor stanfit.
 #'
 #' Returns the test data used during the creation of the \code{\link[rstan]{stanfit}}.
@@ -113,7 +163,7 @@ get_input_from_stanfit = function(fit) {
 #' TBD
 #' @export
 get_test_data_from_stanfit = function(fit) {
-  data = fit@input_data
+  data <- get_input_from_stanfit(fit)
   data[["x_test"]] %>%
     cbind(data[["z_test_counts"]]) %>%
     mutate(
@@ -130,8 +180,8 @@ get_test_data_from_stanfit = function(fit) {
 #' Checks if information is available about the original values and order of the factor levels
 #' for the category variable (for which beliefs about means and covariances are inferred) or
 #' group variable (e.g., subject or exposure group), respectively. If available,
-#' that information is returned. `get_category_levels()` and `get_group_levels()` are
-#' convenience functions, calling `get_original_levels()`.
+#' that information is returned. `get_category_levels_from_stanfit()` and `get_group_levels_from_stanfit()` are
+#' convenience functions, calling `get_original_variable_levels_from_stanfit()`.
 #'
 #' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param variable Either "category" or "group".
@@ -146,9 +196,9 @@ get_test_data_from_stanfit = function(fit) {
 #' @keywords TBD
 #' @examples
 #' TBD
-#' @rdname get_original_levels
+#' @rdname get_original_variable_levels_from_stanfit
 #' @export
-get_original_levels = function(fit, variable = c("category", "group"), indices = NULL) {
+get_original_variable_levels_from_stanfit = function(fit, variable = c("category", "group", "cue"), indices = NULL) {
   assert_that(is.null(indices) | all(indices > 0))
   f = get_constructor(fit, variable)
 
@@ -156,19 +206,27 @@ get_original_levels = function(fit, variable = c("category", "group"), indices =
 }
 
 
-#' @rdname get_original_levels
+#' @rdname get_original_variable_levels_from_stanfit
 #' @export
-get_category_levels = function(fit, indices = NULL) {
-  return(get_original_levels(fit, "category", indices))
+get_category_levels_from_stanfit = function(fit, indices = NULL) {
+  return(get_original_variable_levels_from_stanfit(fit, "category", indices))
 }
 
-#' @rdname get_original_levels
+#' @rdname get_original_variable_levels_from_stanfit
 #' @export
-get_group_levels = function(fit, indices = NULL, include_prior = F) {
-  groups = get_original_levels(fit, "group", indices)
+get_group_levels_from_stanfit = function(fit, indices = NULL, include_prior = F) {
+  groups = get_original_variable_levels_from_stanfit(fit, "group", indices)
   if (include_prior) groups = append(groups, "prior")
 
   return(groups)
+}
+
+#' @rdname get_original_variable_levels_from_stanfit
+#' @export
+get_cue_levels_from_stanfit = function(fit, indices = NULL) {
+  cues = get_original_variable_levels_from_stanfit(fit, "cue", indices)
+
+  return(cues)
 }
 
 
@@ -185,25 +243,27 @@ get_group_levels = function(fit, indices = NULL, include_prior = F) {
 #' @return A constructor function, a list of constructor functions, or `NULL`. If a specific constructor
 #' function is requested but not found, a warning is shown.
 #'
-#' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_original_levels}}
+#' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_original_variable_levels_from_stanfit}}
 #' @keywords TBD
 #' @examples
 #' TBD
 #' @rdname get_constructor
 #' @export
 get_constructor = function(fit, variable = NULL) {
+  available_constructors <- c("category", "group", "cue", "cue2")
   assert_NIW_ideal_adaptor_stanfit(fit)
   if (is.null(variable)) return(attr(fit, "tidybayes_constructors"))
 
-  assert_that(variable %in% c("category", "group"), msg = "Variable name must be one of category or group.")
+  assert_that(variable %in% available_constructors,
+              msg = paste0("Variable name must be one of ", paste(available_constructors, collapse = "or"), "."))
 
   if (is.null(attr(fit, "tidybayes_constructors")[[rlang::sym(variable)]])) {
-    warning(paste0(class_name, " object does not contain type information about the ", variable,
-                   " variable. Consider applying tidybayes::recover_types() first."))
+    warning(paste0(class_name, " object does not contain type information about the variable ", variable,
+                   ". Applying tidybayes::recover_types() to the object might fix this."))
     return(NULL)
   }
 
-  f = attr(fit, "tidybayes_constructors")[[rlang::sym(variable)]]
+  f <- attr(fit, "tidybayes_constructors")[[rlang::sym(variable)]]
 
   return(f)
 }
@@ -219,6 +279,18 @@ get_category_constructor = function(fit) {
 #' @export
 get_group_constructor = function(fit) {
   return(get_constructor(fit, "group"))
+}
+
+#' @rdname get_constructor
+#' @export
+get_cue_constructor = function(fit) {
+  return(get_constructor(fit, "cue"))
+}
+
+#' @rdname get_constructor
+#' @export
+get_cue2_constructor = function(fit) {
+  return(get_constructor(fit, "cue2"))
 }
 
 
@@ -312,56 +384,6 @@ get_expected_mu_from_stanfit = function(x, category, group, ...) {
 #' @export
 get_expected_sigma_from_stanfit = function(x, category, group, ...) {
   return(get_expected_category_statistic_from_stanfit(x, category, group, statistic = "Sigma", ...))
-}
-
-
-#' Get category mean mu or covariance matrix sigma of exposure data from NIW IBBU stanfit.
-#'
-#' Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
-#' Bayesian belief-updating (IBBU) model from an NIW IBBU stanfit or NIW belief MCMC object.
-#'
-#' @param x \code{\link{NIW_ideal_adaptor_stanfit}} or NIW belief MCMC object.
-#' @param category Character vector with categories (or category) for which category statistics are to be
-#' returned.  If `NULL` then all categories are included. (default: `NULL`)
-#' @param group Character vector with groups (or group) for which category statistics are to be
-#' returned. If `NULL` then all groups are included. (default: `NULL`)
-#' @param statistic Which category statistic should be returned? `mu` for category mean or `Sigma` for category
-#' covariance matrix, or `c("mu", "Sigma")` for both. (default: both)
-#'
-#' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
-#' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
-#' of group and category.
-
-#' @seealso TBD
-#' @keywords TBD
-#' @examples
-#' TBD
-#' @rdname get_ibbu_stanfit_exposure_category_statistic
-#' @export
-get_ibbu_stanfit_exposure_category_statistic = function(x, category = NULL, group = NULL,
-                                  statistic = c("mu", "Sigma")) {
-  assert_that(is.NIW_ideal_adaptor_input(x) | is.NIW_ideal_adaptor_stanfit(x))
-  stop("get_ibbu_stanfit_exposure_statistics not yet implemented!")
-
-  x = get_input_from_stanfit(x)
-  # More here. ######################################
-  # filter out group "prior"
-  # deal with cases for which there is no exposure data
-  # Assume that all cues are used
-
-  return(get_ibbu_stanfit_category_statistic(x, grouping.vars = c("category", "group"), statistic))
-}
-
-#' @rdname get_ibbu_stanfit_exposure_category_statistic
-#' @export
-get_ibbu_stanfit_exposure_mean = function(x, category, group) {
-  return(get_ibbu_stanfit_exposure_category_statistic(x, category, group, statistic = "mu"))
-}
-
-#' @rdname get_ibbu_stanfit_exposure_category_statistic
-#' @export
-get_ibbu_stanfit_exposure_Sigma = function(x, category, group) {
-  return(get_ibbu_stanfit_exposure_category_statistic(x, category, group, statistic = "Sigma"))
 }
 
 

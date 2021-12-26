@@ -4,6 +4,8 @@
 \alias{get_constructor}
 \alias{get_category_constructor}
 \alias{get_group_constructor}
+\alias{get_cue_constructor}
+\alias{get_cue2_constructor}
 \title{Get tidybayes constructor from an NIW IBBU stanfit.}
 \usage{
 get_constructor(fit, variable = NULL)
@@ -11,6 +13,10 @@ get_constructor(fit, variable = NULL)
 get_category_constructor(fit)
 
 get_group_constructor(fit)
+
+get_cue_constructor(fit)
+
+get_cue2_constructor(fit)
 }
 \arguments{
 \item{fit}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
@@ -31,6 +37,6 @@ Gets the tidybayes constructor function from the stanfit object. `get_category_c
 TBD
 }
 \seealso{
-\code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_original_levels}}
+\code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_original_variable_levels_from_stanfit}}
 }
 \keyword{TBD}

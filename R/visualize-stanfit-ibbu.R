@@ -233,7 +233,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
   untransform_cues = TRUE,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
-  fit.input = get_input_from_stanfit(model)
+  fit.input <- get_input_from_stanfit(model)
   assert_that(!all(is.null(fit.input), plot.test))
   d <- get_expected_category_statistic_from_stanfit(model, untransform_cues = untransform_cues)
 
@@ -243,21 +243,14 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
   if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
   if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
+  cue.names <- get_cue_levels_from_stanfit(model)
   d %<>%
     rename(x = Sigma.mean, centre = mu.mean) %>%
     crossing(level = levels) %>%
     mutate(ellipse = pmap(., ellipse.pmap)) %>%
-    # This step is necessary since unnest() can't yet unnest lists of matrices
-    # (bug was reported and added as milestone, 11/2019)
-    mutate(ellipse = map(ellipse, as_tibble)) %>%
-    unnest(ellipse)
-
-  cue.names = setdiff(names(d), c("group", "category", "centre", "x", "level"))
-  d %<>%
-    rename_at(cue.names,
-              function(x) paste0("cue", which(x == cue.names)))
-  message("If cues labels can be extracted from stanfit, this code can be improved, and .data[[cue.labels[1]]], etc. can be used.
-          See plot_expected_categories for NIW_belief objects.")
+    unnest(ellipse) %>%
+    group_by(across(-ellipse)) %>%
+    transmute(cue1 = ellipse[,1], cue2 = ellipse[,2])
 
   ggplot(d,
          aes(x = .data$cue1,
@@ -269,7 +262,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     # Optionally plot test data
     { if (plot.test)
       geom_point(
-        data = fit.input$x_test %>%
+        data = get_test_data_from_stanfit(model) %>%
           rename_at(cue.names,
                     function(x) paste0("cue", which(x == cue.names))),
         mapping = aes(x = .data$cue1, y = .data$cue2),
@@ -280,8 +273,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     { if (plot.exposure)
       geom_point(
         data =
-          get_ibbu_stanfit_exposure_mean(
-            fit.input,
+          get_exposure_mean_from_stanfit(
+            model,
             category = levels(d$category),
             group = levels(d$group)) %>%
           rename_at(cue.names,
@@ -291,30 +284,27 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
           y = .data$cue2,
           shape = .data$category,
           color = .data$category),
-        inherit.aes = F, size = 2
-      ) +
-        geom_path(
-          data = crossing(
+        inherit.aes = F, size = 2) +
+      geom_path(
+        data =
+          crossing(
             group = levels(d$group),
             category = levels(d$category),
-            level = .95
-          ) %>%
-            mutate(
-              x = map2(category, group, get_ibbu_stanfit_exposure_sigma(fit.input, .x, .y)),
-              centre = map2(category, group, get_ibbu_stanfit_exposure_mean(fit.input, .x, .y))
-            ) %>%
-            mutate(ellipse = pmap(., ellipse.pmap)) %>%
-            mutate(ellipse = map(ellipse, as_tibble)) %>%
-            unnest(ellipse) %>%
-            rename_at(cue.names,
-                      function(x) paste0("cue", which(x == cue.names))),
-          mapping = aes(
-            x = .data$cue1,
-            y = .data$cue2,
-            shape = .data$category,
-            color = .data$category),
-          linetype = 2,
-          inherit.aes = F)
+            level = .95) %>%
+          mutate(
+            x = map2(category, group, get_exposure_sd_from_stanfit(model, .x, .y)),
+            centre = map2(category, group, get_exposure_mean_from_stanfit(model, .x, .y))) %>%
+          mutate(ellipse = pmap(., ellipse.pmap)) %>%
+          unnest(ellipse) %>%
+          group_by(across(-ellipse)) %>%
+          transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]),
+        mapping = aes(
+          x = .data$cue1,
+          y = .data$cue2,
+          shape = .data$category,
+          color = .data$category),
+        linetype = 2,
+        inherit.aes = F)
     } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
@@ -376,7 +366,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
     # Optionally plot test data
     { if (plot.test)
       geom_point(
-        data = fit.input$x_test %>%
+        data = get_test_data_from_stanfit(model) %>%
           rename_at(cue.names,
                     function(x) paste0("cue", which(x == cue.names))),
         mapping = aes(
@@ -388,9 +378,11 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
     # Optionally plot exposure data
     { if (plot.exposure)
       geom_point(
-        data = get_ibbu_stanfit_exposure_mean(fit.input,
-                                              category = levels(d$category),
-                                              group = levels(d$group)) %>%
+        data =
+          get_exposure_mean_from_stanfit(
+            model,
+            category = levels(d$category),
+            group = levels(d$group)) %>%
           rename_at(cue.names,
                     function(x) paste0("cue", which(x == cue.names))),
         mapping = aes(
@@ -399,33 +391,33 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
           shape = .data$category,
           color = .data$category),
         inherit.aes = F, size = 2) +
-        geom_path(
-          data = crossing(
-            group = levels(d$group),
-            category = levels(d$category),
-            level = .95) %>%
-            mutate(
-              x = map2(category, group, get_ibbu_stanfit_exposure_sigma(fit.input, .x, .y)),
-              centre = map2(category, group, get_ibbu_stanfit_exposure_mean(fit.input, .x, .y))) %>%
-            mutate(ellipse = pmap(., ellipse.pmap)) %>%
-            mutate(ellipse = map(ellipse, as_tibble)) %>%
-            unnest(ellipse) %>%
-            rename_at(cue.names,
-                      function(x) paste0("cue", which(x == cue.names))),
-          mapping = aes(
-            x = .data$cue1,
-            y = .data$cue2,
-            shape = .data$category,
-            color = .data$category),
-          linetype = 2,
-          inherit.aes = F)
-    } +
+      geom_path(
+        data =
+          crossing(
+           group = levels(d$group),
+           category = levels(d$category),
+           level = .95) %>%
+          mutate(
+            x = map2(category, group, get_exposure_sd_from_stanfit(model, .x, .y)),
+            centre = map2(category, group, get_exposure_mean_from_stanfit(model, .x, .y))) %>%
+          mutate(ellipse = pmap(., ellipse.pmap)) %>%
+          unnest(ellipse) %>%
+          group_by(across(-ellipse)) %>%
+          transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]),
+        mapping = aes(
+          x = .data$cue1,
+          y = .data$cue2,
+          shape = .data$category,
+          color = .data$category),
+        linetype = 2,
+        inherit.aes = F) } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
-    scale_color_manual("Category",
-                       breaks = category.ids,
-                       labels = category.labels,
-                       values = category.colors) +
+    scale_color_manual(
+      "Category",
+      breaks = category.ids,
+      labels = category.labels,
+      values = category.colors) +
     coord_fixed(xlim = xlim, ylim = ylim, ratio = 1) +
     facet_wrap(~ .data$group)
 }
@@ -611,8 +603,8 @@ plot_ibbu_stanfit_test_categorization = function(
         token = factor(as.numeric(token.cues), levels = 1:length(levels(token.cues))))
   }
 
-  if (is.null(get_category_levels(model)))
-    category1 = "category 1" else category1 = get_category_levels(model, 1)
+  if (is.null(get_category_levels_from_stanfit(model)))
+    category1 = "category 1" else category1 = get_category_levels_from_stanfit(model, 1)
 
   p = d.pars %>%
     ungroup() %>%

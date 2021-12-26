@@ -9,7 +9,7 @@ get_cue_labels_fom_MCMC(x, indices = NULL)
 \arguments{
 \item{x}{mv_ibbu_stanfit object.}
 
-\item{indeces}{A vector of indices that should be turned into the original cue labels corresponding to those
+\item{indices}{A vector of indices that should be turned into the original cue labels corresponding to those
 indices, or `NULL` if all cue labels should be returned. (default: `NULL`)}
 }
 \value{

@@ -8,6 +8,7 @@ is.NIW_ideal_adaptor_MCMC(
   x,
   is.nested = T,
   is.long = T,
+  with.prior = F,
   with.lapse = if (with.lapse_bias) T else F,
   with.lapse_bias = F
 )

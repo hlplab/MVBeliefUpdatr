@@ -112,6 +112,7 @@ get_limits = function(data, measure, hdi.prob = .99, min = NULL, max = NULL) {
 ellipse.pmap = function(x, centre, level, ...)
   ellipse(x = x, centre = centre, level = level)
 
+#' @export
 add_exposure_data_to_1D_plot = function(
   data,
   cue.labels,
@@ -124,12 +125,14 @@ add_exposure_data_to_1D_plot = function(
   add_exposure_data_to_2D_plot(data, cue.labels, category.ids, category.labels, category.colors)
 }
 
+#' @export
 add_test_data_to_1D_plot = function(data, cue.labels) {
   cue.labels[2] = "cue2"
   data %<>% mutate(cue2 = 0)
   add_test_data_to_2D_plot(data, cue.labels)
 }
 
+#' @export
 add_exposure_data_to_2D_plot = function(
   data,
   cue.labels,
@@ -155,6 +158,7 @@ add_exposure_data_to_2D_plot = function(
                        values = category.colors))
 }
 
+#' @export
 add_test_data_to_2D_plot = function(data, cue.labels) {
   list(
     geom_point(
@@ -166,6 +170,7 @@ add_test_data_to_2D_plot = function(data, cue.labels) {
       color = "black", size = 1))
 }
 
+#' @export
 facet_or_animate = function(p, facet_rows_by, facet_cols_by, facet_wrap_by, animate_by, animation_follow) {
   facet_rows_by = enquo(facet_rows_by)
   facet_cols_by = enquo(facet_cols_by)
