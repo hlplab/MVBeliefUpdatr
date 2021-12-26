@@ -2,7 +2,6 @@
 % Please edit documentation in R/visualize-stanfit-ibbu.R
 \name{plot_ibbu_stanfit_test_categorization}
 \alias{plot_ibbu_stanfit_test_categorization}
-\alias{plot_ibbu_stanfit_test_categorization_2D}
 \title{Plot prior and posterior categorization of test tokens.}
 \usage{
 plot_ibbu_stanfit_test_categorization(
@@ -23,8 +22,6 @@ plot_ibbu_stanfit_test_categorization(
   plot_in_cue_space = FALSE,
   sort_by = "prior"
 )
-
-plot_ibbu_stanfit_test_categorization_2D(...)
 }
 \arguments{
 \item{model}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
