@@ -66,6 +66,7 @@ make_named_square_matrix = function(x, names) {
 #' @param data `tibble` or `data.frame`.
 #' @param cols Vector of characters with names of variables to combine.
 #' @param vector_col Name of new column of vectors.
+#' @param .keep See \code{\link{dplyr::mutate}}.
 #'
 #' @return Same as \code{data}.
 #'
@@ -74,7 +75,7 @@ make_named_square_matrix = function(x, names) {
 #' @examples
 #' TBD
 #' @export
-make_vector_column = function(data, cols, vector_col, transmute = F) {
+make_vector_column = function(data, cols, vector_col, .keep = "all") {
   # CHECK: expand to also handle quo input. (each instance of calls then needs to change)
   # then make_NIW_prior_from...  use this function
   data %<>%
@@ -84,8 +85,8 @@ make_vector_column = function(data, cols, vector_col, transmute = F) {
         x = c(...)
         names(x) = cols
         return(x)
-      })) %>%
-    { if (transmute) select(., vector_col) else . }
+      }),
+      .keep = .keep)
 
   return(data)
 }
@@ -321,7 +322,7 @@ transform_cues = function(data, cues,
   }
 
   transform.function = if (!return.transform.function) NULL else {
-    function(data) {
+    function(data, attach = attach) {
       cues = cues
       center = center
       scale = scale
@@ -427,13 +428,14 @@ untransform_cues = function(data, cues,
   }
 
   untransform.function = if (!return.untransform.function) NULL else {
-    function(data) {
+    function(data, attach = attach) {
       cues = cues
       uncenter = uncenter
       unscale = unscale
       unpca = unpca
 
       untransform_cues(data, cues, uncenter = uncenter, unscale = unscale, unpca = unpca,
+                       attach = attach,
                        transform.parameters = transform.parameters,
                        return.untransformed.data = T, return.untransform.function = F)
 
