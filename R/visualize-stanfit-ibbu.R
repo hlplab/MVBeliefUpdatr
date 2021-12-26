@@ -603,7 +603,7 @@ plot_ibbu_stanfit_test_categorization = function(
     mutate(
       token.cues = map(x, ~paste(.x, collapse = ",\n"))) %>%
     ungroup() %>%
-    select(-c(x, f))
+    select(-c(x))
 
   if (is.null(get_category_levels_from_stanfit(model)))
     category1 = "category 1" else category1 = get_category_levels_from_stanfit(model, 1)
@@ -716,10 +716,4 @@ plot_ibbu_stanfit_test_categorization = function(
       if (!summarize) p = p + facet_wrap(~ .draw)
 
   return(p)
-}
-
-#' @rdname plot_ibbu_stanfit_test_categorization
-#' @export
-plot_ibbu_stanfit_test_categorization_2D = function(...) {
-  plot_ibbu_stanfit_test_categorization(type = "2D", ...)
 }
