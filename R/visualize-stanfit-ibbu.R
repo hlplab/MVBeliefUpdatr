@@ -87,7 +87,7 @@ plot_ibbu_stanfit_parameters = function(
       labels = group.labels,
       values = group.colors) +
     coord_cartesian(xlim = x.limits, default = T) +
-    facet_grid(~ .data$cue) +
+    facet_grid(~ .data$cue, scales = "free_x") +
     theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
   legend = cowplot::get_legend(p.m)
 
@@ -106,7 +106,7 @@ plot_ibbu_stanfit_parameters = function(
             ceiling(symlog(min(x.limits))),
             floor(symlog(max(x.limits)))))) +
       coord_trans(x = "symlog", xlim = x.limits) +
-      facet_grid(.data$cue2 ~ .data$cue)) +
+      facet_grid(.data$cue2 ~ .data$cue, scales = "free_x")) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
   p.KN <- suppressWarnings(
@@ -126,7 +126,7 @@ plot_ibbu_stanfit_parameters = function(
                              ))) +
         scale_y_discrete("", expand = expansion(mult = c(0 , 0.1))) +
         coord_trans(x = "log10", xlim = x.limits) +
-        facet_grid(~ .data$key))) +
+        facet_grid(~ .data$key, scales = "free_x"))) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
   p.LR <-
@@ -505,7 +505,7 @@ plot_ibbu_stanfit_test_categorization = function(
   confidence.intervals = sort(confidence.intervals)
 
   # Get prior and posterior parameters
-  d.pars =
+  d.pars <-
     add_ibbu_stanfit_draws(
       model,
       which = which,
@@ -515,7 +515,7 @@ plot_ibbu_stanfit_test_categorization = function(
       untransform_cues = untransform_cues)
 
   # Now set ndraws to the number of MCMC samples
-  ndraws = if (is.null(ndraws)) get_number_of_draws(model) else ndraws
+  ndraws <- if (is.null(ndraws)) get_number_of_draws(model) else ndraws
   if (ndraws > 500)
     message(paste("Marginalizing over", ndraws, "MCMC samples. This might take some time.\n"))
 
@@ -606,7 +606,8 @@ plot_ibbu_stanfit_test_categorization = function(
   if (is.null(get_category_levels_from_stanfit(model)))
     category1 = "category 1" else category1 = get_category_levels_from_stanfit(model, 1)
 
-  p = d.pars %>%
+  p <-
+    d.pars %>%
     ungroup() %>%
     mutate(group = factor(group, levels = group.ids)) %>%
     ggplot(aes(
@@ -636,7 +637,7 @@ plot_ibbu_stanfit_test_categorization = function(
     )
 
   if (summarize & !is.null(confidence.intervals)) {
-    p = p +
+    p <- p +
       geom_ribbon(
         aes(
           x = as.numeric(.data$token),
@@ -667,7 +668,7 @@ plot_ibbu_stanfit_test_categorization = function(
       )
 
     # Place information about confidence intervals on plot.
-    p = p +
+    p <- p +
       ggtitle(paste0((confidence.intervals[4]-confidence.intervals[1]) * 100,
                      "% and ",
                      (confidence.intervals[3]-confidence.intervals[2]) * 100,
@@ -677,7 +678,7 @@ plot_ibbu_stanfit_test_categorization = function(
       )
   }
 
-  p = p +
+  p <- p +
     geom_point(alpha = .9) +
     geom_line(size = 1, alpha = .9, aes(x = as.numeric(.data$token)))
 
