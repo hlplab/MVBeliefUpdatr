@@ -3,11 +3,14 @@
 \name{get_transform_function_from_stanfit}
 \alias{get_transform_function_from_stanfit}
 \alias{get_untransform_function_from_stanfit}
-\title{Get the transform/untransform fucntion from an NIW ideal adaptor stanfit.}
+\alias{get_transform_information_from_stanfit}
+\title{Get the transform/untransform information from an NIW ideal adaptor stanfit.}
 \usage{
-get_transform_function_from_stanfit(fit)
+get_transform_function_from_stanfit(model)
 
-get_untransform_function_from_stanfit(fit)
+get_untransform_function_from_stanfit(model)
+
+get_transform_information_from_stanfit(model)
 }
 \arguments{
 \item{fit}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
@@ -16,7 +19,7 @@ get_untransform_function_from_stanfit(fit)
 A function.
 }
 \description{
-Returns the transform/untransform function handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
+Returns the transform/untransform information handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
 object.
 }
 \examples{

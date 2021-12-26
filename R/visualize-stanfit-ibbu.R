@@ -235,7 +235,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
 ) {
   fit.input = get_input_from_stanfit(model)
   assert_that(!all(is.null(fit.input), plot.test))
-  d = get_expected_category_statistic_from_stanfit(model, untransform_cues = untransform_cues)
+  d <- get_expected_category_statistic_from_stanfit(model, untransform_cues = untransform_cues)
 
   # Setting aes defaults
   if(is.null(category.ids)) category.ids = levels(d$category)

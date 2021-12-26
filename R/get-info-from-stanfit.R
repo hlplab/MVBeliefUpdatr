@@ -266,15 +266,23 @@ get_expected_category_statistic_from_stanfit = function(
   untransform_cues = T
 ) {
   assert_that(all(statistic %in% c("mu", "Sigma")))
-  assert_that(is.NIW_ideal_adaptor_stanfit(x) | is.NIW_ideal_adaptor_MCMC(x, is.nested = T, is.long = T))
-  if (is.NIW_ideal_adaptor_stanfit(x)) samples = add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T)
+  if (untransform_cues) {
+    assert_that(is.NIW_ideal_adaptor_stanfit(x))
+    transform_information <- get_transform_information_from_stanfit(x)
+  } else {
+    assert_that(is.NIW_ideal_adaptor_stanfit(x) | is.NIW_ideal_adaptor_MCMC(x, is.nested = T, is.long = T))
+  }
+
+  if (is.NIW_ideal_adaptor_stanfit(x)) {
+    x = add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T)
+  }
 
   assert_that(any(is.null(category), is.character(category), is.numeric(category)))
   assert_that(any(is.null(group), is.character(group), is.numeric(group)))
-  if (is.null(category)) category = unique(samples$category)
-  if (is.null(group)) group = unique(samples$group)
+  if (is.null(category)) category = unique(x$category)
+  if (is.null(group)) group = unique(x$group)
 
-  samples %<>%
+  x %<>%
     filter(group %in% !! group, category %in% !! category) %>%
     mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
     group_by(group, category) %>%
@@ -284,13 +292,13 @@ get_expected_category_statistic_from_stanfit = function(
     select(group, category, !!! rlang::syms(paste0(statistic, ".mean"))) %>%
     { if (untransform_cues) untransform_model(., get_transform_information_from_stanfit(x)) else . }
 
-  if (!all(sort(unique(as.character(samples$group))) == sort(as.character(group))))
+  if (!all(sort(unique(as.character(x$group))) == sort(as.character(group))))
     warning("Not all groups were found in x.")
 
   # If just one category and group was requested, just return that object, rather
   # than the tibble
-  if (nrow(samples) == 1) samples = samples[,paste0(statistic, ".mean")][[1]][[1]]
-  return(samples)
+  if (nrow(x) == 1) x = x[,paste0(statistic, ".mean")][[1]][[1]]
+  return(x)
 }
 
 #' @rdname get_expected_category_statistic_from_stanfit
