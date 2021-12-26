@@ -78,12 +78,13 @@ make_vector_column = function(data, cols, vector_col, transmute = F) {
   # CHECK: expand to also handle quo input. (each instance of calls then needs to change)
   # then make_NIW_prior_from...  use this function
   data %<>%
-    mutate(!! sym(vector_col) := pmap(.l = list(!!! syms(cols)),
-                                      .f = function(...) {
-                                        x = c(...)
-                                        names(x) = cols
-                                        return(x)
-                                      })) %>%
+    mutate(!! sym(vector_col) := pmap(
+      .l = list(!!! syms(cols)),
+      .f = function(...) {
+        x = c(...)
+        names(x) = cols
+        return(x)
+      })) %>%
     { if (transmute) select(., vector_col) else . }
 
   return(data)
@@ -327,6 +328,7 @@ transform_cues = function(data, cues,
       pca = pca
 
       transform_cues(data, cues, center = center, scale = scale, pca = pca,
+                     attach = attach,
                      transform.parameters = transform.parameters,
                      return.transformed.data = T, return.transform.parameters = F,
                      return.transform.function = F, return.untransform.function = F)
@@ -336,6 +338,7 @@ transform_cues = function(data, cues,
 
   untransform.function = if (!return.untransform.function) NULL else {
     untransform_cues(data, cues, uncenter = center, unscale = scale, unpca = pca,
+                     attach = attach,
                      transform.parameters = transform.parameters,
                      return.untransformed.data = F, return.untransform.function = T)
   }
@@ -366,12 +369,14 @@ transform_cues = function(data, cues,
 #' @export
 untransform_cues = function(data, cues,
                             uncenter = NULL, unscale = NULL, unpca = NULL,
+                            attach = T,
                             transform.parameters = NULL,
                             return.untransformed.data = T, return.untransform.function = F
 ) {
   assert_that(is.data.frame(data) | is_tibble(data))
   assert_that(!is.null(transform.parameters) & is.list(transform.parameters),
               msg = "Must provide transform parameters.")
+  old_data <- data
   groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
 
   # By default untransform all transformations available in transform object
@@ -433,6 +438,14 @@ untransform_cues = function(data, cues,
                        return.untransformed.data = T, return.untransform.function = F)
 
     }
+  }
+
+  if (attach) {
+    data %<>%
+      cbind(
+        old_data %>%
+          select(-intersect(names(old_data), names(data))),
+        .)
   }
 
   if (return.untransformed.data & !return.untransform.function) return(data) else
