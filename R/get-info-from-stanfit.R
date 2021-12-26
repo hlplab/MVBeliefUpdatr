@@ -58,7 +58,7 @@ get_random_draw_indices = function(fit, ndraws)
 get_transform_function_from_stanfit = function(fit) {
   assert_that(is.NIW_ideal_adaptor_stanfit(fit))
 
-  return(fit@transform_information@transform.function)
+  return(fit@transform_information$transform.function)
 }
 
 #' @rdname get_transform_function_from_stanfit
@@ -66,7 +66,7 @@ get_transform_function_from_stanfit = function(fit) {
 get_untransform_function_from_stanfit = function(fit) {
   assert_that(is.NIW_ideal_adaptor_stanfit(fit))
 
-  return(fit@transform_information@untransform.function)
+  return(fit@transform_information$untransform.function)
 }
 
 
