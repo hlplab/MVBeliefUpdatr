@@ -436,7 +436,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' phonetic tuning studies.
 #'
 #' Tokens are sorted based on the increasing probability of a \code{target_category} response for the condition
-#' (\code{group}, e.g., prior or a specific exposure group) specified in \code{sort.by}. By default both the mean
+#' (\code{group}, e.g., prior or a specific exposure group) specified in \code{sort_by}. By default both the mean
 #' categorization and confidence intervals are plotted.
 #' If `summarize=TRUE`, the function marginalizes over all posterior samples. The number of samples
 #' is determined by ndraws. If ndraws is NULL, all samples are used. Otherwise ndraws random
@@ -463,6 +463,8 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' @param group.linetypes Vector of linetypes of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
 #' @param sort_by Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
 #' from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired.
+#' @param all_test_locations Should predictions be shown for all combinations of test locations and group, or should only
+#' combinations be shown that actually occurred in the data? (default: `TRUE`)
 #'
 #' @return ggplot object.
 #'
@@ -482,12 +484,10 @@ plot_ibbu_stanfit_test_categorization = function(
   target_category = 1,
   panel.group = FALSE,
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
-  sort.by = "prior"
+  sort_by = "prior", all_test_locations = TRUE
 ) {
   assert_NIW_ideal_adaptor_stanfit(model)
-  if (is.null(data.test)) {
-    data.test = get_test_data_from_stanfit(model)
-  }
+  if (is.null(data.test)) data.test = get_test_data_from_stanfit(model)
   assert_that(is.flag(summarize))
   assert_that(is.null(confidence.intervals) |
                 all(is.numeric(confidence.intervals),
@@ -496,7 +496,7 @@ plot_ibbu_stanfit_test_categorization = function(
               msg = "Confidence intervals must be NULL (if not CIs are desired) or a vector of two probabilities.")
   assert_that(is.null(group.labels) | is.character(group.labels))
   assert_that(is.null(group.linetypes) | is.numeric(group.linetypes))
-  assert_that(is.null(sort.by) | length(sort.by) == 1)
+  assert_that(is.null(sort_by) | length(sort_by) == 1)
 
 
   # Set confidence intervals
@@ -523,11 +523,13 @@ plot_ibbu_stanfit_test_categorization = function(
 
   # If group.ids are NULL set them to the levels of groups found in the extraction
   # of posteriors from model
-  if (is.null(group.ids))  group.ids = levels(d.pars$group)
+  if (is.null(group.ids)) group.ids = levels(d.pars$group)
   assert_that(all(group.ids %in% unique(d.pars$group)),
-              msg = "Some group.ids were not found in the stanfit object.")
-  assert_that(sort.by %in% group.ids,
-              msg = "Sort.by must be NULL or one of the group IDs (group.ids).")
+              msg = paste("Some group.ids were not found in the stanfit object: ",
+                          paste(setdiff(group.ids, unique(d.pars$group)), collapse = ", ")))
+  assert_that(sort_by %in% group.ids,
+              msg = paste("sort_by must be NULL or one of the group IDs (group.ids):",
+                          paste(group.ids, collapse = ", ")))
 
   # Setting aes defaults
   if(is.null(group.labels)) group.labels = paste0("posterior (", group.ids[-1], ")")
@@ -543,25 +545,31 @@ plot_ibbu_stanfit_test_categorization = function(
     filter(group %in% group.ids)
 
   # Prepare test_data
-  message("Using IBBU stanfit input to extract information about test data.")
-  cue.labels = get_cue_labels_from_model(d.pars)
-  test_data = data.test %>%
-    distinct() %>%
-    { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
-    # CHECK: Could be replaced by make_vector_column
-    transmute(x = pmap(.l = list(!!! syms(cue.labels)), .f = ~ c(...))) %>%
-    nest(cues = x) %>%
-    crossing(group = levels(d.pars$group))
+  cue.labels <- get_cue_levels_from_stanfit(model)
+  if (all_test_locations) {
+    test_data <-
+      data.test %>%
+      distinct(!!! syms(cue.labels)) %>%
+      { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
+      make_vector_column(cols = cue.labels, vector_col = "x", .keep = "unused") %>%
+      nest(cues = x) %>%
+      crossing(group = levels(d.pars$group))
+  } else {
+    test_data <-
+      data.test %>%
+      distinct(!!! syms(cue.labels), group.id, group) %>%
+      { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
+      make_vector_column(cols = cue.labels, vector_col = "x", .keep = "unused") %>%
+      group_by(group.id, group) %>%
+      nest(cues = x)
+  }
 
   d.pars %<>%
-    # Write a categorization function for each draw
     group_by(group, .draw) %>%
     do(f = get_categorization_function_from_grouped_ibbu_stanfit_draws(., logit = T)) %>%
-    left_join(test_data) %>%
+    right_join(test_data) %>%
     group_by(group, .draw) %>%
-    mutate(
-      p_cat = invoke_map(.f = f, .x = cues, target_category = target_category),
-      f = NULL) %>%
+    mutate(p_cat = invoke_map(.f = f, .x = cues, target_category = target_category)) %>%
     unnest(c(cues, p_cat))
 
   if (summarize) {
@@ -576,8 +584,7 @@ plot_ibbu_stanfit_test_categorization = function(
           y.outer.max = function(x) plogis(quantile(x, confidence.intervals[4], na.rm = T)),
           y.inner.min = function(x) plogis(quantile(x, confidence.intervals[2], na.rm = T)),
           y.inner.max = function(x) plogis(quantile(x, confidence.intervals[3], na.rm = T)),
-          p_cat = function(x) plogis(mean(x, na.rm = T)))
-      )
+          p_cat = function(x) plogis(mean(x, na.rm = T))))
   } else {
     d.pars %<>%
       mutate(p_cat = plogis(p_cat))
@@ -586,14 +593,14 @@ plot_ibbu_stanfit_test_categorization = function(
   d.pars %<>%
     # Get cues as character strings (just in case)
     mutate(
-      token.cues = map(x, ~paste(.x, collapse = ",\n")),
-      x = NULL) %>%
-    ungroup()
+      token.cues = map(x, ~paste(.x, collapse = ",\n"))) %>%
+    ungroup() %>%
+    select(-c(x, f))
 
-  # If sort.by is specified, sort levels of x-axis by that group.
-  if (!is.null(sort.by)) {
+  # If sort_by is specified, sort levels of x-axis by that group.
+  if (!is.null(sort_by)) {
     sort.levels = d.pars %>%
-      filter(group == sort.by) %>%
+      filter(group == sort_by) %>%
       group_by(token.cues) %>%
       summarise(p_cat = mean(p_cat)) %>%
       arrange(p_cat) %>% pull(token.cues)
