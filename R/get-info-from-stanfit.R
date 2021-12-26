@@ -40,9 +40,9 @@ get_random_draw_indices = function(fit, ndraws)
 }
 
 
-#' Get the transform/untransform fucntion from an NIW ideal adaptor stanfit.
+#' Get the transform/untransform information from an NIW ideal adaptor stanfit.
 #'
-#' Returns the transform/untransform function handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
+#' Returns the transform/untransform information handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
 #' object.
 #'
 #' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
@@ -55,21 +55,23 @@ get_random_draw_indices = function(fit, ndraws)
 #' TBD
 #' @rdname get_transform_function_from_stanfit
 #' @export
-get_transform_function_from_stanfit = function(fit) {
-  assert_that(is.NIW_ideal_adaptor_stanfit(fit))
-
-  return(fit@transform_information$transform.function)
+get_transform_function_from_stanfit <- function(model) {
+  return(get_transform_information_from_stanfit(model)$transform.function)
 }
 
 #' @rdname get_transform_function_from_stanfit
 #' @export
-get_untransform_function_from_stanfit = function(fit) {
-  assert_that(is.NIW_ideal_adaptor_stanfit(fit))
-
-  return(fit@transform_information$untransform.function)
+get_untransform_function_from_stanfit <- function(model) {
+  return(get_transform_information_from_stanfit(model)$untransform.function)
 }
 
+#' @rdname get_transform_function_from_stanfit
+#' @export
+get_transform_information_from_stanfit <- function(model) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(model))
 
+  return(model@transform_information)
+}
 
 
 #' Get the input data from an NIW ideal adaptor stanfit.
@@ -280,7 +282,7 @@ get_expected_category_statistic_from_stanfit = function(
       mu.mean = list(m %>% reduce(`+`) / length(m)),
       Sigma.mean = list(Sigma %>% reduce(`+`) / length(Sigma))) %>%
     select(group, category, !!! rlang::syms(paste0(statistic, ".mean"))) %>%
-    { if (untransform_cues) untransform_model(., get_untransform_function_from_stanfit(x)) else . }
+    { if (untransform_cues) untransform_model(., get_transform_information_from_stanfit(x)) else . }
 
   if (!all(sort(unique(as.character(samples$group))) == sort(as.character(group))))
     warning("Not all groups were found in x.")
