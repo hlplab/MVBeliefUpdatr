@@ -156,7 +156,7 @@ plot_ibbu_stanfit_parameters = function(
       cowplot::plot_grid(plotlist = list(legend, p.LR),
                          nrow = 2, rel_heights = c(.5, .5))),
       nrow = 1, rel_widths = c(K,1)),
-    rel_heights = c(1.5, K), nrow = 2, axis = "lrtb"))
+    rel_heights = c(1.5, K), nrow = 2, axis = "btlr", align = "hv"))
   return(p)
 }
 
