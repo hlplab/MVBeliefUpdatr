@@ -127,7 +127,7 @@ plot_ibbu_stanfit_parameters = function(
               ceiling(log10(min(x.limits))),
               floor(log10(max(x.limits)))))) +
         scale_y_discrete("", expand = expansion(mult = c(0 , 0.1))) +
-        coord_trans(x = "log10") +
+        coord_trans(x = "log10", xlim = x.limits) +  # <------------------------ xlim = x.limits for now put back in since plots was empty without it.
         facet_grid(~ .data$key, scales = "free_x"))) +
     theme(panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -264,7 +264,9 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     # Optionally plot test data
     { if (plot.test)
       geom_point(
-        data = get_test_data_from_stanfit(model) %>%
+        data =
+          get_test_data_from_stanfit(model) %>%
+          { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
           rename_at(cue.names,
                     function(x) paste0("cue", which(x == cue.names))),
         mapping = aes(x = .data$cue1, y = .data$cue2),
@@ -368,7 +370,9 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
     # Optionally plot test data
     { if (plot.test)
       geom_point(
-        data = get_test_data_from_stanfit(model) %>%
+        data =
+          get_test_data_from_stanfit(model) %>%
+          { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
           rename_at(cue.names,
                     function(x) paste0("cue", which(x == cue.names))),
         mapping = aes(
