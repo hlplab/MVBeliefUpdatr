@@ -10,12 +10,13 @@ get_expected_category_statistic_from_stanfit(
   x,
   category = NULL,
   group = NULL,
-  statistic = c("mu", "Sigma")
+  statistic = c("mu", "Sigma"),
+  untransform_cues = T
 )
 
-get_expected_mu_from_stanfit(x, category, group)
+get_expected_mu_from_stanfit(x, category, group, ...)
 
-get_expected_sigma_from_stanfit(x, category, group)
+get_expected_sigma_from_stanfit(x, category, group, ...)
 }
 \arguments{
 \item{x}{An \code{\link[=is.NIW_ideal_adaptor_stanfit]{mv_ibbu_stanfit}} or \code{\link[=NIW_ideal_adaptor_MCMC]{NIW_ideal_adaptor_MCMC}} object.}

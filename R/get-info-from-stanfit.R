@@ -256,46 +256,52 @@ get_group_constructor = function(fit) {
 #' TBD
 #' @rdname get_expected_category_statistic_from_stanfit
 #' @export
-get_expected_category_statistic_from_stanfit = function(x, category = NULL, group = NULL,
-                                           statistic = c("mu", "Sigma")) {
+get_expected_category_statistic_from_stanfit = function(
+  x,
+  category = NULL,
+  group = NULL,
+  statistic = c("mu", "Sigma"),
+  untransform_cues = T
+) {
   assert_that(all(statistic %in% c("mu", "Sigma")))
   assert_that(is.NIW_ideal_adaptor_stanfit(x) | is.NIW_ideal_adaptor_MCMC(x, is.nested = T, is.long = T))
   if (is.NIW_ideal_adaptor_stanfit(x))
-    x = add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T)
+    samples = add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T)
 
   assert_that(any(is.null(category), is.character(category), is.numeric(category)))
   assert_that(any(is.null(group), is.character(group), is.numeric(group)))
   if (is.null(category)) category = unique(x$category)
   if (is.null(group)) group = unique(x$group)
 
-  x %<>%
+  samples %<>%
     filter(group %in% !! group, category %in% !! category) %>%
     mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
     group_by(group, category) %>%
     summarise(
       mu.mean = list(m %>% reduce(`+`) / length(m)),
       Sigma.mean = list(Sigma %>% reduce(`+`) / length(Sigma))) %>%
-    select(group, category, !!! rlang::syms(paste0(statistic, ".mean")))
+    select(group, category, !!! rlang::syms(paste0(statistic, ".mean"))) %>%
+    { if (untransform_cues) untransform_model(., get_untransform_function_from_stanfit(x)) else . }
 
-  if (!all(sort(unique(as.character(x$group))) == sort(as.character(group))))
+  if (!all(sort(unique(as.character(samples$group))) == sort(as.character(group))))
     warning("Not all groups were found in x.")
 
   # If just one category and group was requested, just return that object, rather
   # than the tibble
-  if (nrow(x) == 1) x = x[,paste0(statistic, ".mean")][[1]][[1]]
-  return(x)
+  if (nrow(samples) == 1) samples = samples[,paste0(statistic, ".mean")][[1]][[1]]
+  return(samples)
 }
 
 #' @rdname get_expected_category_statistic_from_stanfit
 #' @export
-get_expected_mu_from_stanfit = function(x, category, group) {
-  return(get_expected_category_statistic_from_stanfit(x, category, group, statistic = "mu"))
+get_expected_mu_from_stanfit = function(x, category, group, ...) {
+  return(get_expected_category_statistic_from_stanfit(x, category, group, statistic = "mu", ...))
 }
 
 #' @rdname get_expected_category_statistic_from_stanfit
 #' @export
-get_expected_sigma_from_stanfit = function(x, category, group) {
-  return(get_expected_category_statistic_from_stanfit(x, category, group, statistic = "Sigma"))
+get_expected_sigma_from_stanfit = function(x, category, group, ...) {
+  return(get_expected_category_statistic_from_stanfit(x, category, group, statistic = "Sigma", ...))
 }
 
 
