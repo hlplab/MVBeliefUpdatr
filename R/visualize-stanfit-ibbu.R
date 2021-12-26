@@ -79,6 +79,8 @@ plot_ibbu_stanfit_parameters = function(
                                   # is estimated for the entire data in each plot
                                   trim = T) +
     geom_vline(xintercept = 0, color = "darkgray") +
+    # # Add empty data points to control scale: https://stackoverflow.com/questions/51735481/ggplot2-change-axis-limits-for-each-individual-facet-panel
+    # geom_blank() +
     scale_x_continuous("Mean of category means") +
     scale_y_discrete("Category", expand = expansion(mult = c(0 , 0.1))) +
     scale_fill_manual(
@@ -86,7 +88,7 @@ plot_ibbu_stanfit_parameters = function(
       breaks = group.ids,
       labels = group.labels,
       values = group.colors) +
-    coord_cartesian(xlim = x.limits, default = T) +
+    coord_cartesian(default = T) +
     facet_grid(~ .data$cue, scales = "free_x") +
     theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
   legend = cowplot::get_legend(p.m)
@@ -105,7 +107,7 @@ plot_ibbu_stanfit_parameters = function(
           seq(
             ceiling(symlog(min(x.limits))),
             floor(symlog(max(x.limits)))))) +
-      coord_trans(x = "symlog", xlim = x.limits) +
+      coord_trans(x = "symlog") +
       facet_grid(.data$cue2 ~ .data$cue, scales = "free_x")) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -125,7 +127,7 @@ plot_ibbu_stanfit_parameters = function(
                                floor(log10(max(x.limits)))
                              ))) +
         scale_y_discrete("", expand = expansion(mult = c(0 , 0.1))) +
-        coord_trans(x = "log10", xlim = x.limits) +
+        coord_trans(x = "log10") +
         facet_grid(~ .data$key, scales = "free_x"))) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
