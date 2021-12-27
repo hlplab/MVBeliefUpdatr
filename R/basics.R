@@ -322,11 +322,12 @@ transform_cues = function(data, cues,
   }
 
   transform.function = if (!return.transform.function) NULL else {
-    function(data, attach = attach) {
-      cues = cues
-      center = center
-      scale = scale
-      pca = pca
+    function(data) {
+      cues <- cues
+      center <- center
+      scale <- scale
+      pca <- pca
+      attach <- attach
 
       transform_cues(data, cues, center = center, scale = scale, pca = pca,
                      attach = attach,
@@ -428,11 +429,12 @@ untransform_cues = function(data, cues,
   }
 
   untransform.function = if (!return.untransform.function) NULL else {
-    function(data, attach = attach) {
-      cues = cues
-      uncenter = uncenter
-      unscale = unscale
-      unpca = unpca
+    function(data) {
+      cues <- cues
+      uncenter <- uncenter
+      unscale <- unscale
+      unpca <- unpca
+      attach <- attach
 
       untransform_cues(data, cues, uncenter = uncenter, unscale = unscale, unpca = unpca,
                        attach = attach,
