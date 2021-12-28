@@ -107,8 +107,9 @@ get_input_from_stanfit = function(fit) {
 #' returned.  If `NULL` then all categories are included. (default: `NULL`)
 #' @param group Character vector with groups (or group) for which category statistics are to be
 #' returned. If `NULL` then all groups are included. (default: `NULL`)
-#' @param statistic Which category statistic should be returned? `mu` for category mean or `Sigma` for category
-#' covariance matrix, or `c("mu", "Sigma")` for both. (default: both)
+#' @param statistic Which exposure statistic should be returned? `n` for number of observations, `mean` for
+#' category mean or `ss` for (uncentered) category sum-of-square matrix, or `c("mean", "ss")` for any combination
+#' thereof. (default: all)
 #'
 #' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
 #' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
@@ -121,29 +122,90 @@ get_input_from_stanfit = function(fit) {
 #' @rdname get_exposure_statistic_from_stanfit
 #' @export
 get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
-                                               statistic = c("mu", "Sigma")) {
+                                               statistic = c("n", "mean", "ss")) {
   assert_that(is.NIW_ideal_adaptor_input(x) | is.NIW_ideal_adaptor_stanfit(x))
-  stop("get_ibbu_stanfit_exposure_statistics not yet implemented!")
-
-  x = get_input_from_stanfit(x)
+  assert_that(all(statistic %in% c("n", "mean", "ss")),
+              msg = "statistic must be one of 'mean' or 'ss'.")
+  if (is.NIW_ideal_adaptor_stanfit(x)) x = get_input_from_stanfit(x)
   # More here. ######################################
   # filter out group "prior"
   # deal with cases for which there is no exposure data
   # Assume that all cues are used
 
-  return("ERROR")
+  if ("mean" %in% statistic) {
+    m <- x$x_mean
+    d <- dim(m)
+    dn <- dimnames(m)
+
+    df <- tibble()
+    for (c in 1:d[1]) { # category
+      for (g in 1:d[2]) { # group/condition
+        for (f in 1:d[3]) { # cue
+          df <-
+            rbind(
+              df,
+              tibble(
+                group = dn[[2]][g],
+                category = dn[[1]][c],
+                cue = dn[[3]][f],
+                value = m[c, g, f]))
+        }
+      }
+    }
+
+    df %<>%
+      pivot_wider(names_from = "cue", values_from = "value") %>%
+      { if (!is.null(group)) filter(., group %in% group) else . } %>%
+      { if (!is.null(category)) filter(., category %in% group) else . } %>%
+      make_vector_column(cols = dn[[3]], vector_col = "mean", .keep = "unused")
+  }
+
+  if ("ss" %in% statistic) {
+    s <- x$x_ss
+    d <- dim(s)
+    dn <- dimnames(s)
+
+    df.s <- tibble()
+    for (c in 1:d[1]) { # category
+      for (g in 1:d[2]) { # group/condition
+        for (f1 in 1:d[3]) { # cue1
+          for (f2 in 1:d[4]) { # cue2
+            df.s <-
+            rbind(
+              df.s,
+              tibble(
+                group = dn[[2]][g],
+                category = dn[[1]][c],
+                cue = dn[[3]][f1],
+                cue2 = dn[[4]][f2],
+                value = s[c, g, f1, f2]))
+          }
+        }
+      }
+    }
+
+    df.s %<>%
+      group_by(category, group) %>%
+      summarise(ss = list(matrix(value, nrow = sqrt(length(value))))) %>%
+      { if (!is.null(group)) filter(., group %in% group) else . } %>%
+      { if (!is.null(category)) filter(., category %in% group) else . }
+
+    df <- if (!is.null(df.m)) df %<>% left_join(df.s, by = c("group", "category")) else df.s
+  }
+
+  return(df)
 }
 
 #' @rdname get_exposure_statistic_from_stanfit
 #' @export
 get_exposure_mean_from_stanfit = function(x, category, group) {
-  return(get_exposure_statistic_from_stanfit(x, category, group, statistic = "mu"))
+  return(get_exposure_statistic_from_stanfit(x, category, group, statistic = "mean"))
 }
 
 #' @rdname get_exposure_statistic_from_stanfit
 #' @export
-get_exposure_sd_from_stanfit = function(x, category, group) {
-  return(get_exposure_statistic_from_stanfit(x, category, group, statistic = "Sigma"))
+get_exposure_ss_from_stanfit = function(x, category, group) {
+  return(get_exposure_statistic_from_stanfit(x, category, group, statistic = "ss"))
 }
 
 

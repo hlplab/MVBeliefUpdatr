@@ -3,19 +3,19 @@
 \name{get_exposure_statistic_from_stanfit}
 \alias{get_exposure_statistic_from_stanfit}
 \alias{get_exposure_mean_from_stanfit}
-\alias{get_exposure_sd_from_stanfit}
+\alias{get_exposure_ss_from_stanfit}
 \title{Get category sample mean or covariance matrix of exposure data from NIW IBBU stanfit.}
 \usage{
 get_exposure_statistic_from_stanfit(
   x,
   category = NULL,
   group = NULL,
-  statistic = c("mu", "Sigma")
+  statistic = c("n", "mean", "ss")
 )
 
 get_exposure_mean_from_stanfit(x, category, group)
 
-get_exposure_sd_from_stanfit(x, category, group)
+get_exposure_ss_from_stanfit(x, category, group)
 }
 \arguments{
 \item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} or NIW belief MCMC object.}
@@ -26,8 +26,9 @@ returned.  If `NULL` then all categories are included. (default: `NULL`)}
 \item{group}{Character vector with groups (or group) for which category statistics are to be
 returned. If `NULL` then all groups are included. (default: `NULL`)}
 
-\item{statistic}{Which category statistic should be returned? `mu` for category mean or `Sigma` for category
-covariance matrix, or `c("mu", "Sigma")` for both. (default: both)}
+\item{statistic}{Which exposure statistic should be returned? `n` for number of observations, `mean` for
+category mean or `ss` for (uncentered) category sum-of-square matrix, or `c("mean", "ss")` for any combination
+thereof. (default: all)}
 }
 \value{
 If just one group and category was requested, a vector (for the mean) or matrix (for the covariance

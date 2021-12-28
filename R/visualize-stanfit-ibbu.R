@@ -281,6 +281,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
             model,
             category = levels(d$category),
             group = levels(d$group)) %>%
+          # SOMETHING IS MISSING HERE. NEED TO TRANSFORM "mean" COLUMN INTO SEPARATE COLUMNS FOR CUES
           rename_at(cue.names,
                     function(x) paste0("cue", which(x == cue.names))),
         mapping = aes(
@@ -291,13 +292,12 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
         inherit.aes = F, size = 2) +
       geom_path(
         data =
-          crossing(
-            group = levels(d$group),
+          get_expected_category_statistic_from_stanfit(
+            model,
             category = levels(d$category),
-            level = .95) %>%
-          mutate(
-            x = map2(category, group, get_exposure_sd_from_stanfit(model, .x, .y)),
-            centre = map2(category, group, get_exposure_mean_from_stanfit(model, .x, .y))) %>%
+            group = levels(d$group)) %>%
+          rename(x = cov, centre = mean) %>%
+          crossing(level = .95) %>%
           mutate(ellipse = pmap(., ellipse.pmap)) %>%
           unnest(ellipse) %>%
           group_by(across(-ellipse)) %>%
@@ -404,7 +404,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
            category = levels(d$category),
            level = .95) %>%
           mutate(
-            x = map2(category, group, get_exposure_sd_from_stanfit(model, .x, .y)),
+            x = map2(category, group, get_exposure_ss_from_stanfit(model, .x, .y)),
             centre = map2(category, group, get_exposure_mean_from_stanfit(model, .x, .y))) %>%
           mutate(ellipse = pmap(., ellipse.pmap)) %>%
           unnest(ellipse) %>%
@@ -463,8 +463,10 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' @param group.labels Vector of group labels of same length as `group.ids` or `NULL` to use defaults. (default: `NULL`)
 #' The default labels each categorization function based on whether it is showing prior or posterior categorization,
 #' and by its group ID.
-#' @param group.colors Vector of colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
-#' @param group.linetypes Vector of linetypes of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
+#' @param group.colors,group.linetypes Vector of colors and linetypes of same length as group.ids or `NULL` to use defaults.
+#' (default: `NULL`)
+#' @param category.colors Vector of colors and linetypes of same length as category.ids or `NULL` to use defaults. Only
+#' relevant when `plot_in_cue_space = TRUE`. (default: `NULL`)
 #' @param all_test_locations Should predictions be shown for all combinations of test locations and group, or should only
 #' combinations be shown that actually occurred in the data? (default: `FALSE`)
 #' @param plot_in_cue_space Should predictions be plotted in the cue space? If not, test tokens are essentially treated
@@ -491,6 +493,7 @@ plot_ibbu_stanfit_test_categorization = function(
   target_category = 1,
   panel.group = FALSE,
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
+  category.ids = NULL, category.colors = NULL,
   all_test_locations = TRUE, plot_in_cue_space = FALSE,
   sort_by = "prior"
 ) {
@@ -531,7 +534,7 @@ plot_ibbu_stanfit_test_categorization = function(
 
   # If group.ids are NULL set them to the levels of groups found in the extraction
   # of posteriors from model
-  if (is.null(group.ids)) group.ids = levels(d.pars$group)
+  if (is.null(group.ids)) group.ids = get_group_levels_from_stanfit(model)
   assert_that(all(group.ids %in% unique(d.pars$group)),
               msg = paste("Some group.ids were not found in the stanfit object: ",
                           paste(setdiff(group.ids, unique(d.pars$group)), collapse = ", ")))
@@ -547,8 +550,10 @@ plot_ibbu_stanfit_test_categorization = function(
   if(length(group.labels) < length(group.ids)) group.labels = c("prior", group.labels)
   if(length(group.colors) < length(group.ids)) group.colors = c("darkgray", group.colors)
   if(length(group.linetypes) < length(group.ids))  group.linetypes = c(3, group.linetypes)
+  if(is.null(category.ids)) category.ids = get_category_levels_from_stanfit(model)
+  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
 
-  # Exclude all groups that are not in group.ids
+  # Exclude all groups that are not in group.id
   d.pars %<>%
     filter(group %in% group.ids)
 
@@ -559,17 +564,17 @@ plot_ibbu_stanfit_test_categorization = function(
       data.test %>%
       distinct(!!! syms(cue.labels)) %>%
       { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
-      make_vector_column(cols = cue.labels, vector_col = "x", .keep = "unused") %>%
-      nest(cues = x) %>%
+      make_vector_column(cols = cue.labels, vector_col = "x", .keep = "all") %>%
+      nest(cues_joint = x, cues_separate = cue.labels) %>%
       crossing(group = levels(d.pars$group))
   } else {
     test_data <-
       data.test %>%
       distinct(!!! syms(cue.labels), group.id, group) %>%
       { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
-      make_vector_column(cols = cue.labels, vector_col = "x", .keep = "unused") %>%
+      make_vector_column(cols = cue.labels, vector_col = "x", .keep = "all") %>%
       group_by(group.id, group) %>%
-      nest(cues = x)
+      nest(cues_joint = x, cues_separate = cue.labels)
   }
 
   d.pars %<>%
@@ -577,13 +582,13 @@ plot_ibbu_stanfit_test_categorization = function(
     do(f = get_categorization_function_from_grouped_ibbu_stanfit_draws(., logit = T)) %>%
     right_join(test_data) %>%
     group_by(group, .draw) %>%
-    mutate(p_cat = invoke_map(.f = f, .x = cues, target_category = target_category)) %>%
-    unnest(c(cues, p_cat))
+    mutate(p_cat = invoke_map(.f = f, .x = cues_joint, target_category = target_category)) %>%
+    unnest(c(cues_joint, cues_separate, p_cat))
 
   if (summarize) {
     d.pars %<>%
       # For each unique group and test token obtain the CIs and the mean.
-      group_by(group, x) %>%
+      group_by(group, x, !!! syms(cue.labels)) %>%
       summarise_at(
         "p_cat",
         .funs = list(
@@ -610,22 +615,28 @@ plot_ibbu_stanfit_test_categorization = function(
 
   if (plot_in_cue_space) {
     if (length(get_cue_levels_from_stanfit(model)) > 2) stop("plot_in_cue_space = T not yet implemented for more than two cues.")
+    if (length(get_category_levels_from_stanfit(model)) > 2) stop("plot_in_cue_space = T not yet implemented for more than two categories.")
 
     p <-
       d.pars %>%
       mutate(group = factor(group, levels = group.ids)) %>%
       ggplot(
         aes(
-        x = .data$cue1,
-        y = .data$cue2,
+        x = !! sym(cue.labels[1]),
+        y = !! sym(cue.labels[2]),
         fill = .data$p_cat)) +
       geom_raster() +
       scale_x_continuous(cue.labels[1]) +
       scale_y_continuous(cue.labels[2]) +
       scale_fill_gradient2(
-        paste0("Predicted proportion of ", category1, "-responses"),
-        mid = .5,
-        limits = c(0,1))
+        paste0("Predicted proportion\n of", category1, "-responses"),
+        midpoint = .5,
+        high = category.colors[target_category],
+        mid = "white",
+        low = category.colors[which(category.ids != category.ids[target_category])],
+        limits = c(0,1)) +
+      coord_cartesian(expand = F) +
+      facet_wrap(~ group)
 
   } else {
     # If sort_by is specified, sort levels of x-axis by that group.
@@ -676,7 +687,6 @@ plot_ibbu_stanfit_test_categorization = function(
             x = as.numeric(.data$token),
             ymin = .data$y.outer.min,
             ymax = .data$y.outer.max,
-            shape = .data$group,
             fill = .data$group),
           color = NA, alpha = .1) +
         geom_ribbon(
@@ -690,21 +700,14 @@ plot_ibbu_stanfit_test_categorization = function(
           "Group",
           breaks = group.ids,
           labels = group.labels,
-          values = group.colors) +
-        scale_shape_discrete(
-          "Group",
-          breaks = group.ids,
-          labels = group.labels)
+          values = group.colors)
 
       # Place information about confidence intervals on plot.
       p <- p +
         ggtitle(paste0((confidence.intervals[4]-confidence.intervals[1]) * 100,
                        "% and ",
                        (confidence.intervals[3]-confidence.intervals[2]) * 100,
-                       "% CIs\nbased on ",
-                       ndraws,
-                       " posterior samples.")
-        )
+                       "% CIs\nbased on ", ndraws, " posterior samples."))
     }
 
     p <- p +

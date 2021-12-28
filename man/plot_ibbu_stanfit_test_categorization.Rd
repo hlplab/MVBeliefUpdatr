@@ -18,6 +18,8 @@ plot_ibbu_stanfit_test_categorization(
   group.labels = NULL,
   group.colors = NULL,
   group.linetypes = NULL,
+  category.ids = NULL,
+  category.colors = NULL,
   all_test_locations = TRUE,
   plot_in_cue_space = FALSE,
   sort_by = "prior"
@@ -50,9 +52,11 @@ unique categorization function be plotted for each MCMC draw (`FALSE`)? (default
 The default labels each categorization function based on whether it is showing prior or posterior categorization,
 and by its group ID.}
 
-\item{group.colors}{Vector of colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)}
+\item{group.colors, group.linetypes}{Vector of colors and linetypes of same length as group.ids or `NULL` to use defaults.
+(default: `NULL`)}
 
-\item{group.linetypes}{Vector of linetypes of same length as group.ids or `NULL` to use defaults. (default: `NULL`)}
+\item{category.colors}{Vector of colors and linetypes of same length as category.ids or `NULL` to use defaults. Only
+relevant when `plot_in_cue_space = TRUE`. (default: `NULL`)}
 
 \item{all_test_locations}{Should predictions be shown for all combinations of test locations and group, or should only
 combinations be shown that actually occurred in the data? (default: `FALSE`)}
