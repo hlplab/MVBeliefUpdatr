@@ -3,6 +3,7 @@
 #' @importFrom mvtnorm dmvt
 #' @importFrom tidybayes mean_hdi
 #' @importFrom ggridges geom_density_ridges
+#' @importFrom ggforce facet_matrix
 #' @importFrom forcats fct_rev
 NULL
 
@@ -159,8 +160,101 @@ plot_ibbu_stanfit_parameters = function(
                          nrow = 2, rel_heights = c(.5, .5))),
       nrow = 1, rel_widths = c(K,1)),
     rel_heights = c(1.5, K), nrow = 2, axis = "btlr", align = "hv"))
+
   return(p)
 }
+
+
+
+
+#' Plot correlations between IBBU parameters.
+#'
+#' Plot correlations between post-warmup MCMC samples for all parameters representing the prior and/or posterior beliefs.
+#'
+#' @param model mv-ibbu-stanfit object.
+#' @param category,group,cue Character vectors of categories, groups, and cues that should be included or `NULL` to include all.
+#' (default: `NULL` for category and cue; `"prior"` for group since those are the only free parameters)
+#' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
+#' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
+#' @param category.colors Vector of fill colors of same length as category or `NULL` to use defaults. (default: `NULL`)
+#'
+#' @return ggplot object.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#'
+#' @export
+plot_ibbu_stanfit_parameter_correlations = function(
+  model,
+  category = NULL, group = "prior", cue = NULL,
+  ndraws = NULL,
+  untransform_cues = TRUE,
+  category.colors = NULL
+) {
+  d.pars <-
+    model %>%
+    add_ibbu_stanfit_draws(
+      which = if (group == "prior") "prior" else if ("prior" %nin% group) "posterior" else "both",
+      ndraws = ndraws,
+      untransform_cues = untransform_cues,
+      nest = T)
+
+  # Setting aes defaults
+  if(is.null(category)) category <- levels(d.pars$category)
+  if(is.null(cue)) cue <- get_cue_labels_from_model(d.pars)
+  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category))
+
+  d.pars %<>%
+    { if (!is.null(category)) filter(., category %in% category) else . } %>%
+    { if (!is.null(group)) filter(., group %in% group) else . } %>%
+    mutate(
+      S_tau = map(S, cov2tau),
+      S_rho = map(S, cov2cor)) %>%
+    select(-S) %>%
+    unnest(c(m, S_tau, S_rho)) %>%
+    group_by(across(-c(m, S_tau, S_rho))) %>%
+    mutate(cue1 = all_of(cue)) %>%
+    group_by(across(-c(S_rho))) %>%
+    transmute(!! sym(cue[1]) := S_rho[,1], !! sym(cue[2]) := S_rho[,2]) %>%
+    pivot_longer(cols = cue, values_to = "S_rho", names_to = "cue2") %>%
+    ungroup() %>%
+    select(cue1, cue2, everything()) %>%
+    filter(cue1 != cue2)
+
+  # Removing redundant (duplicate) correlation information
+  d.pars %<>%
+    select(-c(cue2, S_rho)) %>%
+    pivot_wider(names_from = c("cue1"), values_from = c("m", "S_tau")) %>%
+    left_join(
+      d.pars %>%
+        group_by(.chain, .iteration, .draw, group, category) %>%
+        mutate(combination = map2(cue1, cue2, ~paste(sort(c(.x, .y)), collapse = "_")) %>% unlist()) %>%
+        distinct(combination, .keep_all = T) %>%
+        select(-c(cue1, cue2, m, S_tau)) %>%
+        pivot_wider(names_from = "combination", values_from = "S_rho", names_prefix = "S_rho_"),
+      by = c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate"))
+
+  p <- d.pars %>%
+    ggplot(aes(x = .panel_x, y = .panel_y)) +
+    geom_point(alpha = 0.2, shape = 16, size = 0.8, aes(color = category)) +
+    geom_smooth(alpha = 0.2, aes(color = category)) +
+    geom_autodensity(aes(fill = category), alpha = .5, position = position_identity()) +
+    geom_density2d(aes(color = category), contour_var = "ndensity") +
+    scale_color_manual("Category",
+                      breaks = category,
+                      values = category.colors, aesthetics = c("color", "fill")) +
+    facet_matrix(
+      vars(starts_with("kappa"), starts_with("nu"), starts_with("m_"), starts_with("S_")),
+      layer.lower = c(1,2), layer.diag = 3, layer.upper = 4) +
+    theme(panel.grid = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+
+  return(p)
+}
+
+
+
 
 
 
@@ -534,10 +628,11 @@ plot_ibbu_stanfit_test_categorization = function(
 
   # If group.ids are NULL set them to the levels of groups found in the extraction
   # of posteriors from model
-  if (is.null(group.ids)) group.ids = get_group_levels_from_stanfit(model)
-  assert_that(all(group.ids %in% unique(d.pars$group)),
+  group.levels <- unique(d.pars$group)
+  if (is.null(group.ids)) group.ids = group.levels
+  assert_that(all(group.ids %in% group.levels),
               msg = paste("Some group.ids were not found in the stanfit object: ",
-                          paste(setdiff(group.ids, unique(d.pars$group)), collapse = ", ")))
+                          paste(setdiff(group.ids, group.levels), collapse = ", ")))
   assert_that(sort_by %in% group.ids,
               msg = paste("sort_by must be NULL or one of the group IDs (group.ids):",
                           paste(group.ids, collapse = ", ")))

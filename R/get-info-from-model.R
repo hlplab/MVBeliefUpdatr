@@ -19,7 +19,7 @@ get_cue_labels_from_model = function(x, indices = NULL) {
   } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x) | is.NIW_ideal_adaptor_MCMC(x)) {
     x <- x$m
   } else {
-    error("Object not recognized.")
+    stop("Object not recognized.")
   }
 
   x <- names(if (is.list(x)) x[[1]] else if (is.numeric(x)) x[1] else error("No suitable information found."))
@@ -181,6 +181,7 @@ unnest_cue_information_in_model <- function(model) {
 
   model %>%
     unnest(c(!! sym(m), !! sym(S))) %>%
+    group_by(across(-c(!! sym(m), !! sym(S)))) %>%
     mutate(cue = cue.labels) %>%
     group_by(across(-c(!! sym(S)))) %>%
     transmute(!! sym(cue.labels[1]) := (!! sym(S))[,1], !! sym(cue.labels[2]) := (!! sym(S))[,2]) %>%
