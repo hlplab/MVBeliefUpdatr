@@ -127,23 +127,29 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
   assert_that(all(statistic %in% c("n", "mean", "ss")),
               msg = "statistic must be one of 'mean' or 'ss'.")
   if (is.NIW_ideal_adaptor_stanfit(x)) x = get_input_from_stanfit(x)
-  # More here. ######################################
-  # filter out group "prior"
-  # deal with cases for which there is no exposure data
-  # Assume that all cues are used
+  if (!is.null(category)) assert_that(all(category %in% unique(x$category)),
+                                      msg = paste("Some categories were not found in the exposure data:",
+                                                  paste(setdiff(category, unique(x$category)), collapse = ", ")))
+  if (!is.null(group)) assert_that(all(group %in% unique(x$group)),
+                                      msg = paste("Some groups were not found in the exposure data:",
+                                                  paste(setdiff(group, unique(x$group)), collapse = ", ")))
+
+  if ("n" %in% statistic) {
+    stop("Not yet implementd for statistic = n.")
+  }
 
   if ("mean" %in% statistic) {
     m <- x$x_mean
     d <- dim(m)
     dn <- dimnames(m)
 
-    df <- tibble()
+    df.m <- tibble()
     for (c in 1:d[1]) { # category
       for (g in 1:d[2]) { # group/condition
         for (f in 1:d[3]) { # cue
-          df <-
+          df.m <-
             rbind(
-              df,
+              df.m,
               tibble(
                 group = dn[[2]][g],
                 category = dn[[1]][c],
@@ -153,11 +159,11 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
       }
     }
 
-    df %<>%
+    df.m %<>%
       pivot_wider(names_from = "cue", values_from = "value") %>%
-      { if (!is.null(group)) filter(., group %in% group) else . } %>%
-      { if (!is.null(category)) filter(., category %in% group) else . } %>%
       make_vector_column(cols = dn[[3]], vector_col = "mean", .keep = "unused")
+
+    df <- if (!is.null(df)) df %<>% left_join(df.m, by = c("group", "category")) else df.m
   }
 
   if ("ss" %in% statistic) {
@@ -186,12 +192,14 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
 
     df.s %<>%
       group_by(category, group) %>%
-      summarise(ss = list(matrix(value, nrow = sqrt(length(value))))) %>%
-      { if (!is.null(group)) filter(., group %in% group) else . } %>%
-      { if (!is.null(category)) filter(., category %in% group) else . }
+      summarise(ss = list(matrix(value, nrow = sqrt(length(value)))))
 
-    df <- if (!is.null(df.m)) df %<>% left_join(df.s, by = c("group", "category")) else df.s
+    df <- if (!is.null(df)) df %<>% left_join(df.s, by = c("group", "category")) else df.s
   }
+
+  df %<>%
+    { if (!is.null(group)) filter(., group %in% group) else . } %>%
+    { if (!is.null(category)) filter(., category %in% group) else . }
 
   return(df)
 }
