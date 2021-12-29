@@ -355,6 +355,14 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
              alpha = 1 - .data$level,
              group = paste(.data$category, .data$level))) +
     geom_polygon() +
+    geom_rug(
+      data = . %>%
+        distinct(group, category, centre),
+      aes(
+        x = map(centre, ~ .x[1]) %>% unlist(),
+        y = map(centre, ~ .x[2]) %>% unlist(),
+        color = category),
+      inherit.aes = F)
     # Optionally plot test data
     { if (plot.test)
       geom_point(
@@ -409,7 +417,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     scale_fill_manual("Category",
                       breaks = category.ids,
                       labels = category.labels,
-                      values = category.colors) +
+                      values = category.colors,
+                      aesthetics = c("color", "fill")) +
     scale_alpha("",
                 range = c(0.1,.9)) +
     facet_wrap(~ group)
@@ -517,7 +526,8 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
       "Category",
       breaks = category.ids,
       labels = category.labels,
-      values = category.colors) +
+      values = category.colors,
+      aesthetics = c("color", "fill")) +
     coord_fixed(xlim = xlim, ylim = ylim, ratio = 1) +
     facet_wrap(~ .data$group)
 }
