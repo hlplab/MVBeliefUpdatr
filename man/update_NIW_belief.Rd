@@ -9,7 +9,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category(
   prior,
   x_category,
   x_mean,
-  x_S,
+  x_SS,
   x_N,
   noise_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_noise",
   lapse_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_lapses",
@@ -34,7 +34,7 @@ update_NIW_belief_by_one_observation(
 
 \item{x_mean}{mean of the observations.}
 
-\item{x_S}{Centered sum of squares matrix of the observations.}
+\item{x_SS}{Centered sum of squares matrix of the observations.}
 
 \item{x_N}{Number of observations that went into the mean and sum of squares matrix.}
 

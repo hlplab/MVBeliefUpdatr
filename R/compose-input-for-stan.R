@@ -98,15 +98,17 @@ get_sufficient_statistics_as_list_of_arrays <- function(
     print(data)
   }
 
-  data = check_exposure_test_data(
-    data = data,
-    cues = cues,
-    category = category,
-    response = NULL,
-    group = group,
-    verbose = verbose)
+  data <-
+    check_exposure_test_data(
+      data = data,
+      cues = cues,
+      category = category,
+      response = NULL,
+      group = group,
+      verbose = verbose)
 
-  data_ss <- data %>%
+  data_ss <-
+    data %>%
     as_tibble() %>%
     group_by(!! sym(category), !! sym(group))
 
@@ -116,8 +118,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
       summarise(
         N = length(!! sym(cues[1])),
         x_mean = list(colMeans(cbind(!!! syms(cues)))),
-        x_ss = list(get_sum_of_uncentered_squares(cbind(!!! syms(cues)), verbose = verbose))
-      )
+        x_ss = list(get_sum_of_uncentered_squares_from_df(cbind(!!! syms(cues)), verbose = verbose)))
 
     if (verbose) {
       print("In get_sufficient_statistics_as_list_of_arrays(), multivariate sum-of-uncentered-squares matrix:")
@@ -358,12 +359,13 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   if (!is.null(m_0)) m_0 <- map(m_0, ~ transform_category_mean(m = .x, transform))
   if (!is.null(S_0) & scale.observations) S_0 <- map(S_0, ~ transform_category_cov(S = .x, transform))
 
-  test_counts <- get_test_counts(
-    test = test,
-    cues = cues,
-    response = response,
-    group = group,
-    verbose = verbose)
+  test_counts <-
+    get_test_counts(
+      test = test,
+      cues = cues,
+      response = response,
+      group = group,
+      verbose = verbose)
 
   n.cats <- nlevels(exposure[[category]])
   n.cues <- length(cues)
@@ -390,14 +392,15 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       rm(temp) }}
 
   if (length(cues) > 1) {
-    data_list <- exposure %>%
+    data_list <-
+      exposure %>%
       get_sufficient_statistics_as_list_of_arrays(
         cues = cues, category = category, group = group,
         verbose = verbose,
         # The part below currently is ignored by get_sufficient_statistics_as_list_of_arrays. If the same syntax as for univariate input could
         # also work for multivariate input to get_sufficient_statistics_as_list_of_arrays that would be more
         # elegant.
-        x_mean = colMeans, N = length, x_ss = get_sum_of_uncentered_squares) %>%
+        x_mean = colMeans, N = length, x_ss = get_sum_of_uncentered_squares_from_df) %>%
       within({
         M <- dim(x_mean)[1]
         L <- dim(x_mean)[2]
@@ -411,10 +414,10 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
           as.matrix()
         N_test <- nrow(x_test)
 
-        m_0_known = m_0_known
-        S_0_known = S_0_known
-        m_0_data = m_0
-        S_0_data = S_0
+        m_0_known <- m_0_known
+        S_0_known <- S_0_known
+        m_0_data <- m_0
+        S_0_data <- S_0
 
         tau_scale <- tau_scale
         L_omega_scale <- L_omega_scale

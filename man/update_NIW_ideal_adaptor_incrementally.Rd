@@ -2,6 +2,7 @@
 % Please edit documentation in R/update-NIW.R
 \name{update_NIW_ideal_adaptor_incrementally}
 \alias{update_NIW_ideal_adaptor_incrementally}
+\alias{update_NIW_ideal_adaptor_batch}
 \alias{update_NIW_beliefs_incrementally}
 \title{Update NIW prior beliefs about multivariate Gaussian category based on exposure data.}
 \usage{
@@ -16,6 +17,15 @@ update_NIW_ideal_adaptor_incrementally(
   method = "label-certain",
   keep.update_history = TRUE,
   keep.exposure_data = FALSE,
+  verbose = FALSE
+)
+
+update_NIW_ideal_adaptor_batch(
+  prior,
+  exposure,
+  exposure.category = "category",
+  exposure.cues = get_cue_labels_from_model(prior),
+  noise_treatment = if (is.NIW_ideal_adaptor(prior)) "marginalize" else "no_noise",
   verbose = FALSE
 )
 

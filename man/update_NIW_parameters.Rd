@@ -13,7 +13,7 @@ update_NIW_belief_nu(nu_0, x_N)
 
 update_NIW_belief_m(kappa_0, m_0, x_N, x_mean)
 
-update_NIW_belief_S(kappa_0, m_0, S_0, x_N, x_mean, x_S)
+update_NIW_belief_S(kappa_0, m_0, S_0, x_N, x_mean, x_SS)
 }
 \value{
 Depending on the updated parameter, a numeric scalar (kappa, nu), vector (m) or square matrix (S).

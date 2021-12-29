@@ -1,5 +1,78 @@
 NULL
 
+#' Get sum-of-squares matrix
+#'
+#' Get sum-of-square matrix.
+#'
+#' @param x A matrix of observations, with each row being a vector observation.
+#' @param centered Should the centered sum-of-squares be returned (`TRUE`) or the uncentered (`FALSE`)? (default: `TRUE`)
+#'
+#' @return A square matrix.
+#'
+#' @seealso \code{\link{ss2cov}}, \code{\link{cov2ss}}
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+ss <- function(x, center = TRUE) {
+  if (center) {
+    # Benchmarked to be more efficient than x - 1 %*% t(1) %*% x
+    xm <- colMeans(x)
+    xm <- matrix(xm, nrow = nrow(x), ncol = length(xm), byrow = T)
+    x <- x - xm
+  }
+
+  # Benchmarked to be more efficient than t(x) %*% x
+  k = dim(x)[2]
+  m = matrix(ncol = k, nrow = k)
+  for (i in 1:k) {
+    m[i,i] = sum(x[,i]**2)
+    if (i < k) for (j in (i + 1):k) {
+      m[j,i] = sum(x[,i] * x[,j])
+      m[i,j] = m[j,i]
+    }
+  }
+
+  return(m)
+}
+
+
+#' Get covariance matrix from centered sum-of-squares matrix
+#'
+#' Get covariance matrix from centered sum-of-square matrix.
+#'
+#' @param SS A sum-of-square matrix.
+#' @param n Number of observations that have gone into the sum-of-square matrix.
+#'
+#' @return A square matrix.
+#'
+#' @seealso \code{\link{cov2ss}}
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+ss2cov <- function(SS, n) {
+  return(SS / (n - 1))
+}
+
+#' Get centered sum-of-squares matrix from covariance matrix.
+#'
+#' Get centered sum-of-square matrix from covariance matrix.
+#'
+#' @param cov A covariance matrix.
+#' @param n Number of observations that have gone into the sum-of-square matrix.
+#'
+#' @return A square matrix.
+#'
+#' @seealso \code{\link{cov2ss}}
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+cov2ss <- function(cov, n) {
+  return(cov * (n - 1))
+}
+
 #' Get covariance matrix from correlation matrix and standard deviations
 #'
 #' Get covariance matrix from correlation matrix and vector of standard deviations. Based on code recommended
@@ -108,16 +181,15 @@ make_vector_column = function(data, cols, vector_col, .keep = "all") {
 #' @keywords TBD
 #' @examples
 #' TBD
-#' @rdname get_sum_of_squares
+#' @rdname get_sum_of_squares_from_df
 #' @export
-#'
-get_sum_of_squares <- function(data, variables = NULL, center = T, verbose = F) {
+get_sum_of_squares_from_df <- function(data, variables = NULL, center = T, verbose = F) {
   assert_that(is_tibble(data) | is.data.frame(data) | is.matrix(data))
   if (is_tibble(data) | is.data.frame(data))
     assert_that(variables %in% names(data),
                 msg = paste("Variable column(s)", variables[which(variables %nin% names(data))], "not found in data."))
 
-  data.matrix = if (is_tibble(data) | is.data.frame(data)) {
+  data.matrix <- if (is_tibble(data) | is.data.frame(data)) {
     # Assume that the variables are to be combined into a data.matrix
     data %>%
       mutate_at(variables, unlist) %>%
@@ -125,33 +197,21 @@ get_sum_of_squares <- function(data, variables = NULL, center = T, verbose = F) 
       as.matrix()
   } else data
 
-  if (center)
-    data.matrix = data.matrix - colMeans(data.matrix)
-
-  k = dim(data.matrix)[2]
-  m = matrix(ncol = k, nrow = k)
-
-  for (i in 1:k) {
-    m[i,i] = sum(data.matrix[,i]**2)
-    if (i < k) for (j in (i + 1):k) {
-      m[j,i] = sum(data.matrix[,i] * data.matrix[,j])
-      m[i,j] = m[j,i]
-    }
-  }
+  ss(data.matrix, center = center)
 
   return(m)
 }
 
-#' @rdname get_sum_of_squares
+#' @rdname get_sum_of_squares_from_df
 #' @export
-get_sum_of_uncentered_squares <- function(data, variables = NULL, verbose = F) {
-  get_sum_of_squares(data = data, variables = variables, center = F, verbose = verbose)
+get_sum_of_uncentered_squares_from_df <- function(data, variables = NULL, verbose = F) {
+  get_sum_of_squares_from_df(data = data, variables = variables, center = F, verbose = verbose)
 }
 
-#' @rdname get_sum_of_squares
+#' @rdname get_sum_of_squares_from_df
 #' @export
-get_sum_of_centered_squares <- function(data, variables = NULL, verbose = F) {
-  get_sum_of_squares(data = data, variables = variables, center = T, verbose = verbose)
+get_sum_of_centered_squares_from_df <- function(data, variables = NULL, verbose = F) {
+  get_sum_of_squares_from_df(data = data, variables = variables, center = T, verbose = verbose)
 }
 
 
@@ -199,7 +259,7 @@ get_sufficient_category_statistics <- function(
       summarise(
         x_N = length(!! sym(cues[1])),
         x_mean = list(colMeans(cbind(!!! syms(cues)))),
-        x_ss = list(get_sum_of_uncentered_squares(cbind(!!! syms(cues)), verbose = verbose)),
+        x_ss = list(get_sum_of_uncentered_squares_from_df(cbind(!!! syms(cues)), verbose = verbose)),
         x_cov = list(cov(cbind(!!! syms(cues)))))
   } else {
     # Univariate observations
@@ -208,7 +268,7 @@ get_sufficient_category_statistics <- function(
       summarise(
         x_N = length(!! sym(cues)),
         x_mean = mean(!! sym(cues)),
-        x_ss = as.numeric(get_sum_of_uncentered_squares(matrix(!! sym(cues)), verbose = verbose)),
+        x_ss = as.numeric(get_sum_of_uncentered_squares_from_df(matrix(!! sym(cues)), verbose = verbose)),
         x_sd = sd(!!! syms(cues)))
   }
 

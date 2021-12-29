@@ -13,7 +13,7 @@ plot_expected_ibbu_stanfit_categories_contour2D(
   levels = plogis(seq(-15, qlogis(0.95), length.out = 20)),
   plot.test = T,
   plot.exposure = F,
-  annotate_mean = T,
+  annotate_inferred_category_means = c("rug", "text"),
   untransform_cues = TRUE,
   category.ids = NULL,
   category.labels = NULL,
@@ -25,6 +25,7 @@ plot_expected_ibbu_stanfit_categories_density2D(
   model,
   plot.test = T,
   plot.exposure = F,
+  annotate_inferred_category_means = c("rug", "text"),
   untransform_cues = TRUE,
   category.ids = NULL,
   category.labels = NULL,
@@ -54,6 +55,9 @@ done for *all* points defined by the data.grid this can be rather computationall
 and the .95 interval of cue distributions during exposure are plotted as dashed ellipse in the same color as the
 expected categories.}
 
+\item{annotate_inferred_category_means}{Character vector indicating whether the location and value of the mean be
+indicated through data rugs (`"rug"`) and/or text labels (`"text"`)? Set to NULL to ignore. (default: `c("rug", "text")`)}
+
 \item{untransform_cues}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
 
 \item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
@@ -70,9 +74,6 @@ Currently being ignored.}
 
 \item{resolution}{For density plots. How many steps along x and y should be calculated? Note that computational
 complexity increases quadratically with resolution. (default: 25)}
-
-\item{annotate_inferred_category_means}{Character vector indicating whether the location and value of the mean be
-indicated through data rugs (`"rug"`) and/or text labels (`"text"`)? Set to NULL to ignore. (default: `c("rug", "text")`)}
 
 \item{summarize}{Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
 expected categories be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`) Currently being ignored.}
