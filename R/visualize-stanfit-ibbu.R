@@ -327,7 +327,7 @@ plot_expected_ibbu_stanfit_categories_2D = function(
 plot_expected_ibbu_stanfit_categories_contour2D = function(
   model,
   levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
-  plot.test = T, plot.exposure = F, annotate_mean = T,
+  plot.test = T, plot.exposure = F, annotate_inferred_category_means = T,
   untransform_cues = TRUE,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
@@ -461,7 +461,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
 #' @export
 plot_expected_ibbu_stanfit_categories_density2D = function(
   model,
-  plot.test = T, plot.exposure = F,
+  plot.test = T, plot.exposure = F, annotate_inferred_category_means = T,
   untransform_cues = TRUE,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   xlim, ylim, resolution = 25
@@ -551,6 +551,40 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
           shape = .data$category,
           color = .data$category),
         linetype = 2,
+        inherit.aes = F) } +
+    { if ("rug" %in% annotate_inferred_category_means)
+      geom_rug(
+        data = . %>%
+          group_by(group, category) %>%
+          summarise(across(c(cue1, cue2), mean)),
+        aes(x = .data$cue1,
+            y = .data$cue2,
+            color = .data$category),
+        inherit.aes = F) } +
+    { if ("text" %in% annotate_inferred_category_means)
+      geom_text(
+        data = . %>%
+          group_by(group, category) %>%
+          summarise(across(c(cue1, cue2), mean)),
+        aes(
+          x = .data$cue1,
+          label= signif(.data$cue1, 2),
+          color = .data$category),
+        y = min.cue2,
+        angle = 90,
+        hjust = 0,
+        inherit.aes = F) +
+      geom_text(
+        data = . %>%
+          group_by(group, category) %>%
+          summarise(across(c(cue1, cue2), mean)),
+        aes(
+          y = .data$cue2,
+          label= signif(.data$cue2, 2),
+          color = .data$category),
+        x = min.cue1,
+        angle = 0,
+        hjust = 0,
         inherit.aes = F) } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
