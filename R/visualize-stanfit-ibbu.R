@@ -3,7 +3,7 @@
 #' @importFrom mvtnorm dmvt
 #' @importFrom tidybayes mean_hdi
 #' @importFrom ggridges geom_density_ridges
-#' @importFrom ggforce facet_matrix
+#' @importFrom ggforce facet_matrix geom_autodensity
 #' @importFrom forcats fct_rev
 NULL
 
