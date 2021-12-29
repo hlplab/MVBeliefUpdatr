@@ -277,6 +277,8 @@ plot_ibbu_stanfit_parameter_correlations = function(
 #' `FALSE` for `plot.exposure`) The test items are plotted as black points. The exposure mean is plotted as point,
 #' and the .95 interval of cue distributions during exposure are plotted as dashed ellipse in the same color as the
 #' expected categories.
+#' @param annotate_inferred_category_means Character vector indicating whether the location and value of the mean be
+#' indicated through data rugs (`"rug"`) and/or text labels (`"text"`)? Set to NULL to ignore. (default: `c("rug", "text")`)
 #' @param summarize Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
 #' expected categories be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`) Currently being ignored.
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
@@ -325,12 +327,13 @@ plot_expected_ibbu_stanfit_categories_2D = function(
 plot_expected_ibbu_stanfit_categories_contour2D = function(
   model,
   levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
-  plot.test = T, plot.exposure = F,
+  plot.test = T, plot.exposure = F, annotate_mean = T,
   untransform_cues = TRUE,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
   fit.input <- get_input_from_stanfit(model)
   assert_that(!all(is.null(fit.input), plot.test))
+  if (!is.null(annotate_inferred_category_means)) assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
   d <- get_expected_category_statistic_from_stanfit(model, untransform_cues = untransform_cues)
 
   # Setting aes defaults
@@ -348,21 +351,16 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     group_by(across(-ellipse)) %>%
     transmute(cue1 = ellipse[,1], cue2 = ellipse[,2])
 
-  ggplot(d,
-         aes(x = .data$cue1,
-             y = .data$cue2,
-             fill = .data$category,
-             alpha = 1 - .data$level,
-             group = paste(.data$category, .data$level))) +
+  min.cue1 <- min(d$cue1)
+  min.cue2 <- min(d$cue2)
+  d %>%
+    ggplot(
+    aes(x = .data$cue1,
+        y = .data$cue2,
+        fill = .data$category,
+        alpha = 1 - .data$level,
+        group = paste(.data$category, .data$level))) +
     geom_polygon() +
-    geom_rug(
-      data = . %>%
-        distinct(group, category, centre),
-      aes(
-        x = map(centre, ~ .x[1]) %>% unlist(),
-        y = map(centre, ~ .x[2]) %>% unlist(),
-        color = category),
-      inherit.aes = F) +
     # Optionally plot test data
     { if (plot.test)
       geom_point(
@@ -373,7 +371,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
                     function(x) paste0("cue", which(x == cue.names))),
         mapping = aes(x = .data$cue1, y = .data$cue2),
         inherit.aes = F,
-        color = "black", size = 1
+        color = "black", size = 1, alpha = .75
     )} +
     # Optionally plot exposure data
     { if (plot.exposure)
@@ -412,6 +410,40 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
         linetype = 2,
         inherit.aes = F)
     } +
+    { if ("rug" %in% annotate_inferred_category_means)
+      geom_rug(
+        data = . %>%
+          distinct(group, category, centre),
+        aes(
+          x = map(centre, ~ .x[1]) %>% unlist(),
+          y = map(centre, ~ .x[2]) %>% unlist(),
+          color = category),
+        inherit.aes = F) } +
+    { if ("text" %in% annotate_inferred_category_means)
+      geom_text(
+          data = . %>%
+            ungroup() %>%
+            distinct(group, category, centre),
+          aes(
+            x = map(centre, ~ .x[1]) %>% unlist(),
+            label= map(centre, ~ paste(signif(.x[1], 2))),
+            color = category),
+          y = min.cue2,
+          angle = 90,
+          hjust = 0,
+          inherit.aes = F) +
+        geom_text(
+          data = . %>%
+            ungroup() %>%
+            distinct(group, category, centre),
+          aes(
+            y = map(centre, ~ .x[2]) %>% unlist(),
+            label= map(centre, ~ paste(signif(.x[2], 2))),
+            color = category),
+          x = min.cue1,
+          angle = 0,
+          hjust = 0,
+          inherit.aes = F) } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
     scale_fill_manual("Category",
