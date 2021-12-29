@@ -186,20 +186,18 @@ make_vector_column = function(data, cols, vector_col, .keep = "all") {
 get_sum_of_squares_from_df <- function(data, variables = NULL, center = T, verbose = F) {
   assert_that(is_tibble(data) | is.data.frame(data) | is.matrix(data))
   if (is_tibble(data) | is.data.frame(data))
-    assert_that(variables %in% names(data),
+    assert_that(all(variables %in% names(data)),
                 msg = paste("Variable column(s)", variables[which(variables %nin% names(data))], "not found in data."))
 
   data.matrix <- if (is_tibble(data) | is.data.frame(data)) {
     # Assume that the variables are to be combined into a data.matrix
     data %>%
       mutate_at(variables, unlist) %>%
-      pull(variables) %>%
+      select(all_of(variables)) %>%
       as.matrix()
   } else data
 
   ss(data.matrix, center = center)
-
-  return(m)
 }
 
 #' @rdname get_sum_of_squares_from_df
