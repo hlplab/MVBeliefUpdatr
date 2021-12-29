@@ -327,7 +327,7 @@ plot_expected_ibbu_stanfit_categories_2D = function(
 plot_expected_ibbu_stanfit_categories_contour2D = function(
   model,
   levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
-  plot.test = T, plot.exposure = F, annotate_inferred_category_means = T,
+  plot.test = T, plot.exposure = F, annotate_inferred_category_means = c("rug", "text"),
   untransform_cues = TRUE,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
 ) {
@@ -461,7 +461,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
 #' @export
 plot_expected_ibbu_stanfit_categories_density2D = function(
   model,
-  plot.test = T, plot.exposure = F, annotate_inferred_category_means = T,
+  plot.test = T, plot.exposure = F, annotate_inferred_category_means = c("rug", "text"),
   untransform_cues = TRUE,
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   xlim, ylim, resolution = 25
@@ -469,6 +469,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
   fit.input = get_input_from_stanfit(model)
   assert_that(is.NIW_ideal_adaptor_stanfit(model) | is.NIW_ideal_adaptor_MCMC(model))
   assert_that(!all(is.null(fit.input), plot.test))
+  if (!is.null(annotate_inferred_category_means)) assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
 
   if (is.NIW_ideal_adaptor_stanfit(model))
     d = add_ibbu_stanfit_draws(model, which = which, wide = F, nest = T, untransform_cues = untransform_cues)
@@ -495,6 +496,8 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
     group_by(group, category, cue1, cue2) %>%
     summarise(density = mean(density))
 
+  min.cue1 <- min(d$cue1)
+  min.cue2 <- min(d$cue2)
   ggplot(d,
          aes(x = .data$cue1,
              y = .data$cue2,
