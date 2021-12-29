@@ -362,7 +362,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
         x = map(centre, ~ .x[1]) %>% unlist(),
         y = map(centre, ~ .x[2]) %>% unlist(),
         color = category),
-      inherit.aes = F)
+      inherit.aes = F) +
     # Optionally plot test data
     { if (plot.test)
       geom_point(
