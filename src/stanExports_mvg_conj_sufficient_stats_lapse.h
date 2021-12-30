@@ -33,7 +33,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_mvg_conj_sufficient_stats_lapse");
-    reader.add_event(181, 179, "end", "model_mvg_conj_sufficient_stats_lapse");
+    reader.add_event(183, 181, "end", "model_mvg_conj_sufficient_stats_lapse");
     return reader;
 }
 #include <stan_meta_header.hpp>
@@ -975,8 +975,6 @@ public:
         names__.push_back("t_scale");
         names__.push_back("p_test_conj");
         names__.push_back("log_p_test_conj");
-        names__.push_back("m_0_cor");
-        names__.push_back("m_0_cov");
     }
     void get_dims(std::vector<std::vector<size_t> >& dimss__) const {
         dimss__.resize(0);
@@ -1048,14 +1046,6 @@ public:
         dims__.resize(0);
         dims__.push_back(N_test);
         dims__.push_back(M);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dims__.push_back(K);
-        dims__.push_back(K);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dims__.push_back(K);
-        dims__.push_back(K);
         dimss__.push_back(dims__);
     }
     template <typename RNG>
@@ -1433,39 +1423,26 @@ public:
                 }
             }
             if (!include_gqs__) return;
-            // declare and define generated quantities
-            current_statement_begin__ = 174;
-            validate_non_negative_index("m_0_cor", "K", K);
-            validate_non_negative_index("m_0_cor", "K", K);
-            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> m_0_cor(K, K);
-            stan::math::initialize(m_0_cor, DUMMY_VAR__);
-            stan::math::fill(m_0_cor, DUMMY_VAR__);
-            current_statement_begin__ = 175;
-            validate_non_negative_index("m_0_cov", "K", K);
-            validate_non_negative_index("m_0_cov", "K", K);
-            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> m_0_cov(K, K);
-            stan::math::initialize(m_0_cov, DUMMY_VAR__);
-            stan::math::fill(m_0_cov, DUMMY_VAR__);
             // generated quantities statements
-            current_statement_begin__ = 177;
-            stan::math::assign(m_0_cor, multiply_lower_tri_self_transpose(m_0_L_omega));
-            current_statement_begin__ = 178;
-            stan::math::assign(m_0_cov, quad_form_diag(m_0_cor, m_0_tau));
-            // validate, write generated quantities
             current_statement_begin__ = 174;
-            size_t m_0_cor_j_2_max__ = K;
-            size_t m_0_cor_j_1_max__ = K;
-            for (size_t j_2__ = 0; j_2__ < m_0_cor_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < m_0_cor_j_1_max__; ++j_1__) {
-                    vars__.push_back(m_0_cor(j_1__, j_2__));
-                }
-            }
-            current_statement_begin__ = 175;
-            size_t m_0_cov_j_2_max__ = K;
-            size_t m_0_cov_j_1_max__ = K;
-            for (size_t j_2__ = 0; j_2__ < m_0_cov_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < m_0_cov_j_1_max__; ++j_1__) {
-                    vars__.push_back(m_0_cov(j_1__, j_2__));
+            if (as_bool(logical_negation(m_0_known))) {
+                {
+                current_statement_begin__ = 175;
+                validate_non_negative_index("m_0_cor", "K", K);
+                validate_non_negative_index("m_0_cor", "K", K);
+                Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> m_0_cor(K, K);
+                stan::math::initialize(m_0_cor, DUMMY_VAR__);
+                stan::math::fill(m_0_cor, DUMMY_VAR__);
+                current_statement_begin__ = 176;
+                validate_non_negative_index("m_0_cov", "K", K);
+                validate_non_negative_index("m_0_cov", "K", K);
+                Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> m_0_cov(K, K);
+                stan::math::initialize(m_0_cov, DUMMY_VAR__);
+                stan::math::fill(m_0_cov, DUMMY_VAR__);
+                current_statement_begin__ = 178;
+                stan::math::assign(m_0_cor, multiply_lower_tri_self_transpose(m_0_L_omega));
+                current_statement_begin__ = 179;
+                stan::math::assign(m_0_cov, quad_form_diag(m_0_cor, m_0_tau));
                 }
             }
         } catch (const std::exception& e) {
@@ -1655,24 +1632,6 @@ public:
             }
         }
         if (!include_gqs__) return;
-        size_t m_0_cor_j_2_max__ = K;
-        size_t m_0_cor_j_1_max__ = K;
-        for (size_t j_2__ = 0; j_2__ < m_0_cor_j_2_max__; ++j_2__) {
-            for (size_t j_1__ = 0; j_1__ < m_0_cor_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "m_0_cor" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
-        }
-        size_t m_0_cov_j_2_max__ = K;
-        size_t m_0_cov_j_1_max__ = K;
-        for (size_t j_2__ = 0; j_2__ < m_0_cov_j_2_max__; ++j_2__) {
-            for (size_t j_1__ = 0; j_1__ < m_0_cov_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "m_0_cov" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
-        }
     }
     void unconstrained_param_names(std::vector<std::string>& param_names__,
                                    bool include_tparams__ = true,
@@ -1820,24 +1779,6 @@ public:
             }
         }
         if (!include_gqs__) return;
-        size_t m_0_cor_j_2_max__ = K;
-        size_t m_0_cor_j_1_max__ = K;
-        for (size_t j_2__ = 0; j_2__ < m_0_cor_j_2_max__; ++j_2__) {
-            for (size_t j_1__ = 0; j_1__ < m_0_cor_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "m_0_cor" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
-        }
-        size_t m_0_cov_j_2_max__ = K;
-        size_t m_0_cov_j_1_max__ = K;
-        for (size_t j_2__ = 0; j_2__ < m_0_cov_j_2_max__; ++j_2__) {
-            for (size_t j_1__ = 0; j_1__ < m_0_cov_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "m_0_cov" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
-        }
     }
 }; // model
 }  // namespace

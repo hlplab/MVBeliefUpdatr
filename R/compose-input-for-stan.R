@@ -91,21 +91,23 @@ get_sufficient_statistics_as_list_of_arrays <- function(
   cues,
   category,
   group,
-  check_exposure_test_format = F,
-  verbose = F, ...) {
+  verbose = F,
+  ...
+) {
+
   if (verbose) {
     print("In get_sufficient_statistics_as_list_of_arrays(), input data is:")
     print(data)
   }
 
-  data <-
-    check_exposure_test_data(
-      data = data,
-      cues = cues,
-      category = category,
-      response = NULL,
-      group = group,
-      verbose = verbose)
+  # data <-
+  #   check_exposure_test_data(
+  #     data = data,
+  #     cues = cues,
+  #     category = category,
+  #     response = NULL,
+  #     group = group,
+  #     verbose = verbose)
 
   data_ss <-
     data %>%
@@ -133,11 +135,11 @@ get_sufficient_statistics_as_list_of_arrays <- function(
     # For helpful concise info on tibbles, see
     #   https://cran.r-project.org/web/packages/tibble/vignettes/tibble.html
     ## -------------------------------------------------------------------------------
-    cats = levels(data[[category]])
-    groups = levels(data[[group]])
-    n_category = length(cats)
-    n_group = length(groups)
-    n_cues = length(cues)
+    cats <- levels(data[[category]])
+    groups <- levels(data[[group]])
+    n_category <- length(cats)
+    n_group <- length(groups)
+    n_cues <- length(cues)
 
     N = array(dim = c(n_category,n_group))
     x_mean = array(dim = c(n_category,n_group,n_cues))
@@ -171,6 +173,8 @@ get_sufficient_statistics_as_list_of_arrays <- function(
     data_ss %<>%
       summarise_at(cues, .funs = list(...))
 
+
+
     if (verbose) {
       print("In get_sufficient_statistics_as_list_of_arrays(), univariate sum-of-squares matrix (prior to map application):")
       print(data_ss)
@@ -186,8 +190,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
   }
 
   if (verbose) {
-    print("In get_sufficient_statistics_as_list_of_arrays(), sum-of-squares matrix (uncentered for multivariate data,
-          centered for univariate data):")
+    print("In get_sufficient_statistics_as_list_of_arrays(), sum-of-squares matrix (uncentered for multivariate data, centered for univariate data):")
     print(data_ss)
   }
 
@@ -328,7 +331,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     message(paste("Not all levels of the grouping variable", group, "that are present in test were found in exposure.
     Creating 0 exposure data for those groups."))
   exposure %<>%
-    mutate_at(group, ~ factor(.x, levels = levels(test[[group]])))
+    mutate_at(all_of(group), ~ factor(.x, levels = levels(test[[!! group]])))
 
   transform <-
     transform_cues(
@@ -395,7 +398,9 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     data_list <-
       exposure %>%
       get_sufficient_statistics_as_list_of_arrays(
-        cues = cues, category = category, group = group,
+        cues = cues,
+        category = category,
+        group = group,
         verbose = verbose,
         # The part below currently is ignored by get_sufficient_statistics_as_list_of_arrays. If the same syntax as for univariate input could
         # also work for multivariate input to get_sufficient_statistics_as_list_of_arrays that would be more
@@ -423,8 +428,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
         L_omega_scale <- L_omega_scale
       })
   } else {
-    message("For univariate input, beliefupdatr is run with legacy parameter names. This might change in
-              the future.")
+    message("For univariate input, beliefupdatr is run with legacy parameter names. This might change in the future.")
     data_list <- exposure %>%
       get_sufficient_statistics_as_list_of_arrays(
         cues = cues, category = category, group = group,

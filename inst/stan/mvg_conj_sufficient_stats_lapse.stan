@@ -171,9 +171,11 @@ model {
 }
 
 generated quantities {
-  matrix[K,K] m_0_cor;
-  matrix[K,K] m_0_cov;
+  if (!m_0_known) {
+    matrix[K,K] m_0_cor;
+    matrix[K,K] m_0_cov;
 
-  m_0_cor = multiply_lower_tri_self_transpose(m_0_L_omega);
-  m_0_cov = quad_form_diag(m_0_cor, m_0_tau);
+    m_0_cor = multiply_lower_tri_self_transpose(m_0_L_omega);
+    m_0_cov = quad_form_diag(m_0_cor, m_0_tau);
+  }
 }
