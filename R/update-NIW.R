@@ -393,8 +393,8 @@ update_NIW_ideal_adaptor_batch <- function(
     group_by(!! sym(exposure.category)) %>%
     summarise(
       N = length(!! sym(exposure.category)),
-      x_mean = pmap(.l = !!! syms(exposure.cues), .f = colMeans(cbind(...))),
-      x_SS = pmap(.l = !!! syms(exposure.cues), .f = get_sum_of_uncentered_squares_from_df(cbind(...), verbose = verbose)))
+      x_mean = pmap(.l = !!! syms(exposure.cues), .f = ~ colMeans(cbind(...))),
+      x_SS = pmap(.l = !!! syms(exposure.cues), .f = ~ get_sum_of_uncentered_squares_from_df(cbind(...), verbose = verbose)))
 
   categories = unique(exposure[[exposure.category]])
   for (c in categories) {
