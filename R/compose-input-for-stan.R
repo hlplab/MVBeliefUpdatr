@@ -147,7 +147,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 
     for (i in 1:n_category) {
       for (j in 1:n_group) {
-        temp.data_ss = data_ss %>%
+        temp.data_ss <- data_ss %>%
           ungroup() %>%
           filter(!! rlang::sym(category) == cats[i] &
                    !! rlang::sym(group) == groups[j])
@@ -164,16 +164,14 @@ get_sufficient_statistics_as_list_of_arrays <- function(
       }
     }
 
-    dimnames(N) = list(cats, groups)
-    dimnames(x_mean) = list(cats, groups, cues)
-    dimnames(x_ss) = list(cats, groups, cues, cues)
-    data_ss = list(N = N, x_mean = x_mean, x_ss = x_ss)
+    dimnames(N) <- list(cats, groups)
+    dimnames(x_mean) <- list(cats, groups, cues)
+    dimnames(x_ss) <- list(cats, groups, cues, cues)
+    data_ss <- list(N = N, x_mean = x_mean, x_ss = x_ss)
   } else {
     # Univariate observations
     data_ss %<>%
       summarise_at(cues, .funs = list(...))
-
-
 
     if (verbose) {
       print("In get_sufficient_statistics_as_list_of_arrays(), univariate sum-of-squares matrix (prior to map application):")
@@ -181,7 +179,6 @@ get_sufficient_statistics_as_list_of_arrays <- function(
     }
 
     stats <- names(list(...))
-
     data_ss <- map(stats, ~ acast(data_ss, as.list(c(category, group)),
                                   value.var = .x,
                                   drop = F,
@@ -411,11 +408,19 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
         L <- dim(x_mean)[2]
         K <- length(cues)
 
-        x_test <- test_counts %>% select(cues)
-        y_test <- as.numeric(test_counts[[group]])
+        x_test <-
+          test_counts %>%
+          select(all_of(cues)) %>%
+          as.matrix()
+        y_test <-
+          test_counts[[group]] %>%
+          as.numeric() %T>%
+          { attr(., which = "levels") <- levels(test[[group]]) }
         z_test_counts <-
           test_counts %>%
-          select(.dots = levels(test[[response]])) %>%
+          select(levels(test[[response]])) %>%
+          mutate(rownames = paste0("group=", !! sym(group), "; ", paste(cues, collapse = "-"), "=", paste(!!! syms(cues), sep = ","))) %>%
+          column_to_rownames("rownames")
           as.matrix()
         N_test <- nrow(x_test)
 
@@ -450,11 +455,6 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
         sigma_0_sd <- 0
       })
   }
-
-  dimnames(data_list$z_test_counts) <- list(
-    test_counts %>% transmute(names = paste(!!! syms(cues), sep = ",")) %>% pull(names),
-    levels(test[[response]]))
-  attr(data_list$y_test, which <- "levels") = levels(test[[group]])
 
   if (verbose) {
     print("In compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats():")

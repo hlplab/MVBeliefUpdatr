@@ -224,7 +224,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
     if (x_N > 1) x_SS = x_SS + ss(x, center = T)
   } else if (noise_treatment == "marginalize") {
     warning("Updating while including noise_treatment = marginalize has not yet been thoroughly tested. If noise is included in perception but not in the prior beliefs, it should be discounted during the updating. This is not yet implemented. You might want to construct the model with the option add_Sigma_noise_to_category_representation = TRUE and use categorization that does not add the noise again noise_treatment = 'no_noise'.")
-    x_SS = x_SS + cov2ss(get_perceptual_noise_from_model(prior), n = X_N)
+    x_SS = x_SS + cov2ss(get_perceptual_noise_from_model(prior), n = x_N)
   }
 
   x_mean = list(x_mean)
@@ -381,7 +381,6 @@ update_NIW_ideal_adaptor_batch <- function(
 ){
   if (verbose) message("Assuming that category variable in NIW belief/ideal adaptor is called category.")
 
-  assert_that(all(is.flag(keep.exposure_data)))
   assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
   assert_that(exposure.category %in% names(exposure),
               msg = paste0("exposure.category variable not found: ", exposure.category, " must be a column in the exposure data."))
@@ -392,9 +391,9 @@ update_NIW_ideal_adaptor_batch <- function(
     make_vector_column(exposure.cues, "cues") %>%
     group_by(!! sym(exposure.category)) %>%
     summarise(
-      N = length(!! sym(exposure.category)),
-      x_mean = pmap(.l = !!! syms(exposure.cues), .f = ~ colMeans(cbind(...))),
-      x_SS = pmap(.l = !!! syms(exposure.cues), .f = ~ get_sum_of_uncentered_squares_from_df(cbind(...), verbose = verbose)))
+      x_N = length(!! sym(exposure.category)),
+      x_mean = list(colMeans(cbind(!!! syms(exposure.cues)))),
+      x_SS = list(get_sum_of_uncentered_squares_from_df(cbind(!!! syms(exposure.cues)), verbose = verbose)))
 
   categories = unique(exposure[[exposure.category]])
   for (c in categories) {
@@ -403,9 +402,9 @@ update_NIW_ideal_adaptor_batch <- function(
         update_NIW_belief_by_sufficient_statistics_of_one_category(
           prior = prior,
           x_category = c,
-          x_mean = exposure[exposure$category == c, "x_mean"],
-          x_SS = exposure[exposure$category == c, "x_SS"],
-          x_N = exposure[exposure$category == c, "x_N"],
+          x_mean = exposure[exposure$category == c,]$x_mean[[1]],
+          x_SS = exposure[exposure$category == c,]$x_SS[[1]],
+          x_N = exposure[exposure$category == c,]$x_N[[1]],
           noise_treatment = noise_treatment,
           lapse_treatment = "no_lapses",
           method = "label-certain",
