@@ -47,6 +47,16 @@ as.NIW_ideal_adaptor_stanfit <- function(stanfit, input_data, transform_informat
 
   if (!is.null(transform_information)) stanfit %<>% attach_stanfit_transform(transform_information)
 
+  # the levels information recovered below should probably should be stored in a more systematic way, either as attributes
+  # to the model or as some part of a list
+  stanfit %<>%
+    recover_types(
+      crossing(
+        category = factor(colnames(input_data$z_test_counts), levels = colnames(input_data$z_test_counts)),
+        group = factor(attr(input_data$y_test, "levels"), levels = attr(input_data$y_test, "levels")),
+        cue = factor(dimnames(input_data$x_test)[[2]], levels = dimnames(input_data$x_test)[[2]]),
+        cue2 = cue))
+
   return(stanfit)
 }
 

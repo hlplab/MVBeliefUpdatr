@@ -133,15 +133,6 @@ infer_prior_beliefs <- function(
 
     if (is.null(fit)) stop("Sampling failed.")
     fit %<>% as.NIW_ideal_adaptor_stanfit(input_data = data_list, transform_information = transform_information)
-    # the levels information recovered below should probably should be stored in a more systematic way, either as attributes
-    # to the model or as some part of a list
-    fit %<>%
-      recover_types(
-        crossing(
-          category = factor(colnames(data_list$z_test_counts), levels = colnames(data_list$z_test_counts)),
-          group = factor(attr(data_list$y_test, "levels"), levels = attr(data_list$y_test, "levels")),
-          cue = factor(dimnames(data_list$x_test)[[2]], levels = dimnames(data_list$x_test)[[2]]),
-          cue2 = cue))
   } else fit <- NULL
 
   if (untransform_fit) {
