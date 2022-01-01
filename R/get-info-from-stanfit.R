@@ -108,8 +108,8 @@ get_input_from_stanfit = function(fit) {
 #' @param group Character vector with groups (or group) for which category statistics are to be
 #' returned. If `NULL` then all groups are included. (default: `NULL`)
 #' @param statistic Which exposure statistic should be returned? `n` for number of observations, `mean` for
-#' category mean or `ss` for (uncentered) category sum-of-square matrix, or `c("mean", "ss")` for any combination
-#' thereof. (default: all)
+#' category mean or `ss` for (uncentered) category sum-of-square matrix, or a character vector with any
+#' combination thereof. (default: all)
 #'
 #' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
 #' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
@@ -126,18 +126,19 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
   assert_that(is.NIW_ideal_adaptor_input(x) | is.NIW_ideal_adaptor_stanfit(x))
   assert_that(all(statistic %in% c("n", "mean", "ss")),
               msg = "statistic must be one of 'mean' or 'ss'.")
-  if (is.NIW_ideal_adaptor_stanfit(x)) x = get_input_from_stanfit(x)
-  if (!is.null(category)) assert_that(all(category %in% unique(x$category)),
+  if (!is.null(category)) assert_that(all(category %in% get_category_levels_from_stanfit(x)),
                                       msg = paste("Some categories were not found in the exposure data:",
-                                                  paste(setdiff(category, unique(x$category)), collapse = ", ")))
-  if (!is.null(group)) assert_that(all(group %in% unique(x$group)),
+                                                  paste(setdiff(category, get_category_levels_from_stanfit(x)), collapse = ", ")))
+  if (!is.null(group)) assert_that(all(group %in% get_group_levels_from_stanfit(x)),
                                       msg = paste("Some groups were not found in the exposure data:",
-                                                  paste(setdiff(group, unique(x$group)), collapse = ", ")))
+                                                  paste(setdiff(group, get_group_levels_from_stanfit(x)), collapse = ", ")))
+  if (is.NIW_ideal_adaptor_stanfit(x)) x <- get_input_from_stanfit(x)
 
   if ("n" %in% statistic) {
     stop("Not yet implementd for statistic = n.")
   }
 
+  df <- NULL
   if ("mean" %in% statistic) {
     m <- x$x_mean
     d <- dim(m)
@@ -206,14 +207,14 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
 
 #' @rdname get_exposure_statistic_from_stanfit
 #' @export
-get_exposure_mean_from_stanfit = function(x, category, group) {
-  return(get_exposure_statistic_from_stanfit(x, category, group, statistic = "mean"))
+get_exposure_mean_from_stanfit = function(...) {
+  return(get_exposure_statistic_from_stanfit(..., statistic = "mean"))
 }
 
 #' @rdname get_exposure_statistic_from_stanfit
 #' @export
-get_exposure_ss_from_stanfit = function(x, category, group) {
-  return(get_exposure_statistic_from_stanfit(x, category, group, statistic = "ss"))
+get_exposure_ss_from_stanfit = function(...) {
+  return(get_exposure_statistic_from_stanfit(..., statistic = "ss"))
 }
 
 

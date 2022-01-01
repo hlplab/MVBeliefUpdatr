@@ -375,41 +375,39 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     )} +
     # Optionally plot exposure data
     { if (plot.exposure)
-      geom_point(
-        data =
-          get_exposure_mean_from_stanfit(
-            model,
-            category = levels(d$category),
-            group = levels(d$group)) %>%
-          # SOMETHING IS MISSING HERE. NEED TO TRANSFORM "mean" COLUMN INTO SEPARATE COLUMNS FOR CUES
-          rename_at(cue.names,
-                    function(x) paste0("cue", which(x == cue.names))),
-        mapping = aes(
-          x = .data$cue1,
-          y = .data$cue2,
-          shape = .data$category,
-          color = .data$category),
-        inherit.aes = F, size = 2) +
-      geom_path(
-        data =
-          get_expected_category_statistic_from_stanfit(
-            model,
-            category = levels(d$category),
-            group = levels(d$group)) %>%
-          rename(x = cov, centre = mean) %>%
-          crossing(level = .95) %>%
-          mutate(ellipse = pmap(., ellipse.pmap)) %>%
-          unnest(ellipse) %>%
-          group_by(across(-ellipse)) %>%
-          transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]),
-        mapping = aes(
-          x = .data$cue1,
-          y = .data$cue2,
-          shape = .data$category,
-          color = .data$category),
-        linetype = 2,
-        inherit.aes = F)
-    } +
+      list(
+        geom_point(
+          data =
+            get_exposure_mean_from_stanfit(
+              model,
+              category = levels(d$category),
+              group = levels(d$group)) %>%
+            mutate(cue1 = unlist(map(mean, ~.x[1])), cue2 = unlist(map(mean, ~.x[2]))),
+          mapping = aes(
+            x = .data$cue1,
+            y = .data$cue2,
+            shape = .data$category,
+            color = .data$category),
+          inherit.aes = F, size = 2),
+        geom_path(
+          data =
+            get_expected_category_statistic_from_stanfit(
+              model,
+              category = levels(d$category),
+              group = levels(d$group)) %>%
+            rename(x = cov, centre = mean) %>%
+            crossing(level = .95) %>%
+            mutate(ellipse = pmap(., ellipse.pmap)) %>%
+            unnest(ellipse) %>%
+            group_by(across(-ellipse)) %>%
+            transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]),
+          mapping = aes(
+            x = .data$cue1,
+            y = .data$cue2,
+            shape = .data$category,
+            color = .data$category),
+          linetype = 2,
+          inherit.aes = F)) } +
     { if ("rug" %in% annotate_inferred_category_means)
       geom_rug(
         data = . %>%
@@ -420,7 +418,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
           color = category),
         inherit.aes = F) } +
     { if ("text" %in% annotate_inferred_category_means)
-      geom_text(
+      list(
+        geom_text(
           data = . %>%
             ungroup() %>%
             distinct(group, category, centre),
@@ -431,7 +430,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
           y = min.cue2,
           angle = 90,
           hjust = 0,
-          inherit.aes = F) +
+          inherit.aes = F),
         geom_text(
           data = . %>%
             ungroup() %>%
@@ -443,16 +442,16 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
           x = min.cue1,
           angle = 0,
           hjust = 0,
-          inherit.aes = F) } +
+          inherit.aes = F)) } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
-    scale_fill_manual("Category",
-                      breaks = category.ids,
-                      labels = category.labels,
-                      values = category.colors,
-                      aesthetics = c("color", "fill")) +
-    scale_alpha("",
-                range = c(0.1,.9)) +
+    scale_fill_manual(
+      "Category",
+      breaks = category.ids,
+      labels = category.labels,
+      values = category.colors,
+      aesthetics = c("color", "fill")) +
+    scale_alpha("", range = c(0.1,.9)) +
     facet_wrap(~ group)
 }
 
@@ -521,20 +520,20 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
       )} +
     # Optionally plot exposure data
     { if (plot.exposure)
-      geom_point(
+      list(
+        geom_point(
         data =
           get_exposure_mean_from_stanfit(
             model,
             category = levels(d$category),
             group = levels(d$group)) %>%
-          rename_at(cue.names,
-                    function(x) paste0("cue", which(x == cue.names))),
+          mutate(cue1 = unlist(map(mean, ~.x[1])), cue2 = unlist(map(mean, ~.x[2]))),
         mapping = aes(
           x = .data$cue1,
           y = .data$cue2,
           shape = .data$category,
           color = .data$category),
-        inherit.aes = F, size = 2) +
+        inherit.aes = F, size = 2),
       geom_path(
         data =
           crossing(
@@ -554,7 +553,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
           shape = .data$category,
           color = .data$category),
         linetype = 2,
-        inherit.aes = F) } +
+        inherit.aes = F)) } +
     { if ("rug" %in% annotate_inferred_category_means)
       geom_rug(
         data = . %>%
@@ -565,30 +564,31 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
             color = .data$category),
         inherit.aes = F) } +
     { if ("text" %in% annotate_inferred_category_means)
-      geom_text(
-        data = . %>%
-          group_by(group, category) %>%
-          summarise(across(c(cue1, cue2), mean)),
-        aes(
-          x = .data$cue1,
-          label= signif(.data$cue1, 2),
-          color = .data$category),
-        y = min.cue2,
-        angle = 90,
-        hjust = 0,
-        inherit.aes = F) +
-      geom_text(
-        data = . %>%
-          group_by(group, category) %>%
-          summarise(across(c(cue1, cue2), mean)),
-        aes(
-          y = .data$cue2,
-          label= signif(.data$cue2, 2),
-          color = .data$category),
-        x = min.cue1,
-        angle = 0,
-        hjust = 0,
-        inherit.aes = F) } +
+      list(
+        geom_text(
+          data = . %>%
+            group_by(group, category) %>%
+            summarise(across(c(cue1, cue2), mean)),
+          aes(
+            x = .data$cue1,
+            label= signif(.data$cue1, 2),
+            color = .data$category),
+          y = min.cue2,
+          angle = 90,
+          hjust = 0,
+          inherit.aes = F),
+        geom_text(
+          data = . %>%
+            group_by(group, category) %>%
+            summarise(across(c(cue1, cue2), mean)),
+          aes(
+            y = .data$cue2,
+            label= signif(.data$cue2, 2),
+            color = .data$category),
+          x = min.cue1,
+          angle = 0,
+          hjust = 0,
+          inherit.aes = F)) } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
     scale_color_manual(
