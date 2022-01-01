@@ -418,9 +418,9 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
           { attr(., which = "levels") <- levels(test[[group]]) }
         z_test_counts <-
           test_counts %>%
-          select(levels(test[[response]])) %>%
           mutate(rownames = paste0("group=", !! sym(group), "; ", paste(cues, collapse = "-"), "=", paste(!!! syms(cues), sep = ","))) %>%
-          column_to_rownames("rownames")
+          column_to_rownames("rownames") %>%
+          select(levels(test[[response]])) %>%
           as.matrix()
         N_test <- nrow(x_test)
 
