@@ -125,7 +125,7 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
                                                statistic = c("n", "mean", "ss")) {
   assert_that(is.NIW_ideal_adaptor_input(x) | is.NIW_ideal_adaptor_stanfit(x))
   assert_that(all(statistic %in% c("n", "mean", "ss")),
-              msg = "statistic must be one of 'mean' or 'ss'.")
+              msg = "statistic must be one of 'n', mean' or 'ss'.")
   if (!is.null(category)) assert_that(all(category %in% get_category_levels_from_stanfit(x)),
                                       msg = paste("Some categories were not found in the exposure data:",
                                                   paste(setdiff(category, get_category_levels_from_stanfit(x)), collapse = ", ")))
@@ -149,7 +149,7 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
             tibble(
               group = dn[[2]][g],
               category = dn[[1]][c],
-              value = n[c, g]))
+              n = n[c, g]))
       }
     }
 
@@ -216,8 +216,8 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
   }
 
   df %<>%
-    { if (!is.null(group)) filter(., group %in% group) else . } %>%
-    { if (!is.null(category)) filter(., category %in% group) else . }
+    { if (!is.null(group)) filter(., .data[["group"]] %in% .env[["group"]]) else . } %>%
+    { if (!is.null(category)) filter(., .data[["category"]] %in% .env[["category"]]) else . }
 
   return(df)
 }

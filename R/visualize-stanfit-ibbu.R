@@ -397,7 +397,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
               group = setdiff(levels(d$group), "prior")) %>%
             rename(x = ss, centre = mean) %>%
             crossing(level = .95) %>%
-            mutate(ellipse = pmap(., ellipse.pmap)) %>%
+            mutate(ellipse = pmap(.l = list(centre, x, level), ellipse.pmap)) %>%
             unnest(ellipse) %>%
             group_by(across(-ellipse)) %>%
             transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]),
