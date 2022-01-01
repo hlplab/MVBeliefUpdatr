@@ -100,15 +100,6 @@ get_sufficient_statistics_as_list_of_arrays <- function(
     print(data)
   }
 
-  # data <-
-  #   check_exposure_test_data(
-  #     data = data,
-  #     cues = cues,
-  #     category = category,
-  #     response = NULL,
-  #     group = group,
-  #     verbose = verbose)
-
   data_ss <-
     data %>%
     as_tibble() %>%
