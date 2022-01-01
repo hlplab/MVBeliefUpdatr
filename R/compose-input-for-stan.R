@@ -443,8 +443,14 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
         m <- dim(xbar)[1]
         l <- dim(xbar)[2]
 
-        x_test <- test_counts[[cues]]
-        y_test <- as.numeric(test_counts[[group]])
+        x_test <-
+          test_counts %>%
+          select(all_of(cues)) %>%
+          as.matrix()
+        y_test <-
+          test_counts[[group]] %>%
+          as.numeric() %T>%
+          { attr(., which = "levels") <- levels(test[[group]]) }
         z_test_counts <-
           test_counts %>%
           select(.dots = levels(test[[response]])) %>%

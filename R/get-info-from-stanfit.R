@@ -546,7 +546,8 @@ add_ibbu_stanfit_draws = function(
         ndraws = NULL, draws = draws,
         untransform_cues = untransform_cues,
         summarize = summarize, wide = wide, nest = nest)
-    d.pars <- rbind(d.prior, d.posterior) %>%
+    d.pars <-
+      rbind(d.prior, d.posterior) %>%
       mutate(!! rlang::sym(group) :=
                factor(!! rlang::sym(group),
                       levels = c(with(d.prior, levels(!! rlang::sym(group))),
@@ -556,36 +557,39 @@ add_ibbu_stanfit_draws = function(
     assert_NIW_ideal_adaptor_stanfit(fit)
 
     # Parameters' names depend on whether prior or posterior is to be extracted.
-    postfix = if (which == "prior") "_0" else "_n"
-    kappa = paste0("kappa", postfix)
-    nu = paste0("nu", postfix)
-    m = paste0("m", postfix)
-    S = paste0("S", postfix)
+    postfix <- if (which == "prior") "_0" else "_n"
+    kappa <- paste0("kappa", postfix)
+    nu <- paste0("nu", postfix)
+    m <- paste0("m", postfix)
+    S <- paste0("S", postfix)
 
     # Variables by which parameters are indexed
-    pars.index = if (which == "prior") category else c(category, group)
+    pars.index <- if (which == "prior") category else c(category, group)
 
     # Get non-nested draws
-    if (which == "prior")
-      d.pars = fit %>%
-      spread_draws(
-        !! rlang::sym(kappa),
-        !! rlang::sym(nu),
-        (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
-        (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
-        lapse_rate,
-        ndraws = ndraws) %>%
-      { if (!is.null(draws)) filter(., .draw %in% draws) else . }
-    else
-      d.pars = fit %>%
-      spread_draws(
-        (!! rlang::sym(kappa))[!!! rlang::syms(pars.index)],
-        (!! rlang::sym(nu))[!!! rlang::syms(pars.index)],
-        (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
-        (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
-        lapse_rate,
-        ndraws = ndraws) %>%
-      { if (!is.null(draws)) filter(., .draw %in% draws) else . }
+    if (which == "prior") {
+      d.pars <-
+        fit %>%
+        spread_draws(
+          !! rlang::sym(kappa),
+          !! rlang::sym(nu),
+          (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
+          (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
+          lapse_rate,
+          ndraws = ndraws) %>%
+        { if (!is.null(draws)) filter(., .draw %in% draws) else . }
+    } else {
+      d.pars <-
+        fit %>%
+        spread_draws(
+          (!! rlang::sym(kappa))[!!! rlang::syms(pars.index)],
+          (!! rlang::sym(nu))[!!! rlang::syms(pars.index)],
+          (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
+          (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
+          lapse_rate,
+          ndraws = ndraws) %>%
+        { if (!is.null(draws)) filter(., .draw %in% draws) else . }
+    }
 
     d.pars %<>%
       rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .)) %>%
