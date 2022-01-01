@@ -391,7 +391,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
           inherit.aes = F, size = 2),
         geom_path(
           data =
-            get_expected_category_statistic_from_stanfit(
+            get_exposure_statistic_from_stanfit(
               model,
               category = levels(d$category),
               group = levels(d$group)) %>%
