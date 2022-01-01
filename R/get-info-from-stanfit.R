@@ -134,11 +134,28 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
                                                   paste(setdiff(group, get_group_levels_from_stanfit(x)), collapse = ", ")))
   if (is.NIW_ideal_adaptor_stanfit(x)) x <- get_input_from_stanfit(x)
 
+  df <- NULL
   if ("n" %in% statistic) {
-    stop("Not yet implementd for statistic = n.")
+    n <- x$N
+    d <- dim(n)
+    dn <- dimnames(n)
+
+    df.n <- tibble()
+    for (c in 1:d[1]) { # category
+      for (g in 1:d[2]) { # group/condition
+        df.n <-
+          rbind(
+            df.n,
+            tibble(
+              group = dn[[2]][g],
+              category = dn[[1]][c],
+              value = n[c, g]))
+      }
+    }
+
+    df <- if (!is.null(df)) df %<>% left_join(df.n, by = c("group", "category")) else df.n
   }
 
-  df <- NULL
   if ("mean" %in% statistic) {
     m <- x$x_mean
     d <- dim(m)
