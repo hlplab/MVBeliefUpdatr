@@ -236,6 +236,7 @@ get_test_data_from_stanfit = function(fit) {
   data <- get_input_from_stanfit(fit)
   data[["x_test"]] %>%
     cbind(data[["z_test_counts"]]) %>%
+    as_tibble() %>%
     mutate(
       group.id = data[["y_test"]],
       group = factor(attr(data[["y_test"]], "levels")[group.id],
