@@ -13,7 +13,7 @@ plot_ibbu_stanfit_test_categorization(
   untransform_cues = TRUE,
   confidence.intervals = c(0.66, 0.95),
   target_category = 1,
-  panel.group = FALSE,
+  panel.group = if (plot_in_cue_space) TRUE else FALSE,
   group.ids = NULL,
   group.labels = NULL,
   group.colors = NULL,

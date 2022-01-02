@@ -349,7 +349,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     mutate(ellipse = pmap(., ellipse.pmap)) %>%
     unnest(ellipse) %>%
     group_by(across(-ellipse)) %>%
-    transmute(cue1 = ellipse[,1], cue2 = ellipse[,2])
+    transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]) %>%
+    mutate(group = factor(group, levels = group.ids))
 
   min.cue1 <- min(d$cue1)
   min.cue2 <- min(d$cue2)
@@ -493,7 +494,8 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
     ) %>%
     # Marginalize over MCMC draws
     group_by(group, category, cue1, cue2) %>%
-    summarise(density = mean(density))
+    summarise(density = mean(density)) %>%
+    mutate(group = factor(group, levels = group.ids))
 
   min.cue1 <- min(d$cue1)
   min.cue2 <- min(d$cue2)
@@ -664,7 +666,7 @@ plot_ibbu_stanfit_test_categorization = function(
   untransform_cues = TRUE,
   confidence.intervals = c(.66, .95),
   target_category = 1,
-  panel.group = FALSE,
+  panel.group = if (plot_in_cue_space) TRUE else FALSE,
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
   category.ids = NULL, category.colors = NULL,
   all_test_locations = TRUE, plot_in_cue_space = FALSE,
@@ -739,7 +741,7 @@ plot_ibbu_stanfit_test_categorization = function(
       distinct(!!! syms(cue.labels)) %>%
       { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
       make_vector_column(cols = cue.labels, vector_col = "x", .keep = "all") %>%
-      nest(cues_joint = x, cues_separate = cue.labels) %>%
+      nest(cues_joint = x, cues_separate = all_of(cue.labels)) %>%
       crossing(group = levels(d.pars$group))
   } else {
     test_data <-
@@ -748,7 +750,7 @@ plot_ibbu_stanfit_test_categorization = function(
       { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
       make_vector_column(cols = cue.labels, vector_col = "x", .keep = "all") %>%
       group_by(group.id, group) %>%
-      nest(cues_joint = x, cues_separate = cue.labels)
+      nest(cues_joint = x, cues_separate = all_of(cue.labels))
   }
 
   d.pars %<>%
@@ -757,6 +759,7 @@ plot_ibbu_stanfit_test_categorization = function(
     right_join(test_data) %>%
     group_by(group, .draw) %>%
     mutate(p_cat = invoke_map(.f = f, .x = cues_joint, target_category = target_category)) %>%
+    select(-f) %>%
     unnest(c(cues_joint, cues_separate, p_cat))
 
   if (summarize) {
@@ -779,8 +782,7 @@ plot_ibbu_stanfit_test_categorization = function(
 
   d.pars %<>%
     # Get cues as character strings (just in case)
-    mutate(
-      token.cues = map(x, ~paste(.x, collapse = ",\n"))) %>%
+    mutate(token.cues = map(x, ~paste(.x, collapse = ",\n"))) %>%
     ungroup() %>%
     select(-c(x))
 
@@ -809,8 +811,7 @@ plot_ibbu_stanfit_test_categorization = function(
         mid = "white",
         low = category.colors[which(category.ids != category.ids[target_category])],
         limits = c(0,1)) +
-      coord_cartesian(expand = F) +
-      facet_wrap(~ group)
+      coord_cartesian(expand = F)
 
   } else {
     # If sort_by is specified, sort levels of x-axis by that group.
@@ -888,9 +889,9 @@ plot_ibbu_stanfit_test_categorization = function(
       geom_point(alpha = .9) +
       geom_line(size = 1, alpha = .9, aes(x = as.numeric(.data$token)))
   }
-  if (!summarize & panel.group) p = p + facet_grid(group ~ .draw) else
-    if (panel.group) p = p + facet_wrap(~ group) else
-      if (!summarize) p = p + facet_wrap(~ .draw)
+  if (!summarize & panel.group) p <- p + facet_grid(group ~ .draw) else
+    if (panel.group) p <- p + facet_wrap(~ group) else
+      if (!summarize) p <- p + facet_wrap(~ .draw)
 
   return(p)
 }

@@ -13,9 +13,9 @@ get_exposure_statistic_from_stanfit(
   statistic = c("n", "mean", "ss")
 )
 
-get_exposure_mean_from_stanfit(x, category, group)
+get_exposure_mean_from_stanfit(...)
 
-get_exposure_ss_from_stanfit(x, category, group)
+get_exposure_ss_from_stanfit(...)
 }
 \arguments{
 \item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} or NIW belief MCMC object.}
@@ -27,8 +27,8 @@ returned.  If `NULL` then all categories are included. (default: `NULL`)}
 returned. If `NULL` then all groups are included. (default: `NULL`)}
 
 \item{statistic}{Which exposure statistic should be returned? `n` for number of observations, `mean` for
-category mean or `ss` for (uncentered) category sum-of-square matrix, or `c("mean", "ss")` for any combination
-thereof. (default: all)}
+category mean or `ss` for (uncentered) category sum-of-square matrix, or a character vector with any
+combination thereof. (default: all)}
 }
 \value{
 If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
