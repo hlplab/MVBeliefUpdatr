@@ -387,7 +387,6 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
           mapping = aes(
             x = .data$cue1,
             y = .data$cue2,
-            shape = .data$category,
             color = .data$category),
           inherit.aes = F, size = 2),
         geom_path(
@@ -533,7 +532,6 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
         mapping = aes(
           x = .data$cue1,
           y = .data$cue2,
-          shape = .data$category,
           color = .data$category),
         inherit.aes = F, size = 2),
       geom_path(
