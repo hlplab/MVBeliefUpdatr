@@ -55,10 +55,10 @@ update_NIW_belief_kappa = function(kappa_0, x_N) { kappa_0 + x_N }
 update_NIW_belief_nu = function(nu_0, x_N) { nu_0 + x_N }
 #' @rdname update_NIW_parameters
 #' @export
-update_NIW_belief_m = function(kappa_0, m_0, x_N, x_mean) { (kappa_0 / (kappa_0 + x_N)) * m_0 + x_N / (kappa_0 + x_N) * x_mean }
+update_NIW_belief_m = function(kappa_0, m_0, x_N, x_mean) { (kappa_0 / (kappa_0 + x_N)) * m_0 + (x_N / (kappa_0 + x_N)) * x_mean }
 #' @rdname update_NIW_parameters
 #' @export
-update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) { S_0 + x_SS + (kappa_0 * x_N) / (kappa_0 + x_N) * (x_mean - m_0) %*% t(x_mean - m_0) }
+update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) { S_0 + x_SS + ((kappa_0 * x_N) / (kappa_0 + x_N)) * (x_mean - m_0) %*% t(x_mean - m_0) }
 
 
 
@@ -123,7 +123,7 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) { S_0 + x_S
 #' @param x_category Character. The label of the category that is to be updated.
 #' @param x A single observation.
 #' @param x_mean mean of the observations.
-#' @param x_SS Centered sum of squares matrix of the observations.
+#' @param x_SS *Centered* sum of squares matrix of the observations.
 #' @param x_N Number of observations that went into the mean and sum of squares matrix.
 #' @param noise_treatment Determines whether multivariate Gaussian noise is added to the input.
 #' If `NULL`, no noise is added during the updating. If "sample" then a sample of
@@ -231,10 +231,11 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
   x_SS = list(x_SS)
   prior %<>%
     mutate(
+      # Order of application matters here since all of these update functions assume inputs (kappa, nu, m, S) that are not yet updated.
+      S = pmap(.l = list(kappa, m, S, x_Ns, x_mean, x_SS), update_NIW_belief_S),
       m = pmap(.l = list(kappa, m, x_Ns, x_mean), update_NIW_belief_m),
       kappa = unlist(map2(kappa, x_Ns, update_NIW_belief_kappa)),
-      nu = unlist(map2(nu, x_Ns, update_NIW_belief_nu)),
-      S = pmap(.l = list(kappa, m, S, x_Ns, x_mean, x_SS), update_NIW_belief_S))
+      nu = unlist(map2(nu, x_Ns, update_NIW_belief_nu)))
 
   return(prior)
 }
@@ -393,7 +394,7 @@ update_NIW_ideal_adaptor_batch <- function(
     summarise(
       x_N = length(!! sym(exposure.category)),
       x_mean = list(colMeans(cbind(!!! syms(exposure.cues)))),
-      x_SS = list(get_sum_of_uncentered_squares_from_df(cbind(!!! syms(exposure.cues)), verbose = verbose)))
+      x_SS = list(get_sum_of_centered_squares_from_df(cbind(!!! syms(exposure.cues)), verbose = verbose)))
 
   categories = unique(exposure[[exposure.category]])
   for (c in categories) {
