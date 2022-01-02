@@ -346,7 +346,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
   d %<>%
     rename(x = Sigma.mean, centre = mu.mean) %>%
     crossing(level = levels) %>%
-    mutate(ellipse = pmap(., ellipse.pmap)) %>%
+    mutate(ellipse = pmap(.l = list(x, centre, level), ellipse.pmap)) %>%
     unnest(ellipse) %>%
     group_by(across(-ellipse)) %>%
     transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]) %>%
@@ -396,9 +396,9 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
               model,
               category = levels(d$category),
               group = setdiff(levels(d$group), "prior")) %>%
-            rename(x = ss, centre = mean) %>%
+            rename(x = cov, centre = mean) %>%
             crossing(level = .95) %>%
-            mutate(ellipse = pmap(.l = list(centre, x, level), ellipse.pmap)) %>%
+            mutate(ellipse = pmap(.l = list(x, centre, level), ellipse.pmap)) %>%
             unnest(ellipse) %>%
             group_by(across(-ellipse)) %>%
             transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]),
@@ -647,7 +647,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' @param plot_in_cue_space Should predictions be plotted in the cue space? If not, test tokens are essentially treated
 #' as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)
 #' @param sort_by Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
-#' from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired.
+#' from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired. (default: `"prior"`)
 #'
 #' @return ggplot object.
 #'
@@ -670,7 +670,7 @@ plot_ibbu_stanfit_test_categorization = function(
   group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
   category.ids = NULL, category.colors = NULL,
   all_test_locations = TRUE, plot_in_cue_space = FALSE,
-  sort_by = "prior"
+  sort_by = if (plot_in_cue_space) NULL else "prior"
 ) {
   assert_NIW_ideal_adaptor_stanfit(model)
   if (is.null(data.test)) data.test = get_test_data_from_stanfit(model)
@@ -714,9 +714,10 @@ plot_ibbu_stanfit_test_categorization = function(
   assert_that(all(group.ids %in% group.levels),
               msg = paste("Some group.ids were not found in the stanfit object: ",
                           paste(setdiff(group.ids, group.levels), collapse = ", ")))
-  assert_that(sort_by %in% group.ids,
-              msg = paste("sort_by must be NULL or one of the group IDs (group.ids):",
-                          paste(group.ids, collapse = ", ")))
+  if (!is.null(sort_by))
+    assert_that(sort_by %in% group.ids,
+                msg = paste("sort_by must be NULL or one of the group IDs (group.ids):",
+                      paste(group.ids, collapse = ", ")))
 
   # Setting aes defaults
   if(is.null(group.labels)) group.labels = paste0("posterior (", group.ids[-1], ")")
