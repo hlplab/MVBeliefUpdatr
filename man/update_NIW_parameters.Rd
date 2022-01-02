@@ -15,6 +15,12 @@ update_NIW_belief_m(kappa_0, m_0, x_N, x_mean)
 
 update_NIW_belief_S(kappa_0, m_0, S_0, x_N, x_mean, x_SS)
 }
+\arguments{
+\item{kappa_0, nu_0, m_0, S_0}{Prior parameter values of NIW.}
+
+\item{x_n, x_mean, x_SS}{Number of observations, mean of those observations, and *centered* sum-of-square matrix of those
+observations based on which the parameters of the NIW should be updated.}
+}
 \value{
 Depending on the updated parameter, a numeric scalar (kappa, nu), vector (m) or square matrix (S).
 }

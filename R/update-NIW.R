@@ -45,6 +45,10 @@ example_NIW_prior = function(example = 1) {
 #' These functions are called, for example, by \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}},
 #' \code{\link{update_NIW_belief_by_one_observation}}, and \code{\link{update_NIW_beliefs_incrementally}}.
 #'
+#' @param kappa_0,nu_0,m_0,S_0 Prior parameter values of NIW.
+#' @param x_n,x_mean,x_SS Number of observations, mean of those observations, and *centered* sum-of-square matrix of those
+#' observations based on which the parameters of the NIW should be updated.
+#'
 #' @return Depending on the updated parameter, a numeric scalar (kappa, nu), vector (m) or square matrix (S).
 #'
 #' @rdname update_NIW_parameters
@@ -411,7 +415,7 @@ update_NIW_ideal_adaptor_batch <- function(
           method = "label-certain",
           verbose = verbose))
 
-    prior = posterior
+    prior <- posterior
   }
 
   return(prior)

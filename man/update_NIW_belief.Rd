@@ -34,7 +34,7 @@ update_NIW_belief_by_one_observation(
 
 \item{x_mean}{mean of the observations.}
 
-\item{x_SS}{Centered sum of squares matrix of the observations.}
+\item{x_SS}{*Centered* sum of squares matrix of the observations.}
 
 \item{x_N}{Number of observations that went into the mean and sum of squares matrix.}
 
