@@ -22,7 +22,7 @@ plot_ibbu_stanfit_test_categorization(
   category.colors = NULL,
   all_test_locations = TRUE,
   plot_in_cue_space = FALSE,
-  sort_by = "prior"
+  sort_by = if (plot_in_cue_space) NULL else "prior"
 )
 }
 \arguments{
@@ -65,7 +65,7 @@ combinations be shown that actually occurred in the data? (default: `FALSE`)}
 as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)}
 
 \item{sort_by}{Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
-from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired.}
+from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired. (default: `"prior"`)}
 }
 \value{
 ggplot object.
