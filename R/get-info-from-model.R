@@ -148,7 +148,7 @@ nest_cue_information_in_model <- function(model) {
     m <- "m"
     S <- "S"
   } else {
-    error("Object not recognized.")
+    stop("Object not recognized.")
   }
 
   assert_that(all(c("cue", "cue2") %in% names(model)),
@@ -171,7 +171,7 @@ unnest_cue_information_in_model <- function(model) {
     m <- "m"
     S <- "S"
   } else {
-    error("Object not recognized.")
+    stop("Object not recognized.")
   }
 
   assert_that(all(c("cue", "cue2") %nin% names(model)),
