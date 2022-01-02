@@ -113,7 +113,7 @@ get_limits = function(data, measure, by = NULL, hdi.prob = .99, min = NULL, max 
 }
 
 ellipse.pmap = function(x, centre, level, ...)
-  ellipse(x = x, centre = centre, level = level)
+  ellipse(x = x, centre = centre, level = level, ...)
 
 #' @export
 add_exposure_data_to_1D_plot = function(
