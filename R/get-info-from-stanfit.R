@@ -108,8 +108,8 @@ get_input_from_stanfit = function(fit) {
 #' @param group Character vector with groups (or group) for which category statistics are to be
 #' returned. If `NULL` then all groups are included. (default: `NULL`)
 #' @param statistic Which exposure statistic should be returned? `n` for number of observations, `mean` for
-#' category mean or `ss` for (uncentered) category sum-of-square matrix, or a character vector with any
-#' combination thereof. (default: all)
+#' category mean, `css` or `uss` for centered or uncentered category sum-of-square matrix, `cov` for the
+#' category covariance matrix, or a character vector with any combination thereof. (default: all)
 #'
 #' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
 #' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
@@ -122,10 +122,10 @@ get_input_from_stanfit = function(fit) {
 #' @rdname get_exposure_statistic_from_stanfit
 #' @export
 get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
-                                               statistic = c("n", "mean", "ss")) {
+                                               statistic = c("n", "mean", "css", "uss", "cov")) {
   assert_that(is.NIW_ideal_adaptor_input(x) | is.NIW_ideal_adaptor_stanfit(x))
-  assert_that(all(statistic %in% c("n", "mean", "ss")),
-              msg = "statistic must be one of 'n', mean' or 'ss'.")
+  assert_that(all(statistic %in% c("n", "mean", "css", "uss", "cov")),
+              msg = "statistic must be one of 'n', mean', 'css', 'uss', or 'cov'.")
   if (!is.null(category)) assert_that(all(category %in% get_category_levels_from_stanfit(x)),
                                       msg = paste("Some categories were not found in the exposure data:",
                                                   paste(setdiff(category, get_category_levels_from_stanfit(x)), collapse = ", ")))
@@ -135,7 +135,7 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
   if (is.NIW_ideal_adaptor_stanfit(x)) x <- get_input_from_stanfit(x)
 
   df <- NULL
-  if ("n" %in% statistic) {
+  if (any(c("n", "css", "cov") %in% statistic)) {
     n <- x$N
     d <- dim(n)
     dn <- dimnames(n)
@@ -156,7 +156,7 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
     df <- if (!is.null(df)) df %<>% left_join(df.n, by = c("group", "category")) else df.n
   }
 
-  if ("mean" %in% statistic) {
+  if (any(c("mean", "css", "cov") %in% statistic)) {
     m <- x$x_mean
     d <- dim(m)
     dn <- dimnames(m)
@@ -184,7 +184,7 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
     df <- if (!is.null(df)) df %<>% left_join(df.m, by = c("group", "category")) else df.m
   }
 
-  if ("ss" %in% statistic) {
+  if (any(c("uss", "css", "cov") %in% statistic)) {
     s <- x$x_ss
     d <- dim(s)
     dn <- dimnames(s)
@@ -210,12 +210,21 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
 
     df.s %<>%
       group_by(category, group) %>%
-      summarise(ss = list(matrix(value, nrow = sqrt(length(value)))))
+      summarise(uss = list(matrix(value, nrow = sqrt(length(value)))))
 
     df <- if (!is.null(df)) df %<>% left_join(df.s, by = c("group", "category")) else df.s
   }
 
+  if (any(c("css", "cov") %in% statistic)) {
+    df %<>% mutate(css = pmap(.l = list(uss, n, mean), uss2css))
+  }
+
+  if (any(c("cov") %in% statistic)) {
+    df %<>% mutate(cov = map2(css, n, css2cov))
+  }
+
   df %<>%
+    select(group, category, !!! syms(statistic)) %>%
     { if (!is.null(group)) filter(., .data[["group"]] %in% .env[["group"]]) else . } %>%
     { if (!is.null(category)) filter(., .data[["category"]] %in% .env[["category"]]) else . }
 

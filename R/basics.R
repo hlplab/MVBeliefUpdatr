@@ -9,7 +9,7 @@ NULL
 #'
 #' @return A square matrix.
 #'
-#' @seealso \code{\link{ss2cov}}, \code{\link{cov2ss}}
+#' @seealso \code{\link{css2cov}}, \code{\link{cov2css}}, \code{\link{uss2css}}
 #' @keywords TBD
 #' @examples
 #' TBD
@@ -37,39 +37,71 @@ ss <- function(x, center = TRUE) {
 }
 
 
-#' Get covariance matrix from centered sum-of-squares matrix
+#' Convert sum-of-square and covariance matrices
 #'
-#' Get covariance matrix from centered sum-of-square matrix.
+#' Convert centered sum-of-square matrices (css), uncentered sum-of-square matrices (uss),
+#' and covariance matrices (cov) into each other.
 #'
-#' @param SS A sum-of-square matrix.
+#' @param uss,css,cov Uncentered sum-of-square, centered sum-of-square, and covariance matrix.
 #' @param n Number of observations that have gone into the sum-of-square matrix.
+#' @param mean Mean of the observations that have gone into the sum-of-square matrix.
 #'
 #' @return A square matrix.
 #'
-#' @seealso \code{\link{cov2ss}}
+#' @seealso \code{\link{ss}}, \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}, \code{\link{cov2tau}}
 #' @keywords TBD
 #' @examples
 #' TBD
+#' @rdname uss2css
 #' @export
-ss2cov <- function(SS, n) {
-  return(SS / (n - 1))
+uss2css <- function(uss, n, mean) {
+  assert_that(is.matrix(uss))
+  assert_that(length(dim(uss)) == 2)
+  assert_that(dim(uss)[[1]] == dim(uss)[[2]],
+              msg = "uss must be a square matrix.")
+  assert_that(length(mean) == dim(uss)[[1]],
+              msg = "uss and mean are not of compatible dimensions.")
+
+  xm <- matrix(mean, nrow = n, ncol = length(mean), byrow = T)
+  css <- uss - ss(xm, center = F)
+  return(css)
 }
 
-#' Get centered sum-of-squares matrix from covariance matrix.
-#'
-#' Get centered sum-of-square matrix from covariance matrix.
-#'
-#' @param cov A covariance matrix.
-#' @param n Number of observations that have gone into the sum-of-square matrix.
-#'
-#' @return A square matrix.
-#'
-#' @seealso \code{\link{cov2ss}}
-#' @keywords TBD
-#' @examples
-#' TBD
+
+#' @rdname uss2css
 #' @export
-cov2ss <- function(cov, n) {
+css2uss <- function(css, n, mean) {
+  assert_that(is.matrix(css))
+  assert_that(length(dim(css)) == 2)
+  assert_that(dim(css)[[1]] == dim(css)[[2]],
+              msg = "uss must be a square matrix.")
+  assert_that(length(mean) == dim(css)[[1]],
+              msg = "uss and mean are not of compatible dimensions.")
+
+  xm <- matrix(mean, nrow = n, ncol = length(mean), byrow = T)
+  uss <- css + ss(xm, center = F)
+  return(uss)
+}
+
+#' @rdname uss2css
+#' @export
+css2cov <- function(css, n) {
+  assert_that(is.matrix(css))
+  assert_that(length(dim(css)) == 2)
+  assert_that(dim(css)[[1]] == dim(css)[[2]],
+              msg = "css must be a square matrix.")
+
+  return(css / (n - 1))
+}
+
+#' @rdname uss2css
+#' @export
+cov2css <- function(cov, n) {
+  assert_that(is.matrix(cov))
+  assert_that(length(dim(cov)) == 2)
+  assert_that(dim(cov)[[1]] == dim(cov)[[2]],
+              msg = "uss must be a square matrix.")
+
   return(cov * (n - 1))
 }
 

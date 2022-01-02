@@ -21,6 +21,6 @@ Get sum-of-square matrix.
 TBD
 }
 \seealso{
-\code{\link{ss2cov}}, \code{\link{cov2ss}}
+\code{\link{css2cov}}, \code{\link{cov2css}}, \code{\link{uss2css}}
 }
 \keyword{TBD}

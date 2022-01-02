@@ -10,7 +10,7 @@ get_exposure_statistic_from_stanfit(
   x,
   category = NULL,
   group = NULL,
-  statistic = c("n", "mean", "ss")
+  statistic = c("n", "mean", "css", "uss", "cov")
 )
 
 get_exposure_mean_from_stanfit(...)
@@ -27,8 +27,8 @@ returned.  If `NULL` then all categories are included. (default: `NULL`)}
 returned. If `NULL` then all groups are included. (default: `NULL`)}
 
 \item{statistic}{Which exposure statistic should be returned? `n` for number of observations, `mean` for
-category mean or `ss` for (uncentered) category sum-of-square matrix, or a character vector with any
-combination thereof. (default: all)}
+category mean, `css` or `uss` for centered or uncentered category sum-of-square matrix, `cov` for the
+category covariance matrix, or a character vector with any combination thereof. (default: all)}
 }
 \value{
 If just one group and category was requested, a vector (for the mean) or matrix (for the covariance

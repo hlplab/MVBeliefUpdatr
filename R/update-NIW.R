@@ -224,7 +224,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
     if (x_N > 1) x_SS = x_SS + ss(x, center = T)
   } else if (noise_treatment == "marginalize") {
     warning("Updating while including noise_treatment = marginalize has not yet been thoroughly tested. If noise is included in perception but not in the prior beliefs, it should be discounted during the updating. This is not yet implemented. You might want to construct the model with the option add_Sigma_noise_to_category_representation = TRUE and use categorization that does not add the noise again noise_treatment = 'no_noise'.")
-    x_SS = x_SS + cov2ss(get_perceptual_noise_from_model(prior), n = x_N)
+    x_SS = x_SS + cov2css(get_perceptual_noise_from_model(prior), n = x_N)
   }
 
   x_mean = list(x_mean)
