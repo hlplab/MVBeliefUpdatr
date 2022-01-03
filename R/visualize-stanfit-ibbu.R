@@ -350,7 +350,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     unnest(ellipse) %>%
     group_by(across(-ellipse)) %>%
     transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]) %>%
-    mutate(group = factor(group, levels = group.ids))
+    mutate(group = factor(group, levels = get_group_levels_from_stanfit(model)))
 
   min.cue1 <- min(d$cue1)
   min.cue2 <- min(d$cue2)
