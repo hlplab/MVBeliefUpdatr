@@ -8,8 +8,8 @@
 \usage{
 get_exposure_statistic_from_stanfit(
   x,
-  category = NULL,
-  group = NULL,
+  categories = get_category_levels_from_stanfit(x),
+  groups = get_group_levels_from_stanfit(x, include_prior = FALSE),
   statistic = c("n", "mean", "css", "uss", "cov")
 )
 
@@ -18,13 +18,13 @@ get_exposure_mean_from_stanfit(...)
 get_exposure_ss_from_stanfit(...)
 }
 \arguments{
-\item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} or NIW belief MCMC object.}
+\item{x}{\code{\link{NIW_ideal_adaptor_stanfit}}.}
 
-\item{category}{Character vector with categories (or category) for which category statistics are to be
-returned.  If `NULL` then all categories are included. (default: `NULL`)}
+\item{categories}{Character vector with categories for which category statistics are to be
+returned. (default: all categories)}
 
-\item{group}{Character vector with groups (or group) for which category statistics are to be
-returned. If `NULL` then all groups are included. (default: `NULL`)}
+\item{groups}{Character vector with groups for which category statistics are to be
+returned. (default: all groups except `"prior"`)}
 
 \item{statistic}{Which exposure statistic should be returned? `n` for number of observations, `mean` for
 category mean, `css` or `uss` for centered or uncentered category sum-of-square matrix, `cov` for the

@@ -8,24 +8,24 @@
 \usage{
 get_expected_category_statistic_from_stanfit(
   x,
-  category = NULL,
-  group = NULL,
+  categories = get_category_levels_from_stanfit(x),
+  groups = get_group_levels_from_stanfit(x, include_prior = TRUE),
   statistic = c("mu", "Sigma"),
   untransform_cues = T
 )
 
-get_expected_mu_from_stanfit(x, category, group, ...)
+get_expected_mu_from_stanfit(x, ...)
 
-get_expected_sigma_from_stanfit(x, category, group, ...)
+get_expected_sigma_from_stanfit(x, ...)
 }
 \arguments{
-\item{x}{An \code{\link[=is.NIW_ideal_adaptor_stanfit]{mv_ibbu_stanfit}} or \code{\link[=NIW_ideal_adaptor_MCMC]{NIW_ideal_adaptor_MCMC}} object.}
+\item{x}{An \code{\link[=is.NIW_ideal_adaptor_stanfit]{mv_ibbu_stanfit}} object.}
 
-\item{category}{Character vector with categories (or category) for which category statistics are to be
-returned.  If `NULL` then all categories are included. (default: `NULL`)}
+\item{categories}{Character vector with categories for which category statistics are to be
+returned. (default: all categories)}
 
-\item{group}{Character vector with groups (or group) for which category statistics are to be
-returned. If `NULL` then all groups are included. (default: `NULL`)}
+\item{groups}{Character vector with groups for which category statistics are to be returned.
+(default: all groups)}
 
 \item{statistic}{Which category statistic should be returned? `mu` for category mean or `Sigma` for category
 covariance matrix, or `c("mu", "Sigma")` for both. (default: both)}

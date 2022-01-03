@@ -102,11 +102,11 @@ get_input_from_stanfit = function(fit) {
 #' Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
 #' Bayesian belief-updating (IBBU) model from an NIW IBBU stanfit or NIW belief MCMC object.
 #'
-#' @param x \code{\link{NIW_ideal_adaptor_stanfit}} or NIW belief MCMC object.
-#' @param category Character vector with categories (or category) for which category statistics are to be
-#' returned.  If `NULL` then all categories are included. (default: `NULL`)
-#' @param group Character vector with groups (or group) for which category statistics are to be
-#' returned. If `NULL` then all groups are included. (default: `NULL`)
+#' @param x \code{\link{NIW_ideal_adaptor_stanfit}}.
+#' @param categories Character vector with categories for which category statistics are to be
+#' returned. (default: all categories)
+#' @param groups Character vector with groups for which category statistics are to be
+#' returned. (default: all groups except `"prior"`)
 #' @param statistic Which exposure statistic should be returned? `n` for number of observations, `mean` for
 #' category mean, `css` or `uss` for centered or uncentered category sum-of-square matrix, `cov` for the
 #' category covariance matrix, or a character vector with any combination thereof. (default: all)
@@ -121,18 +121,24 @@ get_input_from_stanfit = function(fit) {
 #' TBD
 #' @rdname get_exposure_statistic_from_stanfit
 #' @export
-get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
-                                               statistic = c("n", "mean", "css", "uss", "cov")) {
-  assert_that(is.NIW_ideal_adaptor_input(x) | is.NIW_ideal_adaptor_stanfit(x))
+get_exposure_statistic_from_stanfit = function(
+  x,
+  categories = get_category_levels_from_stanfit(x),
+  groups = get_group_levels_from_stanfit(x, include_prior = FALSE),
+  statistic = c("n", "mean", "css", "uss", "cov")
+) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(x))
   assert_that(all(statistic %in% c("n", "mean", "css", "uss", "cov")),
               msg = "statistic must be one of 'n', mean', 'css', 'uss', or 'cov'.")
-  if (!is.null(category)) assert_that(all(category %in% get_category_levels_from_stanfit(x)),
-                                      msg = paste("Some categories were not found in the exposure data:",
-                                                  paste(setdiff(category, get_category_levels_from_stanfit(x)), collapse = ", ")))
-  if (!is.null(group)) assert_that(all(group %in% get_group_levels_from_stanfit(x)),
-                                      msg = paste("Some groups were not found in the exposure data:",
-                                                  paste(setdiff(group, get_group_levels_from_stanfit(x)), collapse = ", ")))
-  if (is.NIW_ideal_adaptor_stanfit(x)) x <- get_input_from_stanfit(x)
+  assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
+  assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
+  assert_that(all(categories %in% get_category_levels_from_stanfit(x)),
+              msg = paste("Some categories not found in the exposure data:",
+                          paste(setdiff(categories, get_category_levels_from_stanfit(x)), collapse = ", ")))
+  assert_that(all(groups %in% get_group_levels_from_stanfit(x)),
+              msg = paste("Some groups not found in the exposure data:",
+                          paste(setdiff(groups, get_group_levels_from_stanfit(x, include_prior = FALSE)), collapse = ", ")))
+  x <- get_input_from_stanfit(x)
 
   df <- NULL
   if (any(c("n", "css", "cov") %in% statistic)) {
@@ -225,8 +231,11 @@ get_exposure_statistic_from_stanfit = function(x, category = NULL, group = NULL,
 
   df %<>%
     select(group, category, !!! syms(statistic)) %>%
-    { if (!is.null(group)) filter(., .data[["group"]] %in% .env[["group"]]) else . } %>%
-    { if (!is.null(category)) filter(., .data[["category"]] %in% .env[["category"]]) else . }
+    filter(., .data[["group"]] %in% .env[["groups"]]) %>%
+    filter(., .data[["category"]] %in% .env[["categories"]]) %>%
+    mutate(
+      category = factor(category, levels = .env[["categories"]]),
+      group = factor(group, levels = .env[["groups"]]))
 
   return(df)
 }
@@ -314,7 +323,7 @@ get_category_levels_from_stanfit = function(fit, indices = NULL) {
 #' @export
 get_group_levels_from_stanfit = function(fit, indices = NULL, include_prior = F) {
   groups = get_original_variable_levels_from_stanfit(fit, "group", indices)
-  if (include_prior) groups = append(groups, "prior")
+  if (include_prior) groups = append("prior", groups)
 
   return(groups)
 }
@@ -410,11 +419,11 @@ get_cue2_constructor = function(fit) {
 #' (representing uncertainty in the true value of \code{S_n}), we get
 #' \code{E[E[Sigma]] = mean(S_n / (nu_n - D - 1))}.
 #'
-#' @param x An \code{\link[=is.NIW_ideal_adaptor_stanfit]{mv_ibbu_stanfit}} or \code{\link[=NIW_ideal_adaptor_MCMC]{NIW_ideal_adaptor_MCMC}} object.
-#' @param category Character vector with categories (or category) for which category statistics are to be
-#' returned.  If `NULL` then all categories are included. (default: `NULL`)
-#' @param group Character vector with groups (or group) for which category statistics are to be
-#' returned. If `NULL` then all groups are included. (default: `NULL`)
+#' @param x An \code{\link[=is.NIW_ideal_adaptor_stanfit]{mv_ibbu_stanfit}} object.
+#' @param categories Character vector with categories for which category statistics are to be
+#' returned. (default: all categories)
+#' @param groups Character vector with groups for which category statistics are to be returned.
+#' (default: all groups)
 #' @param statistic Which category statistic should be returned? `mu` for category mean or `Sigma` for category
 #' covariance matrix, or `c("mu", "Sigma")` for both. (default: both)
 #'
@@ -431,54 +440,52 @@ get_cue2_constructor = function(fit) {
 #' @export
 get_expected_category_statistic_from_stanfit = function(
   x,
-  category = NULL,
-  group = NULL,
+  categories = get_category_levels_from_stanfit(x),
+  groups = get_group_levels_from_stanfit(x, include_prior = TRUE),
   statistic = c("mu", "Sigma"),
   untransform_cues = T
 ) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(x))
   assert_that(all(statistic %in% c("mu", "Sigma")))
-  if (is.NIW_ideal_adaptor_stanfit(x)) {
-    x = add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T, untransform_cues = untransform_cues)
-  } else if (is.NIW_ideal_adaptor_MCMC(x)) {
-    assert_that(is.NIW_ideal_adaptor_MCMC(x, is.nested = T, is.long = T),
-                msg = "If x is an NIW_ideal_adaptor_MCMC object, it must be in nested long format.")
-    assert_that(!untransform_cues,
-                msg = "If untransform_cues = T, then x must be an NIW_ideal_adaptor_stanfit object.")
-  }
+  assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
+  assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
+  assert_that(all(categories %in% get_category_levels_from_stanfit(x)),
+              msg = paste("Some categories not found in model:",
+                          paste(setdiff(categories, get_category_levels_from_stanfit(x)), collapse = ", ")))
+  assert_that(all(groups %in% get_group_levels_from_stanfit(x, include_prior = T)),
+              msg = paste("Some groups not found in model:",
+                          paste(setdiff(groups, get_group_levels_from_stanfit(x, include_prior = T)), collapse = ", ")))
 
-  assert_that(any(is.null(category), is.character(category), is.numeric(category)))
-  assert_that(any(is.null(group), is.character(group), is.numeric(group)))
-  if (is.null(category)) category = unique(x$category)
-  if (is.null(group)) group = unique(x$group)
-
-  x %<>%
-    filter(group %in% !! group, category %in% !! category) %>%
+  x <-
+    add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T, untransform_cues = untransform_cues) %>%
+    filter(group %in% .env[["groups"]], category %in% .env[["categories"]]) %>%
     mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
     group_by(group, category) %>%
     summarise(
       mu.mean = list(m %>% reduce(`+`) / length(m)),
       Sigma.mean = list(Sigma %>% reduce(`+`) / length(Sigma))) %>%
-    select(group, category, !!! rlang::syms(paste0(statistic, ".mean")))
-
-  if (!all(sort(unique(as.character(x$group))) == sort(as.character(group))))
-    warning("Not all groups were found in x.")
+    ungroup() %>%
+    select(group, category, !!! rlang::syms(paste0(statistic, ".mean"))) %>%
+    mutate(
+      category = factor(category, levels = .env[["categories"]]),
+      group = factor(group, levels = .env[["groups"]]))
 
   # If just one category and group was requested, just return that object, rather
   # than the tibble
-  if (nrow(x) == 1) x = x[,paste0(statistic, ".mean")][[1]][[1]]
+  if (nrow(x) == 1) x <- x[, paste0(statistic, ".mean")][[1]][[1]]
   return(x)
 }
 
 #' @rdname get_expected_category_statistic_from_stanfit
 #' @export
-get_expected_mu_from_stanfit = function(x, category, group, ...) {
-  return(get_expected_category_statistic_from_stanfit(x, category, group, statistic = "mu", ...))
+get_expected_mu_from_stanfit = function(x, ...) {
+  return(get_expected_category_statistic_from_stanfit(x, statistic = "mu", ...))
 }
 
 #' @rdname get_expected_category_statistic_from_stanfit
 #' @export
-get_expected_sigma_from_stanfit = function(x, category, group, ...) {
-  return(get_expected_category_statistic_from_stanfit(x, category, group, statistic = "Sigma", ...))
+get_expected_sigma_from_stanfit = function(x, ...) {
+  return(get_expected_category_statistic_from_stanfit(x, statistic = "Sigma", ...))
 }
 
 
@@ -507,7 +514,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #' stored separately (`nest=TRUE`).
 #'
 #' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
-#' @param which Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)
+#' @param which DEPRECATED. Use `groups` instead. Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)
 #' @param ndraws Number of random draws or `NULL` if all draws are to be returned. Only `draws` or `ndraws` should be non-zero. (default: `NULL`)
 #' @param draws Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)
 #' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
@@ -517,6 +524,8 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #' be stored in a separate cell? (default: `TRUE`)
 #' @param category Name of the category variable. (default: "category")
 #' @param group Name of the group variable. (default: "group")
+#' @param categories Character vector of categories for which draws are to be returned. (default: all categories)
+#' @param groups Character vector of groups for which draws are to be returned. (default: all groups)
 #'
 #' @return tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
 #' (\code{kappa, nu, m, S, lapse_rate}). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
@@ -536,7 +545,11 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #' @export
 add_ibbu_stanfit_draws = function(
   fit,
-  which = "posterior",
+  categories = get_category_levels_from_stanfit(x),
+  groups = get_group_levels_from_stanfit(x, include_prior = TRUE),
+  ##### SPECIAL HANDLING OF WHICH, WHICH IS NOW DEPRECATED.
+  which = if ("prior" %in% groups) { if (length(groups) > 1) "both" else "prior" } else "posterior",
+  ##### END OF SPECIAL HANDLING
   ndraws = NULL,
   draws = NULL,
   untransform_cues = TRUE,
@@ -546,9 +559,21 @@ add_ibbu_stanfit_draws = function(
   category = "category",
   group = "group"
 ) {
-  assert_NIW_ideal_adaptor_stanfit(fit)
+  assert_that(is.NIW_ideal_adaptor_stanfit(fit))
+  assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
+  assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
+  assert_that(all(categories %in% get_category_levels_from_stanfit(fit)),
+              msg = paste("Some categories not found in model:",
+                          paste(setdiff(categories, get_category_levels_from_stanfit(fit)), collapse = ", ")))
+  assert_that(all(groups %in% get_group_levels_from_stanfit(fit, include_prior = T)),
+              msg = paste("Some groups not found in model:",
+                          paste(setdiff(groups, get_group_levels_from_stanfit(fit, include_prior = T)), collapse = ", ")))
+
+  ##### SPECIAL HANDLING OF WHICH, WHICH IS NOW DEPRECATED.
   assert_that(which %in% c("prior", "posterior", "both"),
               msg = "which must be one of 'prior', 'posterior', or 'both'.")
+  ##### END OF SPECIAL HANDLING
+
   assert_that(any(is.null(ndraws), is.count(ndraws)),
               msg = "If not NULL, ndraw must be a count.")
   assert_that(any(all(is.null(draws), is.null(ndraws)), xor(!is.null(draws), !is.null(ndraws))),
@@ -561,16 +586,16 @@ add_ibbu_stanfit_draws = function(
               msg = "Wide format is currently not implemented without nesting.")
 
   if (!is.null(ndraws)) draws = get_random_draw_indices(fit, ndraws)
-  if (which == "both") {
+  if ("prior" %in% groups & length(groups) > 1) {
     d.prior <-
       add_ibbu_stanfit_draws(
-        fit = fit, which = "prior",
+        fit = fit, categories = categories, groups = "prior",
         ndraws = NULL, draws = draws,
         untransform_cues = untransform_cues,
         summarize = summarize, wide = wide, nest = nest)
     d.posterior <-
       add_ibbu_stanfit_draws(
-        fit = fit, which = "posterior",
+        fit = fit, categories = categories, groups = setdiff(.env[["groups"]], "prior"),
         ndraws = NULL, draws = draws,
         untransform_cues = untransform_cues,
         summarize = summarize, wide = wide, nest = nest)
@@ -582,20 +607,18 @@ add_ibbu_stanfit_draws = function(
                                  with(d.posterior, levels(!! rlang::sym(group))))))
     return(d.pars)
   } else {
-    assert_NIW_ideal_adaptor_stanfit(fit)
-
     # Parameters' names depend on whether prior or posterior is to be extracted.
-    postfix <- if (which == "prior") "_0" else "_n"
+    postfix <- if (groups == "prior") "_0" else "_n"
     kappa <- paste0("kappa", postfix)
     nu <- paste0("nu", postfix)
     m <- paste0("m", postfix)
     S <- paste0("S", postfix)
 
     # Variables by which parameters are indexed
-    pars.index <- if (which == "prior") category else c(category, group)
+    pars.index <- if (groups == "prior") category else c(category, group)
 
     # Get non-nested draws
-    if (which == "prior") {
+    if (groups == "prior") {
       d.pars <-
         fit %>%
         spread_draws(
@@ -604,8 +627,7 @@ add_ibbu_stanfit_draws = function(
           (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
           (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
           lapse_rate,
-          ndraws = ndraws) %>%
-        { if (!is.null(draws)) filter(., .draw %in% draws) else . }
+          ndraws = ndraws)
     } else {
       d.pars <-
         fit %>%
@@ -615,11 +637,12 @@ add_ibbu_stanfit_draws = function(
           (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
           (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
           lapse_rate,
-          ndraws = ndraws) %>%
-        { if (!is.null(draws)) filter(., .draw %in% draws) else . }
+          ndraws = ndraws)
     }
 
     d.pars %<>%
+      { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
+      filter(group %in% .env[["groups"]], category %in% .env[["categories"]]) %>%
       rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .)) %>%
       { if (summarize) {
         group_by(., !!! syms(pars.index), cue, cue2) %>%
@@ -627,7 +650,7 @@ add_ibbu_stanfit_draws = function(
           mutate_at(., vars(.chain, .iteration, .draw), ~ "all")
       } else . } %>%
       # If group is prior, then add the group variable with value "prior" to d.pars first.
-      { if (which == "prior") mutate(., (!! rlang::sym(group)) := "prior") else . } %>%
+      { if (groups == "prior") mutate(., (!! rlang::sym(group)) := "prior") else . } %>%
       # Make sure order of variables is identical for prior or posterior (facilitates processing
       # of the output of this function).
       select(.chain, .iteration, .draw,
@@ -649,10 +672,12 @@ add_ibbu_stanfit_draws = function(
     d.pars %<>%
       ungroup() %>%
       # Make sure that group and category are factors (even if group or category ids are just numbers)
-      mutate_at(vars(!! rlang::sym(group), !! rlang::sym(category)), factor)
+      mutate(
+        category = factor(category, levels = .env[["categories"]]),
+        group = factor(group, levels = .env[["groups"]]))
 
     if (wide) {
-      if (which == "prior")
+      if (groups == "prior")
         d.pars %<>% gather(variable, value, c(m, S))
       else
         d.pars %<>% gather(variable, value, c(kappa, nu, m, S))

@@ -240,10 +240,10 @@ plot_expected_categories_density1D = function(
   assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
 
   # Setting aes defaults
-  if(is.null(category.ids)) category.ids = levels(x$category)
-  if(is.null(category.labels)) category.labels = levels(x$category)
-  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
-  if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
+  if (is.null(category.ids)) category.ids = levels(x$category)
+  if (is.null(category.labels)) category.labels = levels(x$category)
+  if (is.null(category.colors)) category.colors = get_default_colors("category", category.ids)
+  if (is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   if (any(!quo_is_null(facet_rows_by),
           !quo_is_null(facet_cols_by),
@@ -337,10 +337,10 @@ plot_expected_categorization_function_1D = function(
   assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
 
   # Setting aes defaults
-  if(is.null(category.ids)) category.ids = levels(x$category)
-  if(is.null(category.labels)) category.labels = levels(x$category)
-  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
-  if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
+  if (is.null(category.ids)) category.ids = levels(x$category)
+  if (is.null(category.labels)) category.labels = levels(x$category)
+  if (is.null(category.colors)) category.colors = get_default_colors("category", category.ids)
+  if (is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   if (any(!quo_is_null(facet_rows_by),
           !quo_is_null(facet_cols_by),
@@ -430,10 +430,10 @@ plot_expected_categories_contour2D = function(
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
 
   # Setting aes defaults
-  if(is.null(category.ids)) category.ids = levels(x$category)
-  if(is.null(category.labels)) category.labels = levels(x$category)
-  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
-  if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
+  if (is.null(category.ids)) category.ids = levels(x$category)
+  if (is.null(category.labels)) category.labels = levels(x$category)
+  if (is.null(category.colors)) category.colors = get_default_colors("category", category.ids)
+  if (is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   x %<>%
     mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
@@ -540,10 +540,10 @@ plot_expected_categorization_function_2D = function(
   assert_that(!is_missing(ylim), msg = "`ylim` must be specified")
 
   # Setting aes defaults
-  if(is.null(category.ids)) category.ids = levels(x$category)
-  if(is.null(category.labels)) category.labels = levels(x$category)
-  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
-  if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
+  if (is.null(category.ids)) category.ids = levels(x$category)
+  if (is.null(category.labels)) category.labels = levels(x$category)
+  if (is.null(category.colors)) category.colors = get_default_colors("category", category.ids)
+  if (is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   if (any(!quo_is_null(facet_rows_by),
           !quo_is_null(facet_cols_by),

@@ -40,25 +40,47 @@ symlog_trans = function(){
 }
 
 
-#' Get default colors
+#' Get default colors, linetype, etc.
 #'
-#' @param var Variable for which default color is requested. Can be either `"category"` or
+#' @param var Variable for which default color/linetype is requested. Can be either `"category"` or
 #' `"group"`.
+#' @param levels Character vector of levels of the variable.
+#'
+#' @return Character vector of color/linetype values in the order specified by `levels`.
 #'
 #' @examples
 #' TBD
+#' @rdname get_default_scale_values
 #' @export
-get_default_colors = function(var, n) {
+get_default_colors = function(var, levels) {
   assert_that(all(var %in% c("category", "group")))
-  assert_that(is.count(n))
+  assert_that(is.character(levels))
+  n <- length(levels)
 
   if (var == "category")
-    c = scales::hue_pal()(n)
-  else
-    c = scales::brewer_pal(palette = "Set1")(n)
+    color <- scales::hue_pal()(n)
+  else {
+    if ("prior" %in% levels) {
+      color <- c()
+      color[which(levels != "prior")] <- scales::brewer_pal(palette = "Set1")(n - 1)
+      color[which(levels == "prior")] <- "darkgray"
+    } else color <- scales::brewer_pal(palette = "Set1")(n)
+  }
 
-  return(c)
+  return(color)
 }
+
+#' @rdname get_default_scale_values
+#' @export
+get_default_linetypes = function(var, levels) {
+  assert_that(all(var %in% c("category", "group")))
+  assert_that(is.character(levels))
+
+  l <- 1:length(levels)
+
+  return(l)
+}
+
 
 
 #' Get plot limits.

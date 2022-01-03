@@ -10,34 +10,32 @@ plot_expected_ibbu_stanfit_categories_2D(model, type, ...)
 
 plot_expected_ibbu_stanfit_categories_contour2D(
   model,
-  levels = plogis(seq(-15, qlogis(0.95), length.out = 20)),
+  categories = get_category_levels_from_stanfit(model),
+  groups = get_group_levels_from_stanfit(model, include_prior = T),
   plot.test = T,
   plot.exposure = F,
   annotate_inferred_category_means = c("rug", "text"),
   untransform_cues = TRUE,
-  category.ids = NULL,
-  category.labels = NULL,
-  category.colors = NULL,
-  category.linetypes = NULL
+  levels = plogis(seq(-15, qlogis(0.95), length.out = 20)),
+  category.colors = get_default_colors("category", categories)
 )
 
 plot_expected_ibbu_stanfit_categories_density2D(
   model,
+  categories = get_category_levels_from_stanfit(model),
+  groups = get_group_levels_from_stanfit(model, include_prior = T),
   plot.test = T,
   plot.exposure = F,
   annotate_inferred_category_means = c("rug", "text"),
   untransform_cues = TRUE,
-  category.ids = NULL,
-  category.labels = NULL,
-  category.colors = NULL,
-  category.linetypes = NULL,
+  category.colors = get_default_colors("category", categories),
   xlim,
   ylim,
   resolution = 25
 )
 }
 \arguments{
-\item{model}{mv-ibbu-stanfit object.}
+\item{model}{An mv-ibbu-stanfit object.}
 
 \item{type}{Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
 faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}
@@ -47,8 +45,9 @@ density plot instead calculates the posterior predictive for each MCMC draw (i.e
 density based on the NIW parameters \code{m, S, kappa, nu}), and then averages those densities. Since this is
 done for *all* points defined by the data.grid this can be rather computationally expensive and slow.}
 
-\item{levels}{Used only if `type` is `"contour"`. levels The cumulative probability levels that should be plotted (using
-`geom_polygon()`) around the mean. By default the most transparent ellipse still drawn corresponds to .95.}
+\item{categories, groups}{Character vector of category/groups IDs to be plotted. It is possible
+to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
+(default: all categories/groups will be plotted)}
 
 \item{plot.test, plot.exposure}{Should the test and/or exposure stimuli be plotted? (default: `TRUE` for `plot.test`,
 `FALSE` for `plot.exposure`) The test items are plotted as black points. The exposure mean is plotted as point,
@@ -60,26 +59,15 @@ indicated through data rugs (`"rug"`) and/or text labels (`"text"`)? Set to NULL
 
 \item{untransform_cues}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
 
-\item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
-to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}
+\item{levels}{Used only if `type` is `"contour"`. levels The cumulative probability levels that should be plotted (using
+`geom_polygon()`) around the mean. By default the most transparent ellipse still drawn corresponds to .95.}
 
-\item{category.labels}{Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)}
-
-\item{category.colors}{Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)}
-
-\item{category.linetypes}{Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
-Currently being ignored.}
+\item{category.colors}{Vector of colors of same length as categories.}
 
 \item{xlim, ylim}{For density plots. Limits for the x- and y-axis.}
 
 \item{resolution}{For density plots. How many steps along x and y should be calculated? Note that computational
 complexity increases quadratically with resolution. (default: 25)}
-
-\item{summarize}{Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
-expected categories be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`) Currently being ignored.}
-
-\item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
-(default: `NULL`) Currently being ignored.}
 
 \item{data.grid.xlim, data.grid.ylim, data.grid.resolution}{Used only if `type` is `"density"`. Limits for x- and y-axis as
 well as resolution of the data.grid, defining the range over which the posterior predictive (multivariate Student-T density)

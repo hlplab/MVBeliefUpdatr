@@ -7,19 +7,16 @@
 plot_ibbu_stanfit_test_categorization(
   model,
   data.test = NULL,
-  which = "both",
+  groups = get_group_levels_from_stanfit(model, include_prior = TRUE),
   summarize = T,
   ndraws = NULL,
   untransform_cues = TRUE,
   confidence.intervals = c(0.66, 0.95),
   target_category = 1,
   panel.group = if (plot_in_cue_space) TRUE else FALSE,
-  group.ids = NULL,
-  group.labels = NULL,
-  group.colors = NULL,
-  group.linetypes = NULL,
-  category.ids = NULL,
-  category.colors = NULL,
+  group.colors = get_default_colors("group", length(groups)),
+  group.linetypes = get_default_linetypes("group", groups),
+  category.colors = get_default_colors("category", categories),
   all_test_locations = TRUE,
   plot_in_cue_space = FALSE,
   sort_by = if (plot_in_cue_space) NULL else "prior"
@@ -31,7 +28,9 @@ plot_ibbu_stanfit_test_categorization(
 \item{data.test}{Optionally, a \code{tibble} or \code{data.frame} with test data.
 If `NULL` the input will be extracted from fit. (default: `NULL`).}
 
-\item{which}{Should categorization for the prior, posterior, or both be plotted? (default: `"both"`)}
+\item{groups}{Character vector of groups IDs to be plotted. It is possible
+to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
+(default: all groups will be plotted)}
 
 \item{summarize}{Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
 unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)}
@@ -46,17 +45,10 @@ unique categorization function be plotted for each MCMC draw (`FALSE`)? (default
 
 \item{panel.group}{Should the groups be plotted in separate panels? (default: `FALSE`)}
 
-\item{group.ids}{Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)}
+\item{group.colors, group.linetypes}{Vector of colors and linetypes of same length as `groups` or `NULL` to use defaults.}
 
-\item{group.labels}{Vector of group labels of same length as `group.ids` or `NULL` to use defaults. (default: `NULL`)
-The default labels each categorization function based on whether it is showing prior or posterior categorization,
-and by its group ID.}
-
-\item{group.colors, group.linetypes}{Vector of colors and linetypes of same length as group.ids or `NULL` to use defaults.
-(default: `NULL`)}
-
-\item{category.colors}{Vector of colors and linetypes of same length as category.ids or `NULL` to use defaults. Only
-relevant when `plot_in_cue_space = TRUE`. (default: `NULL`)}
+\item{category.colors}{Vector of colors and linetypes of same length as `categories` or `NULL` to use defaults. Only
+relevant when `plot_in_cue_space = TRUE`.}
 
 \item{all_test_locations}{Should predictions be shown for all combinations of test locations and group, or should only
 combinations be shown that actually occurred in the data? (default: `FALSE`)}

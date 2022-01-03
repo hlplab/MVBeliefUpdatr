@@ -57,11 +57,11 @@ plot_ibbu_stanfit_parameters = function(
     if(is.null(group.labels)) group.labels[1] = "prior"
     if(is.null(group.colors)) group.colors[1] = "darkgray"
   } else if (which == "posterior") {
-    if(is.null(group.labels)) group.labels = paste0("posterior (", group.ids, ")")
-    if(is.null(group.colors)) group.colors = get_default_colors("group", length(group.ids))
+    if (is.null(group.labels)) group.labels = paste0("posterior (", group.ids, ")")
+    if (is.null(group.colors)) group.colors = get_default_colors("group", group.ids)
   } else {
-    if(is.null(group.labels)) group.labels = ifelse(group.ids == "prior", group.ids, paste0("posterior (", group.ids, ")"))
-    if(is.null(group.colors)) group.colors = c("darkgray", get_default_colors("group", length(group.ids) - 1))
+    if (is.null(group.labels)) group.labels = ifelse(group.ids == "prior", group.ids, paste0("posterior (", group.ids, ")"))
+    if (is.null(group.colors)) group.colors = get_default_colors("group", group.ids)
   }
 
   p.m <- d.pars %>%
@@ -202,9 +202,9 @@ plot_ibbu_stanfit_parameter_correlations = function(
       nest = T)
 
   # Setting aes defaults
-  if(is.null(category)) category <- levels(d.pars$category)
-  if(is.null(cue)) cue <- get_cue_labels_from_model(d.pars)
-  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category))
+  if (is.null(category)) category <- levels(d.pars$category)
+  if (is.null(cue)) cue <- get_cue_labels_from_model(d.pars)
+  if (is.null(category.colors)) category.colors = get_default_colors("category", category)
 
   d.pars %<>%
     { if (!is.null(category)) filter(., category %in% category) else . } %>%
@@ -265,7 +265,7 @@ plot_ibbu_stanfit_parameter_correlations = function(
 #' by the (post-warmup) MCMC samples. Two methods are available (specified by `type`), which differ in their
 #' computational demands and speed.
 #'
-#' @param model mv-ibbu-stanfit object.
+#' @param model An mv-ibbu-stanfit object.
 #' @param type Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
 #' faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}
 #' (based on the NIW parameters \code{S} and \code{nu}) at each MCMC draw, and then averages over
@@ -273,28 +273,22 @@ plot_ibbu_stanfit_parameter_correlations = function(
 #' density plot instead calculates the posterior predictive for each MCMC draw (i.e, the multivariate Student-T
 #' density based on the NIW parameters \code{m, S, kappa, nu}), and then averages those densities. Since this is
 #' done for *all* points defined by the data.grid this can be rather computationally expensive and slow.
+#' @param categories,groups Character vector of category/groups IDs to be plotted. It is possible
+#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
+#' (default: all categories/groups will be plotted)
 #' @param plot.test,plot.exposure Should the test and/or exposure stimuli be plotted? (default: `TRUE` for `plot.test`,
 #' `FALSE` for `plot.exposure`) The test items are plotted as black points. The exposure mean is plotted as point,
 #' and the .95 interval of cue distributions during exposure are plotted as dashed ellipse in the same color as the
 #' expected categories.
 #' @param annotate_inferred_category_means Character vector indicating whether the location and value of the mean be
 #' indicated through data rugs (`"rug"`) and/or text labels (`"text"`)? Set to NULL to ignore. (default: `c("rug", "text")`)
-#' @param summarize Should one expected categories be plotted, marginalizing over MCMC draws (`TRUE`), or should separate
-#' expected categories be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`) Currently being ignored.
-#' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
-#' (default: `NULL`) Currently being ignored.
 #' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
 #' @param levels Used only if `type` is `"contour"`. levels The cumulative probability levels that should be plotted (using
 #' `geom_polygon()`) around the mean. By default the most transparent ellipse still drawn corresponds to .95.
 #' @param xlim,ylim For density plots. Limits for the x- and y-axis.
 #' @param resolution For density plots. How many steps along x and y should be calculated? Note that computational
 #' complexity increases quadratically with resolution. (default: 25)
-#' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
-#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
-#' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
-#' @param category.colors Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
-#' @param category.linetypes Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
-#' Currently being ignored.
+#' @param category.colors Vector of colors of same length as categories.
 #' @param data.grid.xlim,data.grid.ylim,data.grid.resolution Used only if `type` is `"density"`. Limits for x- and y-axis as
 #' well as resolution of the data.grid, defining the range over which the posterior predictive (multivariate Student-T density)
 #' is calculated. Note that the number of densities to calculate is a *quadratic* function of `data.grid.resolution`. The default
@@ -326,21 +320,25 @@ plot_expected_ibbu_stanfit_categories_2D = function(
 #' @export
 plot_expected_ibbu_stanfit_categories_contour2D = function(
   model,
-  levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
-  plot.test = T, plot.exposure = F, annotate_inferred_category_means = c("rug", "text"),
+  categories = get_category_levels_from_stanfit(model),
+  groups = get_group_levels_from_stanfit(model, include_prior = T),
+  plot.test = T,
+  plot.exposure = F,
+  annotate_inferred_category_means = c("rug", "text"),
   untransform_cues = TRUE,
-  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL
+  levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
+  category.colors = get_default_colors("category", categories)
 ) {
   fit.input <- get_input_from_stanfit(model)
   assert_that(!all(is.null(fit.input), plot.test))
-  if (!is.null(annotate_inferred_category_means)) assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
-  d <- get_expected_category_statistic_from_stanfit(model, untransform_cues = untransform_cues)
+  assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
 
-  # Setting aes defaults
-  if(is.null(category.ids)) category.ids = levels(d$category)
-  if(is.null(category.labels)) category.labels = levels(d$category)
-  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
-  if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
+  d <-
+    get_expected_category_statistic_from_stanfit(
+      model,
+      categories = .env[["categories"]],
+      groups = .env[["groups"]],
+      untransform_cues = untransform_cues)
 
   cue.names <- get_cue_levels_from_stanfit(model)
   d %<>%
@@ -349,8 +347,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     mutate(ellipse = pmap(.l = list(x, centre, level), ellipse.pmap)) %>%
     unnest(ellipse) %>%
     group_by(across(-ellipse)) %>%
-    transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]) %>%
-    mutate(group = factor(group, levels = get_group_levels_from_stanfit(model)))
+    transmute(cue1 = ellipse[,1], cue2 = ellipse[,2])
 
   min.cue1 <- min(d$cue1)
   min.cue2 <- min(d$cue2)
@@ -381,8 +378,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
           data =
             get_exposure_mean_from_stanfit(
               model,
-              category = levels(d$category),
-              group = setdiff(levels(d$group), "prior")) %>%
+              categories = levels(d$category),
+              groups = setdiff(levels(d$group), "prior")) %>%
             mutate(cue1 = unlist(map(mean, ~.x[1])), cue2 = unlist(map(mean, ~.x[2]))),
           mapping = aes(
             x = .data$cue1,
@@ -393,8 +390,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
           data =
             get_exposure_statistic_from_stanfit(
               model,
-              category = levels(d$category),
-              group = setdiff(levels(d$group), "prior")) %>%
+              categories = levels(d$category),
+              groups = setdiff(levels(d$group), "prior")) %>%
             rename(x = cov, centre = mean) %>%
             crossing(level = .95) %>%
             mutate(ellipse = pmap(.l = list(x, centre, level), ellipse.pmap)) %>%
@@ -447,8 +444,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     scale_y_continuous(cue.names[2]) +
     scale_fill_manual(
       "Category",
-      breaks = category.ids,
-      labels = category.labels,
+      breaks = .env[["categories"]],
       values = category.colors,
       aesthetics = c("color", "fill")) +
     scale_alpha("", range = c(0.1,.9)) +
@@ -460,26 +456,28 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
 #' @export
 plot_expected_ibbu_stanfit_categories_density2D = function(
   model,
-  plot.test = T, plot.exposure = F, annotate_inferred_category_means = c("rug", "text"),
+  categories = get_category_levels_from_stanfit(model),
+  groups = get_group_levels_from_stanfit(model, include_prior = T),
+  plot.test = T,
+  plot.exposure = F,
+  annotate_inferred_category_means = c("rug", "text"),
   untransform_cues = TRUE,
-  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
+  category.colors = get_default_colors("category", categories),
   xlim, ylim, resolution = 25
 ) {
   fit.input = get_input_from_stanfit(model)
-  assert_that(is.NIW_ideal_adaptor_stanfit(model) | is.NIW_ideal_adaptor_MCMC(model))
+  assert_that(is.NIW_ideal_adaptor_stanfit(model))
   assert_that(!all(is.null(fit.input), plot.test))
-  if (!is.null(annotate_inferred_category_means)) assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
+  assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
 
-  if (is.NIW_ideal_adaptor_stanfit(model))
-    d = add_ibbu_stanfit_draws(model, which = which, wide = F, nest = T, untransform_cues = untransform_cues)
-  else
-    d = model
-
-  # Setting aes defaults
-  if(is.null(category.ids)) category.ids = levels(d$category)
-  if(is.null(category.labels)) category.labels = levels(d$category)
-  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
-  if(is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
+  d <-
+    add_ibbu_stanfit_draws(
+      model,
+      categories = .env["categories"],
+      groups = .env[["groups"]],
+      wide = F,
+      nest = T,
+      untransform_cues = untransform_cues)
 
   cue.names = row.names(d$m[[1]])
   d %<>%
@@ -489,12 +487,10 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
     mutate(x = map2(cue1, cue2, ~ c(.x, .y))) %>%
     mutate(
       density = pmap(., get_NIW_posterior_predictive.pmap),
-      density = unlist(density)
-    ) %>%
+      density = unlist(density)) %>%
     # Marginalize over MCMC draws
     group_by(group, category, cue1, cue2) %>%
-    summarise(density = mean(density)) %>%
-    mutate(group = factor(group, levels = group.ids))
+    summarise(density = mean(density))
 
   min.cue1 <- min(d$cue1)
   min.cue2 <- min(d$cue2)
@@ -526,8 +522,8 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
         data =
           get_exposure_mean_from_stanfit(
             model,
-            category = levels(d$category),
-            group = setdiff(levels(d$group), "prior")) %>%
+            categories = levels(d$category),
+            groups = setdiff(levels(d$group), "prior")) %>%
           mutate(cue1 = unlist(map(mean, ~.x[1])), cue2 = unlist(map(mean, ~.x[2]))),
         mapping = aes(
           x = .data$cue1,
@@ -541,8 +537,8 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
            group = setdiff(levels(d$group), "prior"),
            level = .95) %>%
           mutate(
-            x = map2(category, group, get_exposure_ss_from_stanfit(model, .x, .y)),
-            centre = map2(category, group, get_exposure_mean_from_stanfit(model, .x, .y))) %>%
+            x = map2(category, group, ~ get_exposure_ss_from_stanfit(model, categories = .x, groups = .y)),
+            centre = map2(category, group, ~ get_exposure_mean_from_stanfit(model, categories = .x, groups = .y))) %>%
           mutate(ellipse = pmap(., ellipse.pmap)) %>%
           unnest(ellipse) %>%
           group_by(across(-ellipse)) %>%
@@ -593,8 +589,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
     scale_y_continuous(cue.names[2]) +
     scale_color_manual(
       "Category",
-      breaks = category.ids,
-      labels = category.labels,
+      breaks = .env[["categories"]],
       values = category.colors,
       aesthetics = c("color", "fill")) +
     coord_fixed(xlim = xlim, ylim = ylim, ratio = 1) +
@@ -623,7 +618,9 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' @param model \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param data.test Optionally, a \code{tibble} or \code{data.frame} with test data.
 #' If `NULL` the input will be extracted from fit. (default: `NULL`).
-#' @param which Should categorization for the prior, posterior, or both be plotted? (default: `"both"`)
+#' @param groups Character vector of groups IDs to be plotted. It is possible
+#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
+#' (default: all groups will be plotted)
 #' @param summarize Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
 #' unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
@@ -632,14 +629,9 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' (default: `c(.66, .95)`)
 #' @param target_category The index of the category for which categorization should be shown. (default: `1`)
 #' @param panel.group Should the groups be plotted in separate panels? (default: `FALSE`)
-#' @param group.ids Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)
-#' @param group.labels Vector of group labels of same length as `group.ids` or `NULL` to use defaults. (default: `NULL`)
-#' The default labels each categorization function based on whether it is showing prior or posterior categorization,
-#' and by its group ID.
-#' @param group.colors,group.linetypes Vector of colors and linetypes of same length as group.ids or `NULL` to use defaults.
-#' (default: `NULL`)
-#' @param category.colors Vector of colors and linetypes of same length as category.ids or `NULL` to use defaults. Only
-#' relevant when `plot_in_cue_space = TRUE`. (default: `NULL`)
+#' @param group.colors,group.linetypes Vector of colors and linetypes of same length as `groups` or `NULL` to use defaults.
+#' @param category.colors Vector of colors and linetypes of same length as `categories` or `NULL` to use defaults. Only
+#' relevant when `plot_in_cue_space = TRUE`.
 #' @param all_test_locations Should predictions be shown for all combinations of test locations and group, or should only
 #' combinations be shown that actually occurred in the data? (default: `FALSE`)
 #' @param plot_in_cue_space Should predictions be plotted in the cue space? If not, test tokens are essentially treated
@@ -658,79 +650,60 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 plot_ibbu_stanfit_test_categorization = function(
   model,
   data.test = NULL,
-  which = "both",
+  groups = get_group_levels_from_stanfit(model, include_prior = TRUE),
   summarize = T,
   ndraws = NULL,
   untransform_cues = TRUE,
   confidence.intervals = c(.66, .95),
   target_category = 1,
   panel.group = if (plot_in_cue_space) TRUE else FALSE,
-  group.ids = NULL, group.labels = NULL, group.colors = NULL, group.linetypes = NULL,
-  category.ids = NULL, category.colors = NULL,
-  all_test_locations = TRUE, plot_in_cue_space = FALSE,
+  group.colors = get_default_colors("group", groups),
+  group.linetypes = get_default_linetypes("group", groups),
+  category.colors = get_default_colors("category", categories),
+  all_test_locations = TRUE,
+  plot_in_cue_space = FALSE,
   sort_by = if (plot_in_cue_space) NULL else "prior"
 ) {
   assert_NIW_ideal_adaptor_stanfit(model)
-  if (is.null(data.test)) data.test = get_test_data_from_stanfit(model)
+  if (is.null(data.test)) data.test <- get_test_data_from_stanfit(model)
   assert_that(is.flag(summarize))
   assert_that(is.null(confidence.intervals) |
                 all(is.numeric(confidence.intervals),
                     length(confidence.intervals) == 2,
                     all(between(confidence.intervals, 0, 1))),
               msg = "Confidence intervals must be NULL (if not CIs are desired) or a vector of two probabilities.")
-  assert_that(is.null(group.labels) | is.character(group.labels))
-  assert_that(is.null(group.linetypes) | is.numeric(group.linetypes))
   assert_that(is.null(sort_by) | length(sort_by) == 1)
 
 
   # Set confidence intervals
   if (!is.null(confidence.intervals)) {
-    ci.offset = (1 - confidence.intervals) / 2
-    confidence.intervals = c(ci.offset, 1-ci.offset)
+    ci.offset <- (1 - confidence.intervals) / 2
+    confidence.intervals <- c(ci.offset, 1-ci.offset)
   }
   confidence.intervals = sort(confidence.intervals)
 
   # Get prior and posterior parameters
+  ndraws <- if (is.null(ndraws)) get_number_of_draws(model) else ndraws
   d.pars <-
     add_ibbu_stanfit_draws(
       model,
-      which = which,
+      group = .env[["groups"]],
       summarize = F,
       wide = F,
       ndraws = ndraws,
       untransform_cues = untransform_cues)
 
-  # Now set ndraws to the number of MCMC samples
-  ndraws <- if (is.null(ndraws)) get_number_of_draws(model) else ndraws
   if (ndraws > 500)
     message(paste("Marginalizing over", ndraws, "MCMC samples. This might take some time.\n"))
 
-  # If group.ids are NULL set them to the levels of groups found in the extraction
-  # of posteriors from model
-  group.levels <- unique(d.pars$group)
-  if (is.null(group.ids)) group.ids = group.levels
-  assert_that(all(group.ids %in% group.levels),
-              msg = paste("Some group.ids were not found in the stanfit object: ",
-                          paste(setdiff(group.ids, group.levels), collapse = ", ")))
   if (!is.null(sort_by))
-    assert_that(sort_by %in% group.ids,
-                msg = paste("sort_by must be NULL or one of the group IDs (group.ids):",
-                      paste(group.ids, collapse = ", ")))
-
-  # Setting aes defaults
-  if(is.null(group.labels)) group.labels = paste0("posterior (", group.ids[-1], ")")
-  if(is.null(group.colors)) group.colors = get_default_colors("group", length(group.ids) - 1)
-  if(is.null(group.linetypes)) group.linetypes = rep(1, length(group.ids) - 1)
-  # If no specific color for prior was specified
-  if(length(group.labels) < length(group.ids)) group.labels = c("prior", group.labels)
-  if(length(group.colors) < length(group.ids)) group.colors = c("darkgray", group.colors)
-  if(length(group.linetypes) < length(group.ids))  group.linetypes = c(3, group.linetypes)
-  if(is.null(category.ids)) category.ids = get_category_levels_from_stanfit(model)
-  if(is.null(category.colors)) category.colors = get_default_colors("category", length(category.ids))
+    assert_that(sort_by %in% groups,
+                msg = paste("sort_by must be NULL or one of the groups:",
+                      paste(groups, collapse = ", ")))
 
   # Exclude all groups that are not in group.id
   d.pars %<>%
-    filter(group %in% group.ids)
+    filter(group %in% .env$groups)
 
   # Prepare test_data
   cue.labels <- get_cue_levels_from_stanfit(model)
@@ -739,7 +712,7 @@ plot_ibbu_stanfit_test_categorization = function(
       data.test %>%
       distinct(!!! syms(cue.labels)) %>%
       { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
-      make_vector_column(cols = cue.labels, vector_col = "x", .keep = "all") %>%
+      make_vector_column(cols = .env$cue.labels, vector_col = "x", .keep = "all") %>%
       nest(cues_joint = x, cues_separate = all_of(cue.labels)) %>%
       crossing(group = levels(d.pars$group))
   } else {
@@ -747,7 +720,7 @@ plot_ibbu_stanfit_test_categorization = function(
       data.test %>%
       distinct(!!! syms(cue.labels), group.id, group) %>%
       { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
-      make_vector_column(cols = cue.labels, vector_col = "x", .keep = "all") %>%
+      make_vector_column(cols = .env$cue.labels, vector_col = "x", .keep = "all") %>%
       group_by(group.id, group) %>%
       nest(cues_joint = x, cues_separate = all_of(cue.labels))
   }
@@ -785,16 +758,14 @@ plot_ibbu_stanfit_test_categorization = function(
     ungroup() %>%
     select(-c(x))
 
-  if (is.null(get_category_levels_from_stanfit(model)))
-    category1 = "category 1" else category1 = get_category_levels_from_stanfit(model, 1)
+  target_category_label <- if (is.null(get_category_levels_from_stanfit(model))) paste("category", target_category) else get_category_levels_from_stanfit(model, target_category)
 
   if (plot_in_cue_space) {
     if (length(get_cue_levels_from_stanfit(model)) > 2) stop("plot_in_cue_space = T not yet implemented for more than two cues.")
-    if (length(get_category_levels_from_stanfit(model)) > 2) stop("plot_in_cue_space = T not yet implemented for more than two categories.")
 
     p <-
       d.pars %>%
-      mutate(group = factor(group, levels = group.ids)) %>%
+      mutate(group = factor(group, levels = .env$groups)) %>%
       ggplot(
         aes(
         x = !! sym(cue.labels[1]),
@@ -804,14 +775,13 @@ plot_ibbu_stanfit_test_categorization = function(
       scale_x_continuous(cue.labels[1]) +
       scale_y_continuous(cue.labels[2]) +
       scale_fill_gradient2(
-        paste0("Predicted proportion\n of", category1, "-responses"),
+        paste0("Predicted proportion\n of", target_category_label, "-responses"),
         midpoint = .5,
         high = category.colors[target_category],
         mid = "white",
-        low = category.colors[which(category.ids != category.ids[target_category])],
+        low = if (length(category.colors[which(get_category_levels_from_stanfit(model) != target_category_label)]) > 1) "gray" else category.colors[which(get_category_levels_from_stanfit(model) != target_category_label)],
         limits = c(0,1)) +
       coord_cartesian(expand = F)
-
   } else {
     # If sort_by is specified, sort levels of x-axis by that group.
     if (!is.null(sort_by)) {
@@ -830,7 +800,6 @@ plot_ibbu_stanfit_test_categorization = function(
 
     p <-
       d.pars %>%
-      mutate(group = factor(group, levels = group.ids)) %>%
       ggplot(aes(
         x = .data$token,
         y = .data$p_cat,
@@ -841,17 +810,15 @@ plot_ibbu_stanfit_test_categorization = function(
                        labels = paste0(levels(.data$token), "\n",
                                        levels(.data$token.cues))) +
       scale_y_continuous(
-        paste0("Predicted proportion of ", category1, "-responses"),
+        paste0("Predicted proportion of ", target_category_label, "-responses"),
         limits = c(0,1)) +
       scale_color_manual(
         "Group",
-        breaks = group.ids,
-        labels = group.labels,
+        breaks = .env$groups,
         values = group.colors) +
       scale_linetype_manual(
         "Group",
-        breaks = group.ids,
-        labels = group.labels,
+        breaks = .env$groups,
         values = group.linetypes)
 
     if (summarize & !is.null(confidence.intervals)) {
@@ -872,8 +839,7 @@ plot_ibbu_stanfit_test_categorization = function(
           color = NA, alpha = .3) +
         scale_fill_manual(
           "Group",
-          breaks = group.ids,
-          labels = group.labels,
+          breaks = .env$groups,
           values = group.colors)
 
       # Place information about confidence intervals on plot.
