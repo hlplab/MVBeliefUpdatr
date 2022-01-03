@@ -329,8 +329,6 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
   levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
   category.colors = get_default_colors("category", categories)
 ) {
-  fit.input <- get_input_from_stanfit(model)
-  assert_that(!all(is.null(fit.input), plot.test))
   assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
 
   d <-
@@ -465,9 +463,6 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
   category.colors = get_default_colors("category", categories),
   xlim, ylim, resolution = 25
 ) {
-  fit.input = get_input_from_stanfit(model)
-  assert_that(is.NIW_ideal_adaptor_stanfit(model))
-  assert_that(!all(is.null(fit.input), plot.test))
   assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
 
   d <-
@@ -664,7 +659,6 @@ plot_ibbu_stanfit_test_categorization = function(
   plot_in_cue_space = FALSE,
   sort_by = if (plot_in_cue_space) NULL else "prior"
 ) {
-  assert_NIW_ideal_adaptor_stanfit(model)
   if (is.null(data.test)) data.test <- get_test_data_from_stanfit(model)
   assert_that(is.flag(summarize))
   assert_that(is.null(confidence.intervals) |

@@ -127,7 +127,6 @@ get_exposure_statistic_from_stanfit = function(
   groups = get_group_levels_from_stanfit(x, include_prior = FALSE),
   statistic = c("n", "mean", "css", "uss", "cov")
 ) {
-  assert_that(is.NIW_ideal_adaptor_stanfit(x))
   assert_that(all(statistic %in% c("n", "mean", "css", "uss", "cov")),
               msg = "statistic must be one of 'n', mean', 'css', 'uss', or 'cov'.")
   assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
@@ -445,7 +444,6 @@ get_expected_category_statistic_from_stanfit = function(
   statistic = c("mu", "Sigma"),
   untransform_cues = T
 ) {
-  assert_that(is.NIW_ideal_adaptor_stanfit(x))
   assert_that(all(statistic %in% c("mu", "Sigma")))
   assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
   assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
@@ -545,8 +543,8 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #' @export
 add_ibbu_stanfit_draws = function(
   fit,
-  categories = get_category_levels_from_stanfit(x),
-  groups = get_group_levels_from_stanfit(x, include_prior = TRUE),
+  categories = get_category_levels_from_stanfit(fit),
+  groups = get_group_levels_from_stanfit(fit, include_prior = TRUE),
   ##### SPECIAL HANDLING OF WHICH, WHICH IS NOW DEPRECATED.
   which = if ("prior" %in% groups) { if (length(groups) > 1) "both" else "prior" } else "posterior",
   ##### END OF SPECIAL HANDLING
