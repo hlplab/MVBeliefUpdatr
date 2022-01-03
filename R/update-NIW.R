@@ -174,7 +174,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
   assert_that(lapse_treatment %in% c("no_lapses", "sample", "marginalize"),
               msg = paste(lapse_treatment, "is not an acceptable lapse_treatment. See details section of help page."))
   if (lapse_treatment == "sample") {
-    x_N <- rbinom(1, x_N, get_lapse_rate_from_model(prior))
+    x_N <- rbinom(1, x_N, 1 - get_lapse_rate_from_model(prior))
   } else if (lapse_treatment == "marginalize") {
     warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.", call. = FALSE)
     x_N <- (1 - get_lapse_rate_from_model(prior)) * x_N
