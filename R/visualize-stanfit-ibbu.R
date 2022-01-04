@@ -401,7 +401,6 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
           mapping = aes(
             x = .data$cue1,
             y = .data$cue2,
-            shape = .data$category,
             color = .data$category),
           linetype = 2,
           inherit.aes = F)) } +
@@ -537,14 +536,13 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
           mutate(
             x = map2(category, group, ~ get_exposure_ss_from_stanfit(model, categories = .x, groups = .y, untransform_cues = untransform_cues)),
             centre = map2(category, group, ~ get_exposure_mean_from_stanfit(model, categories = .x, groups = .y, untransform_cues = untransform_cues))) %>%
-          mutate(ellipse = pmap(., ellipse.pmap)) %>%
+          mutate(ellipse = pmap(.l = list(x, centre, level), ellipse.pmap)) %>%
           unnest(ellipse) %>%
           group_by(across(-ellipse)) %>%
           transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]),
         mapping = aes(
           x = .data$cue1,
           y = .data$cue2,
-          shape = .data$category,
           color = .data$category),
         linetype = 2,
         inherit.aes = F)) } +
