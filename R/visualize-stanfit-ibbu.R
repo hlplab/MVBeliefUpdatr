@@ -715,7 +715,7 @@ plot_ibbu_stanfit_test_categorization = function(
       distinct(!!! syms(cue.labels)) %>%
       { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
       make_vector_column(cols = .env$cue.labels, vector_col = "x", .keep = "all") %>%
-      nest(cues_joint = x, cues_separate = all_of(cue.labels)) %>%
+      nest(cues_joint = x, cues_separate = !!! syms(cue.labels)) %>%
       crossing(group = levels(d.pars$group))
   } else {
     test_data <-
@@ -724,7 +724,7 @@ plot_ibbu_stanfit_test_categorization = function(
       { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
       make_vector_column(cols = .env$cue.labels, vector_col = "x", .keep = "all") %>%
       group_by(group.id, group) %>%
-      nest(cues_joint = x, cues_separate = all_of(cue.labels))
+      nest(cues_joint = x, cues_separate = !!! syms(cue.labels))
   }
 
   d.pars %<>%
