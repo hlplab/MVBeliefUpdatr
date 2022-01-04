@@ -187,7 +187,7 @@ get_exposure_statistic_from_stanfit = function(
     df.m %<>%
       pivot_wider(names_from = "cue", values_from = "value") %>%
       make_vector_column(cols = dn[[3]], vector_col = "mean", .keep = "unused") %>%
-      { if (untransform_cues) mutate(., m = map(m, ~ transform_category_mean(.x, get_transform_information_from_stanfit(fit)))) else . }
+      { if (untransform_cues) mutate(., mean = map(.data$mean, ~ transform_category_mean(.x, get_transform_information_from_stanfit(fit)))) else . }
 
     df <- if (!is.null(df)) df %<>% left_join(df.m, by = c("group", "category")) else df.m
   }
@@ -219,7 +219,7 @@ get_exposure_statistic_from_stanfit = function(
     df.s %<>%
       group_by(category, group) %>%
       summarise(uss = list(matrix(value, nrow = sqrt(length(value)))))  %>%
-      { if (untransform_cues) mutate(., cov = map(cov, ~ transform_category_cov(.x, get_transform_information_from_stanfit(fit)))) else . }
+      { if (untransform_cues) mutate(., uss = map(.data$uss, ~ transform_category_cov(.x, get_transform_information_from_stanfit(fit)))) else . }
 
     df <- if (!is.null(df)) df %<>% left_join(df.s, by = c("group", "category")) else df.s
   }
