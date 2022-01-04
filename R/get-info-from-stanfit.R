@@ -565,9 +565,7 @@ add_ibbu_stanfit_draws = function(
   untransform_cues = TRUE,
   summarize = FALSE,
   wide = FALSE,
-  nest = TRUE,
-  category = "category",
-  group = "group"
+  nest = TRUE
 ) {
   assert_that(is.NIW_ideal_adaptor_stanfit(fit))
   assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
@@ -611,10 +609,8 @@ add_ibbu_stanfit_draws = function(
         summarize = summarize, wide = wide, nest = nest)
     d.pars <-
       rbind(d.prior, d.posterior) %>%
-      mutate(!! rlang::sym(group) :=
-               factor(!! rlang::sym(group),
-                      levels = c(with(d.prior, levels(!! rlang::sym(group))),
-                                 with(d.posterior, levels(!! rlang::sym(group))))))
+      mutate(group = factor(.data$group, levels = c(levels(d.prior$group), levels(d.posterior$group))))
+
     return(d.pars)
   } else {
     # Parameters' names depend on whether prior or posterior is to be extracted.
@@ -625,7 +621,7 @@ add_ibbu_stanfit_draws = function(
     S <- paste0("S", postfix)
 
     # Variables by which parameters are indexed
-    pars.index <- if ("prior" %in% groups) category else c(category, group)
+    pars.index <- if ("prior" %in% groups) "category" else c("category", "group")
 
     # Get non-nested draws
     if ("prior" %in% groups) {
@@ -659,13 +655,9 @@ add_ibbu_stanfit_draws = function(
           summarise_at(., vars(kappa, nu, m, S, lapse_rate), mean) %>%
           mutate(.chain = "all", .iteration = "all", .draw = "all")
       } else . } %>%
-      { if ("prior" %in% groups) mutate(., (!! rlang::sym(group)) := "prior") else . } %>%
-      filter(group %in% .env[["groups"]], category %in% .env[["categories"]]) %>%
-      # Make sure order of variables is identical for prior or posterior (facilitates processing
-      # of the output of this function).
-      select(.chain, .iteration, .draw,
-             !! rlang::sym(group), !! rlang::sym(category),
-             kappa, nu, m, S, lapse_rate)
+      { if ("prior" %in% groups) mutate(., group = "prior") else . } %>%
+      filter(.data$group %in% .env$groups, .data$category %in% .env$categories) %>%
+      relocate(.chain, .iteration, .draw, group, category, kappa, nu, m, S, lapse_rate)
 
     if (untransform_cues) {
       d.pars %<>%
@@ -683,8 +675,8 @@ add_ibbu_stanfit_draws = function(
       ungroup() %>%
       # Make sure that group and category are factors (even if group or category ids are just numbers)
       mutate(
-        category = factor(category, levels = .env[["categories"]]),
-        group = factor(group, levels = .env[["groups"]]))
+        category = factor(category, levels = .env$categories),
+        group = factor(group, levels = .env$groups))
 
     if (wide) {
       if ("prior" %in% groups)

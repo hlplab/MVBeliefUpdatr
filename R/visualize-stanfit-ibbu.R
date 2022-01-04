@@ -682,7 +682,7 @@ plot_ibbu_stanfit_test_categorization = function(
   d.pars <-
     add_ibbu_stanfit_draws(
       model,
-      group = groups,
+      groups = groups,
       summarize = F,
       wide = F,
       ndraws = ndraws,
