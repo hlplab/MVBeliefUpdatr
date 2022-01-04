@@ -53,7 +53,7 @@ plot_ibbu_stanfit_parameters = function(
 
   if (is.null(group.ids)) group.ids = levels(d.pars$group)
   # Setting aes defaults
-  if (which  == "prior") {
+  if (which == "prior") {
     if(is.null(group.labels)) group.labels[1] = "prior"
     if(is.null(group.colors)) group.colors[1] = "darkgray"
   } else if (which == "posterior") {
@@ -377,8 +377,9 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
             get_exposure_mean_from_stanfit(
               model,
               categories = levels(d$category),
-              groups = setdiff(levels(d$group), "prior")) %>%
-            mutate(cue1 = unlist(map(mean, ~.x[1])), cue2 = unlist(map(mean, ~.x[2]))),
+              groups = setdiff(levels(d$group), "prior"),
+              untransform_cues = untransform_cues) %>%
+            mutate(cue1 = unlist(map(.data$mean, ~ .x[1])), cue2 = unlist(map(.data$mean, ~ .x[2]))),
           mapping = aes(
             x = .data$cue1,
             y = .data$cue2,
@@ -389,7 +390,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
             get_exposure_statistic_from_stanfit(
               model,
               categories = levels(d$category),
-              groups = setdiff(levels(d$group), "prior")) %>%
+              groups = setdiff(levels(d$group), "prior"),
+              untransform_cues = untransform_cues) %>%
             rename(x = cov, centre = mean) %>%
             crossing(level = .95) %>%
             mutate(ellipse = pmap(.l = list(x, centre, level), ellipse.pmap)) %>%
@@ -468,7 +470,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
   d <-
     add_ibbu_stanfit_draws(
       model,
-      categories = .categories,
+      categories = categories,
       groups = groups,
       wide = F,
       nest = T,
@@ -518,7 +520,8 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
           get_exposure_mean_from_stanfit(
             model,
             categories = levels(d$category),
-            groups = setdiff(levels(d$group), "prior")) %>%
+            groups = setdiff(levels(d$group), "prior"),
+            untransform_cues = untransform_cues) %>%
           mutate(cue1 = unlist(map(mean, ~.x[1])), cue2 = unlist(map(mean, ~.x[2]))),
         mapping = aes(
           x = .data$cue1,
@@ -532,8 +535,8 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
            group = setdiff(levels(d$group), "prior"),
            level = .95) %>%
           mutate(
-            x = map2(category, group, ~ get_exposure_ss_from_stanfit(model, categories = .x, groups = .y)),
-            centre = map2(category, group, ~ get_exposure_mean_from_stanfit(model, categories = .x, groups = .y))) %>%
+            x = map2(category, group, ~ get_exposure_ss_from_stanfit(model, categories = .x, groups = .y, untransform_cues = untransform_cues)),
+            centre = map2(category, group, ~ get_exposure_mean_from_stanfit(model, categories = .x, groups = .y, untransform_cues = untransform_cues))) %>%
           mutate(ellipse = pmap(., ellipse.pmap)) %>%
           unnest(ellipse) %>%
           group_by(across(-ellipse)) %>%
@@ -681,7 +684,7 @@ plot_ibbu_stanfit_test_categorization = function(
   d.pars <-
     add_ibbu_stanfit_draws(
       model,
-      group = .env[["groups"]],
+      group = groups,
       summarize = F,
       wide = F,
       ndraws = ndraws,
