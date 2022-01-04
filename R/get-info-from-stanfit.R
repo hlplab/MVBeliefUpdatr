@@ -186,8 +186,7 @@ get_exposure_statistic_from_stanfit = function(
 
     df.m %<>%
       pivot_wider(names_from = "cue", values_from = "value") %>%
-      make_vector_column(cols = dn[[3]], vector_col = "mean", .keep = "unused") %>%
-      { if (untransform_cues) mutate(., mean = map(.data$mean, ~ untransform_category_mean(.x, get_transform_information_from_stanfit(fit)))) else . }
+      make_vector_column(cols = dn[[3]], vector_col = "mean", .keep = "unused")
 
     df <- if (!is.null(df)) df %<>% left_join(df.m, by = c("group", "category")) else df.m
   }
@@ -233,8 +232,11 @@ get_exposure_statistic_from_stanfit = function(
       { if (untransform_cues) mutate(., cov = map(.data$cov, ~ untransform_category_cov(.x, get_transform_information_from_stanfit(fit)))) else . } %>%
       # Obtain untransformed uss and/or css from cov by walking back/undoing above steps
       # (direct transform of uss)
+      # BE VERY CAREFUL IN CHANGING THIS ORDER OR MOVING PARTS OF THIS UP, BECAUSE OF THE DEPENDENCIES BETWEEN THE OPERATIONS
       { if (untransform_cues & any(c("css", "uss") %in% statistic)) mutate(., css = map2(.data$cov, n, cov2css)) else . } %>%
+      { if (untransform_cues) mutate(., mean = map(.data$mean, ~ untransform_category_mean(.x, get_transform_information_from_stanfit(fit)))) else . } %>%
       { if (untransform_cues & "uss" %in% statistic) mutate(., uss = pmap(.l = list(cov, n, mean), css2uss)) else . }
+
   }
 
   df %<>%
