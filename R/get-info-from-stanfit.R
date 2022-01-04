@@ -606,7 +606,7 @@ add_ibbu_stanfit_draws = function(
     return(d.pars)
   } else {
     # Parameters' names depend on whether prior or posterior is to be extracted.
-    postfix <- if (groups == "prior") "_0" else "_n"
+    postfix <- if ("prior" %in% groups) "_0" else "_n"
     kappa <- paste0("kappa", postfix)
     nu <- paste0("nu", postfix)
     m <- paste0("m", postfix)
@@ -616,7 +616,7 @@ add_ibbu_stanfit_draws = function(
     pars.index <- if (groups == "prior") category else c(category, group)
 
     # Get non-nested draws
-    if (groups == "prior") {
+    if ("prior" %in% groups) {
       d.pars <-
         fit %>%
         spread_draws(
@@ -647,7 +647,7 @@ add_ibbu_stanfit_draws = function(
           summarise_at(., vars(kappa, nu, m, S, lapse_rate), mean) %>%
           mutate(.chain = "all", .iteration = "all", .draw = "all")
       } else . } %>%
-      { if (groups == "prior") mutate(., (!! rlang::sym(group)) := "prior") else . } %>%
+      { if ("prior" %in% groups) mutate(., (!! rlang::sym(group)) := "prior") else . } %>%
       filter(group %in% .env[["groups"]], category %in% .env[["categories"]]) %>%
       # Make sure order of variables is identical for prior or posterior (facilitates processing
       # of the output of this function).
@@ -675,7 +675,7 @@ add_ibbu_stanfit_draws = function(
         group = factor(group, levels = .env[["groups"]]))
 
     if (wide) {
-      if (groups == "prior")
+      if ("prior" %in% groups)
         d.pars %<>% gather(variable, value, c(m, S))
       else
         d.pars %<>% gather(variable, value, c(kappa, nu, m, S))
