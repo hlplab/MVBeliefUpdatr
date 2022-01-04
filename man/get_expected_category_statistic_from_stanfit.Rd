@@ -11,7 +11,7 @@ get_expected_category_statistic_from_stanfit(
   categories = get_category_levels_from_stanfit(x),
   groups = get_group_levels_from_stanfit(x, include_prior = TRUE),
   statistic = c("mu", "Sigma"),
-  untransform_cues = T
+  untransform_cues = TRUE
 )
 
 get_expected_mu_from_stanfit(x, ...)
@@ -29,6 +29,8 @@ returned. (default: all categories)}
 
 \item{statistic}{Which category statistic should be returned? `mu` for category mean or `Sigma` for category
 covariance matrix, or `c("mu", "Sigma")` for both. (default: both)}
+
+\item{untransform_cues}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
 }
 \value{
 If just one group and category was requested, a vector (for the mean) or matrix (for the covariance

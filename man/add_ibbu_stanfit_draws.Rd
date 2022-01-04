@@ -6,8 +6,8 @@
 \usage{
 add_ibbu_stanfit_draws(
   fit,
-  categories = get_category_levels_from_stanfit(x),
-  groups = get_group_levels_from_stanfit(x, include_prior = TRUE),
+  categories = get_category_levels_from_stanfit(fit),
+  groups = get_group_levels_from_stanfit(fit, include_prior = TRUE),
   which = if ("prior" \%in\% groups) {     if (length(groups) > 1)          "both"    
     else "prior" } else "posterior",
   ndraws = NULL,

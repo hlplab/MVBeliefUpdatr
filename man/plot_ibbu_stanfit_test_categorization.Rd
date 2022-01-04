@@ -14,7 +14,7 @@ plot_ibbu_stanfit_test_categorization(
   confidence.intervals = c(0.66, 0.95),
   target_category = 1,
   panel.group = if (plot_in_cue_space) TRUE else FALSE,
-  group.colors = get_default_colors("group", length(groups)),
+  group.colors = get_default_colors("group", groups),
   group.linetypes = get_default_linetypes("group", groups),
   category.colors = get_default_colors("category", categories),
   all_test_locations = TRUE,

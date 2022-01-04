@@ -7,10 +7,11 @@
 \title{Get category sample mean or covariance matrix of exposure data from NIW IBBU stanfit.}
 \usage{
 get_exposure_statistic_from_stanfit(
-  x,
-  categories = get_category_levels_from_stanfit(x),
-  groups = get_group_levels_from_stanfit(x, include_prior = FALSE),
-  statistic = c("n", "mean", "css", "uss", "cov")
+  fit,
+  categories = get_category_levels_from_stanfit(fit),
+  groups = get_group_levels_from_stanfit(fit, include_prior = FALSE),
+  statistic = c("n", "mean", "css", "uss", "cov"),
+  untransform_cues = TRUE
 )
 
 get_exposure_mean_from_stanfit(...)
@@ -18,7 +19,7 @@ get_exposure_mean_from_stanfit(...)
 get_exposure_ss_from_stanfit(...)
 }
 \arguments{
-\item{x}{\code{\link{NIW_ideal_adaptor_stanfit}}.}
+\item{fit}{An \code{\link{NIW_ideal_adaptor_stanfit}}.}
 
 \item{categories}{Character vector with categories for which category statistics are to be
 returned. (default: all categories)}
@@ -29,6 +30,8 @@ returned. (default: all groups except `"prior"`)}
 \item{statistic}{Which exposure statistic should be returned? `n` for number of observations, `mean` for
 category mean, `css` or `uss` for centered or uncentered category sum-of-square matrix, `cov` for the
 category covariance matrix, or a character vector with any combination thereof. (default: all)}
+
+\item{untransform_cues}{Should statistics be transformed back into the original cue space? (default: `TRUE`)}
 }
 \value{
 If just one group and category was requested, a vector (for the mean) or matrix (for the covariance

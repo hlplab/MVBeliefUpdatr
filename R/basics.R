@@ -555,7 +555,7 @@ untransform_cues = function(data, cues,
 #' @param model A model with columns that specify category means (mu or m) and covariance information (Sigma or S).
 #' @param m A single category mean or alike.
 #' @param S A single covariance matrix or alike.
-#' @param transform A transform object of the type returned by \code{\link{transform_cues}}.
+#' @param transform A transform or transform parameter object of the type returned by \code{\link{transform_cues}}.
 #'
 #' @return A model, category mean, or covariance matrix of the same type as the input.
 #'

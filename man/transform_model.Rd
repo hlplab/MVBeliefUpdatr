@@ -24,7 +24,7 @@ untransform_category_cov(S, transform)
 \arguments{
 \item{model}{A model with columns that specify category means (mu or m) and covariance information (Sigma or S).}
 
-\item{transform}{A transform object of the type returned by \code{\link{transform_cues}}.}
+\item{transform}{A transform or transform parameter object of the type returned by \code{\link{transform_cues}}.}
 
 \item{m}{A single category mean or alike.}
 
