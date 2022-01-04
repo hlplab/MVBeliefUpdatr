@@ -334,8 +334,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
   d <-
     get_expected_category_statistic_from_stanfit(
       model,
-      categories = .env[["categories"]],
-      groups = .env[["groups"]],
+      categories = categories,
+      groups = groups,
       untransform_cues = untransform_cues)
 
   cue.names <- get_cue_levels_from_stanfit(model)
@@ -468,8 +468,8 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
   d <-
     add_ibbu_stanfit_draws(
       model,
-      categories = .env["categories"],
-      groups = .env[["groups"]],
+      categories = .categories,
+      groups = groups,
       wide = F,
       nest = T,
       untransform_cues = untransform_cues)
