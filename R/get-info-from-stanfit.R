@@ -593,7 +593,7 @@ add_ibbu_stanfit_draws = function(
         summarize = summarize, wide = wide, nest = nest)
     d.posterior <-
       add_ibbu_stanfit_draws(
-        fit = fit, categories = categories, groups = setdiff(.env$groups, "prior"),
+        fit = fit, categories = categories, groups = setdiff(groups, "prior"),
         ndraws = NULL, draws = draws,
         untransform_cues = untransform_cues,
         summarize = summarize, wide = wide, nest = nest)
