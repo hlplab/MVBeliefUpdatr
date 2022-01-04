@@ -369,7 +369,9 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
           get_test_data_from_stanfit(model) %>%
           { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
           rename_at(cue.names,
-                    function(x) paste0("cue", which(x == cue.names))),
+                    function(x) paste0("cue", which(x == cue.names))) %>%
+          ungroup() %>%
+          distinct(group, cue1, cue2),
         mapping = aes(x = .data$cue1, y = .data$cue2),
         inherit.aes = F,
         color = "black", size = 1, alpha = .75
@@ -449,8 +451,11 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     scale_fill_manual(
       "Category",
       breaks = categories,
-      values = category.colors,
-      aesthetics = c("color", "fill")) +
+      values = category.colors) +
+    scale_color_manual(
+      "Category",
+      breaks = categories,
+      values = lighten(category.colors, amount = .1)) +
     scale_alpha("", range = c(0.1,.9)) +
     facet_wrap(~ group)
 }
@@ -509,7 +514,9 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
           get_test_data_from_stanfit(model) %>%
           { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
           rename_at(cue.names,
-                    function(x) paste0("cue", which(x == cue.names))),
+                    function(x) paste0("cue", which(x == cue.names))) %>%
+          ungroup() %>%
+          distinct(group, cue1, cue2),
         mapping = aes(
           x = .data$cue1,
           y = .data$cue2),
@@ -588,11 +595,14 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
           inherit.aes = F)) } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
+    scale_fill_manual(
+      "Category",
+      breaks = categories,
+      values = category.colors) +
     scale_color_manual(
       "Category",
       breaks = categories,
-      values = category.colors,
-      aesthetics = c("color", "fill")) +
+      values = lighten(category.colors, amount = .1)) +
     coord_fixed(xlim = xlim, ylim = ylim, ratio = 1) +
     facet_wrap(~ .data$group)
 }

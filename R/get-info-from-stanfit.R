@@ -228,18 +228,17 @@ get_exposure_statistic_from_stanfit = function(
 
   if (any(c("cov") %in% statistic)) {
     df %<>%
-      mutate(cov = map2(.data$css, n, css2cov)) %>%
-      { if (untransform_cues) mutate(., cov = map(.data$cov, ~ untransform_category_cov(.x, get_transform_information_from_stanfit(fit)))) else . } %>%
-      # Obtain untransformed uss and/or css from cov by walking back/undoing above steps
-      # (direct transform of uss)
-      # BE VERY CAREFUL IN CHANGING THIS ORDER OR MOVING PARTS OF THIS UP, BECAUSE OF THE DEPENDENCIES BETWEEN THE OPERATIONS
-      { if (untransform_cues & any(c("css", "uss") %in% statistic)) mutate(., css = map2(.data$cov, n, cov2css)) else . } %>%
-      { if (untransform_cues) mutate(., mean = map(.data$mean, ~ untransform_category_mean(.x, get_transform_information_from_stanfit(fit)))) else . } %>%
-      { if (untransform_cues & "uss" %in% statistic) mutate(., uss = pmap(.l = list(cov, n, mean), css2uss)) else . }
-
+      mutate(cov = map2(.data$css, n, css2cov))
   }
 
   df %<>%
+    # Obtain untransformed uss and/or css from cov by walking back/undoing above steps
+    # (direct transform of uss)
+    # BE VERY CAREFUL IN CHANGING THIS ORDER OR MOVING PARTS OF THIS UP, BECAUSE OF THE DEPENDENCIES BETWEEN THE OPERATIONS
+    { if (untransform_cues & "cov" %in% statistic) mutate(., cov = map(.data$cov, ~ untransform_category_cov(.x, get_transform_information_from_stanfit(fit)))) else . } %>%
+    { if (untransform_cues & any(c("css", "uss") %in% statistic)) mutate(., css = map2(.data$cov, n, cov2css)) else . } %>%
+    { if (untransform_cues & any(c("uss", "mean") %in% statistic)) mutate(., mean = map(.data$mean, ~ untransform_category_mean(.x, get_transform_information_from_stanfit(fit)))) else . } %>%
+    { if (untransform_cues & "uss" %in% statistic) mutate(., uss = pmap(.l = list(cov, n, mean), css2uss)) else . } %>%
     select(group, category, !!! syms(statistic)) %>%
     filter(., .data[["group"]] %in% .env[["groups"]]) %>%
     filter(., .data[["category"]] %in% .env[["categories"]]) %>%
