@@ -593,7 +593,7 @@ add_ibbu_stanfit_draws = function(
         summarize = summarize, wide = wide, nest = nest)
     d.posterior <-
       add_ibbu_stanfit_draws(
-        fit = fit, categories = categories, groups = setdiff(.env[["groups"]], "prior"),
+        fit = fit, categories = categories, groups = setdiff(.env$groups, "prior"),
         ndraws = NULL, draws = draws,
         untransform_cues = untransform_cues,
         summarize = summarize, wide = wide, nest = nest)
@@ -639,16 +639,16 @@ add_ibbu_stanfit_draws = function(
     }
 
     d.pars %<>%
+      # If group is prior, then add the group variable with value "prior" to d.pars first.
       { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
-      filter(group %in% .env[["groups"]], category %in% .env[["categories"]]) %>%
       rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .)) %>%
       { if (summarize) {
         group_by(., !!! syms(pars.index), cue, cue2) %>%
           summarise_at(., vars(kappa, nu, m, S, lapse_rate), mean) %>%
-          mutate_at(., vars(.chain, .iteration, .draw), ~ "all")
+          mutate(.chain = "all", .iteration = "all", .draw = "all")
       } else . } %>%
-      # If group is prior, then add the group variable with value "prior" to d.pars first.
       { if (groups == "prior") mutate(., (!! rlang::sym(group)) := "prior") else . } %>%
+      filter(group %in% .env[["groups"]], category %in% .env[["categories"]]) %>%
       # Make sure order of variables is identical for prior or posterior (facilitates processing
       # of the output of this function).
       select(.chain, .iteration, .draw,
