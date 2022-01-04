@@ -102,7 +102,7 @@ get_input_from_stanfit = function(fit) {
 #' Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
 #' Bayesian belief-updating (IBBU) model from an NIW IBBU stanfit or NIW belief MCMC object.
 #'
-#' @param x \code{\link{NIW_ideal_adaptor_stanfit}}.
+#' @param fit An \code{\link{NIW_ideal_adaptor_stanfit}}.
 #' @param categories Character vector with categories for which category statistics are to be
 #' returned. (default: all categories)
 #' @param groups Character vector with groups for which category statistics are to be
@@ -110,6 +110,7 @@ get_input_from_stanfit = function(fit) {
 #' @param statistic Which exposure statistic should be returned? `n` for number of observations, `mean` for
 #' category mean, `css` or `uss` for centered or uncentered category sum-of-square matrix, `cov` for the
 #' category covariance matrix, or a character vector with any combination thereof. (default: all)
+#' @param untransform_cues Should statistics be transformed back into the original cue space? (default: `TRUE`)
 #'
 #' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
 #' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
@@ -122,22 +123,23 @@ get_input_from_stanfit = function(fit) {
 #' @rdname get_exposure_statistic_from_stanfit
 #' @export
 get_exposure_statistic_from_stanfit = function(
-  x,
-  categories = get_category_levels_from_stanfit(x),
-  groups = get_group_levels_from_stanfit(x, include_prior = FALSE),
-  statistic = c("n", "mean", "css", "uss", "cov")
+  fit,
+  categories = get_category_levels_from_stanfit(fit),
+  groups = get_group_levels_from_stanfit(fit, include_prior = FALSE),
+  statistic = c("n", "mean", "css", "uss", "cov"),
+  untransform_cues = TRUE
 ) {
   assert_that(all(statistic %in% c("n", "mean", "css", "uss", "cov")),
               msg = "statistic must be one of 'n', mean', 'css', 'uss', or 'cov'.")
   assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
   assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
-  assert_that(all(categories %in% get_category_levels_from_stanfit(x)),
+  assert_that(all(categories %in% get_category_levels_from_stanfit(fit)),
               msg = paste("Some categories not found in the exposure data:",
-                          paste(setdiff(categories, get_category_levels_from_stanfit(x)), collapse = ", ")))
-  assert_that(all(groups %in% get_group_levels_from_stanfit(x)),
+                          paste(setdiff(categories, get_category_levels_from_stanfit(fit)), collapse = ", ")))
+  assert_that(all(groups %in% get_group_levels_from_stanfit(fit)),
               msg = paste("Some groups not found in the exposure data:",
-                          paste(setdiff(groups, get_group_levels_from_stanfit(x, include_prior = FALSE)), collapse = ", ")))
-  x <- get_input_from_stanfit(x)
+                          paste(setdiff(groups, get_group_levels_from_stanfit(fit, include_prior = FALSE)), collapse = ", ")))
+  x <- get_input_from_stanfit(fit)
 
   df <- NULL
   if (any(c("n", "css", "cov") %in% statistic)) {
@@ -184,7 +186,8 @@ get_exposure_statistic_from_stanfit = function(
 
     df.m %<>%
       pivot_wider(names_from = "cue", values_from = "value") %>%
-      make_vector_column(cols = dn[[3]], vector_col = "mean", .keep = "unused")
+      make_vector_column(cols = dn[[3]], vector_col = "mean", .keep = "unused") %>%
+      { if (untransform_cues) mutate(., m = map(m, ~ transform_category_mean(.x, get_transform_information_from_stanfit(fit)))) else . }
 
     df <- if (!is.null(df)) df %<>% left_join(df.m, by = c("group", "category")) else df.m
   }
@@ -215,7 +218,8 @@ get_exposure_statistic_from_stanfit = function(
 
     df.s %<>%
       group_by(category, group) %>%
-      summarise(uss = list(matrix(value, nrow = sqrt(length(value)))))
+      summarise(uss = list(matrix(value, nrow = sqrt(length(value)))))  %>%
+      { if (untransform_cues) mutate(., cov = map(cov, ~ transform_category_cov(.x, get_transform_information_from_stanfit(fit)))) else . }
 
     df <- if (!is.null(df)) df %<>% left_join(df.s, by = c("group", "category")) else df.s
   }
@@ -225,7 +229,8 @@ get_exposure_statistic_from_stanfit = function(
   }
 
   if (any(c("cov") %in% statistic)) {
-    df %<>% mutate(cov = map2(css, n, css2cov))
+    df %<>%
+      mutate(cov = map2(css, n, css2cov))
   }
 
   df %<>%
@@ -425,6 +430,7 @@ get_cue2_constructor = function(fit) {
 #' (default: all groups)
 #' @param statistic Which category statistic should be returned? `mu` for category mean or `Sigma` for category
 #' covariance matrix, or `c("mu", "Sigma")` for both. (default: both)
+#' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
 #'
 #' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
 #' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
@@ -442,7 +448,7 @@ get_expected_category_statistic_from_stanfit = function(
   categories = get_category_levels_from_stanfit(x),
   groups = get_group_levels_from_stanfit(x, include_prior = TRUE),
   statistic = c("mu", "Sigma"),
-  untransform_cues = T
+  untransform_cues = TRUE
 ) {
   assert_that(all(statistic %in% c("mu", "Sigma")))
   assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
@@ -613,7 +619,7 @@ add_ibbu_stanfit_draws = function(
     S <- paste0("S", postfix)
 
     # Variables by which parameters are indexed
-    pars.index <- if (groups == "prior") category else c(category, group)
+    pars.index <- if ("prior" %in% groups) category else c(category, group)
 
     # Get non-nested draws
     if ("prior" %in% groups) {
