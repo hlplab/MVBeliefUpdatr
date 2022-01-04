@@ -218,8 +218,7 @@ get_exposure_statistic_from_stanfit = function(
 
     df.s %<>%
       group_by(category, group) %>%
-      summarise(uss = list(matrix(value, nrow = sqrt(length(value)))))  %>%
-      { if (untransform_cues) mutate(., uss = map(.data$uss, ~ untransform_category_cov(.x, get_transform_information_from_stanfit(fit)))) else . }
+      summarise(uss = list(matrix(value, nrow = sqrt(length(value)))))
 
     df <- if (!is.null(df)) df %<>% left_join(df.s, by = c("group", "category")) else df.s
   }
@@ -230,7 +229,12 @@ get_exposure_statistic_from_stanfit = function(
 
   if (any(c("cov") %in% statistic)) {
     df %<>%
-      mutate(cov = map2(.data$css, n, css2cov))
+      mutate(cov = map2(.data$css, n, css2cov)) %>%
+      { if (untransform_cues) mutate(., cov = map(.data$cov, ~ untransform_category_cov(.x, get_transform_information_from_stanfit(fit)))) else . } %>%
+      # Obtain untransformed uss and/or css from cov by walking back/undoing above steps
+      # (direct transform of uss)
+      { if (untransform_cues & any(c("css", "uss") %in% statistic)) mutate(., css = map2(.data$cov, n, cov2css)) else . } %>%
+      { if (untransform_cues & "uss" %in% statistic) mutate(., uss = pmap(.l = list(cov, n, mean), css2uss)) else . }
   }
 
   df %<>%
