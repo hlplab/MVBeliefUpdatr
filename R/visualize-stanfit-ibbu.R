@@ -93,8 +93,7 @@ plot_ibbu_stanfit_parameters = function(
     scale_y_discrete("Category", expand = expansion(mult = c(0 , 0.1))) +
     scale_fill_manual(
       "Group",
-      breaks = group.ids,
-      labels = group.labels,
+      breaks = groups,
       values = group.colors) +
     coord_cartesian(default = T) +
     facet_grid(~ .data$cue, scales = "free_x") +
@@ -151,8 +150,7 @@ plot_ibbu_stanfit_parameters = function(
     scale_y_discrete("", expand = expansion(mult = c(0 , 0.1))) +
     scale_fill_manual(
       "Group",
-      breaks = group.ids,
-      labels = group.labels,
+      breaks = groups,
       values = group.colors
     ) +
     coord_cartesian(xlim = x.limits) +
@@ -222,7 +220,7 @@ plot_ibbu_stanfit_parameter_correlations = function(
     group_by(across(-c(m, S_tau, S_rho))) %>%
     mutate(cue1 = .env$cues) %>%
     group_by(across(-c(S_rho))) %>%
-    transmute(!! sym(.env$cues[1]) := S_rho[,1], !! sym(.env$cues[2]) := S_rho[,2]) %>%
+    transmute(!! sym(cues[1]) := S_rho[,1], !! sym(cues[2]) := S_rho[,2]) %>%
     pivot_longer(cols = .env$cues, values_to = "S_rho", names_to = "cue2") %>%
     ungroup() %>%
     select(cue1, cue2, everything()) %>%
@@ -248,8 +246,9 @@ plot_ibbu_stanfit_parameter_correlations = function(
     geom_autodensity(aes(fill = category), alpha = .5, position = position_identity()) +
     geom_density2d(aes(color = category), contour_var = "ndensity") +
     scale_color_manual("Category",
-                      breaks = .env$categories,
-                      values = .env$category.colors, aesthetics = c("color", "fill")) +
+                      breaks = categories,
+                      values = category.colors,
+                      aesthetics = c("color", "fill")) +
     facet_matrix(
       vars(starts_with("kappa"), starts_with("nu"), starts_with("m_"), starts_with("S_")),
       layer.lower = c(1,2), layer.diag = 3, layer.upper = 4) +
@@ -449,7 +448,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     scale_y_continuous(cue.names[2]) +
     scale_fill_manual(
       "Category",
-      breaks = .env[["categories"]],
+      breaks = categories,
       values = category.colors,
       aesthetics = c("color", "fill")) +
     scale_alpha("", range = c(0.1,.9)) +
@@ -591,7 +590,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
     scale_y_continuous(cue.names[2]) +
     scale_color_manual(
       "Category",
-      breaks = .env[["categories"]],
+      breaks = categories,
       values = category.colors,
       aesthetics = c("color", "fill")) +
     coord_fixed(xlim = xlim, ylim = ylim, ratio = 1) +
@@ -714,17 +713,17 @@ plot_ibbu_stanfit_test_categorization = function(
       data.test %>%
       distinct(!!! syms(cue.labels)) %>%
       { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
-      make_vector_column(cols = .env$cue.labels, vector_col = "x", .keep = "all") %>%
-      nest(cues_joint = x, cues_separate = !!! syms(cue.labels)) %>%
+      make_vector_column(cols = cue.labels, vector_col = "x", .keep = "all") %>%
+      nest(cues_joint = x, cues_separate = cue.labels) %>%
       crossing(group = levels(d.pars$group))
   } else {
     test_data <-
       data.test %>%
       distinct(!!! syms(cue.labels), group.id, group) %>%
       { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
-      make_vector_column(cols = .env$cue.labels, vector_col = "x", .keep = "all") %>%
+      make_vector_column(cols = cue.labels, vector_col = "x", .keep = "all") %>%
       group_by(group.id, group) %>%
-      nest(cues_joint = x, cues_separate = !!! syms(cue.labels))
+      nest(cues_joint = x, cues_separate = cue.labels)
   }
 
   d.pars %<>%
@@ -841,7 +840,7 @@ plot_ibbu_stanfit_test_categorization = function(
           color = NA, alpha = .3) +
         scale_fill_manual(
           "Group",
-          breaks = .env$groups,
+          breaks = groups,
           values = group.colors)
 
       # Place information about confidence intervals on plot.
