@@ -14,6 +14,10 @@ NULL
 #' prior and/or posterior beliefs.
 #'
 #' @param model mv-ibbu-stanfit object.
+#' @param categories,groups,cues Character vector of categories/groups/cues to be plotted. Typically, the levels of these factors
+#' are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
+#' \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+#' (default: all categories/groups/cues will be plotted)
 #' @param which Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
 #' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
@@ -37,6 +41,9 @@ NULL
 #' @export
 plot_ibbu_stanfit_parameters = function(
   model,
+  categories = get_category_levels_from_stanfit(model),
+  groups = get_group_levels_from_stanfit(model, include_prior = T),
+  cues = get_cue_levels_from_stanfit(model),
   which = "both",
   ndraws = NULL,
   untransform_cues = TRUE,
@@ -172,8 +179,10 @@ plot_ibbu_stanfit_parameters = function(
 #' Plot correlations between post-warmup MCMC samples for all parameters representing the prior and/or posterior beliefs.
 #'
 #' @param model mv-ibbu-stanfit object.
-#' @param category,group,cue Character vectors of categories, groups, and cues that should be included or `NULL` to include all.
-#' (default: `NULL` for category and cue; `"prior"` for group since those are the only free parameters)
+#' @param categories,groups,cues Character vector of categories/groups/cues to be plotted. Typically, the levels of these factors
+#' are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
+#' \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+#' (default: all categories and cues; `"prior"` for group since those are the only free parameters)
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
 #' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
 #' @param category.colors Vector of fill colors of same length as category or `NULL` to use defaults. (default: `NULL`)
@@ -188,37 +197,33 @@ plot_ibbu_stanfit_parameters = function(
 #' @export
 plot_ibbu_stanfit_parameter_correlations = function(
   model,
-  category = NULL, group = "prior", cue = NULL,
+  categories = get_category_levels_from_stanfit(model),
+  groups = "prior",
+  cues = get_cue_levels_from_stanfit(model),
   ndraws = NULL,
   untransform_cues = TRUE,
-  category.colors = NULL
+  category.colors = get_default_colors("category", categories)
 ) {
   d.pars <-
     model %>%
     add_ibbu_stanfit_draws(
-      which = if (group == "prior") "prior" else if ("prior" %nin% group) "posterior" else "both",
+      categories = categories,
+      groups = groups,
       ndraws = ndraws,
       untransform_cues = untransform_cues,
       nest = T)
 
-  # Setting aes defaults
-  if (is.null(category)) category <- levels(d.pars$category)
-  if (is.null(cue)) cue <- get_cue_labels_from_model(d.pars)
-  if (is.null(category.colors)) category.colors = get_default_colors("category", category)
-
   d.pars %<>%
-    { if (!is.null(category)) filter(., category %in% category) else . } %>%
-    { if (!is.null(group)) filter(., group %in% group) else . } %>%
     mutate(
       S_tau = map(S, cov2tau),
       S_rho = map(S, cov2cor)) %>%
     select(-S) %>%
     unnest(c(m, S_tau, S_rho)) %>%
     group_by(across(-c(m, S_tau, S_rho))) %>%
-    mutate(cue1 = all_of(cue)) %>%
+    mutate(cue1 = .env$cues) %>%
     group_by(across(-c(S_rho))) %>%
-    transmute(!! sym(cue[1]) := S_rho[,1], !! sym(cue[2]) := S_rho[,2]) %>%
-    pivot_longer(cols = cue, values_to = "S_rho", names_to = "cue2") %>%
+    transmute(!! sym(.env$cues[1]) := S_rho[,1], !! sym(.env$cues[2]) := S_rho[,2]) %>%
+    pivot_longer(cols = .env$cues, values_to = "S_rho", names_to = "cue2") %>%
     ungroup() %>%
     select(cue1, cue2, everything()) %>%
     filter(cue1 != cue2)
@@ -226,11 +231,11 @@ plot_ibbu_stanfit_parameter_correlations = function(
   # Removing redundant (duplicate) correlation information
   d.pars %<>%
     select(-c(cue2, S_rho)) %>%
-    pivot_wider(names_from = c("cue1"), values_from = c("m", "S_tau")) %>%
+    pivot_wider(names_from = "cue1", values_from = c("m", "S_tau")) %>%
     left_join(
       d.pars %>%
         group_by(.chain, .iteration, .draw, group, category) %>%
-        mutate(combination = map2(cue1, cue2, ~paste(sort(c(.x, .y)), collapse = "_")) %>% unlist()) %>%
+        mutate(combination = map2(.data$cue1, .data$cue2, ~paste(sort(c(.x, .y)), collapse = "_")) %>% unlist()) %>%
         distinct(combination, .keep_all = T) %>%
         select(-c(cue1, cue2, m, S_tau)) %>%
         pivot_wider(names_from = "combination", values_from = "S_rho", names_prefix = "S_rho_"),
@@ -243,8 +248,8 @@ plot_ibbu_stanfit_parameter_correlations = function(
     geom_autodensity(aes(fill = category), alpha = .5, position = position_identity()) +
     geom_density2d(aes(color = category), contour_var = "ndensity") +
     scale_color_manual("Category",
-                      breaks = category,
-                      values = category.colors, aesthetics = c("color", "fill")) +
+                      breaks = .env$categories,
+                      values = .env$category.colors, aesthetics = c("color", "fill")) +
     facet_matrix(
       vars(starts_with("kappa"), starts_with("nu"), starts_with("m_"), starts_with("S_")),
       layer.lower = c(1,2), layer.diag = 3, layer.upper = 4) +
@@ -273,8 +278,9 @@ plot_ibbu_stanfit_parameter_correlations = function(
 #' density plot instead calculates the posterior predictive for each MCMC draw (i.e, the multivariate Student-T
 #' density based on the NIW parameters \code{m, S, kappa, nu}), and then averages those densities. Since this is
 #' done for *all* points defined by the data.grid this can be rather computationally expensive and slow.
-#' @param categories,groups Character vector of category/groups IDs to be plotted. It is possible
-#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
+#' @param categories,groups Character vector of categories/groups to be plotted. Typically, the levels of these factors
+#' are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
+#' \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
 #' (default: all categories/groups will be plotted)
 #' @param plot.test,plot.exposure Should the test and/or exposure stimuli be plotted? (default: `TRUE` for `plot.test`,
 #' `FALSE` for `plot.exposure`) The test items are plotted as black points. The exposure mean is plotted as point,
@@ -614,9 +620,10 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' @param model \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param data.test Optionally, a \code{tibble} or \code{data.frame} with test data.
 #' If `NULL` the input will be extracted from fit. (default: `NULL`).
-#' @param groups Character vector of groups IDs to be plotted. It is possible
-#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
-#' (default: all groups will be plotted)
+#' @param groups Character vector of groups to be plotted. Typically, the levels of these factors
+#' are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
+#' \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+#' (default: all categories/groups will be plotted)
 #' @param summarize Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
 #' unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
