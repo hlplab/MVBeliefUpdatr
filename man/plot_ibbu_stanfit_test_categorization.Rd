@@ -28,9 +28,10 @@ plot_ibbu_stanfit_test_categorization(
 \item{data.test}{Optionally, a \code{tibble} or \code{data.frame} with test data.
 If `NULL` the input will be extracted from fit. (default: `NULL`).}
 
-\item{groups}{Character vector of groups IDs to be plotted. It is possible
-to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
-(default: all groups will be plotted)}
+\item{groups}{Character vector of groups to be plotted. Typically, the levels of these factors
+are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
+\code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+(default: all categories/groups will be plotted)}
 
 \item{summarize}{Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
 unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)}

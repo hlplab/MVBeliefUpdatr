@@ -6,19 +6,21 @@
 \usage{
 plot_ibbu_stanfit_parameter_correlations(
   model,
-  category = NULL,
-  group = "prior",
-  cue = NULL,
+  categories = get_category_levels_from_stanfit(model),
+  groups = "prior",
+  cues = get_cue_levels_from_stanfit(model),
   ndraws = NULL,
   untransform_cues = TRUE,
-  category.colors = NULL
+  category.colors = get_default_colors("category", categories)
 )
 }
 \arguments{
 \item{model}{mv-ibbu-stanfit object.}
 
-\item{category, group, cue}{Character vectors of categories, groups, and cues that should be included or `NULL` to include all.
-(default: `NULL` for category and cue; `"prior"` for group since those are the only free parameters)}
+\item{categories, groups, cues}{Character vector of categories/groups/cues to be plotted. Typically, the levels of these factors
+are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
+\code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+(default: all categories and cues; `"prior"` for group since those are the only free parameters)}
 
 \item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
 

@@ -15,9 +15,7 @@ add_ibbu_stanfit_draws(
   untransform_cues = TRUE,
   summarize = FALSE,
   wide = FALSE,
-  nest = TRUE,
-  category = "category",
-  group = "group"
+  nest = TRUE
 )
 }
 \arguments{

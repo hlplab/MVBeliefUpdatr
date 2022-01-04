@@ -1,4 +1,5 @@
 #' @import ggplot2 cowplot gganimate transformr av
+#' @importFrom colorspace lighten darken
 #' @importFrom ellipse ellipse
 #' @importFrom mvtnorm dmvt
 #' @importFrom tidybayes mean_hdi

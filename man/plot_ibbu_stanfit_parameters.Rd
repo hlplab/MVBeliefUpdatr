@@ -6,6 +6,9 @@
 \usage{
 plot_ibbu_stanfit_parameters(
   model,
+  categories = get_category_levels_from_stanfit(model),
+  groups = get_group_levels_from_stanfit(model, include_prior = T),
+  cues = get_cue_levels_from_stanfit(model),
   which = "both",
   ndraws = NULL,
   untransform_cues = TRUE,
@@ -17,6 +20,11 @@ plot_ibbu_stanfit_parameters(
 }
 \arguments{
 \item{model}{mv-ibbu-stanfit object.}
+
+\item{categories, groups, cues}{Character vector of categories/groups/cues to be plotted. Typically, the levels of these factors
+are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
+\code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+(default: all categories/groups/cues will be plotted)}
 
 \item{which}{Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)}
 

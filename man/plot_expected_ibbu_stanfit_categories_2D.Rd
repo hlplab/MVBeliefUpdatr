@@ -45,8 +45,9 @@ density plot instead calculates the posterior predictive for each MCMC draw (i.e
 density based on the NIW parameters \code{m, S, kappa, nu}), and then averages those densities. Since this is
 done for *all* points defined by the data.grid this can be rather computationally expensive and slow.}
 
-\item{categories, groups}{Character vector of category/groups IDs to be plotted. It is possible
-to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
+\item{categories, groups}{Character vector of categories/groups to be plotted. Typically, the levels of these factors
+are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
+\code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
 (default: all categories/groups will be plotted)}
 
 \item{plot.test, plot.exposure}{Should the test and/or exposure stimuli be plotted? (default: `TRUE` for `plot.test`,
