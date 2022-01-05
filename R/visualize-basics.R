@@ -137,6 +137,27 @@ get_limits = function(data, measure, by = NULL, hdi.prob = .99, min = NULL, max 
 ellipse.pmap = function(x, centre, level, ...)
   ellipse(x = x, centre = centre, level = level, ...)
 
+#' Add exposure/test data to a plot as points or ellipse
+#'
+#' Add exposure/test data as points or ellipse to a ggplot2. For the 1D functions, the x-axis is
+#' assumed to be a phonetic cue. For the 2D functions, the x- and y-axes are assumed to be
+#' phonetic cues. The difference between adding exposure and test data is whether the data are
+#' colored by the category (exposure) or not (test).
+#'
+#' @param data A `tibble` or `data.frame`. For plotting points, this table must contain columns
+#' named in `cue.labels`. For ellipsis plots, the table must contain the columns `mean` and `cov`.
+#' @param cue.labels Name of the columns in `data` that contain the cue values of the data to be
+#' plotted.
+#' @param level Level of probability mass for which ellipsis should be plotted (default: .95)
+#'
+#' @return A list of geoms.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#'
+#' @rdname add_data_to_plot
 #' @export
 add_exposure_data_to_1D_plot = function(
   data,
@@ -150,6 +171,7 @@ add_exposure_data_to_1D_plot = function(
   add_exposure_data_to_2D_plot(data, cue.labels, category.ids, category.labels, category.colors)
 }
 
+#' @rdname add_data_to_plot
 #' @export
 add_test_data_to_1D_plot = function(data, cue.labels) {
   cue.labels[2] = "cue2"
@@ -157,6 +179,7 @@ add_test_data_to_1D_plot = function(data, cue.labels) {
   add_test_data_to_2D_plot(data, cue.labels)
 }
 
+#' @rdname add_data_to_plot
 #' @export
 add_exposure_data_to_2D_plot = function(
   data,
@@ -183,6 +206,7 @@ add_exposure_data_to_2D_plot = function(
                        values = category.colors))
 }
 
+#' @rdname add_data_to_plot
 #' @export
 add_test_data_to_2D_plot = function(data, cue.labels) {
   list(
@@ -192,7 +216,39 @@ add_test_data_to_2D_plot = function(data, cue.labels) {
         x = .data[[cue.labels[1]]],
         y = .data[[cue.labels[2]]]),
       inherit.aes = F,
-      color = "black", size = 1))
+      color = "black", size = 1, alpha = .75))
+}
+
+#' @rdname add_data_to_plot
+#' @export
+add_exposure_ellipse_to_2D_plot = function(
+  data,
+  level = .95
+) {
+  list(
+    geom_point(
+      data =
+        data %>%
+        mutate(cue1 = unlist(map(.data$mean, ~ .x[1])), cue2 = unlist(map(.data$mean, ~ .x[2]))),
+      mapping = aes(
+        x = .data$cue1,
+        y = .data$cue2,
+        color = .data$category),
+      inherit.aes = F, size = 1),
+    geom_path(
+      data =
+        data %>%
+        crossing(level = level) %>%
+        mutate(ellipse = pmap(.l = list(cov, mean, level), ellipse.pmap)) %>%
+        unnest(ellipse) %>%
+        group_by(across(-ellipse)) %>%
+        transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]),
+      mapping = aes(
+        x = .data$cue1,
+        y = .data$cue2,
+        color = .data$category),
+      linetype = 2,
+      inherit.aes = F))
 }
 
 #' @export

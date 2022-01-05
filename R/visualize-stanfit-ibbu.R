@@ -45,32 +45,18 @@ plot_ibbu_stanfit_parameters = function(
   categories = get_category_levels_from_stanfit(model),
   groups = get_group_levels_from_stanfit(model, include_prior = T),
   cues = get_cue_levels_from_stanfit(model),
-  which = "both",
   ndraws = NULL,
   untransform_cues = TRUE,
-  group.ids = NULL, group.labels = NULL, group.colors = NULL,
-  panel_scaling = F
+  panel_scaling = F,
+  group.colors = get_default_colors("group", groups)
 ) {
   d.pars <-
     model %>%
     add_ibbu_stanfit_draws(
-      which = which,
+      groups = groups,
       ndraws = ndraws,
       untransform_cues = untransform_cues,
       nest = F)
-
-  if (is.null(group.ids)) group.ids = levels(d.pars$group)
-  # Setting aes defaults
-  if (which == "prior") {
-    if(is.null(group.labels)) group.labels[1] = "prior"
-    if(is.null(group.colors)) group.colors[1] = "darkgray"
-  } else if (which == "posterior") {
-    if (is.null(group.labels)) group.labels = paste0("posterior (", group.ids, ")")
-    if (is.null(group.colors)) group.colors = get_default_colors("group", group.ids)
-  } else {
-    if (is.null(group.labels)) group.labels = ifelse(group.ids == "prior", group.ids, paste0("posterior (", group.ids, ")"))
-    if (is.null(group.colors)) group.colors = get_default_colors("group", group.ids)
-  }
 
   p.m <- d.pars %>%
     select(.draw, group, category, cue, m) %>%
@@ -135,7 +121,7 @@ plot_ibbu_stanfit_parameters = function(
               ceiling(log10(min(x.limits))),
               floor(log10(max(x.limits)))))) +
         scale_y_discrete("", expand = expansion(mult = c(0 , 0.1))) +
-        coord_trans(x = "log10", xlim = x.limits) +  # <------------------------ xlim = x.limits for now put back in since plots was empty without it.
+        coord_trans(x = "log10", xlim = x.limits) +  # lim = x.limits for now put back in since plots was empty without it.
         facet_grid(~ .data$key, scales = "free_x"))) +
     theme(panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -242,17 +228,21 @@ plot_ibbu_stanfit_parameter_correlations = function(
 
   p <- d.pars %>%
     ggplot(aes(x = .panel_x, y = .panel_y)) +
-    geom_point(alpha = 0.2, shape = 16, size = 0.8, aes(color = category)) +
-    geom_smooth(alpha = 0.2, aes(color = category)) +
+    geom_density2d(aes(color = category), contour_var = "ndensity", alpha = .5) +
     geom_autodensity(aes(fill = category), alpha = .5, position = position_identity()) +
-    geom_density2d(aes(color = category), contour_var = "ndensity") +
+    geom_point(alpha = 0.1, shape = 16, size = 0.8, aes(color = category)) +
+    scale_color_manual("Category",
+                       breaks = categories,
+                       values = category.colors,
+                       aesthetics = c("color", "fill")) +
+    new_scale_color() +
+    geom_smooth(alpha = 0.5, aes(color = category)) +
     scale_color_manual("Category",
                       breaks = categories,
-                      values = category.colors,
-                      aesthetics = c("color", "fill")) +
+                      values = lighten(category.colors, amount = .5)) +
     facet_matrix(
       vars(starts_with("kappa"), starts_with("nu"), starts_with("m_"), starts_with("S_")),
-      layer.lower = c(1,2), layer.diag = 3, layer.upper = 4) +
+      layer.lower = c(3,4), layer.diag = 2, layer.upper = 1) +
     theme(panel.grid = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
 
   return(p)
@@ -363,55 +353,6 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
         alpha = 1 - .data$level,
         group = paste(.data$category, .data$level))) +
     geom_polygon() +
-    # Optionally plot test data
-    { if (plot.test)
-      geom_point(
-        data =
-          get_test_data_from_stanfit(model) %>%
-          { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
-          rename_at(cue.names,
-                    function(x) paste0("cue", which(x == cue.names))) %>%
-          ungroup() %>%
-          distinct(group, cue1, cue2),
-        mapping = aes(x = .data$cue1, y = .data$cue2),
-        inherit.aes = F,
-        color = "black", size = 1, alpha = .75
-    )} +
-    # Optionally plot exposure data
-    { if (plot.exposure)
-      list(
-        geom_point(
-          data =
-            get_exposure_mean_from_stanfit(
-              model,
-              categories = levels(d$category),
-              groups = setdiff(levels(d$group), "prior"),
-              untransform_cues = untransform_cues) %>%
-            mutate(cue1 = unlist(map(.data$mean, ~ .x[1])), cue2 = unlist(map(.data$mean, ~ .x[2]))),
-          mapping = aes(
-            x = .data$cue1,
-            y = .data$cue2,
-            color = .data$category),
-          inherit.aes = F, size = 2),
-        geom_path(
-          data =
-            get_exposure_statistic_from_stanfit(
-              model,
-              categories = levels(d$category),
-              groups = setdiff(levels(d$group), "prior"),
-              untransform_cues = untransform_cues) %>%
-            rename(x = cov, centre = mean) %>%
-            crossing(level = .95) %>%
-            mutate(ellipse = pmap(.l = list(x, centre, level), ellipse.pmap)) %>%
-            unnest(ellipse) %>%
-            group_by(across(-ellipse)) %>%
-            transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]),
-          mapping = aes(
-            x = .data$cue1,
-            y = .data$cue2,
-            color = .data$category),
-          linetype = 2,
-          inherit.aes = F)) } +
     { if ("rug" %in% annotate_inferred_category_means)
       geom_rug(
         data = . %>%
@@ -447,16 +388,34 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
           angle = 0,
           hjust = 0,
           inherit.aes = F)) } +
-    scale_x_continuous(cue.names[1]) +
-    scale_y_continuous(cue.names[2]) +
     scale_fill_manual(
       "Category",
       breaks = categories,
-      values = category.colors) +
+      values = category.colors,
+      aesthetics = c("color", "fill")) +
+    new_scale_color() +
+    # Optionally plot test data
+    { if (plot.test)
+      add_test_data_to_2D_plot(
+        get_test_data_from_stanfit(model) %>%
+          { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
+          ungroup() %>%
+          distinct(group, !!! syms(cue.names)),
+        cue.labels = cue.names) } +
+    # Optionally plot exposure data
+    { if (plot.exposure)
+      add_exposure_ellipse_to_2D_plot(
+        get_exposure_statistic_from_stanfit(
+          model,
+          categories = levels(d$category),
+          groups = setdiff(levels(d$group), "prior"),
+          untransform_cues = untransform_cues)) } +
+    scale_x_continuous(cue.names[1]) +
+    scale_y_continuous(cue.names[2]) +
     scale_color_manual(
       "Category",
       breaks = categories,
-      values = lighten(category.colors, amount = .1)) +
+      values = lighten(category.colors, amount = .5)) +
     scale_alpha("", range = c(0.1,.9)) +
     facet_wrap(~ group)
 }
@@ -493,7 +452,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
       cue2 = seq(min(ylim), max(ylim), length.out = resolution)) %>%
     mutate(x = map2(cue1, cue2, ~ c(.x, .y))) %>%
     mutate(
-      density = pmap(., get_NIW_posterior_predictive.pmap),
+      density = pmap(.l = list(x, m, S, kappa, nu), get_NIW_posterior_predictive.pmap),
       density = unlist(density)) %>%
     # Marginalize over MCMC draws
     group_by(group, category, cue1, cue2) %>%
@@ -508,57 +467,6 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
              fill = .data$category,
              z = .data$density)) +
     geom_contour() +
-    # Optionally plot test data
-    { if (plot.test)
-      geom_point(
-        data =
-          get_test_data_from_stanfit(model) %>%
-          { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
-          rename_at(cue.names,
-                    function(x) paste0("cue", which(x == cue.names))) %>%
-          ungroup() %>%
-          distinct(group, cue1, cue2),
-        mapping = aes(
-          x = .data$cue1,
-          y = .data$cue2),
-        inherit.aes = F,
-        color = "black", size = 1
-      )} +
-    # Optionally plot exposure data
-    { if (plot.exposure)
-      list(
-        geom_point(
-        data =
-          get_exposure_mean_from_stanfit(
-            model,
-            categories = levels(d$category),
-            groups = setdiff(levels(d$group), "prior"),
-            untransform_cues = untransform_cues) %>%
-          mutate(cue1 = unlist(map(mean, ~.x[1])), cue2 = unlist(map(mean, ~.x[2]))),
-        mapping = aes(
-          x = .data$cue1,
-          y = .data$cue2,
-          color = .data$category),
-        inherit.aes = F, size = 2),
-      geom_path(
-        data =
-          crossing(
-           category = levels(d$category),
-           group = setdiff(levels(d$group), "prior"),
-           level = .95) %>%
-          mutate(
-            x = map2(category, group, ~ get_exposure_ss_from_stanfit(model, categories = .x, groups = .y, untransform_cues = untransform_cues)),
-            centre = map2(category, group, ~ get_exposure_mean_from_stanfit(model, categories = .x, groups = .y, untransform_cues = untransform_cues))) %>%
-          mutate(ellipse = pmap(.l = list(x, centre, level), ellipse.pmap)) %>%
-          unnest(ellipse) %>%
-          group_by(across(-ellipse)) %>%
-          transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]),
-        mapping = aes(
-          x = .data$cue1,
-          y = .data$cue2,
-          color = .data$category),
-        linetype = 2,
-        inherit.aes = F)) } +
     { if ("rug" %in% annotate_inferred_category_means)
       geom_rug(
         data = . %>%
@@ -594,16 +502,34 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
           angle = 0,
           hjust = 0,
           inherit.aes = F)) } +
-    scale_x_continuous(cue.names[1]) +
-    scale_y_continuous(cue.names[2]) +
     scale_fill_manual(
       "Category",
       breaks = categories,
-      values = category.colors) +
+      values = category.colors,
+      aesthetics = c("color", "fill")) +
+    new_scale_color() +
+    # Optionally plot test data
+    { if (plot.test)
+      add_test_data_to_2D_plot(
+        get_test_data_from_stanfit(model) %>%
+          { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
+          ungroup() %>%
+          distinct(group, !!! syms(cue.names)),
+        cue.labels = cue.names) } +
+    # Optionally plot exposure data
+    { if (plot.exposure)
+      add_exposure_ellipse_to_2D_plot(
+        get_exposure_statistic_from_stanfit(
+          model,
+          categories = levels(d$category),
+          groups = setdiff(levels(d$group), "prior"),
+          untransform_cues = untransform_cues)) } +
+    scale_x_continuous(cue.names[1]) +
+    scale_y_continuous(cue.names[2]) +
     scale_color_manual(
       "Category",
       breaks = categories,
-      values = lighten(category.colors, amount = .1)) +
+      values = lighten(category.colors, amount = .5)) +
     coord_fixed(xlim = xlim, ylim = ylim, ratio = 1) +
     facet_wrap(~ .data$group)
 }
@@ -826,11 +752,11 @@ plot_ibbu_stanfit_test_categorization = function(
         limits = c(0,1)) +
       scale_color_manual(
         "Group",
-        breaks = .env$groups,
+        breaks = groups,
         values = group.colors) +
       scale_linetype_manual(
         "Group",
-        breaks = .env$groups,
+        breaks = groups,
         values = group.linetypes)
 
     if (summarize & !is.null(confidence.intervals)) {
