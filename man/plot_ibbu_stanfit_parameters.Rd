@@ -9,13 +9,10 @@ plot_ibbu_stanfit_parameters(
   categories = get_category_levels_from_stanfit(model),
   groups = get_group_levels_from_stanfit(model, include_prior = T),
   cues = get_cue_levels_from_stanfit(model),
-  which = "both",
   ndraws = NULL,
   untransform_cues = TRUE,
-  group.ids = NULL,
-  group.labels = NULL,
-  group.colors = NULL,
-  panel_scaling = F
+  panel_scaling = F,
+  group.colors = get_default_colors("group", groups)
 )
 }
 \arguments{
@@ -26,11 +23,16 @@ are automatically added to the fit during the creation of the fit. If necessary,
 \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
 (default: all categories/groups/cues will be plotted)}
 
-\item{which}{Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)}
-
 \item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
 
 \item{untransform_cues}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
+
+\item{panel_scaling}{Should the relative scaling be calculated separately for each panel? If not the scaling is calculated
+globally. (default: `FALSE`)}
+
+\item{group.colors}{Vector of fill colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)}
+
+\item{which}{Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)}
 
 \item{group.ids}{Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
 to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.}
@@ -38,11 +40,6 @@ to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to han
 \item{group.labels}{Vector of group labels of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
 The default labels each categorization function based on whether it is showing prior or posterior categorization,
 and by its group ID.}
-
-\item{group.colors}{Vector of fill colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)}
-
-\item{panel_scaling}{Should the relative scaling be calculated separately for each panel? If not the scaling is calculated
-globally. (default: `FALSE`)}
 }
 \value{
 ggplot object.
