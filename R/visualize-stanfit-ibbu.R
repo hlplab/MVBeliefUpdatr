@@ -1,4 +1,4 @@
-#' @import ggplot2 cowplot gganimate ggnewscales transformr av
+#' @import ggplot2 cowplot gganimate ggnewscale transformr av
 #' @importFrom colorspace lighten darken
 #' @importFrom ellipse ellipse
 #' @importFrom mvtnorm dmvt
