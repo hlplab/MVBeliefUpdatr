@@ -249,6 +249,7 @@ get_sum_of_centered_squares_from_df <- function(data, variables = NULL, verbose 
 #'
 #' Get sufficient statistics from data. Calculates functions for the specified cues for
 #' any combination of groups (optional) and categories, and returns them as a tibble.
+#' Rows with missing values for cues will be ignored in the calculation of the sufficient statistics.
 #'
 #' @param data `tibble` or `data.frame` with the data. Each row should be an observation of a category,
 #' and contain information about the category label, the cue values of the observation, and optionally grouping variables.
@@ -257,11 +258,13 @@ get_sum_of_centered_squares_from_df <- function(data, variables = NULL, verbose 
 #' @param cues Names of columns with cue values.
 #' @param category Name of column that contains the category label for the exposure data. Can be `NULL` for unsupervised updating
 #' (not yet implemented). (default: "category")
-#' @param groups Name of column(s) that contains information about which observations form a group. This could be individual
+#' @param group Name of column(s) that contains information about which observations form a group. This could be individual
 #' subjects or conditions in an experiment. The latter is more efficient, but should only be used if exposure is
 #' identical for every individual within the group. Test does not have to be identical for every individual within
 #' the same group. For example, one can group multiple groups of subjects that have received the same exposure
-#' but were tested on different test tokens.
+#' but were tested on different test tokens. If `NULL` no grouping variable will be considered. (default: `NULL`)
+#' @param categories,groups Character vector of categories/groups to be summarize. If `NULL`, all categories/groups will be
+#' included. (default: `NULL`)
 #'
 #' @return A tibble of sufficient statistics for each combination of category and group.
 #'
@@ -274,13 +277,17 @@ get_sufficient_category_statistics <- function(
   data,
   cues,
   category = "category",
-  groups,
+  group = NULL,
+  categories = NULL,
+  groups = NULL,
   ...
 ) {
-  message("rows with missing values for cues will be ignored in the calculation of the sufficient statistics.")
   data_ss <- data %>%
     as_tibble() %>%
-    group_by(!! sym(category), !!! syms(groups))
+    group_by(!! sym(category), !!! syms(group)) %>%
+    { if(!is.null(categories)) filter(., !! sym(category) %in% categories) else . } %>%
+    { if(!is.null(groups)) filter(., !! sym(group) %in% groups) else . } %>%
+    droplevels()
 
   if (length(cues) > 1) {
     # Multivariate observations

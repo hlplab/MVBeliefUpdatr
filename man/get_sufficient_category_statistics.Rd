@@ -8,7 +8,9 @@ get_sufficient_category_statistics(
   data,
   cues,
   category = "category",
-  groups,
+  group = NULL,
+  categories = NULL,
+  groups = NULL,
   ...
 )
 }
@@ -21,11 +23,14 @@ and contain information about the category label, the cue values of the observat
 \item{category}{Name of column that contains the category label for the exposure data. Can be `NULL` for unsupervised updating
 (not yet implemented). (default: "category")}
 
-\item{groups}{Name of column(s) that contains information about which observations form a group. This could be individual
+\item{group}{Name of column(s) that contains information about which observations form a group. This could be individual
 subjects or conditions in an experiment. The latter is more efficient, but should only be used if exposure is
 identical for every individual within the group. Test does not have to be identical for every individual within
 the same group. For example, one can group multiple groups of subjects that have received the same exposure
-but were tested on different test tokens.}
+but were tested on different test tokens. If `NULL` no grouping variable will be considered. (default: `NULL`)}
+
+\item{categories, groups}{Character vector of categories/groups to be summarize. If `NULL`, all categories/groups will be
+included. (default: `NULL`)}
 
 \item{test}{`tibble` or `data.frame` with the test data. Each row should be an observation, and contain information
 about the cue values of the test stimulus and the participant's response.}
@@ -36,6 +41,7 @@ A tibble of sufficient statistics for each combination of category and group.
 \description{
 Get sufficient statistics from data. Calculates functions for the specified cues for
 any combination of groups (optional) and categories, and returns them as a tibble.
+Rows with missing values for cues will be ignored in the calculation of the sufficient statistics.
 }
 \examples{
 TBD
