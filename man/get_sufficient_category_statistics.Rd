@@ -36,7 +36,8 @@ included. (default: `NULL`)}
 about the cue values of the test stimulus and the participant's response.}
 }
 \value{
-A tibble of sufficient statistics for each combination of category and group.
+A tibble of sufficient statistics for each combination of category and group. This includes the count, mean,
+uncentered and centered sums-of-squares and the covariance matrix (or, for univariate, stimuli: the standard deviation).
 }
 \description{
 Get sufficient statistics from data. Calculates functions for the specified cues for

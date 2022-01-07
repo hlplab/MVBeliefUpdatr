@@ -1,3 +1,24 @@
+#' Example NIW priors.
+#'
+#' @export
+example_MVG_ideal_observer = function(example = 1) {
+  if (example == 1) {
+    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
+    tibble(
+      category = c("A", "B"),
+      mu = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
+      Sigma = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
+      prior = c(.5, .5),
+      lapse_rate = .05,
+      lapse_bias = c(.5, .5),
+      Sigma_noise = list(diag(c(0,0), diag(c(0,0))))
+    ) %>%
+      mutate(category = factor(category))
+  }
+}
+
+
 #' Get likelihood
 #'
 #' Get likelihood of observations x given the MVG parameters mu and Sigma. This is the density of
