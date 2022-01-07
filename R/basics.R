@@ -266,7 +266,8 @@ get_sum_of_centered_squares_from_df <- function(data, variables = NULL, verbose 
 #' @param categories,groups Character vector of categories/groups to be summarize. If `NULL`, all categories/groups will be
 #' included. (default: `NULL`)
 #'
-#' @return A tibble of sufficient statistics for each combination of category and group.
+#' @return A tibble of sufficient statistics for each combination of category and group. This includes the count, mean,
+#' uncentered and centered sums-of-squares and the covariance matrix (or, for univariate, stimuli: the standard deviation).
 #'
 #' @seealso
 #' @keywords TBD
@@ -296,7 +297,8 @@ get_sufficient_category_statistics <- function(
       summarise(
         x_N = length(!! sym(cues[1])),
         x_mean = list(colMeans(cbind(!!! syms(cues)))),
-        x_ss = list(get_sum_of_uncentered_squares_from_df(cbind(!!! syms(cues)), verbose = verbose)),
+        x_uss = list(get_sum_of_uncentered_squares_from_df(cbind(!!! syms(cues)), verbose = verbose)),
+        x_css = list(get_sum_of_centered_squares_from_df(cbind(!!! syms(cues)), verbose = verbose)),
         x_cov = list(cov(cbind(!!! syms(cues)))))
   } else {
     # Univariate observations
@@ -305,8 +307,9 @@ get_sufficient_category_statistics <- function(
       summarise(
         x_N = length(!! sym(cues)),
         x_mean = mean(!! sym(cues)),
-        x_ss = as.numeric(get_sum_of_uncentered_squares_from_df(matrix(!! sym(cues)), verbose = verbose)),
-        x_sd = sd(!!! syms(cues)))
+        x_uss = as.numeric(get_sum_of_uncentered_squares_from_df(matrix(!! sym(cues)), verbose = verbose)),
+        x_css = as.numeric(get_sum_of_centered_squares_from_df(matrix(!! sym(cues)), verbose = verbose)),
+        x_sd = sd(!! sym(cues)))
   }
 
   return(data_ss)
