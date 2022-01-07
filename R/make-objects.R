@@ -555,7 +555,7 @@ make_MVG_data_from_model = function(
       mus = model$mu,
       Sigmas = model$Sigma,
       category.labels = get_category_labels_from_model(model),
-      cue.labels = get_cue_labels_from_MVG(model),
+      cue.labels = get_cue_labels_from_model(model),
       randomize.order = randomize.order,
       keep.input_parameters = keep.input_parameters))
   } else if (is.NIW_belief(model)) {
