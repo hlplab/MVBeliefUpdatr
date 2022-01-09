@@ -7,21 +7,21 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
   assert_cols_in_data(data, group, which.data, scalar = T)
 
   data %<>%
-    drop_na(cues, group) %>%
-    mutate_at(group, as.factor)
+    drop_na(.env$cues, .env$group) %>%
+    mutate(across(.env$group, as.factor))
 
   if(!is.null(category)) {
     assert_cols_in_data(data, category, which.data, scalar = T)
     data %<>%
-      mutate_at(category, as.factor) %>%
-      drop_na(category)
+      mutate(across(.env$category, as.factor)) %>%
+      drop_na(.env$category)
   }
 
   if (!is.null(response)) {
     assert_cols_in_data(data, response, which.data, scalar = T)
     data %<>%
-      mutate_at(response, as.factor) %>%
-      drop_na(response)
+      mutate(across(.env$response, as.factor)) %>%
+      drop_na(.env$response)
   }
   assert_that(nrow(data) > 0,
               msg = paste("There must be at least one observation in", which.data, "data."))
@@ -262,10 +262,6 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   if ((!center.observations | !scale.observations) & (tau_scale == 0 | L_omega_scale == 0))
     message("The tau_scale and L_omega_scale parameters are not specified (using defaults). Since you also did not ask for the input to be centered *and* scaled, this puts the priors assumed in the model on a scale that has no relation to the input. Unless you have manually centered and scaled the cues, this is strongly discouraged.")
 
-  if (!is.null(m_0)) assert_that(is.list(m_0) | is.array(m_0))
-  if (!is.null(S_0)) assert_that(is.list(S_0) | is.array(S_0))
-  message("Message to developer: Add assertions about m_0 and S_0 dimensions")
-
   if (pca.observations)
     assert_that(between(pca.cutoff, 0, 1),
                 msg = "pca.cutoff must be between 0 and 1.")
@@ -288,7 +284,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     only be counted once. All test observations are still counted, but aggregated for each unique value of group.unique."))
 
     exposure %<>%
-      mutate_at(group.unique, as.factor) %>%
+      mutate(across(group.unique, as.factor)) %>%
       group_by(!! sym(group.unique), !! sym(category), !!! syms(cues)) %>%
       filter(!! sym(group) == unique(!! sym(group))[1])
 
@@ -321,6 +317,42 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   exposure %<>%
     mutate_at(all_of(group), ~ factor(.x, levels = levels(test[[!! group]])))
 
+  if (!is.null(m_0)) {
+    if (nlevels(exposure[[category]]) == 1) {
+      assert_that(is.vector(m_0),
+                  msg = "If m_0 is not NULL and there is only one category, m_0 must be a vector.")
+    } else {
+      assert_that(is.list(m_0) & length(m_0) == nlevels(exposure[[category]]),
+                msg = "If m_0 is not NULL, m_0 must be a list of vectors with as many elements as there are categories.")
+    }
+    assert_that(all(map(m_0, is.numeric)  %>% unlist, map(m_0, ~ is.null(dim(.x)) | length(dim(.x)) == 1) %>% unlist),
+                msg = "If m_0 is a list, each element must be a vector.")
+    assert_that(all((map(m_0, length) %>% unlist()) == length(cues)),
+                msg = paste(
+                  "At least one element of m_0 does not have the correct dimensionality. Observations have",
+                  length(cues),
+                  "dimensions. Dimensionality of m_0 ranges from",
+                  paste(map(m_0, length) %>% unlist() %>% range(), collapse = " to ")))
+  }
+  if (!is.null(S_0)) {
+    if (nlevels(exposure[[category]]) == 1) {
+      assert_that(is.array(S_0),
+                msg = "If S_0 is not NULL and there is only one category, S_0 must be a positive-definite  matrix.")
+    } else {
+      assert_that(is.list(S_0) & length(S_0) == nlevels(exposure[[category]]),
+                 msg = "If S_0 not NULL, S_0 must be a list of positive-definite matrices with as many elements as there are categories.")
+    }
+    assert_that(all(map(S_0, is.numeric)  %>% unlist, map(S_0, ~ length(dim(.x)) == 2) %>% unlist),
+                msg = "If S_0 is a list, each element must be a k x k matrix.")
+    assert_that(all(map(S_0, ~ dim(.x) == length(cues)) %>% unlist()),
+                msg = paste(
+                  "At least one element of S_0 does not have the correct dimensionality. Observations have",
+                  length(cues),
+                  "dimensions. S_0 includes matrices of dimension",
+                  paste(paste(map(S_0, ~ dim(.x) %>% paste(collapse = " x "))) %>% unique(), collapse = ", ")))
+  }
+
+  # Transform data
   transform <-
     transform_cues(
       data = exposure,
@@ -344,7 +376,6 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     cues = colnames(s)[1:l]
   }
 
-  # Transform data
   exposure <- transform[["data"]]
   test <- transform[["transform.function"]](test)
   if (!is.null(m_0)) m_0 <- map(m_0, ~ transform_category_mean(m = .x, transform))
@@ -369,7 +400,9 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       temp <- array(dim = c(n.cats, n.cues))
       for (i in 1:length(m_0)) temp[i,] <- m_0[[i]]
       m_0 <- temp
-      rm(temp) }}
+      rm(temp)
+    }
+  }
 
   if (is.null(S_0)) {
     S_0 <- array(numeric(), dim = c(0,0,0))
@@ -380,7 +413,9 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       temp <- array(dim = c(n.cats, n.cues, n.cues))
       for (i in 1:length(S_0)) temp[i,,] <- S_0[[i]]
       S_0 <- temp
-      rm(temp) }}
+      rm(temp)
+    }
+  }
 
   if (length(cues) > 1) {
     data_list <-
