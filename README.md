@@ -1,5 +1,5 @@
 # MVBeliefUpdatr
-MVBeliefUpdatr is a package that aims to facilitate the fitting, summarizing, and visualizing of multivariate Gaussian ideal observers and adaptors. This models can be used, for example, to model speech perception and changes in speech perception as a response to recently experienced speech input. The package is still very much under development, and would benefit from your feedback. 
+`MVBeliefUpdatr` is a package that aims to facilitate the fitting, summarizing, and visualizing of multivariate Gaussian ideal observers and adaptors. This models can be used, for example, to model speech perception and changes in speech perception as a response to recently experienced speech input. The package is still very much under development, and would benefit from your feedback. 
 
 
 # Installation
@@ -9,8 +9,12 @@ You can install `MVBeliefUpdatr` from R:
 devtools::install_github("hlplab/MVBeliefUpdatr")
 ```
 
-That should install MVBeliefUpdatr and all of its dependencies. If some dependencies are *not* automatically installed, please let email
+That should install `MVBeliefUpdatr` and all of its dependencies. If some dependencies are *not* automatically installed, please let email
 Florian Jaeger (<fjaeger@ur.rochester.edu>), so that I can add them to the dependencies. 
+
+
+# Examples
+`MVBeliefUpdatr` code was used in [Tan, Xie, & Jaeger (2021)](https://www.frontiersin.org/articles/10.3389/fpsyg.2021.676271/full), [Xie, Buxo-Lugo, & Kurumada (2021)](https://www.sciencedirect.com/science/article/pii/S001002772100038X), and [Xie, Jaeger, & Kurumada (2021)](https://osf.io/q7gjp/). The final of these examples includes a public OSF repository with an R Markdown document that illustrates some of the ways in which `MVBeliefUpdatr` can be used in research on speech perception.
 
 
 # Acknowledgments
