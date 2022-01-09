@@ -296,12 +296,12 @@ public:
             validate_non_negative_index("m_0_param", "(m_0_known ? 0 : M )", (m_0_known ? 0 : M ));
             num_params_r__ += (K * (m_0_known ? 0 : M ));
             current_statement_begin__ = 63;
-            validate_non_negative_index("m_0_tau", "K", K);
-            num_params_r__ += K;
+            validate_non_negative_index("m_0_tau", "(m_0_known ? K : 0 )", (m_0_known ? K : 0 ));
+            num_params_r__ += (m_0_known ? K : 0 );
             current_statement_begin__ = 64;
-            validate_non_negative_index("m_0_L_omega", "K", K);
-            validate_non_negative_index("m_0_L_omega", "K", K);
-            num_params_r__ += ((K * (K - 1)) / 2);
+            validate_non_negative_index("m_0_L_omega", "(m_0_known ? K : 0 )", (m_0_known ? K : 0 ));
+            validate_non_negative_index("m_0_L_omega", "(m_0_known ? K : 0 )", (m_0_known ? K : 0 ));
+            num_params_r__ += (((m_0_known ? K : 0 ) * ((m_0_known ? K : 0 ) - 1)) / 2);
             current_statement_begin__ = 66;
             validate_non_negative_index("tau_0_param", "K", K);
             validate_non_negative_index("tau_0_param", "(S_0_known ? 0 : M )", (S_0_known ? 0 : M ));
@@ -385,10 +385,10 @@ public:
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable m_0_tau missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("m_0_tau");
         pos__ = 0U;
-        validate_non_negative_index("m_0_tau", "K", K);
-        context__.validate_dims("parameter initialization", "m_0_tau", "vector_d", context__.to_vec(K));
-        Eigen::Matrix<double, Eigen::Dynamic, 1> m_0_tau(K);
-        size_t m_0_tau_j_1_max__ = K;
+        validate_non_negative_index("m_0_tau", "(m_0_known ? K : 0 )", (m_0_known ? K : 0 ));
+        context__.validate_dims("parameter initialization", "m_0_tau", "vector_d", context__.to_vec((m_0_known ? K : 0 )));
+        Eigen::Matrix<double, Eigen::Dynamic, 1> m_0_tau((m_0_known ? K : 0 ));
+        size_t m_0_tau_j_1_max__ = (m_0_known ? K : 0 );
         for (size_t j_1__ = 0; j_1__ < m_0_tau_j_1_max__; ++j_1__) {
             m_0_tau(j_1__) = vals_r__[pos__++];
         }
@@ -402,12 +402,12 @@ public:
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable m_0_L_omega missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("m_0_L_omega");
         pos__ = 0U;
-        validate_non_negative_index("m_0_L_omega", "K", K);
-        validate_non_negative_index("m_0_L_omega", "K", K);
-        context__.validate_dims("parameter initialization", "m_0_L_omega", "matrix_d", context__.to_vec(K,K));
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> m_0_L_omega(K, K);
-        size_t m_0_L_omega_j_2_max__ = K;
-        size_t m_0_L_omega_j_1_max__ = K;
+        validate_non_negative_index("m_0_L_omega", "(m_0_known ? K : 0 )", (m_0_known ? K : 0 ));
+        validate_non_negative_index("m_0_L_omega", "(m_0_known ? K : 0 )", (m_0_known ? K : 0 ));
+        context__.validate_dims("parameter initialization", "m_0_L_omega", "matrix_d", context__.to_vec((m_0_known ? K : 0 ),(m_0_known ? K : 0 )));
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> m_0_L_omega((m_0_known ? K : 0 ), (m_0_known ? K : 0 ));
+        size_t m_0_L_omega_j_2_max__ = (m_0_known ? K : 0 );
+        size_t m_0_L_omega_j_1_max__ = (m_0_known ? K : 0 );
         for (size_t j_2__ = 0; j_2__ < m_0_L_omega_j_2_max__; ++j_2__) {
             for (size_t j_1__ = 0; j_1__ < m_0_L_omega_j_1_max__; ++j_1__) {
                 m_0_L_omega(j_1__, j_2__) = vals_r__[pos__++];
@@ -536,16 +536,16 @@ public:
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> m_0_tau;
             (void) m_0_tau;  // dummy to suppress unused var warning
             if (jacobian__)
-                m_0_tau = in__.vector_lb_constrain(0, K, lp__);
+                m_0_tau = in__.vector_lb_constrain(0, (m_0_known ? K : 0 ), lp__);
             else
-                m_0_tau = in__.vector_lb_constrain(0, K);
+                m_0_tau = in__.vector_lb_constrain(0, (m_0_known ? K : 0 ));
             current_statement_begin__ = 64;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> m_0_L_omega;
             (void) m_0_L_omega;  // dummy to suppress unused var warning
             if (jacobian__)
-                m_0_L_omega = in__.cholesky_factor_corr_constrain(K, lp__);
+                m_0_L_omega = in__.cholesky_factor_corr_constrain((m_0_known ? K : 0 ), lp__);
             else
-                m_0_L_omega = in__.cholesky_factor_corr_constrain(K);
+                m_0_L_omega = in__.cholesky_factor_corr_constrain((m_0_known ? K : 0 ));
             current_statement_begin__ = 66;
             std::vector<Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> > tau_0_param;
             size_t tau_0_param_d_0_max__ = (S_0_known ? 0 : M );
@@ -988,11 +988,11 @@ public:
         dims__.push_back(K);
         dimss__.push_back(dims__);
         dims__.resize(0);
-        dims__.push_back(K);
+        dims__.push_back((m_0_known ? K : 0 ));
         dimss__.push_back(dims__);
         dims__.resize(0);
-        dims__.push_back(K);
-        dims__.push_back(K);
+        dims__.push_back((m_0_known ? K : 0 ));
+        dims__.push_back((m_0_known ? K : 0 ));
         dimss__.push_back(dims__);
         dims__.resize(0);
         dims__.push_back((S_0_known ? 0 : M ));
@@ -1079,14 +1079,14 @@ public:
                 vars__.push_back(m_0_param[k_0__](j_1__));
             }
         }
-        Eigen::Matrix<double, Eigen::Dynamic, 1> m_0_tau = in__.vector_lb_constrain(0, K);
-        size_t m_0_tau_j_1_max__ = K;
+        Eigen::Matrix<double, Eigen::Dynamic, 1> m_0_tau = in__.vector_lb_constrain(0, (m_0_known ? K : 0 ));
+        size_t m_0_tau_j_1_max__ = (m_0_known ? K : 0 );
         for (size_t j_1__ = 0; j_1__ < m_0_tau_j_1_max__; ++j_1__) {
             vars__.push_back(m_0_tau(j_1__));
         }
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> m_0_L_omega = in__.cholesky_factor_corr_constrain(K);
-        size_t m_0_L_omega_j_2_max__ = K;
-        size_t m_0_L_omega_j_1_max__ = K;
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> m_0_L_omega = in__.cholesky_factor_corr_constrain((m_0_known ? K : 0 ));
+        size_t m_0_L_omega_j_2_max__ = (m_0_known ? K : 0 );
+        size_t m_0_L_omega_j_1_max__ = (m_0_known ? K : 0 );
         for (size_t j_2__ = 0; j_2__ < m_0_L_omega_j_2_max__; ++j_2__) {
             for (size_t j_1__ = 0; j_1__ < m_0_L_omega_j_1_max__; ++j_1__) {
                 vars__.push_back(m_0_L_omega(j_1__, j_2__));
@@ -1490,14 +1490,14 @@ public:
                 param_names__.push_back(param_name_stream__.str());
             }
         }
-        size_t m_0_tau_j_1_max__ = K;
+        size_t m_0_tau_j_1_max__ = (m_0_known ? K : 0 );
         for (size_t j_1__ = 0; j_1__ < m_0_tau_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
             param_name_stream__ << "m_0_tau" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
-        size_t m_0_L_omega_j_2_max__ = K;
-        size_t m_0_L_omega_j_1_max__ = K;
+        size_t m_0_L_omega_j_2_max__ = (m_0_known ? K : 0 );
+        size_t m_0_L_omega_j_1_max__ = (m_0_known ? K : 0 );
         for (size_t j_2__ = 0; j_2__ < m_0_L_omega_j_2_max__; ++j_2__) {
             for (size_t j_1__ = 0; j_1__ < m_0_L_omega_j_1_max__; ++j_1__) {
                 param_name_stream__.str(std::string());
@@ -1652,13 +1652,13 @@ public:
                 param_names__.push_back(param_name_stream__.str());
             }
         }
-        size_t m_0_tau_j_1_max__ = K;
+        size_t m_0_tau_j_1_max__ = (m_0_known ? K : 0 );
         for (size_t j_1__ = 0; j_1__ < m_0_tau_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
             param_name_stream__ << "m_0_tau" << '.' << j_1__ + 1;
             param_names__.push_back(param_name_stream__.str());
         }
-        size_t m_0_L_omega_j_1_max__ = ((K * (K - 1)) / 2);
+        size_t m_0_L_omega_j_1_max__ = (((m_0_known ? K : 0 ) * ((m_0_known ? K : 0 ) - 1)) / 2);
         for (size_t j_1__ = 0; j_1__ < m_0_L_omega_j_1_max__; ++j_1__) {
             param_name_stream__.str(std::string());
             param_name_stream__ << "m_0_L_omega" << '.' << j_1__ + 1;
