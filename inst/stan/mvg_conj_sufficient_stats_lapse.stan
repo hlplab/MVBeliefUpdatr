@@ -60,8 +60,8 @@ parameters {
   real<lower=K + 1> nu_0;                 // prior pseudocount for category Sigma
 
   vector[K] m_0_param[m_0_known ? 0 : M];                 // prior mean of means
-  vector<lower=0>[m_0_known ? K : 0] m_0_tau;             // prior variances of m_0
-  cholesky_factor_corr[m_0_known ? K : 0] m_0_L_omega;    // prior correlations of variances of m_0 (in cholesky form)
+  vector<lower=0>[m_0_known ? 0 : K] m_0_tau;             // prior variances of m_0
+  cholesky_factor_corr[m_0_known ? 0 : K] m_0_L_omega;    // prior correlations of variances of m_0 (in cholesky form)
 
   vector<lower=0>[K] tau_0_param[S_0_known ? 0 : M];          // standard deviations of prior scatter matrix S_0
   cholesky_factor_corr[K] L_omega_0_param[S_0_known ? 0 : M]; // correlation matrix of prior scatter matrix S_0 (in cholesky form)
