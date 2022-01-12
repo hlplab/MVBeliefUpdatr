@@ -713,7 +713,7 @@ plot_ibbu_stanfit_test_categorization = function(
       scale_x_continuous(cue.labels[1]) +
       scale_y_continuous(cue.labels[2]) +
       scale_fill_gradient2(
-        paste0("Predicted proportion\n of", target_category_label, "-responses"),
+        paste0("Predicted proportion\n of ", target_category_label, "-responses"),
         midpoint = .5,
         high = category.colors[target_category],
         mid = "white",

@@ -128,3 +128,12 @@ is.NIW_ideal_adaptor_input <- function(x) {
   return(TRUE)
 }
 
+#' @export
+print.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
+  if (is.null(pars)) {
+    pars <- names(x)
+    pars <- grep("^((kappa|nu|m|S)_|lapse_rate)", pars, value = T)
+  }
+
+  print(x, pars = pars, ...)
+}
