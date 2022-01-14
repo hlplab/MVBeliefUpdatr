@@ -22,11 +22,6 @@ NULL
 #' @param which Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
 #' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
-#' @param group.ids Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`) It is possible
-#' to use \code{\link[tidybayes]{recover_types}} on the stanfit object prior to handing it to this plotting function.
-#' @param group.labels Vector of group labels of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
-#' The default labels each categorization function based on whether it is showing prior or posterior categorization,
-#' and by its group ID.
 #' @param group.colors Vector of fill colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
 #' @param panel_scaling Should the relative scaling be calculated separately for each panel? If not the scaling is calculated
 #' globally. (default: `FALSE`)
@@ -639,7 +634,6 @@ plot_ibbu_stanfit_test_categorization = function(
                 msg = paste("sort_by must be NULL or one of the groups:",
                       paste(groups, collapse = ", ")))
 
-  # Exclude all groups that are not in group.id
   d.pars %<>%
     filter(group %in% .env$groups)
 
@@ -651,16 +645,16 @@ plot_ibbu_stanfit_test_categorization = function(
       distinct(!!! syms(cue.labels)) %>%
       { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
       make_vector_column(cols = cue.labels, vector_col = "x", .keep = "all") %>%
-      nest(cues_joint = x, cues_separate = cue.labels) %>%
+      nest(cues_joint = x, cues_separate = .env$cue.labels) %>%
       crossing(group = levels(d.pars$group))
   } else {
     test_data <-
       data.test %>%
-      distinct(!!! syms(cue.labels), group.id, group) %>%
+      distinct(!!! syms(cue.labels), group) %>%
       { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
       make_vector_column(cols = cue.labels, vector_col = "x", .keep = "all") %>%
-      group_by(group.id, group) %>%
-      nest(cues_joint = x, cues_separate = cue.labels)
+      group_by(group) %>%
+      nest(cues_joint = x, cues_separate = .env$cue.labels)
   }
 
   d.pars %<>%
