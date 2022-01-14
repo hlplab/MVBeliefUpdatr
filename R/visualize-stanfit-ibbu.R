@@ -221,8 +221,8 @@ plot_ibbu_stanfit_parameter_correlations = function(
         pivot_wider(names_from = "combination", values_from = "S_rho", names_prefix = "S_rho_"),
       by = c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate"))
 
-  p <- d.pars %>%
-    ggplot(aes(x = .panel_x, y = .panel_y)) +
+  correlation_plot <-
+    ggplot(data = NULL, aes(x = .panel_x, y = .panel_y)) +
     geom_density2d(aes(color = category), contour_var = "ndensity", alpha = .5) +
     geom_autodensity(aes(fill = category), alpha = .5, position = position_identity()) +
     geom_point(alpha = 0.1, shape = 16, size = 0.8, aes(color = category)) +
@@ -233,12 +233,20 @@ plot_ibbu_stanfit_parameter_correlations = function(
     new_scale_color() +
     geom_smooth(alpha = 0.5, aes(color = category)) +
     scale_color_manual("Category",
-                      breaks = categories,
-                      values = lighten(category.colors, amount = .5)) +
+                       breaks = categories,
+                       values = lighten(category.colors, amount = .5)) +
     facet_matrix(
       vars(starts_with("kappa"), starts_with("nu"), starts_with("m_"), starts_with("S_")),
       layer.lower = c(3,4), layer.diag = 2, layer.upper = 1) +
     theme(panel.grid = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+
+  if (length(groups) > 1) {
+    p <- list()
+    for (g in groups) {
+      p <- append(p, correlation_plot %+% (d.pars %>% filter(group == g)))
+    }
+    p <- plot_grid(plotlist = p)
+  } else p <- correlation_plot %+% d.pars
 
   return(p)
 }
@@ -703,7 +711,7 @@ plot_ibbu_stanfit_test_categorization = function(
         x = !! sym(cue.labels[1]),
         y = !! sym(cue.labels[2]),
         fill = .data$p_cat)) +
-      geom_raster() +
+      geom_raster(interpolate = FALSE) +
       scale_x_continuous(cue.labels[1]) +
       scale_y_continuous(cue.labels[2]) +
       scale_fill_gradient2(
