@@ -128,18 +128,4 @@ is.NIW_ideal_adaptor_input <- function(x) {
   return(TRUE)
 }
 
-#' Print NIW ideal adaptor stanfit
-#'
-#' Specifies reasonable defaults for the parameters to be summarized for the stanfit object.
-#'
-#' @param x An \code{\link{NIW_ideal_adaptor_stanfit}} object.
-#'
-#' @export
-print.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
-  if (is.null(pars)) {
-    pars <- names(x)
-    pars <- grep("^((kappa|nu|m|S)_|lapse_rate)", pars, value = T)
-  }
 
-  print(x, pars = pars, ...)
-}
