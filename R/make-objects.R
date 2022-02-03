@@ -66,11 +66,11 @@ make_MVG_from_data = function(
       Sigma = list(cov(cbind(!!! cues))))
 
   model %<>%
-    mutate(
-      !! category := factor(!! category)) %>%
+    rename(category = !! category) %>%
+    mutate(category = factor(category)) %>%
     ungroup()
 
-  if (is.null(group) & !is.MVG(model, category = as_name(category), verbose = verbose)) {
+  if (is.null(group) & !is.MVG(model, verbose = verbose)) {
     warning("Something went wrong. The returned object is not an MVG. Try again with verbose = T?")
   } else if (!is.null(group)) {
     warning("Currently, groups of ideal observers are not checked for internal consistency.")
@@ -99,16 +99,16 @@ make_MVG_ideal_observer_from_data = function(
 
   model %<>%
     lift_MVG_to_MVG_ideal_observer(
-    group = group, category = category,
+    group = group,
     prior = prior,
     lapse_rate = lapse_rate, lapse_bias = lapse_bias,
     Sigma_noise = Sigma_noise,
     add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
 
-  if (is.null(group) & !is.MVG_ideal_observer(model, category = as_name(category), verbose = verbose)) {
+  if (is.null(group) & !is.MVG_ideal_observer(model, verbose = verbose)) {
     warning("Something went wrong. The returned object is not an MVG ideal observer. Try again with verbose = T?")
   } else if (!is.null(group)) {
-    message("Currently, groups of ideal observers are not checked for internal consistency.")
+    # message("Currently, groups of ideal observers are not checked for internal consistency.")
   }
 
   return(model)
@@ -193,7 +193,7 @@ make_NIW_belief_from_data = function(
     ungroup()
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
-  if (!is.NIW_belief(model, category = as_name(category), verbose = verbose))
+  if (!is.NIW_belief(model, verbose = verbose))
     warning("Something went wrong. The returned object is not an NIW belief.")
 
   return(model)
@@ -225,11 +225,11 @@ make_NIW_ideal_adaptor_from_data = function(
 
   model %<>%
     lift_NIW_belief_to_NIW_ideal_adaptor(
-      group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
+      group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
       Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
-  if (!is.NIW_ideal_adaptor(model, category = as_name(category), verbose = verbose))
+  if (!is.NIW_ideal_adaptor(model, verbose = verbose))
     warning("Something went wrong. The returned object is not an NIW ideal adaptor.")
 
   return(model)
@@ -488,7 +488,7 @@ aggregate_models_by_group_structure = function(
 }
 
 
-#' Make multivariate Gaussian exposure data.
+#' Sample multivariate Gaussian exposure data.
 #'
 #' Returns a tibble of observations drawn from multivariate Gaussians, with one observation per row. Each row
 #' provides the category label and cue values. If \code{keep.parameters = T} then the parameters (\code{N, mean, sigma})
@@ -516,7 +516,7 @@ aggregate_models_by_group_structure = function(
 #' @examples
 #' TBD
 #' @export
-make_MVG_data = function(
+sample_MVG_data = function(
   Ns, mus, Sigmas,
   category.labels = NULL,
   cue.labels = NULL,
@@ -546,7 +546,7 @@ make_MVG_data = function(
 
 #' @rdname make_MVG_data
 #' @export
-make_MVG_data_from_model = function(
+sample_MVG_data_from_model = function(
   Ns,
   model = NULL,
   randomize.order = F,
