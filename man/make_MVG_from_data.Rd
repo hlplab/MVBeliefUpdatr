@@ -29,7 +29,7 @@ make_MVG_ideal_observer_from_data(
 \arguments{
 \item{data}{The tibble or data.frame from which to construct the MVG or MVG ideal observer object.}
 
-\item{group}{Optionally, one or more grouping variables can be specified. If group is not NULL, one MVG or
+\item{group}{Optionally, a vector of one or more grouping variables. If group is not NULL, one MVG or
 ideal observers will be derived for each level of \code{group}. (default: NULL)}
 
 \item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}

@@ -108,7 +108,7 @@ make_MVG_ideal_observer_from_data = function(
   if (is.null(group) & !is.MVG_ideal_observer(model, category = as_name(category), verbose = verbose)) {
     warning("Something went wrong. The returned object is not an MVG ideal observer. Try again with verbose = T?")
   } else if (!is.null(group)) {
-    warning("Currently, groups of ideal observers are not checked for internal consistency.")
+    message("Currently, groups of ideal observers are not checked for internal consistency.")
   }
 
   return(model)
@@ -434,11 +434,10 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
 #' variable should be a superset of the second group variable; etc.
 #'
 #' @param x An MVG, MVG_ideal_observer, NIW_belief, or NIW_ideal_adaptor object.
+#' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param group_structure The group structure that will be used for aggregation.
 #'
-#' @return The aggregated object. Note that geometric means will be used for count and variance variables,
-#' whereas arithmetric means will be used for all other types of variables.
-#'
+#' @return The aggregated object.
 #' @seealso TBD
 #' @keywords TBD
 #' @examples
@@ -446,40 +445,46 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
 #' @export
 aggregate_models_by_group_structure = function(
   x,
+  category = "category",
   group_structure = NULL
 ) {
   assert_that(all(is.character(group_structure) | is.symbol(group_structure)),
               msg = "Group structure must be a vector characters or symbols.")
   if (is.character(group_structure)) group_structure = syms(group_structure)
-  assert_that(all(is.character(aggregate_to_group) | is.symbol(aggregate_to_group), length(aggregate_to_group) == 1),
-              msg = "aggregate_to_group must be a single character or symbol.")
-  if (is.character(aggregate_to_group)) aggregate_to_group = sym(aggregate_to_group)
-  assert_that(as_name(aggregate_to_group) %in% as_name(group_structure),
-              msg = "aggregate_to_group must be contained in group_structure.")
+  # assert_that(all(is.character(group_structure) | is.symbol(group_structure), length(group_structure) == 1),
+  #             msg = "aggregate_to_group must be a single character or symbol.")
+  # if (is.character(aggregate_to_group)) aggregate_to_group = sym(aggregate_to_group)
+  # assert_that(as_name(aggregate_to_group) %in% as_name(group_structure),
+  #             msg = "aggregate_to_group must be contained in group_structure.")
 
-  aggregate_what_into_means = case_when(
-    is.NIW_ideal_adaptor(x) ~ c("m", "prior", "lapse_rate", "lapse_bias"),
-    is.NIW_belief(x) ~ c("m"),
-    is.MVG_ideal_observer(x) ~ c("mu", "prior", "lapse_rate", "lapse_bias"),
-    is.MVG(x) ~ c("mu"),
-    T ~ NA_character_)
+  aggregate_what_into_means <-
+    if (is.NIW_ideal_adaptor(x, category = category)) c("m", "prior", "lapse_rate", "lapse_bias", "kappa", "nu", "S", "Sigma_noise") else
+      if (is.NIW_belief(x, category = category)) c("m", "kappa", "nu", "S") else
+        if (is.MVG_ideal_observer(x, category = category)) c("mu", "prior", "lapse_rate", "lapse_bias", "Sigma", "Sigma_noise") else
+          if (is.MVG(x, category = category)) c("mu", "Sigma") else NA_character_
 
-  aggregate_what_into_geometric_means = case_when(
-    is.NIW_ideal_adaptor(x) ~ c("kappa", "nu", "S", "Sigma_noise"),
-    is.NIW_belief(x) ~ c("kappa", "nu", "S"),
-    is.MVG_ideal_observer(x) ~ c("Sigma", "Sigma_noise"),
-    is.MVG(x) ~ c("Sigma"),
-    T ~ NA_character_)
+  # Consider geommetric mean for some variables in the future:
+  # (but for covs that would mean first getting the taus, then getting geommetric mean. then transforming
+  # back into covs (since covs can be negative)). If implemented add the following to docu:
+  # Note that geometric means will be used for count and variance variables (e.g., Sigma, S, Sigma_noise, kappa, nu),
+  # whereas arithmetic means will be used for all other types of variables (e.g., mu, m, prior, lapse rate and bias).
+  # aggregate_what_into_geometric_means <-
+  #   if (is.NIW_ideal_adaptor(x, category = category)) c("kappa", "nu", "S", "Sigma_noise") else
+  #     if (is.NIW_belief(x, category = category)) c("kappa", "nu", "S") else
+  #       if (is.MVG_ideal_observer(x, category = category)) c("Sigma", "Sigma_noise") else
+  #         if (is.MVG(x, category = category)) c("Sigma") else NA_character_
 
-
-  while(length(group_structure) > 1) {
-    group_structure = group_structure[2:length(group_structure)]
+  while(length(group_structure) > 0) {
+    group_structure = group_structure[-1]
     x %<>%
-      group_by(!!! group_structure, !! category) %>%
+      group_by(!!! syms(group_structure), !! sym(category)) %>%
       summarise(
-        across(aggregate_what_into_means, ~ list(reduce(.x, `+`) / length(.x))),
-        across(aggregate_what_into_geometric_means), ~ list(exp(reduce(log(.x), `+`) / length(.x))))
+        across(aggregate_what_into_means, ~ list(reduce(.x, `+`) / length(.x))))
+    # Consider geommetric mean for some variables in the future:
+    # across(aggregate_what_into_geometric_means, ~ list(exp(reduce(log(.x), `+`) / length(.x))))
   }
+
+  return(x)
 }
 
 
