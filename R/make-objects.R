@@ -96,7 +96,9 @@ make_MVG_ideal_observer_from_data = function(
   model <-
     data %>%
     make_MVG_from_data(group = group, category = category, cues = cues, verbose = verbose)
-  model %<>% lift_MVG_to_MVG_ideal_observer(
+
+  model %<>%
+    lift_MVG_to_MVG_ideal_observer(
     group = group, category = category,
     prior = prior,
     lapse_rate = lapse_rate, lapse_bias = lapse_bias,
@@ -166,29 +168,18 @@ make_NIW_belief_from_data = function(
   keep.category_parameters = F,
   verbose = F
 ) {
-  assert_that(is.data.frame(data) | is_tibble(data))
-  assert_that(all(is.null(group) | all(is.character(group) | is_symbol(group))))
-  assert_that(all(is.character(category) | is_symbol(category), length(category) == 1))
-  assert_that(all(is.character(cues) | is_symbol(cues), length(cues) > 0))
   assert_that(all(is.numeric(kappa), is.numeric(nu), !is.na(kappa), !is.na(nu)))
   assert_that(nu > length(cues) + 1,
               msg = paste0("nu must be larger than dimensionality of cues + 1 (>", length(cues) + 1, ")."))
 
-  if (is.character(group)) group = syms(group)
-  if (is.character(category)) category = sym(category)
-  if (is.character(cues)) cues = syms(cues)
+  # if (is.character(group)) group = syms(group)
+  # if (is.character(category)) category = sym(category)
+  # if (is.character(cues)) cues = syms(cues)
 
-  model <- data %>%
-    select(!! category, !!! cues, !!! group) %>%
-    mutate(cues = pmap(list(!!! cues),
-                       .f = function(...) {
-                         x = c(...)
-                         names(x) = as.character(cues)
-                         return(x) })) %>%
-    { if (is.null(group)) group_by(., !! category) else group_by(., !!! group, !! category) } %>%
-    summarise(
-      mu = list(colMeans(cbind(!!! cues))), # list(reduce(cues, `+`) / length(cues)),
-      Sigma = list(cov(cbind(!!! cues))))
+  model <-
+    data %>%
+    make_MVG_from_data(group = group, category = category, cues = cues, verbose = verbose) %>%
+    rename(m = mu, S = Sigma)
 
   message("S is set so that the expected category covariance matrix Sigma matches the category covariance in the sample (given nu). ",
           "It might be safer to fit an Inverse-Wishart distribution to the entire set of covariance matrices.")
@@ -198,7 +189,7 @@ make_NIW_belief_from_data = function(
       kappa = kappa,
       nu = nu,
       m = mu,
-      S = get_S_from_expected_Sigma(Sigma, nu)) %>%
+      S = get_S_from_expected_Sigma(S, nu)) %>%
     ungroup()
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
@@ -228,9 +219,14 @@ make_NIW_ideal_adaptor_from_data = function(
   add_Sigma_noise_to_category_representation = T,
   keep.category_parameters = F
 ) {
-  model <- data %>% make_NIW_belief_from_data(group = group, category = category, cues = cues, verbose = verbose)
-  model %<>% lift_NIW_belief_to_NIW_ideal_adaptor(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
-                                                 Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
+  model <-
+    data %>%
+    make_NIW_belief_from_data(group = group, category = category, cues = cues, verbose = verbose)
+
+  model %<>%
+    lift_NIW_belief_to_NIW_ideal_adaptor(
+      group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
+      Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
   if (!is.NIW_ideal_adaptor(model, category = as_name(category), verbose = verbose))
