@@ -12,9 +12,9 @@ colMeans <- function(x, ...) {
 
 # Added here to handle the case of univariate categories
 #' @export
-cov <- function(x, ...) {
-  if (!is.array(x) || length(dim(x)) < 2L)
-    var(x) else stats::cov(x)
+cov <- function(x, y = NULL, ...) {
+  if (is.null(y) & (!is.array(x) || length(dim(x)) < 2L))
+    var(x) else stats::cov(x, y, ...)
 }
 
 #' Overrides stats::rmultinom, reformatting its output. Specifically, the output of stats:rmultinom is transpased, so
