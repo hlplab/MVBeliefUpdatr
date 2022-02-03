@@ -3,9 +3,8 @@
 #' Constructs an \code{\link[=is.MVG]{MVG}} or \code{\link[=is.MVG_ideal_observer]{MVG_ideal_observer}} object with category
 #' information for all categories found in the data.
 #'
-#'
 #' @param data The tibble or data.frame from which to construct the MVG or MVG ideal observer object.
-#' @param group Optionally, one or more grouping variables can be specified. If group is not NULL, one MVG or
+#' @param group Optionally, a vector of one or more grouping variables. If group is not NULL, one MVG or
 #' ideal observers will be derived for each level of \code{group}. (default: NULL)
 #' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param cues Name(s) of variables in \code{data} that contain the cue information.
@@ -66,15 +65,6 @@ make_MVG_from_data = function(
       mu = list(colMeans(cbind(!!! cues))),
       Sigma = list(cov(cbind(!!! cues))))
 
-  if (!is.null(group))
-    while(length(group) > 1) {
-      group = group[2:length(group)]
-      model %<>%
-        group_by(., !!! group, !! category) %>%
-        summarise_at(vars(starts_with(c("mu", "Sigma"))),
-                     ~ list(reduce(.x, `+`) / length(.x)))
-    }
-
   model %<>%
     mutate(
       !! category := factor(!! category)) %>%
@@ -103,7 +93,9 @@ make_MVG_ideal_observer_from_data = function(
   add_Sigma_noise_to_category_representation = T,
   verbose = F
 ) {
-  model <- data %>% make_MVG_from_data(group = group, category = category, cues = cues, verbose = verbose)
+  model <-
+    data %>%
+    make_MVG_from_data(group = group, category = category, cues = cues, verbose = verbose)
   model %<>% lift_MVG_to_MVG_ideal_observer(
     group = group, category = category,
     prior = prior,
@@ -448,7 +440,8 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
 #' @param x An MVG, MVG_ideal_observer, NIW_belief, or NIW_ideal_adaptor object.
 #' @param group_structure The group structure that will be used for aggregation.
 #'
-#' @return The aggregated object.
+#' @return The aggregated object. Note that geometric means will be used for count and variance variables,
+#' whereas arithmetric means will be used for all other types of variables.
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -468,21 +461,30 @@ aggregate_models_by_group_structure = function(
   assert_that(as_name(aggregate_to_group) %in% as_name(group_structure),
               msg = "aggregate_to_group must be contained in group_structure.")
 
-  aggregate_what = case_when(
-    is.NIW_ideal_adaptor(x) ~ c("kappa", "nu", "m", "S", "prior", "lapse_rate", "lapse_bias", "Sigma_noise"),
-    is.NIW_belief(x) ~ c("kappa", "nu", "m", "S"),
-    is.MVG_ideal_observer(x) ~ c("mu", "Sigma", "prior", "lapse_rate", "lapse_bias", "Sigma_noise"),
-    is.MVG(x) ~ c("mu", "Sigma"),
+  aggregate_what_into_means = case_when(
+    is.NIW_ideal_adaptor(x) ~ c("m", "prior", "lapse_rate", "lapse_bias"),
+    is.NIW_belief(x) ~ c("m"),
+    is.MVG_ideal_observer(x) ~ c("mu", "prior", "lapse_rate", "lapse_bias"),
+    is.MVG(x) ~ c("mu"),
     T ~ NA_character_)
+
+  aggregate_what_into_geometric_means = case_when(
+    is.NIW_ideal_adaptor(x) ~ c("kappa", "nu", "S", "Sigma_noise"),
+    is.NIW_belief(x) ~ c("kappa", "nu", "S"),
+    is.MVG_ideal_observer(x) ~ c("Sigma", "Sigma_noise"),
+    is.MVG(x) ~ c("Sigma"),
+    T ~ NA_character_)
+
 
   while(length(group_structure) > 1) {
     group_structure = group_structure[2:length(group_structure)]
     x %<>%
       group_by(!!! group_structure, !! category) %>%
-      summarise_at(aggregate_what, ~ list(reduce(.x, `+`) / length(.x)))
+      summarise(
+        across(aggregate_what_into_means, ~ list(reduce(.x, `+`) / length(.x))),
+        across(aggregate_what_into_geometric_means), ~ list(exp(reduce(log(.x), `+`) / length(.x))))
   }
 }
-
 
 
 #' Make multivariate Gaussian exposure data.
