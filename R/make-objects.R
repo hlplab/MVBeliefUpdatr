@@ -553,7 +553,7 @@ sample_MVG_data_from_model = function(
   keep.input_parameters = F
 ) {
   if (is.MVG(model)) {
-    return(make_MVG_data(
+    return(sample_MVG_data(
       Ns = Ns,
       mus = model$mu,
       Sigmas = model$Sigma,
