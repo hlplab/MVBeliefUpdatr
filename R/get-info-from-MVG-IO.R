@@ -21,8 +21,8 @@ example_MVG_ideal_observer = function(example = 1) {
 
 #' Get likelihood
 #'
-#' Get likelihood of observations x given the MVG parameters mu and Sigma. This is the density of
-#' a multivariate normal distribution.
+#' Get likelihood of observation(s) x given the MVG parameters mu and Sigma. This is the density of
+#' a multivariate normal distribution over k dimensions.
 #'
 #' @param x Observations. Can be a vector with k elements for a single observation or a matrix with k
 #' columns and n rows, in which case each row of the matrix is taken to be one observation. If x is a
@@ -54,7 +54,7 @@ get_MVG_likelihood = function(x, mu, Sigma, log = T, noise_treatment = "no_noise
   assert_that(is.Sigma(Sigma))
   # do not reorder these conditionals (go from more to less specific)
   if (is_tibble(x)) x %<>% as.matrix() else
-    if (is.list(x)) x %<>% reduce(rbind) %<>% as.matrix(nrow = 1) else
+    if (is.list(x)) x %<>% reduce(rbind) %>% as.matrix() else
       if (is.vector(x)) x %<>% matrix(nrow = 1)
   if (is.matrix(mu)) mu = as.vector(mu)
 
@@ -83,10 +83,10 @@ get_MVG_likelihood = function(x, mu, Sigma, log = T, noise_treatment = "no_noise
   # How should noise be treated?
   if (noise_treatment == "sample") {
     assert_that(
-      is_weakly_greater_than(length(x), 1),
+      is_weakly_greater_than(nrow(x), 1),
       msg = "For noise sampling, x must be of length 1 or longer.")
 
-    x <- map(x, ~ rmvnorm(n = 1, mean = .x, sigma = Sigma_noise))
+    x <- x + rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
   } else if (noise_treatment == "marginalize") {
     Sigma = Sigma + Sigma_noise
   }

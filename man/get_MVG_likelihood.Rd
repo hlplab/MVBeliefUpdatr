@@ -47,8 +47,8 @@ interested in estimating the consequences of noise across individuals. (default:
 calculating the posterior predictive. (default: `NULL`)}
 }
 \description{
-Get likelihood of observations x given the MVG parameters mu and Sigma. This is the density of
-a multivariate normal distribution.
+Get likelihood of observation(s) x given the MVG parameters mu and Sigma. This is the density of
+a multivariate normal distribution over k dimensions.
 }
 \examples{
 TBD

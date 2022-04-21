@@ -59,7 +59,8 @@ The package defines a number of new classes that are essentially tibbles with ce
 
 The belief-updating formulas are taken from Murphy (2012). The package incorporates code
 from Dave Kleinschmidt's BeliefUpdatr (Kleinschmidt and Jaeger, 2011, 2012, 2015, 2016) and Shaorong Yan's modeling of
-unsupervised adaptation (Yan and Jaeger, 2018).
+unsupervised adaptation (Yan and Jaeger, 2018). Pull requests and suggestions from Zach Burchill, Anna Persson, and Xin Xie
+are gratefully acknowledged.
 }
 
 \section{Package options}{
