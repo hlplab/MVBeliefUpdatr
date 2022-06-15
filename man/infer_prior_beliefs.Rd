@@ -7,25 +7,27 @@
 infer_prior_beliefs(
   exposure,
   test,
-  data_list = NULL,
   cues,
   category,
   response,
   group,
-  group.unique,
+  group.unique = NULL,
   center.observations = TRUE,
   scale.observations = TRUE,
   pca.observations = FALSE,
   pca.cutoff = 1,
+  untransform_fit = TRUE,
   m_0 = NULL,
   S_0 = NULL,
   tau_scale = 0,
   L_omega_scale = 0,
+  data_list = NULL,
+  transform_information = NULL,
   sample = TRUE,
   file = NULL,
   model = NULL,
-  verbose = FALSE,
   use_multivariate_updating = NULL,
+  verbose = FALSE,
   ...
 )
 }
@@ -48,17 +50,27 @@ a variable identifying subjects/participants. Must exist in both exposure and te
 
 \item{group.unique}{Name of column that uniquely identifies each group with identical exposure. This could be a
 variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
-substantially more efficient if many groups share the same exposure.}
+substantially more efficient if many groups share the same exposure. To ignore, set to `NULL`. (default: `NULL`)}
 
-\item{center.observations}{Should the data be centered? (default: `TRUE`)}
+\item{center.observations}{Should the data be centered? Centering will not affect the inferred correlation or
+covariance matrices but it will affect the absolute position of the inferred means. The relative position of
+the inferred means remains unaffected. If `TRUE` and `m_0` is specified, `m_0` will also be centered (`S_0` is not
+affected by centering and thus not changed). (default: `TRUE`)}
 
-\item{scale.observations}{Should the data be standardized? (default: `TRUE`)}
+\item{scale.observations}{Should the data be standardized? Scaling will not affect the inferred correlation matrix,
+but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
+affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
+If `TRUE` and `m_0` and `S_0` are specified, `m_0` and `S_0` will also be scaled.
+(default: `TRUE`)}
 
 \item{pca.observations}{Should the data be transformed into orthogonal principal components? (default: `FALSE`)}
 
 \item{pca.cutoff}{Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 `pca.observation = FALSE`. (default: 1)}
+
+\item{untransform_fit}{Logical flag indicating whether the MCMC samples of the model should be transformed back
+into the original cue space by applying the untransform function. (default: `TRUE`)}
 
 \item{m_0}{Optionally, prior means (m_0) and/or prior scatter matrices (S_0) for all categories. Each should be
 a list, with
@@ -86,13 +98,13 @@ during the creation of the scatter matrix S_0. For that reason, we recommend the
 \code{\link{make_NIW_prior_from_data}} (the default), since the S_0 obtained that way is identical to the category
 covariance matrix Sigma.}
 
-\item{tau_scale}{Optionally, scale for the Cauchy prior for standard deviations of the covariance
-matrix of mu_0 and scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
-ignore. (default: 0)}
+\item{data_list}{A list of the type that would be returned by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.
+This list can be provided instead of the individual inputs that are handed to \code{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}.}
 
-\item{L_omega_scale}{Optionally, scale for the Cauchy prior for standard deviations of the covariance
-matrix of mu_0 and scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
-ignore. (default: 0)}
+\item{transform_information}{Optionally, a list of transform paramters, transform function, and corresponding untransform
+function of the type returned by \code{\link[transform_cues]{transform_cues}}. These functions
+will be attached to the \code{NIW_ideal_adaptor_stanfit} object. This object will override any transform
+information that is created by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.}
 
 \item{sample}{Should the model be fit and sampled from?}
 
@@ -100,8 +112,8 @@ ignore. (default: 0)}
 via saveRDS in a file named after the string supplied in file. The .rds extension is added automatically.
 If the file already exists, the model from that file will be loaded and returned instead of refitting the model.
 As existing files won't be overwritten, you have to manually remove the file in order to refit and save the
-model under an existing file name. The file name is stored in the NIW_ideal_adaptor_stanfit object for later usage.
-(default `NULL`)}
+model under an existing file name. The file name is stored in the \code{NIW_ideal_adaptor_stanfit} object
+for later use. (default `NULL`)}
 
 \item{model}{Name of stanmodel that should be used. Overrides any default selection.}
 

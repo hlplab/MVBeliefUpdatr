@@ -31,11 +31,11 @@ test_that("Add ibbu draws - output check", {
 })
 
 test_that("Get expected category statistic", {
-  expect_success(get_expected_mu(fit, "sh", "prior"))
-  expect_success(get_expected_sigma(fit, "sh", "prior"))
-  expect_success(get_expected_sigma(fit, c("s","sh"), c("prior", "control")))
-  expect_success(get_expected_sigma(fit, c("s","sh"), c("prior", "Control")))
-  expect_success(get_expected_category_statistic(fit, c("s","sh"), c("prior", "Control"), c("mu", "Sigma")))
+  expect_success(get_expected_mu_from_stanfit(fit, "sh", "prior"))
+  expect_success(get_expected_sigma_from_stanfit(fit, "sh", "prior"))
+  expect_success(get_expected_sigma_from_stanfit(fit, c("s","sh"), c("prior", "control")))
+  expect_success(get_expected_sigma_from_stanfit(fit, c("s","sh"), c("prior", "Control")))
+  expect_success(get_expected_category_statistic_from_stanfit(fit, c("s","sh"), c("prior", "Control"), c("mu", "Sigma")))
 })
 
 

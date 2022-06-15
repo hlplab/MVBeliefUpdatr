@@ -4,18 +4,18 @@
 \alias{get_random_draw_indices}
 \title{Get indices for random MCMC draws from stanfit}
 \usage{
-get_random_draw_indices(fit, n.draws)
+get_random_draw_indices(fit, ndraws)
 }
 \arguments{
 \item{fit}{mv_ibbu_stanfit object.}
 
-\item{n.draws}{Number of indices to be returned. Can't be larger than total number of
+\item{ndraws}{Number of indices to be returned. Can't be larger than total number of
 post-warmup samples across all MCMC chains in `fit`.}
 }
 \value{
 A numeric vector.
 }
 \description{
-Returns `n.draws` indices for random post-warmup MCMC draws (without replacement) from
+Returns `ndraws` indices for random post-warmup MCMC draws (without replacement) from
 `fit`.
 }

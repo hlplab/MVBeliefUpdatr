@@ -6,21 +6,32 @@
 \usage{
 add_ibbu_stanfit_draws(
   fit,
-  which = "posterior",
+  categories = get_category_levels_from_stanfit(fit),
+  groups = get_group_levels_from_stanfit(fit, include_prior = TRUE),
+  which = if ("prior" \%in\% groups) {     if (length(groups) > 1)          "both"    
+    else "prior" } else "posterior",
+  ndraws = NULL,
   draws = NULL,
+  untransform_cues = TRUE,
   summarize = FALSE,
   wide = FALSE,
-  nest = TRUE,
-  category = "category",
-  group = "group"
+  nest = TRUE
 )
 }
 \arguments{
 \item{fit}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
 
-\item{which}{Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)}
+\item{categories}{Character vector of categories for which draws are to be returned. (default: all categories)}
+
+\item{groups}{Character vector of groups for which draws are to be returned. (default: all groups)}
+
+\item{which}{DEPRECATED. Use `groups` instead. Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)}
+
+\item{ndraws}{Number of random draws or `NULL` if all draws are to be returned. Only `draws` or `ndraws` should be non-zero. (default: `NULL`)}
 
 \item{draws}{Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)}
+
+\item{untransform_cues}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
 
 \item{summarize}{Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)}
 

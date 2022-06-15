@@ -1,5 +1,110 @@
 NULL
 
+#' Get sum-of-squares matrix
+#'
+#' Get sum-of-square matrix.
+#'
+#' @param x A matrix of observations, with each row being a vector observation.
+#' @param centered Should the centered sum-of-squares be returned (`TRUE`) or the uncentered (`FALSE`)? (default: `TRUE`)
+#'
+#' @return A square matrix.
+#'
+#' @seealso \code{\link{css2cov}}, \code{\link{cov2css}}, \code{\link{uss2css}}
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+ss <- function(x, center = TRUE) {
+  if (center) {
+    # Benchmarked to be more efficient than x - 1 %*% t(1) %*% x
+    xm <- colMeans(x)
+    xm <- matrix(xm, nrow = nrow(x), ncol = length(xm), byrow = T)
+    x <- x - xm
+  }
+
+  # Benchmarked to be more efficient than t(x) %*% x
+  k = dim(x)[2]
+  m = matrix(ncol = k, nrow = k)
+  for (i in 1:k) {
+    m[i,i] = sum(x[,i]**2)
+    if (i < k) for (j in (i + 1):k) {
+      m[j,i] = sum(x[,i] * x[,j])
+      m[i,j] = m[j,i]
+    }
+  }
+
+  return(m)
+}
+
+
+#' Convert sum-of-square and covariance matrices
+#'
+#' Convert centered sum-of-square matrices (css), uncentered sum-of-square matrices (uss),
+#' and covariance matrices (cov) into each other.
+#'
+#' @param uss,css,cov Uncentered sum-of-square, centered sum-of-square, and covariance matrix.
+#' @param n Number of observations that have gone into the sum-of-square matrix.
+#' @param mean Mean of the observations that have gone into the sum-of-square matrix.
+#'
+#' @return A square matrix.
+#'
+#' @seealso \code{\link{ss}}, \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}, \code{\link{cov2tau}}
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname uss2css
+#' @export
+uss2css <- function(uss, n, mean) {
+  assert_that(is.matrix(uss))
+  assert_that(length(dim(uss)) == 2)
+  assert_that(dim(uss)[[1]] == dim(uss)[[2]],
+              msg = "uss must be a square matrix.")
+  assert_that(length(mean) == dim(uss)[[1]],
+              msg = "uss and mean are not of compatible dimensions.")
+
+  xm <- matrix(mean, nrow = n, ncol = length(mean), byrow = T)
+  css <- uss - ss(xm, center = F)
+  return(css)
+}
+
+
+#' @rdname uss2css
+#' @export
+css2uss <- function(css, n, mean) {
+  assert_that(is.matrix(css))
+  assert_that(length(dim(css)) == 2)
+  assert_that(dim(css)[[1]] == dim(css)[[2]],
+              msg = "uss must be a square matrix.")
+  assert_that(length(mean) == dim(css)[[1]],
+              msg = "uss and mean are not of compatible dimensions.")
+
+  xm <- matrix(mean, nrow = n, ncol = length(mean), byrow = T)
+  uss <- css + ss(xm, center = F)
+  return(uss)
+}
+
+#' @rdname uss2css
+#' @export
+css2cov <- function(css, n) {
+  assert_that(is.matrix(css))
+  assert_that(length(dim(css)) == 2)
+  assert_that(dim(css)[[1]] == dim(css)[[2]],
+              msg = "css must be a square matrix.")
+
+  return(css / (n - 1))
+}
+
+#' @rdname uss2css
+#' @export
+cov2css <- function(cov, n) {
+  assert_that(is.matrix(cov))
+  assert_that(length(dim(cov)) == 2)
+  assert_that(dim(cov)[[1]] == dim(cov)[[2]],
+              msg = "uss must be a square matrix.")
+
+  return(cov * (n - 1))
+}
+
 #' Get covariance matrix from correlation matrix and standard deviations
 #'
 #' Get covariance matrix from correlation matrix and vector of standard deviations. Based on code recommended
@@ -54,6 +159,11 @@ make_named_vector = function(x, names) {
   return(x)
 }
 
+make_named_square_matrix = function(x, names) {
+  x = matrix(x, nrow = sqrt(length(x)), dimnames = list(names, names))
+  return(x)
+}
+
 #' Combine a number of columns into a new vector column
 #'
 #' Combine a number of columns into a new column in which each cell is the vector of values from the original columns.
@@ -61,6 +171,7 @@ make_named_vector = function(x, names) {
 #' @param data `tibble` or `data.frame`.
 #' @param cols Vector of characters with names of variables to combine.
 #' @param vector_col Name of new column of vectors.
+#' @param .keep See \code{\link{dplyr::mutate}}.
 #'
 #' @return Same as \code{data}.
 #'
@@ -69,17 +180,18 @@ make_named_vector = function(x, names) {
 #' @examples
 #' TBD
 #' @export
-make_vector_column = function(data, cols, vector_col, transmute = F) {
-  # CHECK: expand to also handle quo input. (each instance of cols then needs to change)
-  # then make_NIW_prior_from... can use this function
+make_vector_column = function(data, cols, vector_col, .keep = "all") {
+  # CHECK: expand to also handle quo input. (each instance of calls then needs to change)
+  # then make_NIW_prior_from...  use this function
   data %<>%
-    mutate(!! sym(vector_col) := pmap(.l = list(!!! syms(cols)),
-                                      .f = function(...) {
-                                        x = c(...)
-                                        names(x) = cols
-                                        return(x)
-                                      })) %>%
-    { if (transmute) select(., vector_col) else . }
+    mutate(!! sym(vector_col) := pmap(
+      .l = list(!!! syms(cols)),
+      .f = function(...) {
+        x = c(...)
+        names(x) = cols
+        return(x)
+      }),
+      .keep = .keep)
 
   return(data)
 }
@@ -101,50 +213,35 @@ make_vector_column = function(data, cols, vector_col, transmute = F) {
 #' @keywords TBD
 #' @examples
 #' TBD
-#' @rdname get_sum_of_squares
+#' @rdname get_sum_of_squares_from_df
 #' @export
-#'
-get_sum_of_squares <- function(data, variables = NULL, center = T, verbose = F) {
+get_sum_of_squares_from_df <- function(data, variables = NULL, center = T, verbose = F) {
   assert_that(is_tibble(data) | is.data.frame(data) | is.matrix(data))
   if (is_tibble(data) | is.data.frame(data))
-    assert_that(variables %in% names(data),
+    assert_that(all(variables %in% names(data)),
                 msg = paste("Variable column(s)", variables[which(variables %nin% names(data))], "not found in data."))
 
-  data.matrix = if (is_tibble(data) | is.data.frame(data)) {
+  data.matrix <- if (is_tibble(data) | is.data.frame(data)) {
     # Assume that the variables are to be combined into a data.matrix
     data %>%
       mutate_at(variables, unlist) %>%
-      pull(variables) %>%
+      select(all_of(variables)) %>%
       as.matrix()
   } else data
 
-  if (center)
-    data.matrix = data.matrix - colMeans(data.matrix)
-
-  k = dim(data.matrix)[2]
-  m = matrix(ncol = k, nrow = k)
-
-  for (i in 1:k) {
-    m[i,i] = sum(data.matrix[,i]**2)
-    if (i < k) for (j in (i + 1):k) {
-      m[j,i] = sum(data.matrix[,i] * data.matrix[,j])
-      m[i,j] = m[j,i]
-    }
-  }
-
-  return(m)
+  ss(data.matrix, center = center)
 }
 
-#' @rdname get_sum_of_squares
+#' @rdname get_sum_of_squares_from_df
 #' @export
-get_sum_of_uncentered_squares <- function(data, variables = NULL, verbose = F) {
-  get_sum_of_squares(data = data, variables = variables, center = F, verbose = verbose)
+get_sum_of_uncentered_squares_from_df <- function(data, variables = NULL, verbose = F) {
+  get_sum_of_squares_from_df(data = data, variables = variables, center = F, verbose = verbose)
 }
 
-#' @rdname get_sum_of_squares
+#' @rdname get_sum_of_squares_from_df
 #' @export
-get_sum_of_centered_squares <- function(data, variables = NULL, verbose = F) {
-  get_sum_of_squares(data = data, variables = variables, center = T, verbose = verbose)
+get_sum_of_centered_squares_from_df <- function(data, variables = NULL, verbose = F) {
+  get_sum_of_squares_from_df(data = data, variables = variables, center = T, verbose = verbose)
 }
 
 
@@ -152,6 +249,7 @@ get_sum_of_centered_squares <- function(data, variables = NULL, verbose = F) {
 #'
 #' Get sufficient statistics from data. Calculates functions for the specified cues for
 #' any combination of groups (optional) and categories, and returns them as a tibble.
+#' Rows with missing values for cues will be ignored in the calculation of the sufficient statistics.
 #'
 #' @param data `tibble` or `data.frame` with the data. Each row should be an observation of a category,
 #' and contain information about the category label, the cue values of the observation, and optionally grouping variables.
@@ -160,13 +258,16 @@ get_sum_of_centered_squares <- function(data, variables = NULL, verbose = F) {
 #' @param cues Names of columns with cue values.
 #' @param category Name of column that contains the category label for the exposure data. Can be `NULL` for unsupervised updating
 #' (not yet implemented). (default: "category")
-#' @param groups Name of column(s) that contains information about which observations form a group. This could be individual
+#' @param group Name of column(s) that contains information about which observations form a group. This could be individual
 #' subjects or conditions in an experiment. The latter is more efficient, but should only be used if exposure is
 #' identical for every individual within the group. Test does not have to be identical for every individual within
 #' the same group. For example, one can group multiple groups of subjects that have received the same exposure
-#' but were tested on different test tokens.
+#' but were tested on different test tokens. If `NULL` no grouping variable will be considered. (default: `NULL`)
+#' @param categories,groups Character vector of categories/groups to be summarize. If `NULL`, all categories/groups will be
+#' included. (default: `NULL`)
 #'
-#' @return A tibble of sufficient statistics for each combination of category and group.
+#' @return A tibble of sufficient statistics for each combination of category and group. This includes the count, mean,
+#' uncentered and centered sums-of-squares and the covariance matrix (or, for univariate, stimuli: the standard deviation).
 #'
 #' @seealso
 #' @keywords TBD
@@ -177,13 +278,17 @@ get_sufficient_category_statistics <- function(
   data,
   cues,
   category = "category",
-  groups,
+  group = NULL,
+  categories = NULL,
+  groups = NULL,
   ...
 ) {
-  message("rows with missing values for cues will be ignored in the calculation of the sufficient statistics.")
   data_ss <- data %>%
     as_tibble() %>%
-    group_by(!! sym(category), !!! syms(groups))
+    group_by(!! sym(category), !!! syms(group)) %>%
+    { if(!is.null(categories)) filter(., !! sym(category) %in% categories) else . } %>%
+    { if(!is.null(groups)) filter(., !! sym(group) %in% groups) else . } %>%
+    droplevels()
 
   if (length(cues) > 1) {
     # Multivariate observations
@@ -192,7 +297,8 @@ get_sufficient_category_statistics <- function(
       summarise(
         x_N = length(!! sym(cues[1])),
         x_mean = list(colMeans(cbind(!!! syms(cues)))),
-        x_ss = list(get_sum_of_uncentered_squares(cbind(!!! syms(cues)), verbose = verbose)),
+        x_uss = list(get_sum_of_uncentered_squares_from_df(cbind(!!! syms(cues)), verbose = verbose)),
+        x_css = list(get_sum_of_centered_squares_from_df(cbind(!!! syms(cues)), verbose = verbose)),
         x_cov = list(cov(cbind(!!! syms(cues)))))
   } else {
     # Univariate observations
@@ -201,8 +307,9 @@ get_sufficient_category_statistics <- function(
       summarise(
         x_N = length(!! sym(cues)),
         x_mean = mean(!! sym(cues)),
-        x_ss = as.numeric(get_sum_of_uncentered_squares(matrix(!! sym(cues)), verbose = verbose)),
-        x_sd = sd(!!! syms(cues)))
+        x_uss = as.numeric(get_sum_of_uncentered_squares_from_df(matrix(!! sym(cues)), verbose = verbose)),
+        x_css = as.numeric(get_sum_of_centered_squares_from_df(matrix(!! sym(cues)), verbose = verbose)),
+        x_sd = sd(!! sym(cues)))
   }
 
   return(data_ss)
@@ -255,26 +362,29 @@ transform_cues = function(data, cues,
 ) {
   assert_that(is.data.frame(data) | is_tibble(data))
   assert_that(is.null(transform.parameters) | is.list(transform.parameters))
-  old_data = data
-  groups = if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
+  old_data <- data
+  groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
 
   if (is.null(transform.parameters)) {
     transform.parameters = list()
-    transform.parameters[["cue.labels"]] = cues
+    transform.parameters[["cue.labels"]] <- cues
 
     if (pca) {
-      transform.parameters[["pca"]] = data %>%
+      transform.parameters[["pca"]] <-
+        data %>%
         select(all_of(cues)) %>%
         prcomp(center = center, scale. = scale, retx = F)
     } else {
       if (center) {
-        transform.parameters[["center"]] = data %>%
+        transform.parameters[["center"]] <-
+          data %>%
           select(all_of(cues)) %>%
           summarise_all(list(mean = mean))
       }
 
       if (scale) {
-        transform.parameters[["scale"]] = data %>%
+        transform.parameters[["scale"]] <-
+          data %>%
           select(all_of(cues)) %>%
           summarise_all(list(sd = sd))
       }
@@ -313,12 +423,14 @@ transform_cues = function(data, cues,
 
   transform.function = if (!return.transform.function) NULL else {
     function(data) {
-      cues = cues
-      center = center
-      scale = scale
-      pca = pca
+      cues <- cues
+      center <- center
+      scale <- scale
+      pca <- pca
+      attach <- attach
 
       transform_cues(data, cues, center = center, scale = scale, pca = pca,
+                     attach = attach,
                      transform.parameters = transform.parameters,
                      return.transformed.data = T, return.transform.parameters = F,
                      return.transform.function = F, return.untransform.function = F)
@@ -328,6 +440,7 @@ transform_cues = function(data, cues,
 
   untransform.function = if (!return.untransform.function) NULL else {
     untransform_cues(data, cues, uncenter = center, unscale = scale, unpca = pca,
+                     attach = attach,
                      transform.parameters = transform.parameters,
                      return.untransformed.data = F, return.untransform.function = T)
   }
@@ -358,12 +471,15 @@ transform_cues = function(data, cues,
 #' @export
 untransform_cues = function(data, cues,
                             uncenter = NULL, unscale = NULL, unpca = NULL,
+                            attach = T,
                             transform.parameters = NULL,
                             return.untransformed.data = T, return.untransform.function = F
 ) {
   assert_that(is.data.frame(data) | is_tibble(data))
   assert_that(!is.null(transform.parameters) & is.list(transform.parameters),
               msg = "Must provide transform parameters.")
+  old_data <- data
+  groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
 
   # By default untransform all transformations available in transform object
   if (is.null(unpca)) unpca = !is.null(transform.parameters[["pca"]])
@@ -414,21 +530,144 @@ untransform_cues = function(data, cues,
 
   untransform.function = if (!return.untransform.function) NULL else {
     function(data) {
-      cues = cues
-      uncenter = uncenter
-      unscale = unscale
-      unpca = unpca
+      cues <- cues
+      uncenter <- uncenter
+      unscale <- unscale
+      unpca <- unpca
+      attach <- attach
 
       untransform_cues(data, cues, uncenter = uncenter, unscale = unscale, unpca = unpca,
+                       attach = attach,
                        transform.parameters = transform.parameters,
                        return.untransformed.data = T, return.untransform.function = F)
 
     }
   }
 
+  if (attach) {
+    data %<>%
+      cbind(
+        old_data %>%
+          select(-intersect(names(old_data), names(data))),
+        .)
+  }
+
   if (return.untransformed.data & !return.untransform.function) return(data) else
     if (!return.untransformed.data & return.untransform.function) return(untransform.function) else
       return(list(data = data, untransform.function = untransform.function))
+}
+
+#' Transform and untransform category means and covariance matrices of a model
+#'
+#' Applies the transformation specified in \code{transform} object (e.g., centering, scaling, PCA) to the category
+#' mean(s) and/or covariance(s) in the model.
+#'
+#' @param model A model with columns that specify category means (mu or m) and covariance information (Sigma or S).
+#' @param m A single category mean or alike.
+#' @param S A single covariance matrix or alike.
+#' @param transform A transform or transform parameter object of the type returned by \code{\link{transform_cues}}.
+#'
+#' @return A model, category mean, or covariance matrix of the same type as the input.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname transform_model
+#' @export
+transform_model <- function(model, transform) {
+  if (is.MVG(model) | is.MVG_ideal_observer(model)) {
+    m = "mu"
+    S = "Sigma"
+  } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model) | is.NIW_ideal_adaptor_stanfit(model) | is.NIW_ideal_adaptor_MCMC(model)) {
+    m = "m"
+    S = "S"
+  } else {
+    stop("Model type not recognized.")
+  }
+
+  model %>%
+    mutate(
+      !! sym(m) := map(!! sym(m), ~ transform_category_mean(.x, transform)),
+      !! sym(S) := map(!! sym(S), ~ transform_category_cov(.x, transform)))
+}
+
+#' @rdname transform_model
+#' @export
+untransform_model <- function(model, transform) {
+  if (is.MVG(model) | is.MVG_ideal_observer(model)) {
+    m = "mu"
+    S = "Sigma"
+  } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model) | is.NIW_ideal_adaptor_stanfit(model) | is.NIW_ideal_adaptor_MCMC(model)) {
+    m = "m"
+    S = "S"
+  } else {
+    stop("Model type not recognized.")
+  }
+
+  model %>%
+    mutate(
+      !! sym(m) := map(!! sym(m), ~ untransform_category_mean(.x, transform)),
+      !! sym(S) := map(!! sym(S), ~ untransform_category_cov(.x, transform)))
+}
+
+#' @rdname transform_model
+#' @export
+transform_category_mean <- function(m, transform) {
+  if (!is.null(transform[["transform.parameters"]])) transform <- transform[["transform.parameters"]]
+  if (!is.null(transform$center)) {
+    mean <- transform$center %>% as.numeric()
+    m <- m - mean
+  }
+
+  if (!is.null(transform$scale)) {
+    taus <- transform$scale %>% as.numeric()
+    m <- m / taus
+  }
+
+  return(m)
+}
+
+#' @rdname transform_model
+#' @export
+untransform_category_mean <- function(m, transform) {
+  if (!is.null(transform[["transform.parameters"]])) transform <- transform[["transform.parameters"]]
+  if (!is.null(transform$scale)) {
+    taus <- transform$scale %>% as.numeric()
+    m <- m * taus
+  }
+
+  if (!is.null(transform$center)) {
+    mean <- transform$center %>% as.numeric()
+    m <- m + mean
+  }
+
+  return(m)
+}
+
+#' @rdname transform_model
+#' @export
+transform_category_cov <- function(S, transform) {
+  if (!is.null(transform[["transform.parameters"]])) transform <- transform[["transform.parameters"]]
+  if (!is.null(transform$scale)) {
+    taus <- transform$scale %>% as.numeric()
+    COVinv <- diag(taus) %>% solve()
+    S <- COVinv %*% S %*% COVinv
+  }
+  return(S)
+}
+
+#' @rdname transform_model
+#' @export
+untransform_category_cov <- function(S, transform) {
+  if (!is.null(transform[["transform.parameters"]])) transform <- transform[["transform.parameters"]]
+  if (!is.null(transform$scale)) {
+    taus <- transform$scale %>% as.numeric()
+    COV <- diag(taus)
+
+    S <- COV %*% S %*% COV
+  }
+  return(S)
 }
 
 

@@ -9,7 +9,6 @@ get_sufficient_statistics_as_list_of_arrays(
   cues,
   category,
   group,
-  check_exposure_test_format = F,
   verbose = F,
   ...
 )

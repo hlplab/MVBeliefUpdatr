@@ -4,7 +4,7 @@
 \alias{make_vector_column}
 \title{Combine a number of columns into a new vector column}
 \usage{
-make_vector_column(data, cols, vector_col, transmute = F)
+make_vector_column(data, cols, vector_col, .keep = "all")
 }
 \arguments{
 \item{data}{`tibble` or `data.frame`.}
@@ -12,6 +12,8 @@ make_vector_column(data, cols, vector_col, transmute = F)
 \item{cols}{Vector of characters with names of variables to combine.}
 
 \item{vector_col}{Name of new column of vectors.}
+
+\item{.keep}{See \code{\link{dplyr::mutate}}.}
 }
 \value{
 Same as \code{data}.

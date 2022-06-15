@@ -11,7 +11,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats(
   category = "category",
   response = "response",
   group = "group",
-  group.unique,
+  group.unique = NULL,
   center.observations = T,
   scale.observations = T,
   pca.observations = F,
@@ -20,6 +20,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats(
   S_0 = NULL,
   tau_scale = 0,
   L_omega_scale = 0,
+  Sigma_noise = NULL,
   verbose = F
 )
 }
@@ -42,11 +43,18 @@ a variable identifying subjects/participants. Must exist in both exposure and te
 
 \item{group.unique}{Name of column that uniquely identifies each group with identical exposure. This could be a
 variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
-substantially more efficient if many groups share the same exposure.}
+substantially more efficient if many groups share the same exposure. To ignore, set to `NULL`. (default: `NULL`)}
 
-\item{center.observations}{Should the data be centered? (default: `TRUE`)}
+\item{center.observations}{Should the data be centered? Centering will not affect the inferred correlation or
+covariance matrices but it will affect the absolute position of the inferred means. The relative position of
+the inferred means remains unaffected. If `TRUE` and `m_0` is specified, `m_0` will also be centered (`S_0` is not
+affected by centering and thus not changed). (default: `TRUE`)}
 
-\item{scale.observations}{Should the data be standardized? (default: `TRUE`)}
+\item{scale.observations}{Should the data be standardized? Scaling will not affect the inferred correlation matrix,
+but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
+affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
+If `TRUE` and `m_0` and `S_0` are specified, `m_0` and `S_0` will also be scaled.
+(default: `TRUE`)}
 
 \item{pca.observations}{Should the data be transformed into orthogonal principal components? (default: `FALSE`)}
 
@@ -67,8 +75,10 @@ during the creation of the scatter matrix S_0. For that reason, we recommend the
 \code{\link{make_NIW_prior_from_data}} (the default), since the S_0 obtained that way is identical to the category
 covariance matrix Sigma.}
 
-\item{tau_scale, L_omega_scale}{Optionally, scale for the Cauchy prior for standard deviations of the covariance
-matrix of mu_0 and scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
+\item{tau_0_scales}{Optionally, a vector of scales for the Cauchy priors for each cue's standard deviations. Used in
+both the prior for m_0 and the prior for S_0. (default: vector of 5s of length of cues, assumes scaled input)}
+
+\item{omega_0_eta}{Optionally, etas the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
 ignore. (default: 0)}
 }
 \value{
@@ -80,7 +90,9 @@ Take exposure and test data as input, and prepare the data for input into an MVB
 \details{
 It is important to use \code{group} to identify individuals that had a specific exposure (or no exposure at all)
 and specific test trials. You should \emph{not} use \code{group} to identify exposure conditions. Setting \code{group} to an exposure condition
-results in an exposure that concatenates the exposure observations from all subjects in that condition. Instead, use
+results in an exposure that concatenates the exposure observations from all subjects in that condition. Typically, this
+is not what users intend, as it models exposure to the combination of exposure tokens across all subjects, rather than
+exposure to one set of those exposure tokens. To achieve this intended outcome, use
 \code{group.unique} to identify groups with identical exposure. This will correctly use only one unique instance of the
 observations that any level of \code{group} receives during exposure.
 }

@@ -6,14 +6,17 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 
 RcppExport SEXP _rcpp_module_boot_stan_fit4mvg_conj_sufficient_stats_lapse_mod();
-RcppExport SEXP _rcpp_module_boot_stan_fit4mvg_conj_uninformative_priors_sufficient_stats_lapse_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4uvg_conj_uninformative_priors_sufficient_stats_lapse_mod();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_stan_fit4mvg_conj_sufficient_stats_lapse_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4mvg_conj_sufficient_stats_lapse_mod, 0},
-    {"_rcpp_module_boot_stan_fit4mvg_conj_uninformative_priors_sufficient_stats_lapse_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4mvg_conj_uninformative_priors_sufficient_stats_lapse_mod, 0},
     {"_rcpp_module_boot_stan_fit4uvg_conj_uninformative_priors_sufficient_stats_lapse_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4uvg_conj_uninformative_priors_sufficient_stats_lapse_mod, 0},
     {NULL, NULL, 0}
 };

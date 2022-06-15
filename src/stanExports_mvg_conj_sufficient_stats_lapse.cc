@@ -7,7 +7,7 @@ using namespace Rcpp ;
 RCPP_MODULE(stan_fit4mvg_conj_sufficient_stats_lapse_mod) {
 
 
-    class_<rstan::stan_fit<stan_model, boost::random::ecuyer1988> >("model_mvg_conj_sufficient_stats_lapse")
+    class_<rstan::stan_fit<stan_model, boost::random::ecuyer1988> >("rstantools_model_mvg_conj_sufficient_stats_lapse")
 
     .constructor<SEXP,SEXP,SEXP>()
 

@@ -2,34 +2,34 @@
 % Please edit documentation in R/get-info-from-NIW-IA.R
 \name{get_categorization_from_NIW_ideal_adaptor}
 \alias{get_categorization_from_NIW_ideal_adaptor}
-\title{Get categorization from an NIW belief}
+\title{Get categorization from an NIW ideal adaptor}
 \usage{
 get_categorization_from_NIW_ideal_adaptor(
   x,
-  belief,
+  model,
   decision_rule,
-  add_noise = NULL,
-  add_lapse = NULL,
-  simplify = F
+  noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+  lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+  simplify = F,
+  verbose = F
 )
 }
 \arguments{
 \item{x}{A vector of observations.}
 
-\item{belief}{An \code{\link[=is.NIW_belief]{NIW_belief}} object.}
+\item{model}{An \code{\link[=is.NIW_ideal_adaptor]{NIW_ideal_adaptor}} object.}
 
 \item{decision_rule}{Must be one of "criterion", "proportional", or "sampling".}
 
-\item{add_noise}{Determines whether multivariate Gaussian noise is added to the input.
-If `NULL`, no noise is added during the updating. If "sample" then a sample of
-noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
-that results from convolving the input with noise. This latter option might be helpful, for example, if one is
-interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
-column must be present in the NIW_belief object specified as the priors argument. (default: `NULL`)}
+\item{noise_treatment}{Determines whether and how multivariate Gaussian noise is added to the input.
+See \code{\link[=get_NIW_posterior_predictive]{get_NIW_posterior_predictive}}. (default: "sample" if decision_rule is
+"sample"; "marginalize" otherwise).}
 
-\item{add_lapse}{Determines the proportion of trials on which the listener lapses, not categorizing based on the
-percept. If add_lapse is "sample", the lapse rate and bias from the ideal adaptor will be used. If NULL, the lapse
-is assumed to be zero. (default: `NULL`)}
+\item{lapse_treatment}{Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
+If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
+a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
+will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
+perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).}
 
 \item{simplify}{Should the output be simplified, and just the label of the selected category be returned? This
 option is only available for the criterion and sampling decision rules. (default: `FALSE`)}
@@ -39,7 +39,7 @@ Either a tibble of observations with posterior probabilities for each category (
 character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
 }
 \description{
-Categorize a single observation based on an NIW belief. The decision rule can be specified to be either the
+Categorize a single observation based on an NIW ideal adaptor The decision rule can be specified to be either the
 criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
 Luce's choice rule.
 }

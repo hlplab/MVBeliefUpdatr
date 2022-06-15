@@ -4,13 +4,14 @@
 #' @importFrom Rdpack reprompt
 #' @importFrom magrittr %<>% %T>%
 #' @importFrom Hmisc %nin%
-#' @importFrom rlang !! !!! .data is_symbol sym syms expr as_name quo_is_null is_missing
+#' @importFrom rlang !! !!! .data .env is_symbol sym syms expr as_name quo_is_null is_missing
 #' @importFrom purrr map map2 pmap reduce
 #' @importFrom dplyr %>% select filter mutate mutate_at summarise summarise_at left_join rename rename_at group_by ungroup between case_when
 #' @importFrom tidyr crossing nest unnest
 #' @importFrom tidyselect starts_with
 #' @importFrom tibble tibble is_tibble
 #' @importFrom rstan sampling
+#' @importFrom LaplacesDemon is.positive.definite
 #' @useDynLib MVBeliefUpdatr, .registration=TRUE
 
 #' @section Overview:
@@ -38,7 +39,7 @@
 #'   Each row contains the mean mu and covariance matrix Sigma of the multivariate Gaussian.}
 #'   \item{\code{MVG_ideal_observer}: }{an ideal observer with multivariate Gaussian categories, by default in long format
 #'   with one category per row. In addition to the Gaussian categories the ideal observer contains the prior probability of
-#'   each category and, optionally, a lapse rate, bias, and/or perceptual noise matrix.}
+#'   each category and, optionally, a lapse rate, lapse bias, and/or perceptual noise matrix.}
 #'   \item{\code{NIW_belief}: }{one or more Normal-Inverse-Wishart beliefs, by default in long format with one belief per row.
 #'   A Normal-Inverse-Wishart belief specifies *uncertainty* about the about the location (i.e., mean mu) and shape (i.e.,
 #'   covariance matrix Sigma) of a multivariate Gaussian. It does so in a specific way that makes assumptions about the
@@ -47,10 +48,10 @@
 #'   \item{\code{NIW_ideal_adaptor}: }{an ideal adaptor with Normal-Inverse-Wishart beliefs, by default in long format with
 #'   one row each for each belief. In addition to the Normal-Inverse-Wishart beliefs, the ideal adaptor contains the prior
 #'   probability of each category (currently without uncertainty about those prior probabilities) and, optionally, a lapse
-#'   rate, bias, and/or perceptual noise matrix.}
+#'   rate, lapse bias, and/or perceptual noise matrix.}
 #'   \item{\code{NIW_ideal_adaptor_MCMC}: }{a collection of MCMC samples, each of which constitutes an NIW ideal adaptor. In
 #'   other words, this object describes uncertainty about the parameters of the NIW ideal adaptor (specifically, in the
-#'   current implementation about the NIW beliefs and the lapse rate and bias, but yet about the category priors). This is
+#'   current implementation about the NIW beliefs and the lapse rate and lapse bias, but not yet about the category priors). This is
 #'   used, for example, to represent the researchers uncertainty about the prior or posterior beliefs of an ideal adaptor.}
 #'   \item{\code{NIW_ideal_adaptor_stanfit}: }{The stanfit resulting from inferring an \code{NIW_ideal_adaptor} from a collection
 #'   of exposure and test data. This object contains an \code{NIW_ideal_adaptor_MCMC} object.}
@@ -59,7 +60,8 @@
 #' @section Acknowledgments:
 #' The belief-updating formulas are taken from Murphy (2012). The package incorporates code
 #' from Dave Kleinschmidt's BeliefUpdatr (Kleinschmidt and Jaeger, 2011, 2012, 2015, 2016) and Shaorong Yan's modeling of
-#' unsupervised adaptation (Yan and Jaeger, 2018).
+#' unsupervised adaptation (Yan and Jaeger, 2018). Pull requests and suggestions from Zach Burchill, Anna Persson, and Xin Xie
+#' are gratefully acknowledged.
 #'
 #' @section Package options: TBD
 #'

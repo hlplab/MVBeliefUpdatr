@@ -4,16 +4,16 @@
 \alias{as.NIW_ideal_adaptor_stanfit}
 \title{Coerce stanfit into NIW_ideal_adaptor_stanfit}
 \usage{
-as.NIW_ideal_adaptor_stanfit(stanfit, input, transform = NULL)
+as.NIW_ideal_adaptor_stanfit(stanfit, input_data, transform_information = NULL)
 }
 \arguments{
 \item{stanfit}{stanfit object}
 
+\item{transform_information}{Optionally, a list of transform parameters, transform function, and corresponding untransform
+function of the type returned by \code{\link[transform_cues]{transform_cues}}.}
+
 \item{input}{Input for a call to rstan prepared for one of the acceptable
 stan programs. See \code{\link{compose_data}}.}
-
-\item{transform}{Optionally, a list of transform (and corresponding untransform) functions that were
-applied to the cues prior while creating the input.}
 }
 \value{
 NIW_ideal_adaptor_stanfit object

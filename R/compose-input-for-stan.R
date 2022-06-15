@@ -1,26 +1,27 @@
 #' @importFrom reshape2 acast
 
+#' @export
 check_exposure_test_data <- function(data, cues, category, response, group, which.data = "the", verbose = F) {
   assert_that(is_tibble(data) | is.data.frame(data))
   assert_cols_in_data(data, cues, which.data, scalar = F)
   assert_cols_in_data(data, group, which.data, scalar = T)
 
   data %<>%
-    drop_na(cues, group) %>%
-    mutate_at(group, as.factor)
+    drop_na(.env$cues, .env$group) %>%
+    mutate(across(.env$group, as.factor))
 
   if(!is.null(category)) {
     assert_cols_in_data(data, category, which.data, scalar = T)
     data %<>%
-      mutate_at(category, as.factor) %>%
-      drop_na(category)
+      mutate(across(.env$category, as.factor)) %>%
+      drop_na(.env$category)
   }
 
   if (!is.null(response)) {
     assert_cols_in_data(data, response, which.data, scalar = T)
     data %<>%
-      mutate_at(response, as.factor) %>%
-      drop_na(response)
+      mutate(across(.env$response, as.factor)) %>%
+      drop_na(.env$response)
   }
   assert_that(nrow(data) > 0,
               msg = paste("There must be at least one observation in", which.data, "data."))
@@ -34,9 +35,10 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
 }
 
 
-
-get_test_counts <- function(test, cues, category, response, group, verbose = F) {
-  test_counts <- test %>%
+#' @export
+get_test_counts <- function(test, cues, response, group, verbose = F) {
+  test_counts <-
+    test %>%
     as_tibble() %>%
     group_by(
       !!! syms(cues),
@@ -46,12 +48,11 @@ get_test_counts <- function(test, cues, category, response, group, verbose = F) 
     pivot_wider(
       names_from = !! response,
       values_from = n,
-      values_fill = 0
-    ) %>%
+      values_fill = 0) %>%
     ungroup()
 
   if (verbose) {
-    print("In test_counts():")
+    print("In get_test_counts():")
     print(test_counts)
   }
 
@@ -90,22 +91,17 @@ get_sufficient_statistics_as_list_of_arrays <- function(
   cues,
   category,
   group,
-  check_exposure_test_format = F,
-  verbose = F, ...) {
+  verbose = F,
+  ...
+) {
+
   if (verbose) {
     print("In get_sufficient_statistics_as_list_of_arrays(), input data is:")
     print(data)
   }
 
-  data = check_exposure_test_data(
-    data = data,
-    cues = cues,
-    category = category,
-    response = NULL,
-    group = group,
-    verbose = verbose)
-
-  data_ss <- data %>%
+  data_ss <-
+    data %>%
     as_tibble() %>%
     group_by(!! sym(category), !! sym(group))
 
@@ -115,8 +111,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
       summarise(
         N = length(!! sym(cues[1])),
         x_mean = list(colMeans(cbind(!!! syms(cues)))),
-        x_ss = list(get_sum_of_uncentered_squares(cbind(!!! syms(cues)), verbose = verbose))
-      )
+        x_ss = list(get_sum_of_uncentered_squares_from_df(cbind(!!! syms(cues)), verbose = verbose)))
 
     if (verbose) {
       print("In get_sufficient_statistics_as_list_of_arrays(), multivariate sum-of-uncentered-squares matrix:")
@@ -131,11 +126,11 @@ get_sufficient_statistics_as_list_of_arrays <- function(
     # For helpful concise info on tibbles, see
     #   https://cran.r-project.org/web/packages/tibble/vignettes/tibble.html
     ## -------------------------------------------------------------------------------
-    cats = levels(data[[category]])
-    groups = levels(data[[group]])
-    n_category = length(cats)
-    n_group = length(groups)
-    n_cues = length(cues)
+    cats <- levels(data[[category]])
+    groups <- levels(data[[group]])
+    n_category <- length(cats)
+    n_group <- length(groups)
+    n_cues <- length(cues)
 
     N = array(dim = c(n_category,n_group))
     x_mean = array(dim = c(n_category,n_group,n_cues))
@@ -143,7 +138,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 
     for (i in 1:n_category) {
       for (j in 1:n_group) {
-        temp.data_ss = data_ss %>%
+        temp.data_ss <- data_ss %>%
           ungroup() %>%
           filter(!! rlang::sym(category) == cats[i] &
                    !! rlang::sym(group) == groups[j])
@@ -160,10 +155,10 @@ get_sufficient_statistics_as_list_of_arrays <- function(
       }
     }
 
-    dimnames(N) = list(cats, groups)
-    dimnames(x_mean) = list(cats, groups, cues)
-    dimnames(x_ss) = list(cats, groups, cues, cues)
-    data_ss = list(N = N, x_mean = x_mean, x_ss = x_ss)
+    dimnames(N) <- list(cats, groups)
+    dimnames(x_mean) <- list(cats, groups, cues)
+    dimnames(x_ss) <- list(cats, groups, cues, cues)
+    data_ss <- list(N = N, x_mean = x_mean, x_ss = x_ss)
   } else {
     # Univariate observations
     data_ss %<>%
@@ -175,7 +170,6 @@ get_sufficient_statistics_as_list_of_arrays <- function(
     }
 
     stats <- names(list(...))
-
     data_ss <- map(stats, ~ acast(data_ss, as.list(c(category, group)),
                                   value.var = .x,
                                   drop = F,
@@ -184,15 +178,12 @@ get_sufficient_statistics_as_list_of_arrays <- function(
   }
 
   if (verbose) {
-    print("In get_sufficient_statistics_as_list_of_arrays(), sum-of-squares matrix (uncentered for multivariate data,
-          centered for univariate data):")
+    print("In get_sufficient_statistics_as_list_of_arrays(), sum-of-squares matrix (uncentered for multivariate data, centered for univariate data):")
     print(data_ss)
   }
 
   return(data_ss)
 }
-
-
 
 
 #' Compose data for input to RStan
@@ -201,7 +192,9 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #'
 #' It is important to use \code{group} to identify individuals that had a specific exposure (or no exposure at all)
 #' and specific test trials. You should \emph{not} use \code{group} to identify exposure conditions. Setting \code{group} to an exposure condition
-#' results in an exposure that concatenates the exposure observations from all subjects in that condition. Instead, use
+#' results in an exposure that concatenates the exposure observations from all subjects in that condition. Typically, this
+#' is not what users intend, as it models exposure to the combination of exposure tokens across all subjects, rather than
+#' exposure to one set of those exposure tokens. To achieve this intended outcome, use
 #' \code{group.unique} to identify groups with identical exposure. This will correctly use only one unique instance of the
 #' observations that any level of \code{group} receives during exposure.
 #'
@@ -217,9 +210,16 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' a variable identifying subjects/participants. Must exist in both exposure and test data. (default: "group")
 #' @param group.unique Name of column that uniquely identifies each group with identical exposure. This could be a
 #' variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
-#' substantially more efficient if many groups share the same exposure.
-#' @param center.observations Should the data be centered? (default: `TRUE`)
-#' @param scale.observations Should the data be standardized? (default: `TRUE`)
+#' substantially more efficient if many groups share the same exposure. To ignore, set to `NULL`. (default: `NULL`)
+#' @param center.observations Should the data be centered? Centering will not affect the inferred correlation or
+#' covariance matrices but it will affect the absolute position of the inferred means. The relative position of
+#' the inferred means remains unaffected. If `TRUE` and `m_0` is specified, `m_0` will also be centered (`S_0` is not
+#' affected by centering and thus not changed). (default: `TRUE`)
+#' @param scale.observations Should the data be standardized? Scaling will not affect the inferred correlation matrix,
+#' but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
+#' affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
+#' If `TRUE` and `m_0` and `S_0` are specified, `m_0` and `S_0` will also be scaled.
+#' (default: `TRUE`)
 #' @param pca.observations Should the data be transformed into orthogonal principal components? (default: `FALSE`)
 #' @param pca.cutoff Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 #' components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
@@ -236,8 +236,9 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' during the creation of the scatter matrix S_0. For that reason, we recommend the use of nu = D + 2 in the call to
 #' \code{\link{make_NIW_prior_from_data}} (the default), since the S_0 obtained that way is identical to the category
 #' covariance matrix Sigma.
-#' @param tau_scale,L_omega_scale Optionally, scale for the Cauchy prior for standard deviations of the covariance
-#' matrix of mu_0 and scale for the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
+#' @param tau_0_scales Optionally, a vector of scales for the Cauchy priors for each cue's standard deviations. Used in
+#' both the prior for m_0 and the prior for S_0. (default: vector of 5s of length of cues, assumes scaled input)
+#' @param omega_0_eta Optionally, etas the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
 #' ignore. (default: 0)
 #'
 #' @return A list that is an \code{NIW_ideal_adaptor_input}.
@@ -250,30 +251,32 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' @export
 compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   exposure, test,
-  cues, category = "category", response = "response", group = "group", group.unique,
+  cues, category = "category", response = "response", group = "group", group.unique = NULL,
   center.observations = T, scale.observations = T, pca.observations = F, pca.cutoff = 1,
   m_0 = NULL, S_0 = NULL,
-  tau_scale = 0, L_omega_scale = 0,
+  tau_scale = 0, # rep(5, length(cues)),
+  L_omega_scale = 0,
+  Sigma_noise = NULL,
   verbose = F
 ) {
-  if (!is.null(m_0)) assert_that(is.list(m_0) | is.array(m_0))
-  if (!is.null(S_0)) assert_that(is.list(S_0) | is.array(S_0))
-  message("Add assertions about m_0 and S_0 dimensions")
+  if ((!center.observations | !scale.observations) & (tau_scale == 0 | L_omega_scale == 0))
+    message("The tau_scale and L_omega_scale parameters are not specified (using defaults). Since you also did not ask for the input to be centered *and* scaled, this puts the priors assumed in the model on a scale that has no relation to the input. Unless you have manually centered and scaled the cues, this is strongly discouraged.")
 
   if (pca.observations)
     assert_that(between(pca.cutoff, 0, 1),
                 msg = "pca.cutoff must be between 0 and 1.")
 
-  exposure <- check_exposure_test_data(
-    data = exposure,
-    cues = cues,
-    category = category,
-    response = NULL,
-    group = group,
-    which.data = "exposure",
-    verbose = verbose)
+  exposure <-
+    check_exposure_test_data(
+      data = exposure,
+      cues = cues,
+      category = category,
+      response = NULL,
+      group = group,
+      which.data = "exposure",
+      verbose = verbose)
 
-  if (!missing(group.unique)) {
+  if (!is.null(group.unique)) {
     assert_that(group.unique %in% names(exposure),
                 msg = paste("Column for group.unique ", group.unique, "not found in exposure data."))
     message(paste0("Collapsing *exposure* observations to unique values of group.unique (", group.unique, ") by
@@ -281,39 +284,75 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     only be counted once. All test observations are still counted, but aggregated for each unique value of group.unique."))
 
     exposure %<>%
-      mutate_at(group.unique, as.factor) %>%
+      mutate(across(group.unique, as.factor)) %>%
       group_by(!! sym(group.unique), !! sym(category), !!! syms(cues)) %>%
-      filter(!! sym(group) == unique(!! sym(group))[1]) %>%
-      ungroup()
+      filter(!! sym(group) == unique(!! sym(group))[1])
 
     group = group.unique
   }
 
   exposure %<>%
-    select(c(group, cues, category))
+    # Make sure data is ungrouped so that transform_cues works correctly.
+    ungroup() %>%
+    select(c(all_of(group), all_of(cues), all_of(category)))
 
-  test <- check_exposure_test_data(
-    data = test,
-    cues = cues,
-    category = NULL,
-    response = response,
-    group = group,
-    which.data = "test",
-    verbose = verbose) %>%
-    select(c(group, cues, response))
+  test <-
+    check_exposure_test_data(
+      data = test,
+      cues = cues,
+      category = NULL,
+      response = response,
+      group = group,
+      which.data = "test",
+      verbose = verbose) %>%
+    select(c(!! group, !!! cues, !! response))
 
   assert_that(all(levels(exposure[[category]]) == levels(test[[response]])),
-              msg = paste("category variable", category, "in exposure and response colum", response, "must be factors
-              with the same levels in the same order in. Either the levels do not match, or they are not in the same
-              order."))
+              msg = paste("category variable", category, "in exposure data and response variable", response, " in test data must be factors with the same levels in the same order. Either the levels do not match, or they are not in the same order."))
   assert_that(all(levels(exposure[[group]]) %in% levels(test[[group]])),
               msg = paste("All levels of the grouping variable", group, "found in exposure must also be present in test."))
   if (!all(levels(test[[group]]) %in% levels(exposure[[group]])))
     message(paste("Not all levels of the grouping variable", group, "that are present in test were found in exposure.
     Creating 0 exposure data for those groups."))
   exposure %<>%
-    mutate_at(group, ~ factor(.x, levels = levels(test[[group]])))
+    mutate_at(all_of(group), ~ factor(.x, levels = levels(test[[!! group]])))
 
+  if (!is.null(m_0)) {
+    if (nlevels(exposure[[category]]) == 1) {
+      assert_that(is.vector(m_0),
+                  msg = "If m_0 is not NULL and there is only one category, m_0 must be a vector.")
+    } else {
+      assert_that(is.list(m_0) & length(m_0) == nlevels(exposure[[category]]),
+                msg = "If m_0 is not NULL, m_0 must be a list of vectors with as many elements as there are categories.")
+    }
+    assert_that(all(map(m_0, is.numeric)  %>% unlist, map(m_0, ~ is.null(dim(.x)) | length(dim(.x)) == 1) %>% unlist),
+                msg = "If m_0 is a list, each element must be a vector.")
+    assert_that(all((map(m_0, length) %>% unlist()) == length(cues)),
+                msg = paste(
+                  "At least one element of m_0 does not have the correct dimensionality. Observations have",
+                  length(cues),
+                  "dimensions. Dimensionality of m_0 ranges from",
+                  paste(map(m_0, length) %>% unlist() %>% range(), collapse = " to ")))
+  }
+  if (!is.null(S_0)) {
+    if (nlevels(exposure[[category]]) == 1) {
+      assert_that(is.array(S_0),
+                msg = "If S_0 is not NULL and there is only one category, S_0 must be a positive-definite  matrix.")
+    } else {
+      assert_that(is.list(S_0) & length(S_0) == nlevels(exposure[[category]]),
+                 msg = "If S_0 not NULL, S_0 must be a list of positive-definite matrices with as many elements as there are categories.")
+    }
+    assert_that(all(map(S_0, is.numeric)  %>% unlist, map(S_0, ~ length(dim(.x)) == 2) %>% unlist),
+                msg = "If S_0 is a list, each element must be a k x k matrix.")
+    assert_that(all(map(S_0, ~ dim(.x) == length(cues)) %>% unlist()),
+                msg = paste(
+                  "At least one element of S_0 does not have the correct dimensionality. Observations have",
+                  length(cues),
+                  "dimensions. S_0 includes matrices of dimension",
+                  paste(paste(map(S_0, ~ dim(.x) %>% paste(collapse = " x "))) %>% unique(), collapse = ", ")))
+  }
+
+  # Transform data
   transform <-
     transform_cues(
       data = exposure,
@@ -326,6 +365,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       return.transform.function = T)
 
   if (pca.observations) {
+    assert_that(all(is.null(m_0), is.null(S_0)),
+                msg = "PCA is not yet implemented when m_0 or S_0 are specified.")
     s = summary(transform[["transform.parameters"]][["pca"]])$importance
     l = min(which(s["Cumulative Proportion",] >= pca.cutoff))
     assert_that(l >= 1, msg = "Specified pca.cutoff does not yield to any PCA component being included. Increase the
@@ -335,74 +376,90 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     cues = colnames(s)[1:l]
   }
 
-  exposure = transform[["data"]]
-  test = transform[["transform.function"]](test)
+  exposure <- transform[["data"]]
+  test <- transform[["transform.function"]](test)
+  if (!is.null(m_0)) m_0 <- map(m_0, ~ transform_category_mean(m = .x, transform))
+  if (!is.null(S_0) & scale.observations) S_0 <- map(S_0, ~ transform_category_cov(S = .x, transform))
 
-  test_counts <- get_test_counts(
-    test = test,
-    cues = cues,
-    category = category,
-    response = response,
-    group = group,
-    verbose = verbose)
+  test_counts <-
+    get_test_counts(
+      test = test,
+      cues = cues,
+      response = response,
+      group = group,
+      verbose = verbose)
 
-  n.cats = nlevels(exposure[[category]])
-  n.cues = length(cues)
+  n.cats <- nlevels(exposure[[category]])
+  n.cues <- length(cues)
   if (is.null(m_0)) {
-    m_0 = array(numeric(), dim = c(0,0))
-    m_0_known = 0
+    m_0 <- array(numeric(), dim = c(0,0))
+    m_0_known <- 0
   } else {
-    m_0_known = 1
+    m_0_known <- 1
     if (is.list(m_0)) {
-      temp = array(dim = c(n.cats, n.cues))
-      for (i in 1:length(m_0)) temp[i,] = m_0[[i]]
-      m_0 = temp
-      rm(temp) }}
+      temp <- array(dim = c(n.cats, n.cues))
+      for (i in 1:length(m_0)) temp[i,] <- m_0[[i]]
+      m_0 <- temp
+      rm(temp)
+    }
+  }
 
   if (is.null(S_0)) {
-    S_0 = array(numeric(), dim = c(0,0,0))
-    S_0_known = 0
+    S_0 <- array(numeric(), dim = c(0,0,0))
+    S_0_known <- 0
   } else {
-    S_0_known = 1
+    S_0_known <- 1
     if (is.list(S_0)) {
-      temp = array(dim = c(n.cats, n.cues, n.cues))
-      for (i in 1:length(S_0)) temp[i,,] = S_0[[i]]
-      S_0 = temp
-      rm(temp) }}
+      temp <- array(dim = c(n.cats, n.cues, n.cues))
+      for (i in 1:length(S_0)) temp[i,,] <- S_0[[i]]
+      S_0 <- temp
+      rm(temp)
+    }
+  }
 
   if (length(cues) > 1) {
-    data_list <- exposure %>%
+    data_list <-
+      exposure %>%
       get_sufficient_statistics_as_list_of_arrays(
-        cues = cues, category = category, group = group,
+        cues = cues,
+        category = category,
+        group = group,
         verbose = verbose,
         # The part below currently is ignored by get_sufficient_statistics_as_list_of_arrays. If the same syntax as for univariate input could
         # also work for multivariate input to get_sufficient_statistics_as_list_of_arrays that would be more
         # elegant.
-        x_mean = colMeans, N = length, x_ss = get_sum_of_uncentered_squares) %>%
+        x_mean = colMeans, N = length, x_ss = get_sum_of_uncentered_squares_from_df) %>%
       within({
         M <- dim(x_mean)[1]
         L <- dim(x_mean)[2]
         K <- length(cues)
 
-        x_test <- test_counts %>% select(cues)
-        y_test <- as.numeric(test_counts[[group]])
+        x_test <-
+          test_counts %>%
+          select(all_of(cues)) %>%
+          as.matrix()
+        y_test <-
+          test_counts[[group]] %>%
+          as.numeric() %T>%
+          { attr(., which = "levels") <- levels(test[[group]]) }
         z_test_counts <-
           test_counts %>%
-          select(.dots = levels(test[[response]])) %>%
+          mutate(rownames = paste0("group=", !! sym(group), "; ", paste(cues, collapse = "-"), "=", paste(!!! syms(cues), sep = ","))) %>%
+          column_to_rownames("rownames") %>%
+          select(levels(test[[response]])) %>%
           as.matrix()
         N_test <- nrow(x_test)
 
-        m_0_known = m_0_known
-        S_0_known = S_0_known
-        m_0_data = m_0
-        S_0_data = S_0
+        m_0_known <- m_0_known
+        S_0_known <- S_0_known
+        m_0_data <- m_0
+        S_0_data <- S_0
 
         tau_scale <- tau_scale
         L_omega_scale <- L_omega_scale
       })
   } else {
-    message("For univariate input, beliefupdatr is run with legacy parameter names. This might change in
-              the future.")
+    message("For univariate input, beliefupdatr is run with legacy parameter names. This might change in the future.")
     data_list <- exposure %>%
       get_sufficient_statistics_as_list_of_arrays(
         cues = cues, category = category, group = group,
@@ -412,8 +469,14 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
         m <- dim(xbar)[1]
         l <- dim(xbar)[2]
 
-        x_test <- test_counts[[cues]]
-        y_test <- as.numeric(test_counts[[group]])
+        x_test <-
+          test_counts %>%
+          select(all_of(cues)) %>%
+          as.matrix()
+        y_test <-
+          test_counts[[group]] %>%
+          as.numeric() %T>%
+          { attr(., which = "levels") <- levels(test[[group]]) }
         z_test_counts <-
           test_counts %>%
           select(.dots = levels(test[[response]])) %>%
@@ -425,11 +488,6 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       })
   }
 
-  dimnames(data_list$z_test_counts) <- list(
-    test_counts %>% transmute(names = paste(!!! syms(cues), sep = ",")) %>% pull(names),
-    levels(test[[response]]))
-  attr(data_list$y_test, which <- "levels") = levels(test[[group]])
-
   if (verbose) {
     print("In compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats():")
     print(data_list)
@@ -439,19 +497,18 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 }
 
 
-
 attach_stanfit_input_data = function(stanfit, input) {
   assert_NIW_ideal_adaptor_stanfit(stanfit)
   assert_that(is.NIW_ideal_adaptor_input(input),
               msg = "input is not an acceptable input data.")
-  stanfit@input_data = input
+  slot(stanfit, "input_data", check = T) <- input
 
   return(stanfit)
 }
 
-attach_stanfit_transform = function(stanfit, transform_functions) {
+attach_stanfit_transform = function(stanfit, transform_information) {
   assert_NIW_ideal_adaptor_stanfit(stanfit)
-  stanfit@transform_functions = transform_functions
+  slot(stanfit, "transform_information", check = T) <- transform_information
 
   return(stanfit)
 }

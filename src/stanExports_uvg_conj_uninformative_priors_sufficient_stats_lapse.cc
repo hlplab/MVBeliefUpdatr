@@ -7,7 +7,7 @@ using namespace Rcpp ;
 RCPP_MODULE(stan_fit4uvg_conj_uninformative_priors_sufficient_stats_lapse_mod) {
 
 
-    class_<rstan::stan_fit<stan_model, boost::random::ecuyer1988> >("model_uvg_conj_uninformative_priors_sufficient_stats_lapse")
+    class_<rstan::stan_fit<stan_model, boost::random::ecuyer1988> >("rstantools_model_uvg_conj_uninformative_priors_sufficient_stats_lapse")
 
     .constructor<SEXP,SEXP,SEXP>()
 

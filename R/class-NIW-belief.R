@@ -1,3 +1,6 @@
+get_expected_columns_for_NIW_belief <- function()
+  c("category", "m", "S", "kappa", "nu")
+
 #' Is this a Normal-Inverse-Wishart (NIW) belief?
 #'
 #' Check whether \code{x} is a Normal-Inverse-Wishard (NIW) belief/set of NIW beliefs. An NIW belief describes a distribution of
@@ -29,13 +32,13 @@ is.NIW_belief = function(x, category = "category", is.long = T, verbose = F) {
   }
 
   if (category %nin% names(x)) {
-    if (verbose) message("x is missing a category column. Did you use another name for this column? You can use the category
-            argument to specify the name of that column.")
+    if (verbose) message(paste(deparse(substitute(x)), "is missing a category column. Did you use another name for this column? You can use the category
+            argument to specify the name of that column."))
     return(FALSE)
   }
 
   if (any(c("kappa", "nu", "m", "S") %nin% names(x))) {
-    if (verbose) message("x is missing at least one of kappa, nu, m, or S.")
+    if (verbose) message(paste(deparse(substitute(x)), "is missing at least one of kappa, nu, m, or S."))
     return(FALSE)
   }
 
@@ -45,7 +48,8 @@ is.NIW_belief = function(x, category = "category", is.long = T, verbose = F) {
     return(FALSE)
   }
 
-  # Check that m and S contain the cue names and that those cue names match.
+  # Check that m and S contain the cue names and that those cue names match. This also serves as
+  # check that m and S have appropriate dimensions.
   names_m = names(x$m[[1]])
   names_S = dimnames(x$S[[1]])
   if (!all(
@@ -54,6 +58,11 @@ is.NIW_belief = function(x, category = "category", is.long = T, verbose = F) {
     if (verbose) message("Names of cue dimensions do not match between m and S.")
     return(FALSE)
   }
+
+  # Check nu vs. dimensionality of S
+  D_S = if (is.null(dim(x$S[[1]]))) 1 else dim(x$S[[1]])
+  if (any(x$nu <= D_S + 1))
+    warning(paste0("At least one category had nu smaller than allowed (is ", min(x$nu), "; should be >", D_S + 1, ").\n"))
 
   return(TRUE)
 }

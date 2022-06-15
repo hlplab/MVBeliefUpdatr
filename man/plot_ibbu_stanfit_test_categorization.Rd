@@ -5,33 +5,38 @@
 \title{Plot prior and posterior categorization of test tokens.}
 \usage{
 plot_ibbu_stanfit_test_categorization(
-  fit,
+  model,
   data.test = NULL,
-  which = "both",
+  groups = get_group_levels_from_stanfit(model, include_prior = TRUE),
   summarize = T,
-  n.draws = NULL,
+  ndraws = NULL,
+  untransform_cues = TRUE,
   confidence.intervals = c(0.66, 0.95),
   target_category = 1,
-  panel.group = FALSE,
-  group.ids = NULL,
-  group.labels = NULL,
-  group.colors = NULL,
-  group.linetypes = NULL,
-  sort.by = "prior"
+  panel.group = if (plot_in_cue_space) TRUE else FALSE,
+  group.colors = get_default_colors("group", groups),
+  group.linetypes = get_default_linetypes("group", groups),
+  category.colors = get_default_colors("category", categories),
+  all_test_locations = TRUE,
+  plot_in_cue_space = FALSE,
+  sort_by = if (plot_in_cue_space) NULL else "prior"
 )
 }
 \arguments{
-\item{fit}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
+\item{model}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
 
 \item{data.test}{Optionally, a \code{tibble} or \code{data.frame} with test data.
 If `NULL` the input will be extracted from fit. (default: `NULL`).}
 
-\item{which}{Should categorization for the prior, posterior, or both be plotted? (default: `"both"`)}
+\item{groups}{Character vector of groups to be plotted. Typically, the levels of these factors
+are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
+\code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+(default: all categories/groups will be plotted)}
 
 \item{summarize}{Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
 unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)}
 
-\item{n.draws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
+\item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
 (default: `NULL`)}
 
 \item{confidence.intervals}{The two confidence intervals that should be plotted (using `geom_ribbon`) around the mean.
@@ -41,18 +46,19 @@ unique categorization function be plotted for each MCMC draw (`FALSE`)? (default
 
 \item{panel.group}{Should the groups be plotted in separate panels? (default: `FALSE`)}
 
-\item{group.ids}{Vector of group IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)}
+\item{group.colors, group.linetypes}{Vector of colors and linetypes of same length as `groups` or `NULL` to use defaults.}
 
-\item{group.labels}{Vector of group labels of same length as `group.ids` or `NULL` to use defaults. (default: `NULL`)
-The default labels each categorization function based on whether it is showing prior or posterior categorization,
-and by its group ID.}
+\item{category.colors}{Vector of colors and linetypes of same length as `categories` or `NULL` to use defaults. Only
+relevant when `plot_in_cue_space = TRUE`.}
 
-\item{group.colors}{Vector of colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)}
+\item{all_test_locations}{Should predictions be shown for all combinations of test locations and group, or should only
+combinations be shown that actually occurred in the data? (default: `FALSE`)}
 
-\item{group.linetypes}{Vector of linetypes of same length as group.ids or `NULL` to use defaults. (default: `NULL`)}
+\item{plot_in_cue_space}{Should predictions be plotted in the cue space? If not, test tokens are essentially treated
+as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)}
 
 \item{sort_by}{Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
-from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired.}
+from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired. (default: `"prior"`)}
 }
 \value{
 ggplot object.
@@ -65,11 +71,11 @@ phonetic tuning studies.
 }
 \details{
 Tokens are sorted based on the increasing probability of a \code{target_category} response for the condition
-(\code{group}, e.g., prior or a specific exposure group) specified in \code{sort.by}. By default both the mean
+(\code{group}, e.g., prior or a specific exposure group) specified in \code{sort_by}. By default both the mean
 categorization and confidence intervals are plotted.
 If `summarize=TRUE`, the function marginalizes over all posterior samples. The number of samples
-is determined by n.draws. If n.draws is NULL, all samples are used. Otherwise n.draws random
-samples will be used. If `summarize=FALSE`, separate categorization plots for all n.draws
+is determined by ndraws. If ndraws is NULL, all samples are used. Otherwise ndraws random
+samples will be used. If `summarize=FALSE`, separate categorization plots for all ndraws
 individual samples will be plotted in separate panels.
 }
 \examples{

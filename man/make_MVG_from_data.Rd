@@ -20,7 +20,7 @@ make_MVG_ideal_observer_from_data(
   cues,
   prior = NA_real_,
   lapse_rate = NA_real_,
-  bias = NA_real_,
+  lapse_bias = NA_real_,
   Sigma_noise = NULL,
   add_Sigma_noise_to_category_representation = T,
   verbose = F
@@ -29,7 +29,7 @@ make_MVG_ideal_observer_from_data(
 \arguments{
 \item{data}{The tibble or data.frame from which to construct the MVG or MVG ideal observer object.}
 
-\item{group}{Optionally, one or more grouping variables can be specified. If group is not NULL, one MVG or
+\item{group}{Optionally, a vector of one or more grouping variables. If group is not NULL, one MVG or
 ideal observers will be derived for each level of \code{group}. (default: NULL)}
 
 \item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
@@ -43,7 +43,7 @@ prior over all categories).}
 
 \item{lapse_rate}{Optionally specify a lapse rate. (default: \code{NA})}
 
-\item{bias}{Optionally specify a response bias. (default: \code{NA})}
+\item{lapse_bias}{Optionally specify a lapse bias. (default: \code{NA})}
 
 \item{Sigma_noise}{Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This
 argument will be ignored if NULL. (default: NULL)}

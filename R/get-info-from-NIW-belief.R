@@ -1,53 +1,64 @@
-#' @rdname get_posterior_predictive
+#' @rdname get_NIW_posterior_predictive
 #' @export
 get_posterior_predictive_from_NIW_belief = function(
   x,
-  belief,
+  model,
   log = T,
+  noise_treatment = if (is.NIW_ideal_adaptor(model)) "marginalize" else "no_noise",
   category = "category",
   category.label = NULL,
   wide = FALSE
 ) {
-  assert_that(is.NIW_belief(belief))
+  assert_that(is.NIW_belief(model))
   assert_that(any(is.null(category.label) | is.character(category.label)))
+  assert_that(any(noise_treatment == "no_noise", is.NIW_ideal_adaptor(model)),
+              msg = 'No noise matrix Sigma_noise found. If noise_treatment is not "no_noise", then model must be an NIW_ideal_adaptor.')
 
   if (is.null(category.label)) {
-    belief %<>%
+    model %<>%
       droplevels()
-    category.label = belief %>%
+    category.label = model %>%
       pull(!! sym(category)) %>%
       unique()
   }
 
-  pp = foreach(c = category.label) %do% {
-    b = belief %>%
+  posterior_predictive <- foreach(c = category.label) %do% {
+    m <-
+      model %>%
       filter(!! sym(category) == c)
 
-    get_posterior_predictive(
+    get_NIW_posterior_predictive(
       x = x,
-      m = b$m[[1]], S = b$S[[1]], kappa = b$kappa[[1]], nu = b$nu[[1]], log = log) %>%
+      m = m$m[[1]],
+      S = m$S[[1]],
+      kappa = m$kappa[[1]],
+      nu = m$nu[[1]],
+      log = log,
+      noise_treatment = noise_treatment,
+      Sigma_noise = if (noise_treatment == "no_noise") NULL else m$Sigma_noise[[1]]) %>%
       as_tibble() %>%
-      rename_all(~ if (log) "lpp" else "pp") %>%
+      rename_with(~ if (log) { "log_posterior_predictive" } else { "posterior_predictive" }) %>%
       mutate(!! sym(category) := c)
   }
 
-  pp %<>% reduce(rbind)
+  posterior_predictive %<>% reduce(rbind)
   if (wide)
-    pp %<>%
+    posterior_predictive %<>%
     pivot_wider(
-      values_from = if (log) "lpp" else "pp",
+      values_from = if (log) "log_posterior_predictive" else "posterior_predictive",
       names_from = !! sym(category),
-      names_prefix = if (log) "lpp." else "pp.") %>%
+      names_prefix = if (log) "log_posterior_predictive." else "posterior_predictive.") %>%
     unnest()
 
-  return(pp)
+  return(posterior_predictive)
 }
 
-# If there's a grouping variable extract the pp for each level of that grouping variable
+# If there's a grouping variable extract the posterior predictive for each level of that grouping variable
 get_posterior_predictives_from_NIW_beliefs = function(
   x,
-  belief,
+  model,
   log = T,
+  noise_treatment = if (is.NIW_ideal_adaptor(model)) "marginalize" else "no_noise",
   category = "category",
   category.label = NULL,
   grouping.var,
@@ -56,7 +67,7 @@ get_posterior_predictives_from_NIW_beliefs = function(
   if (is.null(grouping.var)) {
     return(get_posterior_predictive_from_NIW_belief(
       x,
-      belief,
+      model,
       log = log,
       category = category,
       category.label = category.label,
@@ -66,19 +77,20 @@ get_posterior_predictives_from_NIW_beliefs = function(
                 msg = "Grouping variable not found in the NIW belief object.")
 
     foreach (i = unique(x[[grouping.var]])) %do% {
-      pp = get_posterior_predictive_from_NIW_belief(
-        x,
-        belief %>% filter(!! sym(grouping.var) == i),
-        log = log,
-        category = category,
-        category.label = category.label,
-        wide = wide
-      ) %>%
+      posterior_predictive <-
+        get_posterior_predictive_from_NIW_belief(
+          x,
+          model %>% filter(!! sym(grouping.var) == i),
+          log = log,
+          category = category,
+          category.label = category.label,
+          wide = wide
+        ) %>%
         mutate(!! sym(grouping.var) := i)
     }
 
-    pp %<>% reduce(rbind)
-    return(pp)
+    posterior_predictive %<>% reduce(rbind)
+    return(posterior_predictive)
   }
 }
 

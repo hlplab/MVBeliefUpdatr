@@ -40,6 +40,8 @@ data {
   /* For now, this script assumes that the observations (cue vectors) are centered. The prior
      mean of m_0 is set to 0. Same for the prior location parameter for the cauchy prior over
      the variance of m_0 */
+  // separate taus for each feature to capture that features can be on separate scales:
+  // vector<lower=0>[K] tau_scales;  // scales of cauchy prior for variances along the K features (set to zero to ignore)
   real<lower=0> tau_scale;      // scale of cauchy prior for variances of m_0 (set to zero to ignore)
   real<lower=0> L_omega_scale;  // scale of LKJ prior for correlation of variance of m_0 (set to zero to ignore)
 }
@@ -47,6 +49,8 @@ data {
 transformed data {
   real sigma_kappanu;
 
+  /* Scale for the prior of kappa/nu_0. In order to deal with input that does not contain observations
+     (in which case n_each == 0), we set the minimum value for SD to 10. */
   sigma_kappanu = max(N) > 0 ? max(N) * 4 : 10;
 }
 
@@ -55,9 +59,9 @@ parameters {
   real<lower=K> kappa_0;                  // prior pseudocount for category mu
   real<lower=K + 1> nu_0;                 // prior pseudocount for category Sigma
 
-  vector[K] m_0_param[m_0_known ? 0 : M]; // prior mean of means
-  vector<lower=0>[K] m_0_tau;             // prior variances of m_0 <------- is this really needed?
-  cholesky_factor_corr[K] m_0_L_omega;    // prior correlations of variances of m_0 (in cholesky form) <------- is this really needed?
+  vector[K] m_0_param[m_0_known ? 0 : M];                 // prior mean of means
+  vector<lower=0>[m_0_known ? 0 : K] m_0_tau;             // prior variances of m_0
+  cholesky_factor_corr[m_0_known ? 0 : K] m_0_L_omega;    // prior correlations of variances of m_0 (in cholesky form)
 
   vector<lower=0>[K] tau_0_param[S_0_known ? 0 : M];          // standard deviations of prior scatter matrix S_0
   cholesky_factor_corr[K] L_omega_0_param[S_0_known ? 0 : M]; // correlation matrix of prior scatter matrix S_0 (in cholesky form)
@@ -138,9 +142,6 @@ model {
 
   lapsing_probs = rep_vector(lapse_rate / M, M);
 
-  /* Need to calculate category probabilities for each test trial. In order to deal with
-     input that does not contain observations (in which case n_each == 0), we set the
-     minimum value for SD to 10 above. */
   kappa_0 ~ normal(0, sigma_kappanu);
   nu_0 ~ normal(0, sigma_kappanu);
 
@@ -170,9 +171,11 @@ model {
 }
 
 generated quantities {
-  matrix[K,K] m_0_cor;
-  matrix[K,K] m_0_cov;
+  if (!m_0_known) {
+    matrix[K,K] m_0_cor;
+    matrix[K,K] m_0_cov;
 
-  m_0_cor = multiply_lower_tri_self_transpose(m_0_L_omega);
-  m_0_cov = quad_form_diag(m_0_cor, m_0_tau);
+    m_0_cor = multiply_lower_tri_self_transpose(m_0_L_omega);
+    m_0_cov = quad_form_diag(m_0_cor, m_0_tau);
+  }
 }
