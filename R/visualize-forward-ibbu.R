@@ -200,9 +200,9 @@ plot_expected_categories_density1D = function(
           !!! syms(group_vars(x)))),
       ...) +
     { if (!is.null(data.test))
-      add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
+      add_test_locations_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
-      add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
+      add_exposure_locations_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
                                    category.ids = category.ids, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous("Density") +
@@ -300,9 +300,9 @@ plot_expected_categories_contour2D = function(
                        !!! syms(group_vars(x)))),
                  ...) +
     { if (!is.null(data.test))
-      add_test_data_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
+      add_test_locations_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
-      add_exposure_data_to_2D_plot(data = data.exposure, cue.labels = cue.labels,
+      add_exposure_locations_to_2D_plot(data = data.exposure, cue.labels = cue.labels,
                                    category.ids = category.ids, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +
@@ -409,9 +409,9 @@ plot_expected_categorization_function_1D = function(
                y = if (logit) qlogis(.data$p_cat) else .data$p_cat)) +
     geom_line(...) +
     { if (!is.null(data.test))
-      add_test_data_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
+      add_test_locations_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
-      add_exposure_data_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
+      add_exposure_locations_to_1D_plot(data = data.exposure, cue.labels = cue.labels,
                                    category.ids = category.ids, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(paste0("P(resp = ", category.labels[target_category], ")")) +
@@ -521,9 +521,9 @@ plot_expected_categorization_function_2D = function(
     # geom_contour(
     #   mapping = aes(z = if (logit) qlogis(.data$p_cat) else .data$p_cat)) +
     { if (!is.null(data.test))
-      add_test_data_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
+      add_test_locations_to_2D_plot(data = data.test, cue.labels = cue.labels) } +
     { if (!is.null(data.exposure))
-      add_exposure_data_to_2D_plot(data = data.exposure, cue.labels = cue.labels,
+      add_exposure_locations_to_2D_plot(data = data.exposure, cue.labels = cue.labels,
                                    category.ids = category.ids, category.labels = category.labels, category.colors) } +
     scale_x_continuous(cue.labels[1]) +
     scale_y_continuous(cue.labels[2]) +

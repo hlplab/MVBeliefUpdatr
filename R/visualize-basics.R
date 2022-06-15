@@ -112,7 +112,7 @@ get_limits = function(data, measure, hdi.prob = .99, min = NULL, max = NULL) {
 ellipse.pmap = function(x, centre, level, ...)
   ellipse(x = x, centre = centre, level = level)
 
-add_exposure_data_to_1D_plot = function(
+add_exposure_locations_to_1D_plot = function(
   data,
   cue.labels,
   category.ids,
@@ -121,16 +121,16 @@ add_exposure_data_to_1D_plot = function(
 ) {
   cue.labels[2] = "cue2"
   data %<>% mutate(cue2 = 0)
-  add_exposure_data_to_2D_plot(data, cue.labels, category.ids, category.labels, category.colors)
+  add_exposure_locations_to_2D_plot(data, cue.labels, category.ids, category.labels, category.colors)
 }
 
-add_test_data_to_1D_plot = function(data, cue.labels) {
+add_test_locations_to_1D_plot = function(data, cue.labels) {
   cue.labels[2] = "cue2"
   data %<>% mutate(cue2 = 0)
-  add_test_data_to_2D_plot(data, cue.labels)
+  add_test_locations_to_2D_plot(data, cue.labels)
 }
 
-add_exposure_data_to_2D_plot = function(
+add_exposure_locations_to_2D_plot = function(
   data,
   cue.labels,
   category.ids,
@@ -155,7 +155,7 @@ add_exposure_data_to_2D_plot = function(
                        values = category.colors))
 }
 
-add_test_data_to_2D_plot = function(data, cue.labels) {
+add_test_locations_to_2D_plot = function(data, cue.labels) {
   list(
     geom_point(
       data = data,
