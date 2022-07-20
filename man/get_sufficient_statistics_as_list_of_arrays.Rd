@@ -41,7 +41,4 @@ any combination of groups (optional) and categories, and returns them as a list.
 \examples{
 TBD
 }
-\seealso{
-
-}
 \keyword{TBD}

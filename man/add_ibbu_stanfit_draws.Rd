@@ -8,8 +8,12 @@ add_ibbu_stanfit_draws(
   fit,
   categories = get_category_levels_from_stanfit(fit),
   groups = get_group_levels_from_stanfit(fit, include_prior = TRUE),
-  which = if ("prior" \%in\% groups) {     if (length(groups) > 1)          "both"    
-    else "prior" } else "posterior",
+  which = if ("prior" \%in\% groups) {
+     if (length(groups) > 1) 
+         "both"
+  
+      else "prior"
+ } else "posterior",
   ndraws = NULL,
   draws = NULL,
   untransform_cues = TRUE,

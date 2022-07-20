@@ -2,6 +2,7 @@
 % Please edit documentation in R/make-objects.R
 \name{sample_MVG_data}
 \alias{sample_MVG_data}
+\alias{sample_MVG_data_from_model}
 \title{Sample multivariate Gaussian exposure data.}
 \usage{
 sample_MVG_data(
@@ -10,6 +11,13 @@ sample_MVG_data(
   Sigmas,
   category.labels = NULL,
   cue.labels = NULL,
+  randomize.order = F,
+  keep.input_parameters = F
+)
+
+sample_MVG_data_from_model(
+  Ns,
+  model = NULL,
   randomize.order = F,
   keep.input_parameters = F
 )
@@ -30,9 +38,9 @@ NIW belief updating, but it will change the incremental updates (and thus, for e
 
 \item{keep.input_parameters}{Should the parameters handed to this function be included in the output? (default: FALSE)}
 
-\item{sigmas}{List of covariance matrices, each specifying the covariance of a multivariate Gaussian.}
-
 \item{model}{\code{\link{MVG}}, \code{\link{MVG_ideal_observer}}, \code{\link{NIW_belief}}, or \code{\link{NIW_ideal_adaptor}} object.}
+
+\item{sigmas}{List of covariance matrices, each specifying the covariance of a multivariate Gaussian.}
 }
 \value{
 A tibble.
