@@ -283,7 +283,7 @@ get_exposure_ss_from_stanfit = function(...) {
 #' @export
 get_test_data_from_stanfit = function(
   fit,
-  groups = get_group_levels_from_stanfit(model, include_prior = FALSE)
+  groups = get_group_levels_from_stanfit(fit, include_prior = FALSE)
 ) {
   data <- get_input_from_stanfit(fit)
   data[["x_test"]] %>%
