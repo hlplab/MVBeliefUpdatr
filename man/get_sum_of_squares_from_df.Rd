@@ -29,7 +29,4 @@ belief-updating under an Normal-Inverse-Wishart prior.
 \examples{
 TBD
 }
-\seealso{
-
-}
 \keyword{TBD}

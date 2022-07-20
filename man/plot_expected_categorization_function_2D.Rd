@@ -42,16 +42,7 @@ plot_expected_categorization_function_2D(
 \item{resolution}{How many steps along x and y should be calculated? Note that computational
 complexity increases quadratically with resolution. (default: 25)}
 
-\item{facet_rows_by}{Which group variables, if any, should be used for faceting and/or
-animation? (defaults: `NULL`)}
-
-\item{facet_cols_by}{Which group variables, if any, should be used for faceting and/or
-animation? (defaults: `NULL`)}
-
-\item{facet_wrap_by}{Which group variables, if any, should be used for faceting and/or
-animation? (defaults: `NULL`)}
-
-\item{animate_by}{Which group variables, if any, should be used for faceting and/or
+\item{facet_rows_by, facet_cols_by, facet_wrap_by, animate_by}{Which group variables, if any, should be used for faceting and/or
 animation? (defaults: `NULL`)}
 
 \item{animation_follow}{Should the animation follow the data (zoom in and out)? (default: `FALSE`)}

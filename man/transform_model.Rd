@@ -40,7 +40,4 @@ mean(s) and/or covariance(s) in the model.
 \examples{
 TBD
 }
-\seealso{
-TBD
-}
 \keyword{TBD}

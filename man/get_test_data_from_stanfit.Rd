@@ -4,9 +4,17 @@
 \alias{get_test_data_from_stanfit}
 \title{Get the test data from an NIW ideal adaptor stanfit.}
 \usage{
-get_test_data_from_stanfit(fit)
+get_test_data_from_stanfit(
+  fit,
+  groups = get_group_levels_from_stanfit(model, include_prior = FALSE)
+)
 }
 \arguments{
+\item{groups}{Character vector of groups for which test data is requested. Typically, the levels of these factors
+are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
+\code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+(default: all categories/groups will be selected)}
+
 \item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
 }
 \value{

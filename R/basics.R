@@ -175,7 +175,6 @@ make_named_square_matrix = function(x, names) {
 #'
 #' @return Same as \code{data}.
 #'
-#' @seealso TBD
 #' @keywords TBD
 #' @examples
 #' TBD
@@ -209,7 +208,6 @@ make_vector_column = function(data, cols, vector_col, .keep = "all") {
 #'
 #' @return A matrix.
 #'
-#' @seealso
 #' @keywords TBD
 #' @examples
 #' TBD
@@ -269,7 +267,6 @@ get_sum_of_centered_squares_from_df <- function(data, variables = NULL, verbose 
 #' @return A tibble of sufficient statistics for each combination of category and group. This includes the count, mean,
 #' uncentered and centered sums-of-squares and the covariance matrix (or, for univariate, stimuli: the standard deviation).
 #'
-#' @seealso
 #' @keywords TBD
 #' @examples
 #' TBD
@@ -347,7 +344,6 @@ get_sufficient_category_statistics <- function(
 #' the data element has name "data", the transform parameters have name "transform.parameters" and the (un)transform
 #' function(s) have the name "(un)transform.function".
 #'
-#' @seealso TBD
 #' @keywords TBD
 #' @examples
 #' TBD
@@ -569,7 +565,6 @@ untransform_cues = function(data, cues,
 #'
 #' @return A model, category mean, or covariance matrix of the same type as the input.
 #'
-#' @seealso TBD
 #' @keywords TBD
 #' @examples
 #' TBD

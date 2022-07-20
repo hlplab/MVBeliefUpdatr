@@ -81,7 +81,6 @@ get_test_counts <- function(test, cues, response, group, verbose = F) {
 #'
 #' @return A list.
 #'
-#' @seealso
 #' @keywords TBD
 #' @examples
 #' TBD

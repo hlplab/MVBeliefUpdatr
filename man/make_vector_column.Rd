@@ -24,7 +24,4 @@ Combine a number of columns into a new column in which each cell is the vector o
 \examples{
 TBD
 }
-\seealso{
-TBD
-}
 \keyword{TBD}

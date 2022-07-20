@@ -76,7 +76,4 @@ centering, scaling, and/or pca \emph{and} to undo those transformations.
 \examples{
 TBD
 }
-\seealso{
-TBD
-}
 \keyword{TBD}

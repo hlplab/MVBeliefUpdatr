@@ -544,7 +544,7 @@ sample_MVG_data = function(
 }
 
 
-#' @rdname make_MVG_data
+#' @rdname sample_MVG_data
 #' @export
 sample_MVG_data_from_model = function(
   Ns,

@@ -348,6 +348,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
 
   min.cue1 <- min(d$cue1)
   min.cue2 <- min(d$cue2)
+  groups_found <- levels(d$group)
   d %>%
     ggplot(
     aes(x = .data$cue1,
@@ -400,7 +401,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     # Optionally plot test data
     { if (plot.test)
       add_test_data_to_2D_plot(
-        get_test_data_from_stanfit(model) %>%
+        get_test_data_from_stanfit(model, groups = setdiff(groups_found, "prior")) %>%
           { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
           ungroup() %>%
           distinct(group, !!! syms(cue.names)),
@@ -411,7 +412,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
         get_exposure_statistic_from_stanfit(
           model,
           categories = levels(d$category),
-          groups = setdiff(levels(d$group), "prior"),
+          groups = setdiff(groups_found, "prior"),
           untransform_cues = untransform_cues)) } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
@@ -463,6 +464,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 
   min.cue1 <- min(d$cue1)
   min.cue2 <- min(d$cue2)
+  groups_found <- levels(d$group)
   ggplot(d,
          aes(x = .data$cue1,
              y = .data$cue2,
@@ -514,7 +516,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
     # Optionally plot test data
     { if (plot.test)
       add_test_data_to_2D_plot(
-        get_test_data_from_stanfit(model) %>%
+        get_test_data_from_stanfit(model, groups = setdiff(groups_found, "prior")) %>%
           { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
           ungroup() %>%
           distinct(group, !!! syms(cue.names)),
@@ -525,7 +527,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
         get_exposure_statistic_from_stanfit(
           model,
           categories = levels(d$category),
-          groups = setdiff(levels(d$group), "prior"),
+          groups = setdiff(groups_found, "prior"),
           untransform_cues = untransform_cues)) } +
     scale_x_continuous(cue.names[1]) +
     scale_y_continuous(cue.names[2]) +
