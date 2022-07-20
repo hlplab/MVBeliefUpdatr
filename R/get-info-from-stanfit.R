@@ -268,6 +268,10 @@ get_exposure_ss_from_stanfit = function(...) {
 #' object.
 #'
 #' @param x \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param groups Character vector of groups for which test data is requested. Typically, the levels of these factors
+#' are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
+#' \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+#' (default: all categories/groups will be selected)
 #'
 #' @return A \code{tibble} in which each row is a test token. Columns include the cues
 #' and the response counts (one column per category) for all test tokens and all groups.
@@ -277,7 +281,10 @@ get_exposure_ss_from_stanfit = function(...) {
 #' @examples
 #' TBD
 #' @export
-get_test_data_from_stanfit = function(fit) {
+get_test_data_from_stanfit = function(
+  fit,
+  groups = get_group_levels_from_stanfit(model, include_prior = FALSE)
+) {
   data <- get_input_from_stanfit(fit)
   data[["x_test"]] %>%
     cbind(data[["z_test_counts"]]) %>%
@@ -285,7 +292,8 @@ get_test_data_from_stanfit = function(fit) {
     mutate(
       group.id = data[["y_test"]],
       group = factor(attr(data[["y_test"]], "levels")[group.id],
-                     levels = attr(data[["y_test"]], "levels")))
+                     levels = attr(data[["y_test"]], "levels"))) %>%
+    filter(group %in% groups)
 }
 
 
