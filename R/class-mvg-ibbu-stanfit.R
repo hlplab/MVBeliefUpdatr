@@ -1,3 +1,5 @@
+#' @importFrom rstan summary
+
 new_stanfit_class_name = "NIW_ideal_adaptor_stanfit"
 
 #' An S4 class for stanfit objects that use one of the NIW_ideal_adaptor stan programs.
@@ -140,9 +142,10 @@ print.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
   if (is.null(pars)) {
     pars <- names(x)
     pars <- grep("^((kappa|nu|m|S)_|lapse_rate)", pars, value = T)
+    pars <- grep("^m_0_(tau|L_omega)", pars, value = T, invert = T)
   }
 
-  print(x, pars = pars, ...)
+  print(kable(rstan::summary(x, pars = pars, ...)$summary))
 }
 
 

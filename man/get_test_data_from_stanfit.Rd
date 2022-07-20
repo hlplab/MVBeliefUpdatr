@@ -6,7 +6,7 @@
 \usage{
 get_test_data_from_stanfit(
   fit,
-  groups = get_group_levels_from_stanfit(model, include_prior = FALSE)
+  groups = get_group_levels_from_stanfit(fit, include_prior = FALSE)
 )
 }
 \arguments{
