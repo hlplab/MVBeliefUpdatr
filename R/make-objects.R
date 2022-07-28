@@ -299,17 +299,6 @@ lift_likelihood_to_model = function(
     lapse_rate = 0
   }
 
-  assert_that(all(
-    is.na(lapse_rate) | between(lapse_rate, 0, 1),
-    is.na(lapse_bias) | between(lapse_bias, 0, 1),
-    between(prior, 0, 1)),
-    msg = "If not NA, the category prior, lapse rate, and lapse bias must have values between 0 and 1.")
-  assert_that(sum(prior) == 1,
-              msg = paste0("Priors must add up to 1. (instead: ", sum(prior), ")."))
-
-  assert_that(is.null(Sigma_noise) | is.matrix(Sigma_noise),
-              msg = "If not NULL, Sigma_noise must be a matrix.")
-
   x %<>%
     group_by(!!! group) %>%
     mutate(
@@ -345,6 +334,10 @@ lift_MVG_to_MVG_ideal_observer = function(
         mutate(Sigma = map2(Sigma, Sigma_noise, ~ .x + .y))
   }
 
+  assert_that(
+    is.MVG_ideal_observer(x, verbose = T),
+    msg = "Outcome is not an MVG_ideal_observer. Something went wrong.")
+
   return(x)
 }
 
@@ -371,6 +364,10 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
       x %<>%
       mutate(S = map2(get_expected_Sigma_from_S(S, nu), Sigma_noise, ~ get_S_from_expected_Sigma(.x + .y, nu)))
   }
+
+  assert_that(
+    is.NIW_ideal_adaptor(x, verbose = T),
+    msg = "Outcome is not an NIW_ideal_adaptor. Something went wrong.")
 
   return(x)
 }
@@ -417,7 +414,7 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
       S = get_S_from_expected_Sigma(S, nu))
 
   assert_that(
-    is.NIW_ideal_adaptor(model),
+    is.NIW_ideal_adaptor(model, verbose = T),
     msg = "Outcome is not an NIW_ideal_adaptor. Something went wrong.")
 
   return(model)

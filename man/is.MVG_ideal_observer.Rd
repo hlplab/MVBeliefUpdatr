@@ -25,6 +25,8 @@ is.MVG_ideal_observer(
 \item{with.lapse}{Does this ideal observer have a lapse rate? (default: `FALSE`)}
 
 \item{with.lapse_bias}{Does this ideal observer have a lapse bias? (default: `FALSE`)}
+
+\item{verbose}{Should verbose output be provided? (default: `TRUE`)}
 }
 \value{
 A logical.

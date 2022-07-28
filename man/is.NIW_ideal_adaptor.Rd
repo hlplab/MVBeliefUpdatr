@@ -26,6 +26,8 @@ is.NIW_ideal_adaptor(
 \item{with.lapse}{Does this ideal adaptor have a lapse rate? (default: `FALSE`)}
 
 \item{with.lapse_bias}{Does this ideal adaptor have a lapse bias? (default: `FALSE`)}
+
+\item{verbose}{Should verbose output be provided? (default: `TRUE`)}
 }
 \value{
 A logical.
