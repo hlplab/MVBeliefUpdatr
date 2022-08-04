@@ -71,7 +71,7 @@ plot_ibbu_stanfit_parameters = function(
     geom_vline(xintercept = 0, color = "darkgray") +
     # # Add empty data points to control scale: https://stackoverflow.com/questions/51735481/ggplot2-change-axis-limits-for-each-individual-facet-panel
     # geom_blank() +
-    scale_x_continuous("Mean of category means") +
+    scale_x_continuous("Mean m of category means") +
     scale_y_discrete("Category", expand = expansion(mult = c(0 , 0.1))) +
     scale_fill_manual(
       "Group",
@@ -91,7 +91,7 @@ plot_ibbu_stanfit_parameters = function(
          { get_limits(., "S") ->> x.limits }) +
       aes(x = .data$S) +
       scale_x_continuous(
-        "Scatter matrix",
+        "Scatter matrix S",
         breaks = inv_symlog(
           seq(
             ceiling(symlog(min(x.limits))),
