@@ -17,6 +17,7 @@ get_expected_columns_for_NIW_ideal_adaptor <- function()
 #' (default: `TRUE`)
 #' @param with.lapse Does this ideal adaptor have a lapse rate? (default: `FALSE`)
 #' @param with.lapse_bias Does this ideal adaptor have a lapse bias? (default: `FALSE`)
+#' @param verbose Should verbose output be provided? (default: `TRUE`)
 #'
 #' @return A logical.
 #'
@@ -55,29 +56,7 @@ is.NIW_ideal_adaptor = function(x, category = "category", is.long = T, with.prio
       group_by(!!! syms(groups))
   }
 
-  # Check that the prior probabilities add up to 1
-  if (with.prior) {
-    if (any(!between(x %>% summarise(sum_prior = sum(prior)) %>% pull(sum_prior), 1 - tolerance, 1 + tolerance))) {
-      if (verbose) message(paste("Prior probabilities in", name_of_x, "do not add up to 1: ", sum(x$prior)))
-      return(FALSE)
-    }
-  }
-
-  # Check that the lapse rate is constant across categories
-  if (with.lapse &
-      any(x %>% summarise(n_unique_lapse_rates = length(unique(lapse_rate))) %>% pull(n_unique_lapse_rates) != 1)) {
-    if (verbose) message(paste("Lapse rates in", name_of_x, "are not constant across categories: ", paste(x$lapse_rate, collapse = ", ")))
-    return(FALSE)
-  }
-
-  # Check that the lapse bias probabilities add up to 1
-  if (with.lapse_bias &
-      any(!between(x %>% summarise(sum_lapse_bias = sum(lapse_bias)) %>% pull(sum_lapse_bias), 1 - tolerance, 1 + tolerance))) {
-    if (verbose) message(paste("Lapse bias probabilities in", name_of_x, "do not add up to 1: ", sum(x$lapse_bias)))
-    return(FALSE)
-  }
-
-  return(TRUE)
+  return(is.model(x, verbose = verbose, tolerance = tolerance))
 }
 
 
