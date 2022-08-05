@@ -28,6 +28,7 @@ is.Sigma <- function(x) {
 #' Check whether \code{x} is a model with lapse rates, biases, priors, and perceptual noise.
 #'
 #' @param x Object to be checked.
+#' @param group Name of one or more group variables, each unique combination of which describes a model. (default: NULL)
 #' @param verbose Should verbose output be provided? (default: `TRUE`)
 #'
 #' @return A logical.
@@ -37,11 +38,18 @@ is.Sigma <- function(x) {
 #' @examples
 #' TBD
 #' @export
-is.model <- function(x, verbose = F, tolerance = 1e-5) {
+is.model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
 
+  if (!is.null(group)) {
+    message("Currently, *groups* of models are not checked for internal consistency. Skipping test of whether this is a model.")
+    return(TRUE)
+    # Make sure that the below works for all the statements once a data frame is grouped. Then remove the return true above.
+    # x %<>% group_by(!!! syms(group))
+  }
+
   # Check that noise is constant across categories (within each group)
-  if (any(x %>% distinct(Sigma_noise) %>% tally() %>% filter(n != 1) %>% nrow() != 0)) {
+  if (any(x %>% distinct(Sigma_noise) %>% tally(name = "n.sigma_noise") %>% filter(n.sigma_noise != 1) %>% nrow() != 0)) {
     if (verbose) message(paste("Noise covariance matrix Sigma_noise in", name_of_x, "is not constant across categories."))
     return(FALSE)
   }
@@ -71,8 +79,14 @@ is.model <- function(x, verbose = F, tolerance = 1e-5) {
   }
 
   # Check that the lapse rate is constant across categories
-  if (any(x %>% distinct(lapse_rate) %>% nrow(.) != 1)) {
-    if (verbose) message(paste("Lapse rates in", name_of_x, "are not constant across categories: ", paste(x$lapse_rate, collapse = ", ")))
+  if (any(x %>% distinct(lapse_rate) %>% tally(name = "n.lapse_rate") %>% filter(n.lapse_rate != 1) %>% nrow() != 0)) {
+    if (verbose)
+      message(
+        paste(
+          "Lapse rates in",
+          name_of_x,
+          "are not constant across categories: ",
+          paste(x$lapse_rate, collapse = ", ")))
     return(FALSE)
   }
 

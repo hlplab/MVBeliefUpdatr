@@ -6,6 +6,7 @@
 \usage{
 is.MVG_ideal_observer(
   x,
+  group = NULL,
   category = "category",
   is.long = T,
   with.lapse = if (with.lapse_bias) T else F,
@@ -16,6 +17,8 @@ is.MVG_ideal_observer(
 }
 \arguments{
 \item{x}{Object to be checked.}
+
+\item{group}{Name of one or more group variables, each unique combination of which describes an MVG_ideal_observer. (default: NULL)}
 
 \item{category}{Name of the category variable. (default: "category")}
 

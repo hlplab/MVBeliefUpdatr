@@ -4,10 +4,12 @@
 \alias{is.MVG}
 \title{Is this a set of multivariate Gaussian (MVG) categories?}
 \usage{
-is.MVG(x, category = "category", is.long = T, verbose = F)
+is.MVG(x, group = NULL, category = "category", is.long = T, verbose = F)
 }
 \arguments{
 \item{x}{Object to be checked.}
+
+\item{group}{Name of one or more group variables, each unique combination of which describes an MVG. (default: NULL)}
 
 \item{category}{Name of the category variable. (default: "category")}
 

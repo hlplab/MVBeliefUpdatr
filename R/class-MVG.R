@@ -6,6 +6,7 @@ get_expected_columns_for_MVG <- function()
 #' Check whether \code{x} is a set of multivariate Gaussian (MVG) categories.
 #'
 #' @param x Object to be checked.
+#' @param group Name of one or more group variables, each unique combination of which describes an MVG. (default: NULL)
 #' @param category Name of the category variable. (default: "category")
 #' @param is.long Is this check assessing whether the ideal observer is in long format (`TRUE`) or wide format (`FALSE`)?
 #' (default: `TRUE`)
@@ -17,8 +18,15 @@ get_expected_columns_for_MVG <- function()
 #' @examples
 #' TBD
 #' @export
-is.MVG <- function(x, category = "category", is.long = T, verbose = F) {
+is.MVG <- function(x, group = NULL, category = "category", is.long = T, verbose = F) {
+  name_of_x <- deparse(substitute(x))
   assert_that(is.flag(is.long))
+
+  if (!is.null(group)) {
+    if (verbose) message("Checking whether ", name_of_x, " is an MVG within each unique combination of group values.")
+    x %<>%
+      group_by(!!! syms(group))
+  }
 
   if (any(!is.long, all(!is_tibble(x), !is.data.frame(x)))) {
     if (verbose) message("Currently only MVGs in long format can be recognized.")

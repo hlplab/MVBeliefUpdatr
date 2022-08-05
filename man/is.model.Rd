@@ -4,10 +4,12 @@
 \alias{is.model}
 \title{Is this a model?}
 \usage{
-is.model(x, verbose = F, tolerance = 1e-05)
+is.model(x, group = NULL, verbose = F, tolerance = 1e-05)
 }
 \arguments{
 \item{x}{Object to be checked.}
+
+\item{group}{Name of one or more group variables, each unique combination of which describes a model. (default: NULL)}
 
 \item{verbose}{Should verbose output be provided? (default: `TRUE`)}
 }

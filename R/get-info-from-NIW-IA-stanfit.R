@@ -659,7 +659,11 @@ add_ibbu_stanfit_draws = function(
       rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .)) %>%
       { if (summarize) {
         group_by(., !!! syms(pars.index), cue, cue2) %>%
-          summarise_at(., vars(kappa, nu, m, S, lapse_rate), mean) %>%
+          summarise(
+            .,
+            across(
+              c(kappa, nu, m, S, lapse_rate),
+              mean)) %>%
           mutate(.chain = "all", .iteration = "all", .draw = "all")
       } else . } %>%
       { if ("prior" %in% groups) mutate(., group = "prior") else . } %>%

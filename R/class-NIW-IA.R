@@ -12,6 +12,7 @@ get_expected_columns_for_NIW_ideal_adaptor <- function()
 #' Future implementations might allow uncertainty over these parameters.
 #'
 #' @param x Object to be checked.
+#' @param group Name of one or more group variables, each unique combination of which describes an NIW_ideal_adaptor. (default: NULL)
 #' @param category Name of the category variable. (default: "category")
 #' @param is.long Is this check assessing whether the ideal adaptor is in long format (`TRUE`) or wide format (`FALSE`)?
 #' (default: `TRUE`)
@@ -26,11 +27,25 @@ get_expected_columns_for_NIW_ideal_adaptor <- function()
 #' @examples
 #' TBD
 #' @export
-is.NIW_ideal_adaptor = function(x, category = "category", is.long = T, with.prior = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = 1e-5) {
+is.NIW_ideal_adaptor = function(x, group = NULL, category = "category", is.long = T, with.prior = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
 
-  if (!is.NIW_belief(x)) {
+  # When no groups are specified, infer groups from object.
+  if (is.null(group)) {
+    group <- setdiff(names(x), get_expected_columns_for_NIW_ideal_adaptor())
+    if (length(group) == 0) group <- NULL else {
+      if (verbose) message(paste(name_of_x, "has additional columns beyond those expected:", paste(group, collapse = ", "), "Interpreting those columns as group variables."))
+    }
+  }
+
+  if (!is.null(group)) {
+    if (verbose) message("Checking whether ", name_of_x, " is an NIW_ideal_adaptor within each unique combination of group values.")
+    x %<>%
+      group_by(!!! syms(group))
+  }
+
+  if (!is.NIW_belief(x, group = group)) {
     if (verbose) message(paste(deparse(substitute(x)), "does not contain NIW beliefs."))
     return(FALSE)
   }
@@ -48,15 +63,11 @@ is.NIW_ideal_adaptor = function(x, category = "category", is.long = T, with.prio
 
   if (any(!is.factor(get(category, x)))) return(FALSE)
 
-  groups <- setdiff(names(x), get_expected_columns_for_NIW_ideal_adaptor())
-  if (length(groups) > 0) {
-    if (verbose) message(paste(name_of_x, "has additional columns beyond those expected:", paste(groups, collapse = ", "),
-                               "Checking whether", name_of_x, "is an NIW_ideal_adaptor within each unique combination of those additional variables."))
-    x %<>%
-      group_by(!!! syms(groups))
+  if (!is.model(x, group = group, verbose = verbose, tolerance = tolerance)) {
+    return(FALSE)
   }
 
-  return(is.model(x, verbose = verbose, tolerance = tolerance))
+  return(TRUE)
 }
 
 

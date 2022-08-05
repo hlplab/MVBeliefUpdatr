@@ -4,10 +4,12 @@
 \alias{is.NIW_belief}
 \title{Is this a Normal-Inverse-Wishart (NIW) belief?}
 \usage{
-is.NIW_belief(x, category = "category", is.long = T, verbose = F)
+is.NIW_belief(x, group = NULL, category = "category", is.long = T, verbose = F)
 }
 \arguments{
 \item{x}{Object to be checked.}
+
+\item{group}{Name of one or more group variables, each unique combination of which describes an NIW_belief. (default: NULL)}
 
 \item{category}{Name of the category variable. (default: "category")}
 

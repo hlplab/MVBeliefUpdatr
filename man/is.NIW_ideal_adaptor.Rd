@@ -6,6 +6,7 @@
 \usage{
 is.NIW_ideal_adaptor(
   x,
+  group = NULL,
   category = "category",
   is.long = T,
   with.prior = T,
@@ -17,6 +18,8 @@ is.NIW_ideal_adaptor(
 }
 \arguments{
 \item{x}{Object to be checked.}
+
+\item{group}{Name of one or more group variables, each unique combination of which describes an NIW_ideal_adaptor. (default: NULL)}
 
 \item{category}{Name of the category variable. (default: "category")}
 

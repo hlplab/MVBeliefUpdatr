@@ -143,6 +143,7 @@ print.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
     pars <- names(x)
     pars <- grep("^((kappa|nu|m|S)_|lapse_rate)", pars, value = T)
     pars <- grep("^m_0_(tau|L_omega)", pars, value = T, invert = T)
+    pars <- grep("^(m|S)_0_param", pars, value = T, invert = T)
   }
 
   print(kable(rstan::summary(x, pars = pars, ...)$summary))

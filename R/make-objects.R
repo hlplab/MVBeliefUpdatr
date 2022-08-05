@@ -53,6 +53,11 @@ make_MVG_from_data = function(
   assert_that(all(cue_names %in% names(data)),
               msg = paste0("Some cues not found in data: ", paste(setdiff(cue_names, intersect(cue_names, names(data))), collapse = ", ")))
 
+  if (verbose) if (!is.null(group))
+    message(
+      paste("Group specified. Making one MVG for each unique value of group.",
+            paste(unique(data$group), collapse = ",")))
+
   model <- data %>%
     select(!! category, !!! cues, !!! group) %>%
     mutate(cues = pmap(list(!!! cues),
@@ -70,11 +75,8 @@ make_MVG_from_data = function(
     mutate(category = factor(category)) %>%
     ungroup()
 
-  if (is.null(group) & !is.MVG(model, verbose = verbose)) {
+  if (!is.MVG(model, group = group, verbose = verbose))
     warning("Something went wrong. The returned object is not an MVG. Try again with verbose = T?")
-  } else if (!is.null(group)) {
-    warning("Currently, groups of ideal observers are not checked for internal consistency.")
-  }
 
   return(model)
 }
@@ -105,11 +107,8 @@ make_MVG_ideal_observer_from_data = function(
     Sigma_noise = Sigma_noise,
     add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
 
-  if (is.null(group) & !is.MVG_ideal_observer(model, verbose = verbose)) {
+  if (!is.MVG_ideal_observer(model, group = group, verbose = verbose))
     warning("Something went wrong. The returned object is not an MVG ideal observer. Try again with verbose = T?")
-  } else if (!is.null(group)) {
-    # message("Currently, groups of ideal observers are not checked for internal consistency.")
-  }
 
   return(model)
 }
@@ -193,8 +192,8 @@ make_NIW_belief_from_data = function(
     ungroup()
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
-  if (!is.NIW_belief(model, verbose = verbose))
-    warning("Something went wrong. The returned object is not an NIW belief.")
+  if (!is.NIW_belief(model, group = group, verbose = verbose))
+    warning("Something went wrong. The returned object is not an NIW belief. Try again with verbose = T?")
 
   return(model)
 }
@@ -229,8 +228,8 @@ make_NIW_ideal_adaptor_from_data = function(
       Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
-  if (!is.NIW_ideal_adaptor(model, verbose = verbose))
-    warning("Something went wrong. The returned object is not an NIW ideal adaptor.")
+  if (!is.NIW_ideal_adaptor(model, group = group, verbose = verbose))
+    warning("Something went wrong. The returned object is not an NIW ideal adaptor. Try again with verbose = T?")
 
   return(model)
 }
@@ -335,7 +334,7 @@ lift_MVG_to_MVG_ideal_observer = function(
   }
 
   assert_that(
-    is.MVG_ideal_observer(x, verbose = T),
+    is.MVG_ideal_observer(x, group = group, verbose = T),
     msg = "Outcome is not an MVG_ideal_observer. Something went wrong.")
 
   return(x)
@@ -366,7 +365,7 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   }
 
   assert_that(
-    is.NIW_ideal_adaptor(x, verbose = T),
+    is.NIW_ideal_adaptor(x, group = group, verbose = T),
     msg = "Outcome is not an NIW_ideal_adaptor. Something went wrong.")
 
   return(x)
@@ -414,7 +413,7 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
       S = get_S_from_expected_Sigma(S, nu))
 
   assert_that(
-    is.NIW_ideal_adaptor(model, verbose = T),
+    is.NIW_ideal_adaptor(model, group = group, verbose = T),
     msg = "Outcome is not an NIW_ideal_adaptor. Something went wrong.")
 
   return(model)

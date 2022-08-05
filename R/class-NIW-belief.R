@@ -7,6 +7,7 @@ get_expected_columns_for_NIW_belief <- function()
 #' \link[=is.MVG]{multivariate Gaussian categories}.
 #'
 #' @param x Object to be checked.
+#' @param group Name of one or more group variables, each unique combination of which describes an NIW_belief. (default: NULL)
 #' @param category Name of the category variable. (default: "category")
 #' @param is.long Is this check assessing whether the belief is in long format (`TRUE`) or wide format (`FALSE`)?
 #' (default: `TRUE`)
@@ -18,8 +19,15 @@ get_expected_columns_for_NIW_belief <- function()
 #' @examples
 #' TBD
 #' @export
-is.NIW_belief = function(x, category = "category", is.long = T, verbose = F) {
+is.NIW_belief = function(x, group = NULL, category = "category", is.long = T, verbose = F) {
+  name_of_x <- deparse(substitute(x))
   assert_that(is.flag(is.long))
+
+  if (!is.null(group)) {
+    if (verbose) message("Checking whether ", name_of_x, " is an NIW_belief within each unique combination of group values.")
+    x %<>%
+      group_by(!!! syms(group))
+  }
 
   if (
     any(
