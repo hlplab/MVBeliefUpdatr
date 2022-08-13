@@ -5,15 +5,16 @@
 \title{Turn an MVG_ideal_observer into an NIW_ideal_adaptor}
 \usage{
 lift_MVG_ideal_observer_to_NIW_ideal_adaptor(
-  model,
+  x,
   group = NULL,
   category = "category",
   kappa,
-  nu
+  nu,
+  verbose = F
 )
 }
 \arguments{
-\item{model}{An MVG_ideal_observer object.}
+\item{x}{An MVG_ideal_observer object.}
 
 \item{group}{Optionally, a grouping structure can be specified. If group structure is not NULL, one
 NIW belief or ideal adaptor will be derived for each level of \code{group_structure}. (default: NULL)}
@@ -25,12 +26,12 @@ NIW belief or ideal adaptor will be derived for each level of \code{group_struct
 \item{nu}{The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
 cues + 2)}
 
+\item{verbose}{If true provides more information. (default: FALSE)}
+
 \item{add_Sigma_noise_to_category_representation}{Should the perceptual noise be added to the category
 representation (category variability)? If FALSE, then noise will be considered during categorization decisions
 but will not be added to the covariance matrix of the MVG categories. If TRUE, then noise will also be to the category
 covariance matrix. Will be ignored if Sigma_noise is NULL. (default: FALSE)}
-
-\item{verbose}{If true provides more information. (default: FALSE)}
 }
 \value{
 A tibble that is an NIW_ideal_adaptor object.

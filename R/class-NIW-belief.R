@@ -25,8 +25,7 @@ is.NIW_belief = function(x, group = NULL, category = "category", is.long = T, ve
 
   if (!is.null(group)) {
     if (verbose) message("Checking whether ", name_of_x, " is an NIW_belief within each unique combination of group values.")
-    x %<>%
-      group_by(!!! syms(group))
+    x %<>% group_by(!!! syms(group))
   }
 
   if (

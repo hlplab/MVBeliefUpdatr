@@ -101,11 +101,12 @@ make_MVG_ideal_observer_from_data = function(
 
   model %<>%
     lift_MVG_to_MVG_ideal_observer(
-    group = group,
-    prior = prior,
-    lapse_rate = lapse_rate, lapse_bias = lapse_bias,
-    Sigma_noise = Sigma_noise,
-    add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
+      group = group,
+      prior = prior,
+      lapse_rate = lapse_rate, lapse_bias = lapse_bias,
+      Sigma_noise = Sigma_noise,
+      add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation,
+      verbose = verbose)
 
   if (!is.MVG_ideal_observer(model, group = group, verbose = verbose))
     warning("Something went wrong. The returned object is not an MVG ideal observer. Try again with verbose = T?")
@@ -225,7 +226,8 @@ make_NIW_ideal_adaptor_from_data = function(
   model %<>%
     lift_NIW_belief_to_NIW_ideal_adaptor(
       group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
-      Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation)
+      Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation,
+      verbose = verbose)
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
   if (!is.NIW_ideal_adaptor(model, group = group, verbose = verbose))
@@ -257,9 +259,9 @@ make_NIW_ideal_adaptor_from_data = function(
 #' representation (category variability)? If FALSE, then noise will be considered during categorization decisions
 #' but will not be added to the covariance matrix of the MVG categories. If TRUE, then noise will also be to the category
 #' covariance matrix. Will be ignored if Sigma_noise is NULL. (default: FALSE)
-#' @param verbose If true provides more information. (default: FALSE)
 #' @param keep.category_parameters Should categories' mu and Sigma be included in the output (in addition to m
 #' and S of the prior)? (default: FALSE)
+#' @param verbose If true provides more information. (default: FALSE)
 #'
 #' @return A tibble that is an NIW_belief or NIW_ideal_adaptor object.
 #'
@@ -275,7 +277,8 @@ lift_likelihood_to_model = function(
   prior = NA_real_,
   lapse_rate = NA_real_,
   lapse_bias = NA_real_,
-  Sigma_noise = NULL
+  Sigma_noise = NULL,
+  verbose = F
 ) {
   if (is.character(group)) group = syms(group)
   if (is.character(category)) category = sym(category)
@@ -319,7 +322,8 @@ lift_MVG_to_MVG_ideal_observer = function(
   lapse_rate = NA_real_,
   lapse_bias = NA_real_,
   Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = F
+  add_Sigma_noise_to_category_representation = F,
+  verbose = F
 ) {
   x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
@@ -333,9 +337,8 @@ lift_MVG_to_MVG_ideal_observer = function(
         mutate(Sigma = map2(Sigma, Sigma_noise, ~ .x + .y))
   }
 
-  assert_that(
-    is.MVG_ideal_observer(x, group = group, verbose = T),
-    msg = "Outcome is not an MVG_ideal_observer. Something went wrong.")
+  if (!is.MVG_ideal_observer(x, group = group, verbose = verbose))
+    warning("Something went wrong. The returned object is not an MVG ideal observer. Try again with verbose = T?")
 
   return(x)
 }
@@ -350,7 +353,8 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   lapse_rate = NA_real_,
   lapse_bias = NA_real_,
   Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = F
+  add_Sigma_noise_to_category_representation = F,
+  verbose = F
 ) {
   x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
@@ -364,9 +368,8 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
       mutate(S = map2(get_expected_Sigma_from_S(S, nu), Sigma_noise, ~ get_S_from_expected_Sigma(.x + .y, nu)))
   }
 
-  assert_that(
-    is.NIW_ideal_adaptor(x, group = group, verbose = T),
-    msg = "Outcome is not an NIW_ideal_adaptor. Something went wrong.")
+  if (!is.NIW_ideal_adaptor(x, group = group, verbose = verbose))
+    warning("Something went wrong. The returned object is not an NIW ideal adaptor. Try again with verbose = T?")
 
   return(x)
 }
@@ -376,7 +379,7 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
 #' Make an ideal adaptor out of an ideal observer, so that the *expected* category mean and category covariance
 #' matrix of the ideal adaptor match the ideal observers category mean and category covariance matrix.
 #'
-#' @param model An MVG_ideal_observer object.
+#' @param x An MVG_ideal_observer object.
 #' @param group Optionally, a grouping structure can be specified. If group structure is not NULL, one
 #' NIW belief or ideal adaptor will be derived for each level of \code{group_structure}. (default: NULL)
 #' @param category Name of variable in \code{data} that contains the category information. (default: "category")
@@ -397,26 +400,26 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
 #' TBD
 #' @export
 lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
-  model,
+  x,
   group = NULL,
   category = "category",
-  kappa, nu
+  kappa, nu,
+  verbose = F
 ) {
   assert_that(!is.null(kappa), !is.null(nu),
               msg = "kappa and nu must be provided.")
 
-  model %<>%
+  x %<>%
     rename(m = mu, S = Sigma) %>%
     mutate(
       kappa = kappa,
       nu = nu,
       S = get_S_from_expected_Sigma(S, nu))
 
-  assert_that(
-    is.NIW_ideal_adaptor(model, group = group, verbose = T),
-    msg = "Outcome is not an NIW_ideal_adaptor. Something went wrong.")
+  if (!is.NIW_ideal_adaptor(x, group = group, verbose = verbose))
+    warning("Something went wrong. The returned object is not an NIW ideal adaptor. Try again with verbose = T?")
 
-  return(model)
+  return(x)
 }
 
 #' Aggregate multiple ideal observers/adaptors into an average ('typical') ideal observer/adaptor
@@ -487,7 +490,7 @@ aggregate_models_by_group_structure = function(
 #' Sample multivariate Gaussian exposure data.
 #'
 #' Returns a tibble of observations drawn from multivariate Gaussians, with one observation per row. Each row
-#' provides the category label and cue values. If \code{keep.parameters = T} then the parameters (\code{N, mean, sigma})
+#' provides the category label and cue values. If \code{keep.input_parameters = T} then the parameters (\code{N, mean, sigma})
 #' are also returned.
 #'
 #' The input is expected to be lists/vectors of parameters with the n-th element of each list/vector specifying the

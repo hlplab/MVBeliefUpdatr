@@ -13,7 +13,8 @@ lift_likelihood_to_model(
   prior = NA_real_,
   lapse_rate = NA_real_,
   lapse_bias = NA_real_,
-  Sigma_noise = NULL
+  Sigma_noise = NULL,
+  verbose = F
 )
 
 lift_MVG_to_MVG_ideal_observer(
@@ -24,7 +25,8 @@ lift_MVG_to_MVG_ideal_observer(
   lapse_rate = NA_real_,
   lapse_bias = NA_real_,
   Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = F
+  add_Sigma_noise_to_category_representation = F,
+  verbose = F
 )
 
 lift_NIW_belief_to_NIW_ideal_adaptor(
@@ -35,7 +37,8 @@ lift_NIW_belief_to_NIW_ideal_adaptor(
   lapse_rate = NA_real_,
   lapse_bias = NA_real_,
   Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = F
+  add_Sigma_noise_to_category_representation = F,
+  verbose = F
 )
 }
 \arguments{
@@ -56,6 +59,8 @@ prior over all categories).}
 \item{Sigma_noise}{Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This argument will be
 ignored if NULL. (default: NULL)}
 
+\item{verbose}{If true provides more information. (default: FALSE)}
+
 \item{add_Sigma_noise_to_category_representation}{Should the perceptual noise be added to the category
 representation (category variability)? If FALSE, then noise will be considered during categorization decisions
 but will not be added to the covariance matrix of the MVG categories. If TRUE, then noise will also be to the category
@@ -65,8 +70,6 @@ covariance matrix. Will be ignored if Sigma_noise is NULL. (default: FALSE)}
 
 \item{nu}{The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
 cues + 2)}
-
-\item{verbose}{If true provides more information. (default: FALSE)}
 
 \item{keep.category_parameters}{Should categories' mu and Sigma be included in the output (in addition to m
 and S of the prior)? (default: FALSE)}

@@ -41,8 +41,7 @@ is.NIW_ideal_adaptor = function(x, group = NULL, category = "category", is.long 
 
   if (!is.null(group)) {
     if (verbose) message("Checking whether ", name_of_x, " is an NIW_ideal_adaptor within each unique combination of group values.")
-    x %<>%
-      group_by(!!! syms(group))
+    x %<>% group_by(!!! syms(group))
   }
 
   if (!is.NIW_belief(x, group = group)) {

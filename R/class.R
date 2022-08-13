@@ -42,10 +42,8 @@ is.model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
 
   if (!is.null(group)) {
-    message("Currently, *groups* of models are not checked for internal consistency. Skipping test of whether this is a model.")
-    return(TRUE)
-    # Make sure that the below works for all the statements once a data frame is grouped. Then remove the return true above.
-    # x %<>% group_by(!!! syms(group))
+    if (verbose) message("Checking whether ", name_of_x, " is a model within each unique combination of group values.")
+    x %<>% group_by(!!! syms(group))
   }
 
   # Check that noise is constant across categories (within each group)

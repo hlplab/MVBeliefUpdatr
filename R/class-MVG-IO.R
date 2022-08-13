@@ -36,8 +36,7 @@ is.MVG_ideal_observer <- function(x, group = NULL, category = "category", is.lon
 
   if (!is.null(group)) {
     if (verbose) message("Checking whether ", name_of_x, " is an MVG_ideal_observer within each unique combination of group values.")
-    x %<>%
-      group_by(!!! syms(group))
+    x %<>% group_by(!!! syms(group))
   }
 
   if (!is.MVG(x, category = category, group = group, verbose = verbose)) {

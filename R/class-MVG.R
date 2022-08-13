@@ -24,8 +24,7 @@ is.MVG <- function(x, group = NULL, category = "category", is.long = T, verbose 
 
   if (!is.null(group)) {
     if (verbose) message("Checking whether ", name_of_x, " is an MVG within each unique combination of group values.")
-    x %<>%
-      group_by(!!! syms(group))
+    x %<>% group_by(!!! syms(group))
   }
 
   if (any(!is.long, all(!is_tibble(x), !is.data.frame(x)))) {

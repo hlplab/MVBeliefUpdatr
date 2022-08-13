@@ -1,7 +1,7 @@
 #' Example NIW priors.
 #'
 #' @export
-example_MVG_ideal_observer = function(example = 1) {
+example_MVG_ideal_observer <- function(example = 1) {
   if (example == 1) {
     message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
     tibble(
@@ -46,7 +46,7 @@ example_MVG_ideal_observer = function(example = 1) {
 #' TBD
 #' @rdname get_MVG_likelihood
 #' @export
-get_MVG_likelihood = function(x, mu, Sigma, log = T, noise_treatment = "no_noise", Sigma_noise = NULL) {
+get_MVG_likelihood <- function(x, mu, Sigma, log = T, noise_treatment = "no_noise", Sigma_noise = NULL) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
   assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
@@ -100,7 +100,7 @@ get_MVG_likelihood = function(x, mu, Sigma, log = T, noise_treatment = "no_noise
 
 #' @rdname get_MVG_likelihood
 #' @export
-get_likelihood_from_MVG = function(
+get_likelihood_from_MVG <- function(
   x,
   model,
   log = T,
@@ -180,7 +180,7 @@ get_likelihood_from_MVG = function(
 #' @examples
 #' TBD
 #' @export
-get_categorization_from_MVG_ideal_observer = function(
+get_categorization_from_MVG_ideal_observer <- function(
   x,
   model,
   decision_rule,

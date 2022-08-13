@@ -47,7 +47,7 @@ A tibble.
 }
 \description{
 Returns a tibble of observations drawn from multivariate Gaussians, with one observation per row. Each row
-provides the category label and cue values. If \code{keep.parameters = T} then the parameters (\code{N, mean, sigma})
+provides the category label and cue values. If \code{keep.input_parameters = T} then the parameters (\code{N, mean, sigma})
 are also returned.
 }
 \details{
