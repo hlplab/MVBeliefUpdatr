@@ -270,7 +270,7 @@ make_NIW_ideal_adaptor_from_data = function(
 #' @examples
 #' TBD
 #' @export
-lift_likelihood_to_model = function(
+lift_likelihood_to_model <- function(
   x,
   group = NULL,
   category = "category",
@@ -285,29 +285,29 @@ lift_likelihood_to_model = function(
   assert_that(all(is.numeric(lapse_rate), is.numeric(lapse_bias), is.numeric(prior)),
               msg = "The category prior, lapse rate, and lapse bias must be numeric.")
 
-  n.cat = length(unique(x %>% pull(!! category)))
+  n.cat <- length(unique(x %>% pull(!! category)))
   if (all(is.na(prior) | is.null(prior))) {
     message(paste0("No prior specified. Defaulting to uniform prior over the ", n.cat, " categories found in x."))
-    prior = rep(1 / n.cat, n.cat)
+    prior <- rep(1 / n.cat, n.cat)
   }
 
   if (all(is.na(lapse_bias) | is.null(lapse_bias))) {
     message(paste0("No lapse_bias specified. Defaulting to uniform lapse_bias over the ", n.cat, " categories found in x."))
-    lapse_bias = rep(1 / n.cat, n.cat)
+    lapse_bias <- rep(1 / n.cat, n.cat)
   }
 
   if (all(is.na(lapse_rate) | is.null(lapse_rate))) {
     message(paste0("No lapse_rate specified. Defaulting to lapse_bias of 0."))
-    lapse_rate = 0
+    lapse_rate <- 0
   }
 
   x %<>%
     group_by(!!! group) %>%
     mutate(
-      prior = prior,
-      lapse_rate = lapse_rate,
-      lapse_bias = lapse_bias,
-      Sigma_noise = list(Sigma_noise))
+      prior = .env$prior,
+      lapse_rate = .env$lapse_rate,
+      lapse_bias = .env$lapse_bias,
+      Sigma_noise = list(.env$Sigma_noise))
 
   return(x)
 }
@@ -329,7 +329,9 @@ lift_MVG_to_MVG_ideal_observer = function(
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(Sigma_noise) == dim(first(x$Sigma))),
                 msg = "If not NULL, Sigma_noise must be a matrix of the same dimensionality as Sigma.")
-    assert_that(all(dimnames(Sigma_noise) == dimnames(first(x$Sigma))),
+    assert_that(!is.null(dimnames(first(x$Sigma_noise))),
+                msg = "Sigma_noise = must have non-NULL dimnames that must match those of Sigma.")
+    assert_that(map2(dimnames(Sigma_noise), dimnames(first(x$Sigma)), ~ .x == .y) %>% reduce(c) %>% all(),
                 msg = "If Sigma_noise is not NULL, the dimnames of Sigma_noise and Sigma must match.")
 
     if (add_Sigma_noise_to_category_representation)
@@ -360,7 +362,9 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(Sigma_noise) == dim(first(x$S))),
                 msg = "If Sigma_noise is not NULL, Sigma_noise must be a matrix of the same dimensionality as S.")
-    assert_that(all(dimnames(Sigma_noise) == dimnames(first(x$S))),
+    assert_that(!is.null(dimnames(first(x$Sigma_noise))),
+                msg = "Sigma_noise = must have non-NULL dimnames that must match those of S.")
+    assert_that(map2(dimnames(Sigma_noise), dimnames(first(x$S)), ~ .x == .y) %>% reduce(c) %>% all(),
                 msg = "If Sigma_noise is not NULL, the dimnames of Sigma_noise and S must match.")
 
     if (add_Sigma_noise_to_category_representation)

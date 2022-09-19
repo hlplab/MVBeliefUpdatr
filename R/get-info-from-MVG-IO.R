@@ -104,7 +104,7 @@ get_likelihood_from_MVG <- function(
   x,
   model,
   log = T,
-  noise_treatment = if (is.MVG_ideal_adaptor(model)) "marginalize" else "no_noise",
+  noise_treatment = if (is.MVG_ideal_observer(model)) "marginalize" else "no_noise",
   category = "category",
   category.label = NULL,
   wide = FALSE
@@ -117,7 +117,8 @@ get_likelihood_from_MVG <- function(
   if (is.null(category.label)) {
     model %<>%
       droplevels()
-    category.label = model %>%
+
+    category.label <- model %>%
       pull(!! sym(category)) %>%
       unique()
   }

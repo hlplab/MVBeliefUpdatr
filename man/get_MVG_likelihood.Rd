@@ -18,7 +18,7 @@ get_likelihood_from_MVG(
   x,
   model,
   log = T,
-  noise_treatment = if (is.MVG_ideal_adaptor(model)) "marginalize" else "no_noise",
+  noise_treatment = if (is.MVG_ideal_observer(model)) "marginalize" else "no_noise",
   category = "category",
   category.label = NULL,
   wide = FALSE
