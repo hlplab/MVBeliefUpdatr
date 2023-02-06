@@ -208,9 +208,9 @@ plot_NIW_belief_parameters = function(
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #' @examples
 #' TBD
-#' @rdname plot_expected_categories
+#' @rdname plot_expected_categories_1D
 #' @export
-plot_expected_categories_density1D = function(
+plot_expected_categories_density_1D <- function(
   x,
   data.exposure = NULL,
   data.test = NULL,
@@ -284,6 +284,10 @@ plot_expected_categories_density1D = function(
   return(p)
 }
 
+#' @rdname plot_expected_categories_1D
+#' @export
+plot_expected_categories_density1D <- plot_expected_categories_density_1D
+
 
 #' Plot expected categorization function for univariate (1D) categories.
 #'
@@ -304,7 +308,7 @@ plot_expected_categories_density1D = function(
 #' @rdname plot_expected_categorization_function_1D
 #' @export
 #'
-plot_expected_categorization_function_1D = function(
+plot_expected_categorization_function_1D <- function(
   x,
   data.exposure = NULL,
   data.test = NULL,
@@ -408,9 +412,9 @@ plot_expected_categorization_function_1D = function(
 #' @keywords TBD
 #' @examples
 #' TBD
-#' @rdname plot_expected_categories
+#' @rdname plot_expected_categories_2D
 #' @export
-plot_expected_categories_contour2D = function(
+plot_expected_categories_contour_2D <- function(
   x,
   levels = c(1/2, 2/3, 4/5, 9/10, 19/20),
   data.exposure = NULL,
@@ -478,6 +482,11 @@ plot_expected_categories_contour2D = function(
   return(p)
 }
 
+#' @rdname plot_expected_categories_2D
+#' @export
+plot_expected_categories_contour2D <- plot_expected_categories_contour_2D
+
+
 
 #' Plot expected categorization function for bivariate (2D) categories.
 #'
@@ -500,7 +509,7 @@ plot_expected_categories_contour2D = function(
 #' @rdname plot_expected_categorization_function_2D
 #' @export
 #'
-plot_expected_categorization_function_2D = function(
+plot_expected_categorization_function_2D <- function(
   x,
   data.exposure = NULL,
   data.test = NULL,
