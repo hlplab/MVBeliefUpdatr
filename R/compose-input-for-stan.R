@@ -39,7 +39,7 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
 get_test_counts <- function(test, cues, response, group, verbose = F) {
   test_counts <-
     test %>%
-    as_tibble() %>%
+    as_tibble(.name_repair = "minimal") %>%
     group_by(
       !!! syms(cues),
       !! sym(response),
@@ -101,7 +101,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 
   data_ss <-
     data %>%
-    as_tibble() %>%
+    as_tibble(.name_repair = "minimal") %>%
     group_by(!! sym(category), !! sym(group))
 
   if (length(cues) > 1) {

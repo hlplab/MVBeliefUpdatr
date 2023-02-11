@@ -27,8 +27,8 @@ example_MVG_ideal_observer <- function(example = 1) {
 #' @param x Observations. Can be a vector with k elements for a single observation or a matrix with k
 #' columns and n rows, in which case each row of the matrix is taken to be one observation. If x is a
 #' tibble with k columns or a list of vectors of length k, it is reduced into a matrix with k columns.
-#' @param mu The category mean mu. Should be a
-#' matrix or vector of length k.
+#' @param mu The category mean mu. Should be a k x 1 or 1 x k
+#' matrix, or vector of length k.
 #' @param Sigma The category covariance matrix Sigma. Should be a square k x k matrix.
 #' @param log Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)
 #' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
@@ -118,7 +118,8 @@ get_likelihood_from_MVG <- function(
     model %<>%
       droplevels()
 
-    category.label <- model %>%
+    category.label <-
+      model %>%
       pull(!! sym(category)) %>%
       unique()
   }
@@ -135,7 +136,7 @@ get_likelihood_from_MVG <- function(
       log = log,
       noise_treatment = noise_treatment,
       Sigma_noise = if (noise_treatment == "no_noise") NULL else m$Sigma_noise[[1]]) %>%
-      as_tibble() %>%
+      as_tibble(.name_repair = "minimal")(.name_repair = "minimal") %>%
       rename_with(~ if (log) { "log_likelihood" } else { "likelihood" }) %>%
       mutate(!! sym(category) := c)
   }

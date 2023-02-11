@@ -281,7 +281,7 @@ get_sufficient_category_statistics <- function(
   ...
 ) {
   data_ss <- data %>%
-    as_tibble() %>%
+    as_tibble(.name_repair = "minimal") %>%
     group_by(!! sym(category), !!! syms(group)) %>%
     { if(!is.null(categories)) filter(., !! sym(category) %in% categories) else . } %>%
     { if(!is.null(groups)) filter(., !! sym(group) %in% groups) else . } %>%
@@ -391,7 +391,7 @@ transform_cues = function(data, cues,
     if (!is.null(transform.parameters[["pca"]])) {
       data %<>%
         predict(transform.parameters[["pca"]], .) %>%
-        as_tibble()
+        as_tibble(.name_repair = "minimal")
     } else {
       if (!is.null(transform.parameters[["center"]])) {
         data %<>%

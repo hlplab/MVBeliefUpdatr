@@ -36,7 +36,7 @@ get_posterior_predictive_from_NIW_belief = function(
       log = log,
       noise_treatment = noise_treatment,
       Sigma_noise = if (noise_treatment == "no_noise") NULL else m$Sigma_noise[[1]]) %>%
-      as_tibble() %>%
+      as_tibble(.name_repair = "minimal") %>%
       rename_with(~ if (log) { "log_posterior_predictive" } else { "posterior_predictive" }) %>%
       mutate(!! sym(category) := c)
   }

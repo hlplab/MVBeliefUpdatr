@@ -288,7 +288,7 @@ get_test_data_from_stanfit = function(
   data <- get_input_from_stanfit(fit)
   data[["x_test"]] %>%
     cbind(data[["z_test_counts"]]) %>%
-    as_tibble() %>%
+    as_tibble(.name_repair = "minimal") %>%
     mutate(
       group.id = data[["y_test"]],
       group = factor(attr(data[["y_test"]], "levels")[group.id],
