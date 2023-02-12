@@ -51,7 +51,7 @@ get_MVG_likelihood <- function(x, mu, Sigma, log = T, noise_treatment = "no_nois
   # in the latter case, each *row* of the matrix is an input.
   assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
   assert_that(is.vector(mu) | is.matrix(mu) | is_scalar_double(mu))
-  assert_that(is.Sigma(Sigma))
+
   # do not reorder these conditionals (go from more to less specific)
   if (is_tibble(x)) x %<>% as.matrix() else
     if (is.list(x)) x %<>% reduce(rbind) %>% as.matrix() else
@@ -136,7 +136,7 @@ get_likelihood_from_MVG <- function(
       log = log,
       noise_treatment = noise_treatment,
       Sigma_noise = if (noise_treatment == "no_noise") NULL else m$Sigma_noise[[1]]) %>%
-      as_tibble(.name_repair = "minimal")(.name_repair = "minimal") %>%
+      as_tibble(.name_repair = "unique") %>%
       rename_with(~ if (log) { "log_likelihood" } else { "likelihood" }) %>%
       mutate(!! sym(category) := c)
   }

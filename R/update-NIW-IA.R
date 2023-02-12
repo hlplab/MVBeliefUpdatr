@@ -4,41 +4,6 @@
 #' @importFrom mvtnorm rmvnorm
 NULL
 
-#' Example NIW priors.
-#'
-#' @export
-example_NIW_prior = function(example = 1) {
-  if (example == 1) {
-    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.")
-    tibble(
-      category = c("A", "B"),
-      kappa = 10,
-      nu = 30,
-      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
-      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
-               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
-      lapse_rate = .05
-    ) %>%
-    mutate(category = factor(category))
-  } else if (example == 2) {
-    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
-            Same as Example 1, but with independent perceptual noise along both cue dimensions.")
-    tibble(
-      category = c("A", "B"),
-      kappa = 10,
-      nu = 30,
-      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
-      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
-               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
-      lapse_rate = .05,
-      Sigma_noise = list(matrix(c(1, 0, 0, .25), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))
-    ) %>%
-      mutate(category = factor(category))
-  }
-}
-
-
-
 #' Update parameters of NIW prior beliefs about multivariate Gaussian category.
 #'
 #' Returns updated/posterior m, S, kappa, or nu based on \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
@@ -124,10 +89,10 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) { S_0 + x_S
 #' Please feel free to suggest additional features.
 #'
 #' @param prior An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
-#' @param x_category Character. The label of the category that is to be updated.
-#' @param x A single observation.
-#' @param x_mean mean of the observations.
-#' @param x_SS *Centered* sum of squares matrix of the observations.
+#' @param x The cues of single observation.
+#' @param x_category The category label(s) of one or more observations.
+#' @param x_mean The cue mean of observations.
+#' @param x_SS *Centered* The sum of squares matrix of observations.
 #' @param x_N Number of observations that went into the mean and sum of squares matrix.
 #' @param noise_treatment Determines whether multivariate Gaussian noise is added to the input.
 #' If `NULL`, no noise is added during the updating. If "sample" then a sample of
@@ -431,3 +396,5 @@ update_NIW_beliefs_incrementally <- function(...){
 
   update_NIW_ideal_adaptor_incrementally(..., noise_treatment = "no_noise", lapse_treatment = "no_lapses")
 }
+
+

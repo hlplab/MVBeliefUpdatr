@@ -29,8 +29,8 @@ get_likelihood_from_MVG(
 columns and n rows, in which case each row of the matrix is taken to be one observation. If x is a
 tibble with k columns or a list of vectors of length k, it is reduced into a matrix with k columns.}
 
-\item{mu}{The category mean mu. Should be a
-matrix or vector of length k.}
+\item{mu}{The category mean mu. Should be a k x 1 or 1 x k
+matrix, or vector of length k.}
 
 \item{Sigma}{The category covariance matrix Sigma. Should be a square k x k matrix.}
 

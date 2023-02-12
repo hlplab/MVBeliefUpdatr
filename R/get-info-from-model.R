@@ -189,3 +189,18 @@ unnest_cue_information_in_model <- function(model) {
     ungroup() %>%
     select(cue, cue2, everything())
 }
+
+
+get_categorization_from_model <- function(model, ...) {
+  if (is.NIW_ideal_adaptor(model)) {
+    c <- get_categorization_from_NIW_ideal_adaptor(model = model, ...)
+  } else {
+    stop(
+      paste(
+        "get_categorization_from_* function for model type",
+        class(model),
+        "does not yet exist."))
+  }
+
+  return(c)
+}

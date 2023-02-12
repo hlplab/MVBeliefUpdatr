@@ -237,6 +237,40 @@ make_NIW_ideal_adaptor_from_data = function(
 }
 
 
+#' Example NIW priors.
+#'
+#' @export
+make_NIW_example = function(example = 1) {
+  if (example == 1) {
+    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.")
+    tibble(
+      category = c("A", "B"),
+      kappa = 10,
+      nu = 30,
+      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
+      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
+      lapse_rate = .05
+    ) %>%
+      mutate(category = factor(category))
+  } else if (example == 2) {
+    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
+            Same as Example 1, but with independent perceptual noise along both cue dimensions.")
+    tibble(
+      category = c("A", "B"),
+      kappa = 10,
+      nu = 30,
+      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
+      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
+      lapse_rate = .05,
+      Sigma_noise = list(matrix(c(1, 0, 0, .25), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))
+    ) %>%
+      mutate(category = factor(category))
+  }
+}
+
+
 #' Turn an MVG/NIW_belief object into an ideal observer/adaptor
 #'
 #' Make an ideal observer or adaptor out of an MVG or NIW_belief object, respectively, by providing the missing
