@@ -441,7 +441,7 @@ plot_expected_categories_contour2D = function(
     mutate(ellipse = pmap(.l = list(Sigma, m, level), ellipse.pmap)) %>%
     # This step is necessary since unnest() can't yet unnest lists of matrices
     # (bug was reported and added as milestone, 11/2019)
-    mutate(ellipse = map(ellipse, as_tibble)) %>%
+    mutate(ellipse = map(ellipse, ~ as_tibble(.x, .name_repair = "unique"))) %>%
     select(-c(kappa, nu, m, S, Sigma, lapse_rate)) %>%
     unnest(ellipse) %>%
     # Get group structure again, as crossing apparently removes it
