@@ -439,17 +439,19 @@ plot_expected_categories_contour_2D <- function(
   if (is.null(category.colors)) category.colors = get_default_colors("category", category.ids)
   if (is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
-  x %<>%
-    mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
-    crossing(level = levels) %>%
-    mutate(ellipse = pmap(.l = list(Sigma, m, level), ellipse.pmap)) %>%
-    # This step is necessary since unnest() can't yet unnest lists of matrices
-    # (bug was reported and added as milestone, 11/2019)
-    mutate(ellipse = map(ellipse, ~ as_tibble(.x, .name_repair = "unique"))) %>%
-    select(-c(kappa, nu, m, S, Sigma, lapse_rate)) %>%
-    unnest(ellipse) %>%
-    # Get group structure again, as crossing apparently removes it
-    group_by(!!! syms(group_vars(x)))
+  suppressMessages(
+    x %<>%
+      mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
+      crossing(level = levels) %>%
+      mutate(ellipse = pmap(.l = list(Sigma, m, level), ellipse.pmap)) %>%
+      # This step is necessary since unnest() can't yet unnest lists of matrices
+      # (bug was reported and added as milestone, 11/2019)
+      mutate(ellipse = map(ellipse, ~ as_tibble(.x, .name_repair = "unique"))) %>%
+      select(-c(kappa, nu, m, S, Sigma, lapse_rate)) %>%
+      unnest(ellipse) %>%
+      # Get group structure again, as crossing apparently removes it
+      group_by(!!! syms(group_vars(x)))
+  )
 
   p = ggplot(x,
              aes(

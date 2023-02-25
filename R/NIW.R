@@ -3,6 +3,26 @@
 NULL
 
 
+#' Get dimensionality of mean or covariance matrix
+#'
+#' @param x A mean or covariance matrix, or lists of means or covariance matrices. If x is a list, then the
+#' dimensionality of the first list element is determined. This function does not currently check whether all
+#' list elements have the same dimensionality.
+#'
+#' @export
+get_D <- function(x) {
+  if (is.list(x)) {
+    return(get_D(x[[1]]))
+  } else if (is.matrix(x)) {
+    # could be mean or cov, so take max of dims
+    return(max(dim(x)))
+  } else if (is.vector(x)) {
+    return(length(x))
+  } else if (is.numeric(x) & length(x) == 1) {
+    return(1)
+  } else stop("Cannot recognize dimensionality of x.")
+}
+
 #' Get expected category mu from mean of means m
 #'
 #' See Murphy (2012, p. 134).
@@ -48,7 +68,7 @@ get_expected_Sigma_from_S = function(S, nu) {
   }
 
   Sigma = map2(S, nu, .f = function(S, nu) {
-    D = if (is.null(dim(S)[1])) 1 else dim(S)[1]
+    D = get_D(S)
     return(S / (nu - D - 1))
   })
 
@@ -67,8 +87,9 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
     Sigma <- list(Sigma)
     nu <- list(nu)
   }
+
   S = map2(Sigma, nu, .f = function(Sigma, nu) {
-    D = if (is.null(dim(Sigma)[1])) 1 else dim(Sigma)[1]
+    D = get_D(Sigma)
     return(Sigma * (nu - D - 1))
   })
 
@@ -132,8 +153,7 @@ get_NIW_posterior_predictive = function(x, m, S, kappa, nu, Sigma_noise = NULL, 
                 msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the scatter matrices S.')
   }
 
-  D = dim(S)[1]
-  if (is.null(D)) D = 1
+  D = get_D(S)
   assert_that(nu >= D,
               msg = "nu must be at least as large as the number of dimensions of the multivariate
               Normal.")
@@ -233,9 +253,10 @@ get_NIW_categorization_function = function(
   } else lapse_biases <- 1 / n.cat
 
   # Get dimensions of multivariate category
-  D = length(ms[[1]])
-  assert_that(nus[[1]] >= D,
-              msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
+  D = get_D(ms)
+  assert_that(
+    nus[[1]] >= D,
+    msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
 
   f <- function(x, target_category = 1) {
     log_p = matrix(

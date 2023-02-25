@@ -51,6 +51,7 @@ get_MVG_likelihood <- function(x, mu, Sigma, log = T, noise_treatment = "no_nois
   # in the latter case, each *row* of the matrix is an input.
   assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
   assert_that(is.vector(mu) | is.matrix(mu) | is_scalar_double(mu))
+  assert_that(is.Sigma(Sigma))
 
   # do not reorder these conditionals (go from more to less specific)
   if (is_tibble(x)) x %<>% as.matrix() else
@@ -67,8 +68,7 @@ get_MVG_likelihood <- function(x, mu, Sigma, log = T, noise_treatment = "no_nois
                 msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the category covariance matrices Sigma.')
   }
 
-  D = dim(Sigma)[1]
-
+  D = get_D(Sigma)
   if (D == 1) {
     assert_that(is_scalar_double(mu), msg = "Sigma and mu are not of compatible dimensions.")
   } else {
@@ -91,10 +91,8 @@ get_MVG_likelihood <- function(x, mu, Sigma, log = T, noise_treatment = "no_nois
     Sigma = Sigma + Sigma_noise
   }
 
-  dmvnorm(x,
-       mean = mu,
-       sigma = Sigma,
-       log = log)
+  dmvnorm(x, mean = mu, sigma = Sigma, log = log) %>%
+    as.numeric()
 }
 
 
@@ -140,8 +138,8 @@ get_likelihood_from_MVG <- function(
       rename_with(~ if (log) { "log_likelihood" } else { "likelihood" }) %>%
       mutate(!! sym(category) := c)
   }
-
   likelihood %<>% reduce(rbind)
+
   if (wide)
     likelihood %<>%
     pivot_wider(
