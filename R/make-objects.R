@@ -1,3 +1,117 @@
+#' Make exemplar models from data.
+#'
+#' Constructs an exemplar model for all categories found in the data.
+#'
+#' @param data The tibble or data.frame from which to construct the exemplar model.
+#' @param group Optionally, a vector of one or more grouping variables. If group is not NULL, one MVG or
+#' ideal observers will be derived for each level of \code{group}. (default: NULL)
+#' @param category Name of variable in \code{data} that contains the category information. (default: "category")
+#' @param cues Name(s) of variables in \code{data} that contain the cue information.
+#' @param prior Optionally specify a prior probability for each category (in each group). (default: a uniform
+#' prior over all categories).
+#' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
+#' @param lapse_bias Optionally specify a lapse bias. (default: \code{NA})
+#' @param Sigma_noise Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This
+#' argument will be ignored if NULL. (default: NULL)
+#' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
+#' representation (category variability)? If FALSE, then noise will be considered during categorization decisions
+#' but will not be added to the MVG categories. If TRUE, then noise will also be to the category covariance matrix.
+#' This is typically the desired result since perceptual noise would have shaped the ideal observers representations.
+#' Will be ignored if Sigma_noise is NULL. (default: TRUE)
+#' @param verbose If true provides more information. (default: FALSE)
+#'
+#' @return A tibble that is an MVG or MVG ideal observer object.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @export
+#'
+make_exemplars_from_data = function(
+    data,
+    group = NULL,
+    category = "category",
+    cues,
+    verbose = F
+) {
+  assert_that(is.data.frame(data) | is_tibble(data))
+  assert_that(all(is.null(group) | all(is.character(group) | is_symbol(group))))
+  assert_that(all(is.character(category) | is_symbol(category), length(category) == 1))
+  assert_that(all(is.character(cues) | is_symbol(cues), length(cues) > 0))
+
+  if (is.character(group)) group <- syms(group)
+  if (is.character(category)) category <- sym(category)
+  if (is.character(cues)) {
+    cue_names <- cues
+    cues <- syms(cues)
+  }
+
+  assert_that(as_name(category) %in% names(data),
+              msg = paste0("Category variable (", as_name(category), ") not found in data."))
+  assert_that(all(cue_names %in% names(data)),
+              msg = paste0("Some cues not found in data: ", paste(setdiff(cue_names, intersect(cue_names, names(data))), collapse = ", ")))
+
+  if (verbose) if (!is.null(group))
+    message(
+      paste("Group specified. Making one exemplar cloud for each unique value of group.",
+            paste(unique(data$group), collapse = ",")))
+
+  model <- data %>%
+    select(!! category, !!! cues, !!! group) %>%
+    mutate(cues = pmap(list(!!! cues),
+                       .f = function(...) {
+                         x = c(...)
+                         names(x) = as.character(cues)
+                         return(x) })) %>%
+    { if (is.null(group)) group_by(., !! category) else group_by(., !!! group, !! category) } %>%
+    nest(exemplars = cues)
+
+  model %<>%
+    rename(category = !! category) %>%
+    mutate(category = factor(category)) %>%
+    ungroup()
+
+  return(model)
+}
+
+
+#' @export
+#' @rdname make_exemplars_from_data
+make_exemplar_model_from_data = function(
+    data,
+    group = NULL,
+    category = "category",
+    cues,
+    sim_function = function(x, y) {
+      j <- 2
+      k <- 1
+      distance <- (x - y)^j
+      similarity <- exp(-distance * k) },
+    prior = NA_real_,
+    lapse_rate = NA_real_,
+    lapse_bias = NA_real_,
+    Sigma_noise = NULL,
+    add_Sigma_noise_to_category_representation = T,
+    verbose = F
+) {
+  model <-
+    data %>%
+    make_exemplars_from_data(group = group, category = category, cues = cues, verbose = verbose)
+
+  model %<>%
+    lift_exmplars_to_exemplar_model(
+      group = group,
+      prior = prior,
+      lapse_rate = lapse_rate, lapse_bias = lapse_bias,
+      Sigma_noise = Sigma_noise,
+      add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation,
+      verbose = verbose)
+
+  return(model)
+}
+
+
 #' Make multivariate Gaussian ideal observer(s) from data.
 #'
 #' Constructs an \code{\link[=is.MVG]{MVG}} or \code{\link[=is.MVG_ideal_observer]{MVG_ideal_observer}} object with category
@@ -107,9 +221,6 @@ make_MVG_ideal_observer_from_data = function(
       Sigma_noise = Sigma_noise,
       add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation,
       verbose = verbose)
-
-  if (!is.MVG_ideal_observer(model, group = group, verbose = verbose))
-    warning("Something went wrong. The returned object is not an MVG ideal observer. Try again with verbose = T?")
 
   return(model)
 }
@@ -230,8 +341,6 @@ make_NIW_ideal_adaptor_from_data = function(
       verbose = verbose)
 
   if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
-  if (!is.NIW_ideal_adaptor(model, group = group, verbose = verbose))
-    warning("Something went wrong. The returned object is not an NIW ideal adaptor. Try again with verbose = T?")
 
   return(model)
 }
@@ -346,6 +455,40 @@ lift_likelihood_to_model <- function(
   return(x)
 }
 
+
+#' @export
+#' @rdname lift_likelihood_to_model
+lift_exemplars_to_exemplar_model = function(
+    x,
+    group = NULL,
+    category = "category",
+    prior = NA_real_,
+    lapse_rate = NA_real_,
+    lapse_bias = NA_real_,
+    Sigma_noise = NULL,
+    add_Sigma_noise_to_category_representation = F,
+    verbose = F
+) {
+  x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
+  if (!is.null(first(x$Sigma_noise))) {
+    assert_that(!is.null(dimnames(first(x$Sigma_noise))),
+                msg = "Sigma_noise = must have non-NULL dimnames.")
+    assert_that(map2(dimnames(Sigma_noise), dimnames(first(x$Sigma)), ~ .x == .y) %>% reduce(c) %>% all(),
+                msg = "The dimnames of Sigma_noise must match the cue names in the list of exemplars.")
+
+    if (add_Sigma_noise_to_category_representation)
+      x %<>%
+      mutate(exemplars = map2(exemplars, Sigma_noise, ~ .x + rmvnorm(1, 0, .y)))
+  }
+
+  # TO DO:
+  # if (!is.exemplar_model(model, group = group, verbose = verbose))
+  #   warning("Something went wrong. The returned object is not an exemplar model. Try again with verbose = T?")
+
+  return(x)
+}
+
+
 #' @export
 #' @rdname lift_likelihood_to_model
 lift_MVG_to_MVG_ideal_observer = function(
@@ -362,11 +505,11 @@ lift_MVG_to_MVG_ideal_observer = function(
   x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(Sigma_noise) == dim(first(x$Sigma))),
-                msg = "If not NULL, Sigma_noise must be a matrix of the same dimensionality as Sigma.")
+                msg = "Sigma_noise must be a matrix of the same dimensionality as Sigma.")
     assert_that(!is.null(dimnames(first(x$Sigma_noise))),
-                msg = "Sigma_noise = must have non-NULL dimnames that must match those of Sigma.")
+                msg = "Sigma_noise = must have non-NULL dimnames.")
     assert_that(map2(dimnames(Sigma_noise), dimnames(first(x$Sigma)), ~ .x == .y) %>% reduce(c) %>% all(),
-                msg = "If Sigma_noise is not NULL, the dimnames of Sigma_noise and Sigma must match.")
+                msg = "The dimnames of Sigma_noise and Sigma must match.")
 
     if (add_Sigma_noise_to_category_representation)
       x %<>%
@@ -395,11 +538,11 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(Sigma_noise) == dim(first(x$S))),
-                msg = "If Sigma_noise is not NULL, Sigma_noise must be a matrix of the same dimensionality as S.")
+                msg = "Sigma_noise must be a matrix of the same dimensionality as S.")
     assert_that(!is.null(dimnames(first(x$Sigma_noise))),
-                msg = "Sigma_noise = must have non-NULL dimnames that must match those of S.")
+                msg = "Sigma_noise = must have non-NULL dimnames.")
     assert_that(map2(dimnames(Sigma_noise), dimnames(first(x$S)), ~ .x == .y) %>% reduce(c) %>% all(),
-                msg = "If Sigma_noise is not NULL, the dimnames of Sigma_noise and S must match.")
+                msg = "The dimnames of Sigma_noise and S must match.")
 
     if (add_Sigma_noise_to_category_representation)
       x %<>%
