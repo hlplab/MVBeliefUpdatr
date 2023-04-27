@@ -17,7 +17,7 @@ get_NIW_categorization_function(
   lapse_biases = rep(1/length(ms), length(ms)),
   Sigma_noise = matrix(0, nrow = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])),
     ncol = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]]))),
-  noise_treatment = "no_noise",
+  noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
   logit = FALSE
 )
 
@@ -43,7 +43,7 @@ get_categorization_function_from_NIW_ideal_adaptor(model, ...)
 \item{Sigma_noise}{A noise matrix. (default: a 0-matrix)}
 
 \item{noise_treatment}{How should the noise specified in \code{Sigma_noise} be considered in the categorization function?
-For details, see \code{\link{get_NIW_posterior_predictive}} (default: "no_noise")}
+For details, see \code{\link{get_NIW_posterior_predictive}}.}
 
 \item{logit}{Should the function that is returned return log-odds (TRUE) or probabilities (FALSE)? (default: TRUE)}
 }

@@ -12,7 +12,13 @@ update_NIW_ideal_adaptor_incrementally(
   exposure.category = "category",
   exposure.cues = get_cue_labels_from_model(prior),
   exposure.order = NULL,
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_noise",
+  noise_treatment = if (is.NIW_ideal_adaptor(prior)) {
+     if
+    (!is.null(first(prior$Sigma_noise))) 
+         "marginalize"
+     else "no_noise"
+ }
+    else "no_noise",
   lapse_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_lapses",
   method = "label-certain",
   keep.update_history = TRUE,
@@ -25,7 +31,13 @@ update_NIW_ideal_adaptor_batch(
   exposure,
   exposure.category = "category",
   exposure.cues = get_cue_labels_from_model(prior),
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) "marginalize" else "no_noise",
+  noise_treatment = if (is.NIW_ideal_adaptor(prior)) {
+     if
+    (!is.null(first(prior$Sigma_noise))) 
+         "marginalize"
+     else "no_noise"
+ }
+    else "no_noise",
   verbose = FALSE
 )
 
@@ -44,8 +56,8 @@ extracted from the prior object.}
 \item{exposure.order}{Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 exposure data is assumed to be in the order in which it should be presented.}
 
-\item{noise_treatment}{Determines whether multivariate Gaussian noise is added to the input before updating based on
-the input. See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.}
+\item{noise_treatment}{Determines whether and how multivariate Gaussian noise is considered during categorization.
+See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.}
 
 \item{lapse_treatment}{Determines whether attentional lapses can occur during which no updating occurs.
 See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.}

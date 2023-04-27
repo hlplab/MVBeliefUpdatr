@@ -67,7 +67,7 @@ is.NIW_belief = function(x, group = NULL, category = "category", is.long = T, ve
   }
 
   # Check nu vs. dimensionality of S
-  D_S = if (is.null(dim(x$S[[1]]))) 1 else dim(x$S[[1]])
+  D_S = if (is.null(dim(x$S[[1]]))) 1 else dim(x$S[[1]])[1]
   if (any(x$nu <= D_S + 1))
     warning(paste0("At least one category had nu smaller than allowed (is ", min(x$nu), "; should be >", D_S + 1, ").\n"))
 

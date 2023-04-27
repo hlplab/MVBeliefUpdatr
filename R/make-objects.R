@@ -7,17 +7,14 @@
 #' ideal observers will be derived for each level of \code{group}. (default: NULL)
 #' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param cues Name(s) of variables in \code{data} that contain the cue information.
+#' @param sim_function Similarity function that is used to calculate exemplar-to-examplar similarity. Defaults
+#' to \code{exp(-(x - y)^2)}.
 #' @param prior Optionally specify a prior probability for each category (in each group). (default: a uniform
 #' prior over all categories).
 #' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
 #' @param lapse_bias Optionally specify a lapse bias. (default: \code{NA})
 #' @param Sigma_noise Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This
 #' argument will be ignored if NULL. (default: NULL)
-#' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
-#' representation (category variability)? If FALSE, then noise will be considered during categorization decisions
-#' but will not be added to the MVG categories. If TRUE, then noise will also be to the category covariance matrix.
-#' This is typically the desired result since perceptual noise would have shaped the ideal observers representations.
-#' Will be ignored if Sigma_noise is NULL. (default: TRUE)
 #' @param verbose If true provides more information. (default: FALSE)
 #'
 #' @return A tibble that is an MVG or MVG ideal observer object.
@@ -33,6 +30,11 @@ make_exemplars_from_data = function(
     group = NULL,
     category = "category",
     cues,
+    sim_function = function(x, y) {
+      j <- 2
+      k <- 1
+      distance <- (x - y)^j
+      similarity <- exp(-distance * k) },
     verbose = F
 ) {
   assert_that(is.data.frame(data) | is_tibble(data))
@@ -57,7 +59,8 @@ make_exemplars_from_data = function(
       paste("Group specified. Making one exemplar cloud for each unique value of group.",
             paste(unique(data$group), collapse = ",")))
 
-  model <- data %>%
+  model <-
+    data %>%
     select(!! category, !!! cues, !!! group) %>%
     mutate(cues = pmap(list(!!! cues),
                        .f = function(...) {
@@ -65,12 +68,17 @@ make_exemplars_from_data = function(
                          names(x) = as.character(cues)
                          return(x) })) %>%
     { if (is.null(group)) group_by(., !! category) else group_by(., !!! group, !! category) } %>%
-    nest(exemplars = cues)
+    select(-c(!!! cues)) %>%
+    nest(exemplars = cues) %>%
+    mutate(sim_function = list(.env$sim_function))
 
   model %<>%
     rename(category = !! category) %>%
     mutate(category = factor(category)) %>%
     ungroup()
+
+  if (!is.exemplars(model, group = group, verbose = verbose))
+    warning("Something went wrong. The returned object is not a set of exemplars. Try again with verbose = T?")
 
   return(model)
 }
@@ -88,25 +96,14 @@ make_exemplar_model_from_data = function(
       k <- 1
       distance <- (x - y)^j
       similarity <- exp(-distance * k) },
-    prior = NA_real_,
-    lapse_rate = NA_real_,
-    lapse_bias = NA_real_,
-    Sigma_noise = NULL,
-    add_Sigma_noise_to_category_representation = T,
+    ...,
     verbose = F
 ) {
   model <-
     data %>%
-    make_exemplars_from_data(group = group, category = category, cues = cues, verbose = verbose)
+    make_exemplars_from_data(group = group, category = category, cues = cues, sim_function = sim_function, verbose = verbose)
 
-  model %<>%
-    lift_exmplars_to_exemplar_model(
-      group = group,
-      prior = prior,
-      lapse_rate = lapse_rate, lapse_bias = lapse_bias,
-      Sigma_noise = Sigma_noise,
-      add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation,
-      verbose = verbose)
+  model %<>% lift_exemplars_to_exemplar_model(group = group, ..., verbose = verbose)
 
   return(model)
 }
@@ -128,11 +125,6 @@ make_exemplar_model_from_data = function(
 #' @param lapse_bias Optionally specify a lapse bias. (default: \code{NA})
 #' @param Sigma_noise Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This
 #' argument will be ignored if NULL. (default: NULL)
-#' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
-#' representation (category variability)? If FALSE, then noise will be considered during categorization decisions
-#' but will not be added to the MVG categories. If TRUE, then noise will also be to the category covariance matrix.
-#' This is typically the desired result since perceptual noise would have shaped the ideal observers representations.
-#' Will be ignored if Sigma_noise is NULL. (default: TRUE)
 #' @param verbose If true provides more information. (default: FALSE)
 #'
 #' @return A tibble that is an MVG or MVG ideal observer object.
@@ -172,7 +164,8 @@ make_MVG_from_data = function(
       paste("Group specified. Making one MVG for each unique value of group.",
             paste(unique(data$group), collapse = ",")))
 
-  model <- data %>%
+  model <-
+    data %>%
     select(!! category, !!! cues, !!! group) %>%
     mutate(cues = pmap(list(!!! cues),
                        .f = function(...) {
@@ -202,25 +195,14 @@ make_MVG_ideal_observer_from_data = function(
   group = NULL,
   category = "category",
   cues,
-  prior = NA_real_,
-  lapse_rate = NA_real_,
-  lapse_bias = NA_real_,
-  Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = T,
+  ...,
   verbose = F
 ) {
   model <-
     data %>%
     make_MVG_from_data(group = group, category = category, cues = cues, verbose = verbose)
 
-  model %<>%
-    lift_MVG_to_MVG_ideal_observer(
-      group = group,
-      prior = prior,
-      lapse_rate = lapse_rate, lapse_bias = lapse_bias,
-      Sigma_noise = Sigma_noise,
-      add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation,
-      verbose = verbose)
+  model %<>% lift_MVG_to_MVG_ideal_observer(group = group, ..., verbose = verbose)
 
   return(model)
 }
@@ -252,14 +234,7 @@ make_MVG_ideal_observer_from_data = function(
 #' @param lapse_bias Optionally specify a lapse bias. (default: \code{NA})
 #' @param Sigma_noise Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This argument will be
 #' ignored if NULL. (default: NULL)
-#' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
-#' representation (category variability)? If FALSE, then noise will be considered during categorization decisions
-#' but will not be added to the MVG categories. If TRUE, then noise will also be to the category covariance matrix.
-#' This is typically the desired result since perceptual noise would have shaped the ideal observers representations.
-#' Will be ignored if Sigma_noise is NULL. (default: TRUE)
 #' @param verbose If true provides more information. (default: FALSE)
-#' @param keep.category_parameters Should categories' mu and Sigma be included in the output (in addition to m
-#' and S of the prior)? (default: FALSE)
 #'
 #' @return A tibble that is an NIW_belief or NIW_ideal_adaptor object.
 #'
@@ -276,7 +251,6 @@ make_NIW_belief_from_data = function(
   cues,
   kappa = nu,
   nu = length(cues) + 2,
-  keep.category_parameters = F,
   verbose = F
 ) {
   assert_that(all(is.numeric(kappa), is.numeric(nu), !is.na(kappa), !is.na(nu)))
@@ -296,14 +270,11 @@ make_NIW_belief_from_data = function(
           "It might be safer to fit an Inverse-Wishart distribution to the entire set of covariance matrices.")
   model %<>%
     mutate(
-      !! category := factor(!! category),
       kappa = kappa,
       nu = nu,
-      m = mu,
       S = get_S_from_expected_Sigma(S, nu)) %>%
     ungroup()
 
-  if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
   if (!is.NIW_belief(model, group = group, verbose = verbose))
     warning("Something went wrong. The returned object is not an NIW belief. Try again with verbose = T?")
 
@@ -323,24 +294,14 @@ make_NIW_ideal_adaptor_from_data = function(
   cues,
   kappa = nu,
   nu = length(cues) + 2,
-  prior = NA_real_,
-  lapse_rate = NA_real_,
-  lapse_bias = NA_real_,
-  Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = T,
-  keep.category_parameters = F
+  ...,
+  verbose = F
 ) {
   model <-
     data %>%
-    make_NIW_belief_from_data(group = group, category = category, cues = cues, verbose = verbose)
+    make_NIW_belief_from_data(group = group, category = category, cues = cues, kappa = kappa, nu = nu, verbose = verbose)
 
-  model %<>%
-    lift_NIW_belief_to_NIW_ideal_adaptor(
-      group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias,
-      Sigma_noise = Sigma_noise, add_Sigma_noise_to_category_representation = add_Sigma_noise_to_category_representation,
-      verbose = verbose)
-
-  if (!keep.category_parameters) data %<>% select(-c(mu, Sigma))
+  model %<>% lift_NIW_belief_to_NIW_ideal_adaptor(group = group, ..., verbose = verbose)
 
   return(model)
 }
@@ -394,14 +355,10 @@ make_NIW_example = function(example = 1) {
 #' cues + 2)
 #' @param prior Optionally specify a prior probability for each category (in each group). (default: a uniform
 #' prior over all categories).
-#' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
-#' @param lapse_bias Optionally specify a lapse bias. (default: \code{NA})
+#' @param lapse_rate Optionally specify a lapse rate. (default: 0)
+#' @param lapse_bias Optionally specify a lapse bias for each category. (default: uniform bias for all categories)
 #' @param Sigma_noise Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This argument will be
 #' ignored if NULL. (default: NULL)
-#' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
-#' representation (category variability)? If FALSE, then noise will be considered during categorization decisions
-#' but will not be added to the covariance matrix of the MVG categories. If TRUE, then noise will also be to the category
-#' covariance matrix. Will be ignored if Sigma_noise is NULL. (default: FALSE)
 #' @param keep.category_parameters Should categories' mu and Sigma be included in the output (in addition to m
 #' and S of the prior)? (default: FALSE)
 #' @param verbose If true provides more information. (default: FALSE)
@@ -413,44 +370,61 @@ make_NIW_example = function(example = 1) {
 #' @examples
 #' TBD
 #' @export
+#' @rdname lift_likelihood_to_model
 lift_likelihood_to_model <- function(
   x,
   group = NULL,
   category = "category",
-  prior = NA_real_,
-  lapse_rate = NA_real_,
-  lapse_bias = NA_real_,
+  prior = rep(1 / get_nlevels_of_category_labels_from_model(x), get_nlevels_of_category_labels_from_model(x)),
+  lapse_rate = 0,
+  lapse_bias = rep(1 / get_nlevels_of_category_labels_from_model(x), get_nlevels_of_category_labels_from_model(x)),
   Sigma_noise = NULL,
   verbose = F
 ) {
   if (is.character(group)) group = syms(group)
   if (is.character(category)) category = sym(category)
   assert_that(all(is.numeric(lapse_rate), is.numeric(lapse_bias), is.numeric(prior)),
-              msg = "The category prior, lapse rate, and lapse bias must be numeric.")
+              msg = "Category prior, lapse rate, and lapse bias must be numeric.")
 
-  n.cat <- length(unique(x %>% pull(!! category)))
-  if (all(is.na(prior) | is.null(prior))) {
-    message(paste0("No prior specified. Defaulting to uniform prior over the ", n.cat, " categories found in x."))
-    prior <- rep(1 / n.cat, n.cat)
+  category_levels <- get_category_labels_from_model(x)
+  n.cat <- get_nlevels_of_category_labels_from_model(x)
+  if (!is.null(prior)) {
+    assert_that(length(prior) == n.cat,
+              msg = paste("Category prior must have as many elements as there are categories. Has", length(prior), "instead of needed", n.cat))
+    if (!is.null(names(prior))) {
+        assert_that(all(names(prior) == category_levels),
+                    msg = paste("Names of category priors must match levels of", category, "in x."))
+    } else {
+      message(paste("Category priors were not named. Assuming that priors are provided in alphabetic order of", category, "in x."))
+      names(prior) <- category_levels
+    }
   }
-
-  if (all(is.na(lapse_bias) | is.null(lapse_bias))) {
-    message(paste0("No lapse_bias specified. Defaulting to uniform lapse_bias over the ", n.cat, " categories found in x."))
-    lapse_bias <- rep(1 / n.cat, n.cat)
+  if (!is.null(lapse_bias)) {
+    assert_that(length(lapse_bias) == n.cat,
+                msg = paste("Lapse_bias must have as many elements as there are categories. Has", length(lapse_bias), "instead of needed", n.cat))
+    if (!is.null(names(lapse_bias))) {
+      assert_that(all(names(lapse_bias) == category_levels),
+                  msg = paste("Names of lapse biases must match levels of", category, "in x."))
+    } else {
+      message(paste("Lapse biases were not named. Assuming that lapse biases are provided in alphabetic order of", category, "in x."))
+      names(lapse_bias) <- category_levels
+    }
   }
 
   if (all(is.na(lapse_rate) | is.null(lapse_rate))) {
-    message(paste0("No lapse_rate specified. Defaulting to lapse_bias of 0."))
     lapse_rate <- 0
   }
 
   x %<>%
     group_by(!!! group) %>%
     mutate(
-      prior = .env$prior,
+      prior = .env$prior[as.character(!! sym(category))],
       lapse_rate = .env$lapse_rate,
-      lapse_bias = .env$lapse_bias,
+      lapse_bias = .env$lapse_bias[as.character(!! sym(category))],
       Sigma_noise = list(.env$Sigma_noise))
+
+  if (!is.model(x, group = group, verbose = verbose))
+    warning("Something went wrong. The returned object is not a model. Try again with verbose = T?")
 
   return(x)
 }
@@ -458,32 +432,25 @@ lift_likelihood_to_model <- function(
 
 #' @export
 #' @rdname lift_likelihood_to_model
-lift_exemplars_to_exemplar_model = function(
+lift_exemplars_to_exemplar_model <- function(
     x,
     group = NULL,
-    category = "category",
-    prior = NA_real_,
-    lapse_rate = NA_real_,
-    lapse_bias = NA_real_,
+    prior = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
+    lapse_rate = 0,
+    lapse_bias = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
     Sigma_noise = NULL,
-    add_Sigma_noise_to_category_representation = F,
     verbose = F
 ) {
-  x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
+  x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(!is.null(dimnames(first(x$Sigma_noise))),
                 msg = "Sigma_noise = must have non-NULL dimnames.")
     assert_that(map2(dimnames(Sigma_noise), dimnames(first(x$Sigma)), ~ .x == .y) %>% reduce(c) %>% all(),
                 msg = "The dimnames of Sigma_noise must match the cue names in the list of exemplars.")
-
-    if (add_Sigma_noise_to_category_representation)
-      x %<>%
-      mutate(exemplars = map2(exemplars, Sigma_noise, ~ .x + rmvnorm(1, 0, .y)))
   }
 
-  # TO DO:
-  # if (!is.exemplar_model(model, group = group, verbose = verbose))
-  #   warning("Something went wrong. The returned object is not an exemplar model. Try again with verbose = T?")
+  if (!is.exemplar_model(x, group = group, verbose = verbose))
+    warning("Something went wrong. The returned object is not an exemplar model. Try again with verbose = T?")
 
   return(x)
 }
@@ -495,11 +462,10 @@ lift_MVG_to_MVG_ideal_observer = function(
   x,
   group = NULL,
   category = "category",
-  prior = NA_real_,
-  lapse_rate = NA_real_,
-  lapse_bias = NA_real_,
+  prior = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
+  lapse_rate = 0,
+  lapse_bias = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = F,
   verbose = F
 ) {
   x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
@@ -510,10 +476,6 @@ lift_MVG_to_MVG_ideal_observer = function(
                 msg = "Sigma_noise = must have non-NULL dimnames.")
     assert_that(map2(dimnames(Sigma_noise), dimnames(first(x$Sigma)), ~ .x == .y) %>% reduce(c) %>% all(),
                 msg = "The dimnames of Sigma_noise and Sigma must match.")
-
-    if (add_Sigma_noise_to_category_representation)
-      x %<>%
-        mutate(Sigma = map2(Sigma, Sigma_noise, ~ .x + .y))
   }
 
   if (!is.MVG_ideal_observer(x, group = group, verbose = verbose))
@@ -528,11 +490,10 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   x,
   group = NULL,
   category = "category",
-  prior = NA_real_,
-  lapse_rate = NA_real_,
-  lapse_bias = NA_real_,
+  prior = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
+  lapse_rate = 0,
+  lapse_bias = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = F,
   verbose = F
 ) {
   x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
@@ -543,10 +504,6 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
                 msg = "Sigma_noise = must have non-NULL dimnames.")
     assert_that(map2(dimnames(Sigma_noise), dimnames(first(x$S)), ~ .x == .y) %>% reduce(c) %>% all(),
                 msg = "The dimnames of Sigma_noise and S must match.")
-
-    if (add_Sigma_noise_to_category_representation)
-      x %<>%
-      mutate(S = map2(get_expected_Sigma_from_S(S, nu), Sigma_noise, ~ get_S_from_expected_Sigma(.x + .y, nu)))
   }
 
   if (!is.NIW_ideal_adaptor(x, group = group, verbose = verbose))
@@ -567,10 +524,6 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
 #' @param kappa The strength of the beliefs over the category mean (pseudocounts). (default: same as nu)
 #' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
 #' cues + 2)
-#' @param add_Sigma_noise_to_category_representation Should the perceptual noise be added to the category
-#' representation (category variability)? If FALSE, then noise will be considered during categorization decisions
-#' but will not be added to the covariance matrix of the MVG categories. If TRUE, then noise will also be to the category
-#' covariance matrix. Will be ignored if Sigma_noise is NULL. (default: FALSE)
 #' @param verbose If true provides more information. (default: FALSE)
 #'
 #' @return A tibble that is an NIW_ideal_adaptor object.

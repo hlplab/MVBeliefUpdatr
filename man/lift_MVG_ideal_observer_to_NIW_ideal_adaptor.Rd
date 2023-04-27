@@ -27,11 +27,6 @@ NIW belief or ideal adaptor will be derived for each level of \code{group_struct
 cues + 2)}
 
 \item{verbose}{If true provides more information. (default: FALSE)}
-
-\item{add_Sigma_noise_to_category_representation}{Should the perceptual noise be added to the category
-representation (category variability)? If FALSE, then noise will be considered during categorization decisions
-but will not be added to the covariance matrix of the MVG categories. If TRUE, then noise will also be to the category
-covariance matrix. Will be ignored if Sigma_noise is NULL. (default: FALSE)}
 }
 \value{
 A tibble that is an NIW_ideal_adaptor object.
