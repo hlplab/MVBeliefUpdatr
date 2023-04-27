@@ -3,8 +3,8 @@
 get_posterior_predictive_from_NIW_belief = function(
   x,
   model,
+  noise_treatment = if (is.NIW_ideal_adaptor(model)) { if (!is.null(first(model$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
   log = T,
-  noise_treatment = if (is.NIW_ideal_adaptor(model)) "marginalize" else "no_noise",
   category = "category",
   category.label = NULL,
   wide = FALSE
@@ -57,8 +57,8 @@ get_posterior_predictive_from_NIW_belief = function(
 get_posterior_predictives_from_NIW_beliefs = function(
   x,
   model,
+  noise_treatment = if (is.NIW_ideal_adaptor(model)) { if (!is.null(first(model$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
   log = T,
-  noise_treatment = if (is.NIW_ideal_adaptor(model)) "marginalize" else "no_noise",
   category = "category",
   category.label = NULL,
   grouping.var,

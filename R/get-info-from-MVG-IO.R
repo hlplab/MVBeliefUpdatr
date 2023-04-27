@@ -30,15 +30,19 @@ example_MVG_ideal_observer <- function(example = 1) {
 #' @param mu The category mean mu. Should be a k x 1 or 1 x k
 #' matrix, or vector of length k.
 #' @param Sigma The category covariance matrix Sigma. Should be a square k x k matrix.
-#' @param log Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)
-#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
-#' or "marginalize". If "no_noise", no noise will be applied. If "sample" or "marginalize", `Sigma_noise` must be a covariance
-#' matrix of appropriate dimensions. If "sample", observations are adjusted by samples drawn from the noise distribution before applying
-#' categorization. If "marginalize" then each observation is transformed into the marginal distribution
-#' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
-#' interested in estimating the consequences of noise across individuals. (default: "no_noise").
 #' @param Sigma_noise Optionally, a covariance matrix describing the perceptual noise to be applied while
 #' calculating the posterior predictive. (default: `NULL`)
+#' @param noise_treatment Determines whether perceptual noise is considered during categorization, and how.
+#' Can be "no_noise", "sample", or "marginalize". If "no_noise", no noise will be applied to the input,
+#' and no noise will be assumed during categorization. If "marginalize", average noise (i.e., no noise)
+#' will be added to the stimulus, and `Sigma_noise` is added to Sigma when calculating the likelihood.
+#' This simulates the expected consequences for perceptual noise on categorization *in the limit*, i.e,
+#' if the input was categorized infinitely many times. If "sample", then noise is sampled and applied to
+#' the input, and `Sigma_noise` is added to Sigma when calculating the likelihood. This simulates the
+#' consequence of perceptual noise *on a particular observation*. If "sample" or "marginalize" are chosen,
+#' `Sigma_noise` must be a covariance matrix of appropriate dimensions. (default: "no_noise" if Sigma_noise
+#' is NULL, "marginalize" otherwise).
+#' @param log Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -46,7 +50,11 @@ example_MVG_ideal_observer <- function(example = 1) {
 #' TBD
 #' @rdname get_MVG_likelihood
 #' @export
-get_MVG_likelihood <- function(x, mu, Sigma, log = T, noise_treatment = "no_noise", Sigma_noise = NULL) {
+get_MVG_likelihood <- function(
+    x, mu, Sigma, Sigma_noise = NULL,
+    noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
+    log = T
+) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
   assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
@@ -60,8 +68,8 @@ get_MVG_likelihood <- function(x, mu, Sigma, log = T, noise_treatment = "no_nois
   if (is.matrix(mu)) mu = as.vector(mu)
 
   assert_that(is.flag(log))
-  assert_that(any(noise_treatment %in% c("no_noise", "sample", "marginalize")),
-              msg = "noise_treatment must be one of 'no_noise', 'sample' or 'marginalize'.")
+  assert_that(any(noise_treatment %in% c("no_noise", "marginalize")),
+              msg = "noise_treatment must be one of 'no_noise' or 'marginalize'.")
   if (noise_treatment != "no_noise") {
     assert_that(is.Sigma(Sigma_noise))
     assert_that(all(dim(Sigma) == dim(Sigma_noise)),
@@ -80,14 +88,15 @@ get_MVG_likelihood <- function(x, mu, Sigma, log = T, noise_treatment = "no_nois
                 msg = "Sigma and mu are not of compatible dimensions.")
   }
 
-  # How should noise be treated?
   if (noise_treatment == "sample") {
     assert_that(
       is_weakly_greater_than(nrow(x), 1),
       msg = "For noise sampling, x must be of length 1 or longer.")
 
     x <- x + rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
-  } else if (noise_treatment == "marginalize") {
+  }
+
+  if (noise_treatment %in% c("sample", "marginalize")) {
     Sigma = Sigma + Sigma_noise
   }
 
@@ -101,8 +110,8 @@ get_MVG_likelihood <- function(x, mu, Sigma, log = T, noise_treatment = "no_nois
 get_likelihood_from_MVG <- function(
   x,
   model,
+  noise_treatment = if (is.MVG_ideal_observer(model)) { if (!is.null(first(model$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
   log = T,
-  noise_treatment = if (is.MVG_ideal_observer(model)) "marginalize" else "no_noise",
   category = "category",
   category.label = NULL,
   wide = FALSE
@@ -161,9 +170,8 @@ get_likelihood_from_MVG <- function(
 #' @param x A vector of observations.
 #' @param model An \code{\link[=is.MVG_ideal_observer]{MVG_ideal_observer}} object.
 #' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
-#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input.
-#' See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
-#' "sample"; "marginalize" otherwise).
+#' @param noise_treatment Determines whether and how multivariate Gaussian noise is considered during categorization.
+#' See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
 #' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
 #' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
 #' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability

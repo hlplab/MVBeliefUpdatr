@@ -23,7 +23,7 @@ get_categorization_function_from_NIW_ideal_adaptor = function(model, ...) {
 #' @param x A vector of observations.
 #' @param model An \code{\link[=is.NIW_ideal_adaptor]{NIW_ideal_adaptor}} object.
 #' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
-#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input.
+#' @param noise_treatment Determines whether and how multivariate Gaussian noise is considered during categorization.
 #' See \code{\link[=get_NIW_posterior_predictive]{get_NIW_posterior_predictive}}. (default: "sample" if decision_rule is
 #' "sample"; "marginalize" otherwise).
 #' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".

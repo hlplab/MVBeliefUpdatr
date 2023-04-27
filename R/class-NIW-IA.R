@@ -1,5 +1,5 @@
 get_expected_columns_for_NIW_ideal_adaptor <- function()
-  c(get_expected_columns_for_NIW_belief(), "prior", "lapse_rate", "lapse_bias", "Sigma_noise")
+  c(get_expected_columns_for_NIW_belief(), get_expected_columns_for_model())
 
 #' Is this an ideal adaptor with Normal-Inverse-Wishart (NIW) beliefs?
 #'

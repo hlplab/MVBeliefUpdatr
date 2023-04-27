@@ -73,13 +73,14 @@ components necessary to explain at least the pca.cutoff of the total variance. (
 into the original cue space by applying the untransform function. (default: `TRUE`)}
 
 \item{m_0, S_0}{Optionally, prior means (m_0) and/or prior scatter matrices (S_0) for all categories. Each should be
-a list, with
-each element being the mean/scatter matrix for a specific category. Elements should be ordered in the same order as
+a list, with each element being the mean/scatter matrix for a specific category. Elements should be ordered in the same order as
 the levels of the category variable in \code{exposure} and \code{test}. The means and scatter matrices could be
 estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_NIW_prior_from_data}}
 for a convenient way to do so). To aspects should be kept in mind, however. First, an \emph{inferred} scatter
-matrix include variability from perceptual and/or environmental noise, \emph{in addition} to the motor noise that
-is reflected in production data. Second, the prior scatter matrix has an implicit nu associated with it, so that
+matrix includes variability from internal perceptual and/or external environmental noise, \emph{in addition} to the motor noise that
+is reflected in production data. That means that any prior for the scatter matrix (S_0) should take into account
+not only the variability in the production data but also any additional variability added by internal (perceptual)
+or external (environmental) noise. Second, the prior scatter matrix has an implicit nu associated with it, so that
 the nu inferred by \code{\link{infer_prior_beliefs}} is best thought of as a multiple of the implicit nu used
 during the creation of the scatter matrix S_0. For that reason, we recommend the use of nu = D + 2 in the call to
 \code{\link{make_NIW_prior_from_data}} (the default), since the S_0 obtained that way is identical to the category

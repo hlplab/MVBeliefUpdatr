@@ -13,11 +13,13 @@
 #' @return A character vector.
 #'
 #' @export
-get_cue_labels_from_model = function(x, indices = NULL) {
+get_cue_labels_from_model <- function(x, indices = NULL) {
   if (is.MVG(x) | is.MVG_ideal_observer(x)) {
     x <- x$mu
   } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x) | is.NIW_ideal_adaptor_MCMC(x)) {
     x <- x$m
+  } else if (is.exemplars(x) | is.exemplar_model(x)) {
+    x <- x$exemplars[[1]]$cues
   } else {
     stop("Object not recognized.")
   }
@@ -25,7 +27,7 @@ get_cue_labels_from_model = function(x, indices = NULL) {
   x <- names(if (is.list(x)) x[[1]] else if (is.numeric(x)) x[1] else error("No suitable information found."))
 
   if (is.null(x)) x <- "cue"
-  if (is.null(indices)) return(x) else return(x(indices))
+  if (is.null(indices)) return(x) else return(x[indices])
   return(x)
 }
 
@@ -38,9 +40,9 @@ get_cue_labels_from_model = function(x, indices = NULL) {
 #' @param x A likelihood or model object.
 #'
 #' @export
-get_category_labels_from_model = function(x) {
-  if (is.MVG(x) | is.MVG_ideal_observer(x) | is.NIW_belief(x) | is.NIW_ideal_adaptor(x)) {
-   return(levels(x$category))
+get_category_labels_from_model <- function(x) {
+  if (is.MVG(x) | is.NIW_belief(x) | is.exemplars(x) | is.model(x)) {
+    return(sort(unique(x$category)))
   } else {
     error("Object not recognized.")
   }
@@ -55,8 +57,8 @@ get_category_labels_from_model = function(x) {
 #' @param x A likelihood or model object.
 #'
 #' @export
-get_nlevels_of_category_labels_from_model = function(x) {
-  if (is.MVG(x) | is.MVG_ideal_observer(x) | is.NIW_belief(x) | is.NIW_ideal_adaptor(x)) {
+get_nlevels_of_category_labels_from_model <- function(x) {
+  if (is.MVG(x) | is.NIW_belief(x) | is.exemplars(x) | is.model(x)) {
     return(length(unique(x$category)))
   } else {
     error("Object not recognized.")

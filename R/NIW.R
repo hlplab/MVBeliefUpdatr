@@ -115,13 +115,16 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts).
 #' @param Sigma_noise Optionally, a covariance matrix describing the perceptual noise to be applied while
 #' calculating the posterior predictive. (default: `NULL`)
-#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
-#' or "marginalize". If "no_noise", no noise will be applied. This describes the idealized categorization function if the percept
-#' was known. If "sample" or "marginalize", `Sigma_noise` must be a covariance
-#' matrix of appropriate dimensions. If "sample", observations are adjusted by samples drawn from the noise distribution before applying
-#' categorization. If "marginalize" then each observation is transformed into the marginal distribution
-#' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
-#' interested in estimating the consequences of noise across individuals. (default: "no_noise").
+#' @param noise_treatment Determines whether perceptual noise is considered during categorization, and how.
+#' Can be "no_noise", "sample", or "marginalize". If "no_noise", no noise will be applied to the input,
+#' and no noise will be assumed during categorization. If "marginalize", average noise (i.e., no noise)
+#' will be added to the stimulus, and `Sigma_noise` is added to Sigma when calculating the likelihood.
+#' This simulates the expected consequences for perceptual noise on categorization *in the limit*, i.e,
+#' if the input was categorized infinitely many times. If "sample", then noise is sampled and applied to
+#' the input, and `Sigma_noise` is added to Sigma when calculating the likelihood. This simulates the
+#' consequence of perceptual noise *on a particular observation*. If "sample" or "marginalize" are chosen,
+#' `Sigma_noise` must be a covariance matrix of appropriate dimensions. (default: "no_noise" if Sigma_noise
+#' is NULL, "marginalize" otherwise).
 #' @param log Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)
 #'
 #' @seealso TBD
@@ -131,7 +134,11 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' TBD
 #' @rdname get_NIW_posterior_predictive
 #' @export
-get_NIW_posterior_predictive = function(x, m, S, kappa, nu, Sigma_noise = NULL, noise_treatment = "no_noise", log = T) {
+get_NIW_posterior_predictive = function(
+    x, m, S, kappa, nu, Sigma_noise = NULL,
+    noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
+    log = T
+) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
   assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
@@ -176,7 +183,10 @@ get_NIW_posterior_predictive = function(x, m, S, kappa, nu, Sigma_noise = NULL, 
       msg = "For noise sampling, x must be of length 1 or longer.")
 
     x <- map(x, ~ rmvnorm(n = 1, mean = .x, sigma = Sigma_noise))
-  } else if (noise_treatment == "marginalize") {
+  }
+
+
+  if (noise_treatment %in% c("sample", "marginalize")) {
     warning("noise_treatment == 'marginalize' is experimental. The math has not yet been verified. Use with caution.")
     S = get_S_from_expected_Sigma(get_expected_Sigma_from_S(S, nu) + Sigma_noise, nu)
   }
@@ -211,7 +221,7 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 #' @param lapse_biases A lapse bias for the categorization responses. (default: uniform bias over categories)
 #' @param Sigma_noise A noise matrix. (default: a 0-matrix)
 #' @param noise_treatment How should the noise specified in \code{Sigma_noise} be considered in the categorization function?
-#' For details, see \code{\link{get_NIW_posterior_predictive}} (default: "no_noise")
+#' For details, see \code{\link{get_NIW_posterior_predictive}}.
 #' @param logit Should the function that is returned return log-odds (TRUE) or probabilities (FALSE)? (default: TRUE)
 #'
 #' @return A function that takes as input cue values and returns posterior probabilities of the first category,
@@ -233,7 +243,7 @@ get_NIW_categorization_function = function(
     0,
     nrow = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])),
     ncol = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]]))),
-  noise_treatment = "no_noise",
+  noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
   logit = FALSE
 ) {
   tolerance = 1e-5
@@ -259,16 +269,14 @@ get_NIW_categorization_function = function(
     msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
 
   f <- function(x, target_category = 1) {
-    log_p = matrix(
-      nrow = length(x),
-      ncol = n.cat
-    )
+    log_p <- matrix(nrow = length(x), ncol = n.cat)
     for (cat in 1:n.cat) {
-      log_p[, cat] = get_NIW_posterior_predictive(
-        x,
-        ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]],
-        Sigma_noise = Sigma_noise[[cat]], noise_treatment = noise_treatment,
-        log = T)
+      log_p[, cat] <-
+        get_NIW_posterior_predictive(
+          x,
+          ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]],
+          Sigma_noise = Sigma_noise[[cat]], noise_treatment = noise_treatment,
+          log = T)
     }
 
     p_target <-
