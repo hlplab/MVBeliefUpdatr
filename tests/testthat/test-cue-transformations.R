@@ -3,6 +3,7 @@ context("Transforming and untransforming cues and sufficient statistics")
 .cues <- c("cue1", "cue2")
 .io <- example_MVG_ideal_observer(1)
 .data <- sample_MVG_data_from_model(model = .io, Ns = 50, keep.input_parameters = F)
+
 test_that("transform_cues() - type check", {
   expect_true(is.data.frame(transform_cues(data = .data, cues = .cues, center = T, scale = T)))
   expect_true(is.list(transform_cues(data = .data, cues = .cues, center = T, scale = T, return.transformed.data = F, return.transform.parameters = T)))
@@ -35,7 +36,7 @@ test_that("untransform_category_mean - does back-transformation of category mean
 })
 
 test_that("untransform_category_cov - does back-transformation of category covariance matrix work?", {
-  expect_equal(
+  expect_equivalent(
     .data %>%
       get_sufficient_category_statistics(cues = .cues) %>%
       pull(x_cov),

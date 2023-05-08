@@ -297,8 +297,6 @@ get_test_data_from_stanfit = function(
 }
 
 
-
-
 #' Get or restore the original group or category levels from an NIW ideal adaptor stanfit.
 #'
 #' Checks if information is available about the original values and order of the factor levels

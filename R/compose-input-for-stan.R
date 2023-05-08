@@ -283,7 +283,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     only be counted once. All test observations are still counted, but aggregated for each unique value of group.unique."))
 
     exposure %<>%
-      mutate(across(group.unique, as.factor)) %>%
+      mutate(across(all_of(group.unique), as.factor)) %>%
       group_by(!! sym(group.unique), !! sym(category), !!! syms(cues)) %>%
       filter(!! sym(group) == unique(!! sym(group))[1])
 
@@ -314,7 +314,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     message(paste("Not all levels of the grouping variable", group, "that are present in test were found in exposure.
     Creating 0 exposure data for those groups."))
   exposure %<>%
-    mutate_at(all_of(group), ~ factor(.x, levels = levels(test[[!! group]])))
+    mutate(across(all_of(group), ~ factor(.x, levels = levels(test[[!! group]]))))
 
   if (!is.null(m_0)) {
     if (nlevels(exposure[[category]]) == 1) {

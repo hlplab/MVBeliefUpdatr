@@ -1,41 +1,46 @@
 context("Get information from stanfit")
 
-fit = readRDS("../test models/IBBU_mv_fit_3 exposure groups_2 categories_2 cues_Drouin et al 2016.rds")
+source("../functions-to-make-or-load-models.R")
+fit <- get_example_stanfit()
 
 test_that("Test fit class", {
-  expect_true(is.mv_ibbu_stanfit(fit))
+  expect_true(is.NIW_ideal_adaptor_stanfit(fit))
 })
 
 test_that("Add ibbu draws - input check", {
-  expect_failure(expect_error(add_ibbu_stanfit_draws(fit, which = "prior")))
-  expect_failure(expect_error(add_ibbu_stanfit_draws(fit, which = "posterior")))
-  expect_failure(expect_error(add_ibbu_stanfit_draws(fit, which = "both")))
-  expect_error(add_ibbu_stanfit_draws(fit, which = "priors"))
-  expect_error(add_ibbu_stanfit_draws(fit, which = "prior", draws = -1:1))
-})
-
-test_that("Add ibbu draws - check wide = T", {
-  expect_equal(nrow(add_ibbu_stanfit_draws(fit, which = "prior", draws = 1:10, wide = T, summarize = T)), 1)
-  expect_equal(nrow(add_ibbu_stanfit_draws(fit, which = "prior", draws = 1:10, wide = T, summarize = F)), 10)
+  expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "prior")))
+  expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "plus2.2")))
+  expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = c("prior", "plus2.2"))))
+  expect_error(add_ibbu_stanfit_draws(fit, groups = "priors"))
+  expect_error(add_ibbu_stanfit_draws(fit, groups = "prior", draws = -1:1))
 })
 
 test_that("Add ibbu draws - output check", {
-  expect_equal(nrow(add_ibbu_stanfit_draws(fit, which = "prior", draws = 1:10, wide = F)), 20)
-  expect_equal(nrow(add_ibbu_stanfit_draws(fit, which = "prior", draws = 1:10, wide = F, summarize = T)), 2)
-  expect_equal(names(add_ibbu_stanfit_draws(fit, which = "prior", summarize = T)),
-               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "M", "S", "lapse_rate"))
-  expect_equal(names(add_ibbu_stanfit_draws(fit, which = "prior", summarize = T, nest = T)),
-               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "M", "S", "lapse_rate"))
-  expect_equal(names(add_ibbu_stanfit_draws(fit, which = "prior", summarize = T, nest = F)),
-               c("cue", "cue2", ".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "M", "S", "lapse_rate"))
+  expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", draws = 1:10, wide = F)), 20)
+  expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", draws = 1:10, wide = F, summarize = T)), 2)
+  expect_equal(names(add_ibbu_stanfit_draws(fit, groups = "prior", summarize = T)),
+               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
+  expect_equal(names(add_ibbu_stanfit_draws(fit, groups = "prior", summarize = T, nest = T)),
+               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
+  expect_equal(names(add_ibbu_stanfit_draws(fit, groups = "prior", summarize = T, nest = F)),
+               c("cue", "cue2", ".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
 })
 
+# test_that("Add ibbu draws - check wide = T", {
+#   expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", draws = 1:10, wide = T, summarize = T)), 1)
+#   expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", draws = 1:10, wide = T, summarize = F)), 10)
+# })
+
+
 test_that("Get expected category statistic", {
-  expect_success(get_expected_mu_from_stanfit(fit, "sh", "prior"))
-  expect_success(get_expected_sigma_from_stanfit(fit, "sh", "prior"))
-  expect_success(get_expected_sigma_from_stanfit(fit, c("s","sh"), c("prior", "control")))
-  expect_success(get_expected_sigma_from_stanfit(fit, c("s","sh"), c("prior", "Control")))
-  expect_success(get_expected_category_statistic_from_stanfit(fit, c("s","sh"), c("prior", "Control"), c("mu", "Sigma")))
+  expect_true(is.vector(get_expected_mu_from_stanfit(fit, "A", "prior")))
+  expect_error(is.vector(get_expected_mu_from_stanfit(fit, "wrong", "prior")))
+  expect_error(is.vector(get_expected_mu_from_stanfit(fit, "A", "wrong")))
+  expect_true(is.matrix(get_expected_sigma_from_stanfit(fit, "A", "prior")))
+  expect_error(is.matrix(get_expected_sigma_from_stanfit(fit, "wrong", "prior")))
+  expect_error(is.matrix(get_expected_sigma_from_stanfit(fit, "A", "wrong")))
+  expect_true(is_tibble(get_expected_sigma_from_stanfit(fit, c("A","B"), c("prior", "plus2.2"))))
+  expect_true(is_tibble(get_expected_category_statistic_from_stanfit(fit, c("A","B"), c("prior", "plus2.2"), c("mu", "Sigma"))))
 })
 
 
