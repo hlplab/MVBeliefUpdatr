@@ -1,30 +1,18 @@
-#' Example MVG ideal observers.
+#' Example exemplar model.
 #'
 #' @export
-example_MVG_ideal_observer <- function(example = 1) {
+example_exemplar_model <- function(example = 1) {
   if (example == 1) {
-    message("An example MVG ideal observer for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
-    tibble(
-      category = c("A", "B"),
-      mu = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
-      Sigma = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
-               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
-      prior = c(.5, .5),
-      lapse_rate = .05,
-      lapse_bias = c(.5, .5),
-      Sigma_noise = NULL) %>%
-      mutate(category = factor(category))
-  } else if (example == 2) {
-    message("An example MVG ideal observer for two categories in a 1D cue continuum. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
-    tibble(
-      category = c("/d/", "/t/"),
-      mu = list(c("VOT" = 5), c("VOT" = 50)),
-      Sigma = list(matrix(c(80), nrow = 1, dimnames = list(c("VOT"), c("VOT"))),
-                   matrix(c(340), nrow = 1, dimnames = list(c("VOT"), c("VOT")))),
-      prior = c(.5, .5),
-      lapse_rate = .05,
-      lapse_bias = c(.5, .5),
-      Sigma_noise = list(NULL)) %>%
+    message("An example exemplar model for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
+            Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
+    example_MVG_ideal_observer(1) %>%
+      sample_MVG_data_from_model(Ns = 50) %>%
+      make_exemplar_model_from_data(
+        cues = c("cue1", "cue2"),
+        prior = c(.5, .5),
+        lapse_rate = .05,
+        lapse_bias = c(.5, .5),
+        Sigma_noise = list(NULL)) %>%
       mutate(category = factor(category))
   }
 }
@@ -32,17 +20,11 @@ example_MVG_ideal_observer <- function(example = 1) {
 
 #' Get likelihood
 #'
-#' Get likelihood of observation(s) x given the MVG parameters mu and Sigma. This is the density of
-#' a multivariate normal distribution over k dimensions.
+#' Get likelihood of observation(s) x given the exemplar model.
 #'
 #' @param x Observations. Can be a vector with k elements for a single observation or a matrix with k
 #' columns and n rows, in which case each row of the matrix is taken to be one observation. If x is a
 #' tibble with k columns or a list of vectors of length k, it is reduced into a matrix with k columns.
-#' @param mu The category mean mu. Should be a k x 1 or 1 x k
-#' matrix, or vector of length k.
-#' @param Sigma The category covariance matrix Sigma. Should be a square k x k matrix.
-#' @param Sigma_noise Optionally, a covariance matrix describing the perceptual noise to be applied while
-#' calculating the posterior predictive. (default: `NULL`)
 #' @param noise_treatment Determines whether perceptual noise is considered during categorization, and how.
 #' Can be "no_noise", "sample", or "marginalize". If "no_noise", no noise will be applied to the input,
 #' and no noise will be assumed during categorization. If "marginalize", average noise (i.e., no noise)
@@ -59,73 +41,14 @@ example_MVG_ideal_observer <- function(example = 1) {
 #' @keywords TBD
 #' @examples
 #' TBD
-#' @rdname get_MVG_likelihood
 #' @export
-get_MVG_likelihood <- function(
-    x, mu, Sigma, Sigma_noise = NULL,
-    noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
-    log = T
-) {
-  # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
-  # in the latter case, each *row* of the matrix is an input.
-  assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
-  assert_that(is.vector(mu) | is.matrix(mu) | is_scalar_double(mu))
-  assert_that(is.Sigma(Sigma))
-
-  # do not reorder these conditionals (go from more to less specific)
-  if (is_tibble(x)) x %<>% as.matrix() else
-    if (is.list(x)) x %<>% reduce(rbind) %>% as.matrix() else
-      if (is.vector(x)) x %<>% matrix(nrow = 1)
-  if (is.matrix(mu)) mu = as.vector(mu)
-
-  assert_that(is.flag(log))
-  assert_that(any(noise_treatment %in% c("no_noise", "marginalize", "sample")),
-              msg = "noise_treatment must be one of 'no_noise', 'marginalize', or 'sample'.")
-  if (noise_treatment != "no_noise") {
-    assert_that(is.Sigma(Sigma_noise))
-    assert_that(all(dim(Sigma) == dim(Sigma_noise)),
-                msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the category covariance matrices Sigma.')
-  }
-
-  D = get_D(Sigma)
-  if (D == 1) {
-    assert_that(is_scalar_double(mu), msg = "Sigma and mu are not of compatible dimensions.")
-  } else {
-    assert_that(dim(Sigma)[2] == D,
-                msg = "Sigma is not a square matrix, and thus not a covariance matrix")
-    assert_that(length(mu) == dim(x)[2],
-                msg = paste("mu and input are not of compatible dimensions. mu is of length", length(mu), "but input has", dim(x)[2], "columns."))
-    assert_that(length(mu) == D,
-                msg = "Sigma and mu are not of compatible dimensions.")
-  }
-
-  if (noise_treatment == "sample") {
-    assert_that(
-      is_weakly_greater_than(nrow(x), 1),
-      msg = "For noise sampling, x must be of length 1 or longer.")
-
-    x <- x + rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
-  }
-
-  if (noise_treatment %in% c("sample", "marginalize")) {
-    Sigma <- Sigma + Sigma_noise
-  }
-
-  dmvnorm(x, mean = mu, sigma = Sigma, log = log) %>%
-    as.numeric()
-}
-
-
-#' @rdname get_MVG_likelihood
-#' @export
-get_likelihood_from_MVG <- function(
+get_likelihood_from_exemplars <- function(
   x,
   model,
-  noise_treatment = if (is.MVG_ideal_observer(model)) { if (!is.null(first(model$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
+  noise_treatment = if (is.exemplar_model(model)) { if (!is.null(first(model$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
   log = T,
   category = "category",
-  category.label = NULL,
-  wide = FALSE
+  category.label = NULL
 ) {
   assert_that(is.MVG(model))
   assert_that(any(is.null(category.label) | is.character(category.label)))
@@ -157,32 +80,71 @@ get_likelihood_from_MVG <- function(
       as_tibble(.name_repair = "unique") %>%
       rename_with(~ if (log) { "log_likelihood" } else { "likelihood" }) %>%
       mutate(!! sym(category) := c)
+
+
+    # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
+    # in the latter case, each *row* of the matrix is an input.
+    assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
+    assert_that(is.vector(mu) | is.matrix(mu) | is_scalar_double(mu))
+    assert_that(is.Sigma(Sigma))
+
+    # do not reorder these conditionals (go from more to less specific)
+    if (is_tibble(x)) x %<>% as.matrix() else
+      if (is.list(x)) x %<>% reduce(rbind) %>% as.matrix() else
+        if (is.vector(x)) x %<>% matrix(nrow = 1)
+    if (is.matrix(mu)) mu = as.vector(mu)
+
+    assert_that(is.flag(log))
+    assert_that(any(noise_treatment %in% c("no_noise", "marginalize")),
+                msg = "noise_treatment must be one of 'no_noise' or 'marginalize'.")
+    if (noise_treatment != "no_noise") {
+      assert_that(is.Sigma(Sigma_noise))
+      assert_that(all(dim(Sigma) == dim(Sigma_noise)),
+                  msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the category covariance matrices Sigma.')
+    }
+
+    D = get_D(Sigma)
+    if (D == 1) {
+      assert_that(is_scalar_double(mu), msg = "Sigma and mu are not of compatible dimensions.")
+    } else {
+      assert_that(dim(Sigma)[2] == D,
+                  msg = "Sigma is not a square matrix, and thus not a covariance matrix")
+      assert_that(length(mu) == dim(x)[2],
+                  msg = paste("mu and input are not of compatible dimensions. mu is of length", length(mu), "but input has", dim(x)[2], "columns."))
+      assert_that(length(mu) == D,
+                  msg = "Sigma and mu are not of compatible dimensions.")
+    }
+
+    if (noise_treatment == "sample") {
+      assert_that(
+        is_weakly_greater_than(nrow(x), 1),
+        msg = "For noise sampling, x must be of length 1 or longer.")
+
+      x <- x + rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
+    }
+
+    if (noise_treatment %in% c("sample", "marginalize")) {
+      Sigma = Sigma + Sigma_noise
+    }
+
   }
   likelihood %<>% reduce(rbind)
-
-  if (wide)
-    likelihood %<>%
-    pivot_wider(
-      values_from = if (log) "log_likelihood" else "likelihood",
-      names_from = !! sym(category),
-      names_prefix = if (log) "log_likelihood." else "likelihood.") %>%
-    unnest()
 
   return(likelihood)
 }
 
 
-#' Get categorization from an ideal observer
+#' Get categorization from an exemplar model
 #'
-#' Categorize a single observation based on an MVG ideal observer. The decision rule can be specified to be either the
+#' Categorize a single observation based on an exemplar model. The decision rule can be specified to be either the
 #' criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
 #' Luce's choice rule.
 #'
 #' @param x A vector of observations.
-#' @param model An \code{\link[=is.MVG_ideal_observer]{MVG_ideal_observer}} object.
+#' @param model An \code{\link[=is.exemplar_model]{exemplar_model}} object.
 #' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
 #' @param noise_treatment Determines whether and how multivariate Gaussian noise is considered during categorization.
-#' See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
+#' See \code{\link[=get_likelihood_from_exemplars]{get_likelihood_from_exemplars}}. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
 #' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
 #' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
 #' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
@@ -199,7 +161,7 @@ get_likelihood_from_MVG <- function(
 #' @examples
 #' TBD
 #' @export
-get_categorization_from_MVG_ideal_observer <- function(
+get_categorization_from_exemplar_model <- function(
   x,
   model,
   decision_rule,
@@ -207,21 +169,18 @@ get_categorization_from_MVG_ideal_observer <- function(
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F
 ) {
-  # TO DO: check dimensionality of x with regard to belief.
-  assert_MVG_ideal_observer(model)
+  assert_that(is.exemplar_model(model))
   assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
               msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
   assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
               msg = "lapse_treatment must be one of 'no_lapses', 'sample' or 'marginalize'.")
 
-  # When the input isn't a list, that's ambiguous between the input being a single input or a set of
-  # 1D inputs. Use the model's cue dimensionality to disambiguate between the two cases.
-  if (!is.list(x)) {
-    x <- if (get_cue_dimensionality_from_model(model) == 1) as.list(x) else list(x)
-  }
+  # In case a single x is handed as argument, make sure it's made a list so that the length check below
+  # correctly treats it as length 1 (rather than the dimensionality of the one observation).
+  if (!is.list(x)) x <- list(x)
 
   posterior_probabilities <-
-    get_likelihood_from_MVG(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%
+    get_likelihood_from_exemplars(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%
     group_by(category) %>%
     mutate(
       observationID = 1:length(x),

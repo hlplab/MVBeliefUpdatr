@@ -569,17 +569,16 @@ plot_expected_categorization_function_2D <- function(
     nest() %>%
     mutate(f = map(data, get_categorization_function_from_NIW_ideal_adaptor, logit = logit)) %>%
     # Join in vectored cues
-    left_join(
+    cross_join(
       d %>%
         transmute(x = pmap(.l = list(!!! syms(cue.labels)), .f = ~ c(...))) %>%
-        nest(cues = everything()),
-      by = character()) %>%
+        nest(cues = everything())) %>%
     mutate(
       p_cat = invoke_map(.f = f, .x = cues, target_category = target_category),
       cues = NULL,
       f = NULL) %>%
     # Join separate cues back in
-    left_join(d %>% nest(cues = everything()), by = character()) %>%
+    cross_join(d %>% nest(cues = everything())) %>%
     unnest(c(cues, p_cat))
 
   p = ggplot(x,

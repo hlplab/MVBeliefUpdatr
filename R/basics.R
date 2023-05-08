@@ -349,12 +349,13 @@ get_sufficient_category_statistics <- function(
 #' TBD
 #' @rdname transform_cues
 #' @export
-transform_cues = function(data, cues,
-                          center =  if (pca) T else F, scale = F, pca = F,
-                          attach = T,
-                          transform.parameters = NULL,
-                          return.transformed.data = T, return.transform.parameters = F,
-                          return.transform.function = F, return.untransform.function = F
+transform_cues <- function(
+    data, cues,
+    center =  if (pca) T else F, scale = F, pca = F,
+    attach = T,
+    transform.parameters = NULL,
+    return.transformed.data = T, return.transform.parameters = F,
+    return.transform.function = F, return.untransform.function = F
 ) {
   assert_that(is.data.frame(data) | is_tibble(data))
   assert_that(is.null(transform.parameters) | is.list(transform.parameters))
@@ -396,9 +397,9 @@ transform_cues = function(data, cues,
       if (!is.null(transform.parameters[["center"]])) {
         data %<>%
           ungroup() %>%
-          select(cues) %>%
+          select(all_of(cues)) %>%
           { . - (data %>%
-                   left_join(transform.parameters[["center"]], by = groups) %>%
+                   { if (length(groups) > 0) left_join(., transform.parameters[["center"]], by = groups) else cross_join(., transform.parameters[["center"]]) } %>%
                    ungroup() %>%
                    select(all_of(paste0(cues, "_mean"))))
           }
@@ -407,9 +408,9 @@ transform_cues = function(data, cues,
       if (!is.null(transform.parameters[["scale"]])) {
         data %<>%
           ungroup() %>%
-          select(cues) %>%
+          select(all_of(cues)) %>%
           { . / (data %>%
-                   left_join(transform.parameters[["scale"]], by = groups) %>%
+                   { if (length(groups) > 0) left_join(., transform.parameters[["scale"]], by = groups) else cross_join(., transform.parameters[["scale"]]) } %>%
                    ungroup() %>%
                    select(all_of(paste0(cues, "_sd"))))
           }
@@ -465,11 +466,12 @@ transform_cues = function(data, cues,
 
 #' @rdname transform_cues
 #' @export
-untransform_cues = function(data, cues,
-                            uncenter = NULL, unscale = NULL, unpca = NULL,
-                            attach = T,
-                            transform.parameters = NULL,
-                            return.untransformed.data = T, return.untransform.function = F
+untransform_cues <- function(
+    data, cues,
+    uncenter = NULL, unscale = NULL, unpca = NULL,
+    attach = T,
+    transform.parameters = NULL,
+    return.untransformed.data = T, return.untransform.function = F
 ) {
   assert_that(is.data.frame(data) | is_tibble(data))
   assert_that(!is.null(transform.parameters) & is.list(transform.parameters),
@@ -504,9 +506,9 @@ untransform_cues = function(data, cues,
     if (unscale) {
       data %<>%
         ungroup() %>%
-        select(cues) %>%
+        select(all_of(cues)) %>%
         { . * (data %>%
-                 left_join(transform.parameters[["scale"]], by = groups) %>%
+                 { if (length(groups) > 0) left_join(., transform.parameters[["scale"]], by = groups) else cross_join(., transform.parameters[["scale"]]) } %>%
                  ungroup() %>%
                  select(all_of(paste0(cues, "_sd"))))
         }
@@ -515,9 +517,9 @@ untransform_cues = function(data, cues,
     if (uncenter) {
       data %<>%
         ungroup() %>%
-        select(cues) %>%
+        select(all_of(cues)) %>%
         { . + (data %>%
-                 left_join(transform.parameters[["center"]], by = groups) %>%
+                 { if (length(groups) > 0) left_join(., transform.parameters[["center"]], by = groups) else cross_join(., transform.parameters[["center"]]) } %>%
                  ungroup() %>%
                  select(all_of(paste0(cues, "_mean"))))
         }

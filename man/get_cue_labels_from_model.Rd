@@ -2,8 +2,7 @@
 % Please edit documentation in R/get-info-from-model.R
 \name{get_cue_labels_from_model}
 \alias{get_cue_labels_from_model}
-\title{Functions that are shared across the various types of likelihood and model types.
-Get cue labels from likelihood or model}
+\title{Get cue labels from likelihood or model}
 \usage{
 get_cue_labels_from_model(x, indices = NULL)
 }

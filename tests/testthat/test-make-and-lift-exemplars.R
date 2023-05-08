@@ -23,7 +23,8 @@ test_that("recognize exemplars", {
 
 test_that("get category and cue information from exemplars", {
   expect_true(is.character(get_cue_labels_from_model(x)))
-  expect_true(is.character(get_category_labels_from_model(x)))
+  expect_true(any(is.character(get_category_labels_from_model(x)),
+                  is.factor(get_category_labels_from_model(x))))
   expect_true(is.numeric(get_nlevels_of_category_labels_from_model(x)))
 })
 
@@ -55,9 +56,10 @@ test_that("recognize exemplar model", {
 })
 
 test_that("get category and cue information from exemplar model", {
-  expect_true(is.character(get_category_labels_from_model(x)))
-  expect_true(is.numeric(get_nlevels_of_category_labels_from_model(x)))
   expect_true(is.character(get_cue_labels_from_model(x)))
+  expect_true(any(is.character(get_category_labels_from_model(x)),
+                  is.factor(get_category_labels_from_model(x))))
+  expect_true(is.numeric(get_nlevels_of_category_labels_from_model(x)))
 })
 
 test_that("get lapse rate, bias, and category prior from exemplar model", {
