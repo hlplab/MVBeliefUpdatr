@@ -21,7 +21,7 @@ get_categorization_from_NIW_ideal_adaptor(
 
 \item{decision_rule}{Must be one of "criterion", "proportional", or "sampling".}
 
-\item{noise_treatment}{Determines whether and how multivariate Gaussian noise is added to the input.
+\item{noise_treatment}{Determines whether and how multivariate Gaussian noise is considered during categorization.
 See \code{\link[=get_NIW_posterior_predictive]{get_NIW_posterior_predictive}}. (default: "sample" if decision_rule is
 "sample"; "marginalize" otherwise).}
 

@@ -11,7 +11,13 @@ update_NIW_belief_by_sufficient_statistics_of_one_category(
   x_mean,
   x_SS,
   x_N,
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_noise",
+  noise_treatment = if (is.NIW_ideal_adaptor(prior)) {
+     if
+    (!is.null(first(prior$Sigma_noise))) 
+         "marginalize"
+     else "no_noise"
+ }
+    else "no_noise",
   lapse_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_lapses",
   method = "label-certain",
   verbose = FALSE
@@ -21,7 +27,13 @@ update_NIW_belief_by_one_observation(
   prior,
   x_category,
   x,
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_noise",
+  noise_treatment = if (is.NIW_ideal_adaptor(prior)) {
+     if
+    (!is.null(first(prior$Sigma_noise))) 
+         "marginalize"
+     else "no_noise"
+ }
+    else "no_noise",
   lapse_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_lapses",
   method = "label-certain",
   verbose = FALSE
@@ -38,13 +50,16 @@ update_NIW_belief_by_one_observation(
 
 \item{x_N}{Number of observations that went into the mean and sum of squares matrix.}
 
-\item{noise_treatment}{Determines whether multivariate Gaussian noise is added to the input.
-If `NULL`, no noise is added during the updating. If "sample" then a sample of
-noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
-that results from convolving the input with noise. This latter option might be helpful, for example, if one is
-interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
-column must be present in the NIW_belief object specified as the priors argument.
-(default: "no_noise" for NIW_beliefs; "sample" for NIW_ideal_adaptors)}
+\item{noise_treatment}{Determines whether perceptual noise is considered during categorization, and how.
+Can be "no_noise", "sample", or "marginalize". If "no_noise", no noise will be applied to the input,
+and no noise will be assumed during categorization. If "marginalize", average noise (i.e., no noise)
+will be added to the stimulus, and `Sigma_noise` is added to Sigma when calculating the likelihood.
+This simulates the expected consequences for perceptual noise on categorization *in the limit*, i.e,
+if the input was categorized infinitely many times. If "sample", then noise is sampled and applied to
+the input, and `Sigma_noise` is added to Sigma when calculating the likelihood. This simulates the
+consequence of perceptual noise *on a particular observation*. If "sample" or "marginalize" are chosen,
+`Sigma_noise` must be a covariance matrix of appropriate dimensions. (default: "no_noise" if Sigma_noise
+is NULL, "marginalize" otherwise).}
 
 \item{lapse_treatment}{Determines whether attentional lapses can occur during which no updating occurs.
 Can be "no_lapses", "sample", or "marginalize". If "no_lapses", no lapses occur (even if the ideal adaptor specifies

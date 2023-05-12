@@ -1,5 +1,53 @@
 #' Functions that are shared across the various types of likelihood and model types.
 
+check_compatibility_between_input_and_model <- function(x, model) {
+  cue_object <- get_cue_representation_from_model(model)
+
+  # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or
+  # a matrix. In the latter case, each *row* of the matrix is an input.
+  assert_that(is.list(x) | is.vector(x) | is.matrix(x) | is_tibble(x))
+
+  # Do not reorder these conditionals (go from more to less specific)
+  if (is_tibble(x)) x %<>% as.matrix() else
+    if (is.list(x)) x %<>% reduce(rbind) %>% as.matrix() else
+      if (is.vector(x)) x %<>% matrix(nrow = 1)
+
+  stop("NOT YET COMPLETED.")
+}
+
+# Just for internal use
+get_cue_representation_from_model <- function(x) {
+  if (is.MVG(x) | is.MVG_ideal_observer(x)) {
+    x <- x$mu
+  } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x) | is.NIW_ideal_adaptor_MCMC(x)) {
+    x <- x$m
+  } else if (is.exemplars(x) | is.exemplar_model(x)) {
+    x <- x$exemplars[[1]]$cues
+  } else {
+    stop(paste("Model object", deparse(substitute(x)), "not recognized."))
+  }
+  x <- names(if (is.list(x)) x[[1]] else if (is.numeric(x)) x[1] else stop(paste("Unable to extract cue representation from", deparse(substitute(x)))))
+
+  return(x)
+}
+
+
+#' Get cue dimensionality from likelihood or model
+#'
+#' Get the number of cues from a likelihood (e.g., MVG or NIW_belief) or model (e.g., an MVG ideal observer
+#' or NIW ideal adaptor) object.
+#'
+#' @param x  A likelihood or model object.
+#'
+#' @return A numeric.
+#'
+#' @export
+get_cue_dimensionality_from_model <- function(x, indices = NULL) {
+  x <- get_cue_representation_from_model(x)
+  d <- if (is.null(dim(x))) length(x) else dim(x)[2]
+  return(d)
+}
+
 
 #' Get cue labels from likelihood or model
 #'
@@ -13,19 +61,10 @@
 #' @return A character vector.
 #'
 #' @export
-get_cue_labels_from_model = function(x, indices = NULL) {
-  if (is.MVG(x) | is.MVG_ideal_observer(x)) {
-    x <- x$mu
-  } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x) | is.NIW_ideal_adaptor_MCMC(x)) {
-    x <- x$m
-  } else {
-    stop("Object not recognized.")
-  }
-
-  x <- names(if (is.list(x)) x[[1]] else if (is.numeric(x)) x[1] else error("No suitable information found."))
-
+get_cue_labels_from_model <- function(x, indices = NULL) {
+  x <- get_cue_representation_from_model(x)
   if (is.null(x)) x <- "cue"
-  if (is.null(indices)) return(x) else return(x(indices))
+  if (is.null(indices)) return(x) else return(x[indices])
   return(x)
 }
 
@@ -38,9 +77,9 @@ get_cue_labels_from_model = function(x, indices = NULL) {
 #' @param x A likelihood or model object.
 #'
 #' @export
-get_category_labels_from_model = function(x) {
-  if (is.MVG(x) | is.MVG_ideal_observer(x) | is.NIW_belief(x) | is.NIW_ideal_adaptor(x)) {
-   return(levels(x$category))
+get_category_labels_from_model <- function(x) {
+  if (is.MVG(x) | is.NIW_belief(x) | is.exemplars(x) | is.model(x)) {
+    return(sort(unique(x$category)))
   } else {
     error("Object not recognized.")
   }
@@ -55,8 +94,8 @@ get_category_labels_from_model = function(x) {
 #' @param x A likelihood or model object.
 #'
 #' @export
-get_nlevels_of_category_labels_from_model = function(x) {
-  if (is.MVG(x) | is.MVG_ideal_observer(x) | is.NIW_belief(x) | is.NIW_ideal_adaptor(x)) {
+get_nlevels_of_category_labels_from_model <- function(x) {
+  if (is.MVG(x) | is.NIW_belief(x) | is.exemplars(x) | is.model(x)) {
     return(length(unique(x$category)))
   } else {
     error("Object not recognized.")

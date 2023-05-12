@@ -1,5 +1,4 @@
-get_expected_columns_for_MVG <- function()
-  c("category", "mu", "Sigma")
+get_expected_columns_for_MVG <- function() c("category", "mu", "Sigma")
 
 #' Is this a set of multivariate Gaussian (MVG) categories?
 #'
@@ -40,8 +39,8 @@ is.MVG <- function(x, group = NULL, category = "category", is.long = T, verbose 
   #   return(FALSE)
   # }
 
-  if (any(c("mu", "Sigma") %nin% names(x))) {
-    if (verbose) message("x is missing either mu or Sigma.")
+  if (any(get_expected_columns_for_MVG() %nin% names(x))) {
+    if (verbose) message(paste("x is missing a required column: ", paste(get_expected_columns_for_exemplars, collapse = ",")))
     return(FALSE)
   }
 

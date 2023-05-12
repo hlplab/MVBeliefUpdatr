@@ -224,13 +224,14 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 #' `pca.observation = FALSE`. (default: 1)
 #' @param m_0,S_0 Optionally, prior means (m_0) and/or prior scatter matrices (S_0) for all categories. Each should be
-#' a list, with
-#' each element being the mean/scatter matrix for a specific category. Elements should be ordered in the same order as
+#' a list, with each element being the mean/scatter matrix for a specific category. Elements should be ordered in the same order as
 #' the levels of the category variable in \code{exposure} and \code{test}. The means and scatter matrices could be
 #' estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_NIW_prior_from_data}}
 #' for a convenient way to do so). To aspects should be kept in mind, however. First, an \emph{inferred} scatter
-#' matrix include variability from perceptual and/or environmental noise, \emph{in addition} to the motor noise that
-#' is reflected in production data. Second, the prior scatter matrix has an implicit nu associated with it, so that
+#' matrix includes variability from internal perceptual and/or external environmental noise, \emph{in addition} to the motor noise that
+#' is reflected in production data. That means that any prior for the scatter matrix (S_0) should take into account
+#' not only the variability in the production data but also any additional variability added by internal (perceptual)
+#' or external (environmental) noise. Second, the prior scatter matrix has an implicit nu associated with it, so that
 #' the nu inferred by \code{\link{infer_prior_beliefs}} is best thought of as a multiple of the implicit nu used
 #' during the creation of the scatter matrix S_0. For that reason, we recommend the use of nu = D + 2 in the call to
 #' \code{\link{make_NIW_prior_from_data}} (the default), since the S_0 obtained that way is identical to the category
@@ -255,7 +256,6 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   m_0 = NULL, S_0 = NULL,
   tau_scale = 0, # rep(5, length(cues)),
   L_omega_scale = 0,
-  Sigma_noise = NULL,
   verbose = F
 ) {
   if ((!center.observations | !scale.observations) & (tau_scale == 0 | L_omega_scale == 0))
@@ -283,7 +283,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     only be counted once. All test observations are still counted, but aggregated for each unique value of group.unique."))
 
     exposure %<>%
-      mutate(across(group.unique, as.factor)) %>%
+      mutate(across(all_of(group.unique), as.factor)) %>%
       group_by(!! sym(group.unique), !! sym(category), !!! syms(cues)) %>%
       filter(!! sym(group) == unique(!! sym(group))[1])
 
@@ -314,7 +314,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     message(paste("Not all levels of the grouping variable", group, "that are present in test were found in exposure.
     Creating 0 exposure data for those groups."))
   exposure %<>%
-    mutate_at(all_of(group), ~ factor(.x, levels = levels(test[[!! group]])))
+    mutate(across(all_of(group), ~ factor(.x, levels = levels(test[[!! group]]))))
 
   if (!is.null(m_0)) {
     if (nlevels(exposure[[category]]) == 1) {

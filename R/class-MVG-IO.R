@@ -1,5 +1,4 @@
-get_expected_columns_for_MVG_ideal_observer <- function()
-  c(get_expected_columns_for_MVG(), "prior", "lapse_rate", "lapse_bias", "Sigma_noise")
+get_expected_columns_for_MVG_ideal_observer <- function() append(get_expected_columns_for_MVG(), get_expected_columns_for_model())
 
 #' Is this an ideal observer with multivariate Gaussian (MVG) categories?
 #'
@@ -44,14 +43,9 @@ is.MVG_ideal_observer <- function(x, group = NULL, category = "category", is.lon
     return(FALSE)
   }
 
-  if (
-    any(
-      "prior" %nin% names(x),
-      with.lapse & "lapse_rate" %nin% names(x),
-      with.lapse_bias & "lapse_bias" %nin% names(x)
-    )
-  ) {
-    if (verbose) message(name_of_x, "is missing prior, lapse rate, or lapse bias.")
+  # Only need to test for MVG columns here since is.model is called below.
+  if (any(get_expected_columns_for_MVG() %nin% names(x))) {
+    if (verbose) message(paste("x is missing a required column: ", paste(get_expected_columns_for_MVG, collapse = ",")))
     return(FALSE)
   }
 

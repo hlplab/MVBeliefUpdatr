@@ -2,6 +2,7 @@
 % Please edit documentation in R/make-objects.R
 \name{lift_likelihood_to_model}
 \alias{lift_likelihood_to_model}
+\alias{lift_exemplars_to_exemplar_model}
 \alias{lift_MVG_to_MVG_ideal_observer}
 \alias{lift_NIW_belief_to_NIW_ideal_adaptor}
 \title{Turn an MVG/NIW_belief object into an ideal observer/adaptor}
@@ -10,9 +11,21 @@ lift_likelihood_to_model(
   x,
   group = NULL,
   category = "category",
-  prior = NA_real_,
-  lapse_rate = NA_real_,
-  lapse_bias = NA_real_,
+  prior = rep(1/get_nlevels_of_category_labels_from_model(x),
+    get_nlevels_of_category_labels_from_model(x)),
+  lapse_rate = 0,
+  lapse_bias = rep(1/get_nlevels_of_category_labels_from_model(x),
+    get_nlevels_of_category_labels_from_model(x)),
+  Sigma_noise = NULL,
+  verbose = F
+)
+
+lift_exemplars_to_exemplar_model(
+  x,
+  group = NULL,
+  prior = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
+  lapse_rate = 0,
+  lapse_bias = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   Sigma_noise = NULL,
   verbose = F
 )
@@ -21,11 +34,10 @@ lift_MVG_to_MVG_ideal_observer(
   x,
   group = NULL,
   category = "category",
-  prior = NA_real_,
-  lapse_rate = NA_real_,
-  lapse_bias = NA_real_,
+  prior = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
+  lapse_rate = 0,
+  lapse_bias = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = F,
   verbose = F
 )
 
@@ -33,11 +45,10 @@ lift_NIW_belief_to_NIW_ideal_adaptor(
   x,
   group = NULL,
   category = "category",
-  prior = NA_real_,
-  lapse_rate = NA_real_,
-  lapse_bias = NA_real_,
+  prior = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
+  lapse_rate = 0,
+  lapse_bias = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = F,
   verbose = F
 )
 }
@@ -52,19 +63,14 @@ NIW belief or ideal adaptor will be derived for each level of \code{group_struct
 \item{prior}{Optionally specify a prior probability for each category (in each group). (default: a uniform
 prior over all categories).}
 
-\item{lapse_rate}{Optionally specify a lapse rate. (default: \code{NA})}
+\item{lapse_rate}{Optionally specify a lapse rate. (default: 0)}
 
-\item{lapse_bias}{Optionally specify a lapse bias. (default: \code{NA})}
+\item{lapse_bias}{Optionally specify a lapse bias for each category. (default: uniform bias for all categories)}
 
 \item{Sigma_noise}{Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This argument will be
 ignored if NULL. (default: NULL)}
 
 \item{verbose}{If true provides more information. (default: FALSE)}
-
-\item{add_Sigma_noise_to_category_representation}{Should the perceptual noise be added to the category
-representation (category variability)? If FALSE, then noise will be considered during categorization decisions
-but will not be added to the covariance matrix of the MVG categories. If TRUE, then noise will also be to the category
-covariance matrix. Will be ignored if Sigma_noise is NULL. (default: FALSE)}
 
 \item{kappa}{The strength of the beliefs over the category mean (pseudocounts). (default: same as nu)}
 

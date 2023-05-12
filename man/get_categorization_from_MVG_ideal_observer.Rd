@@ -20,9 +20,8 @@ get_categorization_from_MVG_ideal_observer(
 
 \item{decision_rule}{Must be one of "criterion", "proportional", or "sampling".}
 
-\item{noise_treatment}{Determines whether and how multivariate Gaussian noise is added to the input.
-See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
-"sample"; "marginalize" otherwise).}
+\item{noise_treatment}{Determines whether and how multivariate Gaussian noise is considered during categorization.
+See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).}
 
 \item{lapse_treatment}{Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
 If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be

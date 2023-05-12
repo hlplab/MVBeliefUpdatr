@@ -13,7 +13,6 @@ make_NIW_belief_from_data(
   cues,
   kappa = nu,
   nu = length(cues) + 2,
-  keep.category_parameters = F,
   verbose = F
 )
 
@@ -24,7 +23,6 @@ make_NIW_prior_from_data(
   cues,
   kappa = nu,
   nu = length(cues) + 2,
-  keep.category_parameters = F,
   verbose = F
 )
 
@@ -35,12 +33,8 @@ make_NIW_ideal_adaptor_from_data(
   cues,
   kappa = nu,
   nu = length(cues) + 2,
-  prior = NA_real_,
-  lapse_rate = NA_real_,
-  lapse_bias = NA_real_,
-  Sigma_noise = NULL,
-  add_Sigma_noise_to_category_representation = T,
-  keep.category_parameters = F
+  ...,
+  verbose = F
 )
 }
 \arguments{
@@ -58,9 +52,6 @@ ideal adaptor will be derived for each level of \code{group}. (default: NULL)}
 \item{nu}{The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
 cues + 2)}
 
-\item{keep.category_parameters}{Should categories' mu and Sigma be included in the output (in addition to m
-and S of the prior)? (default: FALSE)}
-
 \item{verbose}{If true provides more information. (default: FALSE)}
 
 \item{prior}{Optionally specify a prior probability for each category (in each group). (default: a uniform
@@ -72,12 +63,6 @@ prior over all categories).}
 
 \item{Sigma_noise}{Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This argument will be
 ignored if NULL. (default: NULL)}
-
-\item{add_Sigma_noise_to_category_representation}{Should the perceptual noise be added to the category
-representation (category variability)? If FALSE, then noise will be considered during categorization decisions
-but will not be added to the MVG categories. If TRUE, then noise will also be to the category covariance matrix.
-This is typically the desired result since perceptual noise would have shaped the ideal observers representations.
-Will be ignored if Sigma_noise is NULL. (default: TRUE)}
 }
 \value{
 A tibble that is an NIW_belief or NIW_ideal_adaptor object.

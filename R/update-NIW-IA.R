@@ -30,7 +30,6 @@ update_NIW_belief_m = function(kappa_0, m_0, x_N, x_mean) { (kappa_0 / (kappa_0 
 update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) { S_0 + x_SS + ((kappa_0 * x_N) / (kappa_0 + x_N)) * (x_mean - m_0) %*% t(x_mean - m_0) }
 
 
-
 #' Update NIW prior beliefs about multivariate Gaussian category based on sufficient statistics of observations.
 #'
 #' Returns updated/posterior beliefs about the Gaussian categories based on conjugate NIW prior.
@@ -94,13 +93,16 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) { S_0 + x_S
 #' @param x_mean The cue mean of observations.
 #' @param x_SS *Centered* The sum of squares matrix of observations.
 #' @param x_N Number of observations that went into the mean and sum of squares matrix.
-#' @param noise_treatment Determines whether multivariate Gaussian noise is added to the input.
-#' If `NULL`, no noise is added during the updating. If "sample" then a sample of
-#' noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
-#' that results from convolving the input with noise. This latter option might be helpful, for example, if one is
-#' interested in estimating the consequences of noise across individuals. If add_noise is not `NULL` a Sigma_noise
-#' column must be present in the NIW_belief object specified as the priors argument.
-#' (default: "no_noise" for NIW_beliefs; "sample" for NIW_ideal_adaptors)
+#' @param noise_treatment Determines whether perceptual noise is considered during categorization, and how.
+#' Can be "no_noise", "sample", or "marginalize". If "no_noise", no noise will be applied to the input,
+#' and no noise will be assumed during categorization. If "marginalize", average noise (i.e., no noise)
+#' will be added to the stimulus, and `Sigma_noise` is added to Sigma when calculating the likelihood.
+#' This simulates the expected consequences for perceptual noise on categorization *in the limit*, i.e,
+#' if the input was categorized infinitely many times. If "sample", then noise is sampled and applied to
+#' the input, and `Sigma_noise` is added to Sigma when calculating the likelihood. This simulates the
+#' consequence of perceptual noise *on a particular observation*. If "sample" or "marginalize" are chosen,
+#' `Sigma_noise` must be a covariance matrix of appropriate dimensions. (default: "no_noise" if Sigma_noise
+#' is NULL, "marginalize" otherwise).
 #' @param lapse_treatment Determines whether attentional lapses can occur during which no updating occurs.
 #' Can be "no_lapses", "sample", or "marginalize". If "no_lapses", no lapses occur (even if the ideal adaptor specifies
 #' a non-zero `lapse_rate`), and all observations lead to updating. If "sample" or "marginalize", the lapse rate from '
@@ -120,9 +122,9 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) { S_0 + x_S
 #' TBD
 #' @rdname update_NIW_belief
 #' @export
-update_NIW_belief_by_sufficient_statistics_of_one_category = function(
+update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
   prior, x_category, x_mean, x_SS, x_N,
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_noise",
+  noise_treatment = if (is.NIW_ideal_adaptor(prior)) { if (!is.null(first(prior$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
   lapse_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_lapses",
   method = "label-certain",
   verbose = FALSE
@@ -150,7 +152,6 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
     if (verbose) message("No observations to update on (x_N == 0 or x_mean is NA). This can happen, for example, if observations are missing or because model was lapsing during all observations. Returning prior as posterior.")
     return(prior)
   }
-
   assert_that(method %in% c("no-updating",
                             "label-certain",
                             "nolabel-criterion", "nolabel-sampling", "nolabel-proportional",
@@ -160,40 +161,51 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
     assert_that(x_N <= 1,
                 msg = "For this updating method, only incremental updating (one observations at a time) is implemented.")
 
-  x_Ns = as.list(rep(0, length(prior$category)))
+  x_Ns <- as.list(rep(0, length(prior$category)))
   # Determine how observations should be distributed across categories
   if (method == "no-updating") return(prior) else
     if (method == "label-certain") x_Ns[[which(prior$category == x_category)]] <- x_N else
       if (method == "nolabel-uniform") x_Ns <- as.list(1 / length(prior$category) * x_N) else
         if (method %in% c("nolabel-criterion", "nolabel-proportional")) {
-          x_Ns = get_categorization_from_NIW_ideal_adaptor(
-            x = x_mean, model = prior,
-            decision_rule = gsub("nolabel-", "", method),
-            simplify = F) %>%
-              pull(response) * x_N %>%
+          x_Ns <-
+            get_categorization_from_NIW_ideal_adaptor(
+              x = x_mean, model = prior,
+              decision_rule = gsub("nolabel-", "", method),
+              simplify = F) %>%
+            pull(response) * x_N %>%
             as.list()
         } else if (method %in% c("nolabel-sampling")) {
-          x_Ns = get_categorization_from_NIW_ideal_adaptor(
-            x = x_mean, model = prior,
-            decision_rule = "proportional",
-            simplify = F) %>%
-              pull(response) %>%
-              rmultinom(1, x_N, .) %>%
+          x_Ns <-
+            get_categorization_from_NIW_ideal_adaptor(
+              x = x_mean, model = prior,
+              decision_rule = "proportional", # perhaps decision_rule = "sampling" could be used here with simplify = T, pre-empting the remaining rows?
+              simplify = F) %>%
+            pull(response) %>%
+            rmultinom(1, x_N, .) %>%
             as.list()
         }
 
   # Handle noise
   assert_that(noise_treatment %in% c("no_noise", "sample", "marginalize"))
+  Sigma_noise <- get_perceptual_noise_from_model(prior)
   if (noise_treatment == "sample") {
     assert_that(all(is_scalar_integerish(x_N), is_weakly_greater_than(x_N, 1)),
                 msg = "If noise_treatment is 'sample', x_N must be a positive integer.")
-    warning("Updating while including noise_treatment = sample has not yet been thoroughly tested. If noise is included in perception but not in the prior beliefs, it should be discounted during the updating. This is not yet implemented. You might want to construct the model with the option add_Sigma_noise_to_category_representation = TRUE and use categorization that does not add the noise again noise_treatment = 'no_noise'.")
-    x = rmvnorm(n = x_N, sigma = get_perceptual_noise_from_model(prior))
-    x_mean = x_mean + colMeans(x)
-    if (x_N > 1) x_SS = x_SS + ss(x, center = T)
+    if (verbose) message("Sampling perceptual noise and adding it to each observation")
+    warning("Updating while including noise_treatment = sample has not yet been thoroughly tested. If noise is included in perception but not in the prior beliefs, it should be discounted during the updating. This implementation has not been tested. You might want to construct the model while adding the perceptual noise to the category beliefs and use categorization that does not add the noise again (noise_treatment = 'no_noise').")
+    x <- rmvnorm(n = x_N, sigma = Sigma_noise)
+    x_mean <- x_mean + colMeans(x)
+    # Add sampled stimulus-level noise and subtract expected noise
+    if (x_N > 1) x_SS <- x_SS + (ss(x, center = T) - cov2css(Sigma_noise, n = x_N))
+    # Handle (hopefuly very rare) case where subtraction results in negative diagonal values
+    # (this is now handled below)
+    # if (any(diag(x_SS) < 0)) diag(x_SS) <- pmax(diag(x_SS), rep(0, length(diag(x_SS))))
   } else if (noise_treatment == "marginalize") {
-    warning("Updating while including noise_treatment = marginalize has not yet been thoroughly tested. If noise is included in perception but not in the prior beliefs, it should be discounted during the updating. This is not yet implemented. You might want to construct the model with the option add_Sigma_noise_to_category_representation = TRUE and use categorization that does not add the noise again noise_treatment = 'no_noise'.")
-    x_SS = x_SS + cov2css(get_perceptual_noise_from_model(prior), n = x_N)
+    # As long the actual perceptual noise experienced during the input is on average the same as the noise
+    # assumed by the input, then the two noise sources cancel each other out. I.e.,
+    # x_SS <- x_SS +
+    #     cov2css(Sigma_noise, n = x_N) - # average stimulus noise experience
+    #     cov2css(Sigma_noise, n = x_N)   # explaining away expected noise
   }
 
   x_mean = list(x_mean)
@@ -206,6 +218,22 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
       kappa = unlist(map2(kappa, x_Ns, update_NIW_belief_kappa)),
       nu = unlist(map2(nu, x_Ns, update_NIW_belief_nu)))
 
+  if (noise_treatment == "sample") {
+    # To correct of expected consequence of perceptual noise on the uncertainty about the mean (the additional
+    # component in the updating of S, cf. update_NIW_belief_S), we need to correct S by subtracting
+    #
+    #   ((kappa * x_N) / (kappa + x_N)) * Sigma_noise / x_N =
+    #   ((kappa * x_N) / (kappa + x_N)) * Sigma_noise / x_N =
+    #   ((kappa) / (kappa + x_N)) * Sigma_noise
+    prior %<>%
+      mutate(
+        # Since kappa has already been updated  ((kappa) / (kappa + x_N)) --> (kappa - x_N) / kappa
+        S = pmap(.l = list(kappa, x_Ns, S), ~ ..3 - (..1 - ..2) / (..1) * .env$Sigma_noise),
+        # Handle (hopefuly very rare) case where subtraction results in negative diagonal values
+        S = S - diag(diag(S)) + diag(pmax(diag(S), rep(0, length(diag(S)))))
+      )
+  }
+
   return(prior)
 }
 
@@ -214,7 +242,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category = function(
 #' @export
 update_NIW_belief_by_one_observation = function(
   prior, x_category, x,
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_noise",
+  noise_treatment = if (is.NIW_ideal_adaptor(prior)) { if (!is.null(first(prior$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
   lapse_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_lapses",
   method = "label-certain",
   verbose = FALSE
@@ -243,8 +271,8 @@ update_NIW_belief_by_one_observation = function(
 #' extracted from the prior object.
 #' @param exposure.order Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 #' exposure data is assumed to be in the order in which it should be presented.
-#' @param noise_treatment Determines whether multivariate Gaussian noise is added to the input before updating based on
-#' the input. See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
+#' @param noise_treatment Determines whether and how multivariate Gaussian noise is considered during categorization.
+#' See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
 #' @param lapse_treatment Determines whether attentional lapses can occur during which no updating occurs.
 #' See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
 #' @param method Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
@@ -272,7 +300,7 @@ update_NIW_ideal_adaptor_incrementally <- function(
   exposure.category = "category",
   exposure.cues = get_cue_labels_from_model(prior),
   exposure.order = NULL,
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_noise",
+  noise_treatment = if (is.NIW_ideal_adaptor(prior)) { if (!is.null(first(prior$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
   lapse_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_lapses",
   method = "label-certain",
   keep.update_history = TRUE,
@@ -346,7 +374,7 @@ update_NIW_ideal_adaptor_batch <- function(
   exposure,
   exposure.category = "category",
   exposure.cues = get_cue_labels_from_model(prior),
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) "marginalize" else "no_noise",
+  noise_treatment = if (is.NIW_ideal_adaptor(prior)) { if (!is.null(first(prior$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
   verbose = FALSE
 ){
   if (verbose) message("Assuming that category variable in NIW belief/ideal adaptor is called category.")

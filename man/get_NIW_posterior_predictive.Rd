@@ -13,7 +13,7 @@ get_NIW_posterior_predictive(
   kappa,
   nu,
   Sigma_noise = NULL,
-  noise_treatment = "no_noise",
+  noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
   log = T
 )
 
@@ -22,8 +22,14 @@ get_NIW_posterior_predictive.pmap(x, m, S, kappa, nu, ...)
 get_posterior_predictive_from_NIW_belief(
   x,
   model,
+  noise_treatment = if (is.NIW_ideal_adaptor(model)) {
+     if
+    (!is.null(first(model$Sigma_noise))) 
+         "marginalize"
+     else "no_noise"
+ }
+    else "no_noise",
   log = T,
-  noise_treatment = if (is.NIW_ideal_adaptor(model)) "marginalize" else "no_noise",
   category = "category",
   category.label = NULL,
   wide = FALSE
@@ -47,13 +53,16 @@ matrix Sigma. Should be a square k x k matrix.}
 \item{Sigma_noise}{Optionally, a covariance matrix describing the perceptual noise to be applied while
 calculating the posterior predictive. (default: `NULL`)}
 
-\item{noise_treatment}{Determines whether and how multivariate Gaussian noise is added to the input. Can be "no_noise", "sample"
-or "marginalize". If "no_noise", no noise will be applied. This describes the idealized categorization function if the percept
-was known. If "sample" or "marginalize", `Sigma_noise` must be a covariance
-matrix of appropriate dimensions. If "sample", observations are adjusted by samples drawn from the noise distribution before applying
-categorization. If "marginalize" then each observation is transformed into the marginal distribution
-that results from convolving the input with noise. This latter option might be helpful, for example, if one is
-interested in estimating the consequences of noise across individuals. (default: "no_noise").}
+\item{noise_treatment}{Determines whether perceptual noise is considered during categorization, and how.
+Can be "no_noise", "sample", or "marginalize". If "no_noise", no noise will be applied to the input,
+and no noise will be assumed during categorization. If "marginalize", average noise (i.e., no noise)
+will be added to the stimulus, and `Sigma_noise` is added to Sigma when calculating the likelihood.
+This simulates the expected consequences for perceptual noise on categorization *in the limit*, i.e,
+if the input was categorized infinitely many times. If "sample", then noise is sampled and applied to
+the input, and `Sigma_noise` is added to Sigma when calculating the likelihood. This simulates the
+consequence of perceptual noise *on a particular observation*. If "sample" or "marginalize" are chosen,
+`Sigma_noise` must be a covariance matrix of appropriate dimensions. (default: "no_noise" if Sigma_noise
+is NULL, "marginalize" otherwise).}
 
 \item{log}{Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)}
 }
