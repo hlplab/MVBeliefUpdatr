@@ -685,7 +685,7 @@ sample_MVG_data_from_model = function(
   randomize.order = F,
   keep.input_parameters = F
 ) {
-  if (is.MVG(model)) {
+  if (is.MVG(model) | is.MVG_ideal_observer(model)) {
     return(sample_MVG_data(
       Ns = Ns,
       mus = model$mu,
@@ -694,7 +694,7 @@ sample_MVG_data_from_model = function(
       cue.labels = get_cue_labels_from_model(model),
       randomize.order = randomize.order,
       keep.input_parameters = keep.input_parameters))
-  } else if (is.NIW_belief(model)) {
+  } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model)) {
     return(make_MVG_data(
       Ns = Ns,
       mus = model$m,

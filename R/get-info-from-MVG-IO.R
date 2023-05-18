@@ -12,7 +12,7 @@ example_MVG_ideal_observer <- function(example = 1) {
       prior = c(.5, .5),
       lapse_rate = .05,
       lapse_bias = c(.5, .5),
-      Sigma_noise = NULL) %>%
+      Sigma_noise = list(diag(c(0,0)), diag(c(0,0)))) %>%
       mutate(category = factor(category))
   } else if (example == 2) {
     message("An example MVG ideal observer for two categories in a 1D cue continuum. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
@@ -25,6 +25,7 @@ example_MVG_ideal_observer <- function(example = 1) {
       lapse_rate = .05,
       lapse_bias = c(.5, .5),
       Sigma_noise = list(NULL)) %>%
+      Sigma_noise = list(diag(c(0,0)), diag(c(0,0)))) %>%
       mutate(category = factor(category))
   }
 }
@@ -172,32 +173,7 @@ get_likelihood_from_MVG <- function(
 }
 
 
-#' Get categorization from an ideal observer
-#'
-#' Categorize a single observation based on an MVG ideal observer. The decision rule can be specified to be either the
-#' criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
-#' Luce's choice rule.
-#'
-#' @param x A vector of observations.
-#' @param model An \code{\link[=is.MVG_ideal_observer]{MVG_ideal_observer}} object.
-#' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
-#' @param noise_treatment Determines whether and how multivariate Gaussian noise is considered during categorization.
-#' See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
-#' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
-#' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
-#' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
-#' will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
-#' perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
-#' @param simplify Should the output be simplified, and just the label of the selected category be returned? This
-#' option is only available for the criterion and sampling decision rules. (default: `FALSE`)
-#'
-#' @return Either a tibble of observations with posterior probabilities for each category (in long format), or a
-#' character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
-#'
-#' @seealso TBD
-#' @keywords TBD
-#' @examples
-#' TBD
+#' @rdname get_categorization_from_model
 #' @export
 get_categorization_from_MVG_ideal_observer <- function(
   x,
