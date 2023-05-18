@@ -229,9 +229,39 @@ unnest_cue_information_in_model <- function(model) {
     select(cue, cue2, everything())
 }
 
-
+#' Get categorization from model
+#'
+#' Categorize a single observation based a model. The decision rule can be specified to be either the
+#' criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
+#' Luce's choice rule.
+#'
+#' @param x A vector of observations.
+#' @param model A model object.
+#' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
+#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input.
+#' See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
+#' "sample"; "marginalize" otherwise).
+#' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
+#' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
+#' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
+#' will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
+#' perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
+#' @param simplify Should the output be simplified, and just the label of the selected category be returned? This
+#' option is only available for the criterion and sampling decision rules. (default: `FALSE`)
+#'
+#' @return Either a tibble of observations with posterior probabilities for each category (in long format), or a
+#' character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname get_categorization_from_model
+#' @export
 get_categorization_from_model <- function(model, ...) {
-  if (is.NIW_ideal_adaptor(model)) {
+  if (is.MVG_ideal_observer(model)) {
+    c <- get_categorization_from_MVG_ideal_observer(model = model, ...)
+  } else if (is.NIW_ideal_adaptor(model)) {
     c <- get_categorization_from_NIW_ideal_adaptor(model = model, ...)
   } else {
     stop(
@@ -243,3 +273,48 @@ get_categorization_from_model <- function(model, ...) {
 
   return(c)
 }
+
+#' Evaluate the fit of a model
+#'
+#' Evaluate the fit of a categorization model against a ground truth (e.g., human responses or the category intended
+#' by a talker).
+#'
+#' @param x A vector of observations.
+#' @param model A model object.
+#' @param cues A list of cue values.
+#' @param correct_category A list of category labels that is taken to be the ground truth. Must be of the same length as the
+#' list of cue values.
+#' @param method Method for evaluating the model. Can be "accuracy" or "likelihood".
+#' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
+#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input.
+#' See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
+#' "sample"; "marginalize" otherwise).
+#' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
+#' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
+#' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
+#' will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
+#' perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
+#' @param simplify Should the output be simplified, and just the label of the selected category be returned? This
+#' option is only available for the criterion and sampling decision rules. (default: `FALSE`)
+#'
+#' @return Either a tibble of observations with posterior probabilities for each category (in long format), or a
+#' character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname evaluate_model
+#' @export
+evaluate_model <- function(model, cues, correct_category, method = "likelihood", ...) {
+  d <-
+    tibble(observation_id = 1:length(cues), cues = cues, correct_category = correct_category) %>%
+    group_by(cues, correct_category) %>%
+    tally()
+  d %<>%
+    mutate(categorization = get_categorization_from_model(x = cues, model = .env$model, ...))
+}
+
+dd %<>%
+  mutate(cues = map2(cue1, cue2, ~ c(.x, .y)))
+evaluate_model(M, dd$cues, dd$category)
