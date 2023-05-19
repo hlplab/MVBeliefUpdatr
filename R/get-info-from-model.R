@@ -314,7 +314,3 @@ evaluate_model <- function(model, cues, correct_category, method = "likelihood",
   d %<>%
     mutate(categorization = get_categorization_from_model(x = cues, model = .env$model, ...))
 }
-
-dd %<>%
-  mutate(cues = map2(cue1, cue2, ~ c(.x, .y)))
-evaluate_model(M, dd$cues, dd$category)
