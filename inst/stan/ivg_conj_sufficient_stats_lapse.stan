@@ -10,11 +10,9 @@
  * counts of responses for test observations.
  *
  *
- * Modified by Florian Jaeger, August 2020 to:
+ * Modified by Florian Jaeger, May 2023 to:
  *
- *    + Allow multivariate categories.
- *    + Specification of known m and/or S
- *    + Specification of scales for priors
+ *    + Allow independent updating over each dimension of multivariate categories.
  */
 
 data {
@@ -28,17 +26,20 @@ data {
      dimensional arrays). */
   matrix[M,L] N;                // number of observations per category (m) and group (l) in exposure
   vector[K] x_mean[M,L];        // means for each category (m) and group (l) in exposure
-  cov_matrix[K] x_ss[M,L];      // sum of uncentered squares matrix for each category (m) and group (l) in exposure
+  vector[K] x_sd[M,L];          // sample standard deviation for each category (m) and group (l) in exposure
 
   int N_test;                   // number of test trials
   vector[K] x_test[N_test];     // locations of test trials
   int y_test[N_test];           // group label of test trials
   int z_test_counts[N_test,M];  // responses for test trials
 
+  int<lower=0, upper=1> multiple_kappa_0;
+  int<lower=0, upper=1> multiple_nu_0;
+
   int<lower=0, upper=1> m_0_known;
   int<lower=0, upper=1> S_0_known;
-  vector[m_0_known ? K : 0] m_0_data[m_0_known ? M : 0];        // optional: user provided m_0 (prior mean of means)
-  cov_matrix[S_0_known ? K : 0] S_0_data[S_0_known ? M : 0];    // optional: user provided S_0 (prior scatter matrix of mean)
+  vector[m_0_known ? K : 0] m_0_data[m_0_known ? M : 0];    // optional: user provided m_0 (prior mean of means)
+  vector[S_0_known ? K : 0] S_0_data[S_0_known ? M : 0];    // optional: user provided S_0 (prior expected standard deviation)
 
   /* For now, this script assumes that the observations (cue vectors) are centered. The prior
      mean of m_0 is set to 0. Same for the prior location parameter for the cauchy prior over
@@ -51,6 +52,10 @@ data {
 
 transformed data {
   real sigma_kappanu;
+  vector[K] x_ss[M,L];          // sample sum of squares for each category (m) and group (l) in exposure
+  for (m in 1:M)
+    for (l in 1:L)
+      x_ss[m,l] = (N[m,l] - 1) * x_sd[m,l];
 
   /* Scale for the prior of kappa/nu_0. In order to deal with input that does not contain observations
      (in which case n_each == 0), we set the minimum value for SD to 10. */
@@ -59,29 +64,28 @@ transformed data {
 
 parameters {
   // these are all shared across groups (same prior beliefs):
-  real<lower=K> kappa_0;                  // prior pseudocount for category mu
-  real<lower=K + 1> nu_0;                 // prior pseudocount for category Sigma
+  vector<lower=K>[multiple_kappa_0 ? K : 1] kappa_0;        // prior pseudocount for category mu
+  vector<lower=K + 1>[multiple_nu_0 ? K : 1] nu_0;          // prior pseudocount for category Sigma
 
   vector[K] m_0_param[m_0_known ? 0 : M];                 // prior mean of means
   vector<lower=0>[m_0_known ? 0 : K] m_0_tau;             // prior variances of m_0
   cholesky_factor_corr[m_0_known ? 0 : K] m_0_L_omega;    // prior correlations of variances of m_0 (in cholesky form)
 
-  vector<lower=0>[K] tau_0_param[S_0_known ? 0 : M];          // standard deviations of prior scatter matrix S_0
-  cholesky_factor_corr[K] L_omega_0_param[S_0_known ? 0 : M]; // correlation matrix of prior scatter matrix S_0 (in cholesky form)
+  vector<lower=0>[K] S_0_param[S_0_known ? 0 : M];        // prior expected standard deviation
 
   real<lower=0, upper=1> lapse_rate;
 }
 
 transformed parameters {
   vector[K] m_0[M];                    // prior mean of means m_0
-  cov_matrix[K] S_0[M];                // prior scatter matrix S_0
+  vector[K] S_0[M];                    // prior expected standard deviation S_0
 
   // updated beliefs depend on input and group
-  real<lower=K> kappa_n[M,L];          // updated mean pseudocount
-  real<lower=K> nu_n[M,L];             // updated sd pseudocount
+  vector<lower=K>[multiple_kappa_0 ? K : 1] kappa_n[M,L];    // updated mean pseudocount
+  vector<lower=K>[multiple_nu_0 ? K : 1] nu_n[M,L];          // updated sd pseudocount
   vector[K] m_n[M,L];                  // updated expected mean
-  cov_matrix[K] S_n[M,L];              // updated expected scatter matrix
-  cov_matrix[K] t_scale[M,L];          // scale matrix of predictive t distribution
+  vector[K] S_n[M,L];                  // updated expected scatter matrix
+  vector[K] t_scale[M,L];              // scale matrix of predictive t distribution
 
   simplex[M] p_test_conj[N_test];
   vector[M] log_p_test_conj[N_test];
@@ -93,25 +97,41 @@ transformed parameters {
   }
   if (S_0_known) {
     S_0 = S_0_data;
+  } else {
+    S_0 = S_0_param;
   }
 
-  // update NIW parameters according to conjugate updating rules are taken from
-  // Murphy (2007, p. 136)
+  // update NIX parameters according to conjugate updating rules are taken from
+  // Murphy (2007, p. XXX)
   for (cat in 1:M) {
-    if (!S_0_known) {
-      // Get S_0 from its components: correlation matrix and vector of standard deviations
-      S_0[cat] = quad_form_diag(multiply_lower_tri_self_transpose(L_omega_0_param[cat]), tau_0_param[cat]);
-    }
     for (group in 1:L) {
       if (N[cat,group] > 0 ) {
         kappa_n[cat,group] = kappa_0 + N[cat,group];
         nu_n[cat,group] = nu_0 + N[cat,group];
-        m_n[cat,group] = (kappa_0 * m_0[cat] + N[cat,group] * x_mean[cat,group]) /
-                        kappa_n[cat,group];
-        S_n[cat,group] = S_0[cat] +
-                        x_ss[cat,group] +
-                        kappa_0 * m_0[cat] * m_0[cat]' -
-                        kappa_n[cat,group] * m_n[cat,group] * m_n[cat,group]';
+        if (multiple_kappa_0) {
+          m_n[cat,group] = (kappa_0 .* m_0[cat] + N[cat,group] * x_mean[cat,group]) ./ kappa_n[cat,group];
+        } else {
+          m_n[cat,group] = (kappa_0[1] * m_0[cat] + N[cat,group] * x_mean[cat,group]) / kappa_n[cat,group,1];
+        }
+
+        if (multiple_nu_0 && multiple_kappa_0) {
+          S_n[cat,group] = sqrt(
+            (nu_0 .* (S_0[cat] .* S_0[cat]) +
+            x_ss[cat,group] +
+            ((kappa_0 * N[cat,group]) ./ kappa_n[cat,group]) .*
+            (m_0[cat] - x_mean[cat,group]) .* (m_0[cat] - x_mean[cat,group])) ./
+            nu_n[cat,group]);
+        } else {
+          // NEED TO HANDLE CASES WHEN ONLY ONE OF MULTIPLE_NU_0 OR MULTIPLE_KAPPA_0 IS TRUE
+          S_n[cat,group] = sqrt(
+            (nu_0[1] * (S_0[cat] .* S_0[cat]) +
+            x_ss[cat,group] +
+            ((kappa_0[1] * N[cat,group]) / kappa_n[cat,group,1]) *
+            (m_0[cat] - x_mean[cat,group]) .* (m_0[cat] - x_mean[cat,group])) /
+            nu_n[cat,group, 1]);
+        }
+
+
       } else {
         kappa_n[cat,group] = kappa_0;
         nu_n[cat,group] = nu_0;
@@ -119,8 +139,8 @@ transformed parameters {
         S_n[cat,group] = S_0[cat];
       }
 
-      t_scale[cat,group] = S_n[cat,group] * (kappa_n[cat,group] + 1) /
-                                              (kappa_n[cat,group] * (nu_n[cat,group] - K + 1));
+      t_scale[cat,group] = S_n[cat,group] .* (kappa_n[cat,group] + 1) ./
+                                              (kappa_n[cat,group] .* (nu_n[cat,group] - K + 1));
     }
   }
 
