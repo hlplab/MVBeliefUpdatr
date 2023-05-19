@@ -7,12 +7,15 @@ example_MVG_ideal_observer <- function(example = 1) {
     tibble(
       category = c("A", "B"),
       mu = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
-      Sigma = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
-               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
+      Sigma = list(
+        matrix(c(3, 2.4, 2.4, 3), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+               matrix(c(3, -2.4, -2.4, 3), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
       prior = c(.5, .5),
       lapse_rate = .05,
       lapse_bias = c(.5, .5),
-      Sigma_noise = list(diag(c(0,0)), diag(c(0,0)))) %>%
+      Sigma_noise = list(
+        matrix(rep(0, 4), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+        matrix(rep(0, 4), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))) %>%
       mutate(category = factor(category))
   } else if (example == 2) {
     message("An example MVG ideal observer for two categories in a 1D cue continuum. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
@@ -24,8 +27,9 @@ example_MVG_ideal_observer <- function(example = 1) {
       prior = c(.5, .5),
       lapse_rate = .05,
       lapse_bias = c(.5, .5),
-      Sigma_noise = list(NULL)) %>%
-      Sigma_noise = list(diag(c(0,0)), diag(c(0,0)))) %>%
+      Sigma_noise = list(
+        matrix(c(0), nrow = 1, dimnames = list(c("VOT"), c("VOT"))),
+        matrix(c(0), nrow = 1, dimnames = list(c("VOT"), c("VOT"))))) %>%
       mutate(category = factor(category))
   }
 }
@@ -74,10 +78,10 @@ get_MVG_likelihood <- function(
   assert_that(is.Sigma(Sigma))
 
   # do not reorder these conditionals (go from more to less specific)
-  if (is_tibble(x)) x %<>% as.matrix() else
-    if (is.list(x)) x %<>% reduce(rbind) %>% as.matrix() else
-      if (is.vector(x)) x %<>% matrix(nrow = 1)
   if (is.matrix(mu)) mu = as.vector(mu)
+  if (is_tibble(x)) x %<>% as.matrix(ncol = length(mu)) else
+    if (is.list(x)) x %<>% reduce(rbind) %>% matrix(ncol = length(mu)) else
+      if (is.vector(x)) x %<>% matrix(ncol = length(mu), nrow = 1)
 
   assert_that(is.flag(log))
   assert_that(any(noise_treatment %in% c("no_noise", "marginalize", "sample")),
@@ -112,8 +116,7 @@ get_MVG_likelihood <- function(
     Sigma <- Sigma + Sigma_noise
   }
 
-  dmvnorm(x, mean = mu, sigma = Sigma, log = log) %>%
-    as.numeric()
+  dmvnorm(x, mean = mu, sigma = Sigma, log = log) %>% as.numeric()
 }
 
 

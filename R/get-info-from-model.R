@@ -307,10 +307,47 @@ get_categorization_from_model <- function(model, ...) {
 #' @rdname evaluate_model
 #' @export
 evaluate_model <- function(model, cues, correct_category, method = "likelihood", ...) {
-  d <-
-    tibble(observation_id = 1:length(cues), cues = cues, correct_category = correct_category) %>%
-    group_by(cues, correct_category) %>%
+  # Get posterior for all *unique* combinations of cues
+  d.unique.observations <-
+    tibble(
+      x = .env$cues,
+      correct_category = .env$correct_category) %>%
+    group_by(x, correct_category) %>%
     tally()
-  d %<>%
-    mutate(categorization = get_categorization_from_model(x = cues, model = .env$model, ...))
+
+  posterior <-
+    d.unique.observations %>%
+    ungroup() %>%
+    summarise(categorization = list(get_categorization_from_model(x = .data$x, model = .env$model, ...))) %>%
+    unnest(categorization)
+
+  r <- list()
+  if ("accuracy" %in% method) {
+    r <-
+      append(
+        r,
+        d.unique.observations %>%
+          ungroup() %>%
+          left_join(posterior, by = join_by(x == x, correct_category == category)) %>%
+          summarise(accuracy = sum(.data$response * .data$n) / sum(.data$n)))
+  }
+  if ("likelihood" %in% method) {
+    r <-
+      append(
+        r,
+        # Get all unique combinations of cues and *possible* responses and fill in 0 as
+        # count n for all combinations that aren't observed
+        crossing(x = .env$cues, correct_category = .env$model$category) %>%
+          left_join(d.unique.observations, by = join_by(x, correct_category)) %>%
+          replace_na(list(n = 0)) %>%
+          left_join(posterior, by = join_by(x == x, correct_category == category)) %>%
+          # Since dmultinom already takes into account the number of observations (size),
+          # no need to carry through the number of observations.
+          group_by(x) %>%
+          summarise(log_likelihood = dmultinom(x = .data$n, prob = .data$response, log = T)) %>%
+          summarise(log_likelihood = sum(log_likelihood)))
+  }
+
+  if (length(r) == 1) r <- as.numeric(r[[1]])
+  return(r)
 }

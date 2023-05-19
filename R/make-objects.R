@@ -1,3 +1,6 @@
+#' @importFrom dplyr rename_all
+NULL
+
 #' Make exemplar models from data.
 #'
 #' Constructs an exemplar model for all categories found in the data.
@@ -24,7 +27,6 @@
 #' @examples
 #' TBD
 #' @export
-#'
 make_exemplars_from_data = function(
     data,
     group = NULL,
@@ -665,13 +667,14 @@ sample_MVG_data = function(
   if (is.null(category.labels)) category.labels = 1:length(mus)
   if (is.null(cue.labels)) cue.labels = paste0("cue", 1:length(mus[[1]]))
 
-  x = tibble(category = category.labels, n = Ns, mu = mus, Sigma = Sigmas) %>%
+  x <-
+    tibble(category = category.labels, n = Ns, mu = mus, Sigma = Sigmas) %>%
     mutate(data = pmap(.l = list(n, mu, Sigma), .f = rmvnorm)) %>%
     mutate(data = map(data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
     unnest(data)
 
   if (randomize.order)
-    x = sample_frac(x, 1)
+    x %<>% slice_sample(prop = 1, replace = FALSE)
 
   if (keep.input_parameters) return(x) else return(x %>% select(category, everything(), -c(n, mu, Sigma)))
 }
