@@ -2,10 +2,10 @@
 % Please edit documentation in R/get-info-from-MVG-IO.R
 \name{example_MVG_ideal_observer}
 \alias{example_MVG_ideal_observer}
-\title{Example NIW priors.}
+\title{Example MVG ideal observers.}
 \usage{
 example_MVG_ideal_observer(example = 1)
 }
 \description{
-Example NIW priors.
+Example MVG ideal observers.
 }

@@ -27,6 +27,7 @@ Imports:
     rstantools (>= 2.1.1),
     assertthat,
     av,
+    colorspace,
     cowplot,
     dplyr,
     mvtnorm,

@@ -1,4 +1,5 @@
-#' @importFrom dplyr near
+#' @importFrom dplyr near tally distinct pull
+NULL
 
 #' @export
 get_class <- function(x) {
