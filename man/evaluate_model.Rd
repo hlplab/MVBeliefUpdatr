@@ -4,19 +4,17 @@
 \alias{evaluate_model}
 \title{Evaluate the fit of a model}
 \usage{
-evaluate_model(model, cues, correct_category, method = "likelihood", ...)
+evaluate_model(model, x, correct_category, method = "likelihood", ...)
 }
 \arguments{
 \item{model}{A model object.}
 
-\item{cues}{A list of cue values.}
+\item{x}{A list of inputs values (vectors of cue values).}
 
 \item{correct_category}{A list of category labels that is taken to be the ground truth. Must be of the same length as the
 list of cue values.}
 
 \item{method}{Method for evaluating the model. Can be "accuracy" or "likelihood".}
-
-\item{x}{A vector of observations.}
 
 \item{decision_rule}{Must be one of "criterion", "proportional", or "sampling".}
 

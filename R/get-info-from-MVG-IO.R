@@ -238,7 +238,7 @@ get_categorization_from_MVG_ideal_observer <- function(
           posterior_probability + runif(
             get_nlevels_of_category_labels_from_model(model),
             min = 0,
-            max = 0),
+            max = 1),
           posterior_probability),
         # select most probable category
         response = ifelse(posterior_probability == max(posterior_probability), 1, 0))
