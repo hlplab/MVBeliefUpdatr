@@ -229,9 +229,39 @@ unnest_cue_information_in_model <- function(model) {
     select(cue, cue2, everything())
 }
 
-
+#' Get categorization from model
+#'
+#' Categorize a single observation based a model. The decision rule can be specified to be either the
+#' criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
+#' Luce's choice rule.
+#'
+#' @param x A vector of observations.
+#' @param model A model object.
+#' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
+#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input.
+#' See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
+#' "sample"; "marginalize" otherwise).
+#' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
+#' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
+#' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
+#' will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
+#' perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
+#' @param simplify Should the output be simplified, and just the label of the selected category be returned? This
+#' option is only available for the criterion and sampling decision rules. (default: `FALSE`)
+#'
+#' @return Either a tibble of observations with posterior probabilities for each category (in long format), or a
+#' character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname get_categorization_from_model
+#' @export
 get_categorization_from_model <- function(model, ...) {
-  if (is.NIW_ideal_adaptor(model)) {
+  if (is.MVG_ideal_observer(model)) {
+    c <- get_categorization_from_MVG_ideal_observer(model = model, ...)
+  } else if (is.NIW_ideal_adaptor(model)) {
     c <- get_categorization_from_NIW_ideal_adaptor(model = model, ...)
   } else {
     stop(
@@ -242,4 +272,113 @@ get_categorization_from_model <- function(model, ...) {
   }
 
   return(c)
+}
+
+#' Evaluate the fit of a model
+#'
+#' Evaluate the fit of a categorization model against a ground truth (e.g., human responses or the category intended
+#' by a talker).
+#'
+#' @param x A vector of observations.
+#' @param model A model object.
+#' @param x A list of inputs values (vectors of cue values).
+#' @param correct_category A list of category labels that is taken to be the ground truth. Must be of the same length as the
+#' list of cue values.
+#' @param method Method for evaluating the model. Can be "accuracy" or "likelihood".
+#' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
+#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input.
+#' See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
+#' "sample"; "marginalize" otherwise).
+#' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
+#' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
+#' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
+#' will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
+#' perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
+#' @param simplify Should the output be simplified, and just the label of the selected category be returned? This
+#' option is only available for the criterion and sampling decision rules. (default: `FALSE`)
+#'
+#' @return Either a tibble of observations with posterior probabilities for each category (in long format), or a
+#' character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname evaluate_model
+#' @export
+evaluate_model <- function(model, x, correct_category, method = "likelihood", ...) {
+  # When the input isn't a list, that's ambiguous between the input being a single input or a set of
+  # 1D inputs. Use the model's cue dimensionality to disambiguate between the two cases.
+  if (!is.list(x)) {
+    x <- if (get_cue_dimensionality_from_model(model) == 1) as.list(x) else list(x)
+  }
+  assert_that(length(x) == length(correct_category),
+              msg = "Input x and correct_category must be lists of the same length.")
+
+  # Get posterior for all *unique* combinations of cues
+  d.unique.observations <-
+    tibble(
+      x = .env$x,
+      correct_category = .env$correct_category) %>%
+    group_by(x, correct_category) %>%
+    tally()
+
+  posterior <-
+    d.unique.observations %>%
+    ungroup() %>%
+    distinct(x) %>%
+    summarise(categorization = list(get_categorization_from_model(x = .data$x, model = .env$model, ...))) %>%
+    unnest(categorization) %>%
+    rename(posterior = response)
+
+  posterior.check <- posterior %>% group_by(x, observationID) %>% summarise(posterior = sum(.data$posterior))
+  if (any(is.na(posterior.check$posterior), is.nan(posterior.check$posterior), !near(posterior.check$posterior, 1.0))) {
+    posterior.check %<>%
+      arrange(posterior) %>%
+      filter(is.na(posterior) | is.nan(posterior) | !near(posterior, 1.0))
+    s <- paste(
+      nrow(posterior.check),
+      "input(s) have an ill-defined posterior under the model. This can happen when inputs are far away from all category means.\n")
+    s %<>% paste0(
+      .,
+      posterior.check %>%
+        arrange(posterior) %>%
+        filter(is.na(posterior) | is.nan(posterior) | !near(posterior, 1.0)) %>%
+        mutate(string = pmap(
+          .l = list(posterior, x, observationID),
+          .f = ~ paste0("Sum of posterior is ", ..1, " for observation ID = ", ..3, "; input = ", paste(..2, collapse = ","))) %>%
+            unlist()) %>%
+        pull(string) %>% paste(., collapse = ".\n"))
+    warning(s)
+  }
+
+  r <- list()
+  if ("accuracy" %in% method) {
+    r <-
+      append(
+        r,
+        d.unique.observations %>%
+          ungroup() %>%
+          left_join(posterior, by = join_by(x == x, correct_category == category)) %>%
+          summarise(accuracy = sum(.data$posterior * .data$n) / sum(.data$n)))
+  }
+  if ("likelihood" %in% method) {
+    r <-
+      append(
+        r,
+        # Get all unique combinations of cues and *possible* responses and fill in 0 as
+        # count n for all combinations that aren't observed
+        crossing(x = .env$x, correct_category = .env$model$category) %>%
+          left_join(d.unique.observations, by = join_by(x, correct_category)) %>%
+          replace_na(list(n = 0)) %>%
+          left_join(posterior, by = join_by(x == x, correct_category == category)) %>%
+          # Since dmultinom already takes into account the number of observations (size),
+          # no need to carry through the number of observations.
+          group_by(x) %>%
+          summarise(log_likelihood = dmultinom(x = .data$n, prob = .data$posterior, log = T)) %>%
+          summarise(log_likelihood = sum(log_likelihood)))
+  }
+
+  if (length(r) == 1) r <- as.numeric(r[[1]])
+  return(r)
 }
