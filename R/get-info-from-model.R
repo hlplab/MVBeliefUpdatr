@@ -346,19 +346,15 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
 
   r <- list()
   if ("accuracy" %in% method) {
-    r <-
-      append(
-        r,
-        d.unique.observations %>%
-          ungroup() %>%
-          left_join(posterior, by = join_by(x == x, correct_category == category)) %>%
-          { if (return_by_x) group_by(., x) else . } %>%
-          summarise(accuracy = sum(.data$posterior * .data$n) / sum(.data$n)))
+    r[["accuracy"]] <-
+      d.unique.observations %>%
+      ungroup() %>%
+      left_join(posterior, by = join_by(x == x, correct_category == category)) %>%
+      { if (return_by_x) group_by(., x) else . } %>%
+      summarise(accuracy = sum(.data$posterior * .data$n) / sum(.data$n))
   }
   if ("likelihood" %in% method) {
-    r <-
-      append(
-        r,
+    r[["likelihood"]] <-
         # Get all unique combinations of cues and *possible* responses and fill in 0 as
         # count n for all combinations that aren't observed
         crossing(x = .env$x, correct_category = .env$model$category) %>%
@@ -369,9 +365,13 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
           # no need to carry through the number of observations.
           group_by(x) %>%
           summarise(log_likelihood = dmultinom(x = .data$n, prob = .data$posterior, log = T)) %>%
-          { if (!return_by_x) summarise(., log_likelihood = sum(log_likelihood)) else . })
+          { if (!return_by_x) summarise(., log_likelihood = sum(log_likelihood)) else . }
   }
 
-  if (length(r) == 1 & nrow(r[[1]]) <= 1) r <- as.numeric(r[[1]])
+  # Simplify return as much as possible
+  if (length(r) == 1) {
+    r <- r[[1]]
+    if (nrow(r) <= 1) r <- as.numeric(r)
+  }
   return(r)
 }
