@@ -4,7 +4,14 @@
 \alias{evaluate_model}
 \title{Evaluate the fit of a model}
 \usage{
-evaluate_model(model, x, correct_category, method = "likelihood", ...)
+evaluate_model(
+  model,
+  x,
+  correct_category,
+  method = "likelihood",
+  ...,
+  return_by_x = F
+)
 }
 \arguments{
 \item{model}{A model object.}
@@ -16,20 +23,7 @@ list of cue values.}
 
 \item{method}{Method for evaluating the model. Can be "accuracy" or "likelihood".}
 
-\item{decision_rule}{Must be one of "criterion", "proportional", or "sampling".}
-
-\item{noise_treatment}{Determines whether and how multivariate Gaussian noise is added to the input.
-See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
-"sample"; "marginalize" otherwise).}
-
-\item{lapse_treatment}{Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
-If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
-a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
-will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
-perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).}
-
-\item{simplify}{Should the output be simplified, and just the label of the selected category be returned? This
-option is only available for the criterion and sampling decision rules. (default: `FALSE`)}
+\item{return_by_x}{Should results be returned separately for each unique x? (default: `FALSE`)}
 }
 \value{
 Either a tibble of observations with posterior probabilities for each category (in long format), or a

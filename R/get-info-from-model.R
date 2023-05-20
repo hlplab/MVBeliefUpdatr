@@ -285,17 +285,8 @@ get_categorization_from_model <- function(model, ...) {
 #' @param correct_category A list of category labels that is taken to be the ground truth. Must be of the same length as the
 #' list of cue values.
 #' @param method Method for evaluating the model. Can be "accuracy" or "likelihood".
-#' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
-#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input.
-#' See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
-#' "sample"; "marginalize" otherwise).
-#' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
-#' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
-#' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
-#' will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
-#' perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
-#' @param simplify Should the output be simplified, and just the label of the selected category be returned? This
-#' option is only available for the criterion and sampling decision rules. (default: `FALSE`)
+#' @inheritParams get_categorization_from_model
+#' @param return_by_x Should results be returned separately for each unique x? (default: `FALSE`)
 #'
 #' @return Either a tibble of observations with posterior probabilities for each category (in long format), or a
 #' character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
@@ -306,7 +297,7 @@ get_categorization_from_model <- function(model, ...) {
 #' TBD
 #' @rdname evaluate_model
 #' @export
-evaluate_model <- function(model, x, correct_category, method = "likelihood", ...) {
+evaluate_model <- function(model, x, correct_category, method = "likelihood", ..., return_by_x = F) {
   # When the input isn't a list, that's ambiguous between the input being a single input or a set of
   # 1D inputs. Use the model's cue dimensionality to disambiguate between the two cases.
   if (!is.list(x)) {
@@ -360,6 +351,7 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
         d.unique.observations %>%
           ungroup() %>%
           left_join(posterior, by = join_by(x == x, correct_category == category)) %>%
+          { if (return_by_x) group_by(., x) else . } %>%
           summarise(accuracy = sum(.data$posterior * .data$n) / sum(.data$n)))
   }
   if ("likelihood" %in% method) {
@@ -376,7 +368,7 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
           # no need to carry through the number of observations.
           group_by(x) %>%
           summarise(log_likelihood = dmultinom(x = .data$n, prob = .data$posterior, log = T)) %>%
-          summarise(log_likelihood = sum(log_likelihood)))
+          { if (!return_by_x) summarise(., log_likelihood = sum(log_likelihood)) else . })
   }
 
   if (length(r) == 1) r <- as.numeric(r[[1]])
