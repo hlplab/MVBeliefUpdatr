@@ -146,7 +146,7 @@ get_NIW_posterior_predictive = function(
   assert_that(is.matrix(S) | is_scalar_double(S))
   # do not reorder these conditionals (go from more to less specific)
   if (is_tibble(x)) x %<>% as.matrix() else
-    if (is.list(x)) x %<>% reduce(rbind) %<>% as.matrix(nrow = 1) else
+    if (is.list(x)) x %<>% reduce(rbind) %>% matrix(ncol = length(m)) else
       if (is.vector(x)) x %<>% matrix(nrow = 1)
   if (is.matrix(m)) m = as.vector(m)
 
@@ -269,11 +269,12 @@ get_NIW_categorization_function = function(
     msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
 
   f <- function(x, target_category = 1) {
-    log_p <- matrix(nrow = length(x), ncol = n.cat)
+    if (!is.list(x)) x <- list(x)
+    log_p <- matrix(nrow = length(x), ncol = n.cat) # this seems to assume that x is a list
     for (cat in 1:n.cat) {
       log_p[, cat] <-
         get_NIW_posterior_predictive(
-          x,
+          x, # can this handle lists?
           ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]],
           Sigma_noise = Sigma_noise[[cat]], noise_treatment = noise_treatment,
           log = T)
