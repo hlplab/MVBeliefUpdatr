@@ -106,14 +106,18 @@ get_nlevels_of_category_labels_from_model <- function(x) {
 #' Get priors from model
 #'
 #' @param model A model object.
+#' @param categories A vector of category values.
+#'
+#' @return A vector of prior values of the same length as \code{categories}.
 #'
 #' @export
 get_priors_from_model <- function(model, categories = model$category) {
   assert_that("prior" %in% names(model),
               msg = "No prior found in model.")
 
-  prior <- model %>%
-    filter(category %in% categories) %>%
+  prior <-
+    model %>%
+    left_join(tibble(category = categories), by = "category") %>%
     pull(prior)
 
   return(prior)
@@ -138,14 +142,18 @@ get_lapse_rate_from_model <- function(model) {
 #' Get lapse bias from model
 #'
 #' @param model A model object.
+#' @param categories A vector of category values.
+#'
+#' @return A vector of lapse bias values of the same length as \code{categories}.
 #'
 #' @export
 get_lapse_biases_from_model <- function(model, categories = model$category) {
   assert_that("lapse_bias" %in% names(model),
               msg = "No lapse_bias found in model.")
 
-  lapse_bias <- model %>%
-    filter(category %in% categories) %>%
+  lapse_bias <-
+    model %>%
+    left_join(tibble(category = categories), by = "category") %>%
     pull(lapse_bias)
 
   return(lapse_bias)
@@ -224,7 +232,7 @@ unnest_cue_information_in_model <- function(model) {
     mutate(cue = cue.labels) %>%
     group_by(across(-c(!! sym(S)))) %>%
     transmute(!! sym(cue.labels[1]) := (!! sym(S))[,1], !! sym(cue.labels[2]) := (!! sym(S))[,2]) %>%
-    pivot_longer(cols = cue.labels, values_to = S, names_to = "cue2") %>%
+    pivot_longer(cols = all_of(cue.labels), values_to = S, names_to = "cue2") %>%
     ungroup() %>%
     select(cue, cue2, everything())
 }

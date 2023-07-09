@@ -8,6 +8,11 @@ get_lapse_biases_from_model(model, categories = model$category)
 }
 \arguments{
 \item{model}{A model object.}
+
+\item{categories}{A vector of category values.}
+}
+\value{
+A vector of lapse bias values of the same length as \code{categories}.
 }
 \description{
 Get lapse bias from model

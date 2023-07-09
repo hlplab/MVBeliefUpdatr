@@ -65,7 +65,6 @@ get_categorization_from_NIW_ideal_adaptor = function(
 
   posterior_probabilities <-
     get_posterior_predictive_from_NIW_belief(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%
-    group_by(category) %>%
     mutate(
       observationID = 1:length(x),
       x = x,
