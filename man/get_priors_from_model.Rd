@@ -8,6 +8,11 @@ get_priors_from_model(model, categories = model$category)
 }
 \arguments{
 \item{model}{A model object.}
+
+\item{categories}{A vector of category values.}
+}
+\value{
+A vector of prior values of the same length as \code{categories}.
 }
 \description{
 Get priors from model
