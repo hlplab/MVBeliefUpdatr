@@ -232,7 +232,7 @@ unnest_cue_information_in_model <- function(model) {
     mutate(cue = cue.labels) %>%
     group_by(across(-c(!! sym(S)))) %>%
     transmute(!! sym(cue.labels[1]) := (!! sym(S))[,1], !! sym(cue.labels[2]) := (!! sym(S))[,2]) %>%
-    pivot_longer(cols = cue.labels, values_to = S, names_to = "cue2") %>%
+    pivot_longer(cols = all_of(cue.labels), values_to = S, names_to = "cue2") %>%
     ungroup() %>%
     select(cue, cue2, everything())
 }

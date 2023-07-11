@@ -558,7 +558,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #' @examples
 #' TBD
 #' @export
-add_ibbu_stanfit_draws = function(
+add_ibbu_stanfit_draws <- function(
   fit,
   categories = get_category_levels_from_stanfit(fit),
   groups = get_group_levels_from_stanfit(fit, include_prior = TRUE),

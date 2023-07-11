@@ -201,7 +201,6 @@ get_categorization_from_MVG_ideal_observer <- function(
 
   posterior_probabilities <-
     get_likelihood_from_MVG(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%
-    group_by(category) %>%
     mutate(
       observationID = 1:length(x),
       x = x,
