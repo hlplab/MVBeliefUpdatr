@@ -202,8 +202,8 @@ get_categorization_from_MVG_ideal_observer <- function(
   posterior_probabilities <-
     get_likelihood_from_MVG(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%
     mutate(
-      observationID = 1:length(x),
-      x = x,
+      observationID = rep(1:length(x), length(get_category_labels_from_model(model))),
+      x = rep(x, length(get_category_labels_from_model(model))),
       lapse_rate = get_lapse_rate_from_model(model),
       lapse_bias = get_lapse_biases_from_model(model, categories = category),
       prior = get_priors_from_model(model, categories = category)) %>%
