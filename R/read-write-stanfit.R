@@ -1,4 +1,5 @@
 #' @importFrom stringr str_sub
+#' @importFrom rlang is_scalar_character
 
 write_NIW_ideal_adaptor_stanfit = function(fit, file) {
   assert_that(is.NIW_ideal_adaptor_stanfit(fit))

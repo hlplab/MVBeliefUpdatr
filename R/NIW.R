@@ -1,5 +1,6 @@
 #' @importFrom mvtnorm dmvt
 #' @importFrom foreach foreach %do%
+#' @importFrom rlang is_scalar_double
 NULL
 
 
@@ -130,8 +131,7 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' @seealso TBD
 #' @keywords TBD
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @examples
-#' TBD
+#' @examples TBD
 #' @rdname get_NIW_posterior_predictive
 #' @export
 get_NIW_posterior_predictive = function(
@@ -141,14 +141,14 @@ get_NIW_posterior_predictive = function(
 ) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
-  assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
   assert_that(is.vector(m) | is.matrix(m) | is_scalar_double(m))
   assert_that(is.matrix(S) | is_scalar_double(S))
   # do not reorder these conditionals (go from more to less specific)
-  if (is_tibble(x)) x %<>% as.matrix() else
-    if (is.list(x)) x %<>% reduce(rbind) %>% matrix(ncol = length(m)) else
-      if (is.vector(x)) x %<>% matrix(nrow = 1)
   if (is.matrix(m)) m = as.vector(m)
+
+  x %<>% format_input_for_likelihood_calculation()
+  assert_that(dim(x)[2] == length(m),
+              msg = "Input x and m are not of compatible dimensions.")
 
   assert_that(all(is.number(kappa), is.number(nu)))
   assert_that(is.flag(log))
@@ -230,8 +230,7 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
+#' @examples TBD
 #' @rdname get_NIW_categorization_function
 #' @export
 get_NIW_categorization_function = function(

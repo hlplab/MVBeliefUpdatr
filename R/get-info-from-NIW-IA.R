@@ -63,14 +63,15 @@ get_categorization_from_NIW_ideal_adaptor = function(
   # correctly treats it as length 1 (rather than the dimensionality of the one observation).
   if (!is.list(x)) x <- list(x)
 
+  n.distinct_categories <- length(get_category_labels_from_model(model))
   posterior_probabilities <-
     get_posterior_predictive_from_NIW_belief(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%
     mutate(
-      observationID = 1:length(x),
-      x = x,
-      lapse_rate = get_lapse_rate_from_model(model),
-      lapse_bias = get_lapse_biases_from_model(model, categories = category),
-      prior = get_priors_from_model(model, categories = category)) %>%
+      observationID = rep(1:length(.env$x), .env$n.distinct_categories),
+      x = rep(.env$x, .env$n.distinct_categories),
+      lapse_rate = get_lapse_rate_from_model(.env$model),
+      lapse_bias = get_lapse_biases_from_model(.env$model, categories = .data$category),
+      prior = get_priors_from_model(.env$model, categories = .data$category)) %>%
     group_by(observationID) %>%
     mutate(posterior_probability = (posterior_predictive * prior) / sum(posterior_predictive * prior))
 

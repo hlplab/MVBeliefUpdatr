@@ -1,3 +1,5 @@
+#' @importFrom dplyr arrange first rename_with
+
 # Functions for incremental bias change model
 probability2logit <- function(p, refcat = 1)
   if (length(p) == 2)

@@ -1,6 +1,8 @@
 #' @import Rcpp
 #' @import methods
 #' @import assertthat
+#' @importFrom stats cov2cor density dmultinom dnorm plogis prcomp predict qlogis quantile rbinom rnorm runif sd var
+#' @importFrom utils data
 #' @importFrom Rdpack reprompt
 #' @importFrom magrittr %<>% %T>%
 #' @importFrom Hmisc %nin%

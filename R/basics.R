@@ -11,8 +11,7 @@ NULL
 #'
 #' @seealso \code{\link{css2cov}}, \code{\link{cov2css}}, \code{\link{uss2css}}
 #' @keywords TBD
-#' @examples
-#' TBD
+#' @examples TBD
 #' @export
 ss <- function(x, center = TRUE) {
   if (center) {
@@ -50,8 +49,7 @@ ss <- function(x, center = TRUE) {
 #'
 #' @seealso \code{\link{ss}}, \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}, \code{\link{cov2tau}}
 #' @keywords TBD
-#' @examples
-#' TBD
+#' @examples TBD
 #' @rdname uss2css
 #' @export
 uss2css <- function(uss, n, mean) {

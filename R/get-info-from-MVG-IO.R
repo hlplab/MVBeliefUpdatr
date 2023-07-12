@@ -79,15 +79,16 @@ get_MVG_likelihood <- function(
 
   # do not reorder these conditionals (go from more to less specific)
   if (is.matrix(mu)) mu = as.vector(mu)
-  if (is_tibble(x)) x %<>% as.matrix(ncol = length(mu)) else
-    if (is.list(x)) x %<>% reduce(rbind) %>% matrix(ncol = length(mu)) else
-      if (is.vector(x)) x %<>% matrix(ncol = length(mu), nrow = 1)
+  x %<>% format_input_for_likelihood_calculation()
+  assert_that(dim(x)[2] == length(mu),
+              msg = "Input x and m are not of compatible dimensions.")
 
   assert_that(is.flag(log))
   assert_that(any(noise_treatment %in% c("no_noise", "marginalize", "sample")),
               msg = "noise_treatment must be one of 'no_noise', 'marginalize', or 'sample'.")
   if (noise_treatment != "no_noise") {
-    assert_that(is.Sigma(Sigma_noise))
+    assert_that(is.Sigma(Sigma_noise),
+                msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the category covariance matrices Sigma.')
     assert_that(all(dim(Sigma) == dim(Sigma_noise)),
                 msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the category covariance matrices Sigma.')
   }
@@ -199,14 +200,15 @@ get_categorization_from_MVG_ideal_observer <- function(
     x <- if (get_cue_dimensionality_from_model(model) == 1) as.list(x) else list(x)
   }
 
+  n.distinct_categories <- length(get_category_labels_from_model(model))
   posterior_probabilities <-
     get_likelihood_from_MVG(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%
     mutate(
-      observationID = 1:length(x),
-      x = x,
-      lapse_rate = get_lapse_rate_from_model(model),
-      lapse_bias = get_lapse_biases_from_model(model, categories = category),
-      prior = get_priors_from_model(model, categories = category)) %>%
+      observationID = rep(1:length(.env$x), .env$n.distinct_categories),
+      x = rep(.env$x, .env$n.distinct_categories),
+      lapse_rate = get_lapse_rate_from_model(.env$model),
+      lapse_bias = get_lapse_biases_from_model(.env$model, categories = .data$category),
+      prior = get_priors_from_model(.env$model, categories = .data$category)) %>%
     group_by(observationID) %>%
     mutate(posterior_probability = (likelihood * prior) / sum(likelihood * prior))
 

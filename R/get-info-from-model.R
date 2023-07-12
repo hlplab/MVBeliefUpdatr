@@ -237,6 +237,17 @@ unnest_cue_information_in_model <- function(model) {
     select(cue, cue2, everything())
 }
 
+
+format_input_for_likelihood_calculation <- function(x) {
+  assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
+  if (is.list(x)) x %<>% reduce(x, .f = ~ rbind(.x, format_input_for_likelihood_calculation(.y)))
+  if (is_tibble(x)) x %<>% as.matrix() else
+    if (is.vector(x)) x %<>% matrix(nrow = 1)
+
+  return(x)
+}
+
+
 #' Get categorization from model
 #'
 #' Categorize a single observation based a model. The decision rule can be specified to be either the
