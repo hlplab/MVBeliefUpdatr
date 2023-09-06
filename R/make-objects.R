@@ -80,7 +80,7 @@ make_exemplars_from_data = function(
     ungroup()
 
   if (!is.exemplars(model, group = group, verbose = verbose))
-    warning("Something went wrong. The returned object is not a set of exemplars. Try again with verbose = T?")
+    warning("NOTE: The returned object does not appear to be a set of exemplars. For more information, try again with verbose = T.")
 
   return(model)
 }
@@ -185,7 +185,7 @@ make_MVG_from_data = function(
     ungroup()
 
   if (!is.MVG(model, group = group, verbose = verbose))
-    warning("Something went wrong. The returned object is not an MVG. Try again with verbose = T?")
+    warning("NOTE: The returned object does not appear to be an MVG. For more information, try again with verbose = T.")
 
   return(model)
 }
@@ -278,7 +278,7 @@ make_NIW_belief_from_data = function(
     ungroup()
 
   if (!is.NIW_belief(model, group = group, verbose = verbose))
-    warning("Something went wrong. The returned object is not an NIW belief. Try again with verbose = T?")
+    warning("NOTE: The returned object does not appear to be an NIW belief. For more information, try again with verbose = T.")
 
   return(model)
 }
@@ -426,7 +426,7 @@ lift_likelihood_to_model <- function(
       Sigma_noise = list(.env$Sigma_noise))
 
   if (!is.model(x, group = group, verbose = verbose))
-    warning("Something went wrong. The returned object is not a model. Try again with verbose = T?")
+    warning("NOTE: The returned object does not appear to be a model. For more information, try again with verbose = T.")
 
   return(x)
 }
@@ -452,7 +452,7 @@ lift_exemplars_to_exemplar_model <- function(
   }
 
   if (!is.exemplar_model(x, group = group, verbose = verbose))
-    warning("Something went wrong. The returned object is not an exemplar model. Try again with verbose = T?")
+    warning("NOTE: The returned object does not appear to be an exemplar model. For more information, try again with verbose = T.")
 
   return(x)
 }
@@ -481,7 +481,7 @@ lift_MVG_to_MVG_ideal_observer = function(
   }
 
   if (!is.MVG_ideal_observer(x, group = group, verbose = verbose))
-    warning("Something went wrong. The returned object is not an MVG ideal observer. Try again with verbose = T?")
+    warning("NOTE: The returned object does not appear to be an MVG ideal observer. For more information, try again with verbose = T.")
 
   return(x)
 }
@@ -509,7 +509,7 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   }
 
   if (!is.NIW_ideal_adaptor(x, group = group, verbose = verbose))
-    warning("Something went wrong. The returned object is not an NIW ideal adaptor. Try again with verbose = T?")
+    warning("NOTE: The returned object does not appear to be an NIW ideal adaptor. For more information, try again with verbose = T.")
 
   return(x)
 }
@@ -553,7 +553,7 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
       S = get_S_from_expected_Sigma(S, nu))
 
   if (!is.NIW_ideal_adaptor(x, group = group, verbose = verbose))
-    warning("Something went wrong. The returned object is not an NIW ideal adaptor. Try again with verbose = T?")
+    warning("NOTE: The returned object does not appear to be an NIW ideal adaptor. For more information, try again with verbose = T.")
 
   return(x)
 }
