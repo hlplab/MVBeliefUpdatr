@@ -1,4 +1,4 @@
-context("Make and lift exemplars and exemplar models")
+context("make and lift exemplars and exemplar models")
 
 library(curl)
 if (has_internet()) remotes::install_github("joeystanley/joeysvowels")
