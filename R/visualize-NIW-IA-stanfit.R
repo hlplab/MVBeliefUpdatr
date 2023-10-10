@@ -670,7 +670,7 @@ plot_ibbu_stanfit_test_categorization = function(
   d.pars %<>%
     group_by(group, .draw) %>%
     do(f = get_categorization_function_from_grouped_ibbu_stanfit_draws(., logit = T)) %>%
-    right_join(test_data) %>%
+    right_join(test_data, by = "group") %>%
     group_by(group, .draw) %>%
     mutate(p_cat = invoke_map(.f = f, .x = cues_joint, target_category = target_category)) %>%
     select(-f) %>%
