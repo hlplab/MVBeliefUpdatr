@@ -376,17 +376,19 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
   }
   if ("likelihood" %in% method) {
     r[["likelihood"]] <-
+      # For now, calculate likelihood per observation and add those up, since this
+      # is the least error prone. But this could be revised to speed things up.
+      #
       # Get all unique combinations of cues and *possible* responses and fill in 0 as
       # count n for all combinations that aren't observed
-      crossing(x = .env$x, correct_category = .env$model$category) %>%
+      tibble(x = .env$x, ID = 1:length(x = .env$x)) %>%
+      crossing(correct_category = .env$model$category) %>%
       left_join(d.unique.observations,
                 by = join_by(x == x, correct_category == correct_category)) %>%
       replace_na(list(n = 0)) %>%
       left_join(posterior,
                 by = join_by(x == x, correct_category == category)) %>%
-      # Since dmultinom already takes into account the number of observations (size),
-      # no need to carry through the number of observations.
-      group_by(x) %>%
+      group_by(ID) %>%
       summarise(log_likelihood = dmultinom(x = .data$n, prob = .data$posterior, log = T)) %>%
       { if (!return_by_x) summarise(., log_likelihood = sum(log_likelihood)) else . }
   }
