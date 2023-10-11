@@ -342,6 +342,8 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
     unnest(categorization) %>%
     rename(posterior = response)
 
+  # Alert users if there are locations for which posteriors of all possible
+  # categories don't sum up  to 1.
   posterior.check <- posterior %>% group_by(x, observationID) %>% summarise(posterior = sum(.data$posterior))
   if (any(is.na(posterior.check$posterior), is.nan(posterior.check$posterior), !near(posterior.check$posterior, 1.0))) {
     posterior.check %<>%
@@ -374,17 +376,19 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
   }
   if ("likelihood" %in% method) {
     r[["likelihood"]] <-
-        # Get all unique combinations of cues and *possible* responses and fill in 0 as
-        # count n for all combinations that aren't observed
-        crossing(x = .env$x, correct_category = .env$model$category) %>%
-          left_join(d.unique.observations, by = join_by(x, correct_category)) %>%
-          replace_na(list(n = 0)) %>%
-          left_join(posterior, by = join_by(x == x, correct_category == category)) %>%
-          # Since dmultinom already takes into account the number of observations (size),
-          # no need to carry through the number of observations.
-          group_by(x) %>%
-          summarise(log_likelihood = dmultinom(x = .data$n, prob = .data$posterior, log = T)) %>%
-          { if (!return_by_x) summarise(., log_likelihood = sum(log_likelihood)) else . }
+      # Get all unique combinations of cues and *possible* responses and fill in 0 as
+      # count n for all combinations that aren't observed
+      crossing(x = .env$x, correct_category = .env$model$category) %>%
+      left_join(d.unique.observations,
+                by = join_by(x == x, correct_category == correct_category)) %>%
+      replace_na(list(n = 0)) %>%
+      left_join(posterior,
+                by = join_by(x == x, correct_category == category)) %>%
+      # Since dmultinom already takes into account the number of observations (size),
+      # no need to carry through the number of observations.
+      group_by(x) %>%
+      summarise(log_likelihood = dmultinom(x = .data$n, prob = .data$posterior, log = T)) %>%
+      { if (!return_by_x) summarise(., log_likelihood = sum(log_likelihood)) else . }
   }
 
   # Simplify return as much as possible
