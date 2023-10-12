@@ -177,20 +177,16 @@ get_likelihood_from_MVG <- function(
 }
 
 
-#' @rdname get_categorization_from_model
+#' @rdname get_posterior_from_model
 #' @export
-get_categorization_from_MVG_ideal_observer <- function(
-  x,
-  model,
-  decision_rule,
-  noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
-  lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
-  simplify = F
+get_posterior_from_MVG_ideal_observer <- function(
+    x,
+    model,
+    noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+    lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize"
 ) {
   # TO DO: check dimensionality of x with regard to belief.
   assert_MVG_ideal_observer(model)
-  assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
-              msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
   assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
               msg = "lapse_treatment must be one of 'no_lapses', 'sample' or 'marginalize'.")
 
@@ -227,6 +223,56 @@ get_categorization_from_MVG_ideal_observer <- function(
       mutate(posterior_probability =  lapse_rate * lapse_bias + (1 - lapse_rate) * posterior_probability)
   }
 
+  posterior_probabilities %<>%
+    ungroup() %>%
+    select(-c(likelihood)) %>%
+    select(observationID, x, category, posterior_probability)
+
+  # Warn if any posteriors don't sum up  to 1.
+  posterior.check <-
+    posterior_probabilities %>%
+    group_by(x, observationID) %>%
+    summarise(posterior_probability = sum(.data$posterior_probability))
+  if (any(
+    is.na(posterior.check$posterior_probability),
+    is.nan(posterior.check$posterior_probability),
+    !near(posterior.check$posterior_probability, 1.0))) {
+    posterior.check %<>%
+      arrange(posterior_probability) %>%
+      filter(is.na(posterior_probability) | is.nan(posterior_probability) | !near(posterior_probability, 1.0))
+    s <- paste(
+      nrow(posterior.check),
+      "input(s) have an ill-defined posterior under the model. This can happen when inputs are far away from all category means.\n")
+    s %<>% paste0(
+      .,
+      posterior.check %>%
+        arrange(posterior_probability) %>%
+        filter(is.na(posterior_probability) | is.nan(posterior_probability) | !near(posterior_probability, 1.0)) %>%
+        mutate(string = pmap(
+          .l = list(posterior_probability, x, observationID),
+          .f = ~ paste0("Sum of posterior is ", ..1, " for observation ID = ", ..3, "; input = ", paste(..2, collapse = ","))) %>%
+            unlist()) %>%
+        pull(string) %>% paste(., collapse = ".\n"))
+    warning(s)
+  }
+
+  return(posterior_probabilities)
+}
+
+
+#' @rdname get_categorization_from_model
+#' @export
+get_categorization_from_MVG_ideal_observer <- function(
+  x,
+  model,
+  decision_rule,
+  noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+  lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+  simplify = F
+) {
+  posterior_probabilities <-
+    get_posterior_from_MVG_ideal_observer(x = x, model = model, noise_treatment = noise_treatment, lapse_treatment = lapse_treatment)
+
   # Apply decision rule
   if (decision_rule == "criterion") {
     posterior_probabilities %<>%
@@ -253,7 +299,7 @@ get_categorization_from_MVG_ideal_observer <- function(
 
   posterior_probabilities %<>%
     ungroup() %>%
-    select(-c(likelihood, posterior_probability)) %>%
+    select(-c(posterior_probability)) %>%
     select(observationID, x, category, response)
 
   if (simplify) {

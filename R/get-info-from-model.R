@@ -326,7 +326,8 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
   assert_that(length(x) == length(correct_category),
               msg = "Input x and correct_category must be lists of the same length.")
 
-  # Get posterior for all *unique* combinations of cues
+  # Get counts of all k possible responses at all *unique* stimulus locations
+  # (unique cue combinations)
   d.unique.observations <-
     tibble(
       x = .env$x,
@@ -334,6 +335,8 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
     group_by(x, correct_category) %>%
     tally()
 
+  # Get predicted posterior probabilities of all k possible responses at all
+  # *unique* stimulus locations (unique cue combinations)
   posterior <-
     d.unique.observations %>%
     ungroup() %>%
@@ -341,29 +344,6 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
     summarise(categorization = list(get_categorization_from_model(x = .data$x, model = .env$model, ...))) %>%
     unnest(categorization) %>%
     rename(posterior = response)
-
-  # Alert users if there are locations for which posteriors of all possible
-  # categories don't sum up  to 1.
-  posterior.check <- posterior %>% group_by(x, observationID) %>% summarise(posterior = sum(.data$posterior))
-  if (any(is.na(posterior.check$posterior), is.nan(posterior.check$posterior), !near(posterior.check$posterior, 1.0))) {
-    posterior.check %<>%
-      arrange(posterior) %>%
-      filter(is.na(posterior) | is.nan(posterior) | !near(posterior, 1.0))
-    s <- paste(
-      nrow(posterior.check),
-      "input(s) have an ill-defined posterior under the model. This can happen when inputs are far away from all category means.\n")
-    s %<>% paste0(
-      .,
-      posterior.check %>%
-        arrange(posterior) %>%
-        filter(is.na(posterior) | is.nan(posterior) | !near(posterior, 1.0)) %>%
-        mutate(string = pmap(
-          .l = list(posterior, x, observationID),
-          .f = ~ paste0("Sum of posterior is ", ..1, " for observation ID = ", ..3, "; input = ", paste(..2, collapse = ","))) %>%
-            unlist()) %>%
-        pull(string) %>% paste(., collapse = ".\n"))
-    warning(s)
-  }
 
   r <- list()
   if ("accuracy" %in% method) {
@@ -375,21 +355,47 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
       summarise(accuracy = sum(.data$posterior * .data$n) / sum(.data$n))
   }
   if ("likelihood" %in% method) {
+    # There seem to be two ways to calculate the log-likelihood of the data for a multinomial regression:
+    #
+    # 1) the sum of all log probabilities for each trial. this can be simplified by calculating log p for
+    #    each unique stimulus location, and then summing up those log ps across stimulus locations.
+    #
+    # 2) however, that would seem to consider one particular order of outcomes. the alternative that is
+    #    considering all possible order of outcomes that yield the overall outcome is given by
+    #    dmultinom(x, prob, log =T) but this can*not* be simply added up across stimulus locations
+
+
+    # The multinomial log-likelihood is:
+    #
+    #       log(L(p)) = log n! + Sum(x_j log(p_j)) - Sum(log(x_j!))
+    #
+    # where n is the total number of responses, p is the vector of k posterior
+    # probabilities (summing to 1), and x_j is the number of occurrences of the j-th
+    # outcome (out of the 1 ... k possible outcomes). dmultinom(x, p, log = T) gives
+    # us this log likelihood.
+    #
+    # Computationally, it is most efficient to calculate log-likelihoods for each
+    # unique stimulus location (i.e., unique cue combination), and then to aggregate
+    # the resulting stimulus-specific log-likelihoods into the overall log-likelihood
+    # of the data. The first step of this is well-formed since  all responses to a
+    # unique cue combination are predicted to have the same posterior distribution p.
+    # So we can use dmultinom(x_[at stimulus location], p_[at stimulus location]).
+    #
+    # Unfortunately, we cannot simply *sum* the different log-likelihoods of the
+    # different stimulus locations since the n! and x_j! should be based on the
+    # aggregate counts *across* stimulus positions.
     r[["likelihood"]] <-
-      # For now, calculate likelihood per observation and add those up, since this
-      # is the least error prone. But this could be revised to speed things up.
-      #
-      # Get all unique combinations of cues and *possible* responses and fill in 0 as
-      # count n for all combinations that aren't observed
-      tibble(x = .env$x, ID = 1:length(x = .env$x)) %>%
-      crossing(correct_category = .env$model$category) %>%
-      left_join(d.unique.observations,
-                by = join_by(x == x, correct_category == correct_category)) %>%
+      # Complete the count of responses to contain also the unobserved responses
+      # (n = 0) at each stimulus location. Then join in the predicted posterior
+      # probabilities p for each stimulus location.
+      d.unique.observations %>%
+      complete(x, correct_category) %>%
       replace_na(list(n = 0)) %>%
-      left_join(posterior,
-                by = join_by(x == x, correct_category == category)) %>%
-      group_by(ID) %>%
-      summarise(log_likelihood = dmultinom(x = .data$n, prob = .data$posterior, log = T)) %>%
+      left_join(posterior, by = join_by(x == x, correct_category == category)) %>%
+      summarise(log_likelihood = sum(n * log(.data$posterior)))
+        # log_likelihood = n
+        #   dmultinom(x = .data$n, prob = .data$posterior, log = T),
+        # n = sum(n),) %>%
       { if (!return_by_x) summarise(., log_likelihood = sum(log_likelihood)) else . }
   }
 
