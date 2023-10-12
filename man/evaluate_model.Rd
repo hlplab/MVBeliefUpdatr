@@ -7,7 +7,7 @@
 evaluate_model(
   model,
   x,
-  correct_category,
+  response_category,
   method = "likelihood",
   ...,
   return_by_x = F
@@ -16,18 +16,20 @@ evaluate_model(
 \arguments{
 \item{model}{A model object.}
 
-\item{x}{A list of inputs values (vectors of cue values).}
+\item{x}{A vector of inputs (cue values).}
 
-\item{correct_category}{A list of category labels that is taken to be the ground truth. Must be of the same length as the
-list of cue values.}
+\item{response_category}{A vector of category responses corresponding to each input. The model is evaluated against
+this ground truth. Must be of the same length as the list of inputs, and each element of the `response_category` must
+be one of the `category` levels of `model`.}
 
-\item{method}{Method for evaluating the model. Can be "accuracy" or "likelihood".}
+\item{method}{Method for evaluating the model. Can be "accuracy" or "likelihood". The latter returns the log-likelihood.}
 
-\item{return_by_x}{Should results be returned separately for each unique x? (default: `FALSE`)}
+\item{return_by_x}{Should results be returned separately for each unique `x`? (default: `FALSE`)}
 }
 \value{
-Either a tibble of observations with posterior probabilities for each category (in long format), or a
-character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
+If `return_by_x`, the accuracy and/or log-likelihood of each unique input `x`. Otherwise, the overall accuracy
+and/or log-likelihood of the all observations. Note that the overall log-likelihood is *not* simply the sum of the
+log-likelihoods of all unique inputs `x`.
 }
 \description{
 Evaluate the fit of a categorization model against a ground truth (e.g., human responses or the category intended

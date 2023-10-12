@@ -248,6 +248,48 @@ format_input_for_likelihood_calculation <- function(x) {
 }
 
 
+#' Get posterior from model
+#'
+#' Categorize a single observation based a model. The decision rule can be specified to be either the
+#' criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
+#' Luce's choice rule.
+#'
+#' @param x A vector of observations.
+#' @param model A model object.
+#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input.
+#' See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
+#' "sample"; "marginalize" otherwise).
+#' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
+#' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
+#' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
+#' will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
+#' perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
+#'
+#' @return A tibble of observations with posterior probabilities for each category (in long format).
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @examples
+#' TBD
+#' @rdname get_posterior_from_model
+#' @export
+get_posterior_from_model <- function(model, ...) {
+  if (is.MVG_ideal_observer(model)) {
+    c <- get_posterior_from_MVG_ideal_observer(model = model, ...)
+  } else if (is.NIW_ideal_adaptor(model)) {
+    c <- get_posterior_from_NIW_ideal_adaptor(model = model, ...)
+  } else {
+    stop(
+      paste(
+        "get_categorization_from_* function for model type",
+        class(model),
+        "does not yet exist."))
+  }
+
+  return(c)
+}
+
+
 #' Get categorization from model
 #'
 #' Categorize a single observation based a model. The decision rule can be specified to be either the
