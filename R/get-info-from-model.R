@@ -298,17 +298,18 @@ get_categorization_from_model <- function(model, ...) {
 #' Evaluate the fit of a categorization model against a ground truth (e.g., human responses or the category intended
 #' by a talker).
 #'
-#' @param x A vector of observations.
 #' @param model A model object.
-#' @param x A list of inputs values (vectors of cue values).
-#' @param correct_category A list of category labels that is taken to be the ground truth. Must be of the same length as the
-#' list of cue values.
-#' @param method Method for evaluating the model. Can be "accuracy" or "likelihood".
+#' @param x A vector of inputs (cue values).
+#' @param response_category A vector of category responses corresponding to each input. The model is evaluated against
+#' this ground truth. Must be of the same length as the list of inputs, and each element of the `response_category` must
+#' be one of the `category` levels of `model`.
+#' @param method Method for evaluating the model. Can be "accuracy" or "likelihood". The latter returns the log-likelihood.
 #' @inheritParams get_categorization_from_model
-#' @param return_by_x Should results be returned separately for each unique x? (default: `FALSE`)
+#' @param return_by_x Should results be returned separately for each unique `x`? (default: `FALSE`)
 #'
-#' @return Either a tibble of observations with posterior probabilities for each category (in long format), or a
-#' character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
+#' @return If `return_by_x`, the accuracy and/or log-likelihood of each unique input `x`. Otherwise, the overall accuracy
+#' and/or log-likelihood of the all observations. Note that the overall log-likelihood is *not* simply the sum of the
+#' log-likelihoods of all unique inputs `x`.
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -316,23 +317,23 @@ get_categorization_from_model <- function(model, ...) {
 #' TBD
 #' @rdname evaluate_model
 #' @export
-evaluate_model <- function(model, x, correct_category, method = "likelihood", ..., return_by_x = F) {
+evaluate_model <- function(model, x, response_category, method = "likelihood", ..., return_by_x = F) {
   assert_that(all(method %in% c("likelihood", "accuracy")))
   # When the input isn't a list, that's ambiguous between the input being a single input or a set of
   # 1D inputs. Use the model's cue dimensionality to disambiguate between the two cases.
   if (!is.list(x)) {
     x <- if (get_cue_dimensionality_from_model(model) == 1) as.list(x) else list(x)
   }
-  assert_that(length(x) == length(correct_category),
-              msg = "Input x and correct_category must be lists of the same length.")
+  assert_that(length(x) == length(response_category),
+              msg = "Input x and response_category must be lists of the same length.")
 
   # Get counts of all k possible responses at all *unique* stimulus locations
   # (unique cue combinations)
   d.unique.observations <-
     tibble(
       x = .env$x,
-      correct_category = .env$correct_category) %>%
-    group_by(x, correct_category) %>%
+      response_category = .env$response_category) %>%
+    group_by(x, response_category) %>%
     tally()
 
   # Get predicted posterior probabilities of all k possible responses at all
@@ -350,7 +351,7 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
     r[["accuracy"]] <-
       d.unique.observations %>%
       ungroup() %>%
-      left_join(posterior, by = join_by(x == x, correct_category == category)) %>%
+      left_join(posterior, by = join_by(x == x, response_category == category)) %>%
       { if (return_by_x) group_by(., x) else . } %>%
       summarise(accuracy = sum(.data$posterior * .data$n) / sum(.data$n))
   }
@@ -367,11 +368,11 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
 
     # The multinomial log-likelihood is:
     #
-    #       log(L(p)) = log n! + Sum(x_j log(p_j)) - Sum(log(x_j!))
+    #       log(L(p)) = log N! + Sum(n_j log(p_j)) - Sum(log(n_j!))
     #
-    # where n is the total number of responses, p is the vector of k posterior
-    # probabilities (summing to 1), and x_j is the number of occurrences of the j-th
-    # outcome (out of the 1 ... k possible outcomes). dmultinom(x, p, log = T) gives
+    # where N is the total number of responses, p is the vector of k posterior
+    # probabilities (summing to 1), and n_j is the number of occurrences of the j-th
+    # outcome (out of the 1 ... k possible outcomes). dmultinom(n, p, log = T) gives
     # us this log likelihood.
     #
     # Computationally, it is most efficient to calculate log-likelihoods for each
@@ -382,8 +383,12 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
     # So we can use dmultinom(x_[at stimulus location], p_[at stimulus location]).
     #
     # Unfortunately, we cannot simply *sum* the different log-likelihoods of the
-    # different stimulus locations since the n! and x_j! should be based on the
+    # different stimulus locations since the N! and n_j! should be based on the
     # aggregate counts *across* stimulus positions.
+    #
+    # However, luckily, the only component of the above equation that is *not* a
+    # constant of the data is Sum(n_j log(p_j)), which can be added across locations.
+    #
     r[["likelihood"]] <-
       # Complete the count of responses to contain also the unobserved responses
       # (n = 0) at each stimulus location. Then join in the predicted posterior
@@ -391,12 +396,28 @@ evaluate_model <- function(model, x, correct_category, method = "likelihood", ..
       d.unique.observations %>%
       complete(x, correct_category) %>%
       replace_na(list(n = 0)) %>%
-      left_join(posterior, by = join_by(x == x, correct_category == category)) %>%
-      summarise(log_likelihood = sum(n * log(.data$posterior)))
-        # log_likelihood = n
-        #   dmultinom(x = .data$n, prob = .data$posterior, log = T),
-        # n = sum(n),) %>%
-      { if (!return_by_x) summarise(., log_likelihood = sum(log_likelihood)) else . }
+      left_join(posterior, by = join_by(x == x, response_category == category)) %>%
+      group_by(x)
+
+    if (return_by_x) {
+      r[["likelihood"]] %<>%
+        summarise(
+          x = first(x),
+          n = sum(n),
+          log_likelihood = dmultinom(x = n, prob = posterior, log = T))
+    } else {
+      r[["likelihood"]] %<>%
+        summarise(
+          # log-likelihood for x up to constant (so that the components can be correctly summed below)
+          log_likelihood = sum(n * log(.data$posterior)),
+          N = sum(n),
+          n_responses_at_x = list(cbind(correct_category, n))) %>%
+        summarise(
+          log_likelihood =
+            sum(log_likelihood) +
+            log(factorial(sum(n))) -
+            sum(log(factorial(reduce(n_responses, `+`)))))
+      }
   }
 
   # Simplify return as much as possible
