@@ -436,7 +436,7 @@ evaluate_model <- function(model, x, response_category, method = "likelihood", .
       # (n = 0) at each stimulus location. Then join in the predicted posterior
       # probabilities p for each stimulus location.
       d.unique.observations %>%
-      complete(x, correct_category) %>%
+      complete(x, response_category) %>%
       replace_na(list(n = 0)) %>%
       left_join(posterior, by = join_by(x == x, response_category == category)) %>%
       group_by(x)
