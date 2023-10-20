@@ -436,6 +436,12 @@ evaluate_model <- function(model, x, response_category, method = "likelihood", .
     }
   }
   if ("likelihood" %in% method) {
+    # Let c_i be the category response to input x_i for 1 ... M observations. For a model
+    # that predicts the category response c_i to have a posterior probability p_i, the
+    # data likelihood of the observed category responses is the product of all the p_i
+    # times the number of possible permutations of all the p_i (since we do not care
+    # about the order of responses), --------------------- CONTINUE HERE
+    #
     # Let n_ij be the number of observed responses for category j = 1 ... M for the
     # stimulus i = 1 ... N. Then the overall log data likelihood for all observations
     # at stimulus i of a model that assigns posterior probabilities p_ij to response j
@@ -460,39 +466,31 @@ evaluate_model <- function(model, x, response_category, method = "likelihood", .
     # *across* stimulus positions, and the n_ij have to be combined in ways I haven't
     # yet figured out.
     #
-    # ------------- THIS IS NOT YET TO BE TRUSTED ----- DO NOT USE! ------------------
-    r[["likelihood"]] <-
-      # Complete the count of responses to contain also the unobserved responses
-      # (n = 0) at each stimulus location. Then join in the predicted posterior
-      # probabilities p for each stimulus location.
-      d.unique.observations %>%
-      ungroup() %>%
-      complete(x, response_category) %>%
-      replace_na(list(n = 0)) %>%
-      left_join(posterior, by = join_by(x == x, response_category == category)) %>%
-      group_by(x)
-
+    # ------------- USE WITH CAUTION! ------------------
     if (return_by_x) {
+      # Note that these by-x likelihoods cannot simply be summed up to get the overall
+      # likelihood. That would fail to correct for the total number of permutations.
       r[["likelihood"]] %<>%
+        d.unique.observations %>%
+        # Complete the count of responses to contain also the unobserved responses
+        # (n = 0) at each stimulus location. Then join in the predicted posterior
+        # probabilities p for each stimulus location. This is required because we're
+        # using dmultinom below.
+        complete(x, response_category) %>%
+        replace_na(list(n = 0)) %>%
+        left_join(posterior, by = join_by(x == x, response_category == category)) %>%
+        group_by(x) %>%
         summarise(
           x = list(first(x)),
           N = sum(n),
           log_likelihood = dmultinom(x = n, prob = posterior, log = T))
     } else {
       r[["likelihood"]] %<>%
+        d.unique.observations %>%
+        left_join(posterior, by = join_by(x == x, response_category == category)) %>%
         summarise(
-          # log-likelihood for x up to constant (so that the components can be correctly summed below)
-          log_likelihood = sum(n * log(.data$posterior)),
           N = sum(n),
-          n_responses = list(n)) %>%
-        summarise(
-          N_summed = sum(N),
-          lfac_N = lfactorial(sum(N)),
-          n = reduce(n_responses, `+`),
-          log_likelihood =
-            sum(log_likelihood) +
-            lfactorial(sum(N)) -
-            sum(lfactorial(reduce(n_responses, `+`))))
+          log_likelihood = lfactorial(.data$N) + sum(.data$n * log(.data$posterior)) - sum(lfactorial(.data$n)))
       }
   }
 
