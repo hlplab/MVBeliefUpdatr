@@ -22,7 +22,16 @@ evaluate_model(
 this ground truth. Must be of the same length as the list of inputs, and each element of the `response_category` must
 be one of the `category` levels of `model`.}
 
-\item{method}{Method for evaluating the model. Can be "accuracy" or "likelihood". The latter returns the log-likelihood.}
+\item{method}{Method for evaluating the model. Can be "accuracy", "likelihood", or "likelihood-up-to-constant". The
+latter two return the log-likelihood or the log-likelihood up to a constant that only depends on the data (rather than
+the model). This option calculates only sum_i sum_j n_ij log p_ij, where i = 1 ... M and M is the number of unique
+inputs x, and j = 1 ... K and K is the number of distinct categories, n_ij is the number of observed responses for
+category j at unique input x_i, and p_ij is the predicted posterior probability of response j at unique input x_i.
+Calculation of the "likelihood-up-to-constant" is thus particularly fast. Since this quantity is sufficient to compare
+models against each other on the same data, it makes the "likelihood-up-to-constant" method particularly useful for
+model fitting. It can, however, be important to keep in mind that this log-likelihood will be much smaller than the true
+data log-likelihood of the model under the assumption that the order of responses in the data should not be considered
+for the evaluation of the model.}
 
 \item{return_by_x}{Should results be returned separately for each unique `x`? (default: `FALSE`)}
 }
