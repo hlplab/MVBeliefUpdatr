@@ -488,7 +488,7 @@ evaluate_model <- function(model, x, response_category, method = "likelihood", .
       r[["likelihood"]] <-
         d.unique.observations %>%
         left_join(posterior, by = join_by(x == x, response_category == category)) %>%
-        summarise(log_likelihood = lfactorial(.data$N) + sum(.data$n * log(.data$posterior)) - sum(lfactorial(.data$n)))
+        summarise(log_likelihood = lfactorial(sum(n)) + sum(n * log(.data$posterior)) - sum(lfactorial(n)))
       }
   }
 
