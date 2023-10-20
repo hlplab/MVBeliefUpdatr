@@ -470,7 +470,7 @@ evaluate_model <- function(model, x, response_category, method = "likelihood", .
     if (return_by_x) {
       # Note that these by-x likelihoods cannot simply be summed up to get the overall
       # likelihood. That would fail to correct for the total number of permutations.
-      r[["likelihood"]] %<>%
+      r[["likelihood"]] <-
         d.unique.observations %>%
         # Complete the count of responses to contain also the unobserved responses
         # (n = 0) at each stimulus location. Then join in the predicted posterior
@@ -485,7 +485,7 @@ evaluate_model <- function(model, x, response_category, method = "likelihood", .
           N = sum(n),
           log_likelihood = dmultinom(x = n, prob = posterior, log = T))
     } else {
-      r[["likelihood"]] %<>%
+      r[["likelihood"]] <-
         d.unique.observations %>%
         left_join(posterior, by = join_by(x == x, response_category == category)) %>%
         summarise(
