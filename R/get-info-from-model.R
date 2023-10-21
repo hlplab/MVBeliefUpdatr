@@ -401,9 +401,18 @@ evaluate_model <- function(model, x, response_category, method = "likelihood", .
   if ("accuracy" %in% method) {
     r[["accuracy"]] <-
       d.unique.observations %>%
-      left_join(posterior, by = join_by(x == x, response_category == category)) %>%
-      { if (return_by_x) group_by(., x) else . } %>%
-      summarise(accuracy = sum(.data$posterior * .data$n) / sum(.data$n))
+      left_join(posterior, by = join_by(x == x, response_category == category))
+
+    if (return_by_x) {
+      r[["accuracy"]] %<>%
+        group_by(x) %>%
+        summarise(
+          N = sum(.data$n),
+          accuracy = sum(.data$posterior * .data$n) / sum(.data$n))
+    } else {
+      r[["accuracy"]] %<>%
+        summarise(accuracy = sum(.data$posterior * .data$n) / sum(.data$n))
+    }
   }
   if ("likelihood-up-to-constant" %in% method) {
     # Let n_ij be the number of observed responses for category j = 1 ... K for the
@@ -427,12 +436,12 @@ evaluate_model <- function(model, x, response_category, method = "likelihood", .
       left_join(posterior, by = join_by(x == x, response_category == category)) %>%
       group_by(x) %>%
       summarise(
-        x = list(first(.data$x)),
         N = sum(.data$n),
         log_likelihood = sum(.data$n * log(.data$posterior)))
 
     if (!return_by_x) {
-      r[["likelihood-up-to-constant"]] %<>% summarise(log_likelihood = sum(.data$log_likelihood))
+      r[["likelihood-up-to-constant"]] %<>%
+        summarise(log_likelihood = sum(.data$log_likelihood))
     }
   }
   if ("likelihood" %in% method) {
@@ -481,7 +490,6 @@ evaluate_model <- function(model, x, response_category, method = "likelihood", .
         left_join(posterior, by = join_by(x == x, response_category == category)) %>%
         group_by(x) %>%
         summarise(
-          x = list(first(x)),
           N = sum(n),
           log_likelihood = dmultinom(x = n, prob = posterior, log = T))
     } else {
@@ -489,7 +497,7 @@ evaluate_model <- function(model, x, response_category, method = "likelihood", .
         d.unique.observations %>%
         left_join(posterior, by = join_by(x == x, response_category == category)) %>%
         summarise(log_likelihood = lfactorial(sum(n)) + sum(n * log(.data$posterior)) - sum(lfactorial(n)))
-      }
+    }
   }
 
   # Simplify return as much as possible
