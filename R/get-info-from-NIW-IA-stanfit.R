@@ -650,7 +650,6 @@ add_ibbu_stanfit_draws <- function(
 
     d.pars %<>%
       # If group is prior, then add the group variable with value "prior" to d.pars first.
-      { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
       rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .)) %>%
       { if (summarize) {
         group_by(., !!! syms(pars.index), cue, cue2) %>%
