@@ -445,6 +445,9 @@ evaluate_model <- function(model, x, response_category, method = "likelihood", .
     }
   }
   if ("likelihood" %in% method) {
+    # Derivation of multinomial density: https://statproofbook.github.io/P/mult-pmf.html
+    # Proof for multinomial coefficient: https://math.stackexchange.com/questions/548027/prove-multinomial-coefficient-probability-theory
+    #
     # Let c_i be the category response to input x_i for 1 ... M observations. For a model
     # that predicts the category response c_i to have a posterior probability p_i, the
     # data likelihood of the observed category responses is the product of all the p_i

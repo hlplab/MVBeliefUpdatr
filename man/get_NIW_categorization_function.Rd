@@ -36,7 +36,7 @@ get_categorization_function_from_NIW_ideal_adaptor(model, ...)
 
 \item{priors}{Vector of categories' prior probabilities. (default: uniform prior over categories)}
 
-\item{lapse_rate}{A lapse rate for the categorization responses.}
+\item{lapse_rate}{A lapse rate for the categorization responses (default: 0).}
 
 \item{lapse_biases}{A lapse bias for the categorization responses. (default: uniform bias over categories)}
 

@@ -217,7 +217,7 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 #' @param kappas Strength of the beliefs into the distribution over category means.
 #' @param nus Strength of the beliefs into the distribution over category covariance matrices.
 #' @param priors Vector of categories' prior probabilities. (default: uniform prior over categories)
-#' @param lapse_rate A lapse rate for the categorization responses.
+#' @param lapse_rate A lapse rate for the categorization responses (default: 0).
 #' @param lapse_biases A lapse bias for the categorization responses. (default: uniform bias over categories)
 #' @param Sigma_noise A noise matrix. (default: a 0-matrix)
 #' @param noise_treatment How should the noise specified in \code{Sigma_noise} be considered in the categorization function?
@@ -233,7 +233,7 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 #' @examples TBD
 #' @rdname get_NIW_categorization_function
 #' @export
-get_NIW_categorization_function = function(
+get_NIW_categorization_function <- function(
   ms, Ss, kappas, nus,
   priors = rep(1 / length(ms), length(ms)),
   lapse_rate = NULL,
@@ -245,13 +245,13 @@ get_NIW_categorization_function = function(
   noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
   logit = FALSE
 ) {
-  tolerance = 1e-5
+  tolerance <- 1e-5
   assert_that(are_equal(length(ms), length(Ss)),
               are_equal(length(ms), length(priors)),
               are_equal(length(ms), length(kappas)),
               are_equal(length(ms), length(nus)),
               msg = "The number of ms, Ss, kappas, nus, and priors must be identical.")
-  n.cat = length(ms)
+  n.cat <- length(ms)
 
   assert_that(all(between(priors, 0, 1), between(sum(priors), 1 - tolerance, 1 + tolerance)),
               msg = "priors must sum to 1.")
