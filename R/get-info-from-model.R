@@ -478,7 +478,7 @@ evaluate_model <- function(model, x, response_category, method = "likelihood", .
     # *across* stimulus positions, and the n_ij have to be combined in ways I haven't
     # yet figured out.
     #
-    # ------------- USE WITH CAUTION! ------------------
+    warning('method = "likelihood" is not yet working properly. DO NOT TRUST THESE RESULTS!')
     if (return_by_x) {
       # Note that these by-x likelihoods cannot simply be summed up to get the overall
       # likelihood. That would fail to correct for the total number of permutations.
