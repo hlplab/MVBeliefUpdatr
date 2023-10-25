@@ -116,8 +116,7 @@ cov2css <- function(cov, n) {
 #' @seealso \code{\link[stats]{cov2cor}}, \code{\link{cov2tau}}
 #' @references \url{https://stats.stackexchange.com/questions/62850/obtaining-covariance-matrix-from-correlation-matrix}
 #' @keywords TBD
-#' @examples
-#' TBD
+#' @examples TBD
 #' @export
 cor2cov = function(omega, tau) {
   assert_that(is.matrix(omega))
@@ -140,8 +139,7 @@ cor2cov = function(omega, tau) {
 #'
 #' @seealso \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}
 #' @keywords TBD
-#' @examples
-#' TBD
+#' @examples TBD
 #' @export
 cov2tau = function(v) {
   assert_that(is.matrix(v))

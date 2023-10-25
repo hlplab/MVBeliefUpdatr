@@ -63,7 +63,7 @@ plot_ibbu_stanfit_parameters = function(
       fill = .data$group)) +
     ggridges::geom_density_ridges(alpha = .5, color = NA,
                                   panel_scaling = panel_scaling, scale = .95,
-                                  stat = "density", aes(height = ..density..),
+                                  stat = "density", aes(height = after_stat(density)),
                                   # trim in order to increase resolution and avoid misleading
                                   # overlap with zero for S matrix; if not trimmed, density range
                                   # is estimated for the entire data in each plot
@@ -626,7 +626,6 @@ plot_ibbu_stanfit_test_categorization = function(
   confidence.intervals = sort(confidence.intervals)
 
   # Get prior and posterior parameters
-  ndraws <- if (is.null(ndraws)) get_number_of_draws(model) else ndraws
   d.pars <-
     add_ibbu_stanfit_draws(
       model,
@@ -636,8 +635,9 @@ plot_ibbu_stanfit_test_categorization = function(
       ndraws = ndraws,
       untransform_cues = untransform_cues)
 
-  if (ndraws > 500)
-    message(paste("Marginalizing over", ndraws, "MCMC samples. This might take some time.\n"))
+  # ndraws <- if (is.null(ndraws)) get_number_of_draws(model) else ndraws
+  # if (ndraws > 500)
+  #   message(paste("Marginalizing over", ndraws, "MCMC samples. This might take some time.\n"))
 
   if (!is.null(sort_by))
     assert_that(sort_by %in% groups,
@@ -670,7 +670,7 @@ plot_ibbu_stanfit_test_categorization = function(
   d.pars %<>%
     group_by(group, .draw) %>%
     do(f = get_categorization_function_from_grouped_ibbu_stanfit_draws(., logit = T)) %>%
-    right_join(test_data) %>%
+    right_join(test_data, by = "group") %>%
     group_by(group, .draw) %>%
     mutate(p_cat = invoke_map(.f = f, .x = cues_joint, target_category = target_category)) %>%
     select(-f) %>%

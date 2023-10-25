@@ -15,11 +15,11 @@ add_ibbu_stanfit_draws(
     else "prior"
  } else "posterior",
   ndraws = NULL,
-  draws = NULL,
   untransform_cues = TRUE,
   summarize = FALSE,
   wide = FALSE,
-  nest = TRUE
+  nest = TRUE,
+  seed = NULL
 )
 }
 \arguments{
@@ -33,8 +33,6 @@ add_ibbu_stanfit_draws(
 
 \item{ndraws}{Number of random draws or `NULL` if all draws are to be returned. Only `draws` or `ndraws` should be non-zero. (default: `NULL`)}
 
-\item{draws}{Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)}
-
 \item{untransform_cues}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
 
 \item{summarize}{Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)}
@@ -44,9 +42,7 @@ add_ibbu_stanfit_draws(
 \item{nest}{Should the category mean vectors and scatter matrices be nested into one cell each, or should each element
 be stored in a separate cell? (default: `TRUE`)}
 
-\item{category}{Name of the category variable. (default: "category")}
-
-\item{group}{Name of the group variable. (default: "group")}
+\item{seed}{A seed to use when subsampling draws (i.e. when ndraws is not NULL).}
 }
 \value{
 tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model

@@ -69,7 +69,9 @@ update_model_decision_bias_by_one_observation <- function(
     left_join(
       # The response variable that is returned by the get_categorization function tells us *how often* each category response is
       # expected to be observed. The x_category argument tells what the (supervising) category label is.
-      get_categorization_from_model(x = x, model = model, decision_rule = "proportional", noise_treatment = noise_treatment, lapse_treatment = lapse_treatment) %>%
+      get_categorization_from_model(
+        x = x, model = model,
+        decision_rule = "proportional", noise_treatment = noise_treatment, lapse_treatment = lapse_treatment) %>%
         # Calculate the amount of change (in log-odds) that the observed category label (x_category) causes.
         # Here we are assuming that each observation leads to change proportional to its surprisal (the
         # surprisal experienced when seeing the category label, x_category):
@@ -113,7 +115,7 @@ update_model_decision_bias_incrementally <- function(
 ){
   if (verbose) message("Assuming that category variable in model is called category.")
   if (lapse_treatment == "marginalize")
-    warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.", call. = FALSE)
+    warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.\n", call. = FALSE)
 
   assert_that(all(is.flag(keep.update_history), is.flag(keep.exposure_data)))
   assert_that(any(is_tibble(exposure), is.data.frame(exposure)))

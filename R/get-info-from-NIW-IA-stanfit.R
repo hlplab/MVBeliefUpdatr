@@ -30,13 +30,13 @@ get_number_of_draws = function(fit) {
 #' post-warmup samples across all MCMC chains in `fit`.
 #'
 #' @return A numeric vector.
-get_random_draw_indices = function(fit, ndraws)
+get_random_draw_indices <- function(fit, ndraws)
 {
-  n.all.draws = get_number_of_draws(fit)
+  n.all.draws <- get_number_of_draws(fit)
   assert_that(ndraws <= n.all.draws,
               msg = paste0("Cannot return ", ndraws, " draws because there are only ", n.all.draws, " in the object."))
 
-  draws = sample(1:n.all.draws, size = ndraws)
+  draws <- sample(1:n.all.draws, size = ndraws)
   return(draws)
 }
 
@@ -508,13 +508,13 @@ get_expected_sigma_from_stanfit = function(x, ...) {
 
 #' @rdname get_NIW_categorization_function
 #' @export
-get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...) {
+get_categorization_function_from_grouped_ibbu_stanfit_draws <- function(fit, ...) {
   get_NIW_categorization_function(
     ms = fit$m,
     Ss = fit$S,
     kappas = fit$kappa,
     nus = fit$nu,
-    lapse_rate = unique(unlist(fit$lapse_rate)),
+    lapse_rate = rep(unique(unlist(fit$lapse_rate)), length(fit$kappa)),
     ...
   )
 }
@@ -532,16 +532,14 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws = function(fit, ...)
 #' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param which DEPRECATED. Use `groups` instead. Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)
 #' @param ndraws Number of random draws or `NULL` if all draws are to be returned. Only `draws` or `ndraws` should be non-zero. (default: `NULL`)
-#' @param draws Vector with specific draw(s) to be returned, or `NULL` if all draws are to be returned. (default: `NULL`)
 #' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)
 #' @param wide Should all parameters be returned in one row? (default: `FALSE`)
 #' @param nest Should the category mean vectors and scatter matrices be nested into one cell each, or should each element
 #' be stored in a separate cell? (default: `TRUE`)
-#' @param category Name of the category variable. (default: "category")
-#' @param group Name of the group variable. (default: "group")
 #' @param categories Character vector of categories for which draws are to be returned. (default: all categories)
 #' @param groups Character vector of groups for which draws are to be returned. (default: all groups)
+#' @param seed A seed to use when subsampling draws (i.e. when ndraws is not NULL).
 #'
 #' @return tibble with post-warmup (posterior) MCMC draws of the prior/posterior parameters of the IBBU model
 #' (\code{kappa, nu, m, S, lapse_rate}). \code{kappa} and \code{nu} are the pseudocounts that determine the strength of the beliefs
@@ -567,11 +565,11 @@ add_ibbu_stanfit_draws <- function(
   which = if ("prior" %in% groups) { if (length(groups) > 1) "both" else "prior" } else "posterior",
   ##### END OF SPECIAL HANDLING
   ndraws = NULL,
-  draws = NULL,
   untransform_cues = TRUE,
   summarize = FALSE,
   wide = FALSE,
-  nest = TRUE
+  nest = TRUE,
+  seed = NULL
 ) {
   assert_that(is.NIW_ideal_adaptor_stanfit(fit))
   assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
@@ -590,29 +588,26 @@ add_ibbu_stanfit_draws <- function(
 
   assert_that(any(is.null(ndraws), is.count(ndraws)),
               msg = "If not NULL, ndraw must be a count.")
-  assert_that(any(all(is.null(draws), is.null(ndraws)), xor(!is.null(draws), !is.null(ndraws))),
-              msg = "Only one of draws and ndraws can be non-NULL.")
-  assert_that(any(is.null(draws), all(draws > 0)),
-              msg = "If not NULL draws, must be a vector of positive integers.")
+  assert_that(any(is.null(ndraws), !is.null(seed)),
+              msg = "If not ndraws is not NULL, seed must be specified.")
   assert_that(is.flag(summarize))
   assert_that(is.flag(wide))
   assert_that(!all(wide, !nest),
               msg = "Wide format is currently not implemented without nesting.")
 
-  if (!is.null(ndraws)) draws = get_random_draw_indices(fit, ndraws)
   if ("prior" %in% groups & length(groups) > 1) {
     d.prior <-
       add_ibbu_stanfit_draws(
         fit = fit, categories = categories, groups = "prior",
-        ndraws = NULL, draws = draws,
+        ndraws = NULL,
         untransform_cues = untransform_cues,
-        summarize = summarize, wide = wide, nest = nest)
+        summarize = summarize, wide = wide, nest = nest, seed = seed)
     d.posterior <-
       add_ibbu_stanfit_draws(
         fit = fit, categories = categories, groups = setdiff(groups, "prior"),
-        ndraws = NULL, draws = draws,
+        ndraws = NULL,
         untransform_cues = untransform_cues,
-        summarize = summarize, wide = wide, nest = nest)
+        summarize = summarize, wide = wide, nest = nest, seed = seed)
     d.pars <-
       rbind(d.prior, d.posterior) %>%
       mutate(group = factor(.data$group, levels = c(levels(d.prior$group), levels(d.posterior$group))))
@@ -639,7 +634,8 @@ add_ibbu_stanfit_draws <- function(
           (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
           (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
           lapse_rate,
-          ndraws = ndraws)
+          ndraws = ndraws,
+          seed = seed)
     } else {
       d.pars <-
         fit %>%
@@ -649,12 +645,12 @@ add_ibbu_stanfit_draws <- function(
           (!! rlang::sym(m))[!!! rlang::syms(pars.index), cue],
           (!! rlang::sym(S))[!!! rlang::syms(pars.index), cue, cue2],
           lapse_rate,
-          ndraws = ndraws)
+          ndraws = ndraws,
+          seed = seed)
     }
 
     d.pars %<>%
       # If group is prior, then add the group variable with value "prior" to d.pars first.
-      { if (!is.null(draws)) filter(., .draw %in% draws) else . } %>%
       rename_at(vars(ends_with(postfix)), ~ sub(postfix, "", .)) %>%
       { if (summarize) {
         group_by(., !!! syms(pars.index), cue, cue2) %>%
