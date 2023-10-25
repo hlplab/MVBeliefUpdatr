@@ -132,12 +132,11 @@ update_model_decision_bias_incrementally <- function(
     make_vector_column(exposure.cues, "cues")
 
   if (keep.update_history)
-    prior %<>%
+    model %<>%
     mutate(observation.n = 0)
 
+  posterior <- model
   for (i in 1:nrow(exposure)) {
-    posterior <- if (keep.update_history) model %>% filter(observation.n == i - 1) else model
-
     posterior <-
       suppressWarnings(
         update_model_decision_bias_by_one_observation(
@@ -149,11 +148,8 @@ update_model_decision_bias_incrementally <- function(
           lapse_treatment = lapse_treatment,
           verbose = verbose))
 
-    if (keep.update_history) {
-      posterior %<>%
-        mutate(observation.n = i)
-      model <- rbind(model, posterior)
-    } else model <- posterior
+    if (keep.update_history)
+      model <- rbind(model, posterior %>% mutate(observation.n = i))
   }
 
   if (keep.exposure_data) {

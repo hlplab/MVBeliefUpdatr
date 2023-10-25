@@ -1,5 +1,6 @@
 #' @importFrom tidybayes spread_draws recover_types
 #' @importFrom tidyr spread gather unite
+#' @importFrom dplyr relocate
 NULL
 
 

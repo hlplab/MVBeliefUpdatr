@@ -1,13 +1,13 @@
-context("Get information from stanfit")
+context("get information from stanfit")
 
 source("../functions-to-make-or-load-models.R")
 fit <- get_example_stanfit()
 
-test_that("Test fit class", {
+test_that("test fit class", {
   expect_true(is.NIW_ideal_adaptor_stanfit(fit))
 })
 
-test_that("Add ibbu draws - input check", {
+test_that("add ibbu draws - input check", {
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "prior")))
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "plus2.2")))
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = c("prior", "plus2.2"))))
@@ -15,7 +15,7 @@ test_that("Add ibbu draws - input check", {
   expect_error(add_ibbu_stanfit_draws(fit, groups = "prior", draws = -1:1))
 })
 
-test_that("Add ibbu draws - output check", {
+test_that("add ibbu draws - output check", {
   expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", draws = 1:10, wide = F)), 20)
   expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", draws = 1:10, wide = F, summarize = T)), 2)
   expect_equal(names(add_ibbu_stanfit_draws(fit, groups = "prior", summarize = T)),
@@ -32,7 +32,7 @@ test_that("Add ibbu draws - output check", {
 # })
 
 
-test_that("Get expected category statistic", {
+test_that("get expected category statistic", {
   expect_true(is.vector(get_expected_mu_from_stanfit(fit, "A", "prior")))
   expect_error(is.vector(get_expected_mu_from_stanfit(fit, "wrong", "prior")))
   expect_error(is.vector(get_expected_mu_from_stanfit(fit, "A", "wrong")))
