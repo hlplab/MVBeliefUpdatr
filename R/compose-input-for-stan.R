@@ -395,6 +395,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     lapse_rate <- numeric()
     lapse_rate_known <- 0
   } else {
+    lapse_rate <- array(lapse_rate, dim = c(1))
     lapse_rate_known <- 1
   }
 
