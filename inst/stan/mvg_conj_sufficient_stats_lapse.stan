@@ -14,7 +14,7 @@
 * August 2020
 */
 
-  data {
+data {
     int M;                        // number of categories
     int L;                        // number of grouping levels (e.g. subjects)
     int K;                        // number of features
