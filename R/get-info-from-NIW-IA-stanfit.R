@@ -337,17 +337,17 @@ get_category_levels_from_stanfit = function(fit, indices = NULL) {
 
 #' @rdname get_original_variable_levels_from_stanfit
 #' @export
-get_group_levels_from_stanfit = function(fit, indices = NULL, include_prior = F) {
-  groups = get_original_variable_levels_from_stanfit(fit, "group", indices)
-  if (include_prior) groups = append("prior", groups)
+get_group_levels_from_stanfit <- function(fit, indices = NULL, include_prior = F) {
+  groups <- get_original_variable_levels_from_stanfit(fit, "group", indices)
+  if (include_prior) groups <- append("prior", groups)
 
   return(groups)
 }
 
 #' @rdname get_original_variable_levels_from_stanfit
 #' @export
-get_cue_levels_from_stanfit = function(fit, indices = NULL) {
-  cues = get_original_variable_levels_from_stanfit(fit, "cue", indices)
+get_cue_levels_from_stanfit <- function(fit, indices = NULL) {
+  cues <- get_original_variable_levels_from_stanfit(fit, "cue", indices)
 
   return(cues)
 }

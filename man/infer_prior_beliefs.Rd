@@ -69,22 +69,8 @@ If `TRUE` and `m_0` and `S_0` are specified, `m_0` and `S_0` will also be scaled
 components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 `pca.observation = FALSE`. (default: 1)}
 
-\item{untransform_fit}{Logical flag indicating whether the MCMC samples of the model should be transformed back
+\item{untransform_fit}{Logical flag indicating whether the samples of the model should be transformed back
 into the original cue space by applying the untransform function. (default: `TRUE`)}
-
-\item{m_0, S_0}{Optionally, prior means (m_0) and/or prior scatter matrices (S_0) for all categories. Each should be
-a list, with each element being the mean/scatter matrix for a specific category. Elements should be ordered in the same order as
-the levels of the category variable in \code{exposure} and \code{test}. The means and scatter matrices could be
-estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_NIW_prior_from_data}}
-for a convenient way to do so). To aspects should be kept in mind, however. First, an \emph{inferred} scatter
-matrix includes variability from internal perceptual and/or external environmental noise, \emph{in addition} to the motor noise that
-is reflected in production data. That means that any prior for the scatter matrix (S_0) should take into account
-not only the variability in the production data but also any additional variability added by internal (perceptual)
-or external (environmental) noise. Second, the prior scatter matrix has an implicit nu associated with it, so that
-the nu inferred by \code{\link{infer_prior_beliefs}} is best thought of as a multiple of the implicit nu used
-during the creation of the scatter matrix S_0. For that reason, we recommend the use of nu = D + 2 in the call to
-\code{\link{make_NIW_prior_from_data}} (the default), since the S_0 obtained that way is identical to the category
-covariance matrix Sigma.}
 
 \item{data_list}{A list of the type that would be returned by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.
 This list can be provided instead of the individual inputs that are handed to \code{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}.}

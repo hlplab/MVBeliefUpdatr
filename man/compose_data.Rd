@@ -16,6 +16,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats(
   scale.observations = T,
   pca.observations = F,
   pca.cutoff = 1,
+  lapse_rate = NULL,
   m_0 = NULL,
   S_0 = NULL,
   tau_scale = 0,
@@ -61,8 +62,9 @@ If `TRUE` and `m_0` and `S_0` are specified, `m_0` and `S_0` will also be scaled
 components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 `pca.observation = FALSE`. (default: 1)}
 
-\item{m_0, S_0}{Optionally, prior means (m_0) and/or prior scatter matrices (S_0) for all categories. Each should be
-a list, with each element being the mean/scatter matrix for a specific category. Elements should be ordered in the same order as
+\item{lapse_rate, m_0, S_0}{Optionally, lapse rate, prior means (m_0) and/or prior scatter matrices (S_0) for all categories.
+Lapse rate should be a number between 0 and 1. For m_0 and S_0, each should be a list, with each element being the
+mean/scatter matrix for a specific category. Elements should be ordered in the same order as
 the levels of the category variable in \code{exposure} and \code{test}. The means and scatter matrices could be
 estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_NIW_prior_from_data}}
 for a convenient way to do so). To aspects should be kept in mind, however. First, an \emph{inferred} scatter

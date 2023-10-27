@@ -223,8 +223,9 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' @param pca.cutoff Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 #' components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 #' `pca.observation = FALSE`. (default: 1)
-#' @param m_0,S_0 Optionally, prior means (m_0) and/or prior scatter matrices (S_0) for all categories. Each should be
-#' a list, with each element being the mean/scatter matrix for a specific category. Elements should be ordered in the same order as
+#' @param lapse_rate,m_0,S_0 Optionally, lapse rate, prior means (m_0) and/or prior scatter matrices (S_0) for all categories.
+#' Lapse rate should be a number between 0 and 1. For m_0 and S_0, each should be a list, with each element being the
+#' mean/scatter matrix for a specific category. Elements should be ordered in the same order as
 #' the levels of the category variable in \code{exposure} and \code{test}. The means and scatter matrices could be
 #' estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_NIW_prior_from_data}}
 #' for a convenient way to do so). To aspects should be kept in mind, however. First, an \emph{inferred} scatter
@@ -253,7 +254,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   exposure, test,
   cues, category = "category", response = "response", group = "group", group.unique = NULL,
   center.observations = T, scale.observations = T, pca.observations = F, pca.cutoff = 1,
-  m_0 = NULL, S_0 = NULL,
+  lapse_rate = NULL, m_0 = NULL, S_0 = NULL,
   tau_scale = 0, # rep(5, length(cues)),
   L_omega_scale = 0,
   verbose = F
@@ -316,6 +317,10 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   exposure %<>%
     mutate(across(all_of(group), ~ factor(.x, levels = levels(test[[!! group]]))))
 
+  if (!is.null(lapse_rate)) {
+    assert_that(is.number(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
+    assert_that(between(lapse_rate, 0, 1), msg = "If not NULL, lapse rate must be a number between 0 and 1.")
+  }
   if (!is.null(m_0)) {
     if (nlevels(exposure[[category]]) == 1) {
       assert_that(is.vector(m_0),
@@ -388,6 +393,13 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       group = group,
       verbose = verbose)
 
+  if (is.null(lapse_rate)) {
+    lapse_rate <- numeric()
+    lapse_rate_known <- 0
+  } else {
+    lapse_rate_known <- 1
+  }
+
   n.cats <- nlevels(exposure[[category]])
   n.cues <- length(cues)
   if (is.null(m_0)) {
@@ -449,9 +461,11 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
           as.matrix()
         N_test <- nrow(x_test)
 
+        lapse_rate_known <- lapse_rate_known
+        lapse_rate_data <- lapse_rate
         m_0_known <- m_0_known
-        S_0_known <- S_0_known
         m_0_data <- m_0
+        S_0_known <- S_0_known
         S_0_data <- S_0
 
         tau_scale <- tau_scale
