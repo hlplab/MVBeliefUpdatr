@@ -17,8 +17,9 @@ infer_prior_beliefs(
   pca.observations = FALSE,
   pca.cutoff = 1,
   untransform_fit = TRUE,
-  m_0 = NULL,
-  S_0 = NULL,
+  lapse_rate = NULL,
+  mu_0 = NULL,
+  Sigma_0 = NULL,
   tau_scale = 0,
   L_omega_scale = 0,
   data_list = NULL,
@@ -71,6 +72,15 @@ components necessary to explain at least the pca.cutoff of the total variance. (
 
 \item{untransform_fit}{Logical flag indicating whether the samples of the model should be transformed back
 into the original cue space by applying the untransform function. (default: `TRUE`)}
+
+\item{lapse_rate, mu_0, Sigma_0}{Optionally, lapse rate, prior expected category means (mu_0) and/or prior expected
+category covariance matrices (Sigma_0) for all categories. Lapse rate should be a number between 0 and 1. For mu_0
+and Sigma_0, each should be a list, with each element being the expected mean/covariance matrix for a specific
+category prior to updating. Elements of mu_0 and Sigma_0 should be ordered in the same order as the levels of the
+category variable in \code{exposure} and \code{test}. These prior expected means and covariance matrices could be
+estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_MVG_from_data}}
+for a convenient way to do so). Internally, m_0 is then set to mu_0 (so that the expected value of the prior
+distribution of means is mu_0) and S_0 is set so that the expected value of the inverse-Wishart is Sigma_0 given nu_0.}
 
 \item{data_list}{A list of the type that would be returned by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.
 This list can be provided instead of the individual inputs that are handed to \code{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}.}

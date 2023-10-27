@@ -35,7 +35,7 @@ infer_prior_beliefs <- function(
   exposure, test,
   cues, category, response, group, group.unique = NULL,
   center.observations = TRUE, scale.observations = TRUE, pca.observations = FALSE, pca.cutoff = 1, untransform_fit = TRUE,
-  m_0 = NULL, S_0 = NULL,
+  lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
   tau_scale = 0, L_omega_scale = 0,
   data_list = NULL, transform_information = NULL,
   sample = TRUE, file = NULL, model = NULL, use_multivariate_updating = NULL,
@@ -71,8 +71,9 @@ infer_prior_beliefs <- function(
         scale.observations = scale.observations,
         pca.observations = pca.observations,
         pca.cutoff = pca.cutoff,
-        m_0 = m_0,
-        S_0 = S_0,
+        lapse_rate = lapse_rate,
+        mu_0 = mu_0,
+        Sigma_0 = Sigma_0,
         tau_scale = tau_scale,
         L_omega_scale = L_omega_scale,
         verbose = verbose)
@@ -94,14 +95,10 @@ infer_prior_beliefs <- function(
 
   if (is.null(use_multivariate_updating))
     use_multivariate_updating = if (is.null(data_list$K)) FALSE else TRUE
-  message("message to developer: change to keep samples only from relevant parameters.")
 
   if (sample) {
     # Parameters *not* to store
     pars <- c("m_0_tau", "m_0_L_omega", "tau_0_param", "t_scale", "p_test_conj", "log_p_test_conj")
-    if (!is.null(m_0)) {
-      pars <- c(pars)
-    }
 
     if (!is.null(model)) {
       fit <- sampling(MVBeliefUpdatr:::stanmodels[[model]],
