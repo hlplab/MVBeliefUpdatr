@@ -78,11 +78,11 @@ static const std::vector<string> locations_array__ = {" (found before start of p
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 53, column 4 to column 26)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 54, column 4 to column 27)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 55, column 4 to column 70)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 56, column 4 to column 43)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 57, column 4 to column 47)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 58, column 4 to column 56)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 59, column 4 to column 54)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 60, column 4 to column 63)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 56, column 4 to column 44)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 57, column 4 to column 48)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 58, column 4 to column 57)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 59, column 4 to column 58)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 60, column 4 to column 67)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 63, column 2 to column 18)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 64, column 2 to column 19)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 65, column 2 to column 23)",
@@ -100,68 +100,70 @@ static const std::vector<string> locations_array__ = {" (found before start of p
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 74, column 2 to line 78, column 3)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 82, column 4 to column 20)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 81, column 9 to line 83, column 3)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 80, column 4 to column 19)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 79, column 17 to line 81, column 3)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 80, column 4 to column 20)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 79, column 18 to line 81, column 3)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 79, column 2 to line 83, column 3)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 85, column 4 to column 19)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 84, column 17 to line 86, column 3)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 84, column 2 to line 86, column 3)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 92, column 6 to column 107)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 90, column 20 to line 93, column 5)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 90, column 4 to line 93, column 5)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 105, column 8 to column 37)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 106, column 8 to column 31)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 107, column 8 to column 34)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 108, column 8 to column 34)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 104, column 13 to line 109, column 7)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 96, column 8 to column 52)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 97, column 8 to column 46)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 98, column 8 to line 99, column 29)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 100, column 8 to line 103, column 78)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 95, column 29 to line 104, column 7)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 95, column 6 to line 109, column 7)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 110, column 6 to line 111, column 57)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 94, column 23 to line 112, column 5)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 94, column 4 to line 112, column 5)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 89, column 19 to line 113, column 3)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 89, column 2 to line 113, column 3)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 116, column 4 to column 14)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 117, column 4 to column 22)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 120, column 6 to line 123, column 72)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 119, column 21 to line 124, column 5)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 119, column 4 to line 124, column 5)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 126, column 4 to column 79)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 115, column 22 to line 127, column 3)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 115, column 2 to line 127, column 3)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 159, column 11 to column 12)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 159, column 13 to column 14)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 159, column 4 to column 24)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 160, column 11 to column 12)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 160, column 13 to column 14)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 160, column 4 to column 24)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 161, column 4 to column 61)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 162, column 4 to column 47)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 158, column 18 to line 163, column 3)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 158, column 2 to line 163, column 3)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 130, column 9 to column 10)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 130, column 2 to column 26)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 133, column 2 to column 48)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 134, column 2 to column 37)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 135, column 2 to column 34)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 142, column 6 to column 57)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 143, column 6 to column 77)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 144, column 6 to column 99)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 141, column 20 to line 145, column 5)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 141, column 4 to line 145, column 5)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 149, column 8 to column 69)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 150, column 8 to column 88)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 148, column 23 to line 151, column 7)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 148, column 6 to line 151, column 7)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 147, column 20 to line 152, column 5)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 147, column 4 to line 152, column 5)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 154, column 4 to column 84)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 153, column 22 to line 155, column 3)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 153, column 2 to line 155, column 3)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 87, column 6 to column 52)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 86, column 20 to line 88, column 4)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 86, column 3 to line 88, column 4)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 84, column 21 to line 89, column 3)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 84, column 2 to line 89, column 3)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 95, column 6 to column 107)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 93, column 24 to line 96, column 5)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 93, column 4 to line 96, column 5)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 108, column 8 to column 37)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 109, column 8 to column 31)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 110, column 8 to column 34)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 111, column 8 to column 34)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 107, column 13 to line 112, column 7)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 99, column 8 to column 52)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 100, column 8 to column 46)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 101, column 8 to line 102, column 29)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 103, column 8 to line 106, column 78)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 98, column 29 to line 107, column 7)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 98, column 6 to line 112, column 7)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 113, column 6 to line 114, column 57)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 97, column 23 to line 115, column 5)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 97, column 4 to line 115, column 5)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 92, column 19 to line 116, column 3)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 92, column 2 to line 116, column 3)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 119, column 4 to column 14)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 120, column 4 to column 22)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 123, column 6 to line 126, column 72)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 122, column 21 to line 127, column 5)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 122, column 4 to line 127, column 5)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 129, column 4 to column 79)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 118, column 22 to line 130, column 3)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 118, column 2 to line 130, column 3)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 162, column 11 to column 12)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 162, column 13 to column 14)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 162, column 4 to column 24)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 163, column 11 to column 12)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 163, column 13 to column 14)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 163, column 4 to column 24)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 164, column 4 to column 61)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 165, column 4 to column 47)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 161, column 19 to line 166, column 3)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 161, column 2 to line 166, column 3)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 133, column 9 to column 10)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 133, column 2 to column 26)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 136, column 2 to column 48)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 137, column 2 to column 37)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 138, column 2 to column 34)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 145, column 6 to column 57)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 146, column 6 to column 77)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 147, column 6 to column 99)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 144, column 21 to line 148, column 5)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 144, column 4 to line 148, column 5)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 152, column 8 to column 69)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 153, column 8 to column 88)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 151, column 23 to line 154, column 7)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 151, column 6 to line 154, column 7)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 150, column 24 to line 155, column 5)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 150, column 4 to line 155, column 5)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 157, column 4 to column 84)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 156, column 22 to line 158, column 3)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 156, column 2 to line 158, column 3)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 17, column 4 to column 10)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 18, column 4 to column 10)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 19, column 4 to column 10)",
@@ -186,28 +188,28 @@ static const std::vector<string> locations_array__ = {" (found before start of p
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 30, column 29 to column 30)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 30, column 4 to column 32)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 31, column 4 to column 43)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 32, column 4 to column 36)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 33, column 4 to column 36)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 32, column 4 to column 37)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 33, column 4 to column 40)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 34, column 25 to column 49)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 34, column 4 to column 51)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 35, column 39 to column 56)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 35, column 11 to column 28)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 35, column 4 to column 58)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 36, column 43 to column 60)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 36, column 15 to column 32)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 36, column 4 to column 62)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 35, column 41 to column 59)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 35, column 11 to column 29)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 35, column 4 to column 61)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 36, column 51 to column 72)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 36, column 15 to column 36)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 36, column 4 to column 74)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 42, column 4 to column 28)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 43, column 4 to column 32)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 46, column 2 to column 21)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 49, column 4 to column 49)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 55, column 44 to column 68)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 56, column 24 to column 41)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 56, column 24 to column 42)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 56, column 11 to column 12)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 57, column 20 to column 37)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 58, column 25 to column 42)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 59, column 35 to column 52)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 57, column 20 to column 38)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 58, column 25 to column 43)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 59, column 35 to column 56)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 59, column 20 to column 21)",
-                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 60, column 44 to column 61)",
+                                                      " (in 'mvg_conj_sufficient_stats_lapse', line 60, column 44 to column 65)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 60, column 25 to column 26)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 64, column 16 to column 17)",
                                                       " (in 'mvg_conj_sufficient_stats_lapse', line 64, column 9 to column 10)",
@@ -244,11 +246,11 @@ private:
   std::vector<int> y_test;
   std::vector<std::vector<int>> z_test_counts;
   int lapse_rate_known;
-  int m_0_known;
-  int S_0_known;
+  int mu_0_known;
+  int Sigma_0_known;
   std::vector<double> lapse_rate_data;
-  std::vector<Eigen::Matrix<double, -1, 1>> m_0_data;
-  std::vector<Eigen::Matrix<double, -1, -1>> S_0_data;
+  std::vector<Eigen::Matrix<double, -1, 1>> mu_0_data;
+  std::vector<Eigen::Matrix<double, -1, -1>> Sigma_0_data;
   double tau_scale;
   double L_omega_scale;
   double sigma_kappanu;
@@ -286,32 +288,32 @@ public:
       pos__ = std::numeric_limits<int>::min();
       
       pos__ = 1;
-      current_statement__ = 88;
+      current_statement__ = 90;
       context__.validate_dims("data initialization","M","int",
           context__.to_vec());
       M = std::numeric_limits<int>::min();
       
-      current_statement__ = 88;
+      current_statement__ = 90;
       M = context__.vals_i("M")[(1 - 1)];
-      current_statement__ = 89;
+      current_statement__ = 91;
       context__.validate_dims("data initialization","L","int",
           context__.to_vec());
       L = std::numeric_limits<int>::min();
       
-      current_statement__ = 89;
+      current_statement__ = 91;
       L = context__.vals_i("L")[(1 - 1)];
-      current_statement__ = 90;
+      current_statement__ = 92;
       context__.validate_dims("data initialization","K","int",
           context__.to_vec());
       K = std::numeric_limits<int>::min();
       
-      current_statement__ = 90;
-      K = context__.vals_i("K")[(1 - 1)];
-      current_statement__ = 91;
-      validate_non_negative_index("N", "M", M);
       current_statement__ = 92;
-      validate_non_negative_index("N", "L", L);
+      K = context__.vals_i("K")[(1 - 1)];
       current_statement__ = 93;
+      validate_non_negative_index("N", "M", M);
+      current_statement__ = 94;
+      validate_non_negative_index("N", "L", L);
+      current_statement__ = 95;
       context__.validate_dims("data initialization","N","double",
           context__.to_vec(M, L));
       N = Eigen::Matrix<double, -1, -1>(M, L);
@@ -319,30 +321,30 @@ public:
       
       {
         std::vector<local_scalar_t__> N_flat__;
-        current_statement__ = 93;
+        current_statement__ = 95;
         assign(N_flat__, nil_index_list(), context__.vals_r("N"),
           "assigning variable N_flat__");
-        current_statement__ = 93;
+        current_statement__ = 95;
         pos__ = 1;
-        current_statement__ = 93;
+        current_statement__ = 95;
         for (int sym1__ = 1; sym1__ <= L; ++sym1__) {
-          current_statement__ = 93;
+          current_statement__ = 95;
           for (int sym2__ = 1; sym2__ <= M; ++sym2__) {
-            current_statement__ = 93;
+            current_statement__ = 95;
             assign(N,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               N_flat__[(pos__ - 1)], "assigning variable N");
-            current_statement__ = 93;
+            current_statement__ = 95;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 94;
-      validate_non_negative_index("x_mean", "M", M);
-      current_statement__ = 95;
-      validate_non_negative_index("x_mean", "L", L);
       current_statement__ = 96;
-      validate_non_negative_index("x_mean", "K", K);
+      validate_non_negative_index("x_mean", "M", M);
       current_statement__ = 97;
+      validate_non_negative_index("x_mean", "L", L);
+      current_statement__ = 98;
+      validate_non_negative_index("x_mean", "K", K);
+      current_statement__ = 99;
       context__.validate_dims("data initialization","x_mean","double",
           context__.to_vec(M, L, K));
       x_mean = std::vector<std::vector<Eigen::Matrix<double, -1, 1>>>(M, std::vector<Eigen::Matrix<double, -1, 1>>(L, Eigen::Matrix<double, -1, 1>(K)));
@@ -350,35 +352,35 @@ public:
       
       {
         std::vector<local_scalar_t__> x_mean_flat__;
-        current_statement__ = 97;
+        current_statement__ = 99;
         assign(x_mean_flat__, nil_index_list(), context__.vals_r("x_mean"),
           "assigning variable x_mean_flat__");
-        current_statement__ = 97;
+        current_statement__ = 99;
         pos__ = 1;
-        current_statement__ = 97;
+        current_statement__ = 99;
         for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
-          current_statement__ = 97;
+          current_statement__ = 99;
           for (int sym2__ = 1; sym2__ <= L; ++sym2__) {
-            current_statement__ = 97;
+            current_statement__ = 99;
             for (int sym3__ = 1; sym3__ <= M; ++sym3__) {
-              current_statement__ = 97;
+              current_statement__ = 99;
               assign(x_mean,
                 cons_list(index_uni(sym3__),
                   cons_list(index_uni(sym2__),
                     cons_list(index_uni(sym1__), nil_index_list()))),
                 x_mean_flat__[(pos__ - 1)], "assigning variable x_mean");
-              current_statement__ = 97;
+              current_statement__ = 99;
               pos__ = (pos__ + 1);}}}
       }
-      current_statement__ = 98;
+      current_statement__ = 100;
       validate_non_negative_index("x_ss", "M", M);
-      current_statement__ = 99;
-      validate_non_negative_index("x_ss", "L", L);
-      current_statement__ = 100;
-      validate_non_negative_index("x_ss", "K", K);
-      current_statement__ = 100;
-      validate_non_negative_index("x_ss", "K", K);
       current_statement__ = 101;
+      validate_non_negative_index("x_ss", "L", L);
+      current_statement__ = 102;
+      validate_non_negative_index("x_ss", "K", K);
+      current_statement__ = 102;
+      validate_non_negative_index("x_ss", "K", K);
+      current_statement__ = 103;
       context__.validate_dims("data initialization","x_ss","double",
           context__.to_vec(M, L, K, K));
       x_ss = std::vector<std::vector<Eigen::Matrix<double, -1, -1>>>(M, std::vector<Eigen::Matrix<double, -1, -1>>(L, Eigen::Matrix<double, -1, -1>(K, K)));
@@ -386,49 +388,49 @@ public:
       
       {
         std::vector<local_scalar_t__> x_ss_flat__;
-        current_statement__ = 101;
+        current_statement__ = 103;
         assign(x_ss_flat__, nil_index_list(), context__.vals_r("x_ss"),
           "assigning variable x_ss_flat__");
-        current_statement__ = 101;
+        current_statement__ = 103;
         pos__ = 1;
-        current_statement__ = 101;
+        current_statement__ = 103;
         for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
-          current_statement__ = 101;
+          current_statement__ = 103;
           for (int sym2__ = 1; sym2__ <= K; ++sym2__) {
-            current_statement__ = 101;
+            current_statement__ = 103;
             for (int sym3__ = 1; sym3__ <= L; ++sym3__) {
-              current_statement__ = 101;
+              current_statement__ = 103;
               for (int sym4__ = 1; sym4__ <= M; ++sym4__) {
-                current_statement__ = 101;
+                current_statement__ = 103;
                 assign(x_ss,
                   cons_list(index_uni(sym4__),
                     cons_list(index_uni(sym3__),
                       cons_list(index_uni(sym2__),
                         cons_list(index_uni(sym1__), nil_index_list())))),
                   x_ss_flat__[(pos__ - 1)], "assigning variable x_ss");
-                current_statement__ = 101;
+                current_statement__ = 103;
                 pos__ = (pos__ + 1);}}}}
       }
-      current_statement__ = 101;
+      current_statement__ = 103;
       for (int sym1__ = 1; sym1__ <= M; ++sym1__) {
-        current_statement__ = 101;
+        current_statement__ = 103;
         for (int sym2__ = 1; sym2__ <= L; ++sym2__) {
-          current_statement__ = 101;
-          current_statement__ = 101;
+          current_statement__ = 103;
+          current_statement__ = 103;
           check_cov_matrix(function__, "x_ss[sym1__, sym2__]",
                            x_ss[(sym1__ - 1)][(sym2__ - 1)]);}}
-      current_statement__ = 102;
+      current_statement__ = 104;
       context__.validate_dims("data initialization","N_test","int",
           context__.to_vec());
       N_test = std::numeric_limits<int>::min();
       
-      current_statement__ = 102;
-      N_test = context__.vals_i("N_test")[(1 - 1)];
-      current_statement__ = 103;
-      validate_non_negative_index("x_test", "N_test", N_test);
       current_statement__ = 104;
-      validate_non_negative_index("x_test", "K", K);
+      N_test = context__.vals_i("N_test")[(1 - 1)];
       current_statement__ = 105;
+      validate_non_negative_index("x_test", "N_test", N_test);
+      current_statement__ = 106;
+      validate_non_negative_index("x_test", "K", K);
+      current_statement__ = 107;
       context__.validate_dims("data initialization","x_test","double",
           context__.to_vec(N_test, K));
       x_test = std::vector<Eigen::Matrix<double, -1, 1>>(N_test, Eigen::Matrix<double, -1, 1>(K));
@@ -436,333 +438,338 @@ public:
       
       {
         std::vector<local_scalar_t__> x_test_flat__;
-        current_statement__ = 105;
+        current_statement__ = 107;
         assign(x_test_flat__, nil_index_list(), context__.vals_r("x_test"),
           "assigning variable x_test_flat__");
-        current_statement__ = 105;
+        current_statement__ = 107;
         pos__ = 1;
-        current_statement__ = 105;
+        current_statement__ = 107;
         for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
-          current_statement__ = 105;
+          current_statement__ = 107;
           for (int sym2__ = 1; sym2__ <= N_test; ++sym2__) {
-            current_statement__ = 105;
+            current_statement__ = 107;
             assign(x_test,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               x_test_flat__[(pos__ - 1)], "assigning variable x_test");
-            current_statement__ = 105;
+            current_statement__ = 107;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 106;
+      current_statement__ = 108;
       validate_non_negative_index("y_test", "N_test", N_test);
-      current_statement__ = 107;
+      current_statement__ = 109;
       context__.validate_dims("data initialization","y_test","int",
           context__.to_vec(N_test));
       y_test = std::vector<int>(N_test, std::numeric_limits<int>::min());
       
-      current_statement__ = 107;
+      current_statement__ = 109;
       assign(y_test, nil_index_list(), context__.vals_i("y_test"),
         "assigning variable y_test");
-      current_statement__ = 108;
-      validate_non_negative_index("z_test_counts", "N_test", N_test);
-      current_statement__ = 109;
-      validate_non_negative_index("z_test_counts", "M", M);
       current_statement__ = 110;
+      validate_non_negative_index("z_test_counts", "N_test", N_test);
+      current_statement__ = 111;
+      validate_non_negative_index("z_test_counts", "M", M);
+      current_statement__ = 112;
       context__.validate_dims("data initialization","z_test_counts","int",
           context__.to_vec(N_test, M));
       z_test_counts = std::vector<std::vector<int>>(N_test, std::vector<int>(M, std::numeric_limits<int>::min()));
       
       {
         std::vector<int> z_test_counts_flat__;
-        current_statement__ = 110;
+        current_statement__ = 112;
         assign(z_test_counts_flat__, nil_index_list(),
           context__.vals_i("z_test_counts"),
           "assigning variable z_test_counts_flat__");
-        current_statement__ = 110;
+        current_statement__ = 112;
         pos__ = 1;
-        current_statement__ = 110;
+        current_statement__ = 112;
         for (int sym1__ = 1; sym1__ <= M; ++sym1__) {
-          current_statement__ = 110;
+          current_statement__ = 112;
           for (int sym2__ = 1; sym2__ <= N_test; ++sym2__) {
-            current_statement__ = 110;
+            current_statement__ = 112;
             assign(z_test_counts,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
               z_test_counts_flat__[(pos__ - 1)],
               "assigning variable z_test_counts");
-            current_statement__ = 110;
+            current_statement__ = 112;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 111;
+      current_statement__ = 113;
       context__.validate_dims("data initialization","lapse_rate_known","int",
           context__.to_vec());
       lapse_rate_known = std::numeric_limits<int>::min();
       
-      current_statement__ = 111;
+      current_statement__ = 113;
       lapse_rate_known = context__.vals_i("lapse_rate_known")[(1 - 1)];
-      current_statement__ = 111;
-      current_statement__ = 111;
+      current_statement__ = 113;
+      current_statement__ = 113;
       check_greater_or_equal(function__, "lapse_rate_known",
                              lapse_rate_known, 0);
-      current_statement__ = 111;
-      current_statement__ = 111;
+      current_statement__ = 113;
+      current_statement__ = 113;
       check_less_or_equal(function__, "lapse_rate_known", lapse_rate_known, 1);
-      current_statement__ = 112;
-      context__.validate_dims("data initialization","m_0_known","int",
-          context__.to_vec());
-      m_0_known = std::numeric_limits<int>::min();
-      
-      current_statement__ = 112;
-      m_0_known = context__.vals_i("m_0_known")[(1 - 1)];
-      current_statement__ = 112;
-      current_statement__ = 112;
-      check_greater_or_equal(function__, "m_0_known", m_0_known, 0);
-      current_statement__ = 112;
-      current_statement__ = 112;
-      check_less_or_equal(function__, "m_0_known", m_0_known, 1);
-      current_statement__ = 113;
-      context__.validate_dims("data initialization","S_0_known","int",
-          context__.to_vec());
-      S_0_known = std::numeric_limits<int>::min();
-      
-      current_statement__ = 113;
-      S_0_known = context__.vals_i("S_0_known")[(1 - 1)];
-      current_statement__ = 113;
-      current_statement__ = 113;
-      check_greater_or_equal(function__, "S_0_known", S_0_known, 0);
-      current_statement__ = 113;
-      current_statement__ = 113;
-      check_less_or_equal(function__, "S_0_known", S_0_known, 1);
       current_statement__ = 114;
+      context__.validate_dims("data initialization","mu_0_known","int",
+          context__.to_vec());
+      mu_0_known = std::numeric_limits<int>::min();
+      
+      current_statement__ = 114;
+      mu_0_known = context__.vals_i("mu_0_known")[(1 - 1)];
+      current_statement__ = 114;
+      current_statement__ = 114;
+      check_greater_or_equal(function__, "mu_0_known", mu_0_known, 0);
+      current_statement__ = 114;
+      current_statement__ = 114;
+      check_less_or_equal(function__, "mu_0_known", mu_0_known, 1);
+      current_statement__ = 115;
+      context__.validate_dims("data initialization","Sigma_0_known","int",
+          context__.to_vec());
+      Sigma_0_known = std::numeric_limits<int>::min();
+      
+      current_statement__ = 115;
+      Sigma_0_known = context__.vals_i("Sigma_0_known")[(1 - 1)];
+      current_statement__ = 115;
+      current_statement__ = 115;
+      check_greater_or_equal(function__, "Sigma_0_known", Sigma_0_known, 0);
+      current_statement__ = 115;
+      current_statement__ = 115;
+      check_less_or_equal(function__, "Sigma_0_known", Sigma_0_known, 1);
+      current_statement__ = 116;
       validate_non_negative_index("lapse_rate_data",
                                   "lapse_rate_known ? 1 : 0",
                                   (lapse_rate_known ? 1 : 0));
-      current_statement__ = 115;
+      current_statement__ = 117;
       context__.validate_dims("data initialization","lapse_rate_data",
           "double",context__.to_vec((lapse_rate_known ? 1 : 0)));
       lapse_rate_data = std::vector<double>((lapse_rate_known ? 1 : 0), std::numeric_limits<double>::quiet_NaN());
       
-      current_statement__ = 115;
+      current_statement__ = 117;
       assign(lapse_rate_data, nil_index_list(),
         context__.vals_r("lapse_rate_data"),
         "assigning variable lapse_rate_data");
-      current_statement__ = 116;
-      validate_non_negative_index("m_0_data", "m_0_known ? M : 0",
-                                  (m_0_known ? M : 0));
-      current_statement__ = 117;
-      validate_non_negative_index("m_0_data", "m_0_known ? K : 0",
-                                  (m_0_known ? K : 0));
       current_statement__ = 118;
-      context__.validate_dims("data initialization","m_0_data","double",
-          context__.to_vec((m_0_known ? M : 0), (m_0_known ? K : 0)));
-      m_0_data = std::vector<Eigen::Matrix<double, -1, 1>>((m_0_known ? M : 0), Eigen::Matrix<double, -1, 1>((
-        m_0_known ? K : 0)));
-      stan::math::fill(m_0_data, std::numeric_limits<double>::quiet_NaN());
+      validate_non_negative_index("mu_0_data", "mu_0_known ? M : 0",
+                                  (mu_0_known ? M : 0));
+      current_statement__ = 119;
+      validate_non_negative_index("mu_0_data", "mu_0_known ? K : 0",
+                                  (mu_0_known ? K : 0));
+      current_statement__ = 120;
+      context__.validate_dims("data initialization","mu_0_data","double",
+          context__.to_vec((mu_0_known ? M : 0), (mu_0_known ? K : 0)));
+      mu_0_data = std::vector<Eigen::Matrix<double, -1, 1>>((mu_0_known ? M :
+                                                               0), Eigen::Matrix<double, -1, 1>((
+        mu_0_known ? K : 0)));
+      stan::math::fill(mu_0_data, std::numeric_limits<double>::quiet_NaN());
       
       {
-        std::vector<local_scalar_t__> m_0_data_flat__;
-        current_statement__ = 118;
-        assign(m_0_data_flat__, nil_index_list(),
-          context__.vals_r("m_0_data"), "assigning variable m_0_data_flat__");
-        current_statement__ = 118;
+        std::vector<local_scalar_t__> mu_0_data_flat__;
+        current_statement__ = 120;
+        assign(mu_0_data_flat__, nil_index_list(),
+          context__.vals_r("mu_0_data"),
+          "assigning variable mu_0_data_flat__");
+        current_statement__ = 120;
         pos__ = 1;
-        current_statement__ = 118;
-        for (int sym1__ = 1; sym1__ <= (m_0_known ? K : 0); ++sym1__) {
-          current_statement__ = 118;
-          for (int sym2__ = 1; sym2__ <= (m_0_known ? M : 0); ++sym2__) {
-            current_statement__ = 118;
-            assign(m_0_data,
+        current_statement__ = 120;
+        for (int sym1__ = 1; sym1__ <= (mu_0_known ? K : 0); ++sym1__) {
+          current_statement__ = 120;
+          for (int sym2__ = 1; sym2__ <= (mu_0_known ? M : 0); ++sym2__) {
+            current_statement__ = 120;
+            assign(mu_0_data,
               cons_list(index_uni(sym2__),
                 cons_list(index_uni(sym1__), nil_index_list())),
-              m_0_data_flat__[(pos__ - 1)], "assigning variable m_0_data");
-            current_statement__ = 118;
+              mu_0_data_flat__[(pos__ - 1)], "assigning variable mu_0_data");
+            current_statement__ = 120;
             pos__ = (pos__ + 1);}}
       }
-      current_statement__ = 119;
-      validate_non_negative_index("S_0_data", "S_0_known ? M : 0",
-                                  (S_0_known ? M : 0));
-      current_statement__ = 120;
-      validate_non_negative_index("S_0_data", "S_0_known ? K : 0",
-                                  (S_0_known ? K : 0));
-      current_statement__ = 120;
-      validate_non_negative_index("S_0_data", "S_0_known ? K : 0",
-                                  (S_0_known ? K : 0));
       current_statement__ = 121;
-      context__.validate_dims("data initialization","S_0_data","double",
-          context__.to_vec((S_0_known ? M : 0), (S_0_known ? K : 0),
-            (S_0_known ? K : 0)));
-      S_0_data = std::vector<Eigen::Matrix<double, -1, -1>>((S_0_known ? M :
-                                                               0), Eigen::Matrix<double, -1, -1>((
-        S_0_known ? K : 0), (S_0_known ? K : 0)));
-      stan::math::fill(S_0_data, std::numeric_limits<double>::quiet_NaN());
+      validate_non_negative_index("Sigma_0_data", "Sigma_0_known ? M : 0",
+                                  (Sigma_0_known ? M : 0));
+      current_statement__ = 122;
+      validate_non_negative_index("Sigma_0_data", "Sigma_0_known ? K : 0",
+                                  (Sigma_0_known ? K : 0));
+      current_statement__ = 122;
+      validate_non_negative_index("Sigma_0_data", "Sigma_0_known ? K : 0",
+                                  (Sigma_0_known ? K : 0));
+      current_statement__ = 123;
+      context__.validate_dims("data initialization","Sigma_0_data","double",
+          context__.to_vec((Sigma_0_known ? M : 0), (Sigma_0_known ? K : 0),
+            (Sigma_0_known ? K : 0)));
+      Sigma_0_data = std::vector<Eigen::Matrix<double, -1, -1>>((
+                                                                   Sigma_0_known
+                                                                   ? M : 0), Eigen::Matrix<double, -1, -1>((
+        Sigma_0_known ? K : 0), (Sigma_0_known ? K : 0)));
+      stan::math::fill(Sigma_0_data, std::numeric_limits<double>::quiet_NaN());
       
       {
-        std::vector<local_scalar_t__> S_0_data_flat__;
-        current_statement__ = 121;
-        assign(S_0_data_flat__, nil_index_list(),
-          context__.vals_r("S_0_data"), "assigning variable S_0_data_flat__");
-        current_statement__ = 121;
+        std::vector<local_scalar_t__> Sigma_0_data_flat__;
+        current_statement__ = 123;
+        assign(Sigma_0_data_flat__, nil_index_list(),
+          context__.vals_r("Sigma_0_data"),
+          "assigning variable Sigma_0_data_flat__");
+        current_statement__ = 123;
         pos__ = 1;
-        current_statement__ = 121;
-        for (int sym1__ = 1; sym1__ <= (S_0_known ? K : 0); ++sym1__) {
-          current_statement__ = 121;
-          for (int sym2__ = 1; sym2__ <= (S_0_known ? K : 0); ++sym2__) {
-            current_statement__ = 121;
-            for (int sym3__ = 1; sym3__ <= (S_0_known ? M : 0); ++sym3__) {
-              current_statement__ = 121;
-              assign(S_0_data,
+        current_statement__ = 123;
+        for (int sym1__ = 1; sym1__ <= (Sigma_0_known ? K : 0); ++sym1__) {
+          current_statement__ = 123;
+          for (int sym2__ = 1; sym2__ <= (Sigma_0_known ? K : 0); ++sym2__) {
+            current_statement__ = 123;
+            for (int sym3__ = 1; sym3__ <= (Sigma_0_known ? M : 0); ++sym3__) {
+              current_statement__ = 123;
+              assign(Sigma_0_data,
                 cons_list(index_uni(sym3__),
                   cons_list(index_uni(sym2__),
                     cons_list(index_uni(sym1__), nil_index_list()))),
-                S_0_data_flat__[(pos__ - 1)], "assigning variable S_0_data");
-              current_statement__ = 121;
+                Sigma_0_data_flat__[(pos__ - 1)],
+                "assigning variable Sigma_0_data");
+              current_statement__ = 123;
               pos__ = (pos__ + 1);}}}
       }
-      current_statement__ = 121;
-      for (int sym1__ = 1; sym1__ <= (S_0_known ? M : 0); ++sym1__) {
-        current_statement__ = 121;
-        current_statement__ = 121;
-        check_cov_matrix(function__, "S_0_data[sym1__]",
-                         S_0_data[(sym1__ - 1)]);}
-      current_statement__ = 122;
+      current_statement__ = 123;
+      for (int sym1__ = 1; sym1__ <= (Sigma_0_known ? M : 0); ++sym1__) {
+        current_statement__ = 123;
+        current_statement__ = 123;
+        check_cov_matrix(function__, "Sigma_0_data[sym1__]",
+                         Sigma_0_data[(sym1__ - 1)]);}
+      current_statement__ = 124;
       context__.validate_dims("data initialization","tau_scale","double",
           context__.to_vec());
       tau_scale = std::numeric_limits<double>::quiet_NaN();
       
-      current_statement__ = 122;
+      current_statement__ = 124;
       tau_scale = context__.vals_r("tau_scale")[(1 - 1)];
-      current_statement__ = 122;
-      current_statement__ = 122;
+      current_statement__ = 124;
+      current_statement__ = 124;
       check_greater_or_equal(function__, "tau_scale", tau_scale, 0);
-      current_statement__ = 123;
+      current_statement__ = 125;
       context__.validate_dims("data initialization","L_omega_scale","double",
           context__.to_vec());
       L_omega_scale = std::numeric_limits<double>::quiet_NaN();
       
-      current_statement__ = 123;
+      current_statement__ = 125;
       L_omega_scale = context__.vals_r("L_omega_scale")[(1 - 1)];
-      current_statement__ = 123;
-      current_statement__ = 123;
+      current_statement__ = 125;
+      current_statement__ = 125;
       check_greater_or_equal(function__, "L_omega_scale", L_omega_scale, 0);
-      current_statement__ = 124;
+      current_statement__ = 126;
       sigma_kappanu = std::numeric_limits<double>::quiet_NaN();
       
-      current_statement__ = 125;
+      current_statement__ = 127;
       sigma_kappanu = (logical_gt(max(N), 0) ?
                          stan::math::promote_scalar<double>((max(N) * 4)) :
                          stan::math::promote_scalar<double>(10));
-      current_statement__ = 126;
+      current_statement__ = 128;
       lapse_rate_param_1dim__ = std::numeric_limits<int>::min();
       
-      current_statement__ = 126;
+      current_statement__ = 128;
       lapse_rate_param_1dim__ = (lapse_rate_known ? 0 : 1);
-      current_statement__ = 126;
+      current_statement__ = 128;
       validate_non_negative_index("lapse_rate_param",
                                   "lapse_rate_known ? 0 : 1",
                                   lapse_rate_param_1dim__);
-      current_statement__ = 127;
+      current_statement__ = 129;
       m_0_param_1dim__ = std::numeric_limits<int>::min();
       
-      current_statement__ = 127;
-      m_0_param_1dim__ = (m_0_known ? 0 : M);
-      current_statement__ = 127;
-      validate_non_negative_index("m_0_param", "m_0_known ? 0 : M",
-                                  m_0_param_1dim__);
-      current_statement__ = 128;
-      validate_non_negative_index("m_0_param", "K", K);
       current_statement__ = 129;
+      m_0_param_1dim__ = (mu_0_known ? 0 : M);
+      current_statement__ = 129;
+      validate_non_negative_index("m_0_param", "mu_0_known ? 0 : M",
+                                  m_0_param_1dim__);
+      current_statement__ = 130;
+      validate_non_negative_index("m_0_param", "K", K);
+      current_statement__ = 131;
       m_0_tau_1dim__ = std::numeric_limits<int>::min();
       
-      current_statement__ = 129;
-      m_0_tau_1dim__ = (m_0_known ? 0 : K);
-      current_statement__ = 129;
-      validate_non_negative_index("m_0_tau", "m_0_known ? 0 : K",
+      current_statement__ = 131;
+      m_0_tau_1dim__ = (mu_0_known ? 0 : K);
+      current_statement__ = 131;
+      validate_non_negative_index("m_0_tau", "mu_0_known ? 0 : K",
                                   m_0_tau_1dim__);
-      current_statement__ = 130;
+      current_statement__ = 132;
       m_0_L_omega_1dim__ = std::numeric_limits<int>::min();
       
-      current_statement__ = 130;
-      m_0_L_omega_1dim__ = (m_0_known ? 0 : K);
-      current_statement__ = 130;
-      validate_non_negative_index("m_0_L_omega", "m_0_known ? 0 : K",
+      current_statement__ = 132;
+      m_0_L_omega_1dim__ = (mu_0_known ? 0 : K);
+      current_statement__ = 132;
+      validate_non_negative_index("m_0_L_omega", "mu_0_known ? 0 : K",
                                   m_0_L_omega_1dim__);
-      current_statement__ = 130;
+      current_statement__ = 132;
       m_0_L_omega_2dim__ = std::numeric_limits<int>::min();
       
-      current_statement__ = 130;
-      m_0_L_omega_2dim__ = (m_0_known ? 0 : K);
-      current_statement__ = 130;
-      validate_non_negative_index("m_0_L_omega", "m_0_known ? 0 : K",
+      current_statement__ = 132;
+      m_0_L_omega_2dim__ = (mu_0_known ? 0 : K);
+      current_statement__ = 132;
+      validate_non_negative_index("m_0_L_omega", "mu_0_known ? 0 : K",
                                   m_0_L_omega_2dim__);
-      current_statement__ = 131;
+      current_statement__ = 133;
       tau_0_param_1dim__ = std::numeric_limits<int>::min();
       
-      current_statement__ = 131;
-      tau_0_param_1dim__ = (S_0_known ? 0 : M);
-      current_statement__ = 131;
-      validate_non_negative_index("tau_0_param", "S_0_known ? 0 : M",
-                                  tau_0_param_1dim__);
-      current_statement__ = 132;
-      validate_non_negative_index("tau_0_param", "K", K);
       current_statement__ = 133;
+      tau_0_param_1dim__ = (Sigma_0_known ? 0 : M);
+      current_statement__ = 133;
+      validate_non_negative_index("tau_0_param", "Sigma_0_known ? 0 : M",
+                                  tau_0_param_1dim__);
+      current_statement__ = 134;
+      validate_non_negative_index("tau_0_param", "K", K);
+      current_statement__ = 135;
       L_omega_0_param_1dim__ = std::numeric_limits<int>::min();
       
-      current_statement__ = 133;
-      L_omega_0_param_1dim__ = (S_0_known ? 0 : M);
-      current_statement__ = 133;
-      validate_non_negative_index("L_omega_0_param", "S_0_known ? 0 : M",
-                                  L_omega_0_param_1dim__);
-      current_statement__ = 134;
-      validate_non_negative_index("L_omega_0_param", "K", K);
-      current_statement__ = 134;
-      validate_non_negative_index("L_omega_0_param", "K", K);
       current_statement__ = 135;
-      validate_non_negative_index("m_0", "M", M);
+      L_omega_0_param_1dim__ = (Sigma_0_known ? 0 : M);
+      current_statement__ = 135;
+      validate_non_negative_index("L_omega_0_param", "Sigma_0_known ? 0 : M",
+                                  L_omega_0_param_1dim__);
       current_statement__ = 136;
-      validate_non_negative_index("m_0", "K", K);
+      validate_non_negative_index("L_omega_0_param", "K", K);
+      current_statement__ = 136;
+      validate_non_negative_index("L_omega_0_param", "K", K);
       current_statement__ = 137;
-      validate_non_negative_index("S_0", "M", M);
+      validate_non_negative_index("m_0", "M", M);
       current_statement__ = 138;
-      validate_non_negative_index("S_0", "K", K);
-      current_statement__ = 138;
-      validate_non_negative_index("S_0", "K", K);
+      validate_non_negative_index("m_0", "K", K);
       current_statement__ = 139;
-      validate_non_negative_index("kappa_n", "M", M);
+      validate_non_negative_index("S_0", "M", M);
       current_statement__ = 140;
-      validate_non_negative_index("kappa_n", "L", L);
+      validate_non_negative_index("S_0", "K", K);
+      current_statement__ = 140;
+      validate_non_negative_index("S_0", "K", K);
       current_statement__ = 141;
-      validate_non_negative_index("nu_n", "M", M);
+      validate_non_negative_index("kappa_n", "M", M);
       current_statement__ = 142;
-      validate_non_negative_index("nu_n", "L", L);
+      validate_non_negative_index("kappa_n", "L", L);
       current_statement__ = 143;
-      validate_non_negative_index("m_n", "M", M);
+      validate_non_negative_index("nu_n", "M", M);
       current_statement__ = 144;
-      validate_non_negative_index("m_n", "L", L);
+      validate_non_negative_index("nu_n", "L", L);
       current_statement__ = 145;
-      validate_non_negative_index("m_n", "K", K);
+      validate_non_negative_index("m_n", "M", M);
       current_statement__ = 146;
-      validate_non_negative_index("S_n", "M", M);
+      validate_non_negative_index("m_n", "L", L);
       current_statement__ = 147;
-      validate_non_negative_index("S_n", "L", L);
+      validate_non_negative_index("m_n", "K", K);
       current_statement__ = 148;
-      validate_non_negative_index("S_n", "K", K);
-      current_statement__ = 148;
-      validate_non_negative_index("S_n", "K", K);
+      validate_non_negative_index("S_n", "M", M);
       current_statement__ = 149;
-      validate_non_negative_index("t_scale", "M", M);
+      validate_non_negative_index("S_n", "L", L);
       current_statement__ = 150;
-      validate_non_negative_index("t_scale", "L", L);
+      validate_non_negative_index("S_n", "K", K);
+      current_statement__ = 150;
+      validate_non_negative_index("S_n", "K", K);
       current_statement__ = 151;
-      validate_non_negative_index("t_scale", "K", K);
-      current_statement__ = 151;
-      validate_non_negative_index("t_scale", "K", K);
+      validate_non_negative_index("t_scale", "M", M);
       current_statement__ = 152;
-      validate_non_negative_index("p_test_conj", "N_test", N_test);
+      validate_non_negative_index("t_scale", "L", L);
       current_statement__ = 153;
-      validate_non_negative_index("p_test_conj", "M", M);
+      validate_non_negative_index("t_scale", "K", K);
+      current_statement__ = 153;
+      validate_non_negative_index("t_scale", "K", K);
       current_statement__ = 154;
-      validate_non_negative_index("log_p_test_conj", "N_test", N_test);
+      validate_non_negative_index("p_test_conj", "N_test", N_test);
       current_statement__ = 155;
+      validate_non_negative_index("p_test_conj", "M", M);
+      current_statement__ = 156;
+      validate_non_negative_index("log_p_test_conj", "N_test", N_test);
+      current_statement__ = 157;
       validate_non_negative_index("log_p_test_conj", "M", M);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
@@ -1020,36 +1027,40 @@ public:
         lapse_rate = lapse_rate_param[(1 - 1)];
       }
       current_statement__ = 28;
-      if (m_0_known) {
+      if (mu_0_known) {
         current_statement__ = 26;
-        assign(m_0, nil_index_list(), m_0_data, "assigning variable m_0");
+        assign(m_0, nil_index_list(), mu_0_data, "assigning variable m_0");
       } else {
         current_statement__ = 24;
         assign(m_0, nil_index_list(), m_0_param, "assigning variable m_0");
       }
-      current_statement__ = 31;
-      if (S_0_known) {
-        current_statement__ = 29;
-        assign(S_0, nil_index_list(), S_0_data, "assigning variable S_0");
+      current_statement__ = 33;
+      if (Sigma_0_known) {
+        current_statement__ = 31;
+        for (int cat = 1; cat <= M; ++cat) {
+          current_statement__ = 29;
+          assign(S_0, cons_list(index_uni(cat), nil_index_list()),
+            multiply(Sigma_0_data[(cat - 1)], ((nu_0 - K) - 1)),
+            "assigning variable S_0");}
       } 
-      current_statement__ = 50;
+      current_statement__ = 52;
       for (int cat = 1; cat <= M; ++cat) {
-        current_statement__ = 34;
-        if (logical_negation(S_0_known)) {
-          current_statement__ = 32;
+        current_statement__ = 36;
+        if (logical_negation(Sigma_0_known)) {
+          current_statement__ = 34;
           assign(S_0, cons_list(index_uni(cat), nil_index_list()),
             quad_form_diag(
               multiply_lower_tri_self_transpose(L_omega_0_param[(cat - 1)]),
               tau_0_param[(cat - 1)]), "assigning variable S_0");
         } 
-        current_statement__ = 48;
+        current_statement__ = 50;
         for (int group = 1; group <= L; ++group) {
-          current_statement__ = 45;
+          current_statement__ = 47;
           if (logical_gt(
                 rvalue(N,
                   cons_list(index_uni(cat),
                     cons_list(index_uni(group), nil_index_list())), "N"), 0)) {
-            current_statement__ = 40;
+            current_statement__ = 42;
             assign(kappa_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())),
@@ -1058,7 +1069,7 @@ public:
                   cons_list(index_uni(cat),
                     cons_list(index_uni(group), nil_index_list())), "N")),
               "assigning variable kappa_n");
-            current_statement__ = 41;
+            current_statement__ = 43;
             assign(nu_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())),
@@ -1067,7 +1078,7 @@ public:
                   cons_list(index_uni(cat),
                     cons_list(index_uni(group), nil_index_list())), "N")),
               "assigning variable nu_n");
-            current_statement__ = 42;
+            current_statement__ = 44;
             assign(m_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())),
@@ -1079,7 +1090,7 @@ public:
                         cons_list(index_uni(group), nil_index_list())), "N"),
                     x_mean[(cat - 1)][(group - 1)])),
                 kappa_n[(cat - 1)][(group - 1)]), "assigning variable m_n");
-            current_statement__ = 43;
+            current_statement__ = 45;
             assign(S_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())),
@@ -1093,28 +1104,28 @@ public:
                   transpose(m_n[(cat - 1)][(group - 1)]))),
               "assigning variable S_n");
           } else {
-            current_statement__ = 35;
+            current_statement__ = 37;
             assign(kappa_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())), kappa_0,
               "assigning variable kappa_n");
-            current_statement__ = 36;
+            current_statement__ = 38;
             assign(nu_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())), nu_0,
               "assigning variable nu_n");
-            current_statement__ = 37;
+            current_statement__ = 39;
             assign(m_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())),
               m_0[(cat - 1)], "assigning variable m_n");
-            current_statement__ = 38;
+            current_statement__ = 40;
             assign(S_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())),
               S_0[(cat - 1)], "assigning variable S_n");
           }
-          current_statement__ = 46;
+          current_statement__ = 48;
           assign(t_scale,
             cons_list(index_uni(cat),
               cons_list(index_uni(group), nil_index_list())),
@@ -1124,16 +1135,16 @@ public:
               (kappa_n[(cat - 1)][(group - 1)] *
                 ((nu_n[(cat - 1)][(group - 1)] - K) + 1))),
             "assigning variable t_scale");}}
-      current_statement__ = 58;
+      current_statement__ = 60;
       for (int j = 1; j <= N_test; ++j) {
         int group;
         group = std::numeric_limits<int>::min();
         
-        current_statement__ = 52;
+        current_statement__ = 54;
         group = y_test[(j - 1)];
-        current_statement__ = 55;
+        current_statement__ = 57;
         for (int cat = 1; cat <= M; ++cat) {
-          current_statement__ = 53;
+          current_statement__ = 55;
           assign(log_p_test_conj,
             cons_list(index_uni(j),
               cons_list(index_uni(cat), nil_index_list())),
@@ -1141,7 +1152,7 @@ public:
               ((nu_n[(cat - 1)][(group - 1)] - K) + 1),
               m_n[(cat - 1)][(group - 1)], t_scale[(cat - 1)][(group - 1)]),
             "assigning variable log_p_test_conj");}
-        current_statement__ = 56;
+        current_statement__ = 58;
         assign(p_test_conj, cons_list(index_uni(j), nil_index_list()),
           stan::math::exp(
             subtract(log_p_test_conj[(j - 1)],
@@ -1191,58 +1202,58 @@ public:
         check_simplex(function__, "p_test_conj[sym1__]",
                       p_test_conj[(sym1__ - 1)]);}
       {
-        current_statement__ = 69;
+        current_statement__ = 71;
         validate_non_negative_index("lapsing_probs", "M", M);
         Eigen::Matrix<local_scalar_t__, -1, 1> lapsing_probs;
         lapsing_probs = Eigen::Matrix<local_scalar_t__, -1, 1>(M);
         stan::math::fill(lapsing_probs, DUMMY_VAR__);
         
-        current_statement__ = 71;
+        current_statement__ = 73;
         assign(lapsing_probs, nil_index_list(),
           rep_vector((lapse_rate / M), M), "assigning variable lapsing_probs");
-        current_statement__ = 72;
+        current_statement__ = 74;
         lp_accum__.add(normal_lpdf<propto__>(kappa_0, 0, sigma_kappanu));
-        current_statement__ = 73;
+        current_statement__ = 75;
         lp_accum__.add(normal_lpdf<propto__>(nu_0, 0, sigma_kappanu));
-        current_statement__ = 78;
-        if (logical_negation(m_0_known)) {
-          current_statement__ = 74;
+        current_statement__ = 80;
+        if (logical_negation(mu_0_known)) {
+          current_statement__ = 76;
           lp_accum__.add(
             cauchy_lpdf<propto__>(m_0_tau, 0,
               (logical_gt(tau_scale, 0) ?
                  stan::math::promote_scalar<double>(tau_scale) :
                  stan::math::promote_scalar<double>(5))));
-          current_statement__ = 75;
+          current_statement__ = 77;
           lp_accum__.add(
             lkj_corr_cholesky_lpdf<propto__>(m_0_L_omega,
               (logical_gt(L_omega_scale, 0) ?
                  stan::math::promote_scalar<double>(L_omega_scale) :
                  stan::math::promote_scalar<double>(1))));
-          current_statement__ = 76;
+          current_statement__ = 78;
           lp_accum__.add(
             multi_normal_cholesky_lpdf<propto__>(m_0_param, rep_vector(0, K),
               diag_pre_multiply(m_0_tau, m_0_L_omega)));
         } 
-        current_statement__ = 84;
-        if (logical_negation(S_0_known)) {
-          current_statement__ = 82;
+        current_statement__ = 86;
+        if (logical_negation(Sigma_0_known)) {
+          current_statement__ = 84;
           for (int cat = 1; cat <= M; ++cat) {
-            current_statement__ = 79;
+            current_statement__ = 81;
             lp_accum__.add(
               cauchy_lpdf<propto__>(tau_0_param[(cat - 1)], 0,
                 (logical_gt(tau_scale, 0) ?
                    stan::math::promote_scalar<double>(tau_scale) :
                    stan::math::promote_scalar<double>(10))));
-            current_statement__ = 80;
+            current_statement__ = 82;
             lp_accum__.add(
               lkj_corr_cholesky_lpdf<propto__>(L_omega_0_param[(cat - 1)],
                 (logical_gt(L_omega_scale, 0) ?
                    stan::math::promote_scalar<double>(L_omega_scale) :
                    stan::math::promote_scalar<double>(1))));}
         } 
-        current_statement__ = 87;
+        current_statement__ = 89;
         for (int i = 1; i <= N_test; ++i) {
-          current_statement__ = 85;
+          current_statement__ = 87;
           lp_accum__.add(
             multinomial_lpmf<propto__>(z_test_counts[(i - 1)],
               add(multiply(p_test_conj[(i - 1)], (1 - lapse_rate)),
@@ -1468,36 +1479,40 @@ public:
         lapse_rate = lapse_rate_param[(1 - 1)];
       }
       current_statement__ = 28;
-      if (m_0_known) {
+      if (mu_0_known) {
         current_statement__ = 26;
-        assign(m_0, nil_index_list(), m_0_data, "assigning variable m_0");
+        assign(m_0, nil_index_list(), mu_0_data, "assigning variable m_0");
       } else {
         current_statement__ = 24;
         assign(m_0, nil_index_list(), m_0_param, "assigning variable m_0");
       }
-      current_statement__ = 31;
-      if (S_0_known) {
-        current_statement__ = 29;
-        assign(S_0, nil_index_list(), S_0_data, "assigning variable S_0");
+      current_statement__ = 33;
+      if (Sigma_0_known) {
+        current_statement__ = 31;
+        for (int cat = 1; cat <= M; ++cat) {
+          current_statement__ = 29;
+          assign(S_0, cons_list(index_uni(cat), nil_index_list()),
+            multiply(Sigma_0_data[(cat - 1)], ((nu_0 - K) - 1)),
+            "assigning variable S_0");}
       } 
-      current_statement__ = 50;
+      current_statement__ = 52;
       for (int cat = 1; cat <= M; ++cat) {
-        current_statement__ = 34;
-        if (logical_negation(S_0_known)) {
-          current_statement__ = 32;
+        current_statement__ = 36;
+        if (logical_negation(Sigma_0_known)) {
+          current_statement__ = 34;
           assign(S_0, cons_list(index_uni(cat), nil_index_list()),
             quad_form_diag(
               multiply_lower_tri_self_transpose(L_omega_0_param[(cat - 1)]),
               tau_0_param[(cat - 1)]), "assigning variable S_0");
         } 
-        current_statement__ = 48;
+        current_statement__ = 50;
         for (int group = 1; group <= L; ++group) {
-          current_statement__ = 45;
+          current_statement__ = 47;
           if (logical_gt(
                 rvalue(N,
                   cons_list(index_uni(cat),
                     cons_list(index_uni(group), nil_index_list())), "N"), 0)) {
-            current_statement__ = 40;
+            current_statement__ = 42;
             assign(kappa_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())),
@@ -1506,7 +1521,7 @@ public:
                   cons_list(index_uni(cat),
                     cons_list(index_uni(group), nil_index_list())), "N")),
               "assigning variable kappa_n");
-            current_statement__ = 41;
+            current_statement__ = 43;
             assign(nu_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())),
@@ -1515,7 +1530,7 @@ public:
                   cons_list(index_uni(cat),
                     cons_list(index_uni(group), nil_index_list())), "N")),
               "assigning variable nu_n");
-            current_statement__ = 42;
+            current_statement__ = 44;
             assign(m_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())),
@@ -1527,7 +1542,7 @@ public:
                         cons_list(index_uni(group), nil_index_list())), "N"),
                     x_mean[(cat - 1)][(group - 1)])),
                 kappa_n[(cat - 1)][(group - 1)]), "assigning variable m_n");
-            current_statement__ = 43;
+            current_statement__ = 45;
             assign(S_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())),
@@ -1541,28 +1556,28 @@ public:
                   transpose(m_n[(cat - 1)][(group - 1)]))),
               "assigning variable S_n");
           } else {
-            current_statement__ = 35;
+            current_statement__ = 37;
             assign(kappa_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())), kappa_0,
               "assigning variable kappa_n");
-            current_statement__ = 36;
+            current_statement__ = 38;
             assign(nu_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())), nu_0,
               "assigning variable nu_n");
-            current_statement__ = 37;
+            current_statement__ = 39;
             assign(m_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())),
               m_0[(cat - 1)], "assigning variable m_n");
-            current_statement__ = 38;
+            current_statement__ = 40;
             assign(S_n,
               cons_list(index_uni(cat),
                 cons_list(index_uni(group), nil_index_list())),
               S_0[(cat - 1)], "assigning variable S_n");
           }
-          current_statement__ = 46;
+          current_statement__ = 48;
           assign(t_scale,
             cons_list(index_uni(cat),
               cons_list(index_uni(group), nil_index_list())),
@@ -1572,16 +1587,16 @@ public:
               (kappa_n[(cat - 1)][(group - 1)] *
                 ((nu_n[(cat - 1)][(group - 1)] - K) + 1))),
             "assigning variable t_scale");}}
-      current_statement__ = 58;
+      current_statement__ = 60;
       for (int j = 1; j <= N_test; ++j) {
         int group;
         group = std::numeric_limits<int>::min();
         
-        current_statement__ = 52;
+        current_statement__ = 54;
         group = y_test[(j - 1)];
-        current_statement__ = 55;
+        current_statement__ = 57;
         for (int cat = 1; cat <= M; ++cat) {
-          current_statement__ = 53;
+          current_statement__ = 55;
           assign(log_p_test_conj,
             cons_list(index_uni(j),
               cons_list(index_uni(cat), nil_index_list())),
@@ -1589,7 +1604,7 @@ public:
               ((nu_n[(cat - 1)][(group - 1)] - K) + 1),
               m_n[(cat - 1)][(group - 1)], t_scale[(cat - 1)][(group - 1)]),
             "assigning variable log_p_test_conj");}
-        current_statement__ = 56;
+        current_statement__ = 58;
         assign(p_test_conj, cons_list(index_uni(j), nil_index_list()),
           stan::math::exp(
             subtract(log_p_test_conj[(j - 1)],
@@ -1696,29 +1711,29 @@ public:
       if (logical_negation(emit_generated_quantities__)) {
         return ;
       } 
-      current_statement__ = 68;
-      if (logical_negation(m_0_known)) {
-        current_statement__ = 59;
+      current_statement__ = 70;
+      if (logical_negation(mu_0_known)) {
+        current_statement__ = 61;
         validate_non_negative_index("m_0_cor", "K", K);
-        current_statement__ = 60;
+        current_statement__ = 62;
         validate_non_negative_index("m_0_cor", "K", K);
         Eigen::Matrix<double, -1, -1> m_0_cor;
         m_0_cor = Eigen::Matrix<double, -1, -1>(K, K);
         stan::math::fill(m_0_cor, std::numeric_limits<double>::quiet_NaN());
         
-        current_statement__ = 62;
+        current_statement__ = 64;
         validate_non_negative_index("m_0_cov", "K", K);
-        current_statement__ = 63;
+        current_statement__ = 65;
         validate_non_negative_index("m_0_cov", "K", K);
         Eigen::Matrix<double, -1, -1> m_0_cov;
         m_0_cov = Eigen::Matrix<double, -1, -1>(K, K);
         stan::math::fill(m_0_cov, std::numeric_limits<double>::quiet_NaN());
         
-        current_statement__ = 65;
+        current_statement__ = 67;
         assign(m_0_cor, nil_index_list(),
           multiply_lower_tri_self_transpose(m_0_L_omega),
           "assigning variable m_0_cor");
-        current_statement__ = 66;
+        current_statement__ = 68;
         assign(m_0_cov, nil_index_list(), quad_form_diag(m_0_cor, m_0_tau),
           "assigning variable m_0_cov");
       } 

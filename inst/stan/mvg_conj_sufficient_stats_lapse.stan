@@ -33,11 +33,11 @@
     int z_test_counts[N_test,M];  // responses for test trials
 
     int<lower=0, upper=1> lapse_rate_known;
-    int<lower=0, upper=1> m_0_known;
-    int<lower=0, upper=1> S_0_known;
-    real lapse_rate_data[lapse_rate_known ? 1 : 0];             // optional: user provided lapse_rate
-    vector[m_0_known ? K : 0] m_0_data[m_0_known ? M : 0];      // optional: user provided m_0 (prior mean of means)
-    cov_matrix[S_0_known ? K : 0] S_0_data[S_0_known ? M : 0];  // optional: user provided S_0 (prior scatter matrix of mean)
+    int<lower=0, upper=1> mu_0_known;
+    int<lower=0, upper=1> Sigma_0_known;
+    real lapse_rate_data[lapse_rate_known ? 1 : 0];                         // optional: user provided lapse_rate
+    vector[mu_0_known ? K : 0] mu_0_data[mu_0_known ? M : 0];               // optional: user provided expected mu_0 (prior category means)
+    cov_matrix[Sigma_0_known ? K : 0] Sigma_0_data[Sigma_0_known ? M : 0];  // optional: user provided expected Sigma_0 (prior category covariance matrices)
 
     /* For now, this script assumes that the observations (cue vectors) are centered. The prior
     mean of m_0 is set to 0. Same for the prior location parameter for the cauchy prior over
@@ -63,12 +63,12 @@ parameters {
 
     real<lower=0, upper=1> lapse_rate_param[lapse_rate_known ? 0 : 1];
 
-    vector[K] m_0_param[m_0_known ? 0 : M];                 // prior mean of means
-    vector<lower=0>[m_0_known ? 0 : K] m_0_tau;             // prior variances of m_0
-    cholesky_factor_corr[m_0_known ? 0 : K] m_0_L_omega;    // prior correlations of variances of m_0 (in cholesky form)
+    vector[K] m_0_param[mu_0_known ? 0 : M];                // prior mean of means
+    vector<lower=0>[mu_0_known ? 0 : K] m_0_tau;            // prior variances of m_0
+    cholesky_factor_corr[mu_0_known ? 0 : K] m_0_L_omega;   // prior correlations of variances of m_0 (in cholesky form)
 
-    vector<lower=0>[K] tau_0_param[S_0_known ? 0 : M];          // standard deviations of prior scatter matrix S_0
-    cholesky_factor_corr[K] L_omega_0_param[S_0_known ? 0 : M]; // correlation matrix of prior scatter matrix S_0 (in cholesky form)
+    vector<lower=0>[K] tau_0_param[Sigma_0_known ? 0 : M];          // standard deviations of prior scatter matrix S_0
+    cholesky_factor_corr[K] L_omega_0_param[Sigma_0_known ? 0 : M]; // correlation matrix of prior scatter matrix S_0 (in cholesky form)
 }
 
 transformed parameters {
@@ -91,19 +91,22 @@ transformed parameters {
   } else {
     lapse_rate = lapse_rate_param[1];
   }
-  if (m_0_known) {
-    m_0 = m_0_data;
+  if (mu_0_known) {
+    m_0 = mu_0_data;
   } else {
     m_0 = m_0_param;
   }
-  if (S_0_known) {
-    S_0 = S_0_data;
+  if (Sigma_0_known) {
+   // Get S_0 from expected Sigma given nu_0
+   for (cat in 1:M) {
+      S_0[cat] = Sigma_0_data[cat] * (nu_0 - K - 1);
+   }
   }
 
   // update NIW parameters according to conjugate updating rules are taken from
   // Murphy (2007, p. 136)
   for (cat in 1:M) {
-    if (!S_0_known) {
+    if (!Sigma_0_known) {
       // Get S_0 from its components: correlation matrix and vector of standard deviations
       S_0[cat] = quad_form_diag(multiply_lower_tri_self_transpose(L_omega_0_param[cat]), tau_0_param[cat]);
     }
@@ -160,14 +163,14 @@ model {
   scale (5) for variances of mean.
   - If no scale for LKJ prior over correlation matrix of m_0 is user-specified use
   scale 1 to set uniform prior over correlation matrices. */
-    if (!m_0_known) {
+    if (!mu_0_known) {
       m_0_tau ~ cauchy(0, tau_scale > 0 ? tau_scale : 5);
       m_0_L_omega ~ lkj_corr_cholesky(L_omega_scale > 0 ? L_omega_scale : 1);
       m_0_param ~ multi_normal_cholesky(rep_vector(0, K), diag_pre_multiply(m_0_tau, m_0_L_omega));
     }
 
   /* Specifying prior for components of S_0: */
-    if (!S_0_known) {
+    if (!Sigma_0_known) {
       for (cat in 1:M) {
         tau_0_param[cat] ~ cauchy(0, tau_scale > 0 ? tau_scale : 10);
         L_omega_0_param[cat] ~ lkj_corr_cholesky(L_omega_scale > 0 ? L_omega_scale : 1);
@@ -181,7 +184,7 @@ model {
 }
 
 generated quantities {
-  if (!m_0_known) {
+  if (!mu_0_known) {
     matrix[K,K] m_0_cor;
     matrix[K,K] m_0_cov;
 

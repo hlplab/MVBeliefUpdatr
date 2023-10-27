@@ -54,13 +54,13 @@ substantially more efficient if many groups share the same exposure. To ignore, 
 
 \item{center.observations}{Should the data be centered? Centering will not affect the inferred correlation or
 covariance matrices but it will affect the absolute position of the inferred means. The relative position of
-the inferred means remains unaffected. If `TRUE` and `m_0` is specified, `m_0` will also be centered (`S_0` is not
+the inferred means remains unaffected. If `TRUE` and `mu_0` is specified, `mu_0` will also be centered (`Sigma_0` is not
 affected by centering and thus not changed). (default: `TRUE`)}
 
 \item{scale.observations}{Should the data be standardized? Scaling will not affect the inferred correlation matrix,
 but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
 affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
-If `TRUE` and `m_0` and `S_0` are specified, `m_0` and `S_0` will also be scaled.
+If `TRUE` and `mu_0` and `Sigma_0` are specified, `mu_0` and `Sigma_0` will also be scaled.
 (default: `TRUE`)}
 
 \item{pca.observations}{Should the data be transformed into orthogonal principal components? (default: `FALSE`)}

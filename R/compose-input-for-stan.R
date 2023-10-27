@@ -212,37 +212,35 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' substantially more efficient if many groups share the same exposure. To ignore, set to `NULL`. (default: `NULL`)
 #' @param center.observations Should the data be centered? Centering will not affect the inferred correlation or
 #' covariance matrices but it will affect the absolute position of the inferred means. The relative position of
-#' the inferred means remains unaffected. If `TRUE` and `m_0` is specified, `m_0` will also be centered (`S_0` is not
+#' the inferred means remains unaffected. If `TRUE` and `mu_0` is specified, `mu_0` will also be centered (`Sigma_0` is not
 #' affected by centering and thus not changed). (default: `TRUE`)
 #' @param scale.observations Should the data be standardized? Scaling will not affect the inferred correlation matrix,
 #' but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
 #' affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
-#' If `TRUE` and `m_0` and `S_0` are specified, `m_0` and `S_0` will also be scaled.
+#' If `TRUE` and `mu_0` and `Sigma_0` are specified, `mu_0` and `Sigma_0` will also be scaled.
 #' (default: `TRUE`)
 #' @param pca.observations Should the data be transformed into orthogonal principal components? (default: `FALSE`)
 #' @param pca.cutoff Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 #' components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 #' `pca.observation = FALSE`. (default: 1)
-#' @param lapse_rate,m_0,S_0 Optionally, lapse rate, prior means (m_0) and/or prior scatter matrices (S_0) for all categories.
-#' Lapse rate should be a number between 0 and 1. For m_0 and S_0, each should be a list, with each element being the
-#' mean/scatter matrix for a specific category. Elements should be ordered in the same order as
-#' the levels of the category variable in \code{exposure} and \code{test}. The means and scatter matrices could be
-#' estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_NIW_prior_from_data}}
-#' for a convenient way to do so). To aspects should be kept in mind, however. First, an \emph{inferred} scatter
-#' matrix includes variability from internal perceptual and/or external environmental noise, \emph{in addition} to the motor noise that
-#' is reflected in production data. That means that any prior for the scatter matrix (S_0) should take into account
-#' not only the variability in the production data but also any additional variability added by internal (perceptual)
-#' or external (environmental) noise. Second, the prior scatter matrix has an implicit nu associated with it, so that
-#' the nu inferred by \code{\link{infer_prior_beliefs}} is best thought of as a multiple of the implicit nu used
-#' during the creation of the scatter matrix S_0. For that reason, we recommend the use of nu = D + 2 in the call to
-#' \code{\link{make_NIW_prior_from_data}} (the default), since the S_0 obtained that way is identical to the category
-#' covariance matrix Sigma.
+#' @param lapse_rate,mu_0,Sigma_0 Optionally, lapse rate, prior expected category means (mu_0) and/or prior expected
+#' category covariance matrices (Sigma_0) for all categories. Lapse rate should be a number between 0 and 1. For mu_0
+#' and Sigma_0, each should be a list, with each element being the expected mean/covariance matrix for a specific
+#' category prior to updating. Elements of mu_0 and Sigma_0 should be ordered in the same order as the levels of the
+#' category variable in \code{exposure} and \code{test}. These prior expected means and covariance matrices could be
+#' estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_MVG_from_data}}
+#' for a convenient way to do so). Internally, m_0 is then set to mu_0 (so that the expected value of the prior
+#' distribution of means is mu_0) and S_0 is set so that the expected value of the inverse-Wishart is Sigma_0 given nu_0.
 #' @param tau_0_scales Optionally, a vector of scales for the Cauchy priors for each cue's standard deviations. Used in
 #' both the prior for m_0 and the prior for S_0. (default: vector of 5s of length of cues, assumes scaled input)
 #' @param omega_0_eta Optionally, etas the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
 #' ignore. (default: 0)
 #'
-#' @return A list that is an \code{NIW_ideal_adaptor_input}.
+#' @return A list that is an \code{NIW_ideal_adaptor_input}. In interpreting the inferred kappa_0 and nu_0, it should
+#' be kept in mind that the \emph{inferred} scatter matrix S_0 includes variability from internal perceptual and/or
+#' external environmental noise, \emph{in addition} to the motor noise that is reflected in production data. This also
+#' implies that, if Sigma_0 is given, Sigma_0 and nu_0 mutually constrain each other, because the expected value of
+#' Sigma_0 is determined by both S_0 and nu.
 #'
 #' @seealso \code{\link{is.NIW_ideal_adaptor_input}}
 #' @keywords TBD
@@ -254,7 +252,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   exposure, test,
   cues, category = "category", response = "response", group = "group", group.unique = NULL,
   center.observations = T, scale.observations = T, pca.observations = F, pca.cutoff = 1,
-  lapse_rate = NULL, m_0 = NULL, S_0 = NULL,
+  lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
   tau_scale = 0, # rep(5, length(cues)),
   L_omega_scale = 0,
   verbose = F
@@ -321,39 +319,39 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     assert_that(is.number(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
     assert_that(between(lapse_rate, 0, 1), msg = "If not NULL, lapse rate must be a number between 0 and 1.")
   }
-  if (!is.null(m_0)) {
+  if (!is.null(mu_0)) {
     if (nlevels(exposure[[category]]) == 1) {
-      assert_that(is.vector(m_0),
-                  msg = "If m_0 is not NULL and there is only one category, m_0 must be a vector.")
+      assert_that(is.vector(mu_0),
+                  msg = "If mu_0 is not NULL and there is only one category, mu_0 must be a vector.")
     } else {
-      assert_that(is.list(m_0) & length(m_0) == nlevels(exposure[[category]]),
-                msg = "If m_0 is not NULL, m_0 must be a list of vectors with as many elements as there are categories.")
+      assert_that(is.list(mu_0) & length(mu_0) == nlevels(exposure[[category]]),
+                msg = "If mu_0 is not NULL, mu_0 must be a list of vectors with as many elements as there are categories.")
     }
-    assert_that(all(map(m_0, is.numeric)  %>% unlist, map(m_0, ~ is.null(dim(.x)) | length(dim(.x)) == 1) %>% unlist),
-                msg = "If m_0 is a list, each element must be a vector.")
-    assert_that(all((map(m_0, length) %>% unlist()) == length(cues)),
+    assert_that(all(map(mu_0, is.numeric)  %>% unlist, map(mu_0, ~ is.null(dim(.x)) | length(dim(.x)) == 1) %>% unlist),
+                msg = "If mu_0 is a list, each element must be a vector.")
+    assert_that(all((map(mu_0, length) %>% unlist()) == length(cues)),
                 msg = paste(
-                  "At least one element of m_0 does not have the correct dimensionality. Observations have",
+                  "At least one element of mu_0 does not have the correct dimensionality. Observations have",
                   length(cues),
-                  "dimensions. Dimensionality of m_0 ranges from",
-                  paste(map(m_0, length) %>% unlist() %>% range(), collapse = " to ")))
+                  "dimensions. Dimensionality of mu_0 ranges from",
+                  paste(map(mu_0, length) %>% unlist() %>% range(), collapse = " to ")))
   }
-  if (!is.null(S_0)) {
+  if (!is.null(Sigma_0)) {
     if (nlevels(exposure[[category]]) == 1) {
-      assert_that(is.array(S_0),
-                msg = "If S_0 is not NULL and there is only one category, S_0 must be a positive-definite  matrix.")
+      assert_that(is.array(Sigma_0),
+                msg = "If Sigma_0 is not NULL and there is only one category, Sigma_0 must be a positive-definite  matrix.")
     } else {
-      assert_that(is.list(S_0) & length(S_0) == nlevels(exposure[[category]]),
-                 msg = "If S_0 not NULL, S_0 must be a list of positive-definite matrices with as many elements as there are categories.")
+      assert_that(is.list(Sigma_0) & length(Sigma_0) == nlevels(exposure[[category]]),
+                 msg = "If Sigma_0 not NULL, Sigma_0 must be a list of positive-definite matrices with as many elements as there are categories.")
     }
-    assert_that(all(map(S_0, is.numeric)  %>% unlist, map(S_0, ~ length(dim(.x)) == 2) %>% unlist),
-                msg = "If S_0 is a list, each element must be a k x k matrix.")
-    assert_that(all(map(S_0, ~ dim(.x) == length(cues)) %>% unlist()),
+    assert_that(all(map(Sigma_0, is.numeric)  %>% unlist, map(Sigma_0, ~ length(dim(.x)) == 2) %>% unlist),
+                msg = "If Sigma_0 is a list, each element must be a k x k matrix.")
+    assert_that(all(map(Sigma_0, ~ dim(.x) == length(cues)) %>% unlist()),
                 msg = paste(
-                  "At least one element of S_0 does not have the correct dimensionality. Observations have",
+                  "At least one element of Sigma_0 does not have the correct dimensionality. Observations have",
                   length(cues),
-                  "dimensions. S_0 includes matrices of dimension",
-                  paste(paste(map(S_0, ~ dim(.x) %>% paste(collapse = " x "))) %>% unique(), collapse = ", ")))
+                  "dimensions. Sigma_0 includes matrices of dimension",
+                  paste(paste(map(Sigma_0, ~ dim(.x) %>% paste(collapse = " x "))) %>% unique(), collapse = ", ")))
   }
 
   # Transform data
@@ -369,8 +367,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       return.transform.function = T)
 
   if (pca.observations) {
-    assert_that(all(is.null(m_0), is.null(S_0)),
-                msg = "PCA is not yet implemented when m_0 or S_0 are specified.")
+    assert_that(all(is.null(mu_0), is.null(Sigma_0)),
+                msg = "PCA is not yet implemented when mu_0 or Sigma_0 are specified.")
     s = summary(transform[["transform.parameters"]][["pca"]])$importance
     l = min(which(s["Cumulative Proportion",] >= pca.cutoff))
     assert_that(l >= 1, msg = "Specified pca.cutoff does not yield to any PCA component being included. Increase the
@@ -382,8 +380,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 
   exposure <- transform[["data"]]
   test <- transform[["transform.function"]](test)
-  if (!is.null(m_0)) m_0 <- map(m_0, ~ transform_category_mean(m = .x, transform))
-  if (!is.null(S_0) & scale.observations) S_0 <- map(S_0, ~ transform_category_cov(S = .x, transform))
+  if (!is.null(mu_0)) mu_0 <- map(mu_0, ~ transform_category_mean(m = .x, transform))
+  if (!is.null(Sigma_0) & scale.observations) Sigma_0 <- map(Sigma_0, ~ transform_category_cov(S = .x, transform))
 
   test_counts <-
     get_test_counts(
@@ -402,28 +400,28 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 
   n.cats <- nlevels(exposure[[category]])
   n.cues <- length(cues)
-  if (is.null(m_0)) {
-    m_0 <- array(numeric(), dim = c(0,0))
-    m_0_known <- 0
+  if (is.null(mu_0)) {
+    mu_0 <- array(numeric(), dim = c(0,0))
+    mu_0_known <- 0
   } else {
-    m_0_known <- 1
-    if (is.list(m_0)) {
+    mu_0_known <- 1
+    if (is.list(mu_0)) {
       temp <- array(dim = c(n.cats, n.cues))
-      for (i in 1:length(m_0)) temp[i,] <- m_0[[i]]
-      m_0 <- temp
+      for (i in 1:length(mu_0)) temp[i,] <- mu_0[[i]]
+      mu_0 <- temp
       rm(temp)
     }
   }
 
-  if (is.null(S_0)) {
-    S_0 <- array(numeric(), dim = c(0,0,0))
-    S_0_known <- 0
+  if (is.null(Sigma_0)) {
+    Sigma_0 <- array(numeric(), dim = c(0,0,0))
+    Sigma_0_known <- 0
   } else {
-    S_0_known <- 1
-    if (is.list(S_0)) {
+    Sigma_0_known <- 1
+    if (is.list(Sigma_0)) {
       temp <- array(dim = c(n.cats, n.cues, n.cues))
-      for (i in 1:length(S_0)) temp[i,,] <- S_0[[i]]
-      S_0 <- temp
+      for (i in 1:length(Sigma_0)) temp[i,,] <- Sigma_0[[i]]
+      Sigma_0 <- temp
       rm(temp)
     }
   }
@@ -463,10 +461,10 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
 
         lapse_rate_known <- lapse_rate_known
         lapse_rate_data <- lapse_rate
-        m_0_known <- m_0_known
-        m_0_data <- m_0
-        S_0_known <- S_0_known
-        S_0_data <- S_0
+        mu_0_known <- mu_0_known
+        mu_0_data <- mu_0
+        Sigma_0_known <- Sigma_0_known
+        Sigma_0_data <- Sigma_0
 
         tau_scale <- tau_scale
         L_omega_scale <- L_omega_scale
