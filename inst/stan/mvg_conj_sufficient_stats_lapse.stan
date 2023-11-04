@@ -1,75 +1,78 @@
 /*
- * Fit multinomial response data using a belief-updating model to infer prior
- * parameters.  A normal-inverse-Wishart prior is used, and it's assumed
+  * Fit multinomial response data using a belief-updating model to infer prior
+* parameters.  A normal-inverse-Wishart prior is used, and it's assumed
  * that the subject knows the true labels of all the input stimuli (e.g.,
  * doesn't model any uncertainty in classification.
- *
- * This version has a lapse rate parameter (probability of random guessing)
- *
- * Input is in the form of raw data points for observations.
- *
- *
- * Modified by
- * Florian Jaeger
- * August 2020
- */
+*
+  * This version has a lapse rate parameter (probability of random guessing)
+*
+  * Input is in the form of raw data points for observations.
+*
+  *
+  * Modified by
+* Florian Jaeger
+* August 2020
+*/
 
 data {
-  int M;                        // number of categories
-  int L;                        // number of grouping levels (e.g. subjects)
-  int K;                        // number of features
+    int M;                        // number of categories
+    int L;                        // number of grouping levels (e.g. subjects)
+    int K;                        // number of features
 
-  /* Efficiency considerations: declaring n as matrix rather than array of int is supposedly faster
-     (https://mc-stan.org/docs/2_18/stan-users-guide/indexing-efficiency-section.html). It also means
-     that standard arithmetic functions can be directly applied to that matrix (unlike to more-than-1-
-     dimensional arrays). */
-  matrix[M,L] N;                // number of observations per category (m) and group (l)
-  vector[K] x_mean[M,L];        // means for each category (m) and group (l)
-  cov_matrix[K] x_ss[M,L];      // sum of uncentered squares matrix for each category (m) and group (l)
+    /* Efficiency considerations: declaring n as matrix rather than array of int is supposedly faster
+    (https://mc-stan.org/docs/2_18/stan-users-guide/indexing-efficiency-section.html). It also means
+    that standard arithmetic functions can be directly applied to that matrix (unlike to more-than-1-
+                                                                                 dimensional arrays). */
+    matrix[M,L] N;                // number of observations per category (m) and group (l)
+    vector[K] x_mean[M,L];        // means for each category (m) and group (l)
+    cov_matrix[K] x_ss[M,L];      // sum of uncentered squares matrix for each category (m) and group (l)
 
-  int N_test;                   // number of test trials
-  vector[K] x_test[N_test];     // locations of test trials
-  int y_test[N_test];           // group label of test trials
-  int z_test_counts[N_test,M];  // responses for test trials
+    int N_test;                   // number of test trials
+    vector[K] x_test[N_test];     // locations of test trials
+    int y_test[N_test];           // group label of test trials
+    int z_test_counts[N_test,M];  // responses for test trials
 
-  int<lower=0, upper=1> m_0_known;
-  int<lower=0, upper=1> S_0_known;
-  vector[m_0_known ? K : 0] m_0_data[m_0_known ? M : 0];        // optional: user provided m_0 (prior mean of means)
-  cov_matrix[S_0_known ? K : 0] S_0_data[S_0_known ? M : 0];    // optional: user provided S_0 (prior scatter matrix of mean)
+    int<lower=0, upper=1> lapse_rate_known;
+    int<lower=0, upper=1> mu_0_known;
+    int<lower=0, upper=1> Sigma_0_known;
+    real lapse_rate_data[lapse_rate_known ? 1 : 0];                         // optional: user provided lapse_rate
+    vector[mu_0_known ? K : 0] mu_0_data[mu_0_known ? M : 0];               // optional: user provided expected mu_0 (prior category means)
+    cov_matrix[Sigma_0_known ? K : 0] Sigma_0_data[Sigma_0_known ? M : 0];  // optional: user provided expected Sigma_0 (prior category covariance matrices)
 
-  /* For now, this script assumes that the observations (cue vectors) are centered. The prior
-     mean of m_0 is set to 0. Same for the prior location parameter for the cauchy prior over
-     the variance of m_0 */
-  // separate taus for each feature to capture that features can be on separate scales:
-  // vector<lower=0>[K] tau_scales;  // scales of cauchy prior for variances along the K features (set to zero to ignore)
-  real<lower=0> tau_scale;      // scale of cauchy prior for variances of m_0 (set to zero to ignore)
-  real<lower=0> L_omega_scale;  // scale of LKJ prior for correlation of variance of m_0 (set to zero to ignore)
-}
+    /* For now, this script assumes that the observations (cue vectors) are centered. The prior
+    mean of m_0 is set to 0. Same for the prior location parameter for the cauchy prior over
+    the variance of m_0 */
+      // separate taus for each feature to capture that features can be on separate scales:
+      // vector<lower=0>[K] tau_scales;  // scales of cauchy prior for variances along the K features (set to zero to ignore)
+    real<lower=0> tau_scale;      // scale of cauchy prior for variances of m_0 (set to zero to ignore)
+    real<lower=0> L_omega_scale;  // scale of LKJ prior for correlation of variance of m_0 (set to zero to ignore)
+  }
 
 transformed data {
   real sigma_kappanu;
 
   /* Scale for the prior of kappa/nu_0. In order to deal with input that does not contain observations
-     (in which case n_each == 0), we set the minimum value for SD to 10. */
-  sigma_kappanu = max(N) > 0 ? max(N) * 4 : 10;
+  (in which case n_each == 0), we set the minimum value for SD to 10. */
+    sigma_kappanu = max(N) > 0 ? max(N) * 4 : 10;
 }
 
 parameters {
   // these are all shared across groups (same prior beliefs):
-  real<lower=K> kappa_0;                  // prior pseudocount for category mu
-  real<lower=K + 1> nu_0;                 // prior pseudocount for category Sigma
+    real<lower=K> kappa_0;                  // prior pseudocount for category mu
+    real<lower=K + 1> nu_0;                 // prior pseudocount for category Sigma
 
-  vector[K] m_0_param[m_0_known ? 0 : M];                 // prior mean of means
-  vector<lower=0>[m_0_known ? 0 : K] m_0_tau;             // prior variances of m_0
-  cholesky_factor_corr[m_0_known ? 0 : K] m_0_L_omega;    // prior correlations of variances of m_0 (in cholesky form)
+    real<lower=0, upper=1> lapse_rate_param[lapse_rate_known ? 0 : 1];
 
-  vector<lower=0>[K] tau_0_param[S_0_known ? 0 : M];          // standard deviations of prior scatter matrix S_0
-  cholesky_factor_corr[K] L_omega_0_param[S_0_known ? 0 : M]; // correlation matrix of prior scatter matrix S_0 (in cholesky form)
+    vector[K] m_0_param[mu_0_known ? 0 : M];                // prior mean of means
+    vector<lower=0>[mu_0_known ? 0 : K] m_0_tau;            // prior variances of m_0
+    cholesky_factor_corr[mu_0_known ? 0 : K] m_0_L_omega;   // prior correlations of variances of m_0 (in cholesky form)
 
-  real<lower=0, upper=1> lapse_rate;
+    vector<lower=0>[K] tau_0_param[Sigma_0_known ? 0 : M];          // standard deviations of prior scatter matrix S_0
+    cholesky_factor_corr[K] L_omega_0_param[Sigma_0_known ? 0 : M]; // correlation matrix of prior scatter matrix S_0 (in cholesky form)
 }
 
 transformed parameters {
+  real lapse_rate;
   vector[K] m_0[M];                    // prior mean of means m_0
   cov_matrix[K] S_0[M];                // prior scatter matrix S_0
 
@@ -83,19 +86,27 @@ transformed parameters {
   simplex[M] p_test_conj[N_test];
   vector[M] log_p_test_conj[N_test];
 
-  if (m_0_known) {
-    m_0 = m_0_data;
+  if (lapse_rate_known) {
+    lapse_rate = lapse_rate_data[1];
+  } else {
+    lapse_rate = lapse_rate_param[1];
+  }
+  if (mu_0_known) {
+    m_0 = mu_0_data;
   } else {
     m_0 = m_0_param;
   }
-  if (S_0_known) {
-    S_0 = S_0_data;
+  if (Sigma_0_known) {
+   // Get S_0 from expected Sigma given nu_0
+   for (cat in 1:M) {
+      S_0[cat] = Sigma_0_data[cat] * (nu_0 - K - 1);
+   }
   }
 
   // update NIW parameters according to conjugate updating rules are taken from
   // Murphy (2007, p. 136)
   for (cat in 1:M) {
-    if (!S_0_known) {
+    if (!Sigma_0_known) {
       // Get S_0 from its components: correlation matrix and vector of standard deviations
       S_0[cat] = quad_form_diag(multiply_lower_tri_self_transpose(L_omega_0_param[cat]), tau_0_param[cat]);
     }
@@ -104,10 +115,10 @@ transformed parameters {
         kappa_n[cat,group] = kappa_0 + N[cat,group];
         nu_n[cat,group] = nu_0 + N[cat,group];
         m_n[cat,group] = (kappa_0 * m_0[cat] + N[cat,group] * x_mean[cat,group]) /
-                        kappa_n[cat,group];
+          kappa_n[cat,group];
         S_n[cat,group] = S_0[cat] +
-                        x_ss[cat,group] +
-                        kappa_0 * m_0[cat] * m_0[cat]' -
+          x_ss[cat,group] +
+          kappa_0 * m_0[cat] * m_0[cat]' -
                         kappa_n[cat,group] * m_n[cat,group] * m_n[cat,group]';
       } else {
         kappa_n[cat,group] = kappa_0;
@@ -117,7 +128,7 @@ transformed parameters {
       }
 
       t_scale[cat,group] = S_n[cat,group] * (kappa_n[cat,group] + 1) /
-                                              (kappa_n[cat,group] * (nu_n[cat,group] - K + 1));
+        (kappa_n[cat,group] * (nu_n[cat,group] - K + 1));
     }
   }
 
@@ -128,9 +139,9 @@ transformed parameters {
     // calculate un-normalized log prob for each category
     for (cat in 1:M) {
       log_p_test_conj[j,cat] = multi_student_t_lpdf(x_test[j] |
-                                              nu_n[cat,group] - K + 1,
-                                              m_n[cat,group],
-                                              t_scale[cat,group]);
+                                                      nu_n[cat,group] - K + 1,
+                                                    m_n[cat,group],
+                                                    t_scale[cat,group]);
     }
     // normalize and store actual probs in simplex
     p_test_conj[j] = exp(log_p_test_conj[j] - log_sum_exp(log_p_test_conj[j]));
@@ -140,29 +151,31 @@ transformed parameters {
 model {
   vector[M] lapsing_probs;
 
+  /* Assuming unifom bias, so that lapsing_prob = probability of each category prior to
+     taking into account stimulus is 1/M */
   lapsing_probs = rep_vector(lapse_rate / M, M);
 
   kappa_0 ~ normal(0, sigma_kappanu);
   nu_0 ~ normal(0, sigma_kappanu);
 
   /* Specifying prior for m_0:
-     - If no scale for variances (tau) of m_0 is user-specified use weakly regularizing
-       scale (5) for variances of mean.
-     - If no scale for LKJ prior over correlation matrix of m_0 is user-specified use
-       scale 1 to set uniform prior over correlation matrices. */
-  if (!m_0_known) {
-    m_0_tau ~ cauchy(0, tau_scale > 0 ? tau_scale : 5);
-    m_0_L_omega ~ lkj_corr_cholesky(L_omega_scale > 0 ? L_omega_scale : 1);
-    m_0_param ~ multi_normal_cholesky(rep_vector(0, K), diag_pre_multiply(m_0_tau, m_0_L_omega));
-  }
+    - If no scale for variances (tau) of m_0 is user-specified use weakly regularizing
+  scale (5) for variances of mean.
+  - If no scale for LKJ prior over correlation matrix of m_0 is user-specified use
+  scale 1 to set uniform prior over correlation matrices. */
+    if (!mu_0_known) {
+      m_0_tau ~ cauchy(0, tau_scale > 0 ? tau_scale : 5);
+      m_0_L_omega ~ lkj_corr_cholesky(L_omega_scale > 0 ? L_omega_scale : 1);
+      m_0_param ~ multi_normal_cholesky(rep_vector(0, K), diag_pre_multiply(m_0_tau, m_0_L_omega));
+    }
 
   /* Specifying prior for components of S_0: */
-  if (!S_0_known) {
+    if (!Sigma_0_known) {
       for (cat in 1:M) {
         tau_0_param[cat] ~ cauchy(0, tau_scale > 0 ? tau_scale : 10);
         L_omega_0_param[cat] ~ lkj_corr_cholesky(L_omega_scale > 0 ? L_omega_scale : 1);
       }
-  }
+    }
 
   for (i in 1:N_test) {
     z_test_counts[i] ~ multinomial(p_test_conj[i] * (1-lapse_rate) + lapsing_probs);
@@ -171,7 +184,7 @@ model {
 }
 
 generated quantities {
-  if (!m_0_known) {
+  if (!mu_0_known) {
     matrix[K,K] m_0_cor;
     matrix[K,K] m_0_cov;
 

@@ -16,8 +16,9 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats(
   scale.observations = T,
   pca.observations = F,
   pca.cutoff = 1,
-  m_0 = NULL,
-  S_0 = NULL,
+  lapse_rate = NULL,
+  mu_0 = NULL,
+  Sigma_0 = NULL,
   tau_scale = 0,
   L_omega_scale = 0,
   verbose = F
@@ -46,13 +47,13 @@ substantially more efficient if many groups share the same exposure. To ignore, 
 
 \item{center.observations}{Should the data be centered? Centering will not affect the inferred correlation or
 covariance matrices but it will affect the absolute position of the inferred means. The relative position of
-the inferred means remains unaffected. If `TRUE` and `m_0` is specified, `m_0` will also be centered (`S_0` is not
+the inferred means remains unaffected. If `TRUE` and `mu_0` is specified, `mu_0` will also be centered (`Sigma_0` is not
 affected by centering and thus not changed). (default: `TRUE`)}
 
 \item{scale.observations}{Should the data be standardized? Scaling will not affect the inferred correlation matrix,
 but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
 affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
-If `TRUE` and `m_0` and `S_0` are specified, `m_0` and `S_0` will also be scaled.
+If `TRUE` and `mu_0` and `Sigma_0` are specified, `mu_0` and `Sigma_0` will also be scaled.
 (default: `TRUE`)}
 
 \item{pca.observations}{Should the data be transformed into orthogonal principal components? (default: `FALSE`)}
@@ -61,19 +62,14 @@ If `TRUE` and `m_0` and `S_0` are specified, `m_0` and `S_0` will also be scaled
 components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 `pca.observation = FALSE`. (default: 1)}
 
-\item{m_0, S_0}{Optionally, prior means (m_0) and/or prior scatter matrices (S_0) for all categories. Each should be
-a list, with each element being the mean/scatter matrix for a specific category. Elements should be ordered in the same order as
-the levels of the category variable in \code{exposure} and \code{test}. The means and scatter matrices could be
-estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_NIW_prior_from_data}}
-for a convenient way to do so). To aspects should be kept in mind, however. First, an \emph{inferred} scatter
-matrix includes variability from internal perceptual and/or external environmental noise, \emph{in addition} to the motor noise that
-is reflected in production data. That means that any prior for the scatter matrix (S_0) should take into account
-not only the variability in the production data but also any additional variability added by internal (perceptual)
-or external (environmental) noise. Second, the prior scatter matrix has an implicit nu associated with it, so that
-the nu inferred by \code{\link{infer_prior_beliefs}} is best thought of as a multiple of the implicit nu used
-during the creation of the scatter matrix S_0. For that reason, we recommend the use of nu = D + 2 in the call to
-\code{\link{make_NIW_prior_from_data}} (the default), since the S_0 obtained that way is identical to the category
-covariance matrix Sigma.}
+\item{lapse_rate, mu_0, Sigma_0}{Optionally, lapse rate, prior expected category means (mu_0) and/or prior expected
+category covariance matrices (Sigma_0) for all categories. Lapse rate should be a number between 0 and 1. For mu_0
+and Sigma_0, each should be a list, with each element being the expected mean/covariance matrix for a specific
+category prior to updating. Elements of mu_0 and Sigma_0 should be ordered in the same order as the levels of the
+category variable in \code{exposure} and \code{test}. These prior expected means and covariance matrices could be
+estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_MVG_from_data}}
+for a convenient way to do so). Internally, m_0 is then set to mu_0 (so that the expected value of the prior
+distribution of means is mu_0) and S_0 is set so that the expected value of the inverse-Wishart is Sigma_0 given nu_0.}
 
 \item{tau_0_scales}{Optionally, a vector of scales for the Cauchy priors for each cue's standard deviations. Used in
 both the prior for m_0 and the prior for S_0. (default: vector of 5s of length of cues, assumes scaled input)}
@@ -82,7 +78,11 @@ both the prior for m_0 and the prior for S_0. (default: vector of 5s of length o
 ignore. (default: 0)}
 }
 \value{
-A list that is an \code{NIW_ideal_adaptor_input}.
+A list that is an \code{NIW_ideal_adaptor_input}. In interpreting the inferred kappa_0 and nu_0, it should
+be kept in mind that the \emph{inferred} scatter matrix S_0 includes variability from internal perceptual and/or
+external environmental noise, \emph{in addition} to the motor noise that is reflected in production data. This also
+implies that, if Sigma_0 is given, Sigma_0 and nu_0 mutually constrain each other, because the expected value of
+Sigma_0 is determined by both S_0 and nu.
 }
 \description{
 Take exposure and test data as input, and prepare the data for input into an MVBeliefUpdatr Stan program.
