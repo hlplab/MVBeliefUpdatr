@@ -114,7 +114,18 @@ make_exemplar_model_from_data = function(
 #' Make multivariate Gaussian ideal observer(s) from data.
 #'
 #' Constructs an \code{\link[=is.MVG]{MVG}} or \code{\link[=is.MVG_ideal_observer]{MVG_ideal_observer}} object with category
-#' information for all categories found in the data.
+#' information for all categories found in the data. Currently, this functions does nothing fancy. It simply gets the mean
+#' and covariance matrix of the cues for each category and group from the data. No cross-validation or other measures against
+#' overfitting are implemented, though it is recommended that such methods are applied.
+#'
+#' Alternative approaches include the use of `brms::brm()` to fit a multivariate Normal model to the data. While this approach
+#' allows fitting of both the means and variances of each category (including for hierarchically organized grouped data), it
+#' currently does not provide a way to model category-specific correlations (or covariances) between cues. Instead, the
+#' approach implemented in `brms` only models correlation at the population-level (residual correlations).
+#'
+#' Yet another alternative would be to write a separate `Stan` program specifically for this purpose. However, while this is
+#' relatively straightforward for data from a single talker, a hierarchical model for grouped data essentially requires an
+#' extension of the multivariate model approach implemented in `brms` and described in the preceding paragraph.
 #'
 #' @param data The tibble or data.frame from which to construct the MVG or MVG ideal observer object.
 #' @param group Optionally, a vector of one or more grouping variables. If group is not NULL, one MVG or
@@ -396,7 +407,9 @@ lift_likelihood_to_model <- function(
     if (!is.null(names(prior))) {
         assert_that(all(names(prior) == category_levels),
                     msg = paste("Names of category priors must match levels of", category, "in x."))
-    } else {
+    } else if (!all(prior == first(prior))) {
+      # If priors are the same there's no need for this message. This also prevents that the message is
+      # displayed when the default uniform prior is used.
       message(paste("Category priors were not named. Assuming that priors are provided in alphabetic order of", category, "in x."))
       names(prior) <- category_levels
     }
@@ -407,7 +420,9 @@ lift_likelihood_to_model <- function(
     if (!is.null(names(lapse_bias))) {
       assert_that(all(names(lapse_bias) == category_levels),
                   msg = paste("Names of lapse biases must match levels of", category, "in x."))
-    } else {
+    } else if (!all(lapse_bias == first(lapse_bias))) {
+      # If biases are the same there's no need for this message. This also prevents that the message is
+      # displayed when the default uniform biases are used.
       message(paste("Lapse biases were not named. Assuming that lapse biases are provided in alphabetic order of", category, "in x."))
       names(lapse_bias) <- category_levels
     }
@@ -426,7 +441,7 @@ lift_likelihood_to_model <- function(
       Sigma_noise = list(.env$Sigma_noise))
 
   if (!is.model(x, group = group, verbose = verbose))
-    warning("NOTE: The returned object does not appear to be a model. For more information, try again with verbose = T.")
+    warning("NOTE: The returned object does not appear to be an MVBeliefUpdatr model. For more information, try again with verbose = T.")
 
   return(x)
 }
@@ -569,7 +584,6 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
 #' variable should be a superset of the second group variable; etc.
 #'
 #' @param x An MVG, MVG_ideal_observer, NIW_belief, or NIW_ideal_adaptor object.
-#' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param group_structure The group structure that will be used for aggregation.
 #'
 #' @return The aggregated object.
@@ -580,45 +594,26 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
 #' @export
 aggregate_models_by_group_structure = function(
   x,
-  category = "category",
   group_structure = NULL
 ) {
-  assert_that(all(is.character(group_structure) | is.symbol(group_structure)),
-              msg = "Group structure must be a vector characters or symbols.")
-  if (is.character(group_structure)) group_structure = syms(group_structure)
-  # assert_that(all(is.character(group_structure) | is.symbol(group_structure), length(group_structure) == 1),
-  #             msg = "aggregate_to_group must be a single character or symbol.")
-  # if (is.character(aggregate_to_group)) aggregate_to_group = sym(aggregate_to_group)
-  # assert_that(as_name(aggregate_to_group) %in% as_name(group_structure),
-  #             msg = "aggregate_to_group must be contained in group_structure.")
+  assert_that(all(is.character(group_structure)),
+              msg = "Group structure must be a vector of characters.")
+  assert_that(all(group_structure %in% names(x)),
+              msg = "All variables in group_structure must be contained in the x.")
 
-  aggregate_what_into_means <-
-    if (is.NIW_ideal_adaptor(x, category = category)) c("m", "prior", "lapse_rate", "lapse_bias", "kappa", "nu", "S", "Sigma_noise") else
-      if (is.NIW_belief(x, category = category)) c("m", "kappa", "nu", "S") else
-        if (is.MVG_ideal_observer(x, category = category)) c("mu", "prior", "lapse_rate", "lapse_bias", "Sigma", "Sigma_noise") else
-          if (is.MVG(x, category = category)) c("mu", "Sigma") else NA_character_
-
+  x_names <- setdiff(names(x), group_structure)
   # Consider geommetric mean for some variables in the future:
-  # (but for covs that would mean first getting the taus, then getting geommetric mean. then transforming
-  # back into covs (since covs can be negative)). If implemented add the following to docu:
-  # Note that geometric means will be used for count and variance variables (e.g., Sigma, S, Sigma_noise, kappa, nu),
-  # whereas arithmetic means will be used for all other types of variables (e.g., mu, m, prior, lapse rate and bias).
-  # aggregate_what_into_geometric_means <-
-  #   if (is.NIW_ideal_adaptor(x, category = category)) c("kappa", "nu", "S", "Sigma_noise") else
-  #     if (is.NIW_belief(x, category = category)) c("kappa", "nu", "S") else
-  #       if (is.MVG_ideal_observer(x, category = category)) c("Sigma", "Sigma_noise") else
-  #         if (is.MVG(x, category = category)) c("Sigma") else NA_character_
-
+  # across(aggregate_what_into_geometric_means, ~ list(exp(reduce(log(.x), `+`) / length(.x))))
   while(length(group_structure) > 0) {
     group_structure = group_structure[-1]
     x %<>%
-      group_by(!!! syms(group_structure), !! sym(category)) %>%
+      group_by(!!! syms(group_structure), category) %>%
       summarise(
-        across(aggregate_what_into_means, ~ list(reduce(.x, `+`) / length(.x))))
-    # Consider geommetric mean for some variables in the future:
-    # across(aggregate_what_into_geometric_means, ~ list(exp(reduce(log(.x), `+`) / length(.x))))
+        across(intersect(names(x), c("kappa", "nu", "prior", "lapse_rate", "lapse_bias")), ~ mean(.x, na.rm = T)),
+        across(intersect(names(x), c("m", "mu", "S", "Sigma", "Sigma_noise")), ~ list(reduce(.x, `+`) / length(.x))))
   }
 
+  x %<>% relocate(!!! syms(x_names))
   return(x)
 }
 
