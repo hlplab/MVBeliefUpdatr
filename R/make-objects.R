@@ -362,7 +362,6 @@ make_NIW_example = function(example = 1) {
 #' @param x Either an MVG or NIW_belief object.
 #' @param group Optionally, a grouping structure can be specified. If group structure is not NULL, one
 #' NIW belief or ideal adaptor will be derived for each level of \code{group_structure}. (default: NULL)
-#' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param kappa The strength of the beliefs over the category mean (pseudocounts). (default: same as nu)
 #' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
 #' cues + 2)
@@ -395,7 +394,6 @@ lift_likelihood_to_model <- function(
   verbose = F
 ) {
   if (is.character(group)) group = syms(group)
-  if (is.character(category)) category = sym(category)
   assert_that(all(is.numeric(lapse_rate), is.numeric(lapse_bias), is.numeric(prior)),
               msg = "Category prior, lapse rate, and lapse bias must be numeric.")
 
@@ -410,22 +408,22 @@ lift_likelihood_to_model <- function(
     } else if (!all(prior == first(prior))) {
       # If priors are the same there's no need for this message. This also prevents that the message is
       # displayed when the default uniform prior is used.
-      message(paste("Category priors were not named. Assuming that priors are provided in alphabetic order of", category, "in x."))
-      names(prior) <- category_levels
+      message(paste("Category priors were not named. Assuming that priors are provided in alphabetic order of category in x."))
     }
+    names(prior) <- category_levels
   }
   if (!is.null(lapse_bias)) {
     assert_that(length(lapse_bias) == n.cat,
                 msg = paste("Lapse_bias must have as many elements as there are categories. Has", length(lapse_bias), "instead of needed", n.cat))
     if (!is.null(names(lapse_bias))) {
       assert_that(all(names(lapse_bias) == category_levels),
-                  msg = paste("Names of lapse biases must match levels of", category, "in x."))
+                  msg = paste("Names of lapse biases must match levels of category in x."))
     } else if (!all(lapse_bias == first(lapse_bias))) {
       # If biases are the same there's no need for this message. This also prevents that the message is
       # displayed when the default uniform biases are used.
-      message(paste("Lapse biases were not named. Assuming that lapse biases are provided in alphabetic order of", category, "in x."))
-      names(lapse_bias) <- category_levels
+      message(paste("Lapse biases were not named. Assuming that lapse biases are provided in alphabetic order of category in x."))
     }
+    names(lapse_bias) <- category_levels
   }
 
   if (all(is.na(lapse_rate) | is.null(lapse_rate))) {
@@ -435,9 +433,9 @@ lift_likelihood_to_model <- function(
   x %<>%
     group_by(!!! group) %>%
     mutate(
-      prior = .env$prior[as.character(!! sym(category))],
+      prior = .env$prior["category"],
       lapse_rate = .env$lapse_rate,
-      lapse_bias = .env$lapse_bias[as.character(!! sym(category))],
+      lapse_bias = .env$lapse_bias["category"],
       Sigma_noise = list(.env$Sigma_noise))
 
   if (!is.model(x, group = group, verbose = verbose))
