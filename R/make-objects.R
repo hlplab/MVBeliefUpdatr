@@ -584,8 +584,12 @@ aggregate_models_by_group_structure = function(
     x %<>%
       group_by(!!! syms(group_structure), category) %>%
       summarise(
-        across(intersect(names(x), c("kappa", "nu", "prior", "lapse_rate", "lapse_bias")), ~ mean(.x, na.rm = T)),
-        across(intersect(names(x), c("m", "mu", "S", "Sigma", "Sigma_noise")), ~ list(reduce(.x, `+`) / length(.x))))
+        across(
+          intersect(names(x), c("kappa", "nu", "prior", "lapse_rate", "lapse_bias")),
+          ~ mean(.x, na.rm = T)),
+        across(
+          intersect(names(x), c("m", "mu", "S", "Sigma", "Sigma_noise")),
+          ~ if (any(is.null(.x))) { NULL } else { list(reduce(.x, `+`) / length(.x)) } ))
   }
 
   x %<>% relocate(!!! syms(x_names))

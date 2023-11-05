@@ -8,7 +8,7 @@ evaluate_model(
   model,
   x,
   response_category,
-  method = "likelihood",
+  method = "likelihood-up-to-constant",
   ...,
   return_by_x = F
 )
