@@ -49,7 +49,19 @@ A tibble that is an MVG or MVG ideal observer object.
 }
 \description{
 Constructs an \code{\link[=is.MVG]{MVG}} or \code{\link[=is.MVG_ideal_observer]{MVG_ideal_observer}} object with category
-information for all categories found in the data.
+information for all categories found in the data. Currently, this functions does nothing fancy. It simply gets the mean
+and covariance matrix of the cues for each category and group from the data. No cross-validation or other measures against
+overfitting are implemented, though it is recommended that such methods are applied.
+}
+\details{
+Alternative approaches include the use of `brms::brm()` to fit a multivariate Normal model to the data. While this approach
+allows fitting of both the means and variances of each category (including for hierarchically organized grouped data), it
+currently does not provide a way to model category-specific correlations (or covariances) between cues. Instead, the
+approach implemented in `brms` only models correlation at the population-level (residual correlations).
+
+Yet another alternative would be to write a separate `Stan` program specifically for this purpose. However, while this is
+relatively straightforward for data from a single talker, a hierarchical model for grouped data essentially requires an
+extension of the multivariate model approach implemented in `brms` and described in the preceding paragraph.
 }
 \examples{
 TBD

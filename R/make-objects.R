@@ -386,7 +386,6 @@ make_NIW_example = function(example = 1) {
 lift_likelihood_to_model <- function(
   x,
   group = NULL,
-  category = "category",
   prior = rep(1 / get_nlevels_of_category_labels_from_model(x), get_nlevels_of_category_labels_from_model(x)),
   lapse_rate = 0,
   lapse_bias = rep(1 / get_nlevels_of_category_labels_from_model(x), get_nlevels_of_category_labels_from_model(x)),
@@ -404,7 +403,7 @@ lift_likelihood_to_model <- function(
               msg = paste("Category prior must have as many elements as there are categories. Has", length(prior), "instead of needed", n.cat))
     if (!is.null(names(prior))) {
         assert_that(all(names(prior) == category_levels),
-                    msg = paste("Names of category priors must match levels of", category, "in x."))
+                    msg = paste("Names of category priors must match levels of category in x."))
     } else if (!all(prior == first(prior))) {
       # If priors are the same there's no need for this message. This also prevents that the message is
       # displayed when the default uniform prior is used.
@@ -433,9 +432,9 @@ lift_likelihood_to_model <- function(
   x %<>%
     group_by(!!! group) %>%
     mutate(
-      prior = .env$prior["category"],
+      prior = .env$prior[as.character(.data$category)],
       lapse_rate = .env$lapse_rate,
-      lapse_bias = .env$lapse_bias["category"],
+      lapse_bias = .env$lapse_bias[as.character(.data$category)],
       Sigma_noise = list(.env$Sigma_noise))
 
   if (!is.model(x, group = group, verbose = verbose))
@@ -476,14 +475,13 @@ lift_exemplars_to_exemplar_model <- function(
 lift_MVG_to_MVG_ideal_observer = function(
   x,
   group = NULL,
-  category = "category",
   prior = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   lapse_rate = 0,
   lapse_bias = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   Sigma_noise = NULL,
   verbose = F
 ) {
-  x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
+  x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(Sigma_noise) == dim(first(x$Sigma))),
                 msg = "Sigma_noise must be a matrix of the same dimensionality as Sigma.")
@@ -504,14 +502,13 @@ lift_MVG_to_MVG_ideal_observer = function(
 lift_NIW_belief_to_NIW_ideal_adaptor = function(
   x,
   group = NULL,
-  category = "category",
   prior = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   lapse_rate = 0,
   lapse_bias = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   Sigma_noise = NULL,
   verbose = F
 ) {
-  x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
+  x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(Sigma_noise) == dim(first(x$S))),
                 msg = "Sigma_noise must be a matrix of the same dimensionality as S.")
@@ -527,31 +524,11 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   return(x)
 }
 
-#' Turn an MVG_ideal_observer into an NIW_ideal_adaptor
-#'
-#' Make an ideal adaptor out of an ideal observer, so that the *expected* category mean and category covariance
-#' matrix of the ideal adaptor match the ideal observers category mean and category covariance matrix.
-#'
-#' @param x An MVG_ideal_observer object.
-#' @param group Optionally, a grouping structure can be specified. If group structure is not NULL, one
-#' NIW belief or ideal adaptor will be derived for each level of \code{group_structure}. (default: NULL)
-#' @param category Name of variable in \code{data} that contains the category information. (default: "category")
-#' @param kappa The strength of the beliefs over the category mean (pseudocounts). (default: same as nu)
-#' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
-#' cues + 2)
-#' @param verbose If true provides more information. (default: FALSE)
-#'
-#' @return A tibble that is an NIW_ideal_adaptor object.
-#'
-#' @seealso TBD
-#' @keywords TBD
-#' @examples
-#' TBD
 #' @export
+#' @rdname lift_likelihood_to_model
 lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
   x,
   group = NULL,
-  category = "category",
   kappa, nu,
   verbose = F
 ) {

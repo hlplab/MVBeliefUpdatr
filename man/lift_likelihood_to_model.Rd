@@ -58,8 +58,6 @@ lift_NIW_belief_to_NIW_ideal_adaptor(
 \item{group}{Optionally, a grouping structure can be specified. If group structure is not NULL, one
 NIW belief or ideal adaptor will be derived for each level of \code{group_structure}. (default: NULL)}
 
-\item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
-
 \item{prior}{Optionally specify a prior probability for each category (in each group). (default: a uniform
 prior over all categories).}
 
