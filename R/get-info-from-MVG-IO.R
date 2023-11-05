@@ -276,6 +276,7 @@ get_categorization_from_MVG_ideal_observer <- function(
   # Apply decision rule
   if (decision_rule == "criterion") {
     posterior_probabilities %<>%
+      group_by(observationID, x) %>%
       mutate(
         # tie breaker in case of uniform probabilities
         posterior_probability = ifelse(
@@ -291,6 +292,7 @@ get_categorization_from_MVG_ideal_observer <- function(
         response = ifelse(posterior_probability == max(posterior_probability), 1, 0))
   } else if (decision_rule == "sampling") {
     posterior_probabilities %<>%
+      group_by(observationID, x) %>%
       mutate(response = rmultinom(1, 1, posterior_probability) %>% as.vector())
   } else if (decision_rule == "proportional") {
     posterior_probabilities %<>%
