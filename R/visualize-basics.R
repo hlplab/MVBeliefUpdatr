@@ -129,8 +129,8 @@ get_limits = function(data, measure, by = NULL, hdi.prob = .99, min = NULL, max 
     mean_hdi((!! rlang::sym(measure)), .width = hdi.prob) %>%
     ungroup() %>%
     { if (!is.null(by)) group_by(., by) else . } %>%
-    summarise(.lower = if (!is.null(min)) min else min(.lower),
-              .upper = if (!is.null(max)) max else max(.upper)) %>%
+    summarise(.lower = if (!is.null(min)) min else min(.data$.lower),
+              .upper = if (!is.null(max)) max else max(.data$.upper)) %>%
     as.numeric()
 }
 

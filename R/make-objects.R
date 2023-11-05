@@ -589,7 +589,7 @@ aggregate_models_by_group_structure = function(
           ~ mean(.x, na.rm = T)),
         across(
           intersect(names(x), c("m", "mu", "S", "Sigma", "Sigma_noise")),
-          ~ if (any(is.null(.x))) { NULL } else { list(reduce(.x, `+`) / length(.x)) } ))
+          ~ if (any(unlist(is.null(.x)))) { NULL } else { list(reduce(.x, `+`) / length(.x)) } ))
   }
 
   x %<>% relocate(!!! syms(x_names))
