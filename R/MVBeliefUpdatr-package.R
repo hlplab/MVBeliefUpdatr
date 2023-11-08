@@ -1,8 +1,10 @@
 #' @import Rcpp
+#' @import RcppParallel
+#' @import rstantools
 #' @import methods
 #' @import assertthat
 #' @importFrom stats cov2cor density dmultinom dnorm plogis prcomp predict qlogis quantile rbinom rnorm runif sd var
-#' @importFrom utils data
+#' @importFrom utils data globalVariables
 #' @importFrom Rdpack reprompt
 #' @importFrom magrittr %<>% %T>%
 #' @importFrom Hmisc %nin%
@@ -15,6 +17,8 @@
 #' @importFrom rstan sampling
 #' @importFrom LaplacesDemon is.positive.definite
 #' @useDynLib MVBeliefUpdatr, .registration=TRUE
+
+utils::globalVariables(".")
 
 #' @section Overview:
 #' This package provides convenience functions to model Bayesian ideal observers with multivariate Gaussian categories and

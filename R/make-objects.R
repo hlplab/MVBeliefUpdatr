@@ -144,10 +144,8 @@ make_exemplar_model_from_data = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
+#' @examples TBD
 #' @export
-#'
 make_MVG_from_data = function(
   data,
   group = NULL,
@@ -577,7 +575,7 @@ aggregate_models_by_group_structure = function(
               msg = "All variables in group_structure must be contained in the x.")
 
   x_names <- setdiff(names(x), group_structure)
-  # Consider geommetric mean for some variables in the future:
+  # Consider geometric mean for some variables in the future:
   # across(aggregate_what_into_geometric_means, ~ list(exp(reduce(log(.x), `+`) / length(.x))))
   while(length(group_structure) > 0) {
     group_structure = group_structure[-1]
@@ -622,10 +620,12 @@ aggregate_models_by_group_structure = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
+#' @examples TBD
+#' @importFrom rlang .data
+#' @importFrom tidyselect everything
+#' @importFrom dplyr slice_sample
 #' @export
-sample_MVG_data = function(
+sample_MVG_data <- function(
   Ns, mus, Sigmas,
   category.labels = NULL,
   cue.labels = NULL,
@@ -643,8 +643,8 @@ sample_MVG_data = function(
 
   x <-
     tibble(category = category.labels, n = Ns, mu = mus, Sigma = Sigmas) %>%
-    mutate(data = pmap(.l = list(n, mu, Sigma), .f = rmvnorm)) %>%
-    mutate(data = map(data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
+    mutate(data = pmap(.l = list(.data$n, .data$mu, .data$Sigma), .f = rmvnorm)) %>%
+    mutate(data = map(.data$data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
     unnest(data)
 
   if (randomize.order)
@@ -672,7 +672,7 @@ sample_MVG_data_from_model = function(
       randomize.order = randomize.order,
       keep.input_parameters = keep.input_parameters))
   } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model)) {
-    return(make_MVG_data(
+    return(sample_MVG_data(
       Ns = Ns,
       mus = model$m,
       Sigmas = get_expected_Sigma_from_S(model$S, model$nu),

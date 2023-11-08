@@ -154,12 +154,11 @@ ellipse.pmap = function(x, centre, level, ...)
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
+#' @examples TBD
 #'
 #' @rdname add_data_to_plot
 #' @export
-add_exposure_data_to_1D_plot = function(
+add_exposure_data_to_1D_plot <- function(
   data,
   cue.labels,
   category.ids,
@@ -173,7 +172,7 @@ add_exposure_data_to_1D_plot = function(
 
 #' @rdname add_data_to_plot
 #' @export
-add_test_data_to_1D_plot = function(data, cue.labels) {
+add_test_data_to_1D_plot <- function(data, cue.labels) {
   cue.labels[2] = "cue2"
   data %<>% mutate(cue2 = 0)
   add_test_locations_to_2D_plot(data, cue.labels)
