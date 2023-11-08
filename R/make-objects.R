@@ -114,7 +114,18 @@ make_exemplar_model_from_data = function(
 #' Make multivariate Gaussian ideal observer(s) from data.
 #'
 #' Constructs an \code{\link[=is.MVG]{MVG}} or \code{\link[=is.MVG_ideal_observer]{MVG_ideal_observer}} object with category
-#' information for all categories found in the data.
+#' information for all categories found in the data. Currently, this functions does nothing fancy. It simply gets the mean
+#' and covariance matrix of the cues for each category and group from the data. No cross-validation or other measures against
+#' overfitting are implemented, though it is recommended that such methods are applied.
+#'
+#' Alternative approaches include the use of `brms::brm()` to fit a multivariate Normal model to the data. While this approach
+#' allows fitting of both the means and variances of each category (including for hierarchically organized grouped data), it
+#' currently does not provide a way to model category-specific correlations (or covariances) between cues. Instead, the
+#' approach implemented in `brms` only models correlation at the population-level (residual correlations).
+#'
+#' Yet another alternative would be to write a separate `Stan` program specifically for this purpose. However, while this is
+#' relatively straightforward for data from a single talker, a hierarchical model for grouped data essentially requires an
+#' extension of the multivariate model approach implemented in `brms` and described in the preceding paragraph.
 #'
 #' @param data The tibble or data.frame from which to construct the MVG or MVG ideal observer object.
 #' @param group Optionally, a vector of one or more grouping variables. If group is not NULL, one MVG or
@@ -133,10 +144,8 @@ make_exemplar_model_from_data = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
+#' @examples TBD
 #' @export
-#'
 make_MVG_from_data = function(
   data,
   group = NULL,
@@ -351,7 +360,6 @@ make_NIW_example = function(example = 1) {
 #' @param x Either an MVG or NIW_belief object.
 #' @param group Optionally, a grouping structure can be specified. If group structure is not NULL, one
 #' NIW belief or ideal adaptor will be derived for each level of \code{group_structure}. (default: NULL)
-#' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param kappa The strength of the beliefs over the category mean (pseudocounts). (default: same as nu)
 #' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
 #' cues + 2)
@@ -376,7 +384,6 @@ make_NIW_example = function(example = 1) {
 lift_likelihood_to_model <- function(
   x,
   group = NULL,
-  category = "category",
   prior = rep(1 / get_nlevels_of_category_labels_from_model(x), get_nlevels_of_category_labels_from_model(x)),
   lapse_rate = 0,
   lapse_bias = rep(1 / get_nlevels_of_category_labels_from_model(x), get_nlevels_of_category_labels_from_model(x)),
@@ -384,7 +391,6 @@ lift_likelihood_to_model <- function(
   verbose = F
 ) {
   if (is.character(group)) group = syms(group)
-  if (is.character(category)) category = sym(category)
   assert_that(all(is.numeric(lapse_rate), is.numeric(lapse_bias), is.numeric(prior)),
               msg = "Category prior, lapse rate, and lapse bias must be numeric.")
 
@@ -395,22 +401,26 @@ lift_likelihood_to_model <- function(
               msg = paste("Category prior must have as many elements as there are categories. Has", length(prior), "instead of needed", n.cat))
     if (!is.null(names(prior))) {
         assert_that(all(names(prior) == category_levels),
-                    msg = paste("Names of category priors must match levels of", category, "in x."))
-    } else {
-      message(paste("Category priors were not named. Assuming that priors are provided in alphabetic order of", category, "in x."))
-      names(prior) <- category_levels
+                    msg = paste("Names of category priors must match levels of category in x."))
+    } else if (!all(prior == first(prior))) {
+      # If priors are the same there's no need for this message. This also prevents that the message is
+      # displayed when the default uniform prior is used.
+      message(paste("Category priors were not named. Assuming that priors are provided in alphabetic order of category in x."))
     }
+    names(prior) <- category_levels
   }
   if (!is.null(lapse_bias)) {
     assert_that(length(lapse_bias) == n.cat,
                 msg = paste("Lapse_bias must have as many elements as there are categories. Has", length(lapse_bias), "instead of needed", n.cat))
     if (!is.null(names(lapse_bias))) {
       assert_that(all(names(lapse_bias) == category_levels),
-                  msg = paste("Names of lapse biases must match levels of", category, "in x."))
-    } else {
-      message(paste("Lapse biases were not named. Assuming that lapse biases are provided in alphabetic order of", category, "in x."))
-      names(lapse_bias) <- category_levels
+                  msg = paste("Names of lapse biases must match levels of category in x."))
+    } else if (!all(lapse_bias == first(lapse_bias))) {
+      # If biases are the same there's no need for this message. This also prevents that the message is
+      # displayed when the default uniform biases are used.
+      message(paste("Lapse biases were not named. Assuming that lapse biases are provided in alphabetic order of category in x."))
     }
+    names(lapse_bias) <- category_levels
   }
 
   if (all(is.na(lapse_rate) | is.null(lapse_rate))) {
@@ -420,13 +430,13 @@ lift_likelihood_to_model <- function(
   x %<>%
     group_by(!!! group) %>%
     mutate(
-      prior = .env$prior[as.character(!! sym(category))],
+      prior = .env$prior[as.character(.data$category)],
       lapse_rate = .env$lapse_rate,
-      lapse_bias = .env$lapse_bias[as.character(!! sym(category))],
+      lapse_bias = .env$lapse_bias[as.character(.data$category)],
       Sigma_noise = list(.env$Sigma_noise))
 
   if (!is.model(x, group = group, verbose = verbose))
-    warning("NOTE: The returned object does not appear to be a model. For more information, try again with verbose = T.")
+    warning("NOTE: The returned object does not appear to be an MVBeliefUpdatr model. For more information, try again with verbose = T.")
 
   return(x)
 }
@@ -463,14 +473,13 @@ lift_exemplars_to_exemplar_model <- function(
 lift_MVG_to_MVG_ideal_observer = function(
   x,
   group = NULL,
-  category = "category",
   prior = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   lapse_rate = 0,
   lapse_bias = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   Sigma_noise = NULL,
   verbose = F
 ) {
-  x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
+  x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(Sigma_noise) == dim(first(x$Sigma))),
                 msg = "Sigma_noise must be a matrix of the same dimensionality as Sigma.")
@@ -491,14 +500,13 @@ lift_MVG_to_MVG_ideal_observer = function(
 lift_NIW_belief_to_NIW_ideal_adaptor = function(
   x,
   group = NULL,
-  category = "category",
   prior = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   lapse_rate = 0,
   lapse_bias = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   Sigma_noise = NULL,
   verbose = F
 ) {
-  x %<>% lift_likelihood_to_model(group = group, category = category, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
+  x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(Sigma_noise) == dim(first(x$S))),
                 msg = "Sigma_noise must be a matrix of the same dimensionality as S.")
@@ -514,31 +522,11 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   return(x)
 }
 
-#' Turn an MVG_ideal_observer into an NIW_ideal_adaptor
-#'
-#' Make an ideal adaptor out of an ideal observer, so that the *expected* category mean and category covariance
-#' matrix of the ideal adaptor match the ideal observers category mean and category covariance matrix.
-#'
-#' @param x An MVG_ideal_observer object.
-#' @param group Optionally, a grouping structure can be specified. If group structure is not NULL, one
-#' NIW belief or ideal adaptor will be derived for each level of \code{group_structure}. (default: NULL)
-#' @param category Name of variable in \code{data} that contains the category information. (default: "category")
-#' @param kappa The strength of the beliefs over the category mean (pseudocounts). (default: same as nu)
-#' @param nu The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
-#' cues + 2)
-#' @param verbose If true provides more information. (default: FALSE)
-#'
-#' @return A tibble that is an NIW_ideal_adaptor object.
-#'
-#' @seealso TBD
-#' @keywords TBD
-#' @examples
-#' TBD
 #' @export
+#' @rdname lift_likelihood_to_model
 lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
   x,
   group = NULL,
-  category = "category",
   kappa, nu,
   verbose = F
 ) {
@@ -569,7 +557,6 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
 #' variable should be a superset of the second group variable; etc.
 #'
 #' @param x An MVG, MVG_ideal_observer, NIW_belief, or NIW_ideal_adaptor object.
-#' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param group_structure The group structure that will be used for aggregation.
 #'
 #' @return The aggregated object.
@@ -580,45 +567,30 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
 #' @export
 aggregate_models_by_group_structure = function(
   x,
-  category = "category",
   group_structure = NULL
 ) {
-  assert_that(all(is.character(group_structure) | is.symbol(group_structure)),
-              msg = "Group structure must be a vector characters or symbols.")
-  if (is.character(group_structure)) group_structure = syms(group_structure)
-  # assert_that(all(is.character(group_structure) | is.symbol(group_structure), length(group_structure) == 1),
-  #             msg = "aggregate_to_group must be a single character or symbol.")
-  # if (is.character(aggregate_to_group)) aggregate_to_group = sym(aggregate_to_group)
-  # assert_that(as_name(aggregate_to_group) %in% as_name(group_structure),
-  #             msg = "aggregate_to_group must be contained in group_structure.")
+  assert_that(all(is.character(group_structure)),
+              msg = "Group structure must be a vector of characters.")
+  assert_that(all(group_structure %in% names(x)),
+              msg = "All variables in group_structure must be contained in the x.")
 
-  aggregate_what_into_means <-
-    if (is.NIW_ideal_adaptor(x, category = category)) c("m", "prior", "lapse_rate", "lapse_bias", "kappa", "nu", "S", "Sigma_noise") else
-      if (is.NIW_belief(x, category = category)) c("m", "kappa", "nu", "S") else
-        if (is.MVG_ideal_observer(x, category = category)) c("mu", "prior", "lapse_rate", "lapse_bias", "Sigma", "Sigma_noise") else
-          if (is.MVG(x, category = category)) c("mu", "Sigma") else NA_character_
-
-  # Consider geommetric mean for some variables in the future:
-  # (but for covs that would mean first getting the taus, then getting geommetric mean. then transforming
-  # back into covs (since covs can be negative)). If implemented add the following to docu:
-  # Note that geometric means will be used for count and variance variables (e.g., Sigma, S, Sigma_noise, kappa, nu),
-  # whereas arithmetic means will be used for all other types of variables (e.g., mu, m, prior, lapse rate and bias).
-  # aggregate_what_into_geometric_means <-
-  #   if (is.NIW_ideal_adaptor(x, category = category)) c("kappa", "nu", "S", "Sigma_noise") else
-  #     if (is.NIW_belief(x, category = category)) c("kappa", "nu", "S") else
-  #       if (is.MVG_ideal_observer(x, category = category)) c("Sigma", "Sigma_noise") else
-  #         if (is.MVG(x, category = category)) c("Sigma") else NA_character_
-
+  x_names <- setdiff(names(x), group_structure)
+  # Consider geometric mean for some variables in the future:
+  # across(aggregate_what_into_geometric_means, ~ list(exp(reduce(log(.x), `+`) / length(.x))))
   while(length(group_structure) > 0) {
     group_structure = group_structure[-1]
     x %<>%
-      group_by(!!! syms(group_structure), !! sym(category)) %>%
+      group_by(!!! syms(group_structure), category) %>%
       summarise(
-        across(aggregate_what_into_means, ~ list(reduce(.x, `+`) / length(.x))))
-    # Consider geommetric mean for some variables in the future:
-    # across(aggregate_what_into_geometric_means, ~ list(exp(reduce(log(.x), `+`) / length(.x))))
+        across(
+          intersect(names(x), c("kappa", "nu", "prior", "lapse_rate", "lapse_bias")),
+          ~ mean(.x, na.rm = T)),
+        across(
+          intersect(names(x), c("m", "mu", "S", "Sigma", "Sigma_noise")),
+          ~ if (any(unlist(is.null(.x)))) { NULL } else { list(reduce(.x, `+`) / length(.x)) } ))
   }
 
+  x %<>% relocate(!!! syms(x_names))
   return(x)
 }
 
@@ -648,10 +620,12 @@ aggregate_models_by_group_structure = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
+#' @examples TBD
+#' @importFrom rlang .data
+#' @importFrom tidyselect everything
+#' @importFrom dplyr slice_sample
 #' @export
-sample_MVG_data = function(
+sample_MVG_data <- function(
   Ns, mus, Sigmas,
   category.labels = NULL,
   cue.labels = NULL,
@@ -669,8 +643,8 @@ sample_MVG_data = function(
 
   x <-
     tibble(category = category.labels, n = Ns, mu = mus, Sigma = Sigmas) %>%
-    mutate(data = pmap(.l = list(n, mu, Sigma), .f = rmvnorm)) %>%
-    mutate(data = map(data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
+    mutate(data = pmap(.l = list(.data$n, .data$mu, .data$Sigma), .f = rmvnorm)) %>%
+    mutate(data = map(.data$data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
     unnest(data)
 
   if (randomize.order)
@@ -698,7 +672,7 @@ sample_MVG_data_from_model = function(
       randomize.order = randomize.order,
       keep.input_parameters = keep.input_parameters))
   } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model)) {
-    return(make_MVG_data(
+    return(sample_MVG_data(
       Ns = Ns,
       mus = model$m,
       Sigmas = get_expected_Sigma_from_S(model$S, model$nu),

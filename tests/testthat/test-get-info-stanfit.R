@@ -12,12 +12,13 @@ test_that("add ibbu draws - input check", {
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "plus2.2")))
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = c("prior", "plus2.2"))))
   expect_error(add_ibbu_stanfit_draws(fit, groups = "priors"))
-  expect_error(add_ibbu_stanfit_draws(fit, groups = "prior", draws = -1:1))
+  expect_error(add_ibbu_stanfit_draws(fit, groups = "prior", ndraws = 1))
+  expect_error(add_ibbu_stanfit_draws(fit, groups = "prior", ndraws = c(1, 2)))
 })
 
 test_that("add ibbu draws - output check", {
-  expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", draws = 1:10, wide = F)), 20)
-  expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", draws = 1:10, wide = F, summarize = T)), 2)
+  expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F) %>% distinct(.draw)), 10)
+  expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", wide = F, summarize = T)), 2)
   expect_equal(names(add_ibbu_stanfit_draws(fit, groups = "prior", summarize = T)),
                c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
   expect_equal(names(add_ibbu_stanfit_draws(fit, groups = "prior", summarize = T, nest = T)),
@@ -27,8 +28,8 @@ test_that("add ibbu draws - output check", {
 })
 
 # test_that("Add ibbu draws - check wide = T", {
-#   expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", draws = 1:10, wide = T, summarize = T)), 1)
-#   expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", draws = 1:10, wide = T, summarize = F)), 10)
+#   expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", wide = T, summarize = T)), 1)
+#   expect_equal(nrow(add_ibbu_stanfit_draws(fit, groups = "prior", wide = T, summarize = F)), 10)
 # })
 
 

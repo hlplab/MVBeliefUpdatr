@@ -341,9 +341,10 @@ get_sufficient_category_statistics <- function(
 #' function(s) have the name "(un)transform.function".
 #'
 #' @keywords TBD
-#' @examples
-#' TBD
+#' @examples TBD
 #' @rdname transform_cues
+#' @importFrom tidyselect all_of
+#' @importFrom dplyr cross_join
 #' @export
 transform_cues <- function(
     data, cues,
@@ -372,14 +373,14 @@ transform_cues <- function(
         transform.parameters[["center"]] <-
           data %>%
           select(all_of(cues)) %>%
-          summarise_all(list(mean = mean))
+          summarise(across(everything(), list(mean = mean)))
       }
 
       if (scale) {
         transform.parameters[["scale"]] <-
           data %>%
           select(all_of(cues)) %>%
-          summarise_all(list(sd = sd))
+          summarise(across(everything(), list(sd = sd)))
       }
     }
   }

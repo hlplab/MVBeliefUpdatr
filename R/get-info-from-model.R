@@ -368,7 +368,7 @@ get_categorization_from_model <- function(model, ...) {
 #' TBD
 #' @rdname evaluate_model
 #' @export
-evaluate_model <- function(model, x, response_category, method = "likelihood", ..., return_by_x = F) {
+evaluate_model <- function(model, x, response_category, method = "likelihood-up-to-constant", ..., return_by_x = F) {
   assert_that(all(method %in% c("likelihood", "likelihood-up-to-constant", "accuracy")))
   # When the input isn't a list, that's ambiguous between the input being a single input or a set of
   # 1D inputs. Use the model's cue dimensionality to disambiguate between the two cases.

@@ -16,7 +16,7 @@ example_MVG_ideal_observer <- function(example = 1) {
       Sigma_noise = list(
         matrix(rep(0, 4), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
         matrix(rep(0, 4), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))) %>%
-      mutate(category = factor(category))
+      mutate(across(category, factor))
   } else if (example == 2) {
     message("An example MVG ideal observer for two categories in a 1D cue continuum. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
     tibble(
@@ -122,6 +122,8 @@ get_MVG_likelihood <- function(
 
 
 #' @rdname get_MVG_likelihood
+#' @importFrom rlang :=
+#' @importFrom tidyr pivot_wider as_tibble
 #' @export
 get_likelihood_from_MVG <- function(
   x,
@@ -206,7 +208,7 @@ get_posterior_from_MVG_ideal_observer <- function(
       lapse_bias = get_lapse_biases_from_model(.env$model, categories = .data$category),
       prior = get_priors_from_model(.env$model, categories = .data$category)) %>%
     group_by(observationID) %>%
-    mutate(posterior_probability = (likelihood * prior) / sum(likelihood * prior))
+    mutate(posterior_probability = (.data$likelihood * .data$prior) / sum(.data$likelihood * .data$prior))
 
   # How should lapses be treated?
   if (lapse_treatment == "sample") {
@@ -214,13 +216,13 @@ get_posterior_from_MVG_ideal_observer <- function(
       mutate(
         posterior_probability = ifelse(
           rep(
-            rbinom(1, 1, lapse_rate),
+            rbinom(1, 1, .data$lapse_rate),
             get_nlevels_of_category_labels_from_model(model)),
-          lapse_bias,                 # substitute lapse probabilities for posterior
-          posterior_probability))     # ... or not
+          .data$lapse_bias,                 # substitute lapse probabilities for posterior
+          .data$posterior_probability))     # ... or not
   } else if (lapse_treatment == "marginalize") {
     posterior_probabilities %<>%
-      mutate(posterior_probability =  lapse_rate * lapse_bias + (1 - lapse_rate) * posterior_probability)
+      mutate(posterior_probability = .data$lapse_rate * .data$lapse_bias + (1 - .data$lapse_rate) * .data$posterior_probability)
   }
 
   posterior_probabilities %<>%
@@ -276,25 +278,27 @@ get_categorization_from_MVG_ideal_observer <- function(
   # Apply decision rule
   if (decision_rule == "criterion") {
     posterior_probabilities %<>%
+      group_by(observationID, x) %>%
       mutate(
         # tie breaker in case of uniform probabilities
         posterior_probability = ifelse(
           rep(
-            sum(posterior_probability == max(posterior_probability)) > 1,
+            sum(.data$posterior_probability == max(.data$posterior_probability)) > 1,
             get_nlevels_of_category_labels_from_model(model)),
           posterior_probability + runif(
             get_nlevels_of_category_labels_from_model(model),
             min = 0,
             max = 1),
-          posterior_probability),
+          .data$posterior_probability),
         # select most probable category
-        response = ifelse(posterior_probability == max(posterior_probability), 1, 0))
+        response = ifelse(.data$posterior_probability == max(.data$posterior_probability), 1, 0))
   } else if (decision_rule == "sampling") {
     posterior_probabilities %<>%
-      mutate(response = rmultinom(1, 1, posterior_probability) %>% as.vector())
+      group_by(observationID, x) %>%
+      mutate(response = rmultinom(1, 1, .data$posterior_probability) %>% as.vector())
   } else if (decision_rule == "proportional") {
     posterior_probabilities %<>%
-      mutate(response = posterior_probability)
+      mutate(response = .data$posterior_probability)
   } else warning("Unsupported decision rule. This should be impossible to happen. Do not trust the results.")
 
   posterior_probabilities %<>%

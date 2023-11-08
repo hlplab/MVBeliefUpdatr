@@ -5,12 +5,12 @@
 \alias{lift_exemplars_to_exemplar_model}
 \alias{lift_MVG_to_MVG_ideal_observer}
 \alias{lift_NIW_belief_to_NIW_ideal_adaptor}
+\alias{lift_MVG_ideal_observer_to_NIW_ideal_adaptor}
 \title{Turn an MVG/NIW_belief object into an ideal observer/adaptor}
 \usage{
 lift_likelihood_to_model(
   x,
   group = NULL,
-  category = "category",
   prior = rep(1/get_nlevels_of_category_labels_from_model(x),
     get_nlevels_of_category_labels_from_model(x)),
   lapse_rate = 0,
@@ -33,7 +33,6 @@ lift_exemplars_to_exemplar_model(
 lift_MVG_to_MVG_ideal_observer(
   x,
   group = NULL,
-  category = "category",
   prior = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   lapse_rate = 0,
   lapse_bias = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
@@ -44,11 +43,18 @@ lift_MVG_to_MVG_ideal_observer(
 lift_NIW_belief_to_NIW_ideal_adaptor(
   x,
   group = NULL,
-  category = "category",
   prior = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   lapse_rate = 0,
   lapse_bias = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
   Sigma_noise = NULL,
+  verbose = F
+)
+
+lift_MVG_ideal_observer_to_NIW_ideal_adaptor(
+  x,
+  group = NULL,
+  kappa,
+  nu,
   verbose = F
 )
 }
@@ -57,8 +63,6 @@ lift_NIW_belief_to_NIW_ideal_adaptor(
 
 \item{group}{Optionally, a grouping structure can be specified. If group structure is not NULL, one
 NIW belief or ideal adaptor will be derived for each level of \code{group_structure}. (default: NULL)}
-
-\item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
 
 \item{prior}{Optionally specify a prior probability for each category (in each group). (default: a uniform
 prior over all categories).}

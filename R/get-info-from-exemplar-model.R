@@ -13,7 +13,7 @@ example_exemplar_model <- function(example = 1) {
         lapse_rate = .05,
         lapse_bias = c(.5, .5),
         Sigma_noise = list(NULL)) %>%
-      mutate(category = factor(category))
+      mutate(across(category, factor))
   }
 }
 
@@ -41,6 +41,8 @@ example_exemplar_model <- function(example = 1) {
 #' @keywords TBD
 #' @examples
 #' TBD
+#' @importFrom rlang :=
+#' @importFrom tidyr as_tibble
 #' @export
 get_likelihood_from_exemplars <- function(
   x,
@@ -50,87 +52,7 @@ get_likelihood_from_exemplars <- function(
   category = "category",
   category.label = NULL
 ) {
-  assert_that(is.MVG(model))
-  assert_that(any(is.null(category.label) | is.character(category.label)))
-  assert_that(any(noise_treatment == "no_noise", is.MVG_ideal_observer(model)),
-              msg = 'No noise matrix Sigma_noise found. If noise_treatment is not "no_noise", then model must be an MVG_ideal_observer.')
 
-  if (is.null(category.label)) {
-    model %<>%
-      droplevels()
-
-    category.label <-
-      model %>%
-      pull(!! sym(category)) %>%
-      unique()
-  }
-
-  likelihood <- foreach(c = category.label) %do% {
-    m <-
-      model %>%
-      filter(!! sym(category) == c)
-
-    get_MVG_likelihood(
-      x = x,
-      mu = m$mu[[1]],
-      Sigma = m$Sigma[[1]],
-      log = log,
-      noise_treatment = noise_treatment,
-      Sigma_noise = if (noise_treatment == "no_noise") NULL else m$Sigma_noise[[1]]) %>%
-      as_tibble(.name_repair = "unique") %>%
-      rename_with(~ if (log) { "log_likelihood" } else { "likelihood" }) %>%
-      mutate(!! sym(category) := c)
-
-
-    # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
-    # in the latter case, each *row* of the matrix is an input.
-    assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
-    assert_that(is.vector(mu) | is.matrix(mu) | is_scalar_double(mu))
-    assert_that(is.Sigma(Sigma))
-
-    # do not reorder these conditionals (go from more to less specific)
-    if (is_tibble(x)) x %<>% as.matrix() else
-      if (is.list(x)) x %<>% reduce(rbind) %>% as.matrix() else
-        if (is.vector(x)) x %<>% matrix(nrow = 1)
-    if (is.matrix(mu)) mu = as.vector(mu)
-
-    assert_that(is.flag(log))
-    assert_that(any(noise_treatment %in% c("no_noise", "marginalize")),
-                msg = "noise_treatment must be one of 'no_noise' or 'marginalize'.")
-    if (noise_treatment != "no_noise") {
-      assert_that(is.Sigma(Sigma_noise))
-      assert_that(all(dim(Sigma) == dim(Sigma_noise)),
-                  msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the category covariance matrices Sigma.')
-    }
-
-    D = get_D(Sigma)
-    if (D == 1) {
-      assert_that(is_scalar_double(mu), msg = "Sigma and mu are not of compatible dimensions.")
-    } else {
-      assert_that(dim(Sigma)[2] == D,
-                  msg = "Sigma is not a square matrix, and thus not a covariance matrix")
-      assert_that(length(mu) == dim(x)[2],
-                  msg = paste("mu and input are not of compatible dimensions. mu is of length", length(mu), "but input has", dim(x)[2], "columns."))
-      assert_that(length(mu) == D,
-                  msg = "Sigma and mu are not of compatible dimensions.")
-    }
-
-    if (noise_treatment == "sample") {
-      assert_that(
-        is_weakly_greater_than(nrow(x), 1),
-        msg = "For noise sampling, x must be of length 1 or longer.")
-
-      x <- x + rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
-    }
-
-    if (noise_treatment %in% c("sample", "marginalize")) {
-      Sigma = Sigma + Sigma_noise
-    }
-
-  }
-  likelihood %<>% reduce(rbind)
-
-  return(likelihood)
 }
 
 

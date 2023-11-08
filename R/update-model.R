@@ -49,6 +49,7 @@ logit2probability <- function(l, refcat = 1)
 #' @examples
 #' TBD
 #' @rdname update_model_decision_bias
+#' @importFrom rlang .data .env
 #' @export
 update_model_decision_bias_by_one_observation <- function(
     model,
@@ -75,7 +76,7 @@ update_model_decision_bias_by_one_observation <- function(
         # Calculate the amount of change (in log-odds) that the observed category label (x_category) causes.
         # Here we are assuming that each observation leads to change proportional to its surprisal (the
         # surprisal experienced when seeing the category label, x_category):
-        mutate(delta_logodds = beta * sum(ifelse(category == x_category, -log2(response) * response, 0))),
+        mutate(delta_logodds = .env$beta * sum(ifelse(.data$category == .env$x_category, -log2(.data$response) * .data$response, 0))),
       # If one wants to use an error signal that is either 0 or 1 (rather than the prediction error) then
       # delta_logodds would simply be the sum of all error signals multiplied by beta:
       # mutate(delta_logodds = beta * sum(ifelse(category == x_category, 0 * response, 1 * response))),
@@ -85,14 +86,20 @@ update_model_decision_bias_by_one_observation <- function(
     # by decreasing the response bias of each of those categories by delta_logodds divided by the number of those
     # categories. Prior to rounding errors, this keeps the sum of the response bias across all categories at 1.
     mutate(
-      lapse_bias = logit2probability(probability2logit(lapse_bias) + ifelse(category == x_category, +delta_logodds, -delta_logodds / (length(category) - 1))),
+      lapse_bias =
+        logit2probability(
+          probability2logit(.data$lapse_bias) +
+            ifelse(category == .env$x_category, +.data$delta_logodds, -.data$delta_logodds / (length(.data$category) - 1))),
       # correct for rounding errors by re-normalizing
-      lapse_bias = lapse_bias / sum(lapse_bias)) %>%
+      lapse_bias = .data$lapse_bias / sum(.data$lapse_bias)) %>%
     { if (update_prior) {
       mutate(
         .,
-        prior = logit2probability(probability2logit(prior) + ifelse(category == x_category, +delta_logodds, -delta_logodds / (length(category) - 1))),
-        prior = prior / sum(prior))
+        prior =
+          logit2probability(
+            probability2logit(.data$prior) +
+              ifelse(category == .env$x_category, +.data$delta_logodds, -.data$delta_logodds / (length(.data$category) - 1))),
+        prior = .data$prior / sum(.data$prior))
     } else . } %>%
     select(-c(observationID, x, response, delta_logodds)) %>%
     ungroup()
@@ -149,7 +156,7 @@ update_model_decision_bias_incrementally <- function(
           verbose = verbose))
 
     if (keep.update_history)
-      model <- rbind(model, posterior %>% mutate(observation.n = i))
+      model <- rbind(model, posterior %>% mutate(observation.n = .env$i))
   }
 
   if (keep.exposure_data) {

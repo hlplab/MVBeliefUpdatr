@@ -4,16 +4,10 @@
 \alias{aggregate_models_by_group_structure}
 \title{Aggregate multiple ideal observers/adaptors into an average ('typical') ideal observer/adaptor}
 \usage{
-aggregate_models_by_group_structure(
-  x,
-  category = "category",
-  group_structure = NULL
-)
+aggregate_models_by_group_structure(x, group_structure = NULL)
 }
 \arguments{
 \item{x}{An MVG, MVG_ideal_observer, NIW_belief, or NIW_ideal_adaptor object.}
-
-\item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
 
 \item{group_structure}{The group structure that will be used for aggregation.}
 }
