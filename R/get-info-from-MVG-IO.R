@@ -208,7 +208,7 @@ get_posterior_from_MVG_ideal_observer <- function(
       lapse_bias = get_lapse_biases_from_model(.env$model, categories = .data$category),
       prior = get_priors_from_model(.env$model, categories = .data$category)) %>%
     group_by(observationID) %>%
-    mutate(posterior_probability = (likelihood * prior) / sum(likelihood * prior))
+    mutate(posterior_probability = (.data$likelihood * .data$prior) / sum(.data$likelihood * .data$prior))
 
   # How should lapses be treated?
   if (lapse_treatment == "sample") {
@@ -216,13 +216,13 @@ get_posterior_from_MVG_ideal_observer <- function(
       mutate(
         posterior_probability = ifelse(
           rep(
-            rbinom(1, 1, lapse_rate),
+            rbinom(1, 1, .data$lapse_rate),
             get_nlevels_of_category_labels_from_model(model)),
-          lapse_bias,                 # substitute lapse probabilities for posterior
-          posterior_probability))     # ... or not
+          .data$lapse_bias,                 # substitute lapse probabilities for posterior
+          .data$posterior_probability))     # ... or not
   } else if (lapse_treatment == "marginalize") {
     posterior_probabilities %<>%
-      mutate(posterior_probability =  lapse_rate * lapse_bias + (1 - lapse_rate) * posterior_probability)
+      mutate(posterior_probability = .data$lapse_rate * .data$lapse_bias + (1 - .data$lapse_rate) * .data$posterior_probability)
   }
 
   posterior_probabilities %<>%
