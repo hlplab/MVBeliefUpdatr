@@ -118,6 +118,8 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) { S_0 + x_S
 #' \code{\link{update_NIW_belief_S}}, all of which are called by \code{update_NIW_belief_by_sufficient_statistics_of_one_category}.
 #' @keywords belief-updating NIW Normal-Inverse Wishart
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
+#'
+#' @importFrom purrr map2_dbl
 #' @rdname update_NIW_belief
 #' @export
 update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
@@ -127,6 +129,10 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
   method = "label-certain",
   verbose = FALSE
 ) {
+  # Binding variables that RMD Check gets confused about otherwise
+  # (since they are in non-standard evaluations)
+  response <- NULL
+
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
   assert_that(all(is_scalar_character(noise_treatment)), is_scalar_character(lapse_treatment))
   if (any(noise_treatment != "no_noise", lapse_treatment != "no_lapses"))
@@ -206,15 +212,15 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
     #     cov2css(Sigma_noise, n = x_N)   # explaining away expected noise
   }
 
-  x_mean = list(x_mean)
-  x_SS = list(x_SS)
+  x_mean <- list(x_mean)
+  x_SS <- list(x_SS)
   prior %<>%
     mutate(
       # Order of application matters here since all of these update functions assume inputs (kappa, nu, m, S) that are not yet updated.
-      S = pmap(.l = list(kappa, m, S, x_Ns, x_mean, x_SS), update_NIW_belief_S),
-      m = pmap(.l = list(kappa, m, x_Ns, x_mean), update_NIW_belief_m),
-      kappa = unlist(map2(kappa, x_Ns, update_NIW_belief_kappa)),
-      nu = unlist(map2(nu, x_Ns, update_NIW_belief_nu)))
+      S = pmap(.l = list(.data$kappa, .data$m, .data$S, x_Ns, x_mean, x_SS), update_NIW_belief_S),
+      m = pmap(.l = list(.data$kappa, .data$m, x_Ns, x_mean), update_NIW_belief_m),
+      kappa = map2_dbl(.data$kappa, x_Ns, update_NIW_belief_kappa),
+      nu = map2_dbl(.data$nu, x_Ns, update_NIW_belief_nu))
 
   if (noise_treatment == "sample") {
     # To correct of expected consequence of perceptual noise on the uncertainty about the mean (the additional
@@ -226,9 +232,9 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
     prior %<>%
       mutate(
         # Since kappa has already been updated  ((kappa) / (kappa + x_N)) --> (kappa - x_N) / kappa
-        S = pmap(.l = list(kappa, x_Ns, S), ~ ..3 - (..1 - ..2) / (..1) * .env$Sigma_noise),
+        S = pmap(.l = list(.data$kappa, x_Ns, .data$S), ~ ..3 - (..1 - ..2) / (..1) * .env$Sigma_noise),
         # Handle (hopefuly very rare) case where subtraction results in negative diagonal values
-        S = S - diag(diag(S)) + diag(pmax(diag(S), rep(0, length(diag(S)))))
+        S = .data$S - diag(diag(.data$S)) + diag(pmax(diag(.data$S), rep(0, length(diag(.data$S)))))
       )
   }
 
@@ -329,7 +335,7 @@ update_NIW_ideal_adaptor_incrementally <- function(
     mutate(observation.n = 0)
 
   for (i in 1:nrow(exposure)) {
-    posterior <- if (keep.update_history) prior %>% filter(observation.n == i - 1) else prior
+    posterior <- if (keep.update_history) prior %>% filter(.data$observation.n == i - 1) else prior
     posterior <-
       suppressWarnings(
         update_NIW_belief_by_one_observation(

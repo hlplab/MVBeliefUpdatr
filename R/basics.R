@@ -214,7 +214,7 @@ get_sum_of_squares_from_df <- function(data, variables = NULL, center = T, verbo
   data.matrix <- if (is_tibble(data) | is.data.frame(data)) {
     # Assume that the variables are to be combined into a data.matrix
     data %>%
-      mutate_at(variables, unlist) %>%
+      mutate(across(!!! syms(variables), unlist)) %>%
       select(all_of(variables)) %>%
       as.matrix()
   } else data

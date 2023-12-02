@@ -148,6 +148,7 @@ ellipse.pmap = function(x, centre, level, ...)
 #' @keywords TBD
 #' @examples TBD
 #'
+#' @importFrom purrr map_dbl
 #' @rdname add_data_to_plot
 #' @export
 add_exposure_data_to_1D_plot <- function(
@@ -220,7 +221,7 @@ add_exposure_ellipse_to_2D_plot = function(
     geom_point(
       data =
         data %>%
-        mutate(cue1 = unlist(map(.data$mean, ~ .x[1])), cue2 = unlist(map(.data$mean, ~ .x[2]))),
+        mutate(cue1 = map_dbl(.data$mean, ~ .x[1]), cue2 = map_dbl(.data$mean, ~ .x[2])),
       mapping = aes(
         x = .data$cue1,
         y = .data$cue2,

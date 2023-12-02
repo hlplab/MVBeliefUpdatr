@@ -39,6 +39,8 @@ get_expected_columns_for_model <- function() c("prior", "lapse_rate", "lapse_bia
 #'
 #' @seealso TBD
 #' @keywords TBD
+#'
+#' @importFrom purrr map_lgl
 #' @export
 is.model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
@@ -58,7 +60,7 @@ is.model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
   }
 
   # Check that all entries of noise are either NULL or a matrix
-  if (!all(map(x$Sigma_noise, ~ if (is.null(.x) | is.matrix(.x)) { TRUE } else { FALSE }) %>% unlist())) {
+  if (!all(map_lgl(x$Sigma_noise, ~ if (is.null(.x) | is.matrix(.x)) { TRUE } else { FALSE }))) {
     if (verbose) message("If not NULL, Sigma_noise must be a matrix.")
     return(FALSE)
   }

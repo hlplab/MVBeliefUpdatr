@@ -31,11 +31,12 @@ get_D <- function(x) {
 #' @param mu expected category mean mu.
 #' @param m Mean of means m.
 #'
+#' @importFrom purrr map_lgl
 #' @rdname get_expected_mu_from_m
 #' @export
 get_expected_mu_from_m = function(m) {
   if (!is.list(m)) m <- list(m) # in case the input is not a list
-  if (all(unlist(map(m, ~ length(.x) == 1)))) mu <- unlist(m) else mu <- m
+  if (all(map_lgl(m, ~ length(.x) == 1))) mu <- unlist(m) else mu <- m
   if (length(mu) == 1) mu <- mu[[1]]
   return(mu)
 }
@@ -46,7 +47,7 @@ get_expected_mu_from_m = function(m) {
 #' @export
 get_m_from_expected_mu = function(mu) {
   if (!is.list(mu)) mu <- list(mu) # in case the input is not a list
-  if (all(unlist(map(mu, ~ length(.x) == 1)))) m <- unlist(mu) else m <- mu
+  if (all(map_lgl(mu, ~ length(.x) == 1))) m <- unlist(mu) else m <- mu
   if (length(m) == 1) m <- m[[1]]
   return(m)
 }
@@ -59,6 +60,7 @@ get_m_from_expected_mu = function(mu) {
 #' @param S Scatter matrix S.
 #' @param nu Strength of belief (pseudocount) about Sigma.
 #'
+#' @importFrom purrr map_lgl
 #' @rdname get_expected_Sigma_from_S
 #' @export
 get_expected_Sigma_from_S = function(S, nu) {
@@ -73,7 +75,7 @@ get_expected_Sigma_from_S = function(S, nu) {
     return(S / (nu - D - 1))
   })
 
-  if (all(unlist(map(Sigma, ~ length(.x) == 1)))) Sigma <- unlist(Sigma)
+  if (all(map_lgl(Sigma, ~ length(.x) == 1))) Sigma <- unlist(Sigma)
   if (length(Sigma) == 1) Sigma <- Sigma[[1]]
   return(Sigma)
 }
@@ -94,7 +96,7 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
     return(Sigma * (nu - D - 1))
   })
 
-  if (all(unlist(map(S, ~ length(.x) == 1)))) S <- unlist(S)
+  if (all(map_lgl(S, ~ length(.x) == 1))) S <- unlist(S)
   if (length(S) == 1) S <- S[[1]]
   return(S)
 }

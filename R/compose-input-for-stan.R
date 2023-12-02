@@ -242,6 +242,8 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #'
 #' @seealso \code{\link{is.NIW_ideal_adaptor_input}}
 #' @keywords TBD
+#'
+#' @importFrom purrr map_lgl map_int
 #' @rdname compose_data
 #' @export
 compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
@@ -323,14 +325,14 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       assert_that(is.list(mu_0) & length(mu_0) == nlevels(exposure[[category]]),
                 msg = "If mu_0 is not NULL, mu_0 must be a list of vectors with as many elements as there are categories.")
     }
-    assert_that(all(map(mu_0, is.numeric)  %>% unlist, map(mu_0, ~ is.null(dim(.x)) | length(dim(.x)) == 1) %>% unlist),
+    assert_that(all(map_lgl(mu_0, is.numeric), map_lgl(mu_0, ~ is.null(dim(.x)) | length(dim(.x)) == 1)),
                 msg = "If mu_0 is a list, each element must be a vector.")
-    assert_that(all((map(mu_0, length) %>% unlist()) == length(cues)),
+    assert_that(all((map_int(mu_0, length)) == length(cues)),
                 msg = paste(
                   "At least one element of mu_0 does not have the correct dimensionality. Observations have",
                   length(cues),
                   "dimensions. Dimensionality of mu_0 ranges from",
-                  paste(map(mu_0, length) %>% unlist() %>% range(), collapse = " to ")))
+                  paste(map_int(mu_0, length) %>% range(), collapse = " to ")))
   }
   if (!is.null(Sigma_0)) {
     if (nlevels(exposure[[category]]) == 1) {
@@ -340,9 +342,9 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       assert_that(is.list(Sigma_0) & length(Sigma_0) == nlevels(exposure[[category]]),
                  msg = "If Sigma_0 not NULL, Sigma_0 must be a list of positive-definite matrices with as many elements as there are categories.")
     }
-    assert_that(all(map(Sigma_0, is.numeric)  %>% unlist, map(Sigma_0, ~ length(dim(.x)) == 2) %>% unlist),
+    assert_that(all(map_lgl(Sigma_0, is.numeric), map_lgl(Sigma_0, ~ length(dim(.x)) == 2)),
                 msg = "If Sigma_0 is a list, each element must be a k x k matrix.")
-    assert_that(all(map(Sigma_0, ~ dim(.x) == length(cues)) %>% unlist()),
+    assert_that(all(map_lgl(Sigma_0, ~ dim(.x) == length(cues))),
                 msg = paste(
                   "At least one element of Sigma_0 does not have the correct dimensionality. Observations have",
                   length(cues),

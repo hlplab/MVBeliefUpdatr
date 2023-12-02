@@ -100,7 +100,7 @@ update_model_decision_bias_by_one_observation <- function(
         prior =
           logit2probability(
             probability2logit(.data$prior) +
-              ifelse(category == .env$x_category, +.data$delta_logodds, -.data$delta_logodds / (length(.data$category) - 1))),
+              ifelse(.data$category == .env$x_category, +.data$delta_logodds, -.data$delta_logodds / (length(.data$category) - 1))),
         prior = .data$prior / sum(.data$prior))
     } else . } %>%
     select(-c(observationID, x, response, delta_logodds)) %>%

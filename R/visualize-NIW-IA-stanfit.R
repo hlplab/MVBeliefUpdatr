@@ -293,6 +293,8 @@ plot_ibbu_stanfit_parameter_correlations = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
+#'
+#' @importFrom purrr map_dbl
 #' @rdname plot_expected_ibbu_stanfit_categories_2D
 #' @export
 plot_expected_ibbu_stanfit_categories_2D = function(
@@ -355,8 +357,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
         data = . %>%
           distinct(group, category, centre),
         aes(
-          x = map(centre, ~ .x[1]) %>% unlist(),
-          y = map(centre, ~ .x[2]) %>% unlist(),
+          x = map_dbl(centre, ~ .x[1]),
+          y = map_dbl(centre, ~ .x[2]),
           color = category),
         inherit.aes = F) } +
     { if ("text" %in% annotate_inferred_category_means)
@@ -366,8 +368,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
             ungroup() %>%
             distinct(group, category, centre),
           aes(
-            x = map(centre, ~ .x[1]) %>% unlist(),
-            label= map(centre, ~ paste(signif(.x[1], 2))),
+            x = map_dbl(centre, ~ .x[1]),
+            label = map(centre, ~ paste(signif(.x[1], 2))),
             color = category),
           y = min.cue2,
           angle = 90,
@@ -378,7 +380,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
             ungroup() %>%
             distinct(group, category, centre),
           aes(
-            y = map(centre, ~ .x[2]) %>% unlist(),
+            y = map_dbl(centre, ~ .x[2]),
             label= map(centre, ~ paste(signif(.x[2], 2))),
             color = category),
           x = min.cue1,
