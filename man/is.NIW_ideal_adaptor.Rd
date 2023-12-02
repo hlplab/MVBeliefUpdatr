@@ -45,9 +45,6 @@ rate and lapse bias is part of the ideal adaptor.
 So far, the ideal adaptor is assumed to have perfect certainty about the prior, lapse rate and lapse bias (if present).
 Future implementations might allow uncertainty over these parameters.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

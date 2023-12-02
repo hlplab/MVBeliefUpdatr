@@ -39,9 +39,6 @@ group variable (e.g., subject or exposure group), respectively. If available,
 that information is returned. `get_category_levels_from_stanfit()` and `get_group_levels_from_stanfit()` are
 convenience functions, calling `get_original_variable_levels_from_stanfit()`.
 }
-\examples{
-TBD
-}
 \seealso{
 \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_constructor}}
 }

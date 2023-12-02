@@ -39,8 +39,6 @@ get_expected_columns_for_model <- function() c("prior", "lapse_rate", "lapse_bia
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 is.model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))

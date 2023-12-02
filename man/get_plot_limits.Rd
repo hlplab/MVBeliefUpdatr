@@ -15,10 +15,6 @@ List with elements x and y, each of which is a vector of two values..
 \description{
 Get x and y limits from a ggplot.
 }
-\examples{
-TBD
-
-}
 \seealso{
 TBD
 }

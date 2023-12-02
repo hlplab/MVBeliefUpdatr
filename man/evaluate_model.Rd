@@ -44,9 +44,6 @@ log-likelihoods of all unique inputs `x`.
 Evaluate the fit of a categorization model against a ground truth (e.g., human responses or the category intended
 by a talker).
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

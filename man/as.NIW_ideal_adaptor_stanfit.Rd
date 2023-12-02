@@ -21,9 +21,6 @@ NIW_ideal_adaptor_stanfit object
 \description{
 Combines a \code{\link[rstan]{stanfit}} object and its input into an \code{\link{NIW_ideal_adaptor_stanfit}} object.
 }
-\examples{
-TBD
-}
 \seealso{
 \code{\link[rstan]{stanfit}}
 }

@@ -19,9 +19,6 @@ A logical.
 \description{
 Check whether \code{x} is a set of exemplar categories.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

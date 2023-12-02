@@ -22,9 +22,6 @@ A function.
 Returns the transform/untransform information handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
 object.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

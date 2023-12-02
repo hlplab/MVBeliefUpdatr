@@ -79,9 +79,6 @@ to be the expected category mean (mu) and covariance (Sigma), and derives the m 
 of the NIW from mu and Sigma based on the user-provided kappa and nu. That means m = mu and S = Sigma * (nu - D -1),
 where D is the dimensionality of the data.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

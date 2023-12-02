@@ -172,8 +172,6 @@ make_named_square_matrix = function(x, names) {
 #' @return Same as \code{data}.
 #'
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 make_vector_column = function(data, cols, vector_col, .keep = "all") {
   # CHECK: expand to also handle quo input. (each instance of calls then needs to change)
@@ -205,8 +203,6 @@ make_vector_column = function(data, cols, vector_col, .keep = "all") {
 #' @return A matrix.
 #'
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname get_sum_of_squares_from_df
 #' @export
 get_sum_of_squares_from_df <- function(data, variables = NULL, center = T, verbose = F) {
@@ -264,8 +260,6 @@ get_sum_of_centered_squares_from_df <- function(data, variables = NULL, verbose 
 #' uncentered and centered sums-of-squares and the covariance matrix (or, for univariate, stimuli: the standard deviation).
 #'
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 get_sufficient_category_statistics <- function(
   data,
@@ -344,7 +338,7 @@ get_sufficient_category_statistics <- function(
 #' @examples TBD
 #' @rdname transform_cues
 #' @importFrom tidyselect all_of
-#' @importFrom dplyr cross_join
+#' @importFrom dplyr across cross_join
 #' @export
 transform_cues <- function(
     data, cues,
@@ -565,8 +559,6 @@ untransform_cues <- function(
 #' @return A model, category mean, or covariance matrix of the same type as the input.
 #'
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname transform_model
 #' @export
 transform_model <- function(model, transform) {

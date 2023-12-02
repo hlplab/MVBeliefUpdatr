@@ -37,7 +37,4 @@ A model, category mean, or covariance matrix of the same type as the input.
 Applies the transformation specified in \code{transform} object (e.g., centering, scaling, PCA) to the category
 mean(s) and/or covariance(s) in the model.
 }
-\examples{
-TBD
-}
 \keyword{TBD}

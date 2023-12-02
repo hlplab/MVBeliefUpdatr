@@ -19,9 +19,6 @@ A logical.
 \description{
 Check whether \code{x} is a model with lapse rates, biases, priors, and perceptual noise.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

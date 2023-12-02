@@ -118,8 +118,6 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) { S_0 + x_S
 #' \code{\link{update_NIW_belief_S}}, all of which are called by \code{update_NIW_belief_by_sufficient_statistics_of_one_category}.
 #' @keywords belief-updating NIW Normal-Inverse Wishart
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @examples
-#' TBD
 #' @rdname update_NIW_belief
 #' @export
 update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
@@ -291,8 +289,6 @@ update_NIW_belief_by_one_observation = function(
 #' @seealso \code{\link{update_NIW_belief_by_one_observation}}, which is called by \code{update_NIW_beliefs_incrementally}
 #' @keywords belief-updating NIW Normal-Inverse Wishart
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @examples
-#' TBD
 #' @export
 update_NIW_ideal_adaptor_incrementally <- function(
   prior,

@@ -30,9 +30,6 @@ ggplot object.
 \description{
 Plot the parameters of an NIW_belief or NIW_beliefs object.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

@@ -18,8 +18,6 @@ get_expected_columns_for_MVG_ideal_observer <- function() append(get_expected_co
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 is.MVG_ideal_observer <- function(x, group = NULL, category = "category", is.long = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))

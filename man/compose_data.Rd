@@ -96,9 +96,6 @@ exposure to one set of those exposure tokens. To achieve this intended outcome, 
 \code{group.unique} to identify groups with identical exposure. This will correctly use only one unique instance of the
 observations that any level of \code{group} receives during exposure.
 }
-\examples{
-TBD
-}
 \seealso{
 \code{\link{is.NIW_ideal_adaptor_input}}
 }

@@ -209,6 +209,8 @@ nest_cue_information_in_model <- function(model) {
 }
 
 #' @rdname nest_model
+#' @importFrom tidyr pivot_longer
+#' @importFrom dplyr across transmute
 #' @export
 unnest_cue_information_in_model <- function(model) {
   if (is.MVG(model) | is.MVG_ideal_observer(model)) {
@@ -269,8 +271,6 @@ format_input_for_likelihood_calculation <- function(x) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname get_posterior_from_model
 #' @export
 get_posterior_from_model <- function(model, ...) {
@@ -315,8 +315,6 @@ get_posterior_from_model <- function(model, ...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname get_categorization_from_model
 #' @export
 get_categorization_from_model <- function(model, ...) {
@@ -364,8 +362,6 @@ get_categorization_from_model <- function(model, ...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname evaluate_model
 #' @export
 evaluate_model <- function(model, x, response_category, method = "likelihood-up-to-constant", ..., return_by_x = F) {

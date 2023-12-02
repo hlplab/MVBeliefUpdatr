@@ -79,9 +79,6 @@ different priors for different talkers (grouping by talker), or different poster
 (grouping by exposure condition), the incremental updating of NIW beliefs (grouping by observations), or any combinations
 of these.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

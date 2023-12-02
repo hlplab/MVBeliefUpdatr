@@ -39,8 +39,6 @@ example_exemplar_model <- function(example = 1) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @importFrom rlang :=
 #' @importFrom tidyr as_tibble
 #' @export
@@ -80,8 +78,6 @@ get_likelihood_from_exemplars <- function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 get_categorization_from_exemplar_model <- function(
   x,

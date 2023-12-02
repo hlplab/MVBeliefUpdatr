@@ -12,9 +12,6 @@ A logical.
 \description{
 Check whether \code{x} is of class \code{NIW_ideal_adaptor_stanfit}.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

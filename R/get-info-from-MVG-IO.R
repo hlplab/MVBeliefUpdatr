@@ -62,8 +62,6 @@ example_MVG_ideal_observer <- function(example = 1) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname get_MVG_likelihood
 #' @export
 get_MVG_likelihood <- function(

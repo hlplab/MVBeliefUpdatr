@@ -46,8 +46,6 @@ logit2probability <- function(l, refcat = 1)
 #' @return A model object.
 #'
 #' @keywords updating, decision bias, response bias
-#' @examples
-#' TBD
 #' @rdname update_model_decision_bias
 #' @importFrom rlang .data .env
 #' @export
@@ -61,6 +59,10 @@ update_model_decision_bias_by_one_observation <- function(
     update_prior = T,
     verbose = F
 ) {
+  # Binding variables that RMD Check gets confused about otherwise
+  # (since they are in non-standard evaluations)
+  observationID <- response <- delta_logodds <- NULL
+
   assert_that(all(is_scalar_character(noise_treatment)), is_scalar_character(lapse_treatment))
   if (any(noise_treatment != "no_noise", lapse_treatment != "no_lapses")) {
     # implement check that this is a model
@@ -89,7 +91,7 @@ update_model_decision_bias_by_one_observation <- function(
       lapse_bias =
         logit2probability(
           probability2logit(.data$lapse_bias) +
-            ifelse(category == .env$x_category, +.data$delta_logodds, -.data$delta_logodds / (length(.data$category) - 1))),
+            ifelse(.data$category == .env$x_category, +.data$delta_logodds, -.data$delta_logodds / (length(.data$category) - 1))),
       # correct for rounding errors by re-normalizing
       lapse_bias = .data$lapse_bias / sum(.data$lapse_bias)) %>%
     { if (update_prior) {

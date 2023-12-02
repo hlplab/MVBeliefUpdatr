@@ -27,9 +27,6 @@ for a ggplot2 coordinate system, C is taken to be 0.
 
 Taken from https://www.mathworks.com/matlabcentral/fileexchange/57902-symlog.
 }
-\examples{
-TBD
-}
 \references{
 Webber (2012). Measurement Science and Technology .
 }

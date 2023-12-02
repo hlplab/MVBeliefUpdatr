@@ -38,9 +38,6 @@ A logical.
 Check whether \code{x} is an ideal observer with \link[=is.MVG]{multivariate Gaussian (MVG) categories}. Optionally, one can also check whether a lapse rate
 and lapse bias is part of the ideal observer.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

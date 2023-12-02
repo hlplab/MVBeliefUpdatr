@@ -13,8 +13,6 @@ get_expected_columns_for_exemplars <- function()
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 is.exemplars <- function(x, group = NULL, verbose = F) {
   name_of_x <- deparse(substitute(x))

@@ -55,9 +55,6 @@ the dimension of the multivariate Normal. Marginalizing across all MCMC samples
 (representing uncertainty in the true value of \code{S_n}), we get
 \code{E[E[Sigma]] = mean(S_n / (nu_n - D - 1))}.
 }
-\examples{
-TBD
-}
 \references{
 \insertRef{murphy2012}{MVBeliefUpdatr}
 }

@@ -30,9 +30,6 @@ NULL
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
-#'
 #' @rdname plot_ibbu_stanfit_parameters
 #' @export
 plot_ibbu_stanfit_parameters = function(
@@ -171,8 +168,6 @@ plot_ibbu_stanfit_parameters = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #'
 #' @export
 plot_ibbu_stanfit_parameter_correlations = function(
@@ -298,8 +293,6 @@ plot_ibbu_stanfit_parameter_correlations = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname plot_expected_ibbu_stanfit_categories_2D
 #' @export
 plot_expected_ibbu_stanfit_categories_2D = function(
@@ -587,8 +580,6 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname plot_ibbu_stanfit_test_categorization
 #' @export
 plot_ibbu_stanfit_test_categorization = function(

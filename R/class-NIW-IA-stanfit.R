@@ -33,8 +33,6 @@ NIW_ideal_adaptor_stanfit
 #' @return NIW_ideal_adaptor_stanfit object
 #'
 #' @seealso \code{\link[rstan]{stanfit}}
-#' @examples
-#' TBD
 #' @export
 as.NIW_ideal_adaptor_stanfit <- function(stanfit, input_data, transform_information = NULL) {
   assert_that(class(stanfit) %in% c("stanfit", "NIW_ideal_adaptor_stanfit"),
@@ -70,8 +68,6 @@ as.NIW_ideal_adaptor_stanfit <- function(stanfit, input_data, transform_informat
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 is.NIW_ideal_adaptor_stanfit <- function(x, verbose = F) {
   if (all(class(x) %in% c("stanfit", new_stanfit_class_name)))
@@ -88,8 +84,6 @@ is.NIW_ideal_adaptor_stanfit <- function(x, verbose = F) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 is.NIW_ideal_adaptor_MCMC <- function(x, is.nested = T, is.long = T, with.prior = F, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F) {
   if(
@@ -111,8 +105,6 @@ is.NIW_ideal_adaptor_MCMC <- function(x, is.nested = T, is.long = T, with.prior 
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 is.NIW_ideal_adaptor_input <- function(x) {
   message("Test of NIW_ideal_adaptor_input class not yet implemented. Always returning T.")
@@ -146,7 +138,7 @@ print.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
     pars <- grep("^(m|S)_0_param", pars, value = T, invert = T)
   }
 
-  print(kable(rstan::summary(x, pars = pars, ...)$summary))
+  rstan::summary(x, pars = pars, ...)$summary
 }
 
 

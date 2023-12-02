@@ -38,7 +38,4 @@ A list.
 Get sufficient statistics from data. Calculates the means and sum of squares matrices for the specified cues for
 any combination of groups (optional) and categories, and returns them as a list.
 }
-\examples{
-TBD
-}
 \keyword{TBD}

@@ -24,10 +24,6 @@ Vector with two values.
 \description{
 Useful for, for example, plotting of distribution.
 }
-\examples{
-TBD
-
-}
 \seealso{
 TBD
 }

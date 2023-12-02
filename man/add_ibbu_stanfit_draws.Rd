@@ -66,6 +66,7 @@ stored separately (`nest=TRUE`).
 }
 \examples{
 TBD
+
 }
 \references{
 \insertRef{murphy2012}{MVBeliefUpdatr}

@@ -43,9 +43,6 @@ Categorize a single observation based on an NIW ideal adaptor The decision rule 
 criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
 Luce's choice rule.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

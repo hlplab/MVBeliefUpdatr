@@ -90,9 +90,6 @@ pseudocounts indicating the strength of the prior beliefs into the mean (\code{k
 nu}), as well as the prior mean of means (\code{m}, same as \code{m_0} in Murphy, 2012) and the prior scatter
 matrix (\code{S}, same as \code{S_0} in Murphy, 2012).
 }
-\examples{
-TBD
-}
 \references{
 \insertRef{murphy2012}{MVBeliefUpdatr}
 }

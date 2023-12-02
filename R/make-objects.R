@@ -24,8 +24,6 @@ NULL
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 make_exemplars_from_data = function(
     data,
@@ -251,10 +249,7 @@ make_MVG_ideal_observer_from_data = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
-#'
 make_NIW_belief_from_data = function(
   data,
   group = NULL,
@@ -377,8 +372,6 @@ make_NIW_example = function(example = 1) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 #' @rdname lift_likelihood_to_model
 lift_likelihood_to_model <- function(
@@ -562,8 +555,6 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
 #' @return The aggregated object.
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 aggregate_models_by_group_structure = function(
   x,
@@ -642,7 +633,7 @@ sample_MVG_data <- function(
   if (is.null(cue.labels)) cue.labels = paste0("cue", 1:length(mus[[1]]))
 
   x <-
-    tibble(category = category.labels, n = Ns, mu = mus, Sigma = Sigmas) %>%
+    tibble("category" = category.labels, "n" = Ns, "mu" = mus, "Sigma" = Sigmas) %>%
     mutate(data = pmap(.l = list(.data$n, .data$mu, .data$Sigma), .f = rmvnorm)) %>%
     mutate(data = map(.data$data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
     unnest(data)

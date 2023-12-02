@@ -21,8 +21,6 @@ NULL
 #' Taken from https://www.mathworks.com/matlabcentral/fileexchange/57902-symlog.
 #'
 #' @references Webber (2012). Measurement Science and Technology .
-#' @examples
-#' TBD
 #' @rdname symlog
 #' @export
 symlog = function(x, C = 0) sign(x) * log10(1 + abs(x) / 10^C)
@@ -48,8 +46,6 @@ symlog_trans = function(){
 #'
 #' @return Character vector of color/linetype values in the order specified by `levels`.
 #'
-#' @examples
-#' TBD
 #' @rdname get_default_scale_values
 #' @export
 get_default_colors = function(var, levels) {
@@ -93,8 +89,6 @@ get_default_linetypes = function(var, levels) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #'
 #' @export
 get_plot_limits = function(plot) {
@@ -120,8 +114,6 @@ get_plot_limits = function(plot) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #'
 #' @export
 get_limits = function(data, measure, by = NULL, hdi.prob = .99, min = NULL, max = NULL) {
@@ -167,7 +159,7 @@ add_exposure_data_to_1D_plot <- function(
 ) {
   cue.labels[2] = "cue2"
   data %<>% mutate(cue2 = 0)
-  add_exposure_locations_to_2D_plot(data, cue.labels, category.ids, category.labels, category.colors)
+  add_exposure_data_to_2D_plot(data, cue.labels, category.ids, category.labels, category.colors)
 }
 
 #' @rdname add_data_to_plot
@@ -175,7 +167,7 @@ add_exposure_data_to_1D_plot <- function(
 add_test_data_to_1D_plot <- function(data, cue.labels) {
   cue.labels[2] = "cue2"
   data %<>% mutate(cue2 = 0)
-  add_test_locations_to_2D_plot(data, cue.labels)
+  add_test_data_to_2D_plot(data, cue.labels)
 }
 
 #' @rdname add_data_to_plot
@@ -298,8 +290,6 @@ facet_or_animate = function(p, facet_rows_by, facet_cols_by, facet_wrap_by, anim
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #'
 #' @export
 plot_pairwise_cue_correlation_matrix <- function(

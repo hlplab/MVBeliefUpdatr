@@ -14,8 +14,6 @@ get_expected_columns_for_MVG <- function() c("category", "mu", "Sigma")
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 is.MVG <- function(x, group = NULL, category = "category", is.long = T, verbose = F) {
   name_of_x <- deparse(substitute(x))

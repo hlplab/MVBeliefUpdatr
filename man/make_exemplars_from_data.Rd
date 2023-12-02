@@ -67,9 +67,6 @@ A tibble that is an MVG or MVG ideal observer object.
 \description{
 Constructs an exemplar model for all categories found in the data.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

@@ -25,9 +25,6 @@ and the response counts (one column per category) for all test tokens and all gr
 Returns the test data used during the creation of the \code{\link[rstan]{stanfit}}.
 object.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

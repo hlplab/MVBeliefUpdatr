@@ -60,9 +60,6 @@ is NULL, "marginalize" otherwise).}
 Get likelihood of observation(s) x given the MVG parameters mu and Sigma. This is the density of
 a multivariate normal distribution over k dimensions.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

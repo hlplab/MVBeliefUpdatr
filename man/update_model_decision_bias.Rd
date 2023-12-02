@@ -70,9 +70,6 @@ a posterior expectation for each category is obtained based on the specified noi
 is used to calculate the surprisal (in bits) of the category label x_category. The surprisal is weighted by the learning
 rate beta to increase the (log-odds of the) decision bias for that category.
 }
-\examples{
-TBD
-}
 \keyword{bias}
 \keyword{bias,}
 \keyword{decision}

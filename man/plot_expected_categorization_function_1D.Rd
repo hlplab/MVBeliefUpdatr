@@ -61,9 +61,6 @@ ggplot object.
 \description{
 Plot categorization function for univariate Gaussian categories expected given NIW parameters.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

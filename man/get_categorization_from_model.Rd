@@ -45,9 +45,6 @@ Categorize a single observation based a model. The decision rule can be specifie
 criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
 Luce's choice rule.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

@@ -82,8 +82,6 @@ get_test_counts <- function(test, cues, response, group, verbose = F) {
 #' @return A list.
 #'
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 get_sufficient_statistics_as_list_of_arrays <- function(
   data,
@@ -244,8 +242,6 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #'
 #' @seealso \code{\link{is.NIW_ideal_adaptor_input}}
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname compose_data
 #' @export
 compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(

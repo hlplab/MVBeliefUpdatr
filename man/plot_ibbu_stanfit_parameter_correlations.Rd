@@ -34,10 +34,6 @@ ggplot object.
 \description{
 Plot correlations between post-warmup MCMC samples for all parameters representing the prior and/or posterior beliefs.
 }
-\examples{
-TBD
-
-}
 \seealso{
 TBD
 }
