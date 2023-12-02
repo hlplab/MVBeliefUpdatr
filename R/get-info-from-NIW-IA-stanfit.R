@@ -540,7 +540,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws <- function(fit, ...
 #' @seealso TBD
 #' @keywords TBD
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @examples TBD
+#'
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom tidyselect ends_with

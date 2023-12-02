@@ -70,9 +70,6 @@ is NULL, "marginalize" otherwise).}
 Get posterior predictive of observations x given the NIW parameters m, S, kappa, and nu. This is
 the density of a multivariate Student-T distribution \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
 }
-\examples{
-TBD
-}
 \references{
 \insertRef{murphy2012}{MVBeliefUpdatr}
 }

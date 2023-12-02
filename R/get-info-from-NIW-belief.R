@@ -133,7 +133,7 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' @seealso TBD
 #' @keywords TBD
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @examples TBD
+#'
 #' @rdname get_NIW_posterior_predictive
 #' @export
 get_NIW_posterior_predictive = function(
@@ -232,7 +232,7 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @rdname get_NIW_categorization_function
 #' @export
 get_NIW_categorization_function = function(

@@ -63,9 +63,6 @@ Yet another alternative would be to write a separate `Stan` program specifically
 relatively straightforward for data from a single talker, a hierarchical model for grouped data essentially requires an
 extension of the multivariate model approach implemented in `brms` and described in the preceding paragraph.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

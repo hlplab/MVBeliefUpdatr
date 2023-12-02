@@ -54,9 +54,6 @@ are also returned.
 The input is expected to be lists/vectors of parameters with the n-th element of each list/vector specifying the
 category label, number of observations, \code{mu}, and \code{Sigma} of the n-th Gaussian.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

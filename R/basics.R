@@ -11,7 +11,7 @@ NULL
 #'
 #' @seealso \code{\link{css2cov}}, \code{\link{cov2css}}, \code{\link{uss2css}}
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @export
 ss <- function(x, center = TRUE) {
   if (center) {
@@ -49,7 +49,7 @@ ss <- function(x, center = TRUE) {
 #'
 #' @seealso \code{\link{ss}}, \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}, \code{\link{cov2tau}}
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @rdname uss2css
 #' @export
 uss2css <- function(uss, n, mean) {
@@ -116,7 +116,7 @@ cov2css <- function(cov, n) {
 #' @seealso \code{\link[stats]{cov2cor}}, \code{\link{cov2tau}}
 #' @references \url{https://stats.stackexchange.com/questions/62850/obtaining-covariance-matrix-from-correlation-matrix}
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @export
 cor2cov = function(omega, tau) {
   assert_that(is.matrix(omega))
@@ -139,7 +139,7 @@ cor2cov = function(omega, tau) {
 #'
 #' @seealso \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @export
 cov2tau = function(v) {
   assert_that(is.matrix(v))
@@ -335,7 +335,7 @@ get_sufficient_category_statistics <- function(
 #' function(s) have the name "(un)transform.function".
 #'
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @rdname transform_cues
 #' @importFrom tidyselect all_of
 #' @importFrom dplyr across cross_join

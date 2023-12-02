@@ -15,9 +15,6 @@ A numeric vector.
 \description{
 Get vector of standard deviations from covariance matrix.
 }
-\examples{
-TBD
-}
 \seealso{
 \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}
 }

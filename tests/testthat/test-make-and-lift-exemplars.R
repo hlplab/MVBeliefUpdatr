@@ -1,3 +1,6 @@
+#' @import curl
+#' @import remotes
+
 context("make and lift exemplars and exemplar models")
 
 library(curl)

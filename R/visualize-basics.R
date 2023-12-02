@@ -146,7 +146,7 @@ ellipse.pmap = function(x, centre, level, ...)
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples TBD
+#'
 #'
 #' @importFrom purrr map_dbl
 #' @rdname add_data_to_plot
@@ -299,6 +299,9 @@ plot_pairwise_cue_correlation_matrix <- function(
   category = category,
   category.colors = 1:length(unique(data$category))
 ) {
+  # Binding variables that RMD Check gets confused about otherwise
+  # (since they are in non-standard evaluations)
+  .panel_x <- .panel_y <- NULL
   cues = enquos(cues)
   category = enquo(category)
 

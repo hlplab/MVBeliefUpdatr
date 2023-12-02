@@ -213,6 +213,10 @@ nest_cue_information_in_model <- function(model) {
 #' @importFrom dplyr across transmute
 #' @export
 unnest_cue_information_in_model <- function(model) {
+  # Binding variables that RMD Check gets confused about otherwise
+  # (since they are in non-standard evaluations)
+  cue <- cue2 <- NULL
+
   if (is.MVG(model) | is.MVG_ideal_observer(model)) {
     m <- "mu"
     S <- "Sigma"

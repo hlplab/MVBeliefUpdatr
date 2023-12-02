@@ -73,7 +73,4 @@ actions for the specific cues. This can be helpful if one wants to store those f
 transform function can return both the transform and untransform functions necessary to perform the specified
 centering, scaling, and/or pca \emph{and} to undo those transformations.
 }
-\examples{
-TBD
-}
 \keyword{TBD}

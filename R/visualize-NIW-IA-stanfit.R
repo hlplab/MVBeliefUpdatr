@@ -30,9 +30,10 @@ NULL
 #'
 #' @seealso TBD
 #' @keywords TBD
+#'
 #' @rdname plot_ibbu_stanfit_parameters
 #' @export
-plot_ibbu_stanfit_parameters = function(
+plot_ibbu_stanfit_parameters <- function(
   model,
   categories = get_category_levels_from_stanfit(model),
   groups = get_group_levels_from_stanfit(model, include_prior = T),
@@ -42,6 +43,10 @@ plot_ibbu_stanfit_parameters = function(
   panel_scaling = F,
   group.colors = get_default_colors("group", groups)
 ) {
+  # Binding variables that RMD Check gets confused about otherwise
+  # (since they are in non-standard evaluations)
+  .draw <- group <- category <- cue <- cue2 <- kappa <- nu <- m <- S <- lapse_rate <- x.limits <- NULL
+
   d.pars <-
     model %>%
     add_ibbu_stanfit_draws(
@@ -50,7 +55,8 @@ plot_ibbu_stanfit_parameters = function(
       untransform_cues = untransform_cues,
       nest = F)
 
-  p.m <- d.pars %>%
+  p.m <-
+    d.pars %>%
     select(.draw, group, category, cue, m) %>%
     distinct() %T>%
     { get_limits(., "m") ->> x.limits } %>%
@@ -582,7 +588,10 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
+#'
 #' @rdname plot_ibbu_stanfit_test_categorization
+#' @importFrom dplyr do right_join
+#' @importFrom purrr invoke_map
 #' @export
 plot_ibbu_stanfit_test_categorization = function(
   model,

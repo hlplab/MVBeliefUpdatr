@@ -1,3 +1,6 @@
+#' @import curl
+#' @import remotes
+
 context("make and lift MVGs and MVG models")
 
 library(curl)

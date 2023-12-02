@@ -142,7 +142,7 @@ make_exemplar_model_from_data = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @export
 make_MVG_from_data = function(
   data,
@@ -250,7 +250,7 @@ make_MVG_ideal_observer_from_data = function(
 #' @seealso TBD
 #' @keywords TBD
 #' @export
-make_NIW_belief_from_data = function(
+make_NIW_belief_from_data <- function(
   data,
   group = NULL,
   category = "category",
@@ -270,15 +270,15 @@ make_NIW_belief_from_data = function(
   model <-
     data %>%
     make_MVG_from_data(group = group, category = category, cues = cues, verbose = verbose) %>%
-    rename(m = mu, S = Sigma)
+    rename(all_of(c(m = "mu", S = "Sigma")))
 
   message("S is set so that the expected category covariance matrix Sigma matches the category covariance in the sample (given nu). ",
           "It might be safer to fit an Inverse-Wishart distribution to the entire set of covariance matrices.")
   model %<>%
     mutate(
-      kappa = kappa,
-      nu = nu,
-      S = get_S_from_expected_Sigma(S, nu)) %>%
+      kappa = .env$kappa,
+      nu = .env$nu,
+      S = get_S_from_expected_Sigma(.data$S, .env$nu)) %>%
     ungroup()
 
   if (!is.NIW_belief(model, group = group, verbose = verbose))
@@ -316,7 +316,7 @@ make_NIW_ideal_adaptor_from_data = function(
 #' Example NIW priors.
 #'
 #' @export
-make_NIW_example = function(example = 1) {
+make_NIW_example <- function(example = 1) {
   if (example == 1) {
     message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.")
     tibble(
@@ -328,7 +328,7 @@ make_NIW_example = function(example = 1) {
                matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
       lapse_rate = .05
     ) %>%
-      mutate(category = factor(category))
+      mutate(category = factor(.data$category))
   } else if (example == 2) {
     message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
             Same as Example 1, but with independent perceptual noise along both cue dimensions.")
@@ -342,7 +342,7 @@ make_NIW_example = function(example = 1) {
       lapse_rate = .05,
       Sigma_noise = list(matrix(c(1, 0, 0, .25), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))
     ) %>%
-      mutate(category = factor(category))
+      mutate(category = factor(.data$category))
   }
 }
 
@@ -517,7 +517,7 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
 
 #' @export
 #' @rdname lift_likelihood_to_model
-lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
+lift_MVG_ideal_observer_to_NIW_ideal_adaptor <- function(
   x,
   group = NULL,
   kappa, nu,
@@ -527,11 +527,11 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
               msg = "kappa and nu must be provided.")
 
   x %<>%
-    rename(m = mu, S = Sigma) %>%
+    rename(all_of(c(m = "mu", S = "Sigma"))) %>%
     mutate(
-      kappa = kappa,
-      nu = nu,
-      S = get_S_from_expected_Sigma(S, nu))
+      kappa = .env$kappa,
+      nu = .env$nu,
+      S = get_S_from_expected_Sigma(.data$S, .env$nu))
 
   if (!is.NIW_ideal_adaptor(x, group = group, verbose = verbose))
     warning("NOTE: The returned object does not appear to be an NIW ideal adaptor. For more information, try again with verbose = T.")
@@ -611,7 +611,7 @@ aggregate_models_by_group_structure = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @importFrom rlang .data
 #' @importFrom tidyselect everything
 #' @importFrom dplyr slice_sample
@@ -623,6 +623,10 @@ sample_MVG_data <- function(
   randomize.order = F,
   keep.input_parameters = F
 ) {
+  # Binding variables that RMD Check gets confused about otherwise
+  # (since they are in non-standard evaluations)
+  category <- n <- mu <- Sigma <- NULL
+
   assert_that(!is.null(mus), !is.null(Sigmas))
   assert_that(is.null(category.labels) | length(mus) == length(category.labels),
               msg = "Number of category labels mismatch number of mus.")

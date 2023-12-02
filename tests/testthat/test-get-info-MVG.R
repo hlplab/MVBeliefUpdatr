@@ -1,3 +1,6 @@
+#' @import curl
+#' @import remotes
+
 context("get information from MVG - INITIAL TEST ONLY")
 
 library(curl)

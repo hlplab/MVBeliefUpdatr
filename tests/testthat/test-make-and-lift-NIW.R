@@ -1,3 +1,6 @@
+#' @import curl
+#' @import remotes
+
 context("make and lift NIW and NIW models")
 
 library(curl)

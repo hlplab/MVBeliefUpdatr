@@ -48,10 +48,6 @@ assumed to be a phonetic cue. For the 2D functions, the x- and y-axes are assume
 phonetic cues. The difference between adding exposure and test data is whether the data are
 colored by the category (exposure) or not (test).
 }
-\examples{
-TBD
-
-}
 \seealso{
 TBD
 }
