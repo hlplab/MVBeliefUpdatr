@@ -107,7 +107,32 @@ update_model_decision_bias_by_one_observation <- function(
     ungroup()
 }
 
-#' @rdname update_model_decision_bias
+#' Update model's decision biases based on exposure data.
+#'
+#' Returns the model with updated decision biases.
+#'
+#' @param model A \code{\link[=is.model]{model}} object with decision biases.
+#' @param exposure \code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.
+#' @param exposure.category Name of variable in \code{data} that contains the category information. (default: "category")
+#' @param exposure.cues Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
+#' extracted from the prior object.
+#' @param exposure.order Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
+#' exposure data is assumed to be in the order in which it should be presented.
+#' @param noise_treatment Determines whether and how multivariate Gaussian noise is considered during categorization.
+#' See \code{\link{update_model_decision_bias_by_one_observation}}.
+#' @param lapse_treatment Determines whether attentional lapses can occur during which no updating occurs.
+#' See \code{\link{update_model_decision_bias_by_one_observation}}.
+#' @param keep.update_history Should the history of the updating be stored and returned? If so, the output is
+#' tibble with the one model for each exposure observation. This is useful, for example, if one wants to
+#' visualize the changes in the category parameters, posterior predictive, categorization function, or alike across time.
+#' (default: `TRUE`)
+#' @param keep.exposure_data Should the input data be included in the output? If `FALSE` then only the category and cue
+#' columns will be kept. If `TRUE` then all columns will be kept. (default: `FALSE`)
+#' @param verbose Should more informative output be provided?
+#'
+#' @return An model object.
+#'
+#' @seealso \code{\link{update_model_decision_bias_by_one_observation}}, which is called by \code{update_model_decision_bias_incrementally}
 #' @export
 update_model_decision_bias_incrementally <- function(
     model,

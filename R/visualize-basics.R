@@ -147,7 +147,6 @@ ellipse.pmap = function(x, centre, level, ...)
 #' @seealso TBD
 #' @keywords TBD
 #'
-#'
 #' @importFrom purrr map_dbl
 #' @rdname add_data_to_plot
 #' @export
