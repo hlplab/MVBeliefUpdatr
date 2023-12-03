@@ -1,23 +1,3 @@
-#' Example exemplar model.
-#'
-#' @export
-example_exemplar_model <- function(example = 1) {
-  if (example == 1) {
-    message("An example exemplar model for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
-            Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
-    example_MVG_ideal_observer(1) %>%
-      sample_MVG_data_from_model(Ns = 50) %>%
-      make_exemplar_model_from_data(
-        cues = c("cue1", "cue2"),
-        prior = c(.5, .5),
-        lapse_rate = .05,
-        lapse_bias = c(.5, .5),
-        Sigma_noise = list(NULL)) %>%
-      mutate(across(category, factor))
-  }
-}
-
-
 #' Get likelihood
 #'
 #' Get likelihood of observation(s) x given the exemplar model.

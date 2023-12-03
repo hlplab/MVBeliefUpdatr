@@ -3,7 +3,16 @@ context("get information from stanfit")
 source("../functions-to-make-or-load-models.R")
 fit <- get_example_stanfit()
 
-test_that("test fit class", {
+test_that("Test is.NIW_ideal_adaptor_stanfit", {
+  expect_false(is.NIW_ideal_adaptor_stanfit(NULL))
+  expect_false(is.NIW_ideal_adaptor_stanfit(NA))
+  expect_false(is.NIW_ideal_adaptor_stanfit(1))
+  expect_false(is.NIW_ideal_adaptor_stanfit("1"))
+  expect_false(is.NIW_ideal_adaptor_stanfit(TRUE))
+  expect_false(is.NIW_ideal_adaptor_stanfit(list(1)))
+  expect_false(is.NIW_ideal_adaptor_stanfit(example_exemplar_model(1)))
+  expect_false(is.NIW_ideal_adaptor_stanfit(example_MVG_ideal_observer(1)))
+  expect_false(is.NIW_ideal_adaptor_stanfit(example_NIW_ideal_adaptor(1)))
   expect_true(is.NIW_ideal_adaptor_stanfit(fit))
 })
 

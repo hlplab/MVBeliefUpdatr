@@ -23,6 +23,10 @@ is.MVG_ideal_observer <- function(x, group = NULL, category = "category", is.lon
   name_of_x <- deparse(substitute(x))
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
 
+  if (!is.model(x, group = group, verbose = verbose, tolerance = tolerance)) {
+    return(FALSE)
+  }
+
   # When no groups are specified, infer groups from object.
   if (is.null(group)) {
     group <- setdiff(names(x), get_expected_columns_for_MVG_ideal_observer())
@@ -48,10 +52,6 @@ is.MVG_ideal_observer <- function(x, group = NULL, category = "category", is.lon
   }
 
   if (any(!is.factor(get(category, x)))) return(FALSE)
-
-  if (!is.model(x, group = group, verbose = verbose, tolerance = tolerance)) {
-    return(FALSE)
-  }
 
   return(TRUE)
 }

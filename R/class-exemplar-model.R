@@ -18,6 +18,10 @@ get_expected_columns_for_exemplar_model <- function() append(get_expected_column
 is.exemplar_model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
 
+  if (!is.model(x, group = group, verbose = verbose, tolerance = tolerance)) {
+    return(FALSE)
+  }
+
   # When no groups are specified, infer groups from object.
   if (is.null(group)) {
     group <- setdiff(names(x), get_expected_columns_for_exemplar_model())
@@ -44,10 +48,6 @@ is.exemplar_model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
 
   if (any(!is.factor(x$category))) {
     if (verbose) message(paste("category must be a factor."))
-    return(FALSE)
-  }
-
-  if (!is.model(x, group = group, verbose = verbose, tolerance = tolerance)) {
     return(FALSE)
   }
 

@@ -8,6 +8,19 @@ if (has_internet()) remotes::install_github("joeystanley/joeysvowels")
 library(joeysvowels)
 data("idahoans")
 
+test_that("Test is.exemplar_model", {
+  expect_false(is.exemplar_model(NULL))
+  expect_false(is.exemplar_model(NA))
+  expect_false(is.exemplar_model(1))
+  expect_false(is.exemplar_model("1"))
+  expect_false(is.exemplar_model(TRUE))
+  expect_false(is.exemplar_model(list(1)))
+  expect_true(is.exemplar_model(example_exemplar_model(1)))
+  expect_false(is.exemplar_model(example_MVG_ideal_observer(1)))
+  expect_false(is.exemplar_model(example_NIW_ideal_adaptor(1)))
+  #  expect_false(is.exemplar_model(example_NIW_ideal_adaptor_stanfit(1)))
+})
+
 test_that("make exemplars", {
   expect_true(is_tibble(make_exemplars_from_data(idahoans, category = "vowel", cues = c("F1"))))
   expect_true(is_tibble(make_exemplars_from_data(idahoans, category = "vowel", cues = c("F1", "F2"))))

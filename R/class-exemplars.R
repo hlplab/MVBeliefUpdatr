@@ -17,6 +17,11 @@ get_expected_columns_for_exemplars <- function()
 is.exemplars <- function(x, group = NULL, verbose = F) {
   name_of_x <- deparse(substitute(x))
 
+  if (!is_tibble(x)) {
+    if (verbose) message("Object is not a tibble.")
+    return(FALSE)
+  }
+
   if (!is.null(group)) {
     if (verbose) message("Checking whether ", name_of_x, " is a collection of exemplars within each unique combination of group values.")
     x %<>% group_by(!!! syms(group))

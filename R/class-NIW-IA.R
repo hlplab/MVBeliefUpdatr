@@ -29,6 +29,10 @@ is.NIW_ideal_adaptor = function(x, group = NULL, category = "category", is.long 
   name_of_x <- deparse(substitute(x))
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
 
+  if (!is.model(x, group = group, verbose = verbose, tolerance = tolerance)) {
+    return(FALSE)
+  }
+
   # When no groups are specified, infer groups from object.
   if (is.null(group)) {
     group <- setdiff(names(x), get_expected_columns_for_NIW_ideal_adaptor())
@@ -59,10 +63,6 @@ is.NIW_ideal_adaptor = function(x, group = NULL, category = "category", is.long 
   }
 
   if (any(!is.factor(get(category, x)))) return(FALSE)
-
-  if (!is.model(x, group = group, verbose = verbose, tolerance = tolerance)) {
-    return(FALSE)
-  }
 
   return(TRUE)
 }

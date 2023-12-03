@@ -45,6 +45,11 @@ get_expected_columns_for_model <- function() c("prior", "lapse_rate", "lapse_bia
 is.model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
 
+  if (!is_tibble(x)) {
+    if (verbose) message("Object is not a tibble. All MVBeliefUpdatr models are stored in tibbles.")
+    return(FALSE)
+  }
+
   if (verbose) message("Checking whether ", name_of_x, " has all the column names required for a model.")
   if (!all(c("prior", "lapse_rate", "lapse_bias", "Sigma_noise") %in% names(x))) return(FALSE)
 

@@ -1,6 +1,97 @@
 #' @importFrom dplyr rename_all
 NULL
 
+#' Example exemplar model.
+#'
+#' @export
+example_exemplar_model <- function(example = 1) {
+  if (example == 1) {
+    message("An example exemplar model for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
+            Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
+    example_MVG_ideal_observer(1) %>%
+      sample_MVG_data_from_model(Ns = 50) %>%
+      make_exemplar_model_from_data(
+        cues = c("cue1", "cue2"),
+        prior = c(.5, .5),
+        lapse_rate = .05,
+        lapse_bias = c(.5, .5),
+        Sigma_noise = NULL) %>%
+      mutate(across(category, factor))
+  }
+}
+
+
+#' Example MVG ideal observers.
+#'
+#' @export
+example_MVG_ideal_observer <- function(example = 1) {
+  if (example == 1) {
+    message("An example MVG ideal observer for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
+    tibble(
+      category = c("A", "B"),
+      mu = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
+      Sigma = list(
+        matrix(c(3, 2.4, 2.4, 3), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+        matrix(c(3, -2.4, -2.4, 3), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
+      prior = c(.5, .5),
+      lapse_rate = .05,
+      lapse_bias = c(.5, .5),
+      Sigma_noise = list(
+        matrix(rep(0, 4), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+        matrix(rep(0, 4), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))) %>%
+      mutate(across(category, factor))
+  } else if (example == 2) {
+    message("An example MVG ideal observer for two categories in a 1D cue continuum. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
+    tibble(
+      category = c("/d/", "/t/"),
+      mu = list(c("VOT" = 5), c("VOT" = 50)),
+      Sigma = list(matrix(c(80), nrow = 1, dimnames = list(c("VOT"), c("VOT"))),
+                   matrix(c(340), nrow = 1, dimnames = list(c("VOT"), c("VOT")))),
+      prior = c(.5, .5),
+      lapse_rate = .05,
+      lapse_bias = c(.5, .5),
+      Sigma_noise = list(
+        matrix(c(0), nrow = 1, dimnames = list(c("VOT"), c("VOT"))),
+        matrix(c(0), nrow = 1, dimnames = list(c("VOT"), c("VOT"))))) %>%
+      mutate(category = factor(category))
+  }
+}
+
+
+#' Example NIW priors.
+#'
+#' @export
+example_NIW_ideal_adaptor <- function(example = 1) {
+  if (example == 1) {
+    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.")
+    tibble(
+      category = c("A", "B"),
+      kappa = 10,
+      nu = 30,
+      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
+      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
+      lapse_rate = .05
+    ) %>%
+      mutate(category = factor(.data$category))
+  } else if (example == 2) {
+    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
+            Same as Example 1, but with independent perceptual noise along both cue dimensions.")
+    tibble(
+      category = c("A", "B"),
+      kappa = 10,
+      nu = 30,
+      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
+      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
+      lapse_rate = .05,
+      Sigma_noise = list(matrix(c(1, 0, 0, .25), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))
+    ) %>%
+      mutate(category = factor(.data$category))
+  }
+}
+
+
 #' Make exemplar models from data.
 #'
 #' Constructs an exemplar model for all categories found in the data.
@@ -310,40 +401,6 @@ make_NIW_ideal_adaptor_from_data = function(
   model %<>% lift_NIW_belief_to_NIW_ideal_adaptor(group = group, ..., verbose = verbose)
 
   return(model)
-}
-
-
-#' Example NIW priors.
-#'
-#' @export
-make_NIW_example <- function(example = 1) {
-  if (example == 1) {
-    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.")
-    tibble(
-      category = c("A", "B"),
-      kappa = 10,
-      nu = 30,
-      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
-      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
-               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
-      lapse_rate = .05
-    ) %>%
-      mutate(category = factor(.data$category))
-  } else if (example == 2) {
-    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
-            Same as Example 1, but with independent perceptual noise along both cue dimensions.")
-    tibble(
-      category = c("A", "B"),
-      kappa = 10,
-      nu = 30,
-      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
-      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
-               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
-      lapse_rate = .05,
-      Sigma_noise = list(matrix(c(1, 0, 0, .25), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))
-    ) %>%
-      mutate(category = factor(.data$category))
-  }
 }
 
 
