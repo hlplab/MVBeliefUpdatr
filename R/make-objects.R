@@ -529,6 +529,8 @@ lift_MVG_to_MVG_ideal_observer = function(
   Sigma_noise = NULL,
   verbose = F
 ) {
+  assert_that(is.MVG(x), group = group, verbose = verbose)
+
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(Sigma_noise) == dim(first(x$Sigma))),
@@ -547,7 +549,7 @@ lift_MVG_to_MVG_ideal_observer = function(
 
 #' @export
 #' @rdname lift_likelihood_to_model
-lift_NIW_belief_to_NIW_ideal_adaptor = function(
+lift_NIW_belief_to_NIW_ideal_adaptor <- function(
   x,
   group = NULL,
   prior = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
@@ -556,6 +558,8 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   Sigma_noise = NULL,
   verbose = F
 ) {
+  assert_that(is.NIW_belief(x), group = group, verbose = verbose)
+
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(Sigma_noise) == dim(first(x$S))),

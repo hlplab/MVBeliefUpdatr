@@ -1,4 +1,7 @@
 VERY IMPORTANT
++++ change handling of cue naming in mu, Sigma, Sigma_noise, m, S. Use attributes instead of naming each column.
++++ think about whether difference between univariate and multivariate models should best be handled by the umbrella functions for sampling/density/etc. Additionally, make print functions for model objects that simplify the output rather than going through the trouble of storing the mu, Sigma, Sigma_noise, m, S columns differently depending on whether they are univariate or multivariate.
+
 +++++ transform_cues doesn't work if center = F and return UNtransform.function = T
 
 

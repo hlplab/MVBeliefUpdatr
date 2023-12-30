@@ -84,19 +84,27 @@ get_expected_Sigma_from_S = function(S, nu) {
 #'
 #' @rdname get_expected_Sigma_from_S
 #' @export
-get_S_from_expected_Sigma = function(Sigma, nu) {
+get_S_from_expected_Sigma <- function(Sigma, nu) {
   if (!is.list(Sigma)) {
     # in case the input is not a list
     Sigma <- list(Sigma)
     nu <- list(nu)
   }
 
-  S = map2(Sigma, nu, .f = function(Sigma, nu) {
+  S <-  map2(Sigma, nu, .f = function(Sigma, nu) {
     D = get_D(Sigma)
     return(Sigma * (nu - D - 1))
   })
 
-  if (all(map_lgl(S, ~ length(.x) == 1))) S <- unlist(S)
+  # if (all(map_lgl(S, ~ length(.x) == 1))) {
+  #   S <- map(
+  #     S,
+  #     function(x) {
+  #       x <- as.vector(x)
+  #       names(x) <- dimnames(Sigma[[1]])[1][[1]]
+  #       return(x)
+  #     })
+  # }
   if (length(S) == 1) S <- S[[1]]
   return(S)
 }

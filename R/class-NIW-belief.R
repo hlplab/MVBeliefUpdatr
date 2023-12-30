@@ -17,7 +17,7 @@ get_expected_columns_for_NIW_belief <- function()
 #' @seealso TBD
 #' @keywords TBD
 #' @export
-is.NIW_belief = function(x, group = NULL, category = "category", is.long = T, verbose = F) {
+is.NIW_belief <- function(x, group = NULL, category = "category", is.long = T, verbose = F) {
   name_of_x <- deparse(substitute(x))
   assert_that(is.flag(is.long))
 
