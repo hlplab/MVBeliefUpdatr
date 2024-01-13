@@ -503,6 +503,8 @@ lift_exemplars_to_exemplar_model <- function(
     Sigma_noise = NULL,
     verbose = F
 ) {
+  assert_that(is.exemplars(x, group = group, verbose = verbose))
+
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(!is.null(dimnames(first(x$Sigma_noise))),
@@ -529,7 +531,7 @@ lift_MVG_to_MVG_ideal_observer = function(
   Sigma_noise = NULL,
   verbose = F
 ) {
-  assert_that(is.MVG(x), group = group, verbose = verbose)
+  assert_that(is.MVG(x, group = group, verbose = verbose))
 
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
@@ -558,7 +560,7 @@ lift_NIW_belief_to_NIW_ideal_adaptor <- function(
   Sigma_noise = NULL,
   verbose = F
 ) {
-  assert_that(is.NIW_belief(x), group = group, verbose = verbose)
+  assert_that(is.NIW_belief(x, group = group, verbose = verbose))
 
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
@@ -584,6 +586,7 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor <- function(
   kappa, nu,
   verbose = F
 ) {
+  assert_that(is.MVG_ideal_observer(x, group = group, verbose = verbose))
   assert_that(!is.null(kappa), !is.null(nu),
               msg = "kappa and nu must be provided.")
 

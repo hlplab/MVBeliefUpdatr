@@ -8,7 +8,7 @@ if (has_internet()) remotes::install_github("joeystanley/joeysvowels")
 library(joeysvowels)
 data("idahoans")
 
-my_model <- make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1", "F2"))
+my_model <- make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1", "F2"), verbose = T)
 x.1 <- idahoans %>% mutate(x = map(F1, ~ c(...))) %>% pull(x)
 x.2 <- idahoans %>% mutate(x = map2(F1, F2, ~ c(...))) %>% pull(x)
 x.3 <- idahoans %>% mutate(x = pmap(.l = list(F1, F2, F3), ~ c(...))) %>% pull(x)
