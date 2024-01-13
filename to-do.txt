@@ -5,6 +5,25 @@ VERY IMPORTANT
 +++++ transform_cues doesn't work if center = F and return UNtransform.function = T
 
 
+IMPORTANT
++ could introduce class definitions for MVBU_representations and MVBU_models
+
+#' An S4 class for MVBeliefUpdatr representation objects
+#'
+#' @slot groups list of group labels
+#' @slot category_representations list of category representations
+#' @slot cue_labels list containing the cue labels
+#' @export
+MVBU_representation <-
+  setClass(
+    "MVBU_representation",
+    slots = c(groups = "list", category_representations = "list", cue_labels = "list"),
+    contains = "tibble",
+    package = "MVBeliefUpdatr")
+
+# Call class constructor function
+MVBU_representation
+
 EASY
 + consolidate forward ibbu plotting for 1d now that it's much more streamlined! (extract common components out of functions)
 

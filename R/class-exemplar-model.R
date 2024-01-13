@@ -18,7 +18,7 @@ get_expected_columns_for_exemplar_model <- function() append(get_expected_column
 is.exemplar_model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
 
-  if (!is.model(x, group = group, verbose = verbose, tolerance = tolerance)) {
+  if (!is.MVBU_model(x, group = group, verbose = verbose, tolerance = tolerance)) {
     return(FALSE)
   }
 
@@ -40,7 +40,7 @@ is.exemplar_model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
     return(FALSE)
   }
 
-  # Only need to test for exemplars columns here since is.model is called below.
+  # Only need to test for exemplars columns here since is.MVBU_model is called below.
   if (any(get_expected_columns_for_exemplars() %nin% names(x))) {
     if (verbose) message("x is missing a required column: ", paste(get_expected_columns_for_exemplars, collapse = ","))
     return(FALSE)

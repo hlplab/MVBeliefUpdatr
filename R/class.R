@@ -9,6 +9,8 @@ get_class <- function(x) {
       is.NIW_belief(x) ~ "NIW_belief",
       is.MVG_ideal_observer(x) ~ "MVG_ideal_observer",
       is.MVG(x) ~ "MVG",
+      is.exemplar_model(x) ~ "exemplar_model",
+      is.exemplars(x) ~ "exemplars",
       is.NIW_ideal_adaptor_stanfit(x) ~ new_stanfit_class_name,
       T ~ "Unrecognized class")
 
@@ -27,7 +29,37 @@ is.Sigma <- function(x) {
 
 get_expected_columns_for_model <- function() c("prior", "lapse_rate", "lapse_bias", "Sigma_noise")
 
-#' Is this a model?
+#' Is this an MVBeliefUpdatr representation?
+#'
+#' Check whether \code{x} is recognized as an MVBeliefUpdatr category representation.
+#'
+#' @param x Object to be checked.
+#' @param group Name of one or more group variables, each unique combination of which describes a model. (default: NULL)
+#' @param verbose Should verbose output be provided? (default: `TRUE`)
+#'
+#' @return A logical.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#'
+#' @importFrom purrr group_map
+#' @export
+is.MVBU_representation <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
+  name_of_x <- deparse(substitute(x))
+
+  if (!is.null(group)) {
+    if (verbose) message("Checking whether ", name_of_x, " is a model within each unique combination of group values.")
+    x %<>% group_by(!!! syms(group))
+  }
+
+  if (any(unlist(group_map(x, .f = ~ !(is.exemplars(.x) || is.MVG(.x) || is.NIW_belief(.x)))))) {
+    return(FALSE)
+  }
+
+  return(TRUE)
+}
+
+#' Is this an MVBeliefUpdatr model?
 #'
 #' Check whether \code{x} is a model with lapse rates, biases, priors, and perceptual noise.
 #'
@@ -42,7 +74,7 @@ get_expected_columns_for_model <- function() c("prior", "lapse_rate", "lapse_bia
 #'
 #' @importFrom purrr map_lgl
 #' @export
-is.model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
+is.MVBU_model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
 
   if (!is_tibble(x)) {
@@ -113,4 +145,21 @@ is.model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
   }
 
   return(TRUE)
+}
+
+#' Print MVBeliefUpdatr model
+#'
+#' Specifies reasonable defaults for the parameters to be summarized for the MVBeliefUpdatr_model object.
+#'
+#' @param x An \code{\link{MVBeliefUpdatr_model}} object.
+#'
+#' @export
+print.MVBU_model <- function(x, ...) {
+  assertthat(is.MVBU_model(x))
+
+  if (get_cue_dimensionality_from_model(x) == 1)
+    x %<>%
+    mutate(across(is.numeric, ~ unlist(.x)))
+
+  print(x)
 }

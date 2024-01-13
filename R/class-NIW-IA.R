@@ -29,7 +29,7 @@ is.NIW_ideal_adaptor = function(x, group = NULL, category = "category", is.long 
   name_of_x <- deparse(substitute(x))
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
 
-  if (!is.model(x, group = group, verbose = verbose, tolerance = tolerance)) {
+  if (!is.MVBU_model(x, group = group, verbose = verbose, tolerance = tolerance)) {
     return(FALSE)
   }
 

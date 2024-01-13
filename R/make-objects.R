@@ -485,7 +485,7 @@ lift_likelihood_to_model <- function(
       lapse_bias = .env$lapse_bias[as.character(.data$category)],
       Sigma_noise = list(.env$Sigma_noise))
 
-  if (!is.model(x, group = group, verbose = verbose))
+  if (!is.MVBU_model(x, group = group, verbose = verbose))
     warning("NOTE: The returned object does not appear to be an MVBeliefUpdatr model. For more information, try again with verbose = T.")
 
   return(x)

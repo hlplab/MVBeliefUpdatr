@@ -78,7 +78,7 @@ get_cue_labels_from_model <- function(x, indices = NULL) {
 #'
 #' @export
 get_category_labels_from_model <- function(x) {
-  if (is.MVG(x) | is.NIW_belief(x) | is.exemplars(x) | is.model(x)) {
+  if (is.MVBU_representation(x) | is.MVBU_model(x)) {
     return(sort(unique(x$category)))
   } else {
     error("Object not recognized.")
@@ -95,7 +95,7 @@ get_category_labels_from_model <- function(x) {
 #'
 #' @export
 get_nlevels_of_category_labels_from_model <- function(x) {
-  if (is.MVG(x) | is.NIW_belief(x) | is.exemplars(x) | is.model(x)) {
+  if (is.MVBU_representation(x) | is.MVBU_model(x)) {
     return(length(unique(x$category)))
   } else {
     error("Object not recognized.")

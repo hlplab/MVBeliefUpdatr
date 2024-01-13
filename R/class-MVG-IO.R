@@ -23,7 +23,7 @@ is.MVG_ideal_observer <- function(x, group = NULL, category = "category", is.lon
   name_of_x <- deparse(substitute(x))
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
 
-  if (!is.model(x, group = group, verbose = verbose, tolerance = tolerance)) {
+  if (!is.MVBU_model(x, group = group, verbose = verbose, tolerance = tolerance)) {
     return(FALSE)
   }
 
@@ -45,7 +45,7 @@ is.MVG_ideal_observer <- function(x, group = NULL, category = "category", is.lon
     return(FALSE)
   }
 
-  # Only need to test for MVG columns here since is.model is called below.
+  # Only need to test for MVG columns here since is.MVBU_model is called below.
   if (any(get_expected_columns_for_MVG() %nin% names(x))) {
     if (verbose) message(paste("x is missing a required column: ", paste(get_expected_columns_for_MVG, collapse = ",")))
     return(FALSE)

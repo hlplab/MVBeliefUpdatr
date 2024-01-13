@@ -111,7 +111,7 @@ update_model_decision_bias_by_one_observation <- function(
 #'
 #' Returns the model with updated decision biases.
 #'
-#' @param model A \code{\link[=is.model]{model}} object with decision biases.
+#' @param model A \code{\link[=is.MVBU_model]{model}} object with decision biases.
 #' @param exposure \code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.
 #' @param exposure.category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param exposure.cues Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
