@@ -19,11 +19,10 @@
 #' If the file already exists, the model from that file will be loaded and returned instead of refitting the model.
 #' As existing files won't be overwritten, you have to manually remove the file in order to refit and save the
 #' model under an existing file name. The file name is stored in the \code{NIW_ideal_adaptor_stanfit} object
-#' for later use. (default `NULL`)
+#' for later use. (default: `NULL`)
 #' @param model Name of stanmodel that should be used. Overrides any default selection.
-#' @param use_multivariate_updating Should multivariate updating be used? By default this option will be
-#' selecting if the relevant cues (after transformations, including PCA, if selected) have more than 1
-#' dimension.
+#' @param use_univariate_updating Should legacy univariate updating be used? Will throw an error if used in
+#' conjunction with multiple cues. (default: `FALSE`)
 #' @param ... Additional parameters are passed to \code{\link[rstan]{sampling}}
 #'
 #' @return \code{NIW_ideal_adaptor_stanfit} object with the fitted stan model.
@@ -38,9 +37,10 @@ infer_prior_beliefs <- function(
   lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
   tau_scale = 0, L_omega_scale = 0,
   data_list = NULL, transform_information = NULL,
-  sample = TRUE, file = NULL, model = NULL, use_multivariate_updating = NULL,
+  sample = TRUE, file = NULL, model = NULL, use_univariate_updating = FALSE,
   verbose = FALSE,
   ...) {
+  assert_that(is.logical(use_univariate_updating))
   if (!is.null(file)) {
     fit <- read_NIW_ideal_adaptor_stanfit(file)
     if (!is.null(fit)) {
@@ -76,6 +76,7 @@ infer_prior_beliefs <- function(
         Sigma_0 = Sigma_0,
         tau_scale = tau_scale,
         L_omega_scale = L_omega_scale,
+        use_univariate_updating = use_univariate_updating,
         verbose = verbose)
 
     if (is.null(transform_information)) {
@@ -93,8 +94,10 @@ infer_prior_beliefs <- function(
     }
   }
 
-  if (is.null(use_multivariate_updating))
-    use_multivariate_updating = if (is.null(data_list$K)) FALSE else TRUE
+  if (use_univariate_updating)
+    assert_that(
+      is.null(data_list$K),
+      msg = "Univariate updating cannot be used with multiple cues.")
 
   if (sample) {
     # Parameters *not* to store
@@ -103,13 +106,13 @@ infer_prior_beliefs <- function(
     if (!is.null(model)) {
       fit <- sampling(MVBeliefUpdatr:::stanmodels[[model]],
                       data = data_list, ...)
-    } else if (use_multivariate_updating) {
-      fit <- sampling(MVBeliefUpdatr:::stanmodels[['mvg_conj_sufficient_stats_lapse']],
-                         data = data_list, pars = pars, include = F, ...)
-    } else {
+    } else if (use_univariate_updating) {
       message("There might be an issue with the compose_data function for univariate models. look into it.")
       fit <- sampling(MVBeliefUpdatr:::stanmodels[['uvg_conj_uninformative_priors_sufficient_stats_lapse']],
-                             data = data_list, ...)
+                      data = data_list, ...)
+    } else {
+      fit <- sampling(MVBeliefUpdatr:::stanmodels[['mvg_conj_sufficient_stats_lapse']],
+                      data = data_list, pars = pars, include = F, ...)
     }
 
     if (is.null(fit)) stop("Sampling failed.")

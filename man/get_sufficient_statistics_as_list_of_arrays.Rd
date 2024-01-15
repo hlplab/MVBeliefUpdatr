@@ -9,6 +9,7 @@ get_sufficient_statistics_as_list_of_arrays(
   cues,
   category,
   group,
+  use_univariate_updating = F,
   verbose = F,
   ...
 )
