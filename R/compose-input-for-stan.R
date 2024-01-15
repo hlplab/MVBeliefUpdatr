@@ -88,6 +88,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
   cues,
   category,
   group,
+  use_univariate_updating = F,
   verbose = F,
   ...
 ) {
@@ -102,7 +103,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
     as_tibble(.name_repair = "minimal") %>%
     group_by(!! sym(category), !! sym(group))
 
-  if (length(cues) > 1) {
+  if (!use_univariate_updating) {
     # Multivariate observations
     data_ss %<>%
       summarise(
@@ -253,6 +254,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
   tau_scale = 0, # rep(5, length(cues)),
   L_omega_scale = 0,
+  use_univariate_updating = FALSE,
   verbose = F
 ) {
   if ((!center.observations | !scale.observations) & (tau_scale == 0 | L_omega_scale == 0))
@@ -344,7 +346,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     }
     assert_that(all(map_lgl(Sigma_0, is.numeric), map_lgl(Sigma_0, ~ length(dim(.x)) == 2)),
                 msg = "If Sigma_0 is a list, each element must be a k x k matrix.")
-    assert_that(all(map_lgl(Sigma_0, ~ dim(.x) == length(cues))),
+    assert_that(all(map_lgl(Sigma_0, ~ all(dim(.x) == length(cues)))),
                 msg = paste(
                   "At least one element of Sigma_0 does not have the correct dimensionality. Observations have",
                   length(cues),
@@ -425,13 +427,14 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
     }
   }
 
-  if (length(cues) > 1) {
+  if (length(cues) > 1 || !use_univariate_updating) {
     data_list <-
       exposure %>%
       get_sufficient_statistics_as_list_of_arrays(
         cues = cues,
         category = category,
         group = group,
+        use_univariate_updating = F,
         verbose = verbose,
         # The part below currently is ignored by get_sufficient_statistics_as_list_of_arrays. If the same syntax as for univariate input could
         # also work for multivariate input to get_sufficient_statistics_as_list_of_arrays that would be more
@@ -469,10 +472,10 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
         L_omega_scale <- L_omega_scale
       })
   } else {
-    message("For univariate input, beliefupdatr is run with legacy parameter names. This might change in the future.")
     data_list <- exposure %>%
       get_sufficient_statistics_as_list_of_arrays(
         cues = cues, category = category, group = group,
+        use_univariate_updating = T,
         verbose = verbose,
         xbar = mean, n = length, xsd = sd) %>%
       within({

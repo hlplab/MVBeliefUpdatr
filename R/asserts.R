@@ -24,13 +24,13 @@ assert_NIW_ideal_adaptor = function(x, category = "category", verbose = F) {
               msg = paste(deparse(substitute(x)), "must be an NIW_ideal_adaptor object."))
 }
 
-assert_NIW_ideal_adaptor_stanfit = function(x, verbose = F) {
+assert_NIW_ideal_adaptor_stanfit <- function(x, verbose = F) {
   assert_that(is.NIW_ideal_adaptor_stanfit(x, verbose = verbose),
               msg = paste(deparse(substitute(x)), "must be of class", new_stanfit_class_name))
 }
 
 #' @export
-assert_cols_in_data = function(data, cols, which.data = "the", scalar = T) {
+assert_cols_in_data <- function(data, cols, which.data = "the", scalar = T) {
   if (scalar) {
     assert_that(all(is_scalar_character(cols)),
                 msg = paste0(paste(cols, collapse = ","), "must be a single column name."))
@@ -41,6 +41,6 @@ assert_cols_in_data = function(data, cols, which.data = "the", scalar = T) {
 
   assert_that(all(cols %in% names(data)),
               msg = paste("Column(s)", paste(cues[which(cols %nin% names(data))], collapse = ","), "not found in", which.data, "data." ))
-  if (nrow(drop_na(data, cols)) == 0)
+  if (nrow(drop_na(data, all_of(cols))) == 0)
     warning(paste("The column(s)", paste(cols, collapse = ", "), "are present in", which.data, "data, but all values are NAs."))
 }

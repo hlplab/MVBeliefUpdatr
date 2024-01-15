@@ -107,7 +107,7 @@ is.NIW_ideal_adaptor_MCMC <- function(x, is.nested = T, is.long = T, with.prior 
 #' @keywords TBD
 #' @export
 is.NIW_ideal_adaptor_input <- function(x) {
-  message("Test of NIW_ideal_adaptor_input class not yet implemented. Always returning T.")
+  # Test of NIW_ideal_adaptor_input class not yet implemented. Always returning T.
 
   # Proposed names for slots in input object (at least internally / not necessarily handed to stan like this:
   #

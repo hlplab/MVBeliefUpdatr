@@ -21,6 +21,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats(
   Sigma_0 = NULL,
   tau_scale = 0,
   L_omega_scale = 0,
+  use_univariate_updating = FALSE,
   verbose = F
 )
 }

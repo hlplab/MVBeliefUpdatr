@@ -27,7 +27,7 @@ infer_prior_beliefs(
   sample = TRUE,
   file = NULL,
   model = NULL,
-  use_multivariate_updating = NULL,
+  use_univariate_updating = FALSE,
   verbose = FALSE,
   ...
 )
@@ -97,13 +97,12 @@ via saveRDS in a file named after the string supplied in file. The .rds extensio
 If the file already exists, the model from that file will be loaded and returned instead of refitting the model.
 As existing files won't be overwritten, you have to manually remove the file in order to refit and save the
 model under an existing file name. The file name is stored in the \code{NIW_ideal_adaptor_stanfit} object
-for later use. (default `NULL`)}
+for later use. (default: `NULL`)}
 
 \item{model}{Name of stanmodel that should be used. Overrides any default selection.}
 
-\item{use_multivariate_updating}{Should multivariate updating be used? By default this option will be
-selecting if the relevant cues (after transformations, including PCA, if selected) have more than 1
-dimension.}
+\item{use_univariate_updating}{Should legacy univariate updating be used? Will throw an error if used in
+conjunction with multiple cues. (default: `FALSE`)}
 
 \item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}}
 }
