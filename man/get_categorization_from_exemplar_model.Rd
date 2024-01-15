@@ -41,9 +41,6 @@ Categorize a single observation based on an exemplar model. The decision rule ca
 criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
 Luce's choice rule.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

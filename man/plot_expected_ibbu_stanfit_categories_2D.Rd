@@ -84,9 +84,6 @@ updating (IBBU). Specifically, the categories are derived by marginalizing over 
 by the (post-warmup) MCMC samples. Two methods are available (specified by `type`), which differ in their
 computational demands and speed.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

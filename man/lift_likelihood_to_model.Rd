@@ -91,9 +91,6 @@ A tibble that is an NIW_belief or NIW_ideal_adaptor object.
 Make an ideal observer or adaptor out of an MVG or NIW_belief object, respectively, by providing the missing
 information about the prior, lapse rate, bias, and perceptual noise (if any).
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

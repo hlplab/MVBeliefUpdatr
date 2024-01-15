@@ -11,7 +11,7 @@ NULL
 #'
 #' @seealso \code{\link{css2cov}}, \code{\link{cov2css}}, \code{\link{uss2css}}
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @export
 ss <- function(x, center = TRUE) {
   if (center) {
@@ -49,7 +49,7 @@ ss <- function(x, center = TRUE) {
 #'
 #' @seealso \code{\link{ss}}, \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}, \code{\link{cov2tau}}
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @rdname uss2css
 #' @export
 uss2css <- function(uss, n, mean) {
@@ -116,7 +116,7 @@ cov2css <- function(cov, n) {
 #' @seealso \code{\link[stats]{cov2cor}}, \code{\link{cov2tau}}
 #' @references \url{https://stats.stackexchange.com/questions/62850/obtaining-covariance-matrix-from-correlation-matrix}
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @export
 cor2cov = function(omega, tau) {
   assert_that(is.matrix(omega))
@@ -139,7 +139,7 @@ cor2cov = function(omega, tau) {
 #'
 #' @seealso \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @export
 cov2tau = function(v) {
   assert_that(is.matrix(v))
@@ -172,8 +172,6 @@ make_named_square_matrix = function(x, names) {
 #' @return Same as \code{data}.
 #'
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 make_vector_column = function(data, cols, vector_col, .keep = "all") {
   # CHECK: expand to also handle quo input. (each instance of calls then needs to change)
@@ -205,8 +203,6 @@ make_vector_column = function(data, cols, vector_col, .keep = "all") {
 #' @return A matrix.
 #'
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname get_sum_of_squares_from_df
 #' @export
 get_sum_of_squares_from_df <- function(data, variables = NULL, center = T, verbose = F) {
@@ -218,7 +214,7 @@ get_sum_of_squares_from_df <- function(data, variables = NULL, center = T, verbo
   data.matrix <- if (is_tibble(data) | is.data.frame(data)) {
     # Assume that the variables are to be combined into a data.matrix
     data %>%
-      mutate_at(variables, unlist) %>%
+      mutate(across(!!! syms(variables), unlist)) %>%
       select(all_of(variables)) %>%
       as.matrix()
   } else data
@@ -264,8 +260,6 @@ get_sum_of_centered_squares_from_df <- function(data, variables = NULL, verbose 
 #' uncentered and centered sums-of-squares and the covariance matrix (or, for univariate, stimuli: the standard deviation).
 #'
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 get_sufficient_category_statistics <- function(
   data,
@@ -341,10 +335,10 @@ get_sufficient_category_statistics <- function(
 #' function(s) have the name "(un)transform.function".
 #'
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @rdname transform_cues
 #' @importFrom tidyselect all_of
-#' @importFrom dplyr cross_join
+#' @importFrom dplyr across cross_join
 #' @export
 transform_cues <- function(
     data, cues,
@@ -565,8 +559,6 @@ untransform_cues <- function(
 #' @return A model, category mean, or covariance matrix of the same type as the input.
 #'
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname transform_model
 #' @export
 transform_model <- function(model, transform) {

@@ -1,3 +1,4 @@
+#' @import tidyverse
 require(tidyverse)
 
 context("cov, css, uss")

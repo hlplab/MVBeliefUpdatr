@@ -22,9 +22,6 @@ A logical.
 \description{
 Check whether \code{x} is a set of multivariate Gaussian (MVG) categories.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

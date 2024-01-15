@@ -14,11 +14,13 @@ get_expected_columns_for_exemplar_model <- function() append(get_expected_column
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 is.exemplar_model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
+
+  if (!is.MVBU_model(x, group = group, verbose = verbose, tolerance = tolerance)) {
+    return(FALSE)
+  }
 
   # When no groups are specified, infer groups from object.
   if (is.null(group)) {
@@ -38,7 +40,7 @@ is.exemplar_model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
     return(FALSE)
   }
 
-  # Only need to test for exemplars columns here since is.model is called below.
+  # Only need to test for exemplars columns here since is.MVBU_model is called below.
   if (any(get_expected_columns_for_exemplars() %nin% names(x))) {
     if (verbose) message("x is missing a required column: ", paste(get_expected_columns_for_exemplars, collapse = ","))
     return(FALSE)
@@ -46,10 +48,6 @@ is.exemplar_model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
 
   if (any(!is.factor(x$category))) {
     if (verbose) message(paste("category must be a factor."))
-    return(FALSE)
-  }
-
-  if (!is.model(x, group = group, verbose = verbose, tolerance = tolerance)) {
     return(FALSE)
   }
 

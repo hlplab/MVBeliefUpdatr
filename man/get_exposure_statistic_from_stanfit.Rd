@@ -42,9 +42,6 @@ of group and category.
 Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
 Bayesian belief-updating (IBBU) model from an NIW IBBU stanfit or NIW belief MCMC object.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

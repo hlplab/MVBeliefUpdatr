@@ -52,8 +52,6 @@ get_random_draw_indices <- function(fit, ndraws)
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname get_transform_information_from_stanfit
 #' @export
 get_transform_information_from_stanfit <- function(model) {
@@ -87,8 +85,6 @@ get_untransform_function_from_stanfit <- function(model) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname get_ibbu_input
 #' @export
 get_input_from_stanfit = function(fit) {
@@ -119,8 +115,6 @@ get_input_from_stanfit = function(fit) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname get_exposure_statistic_from_stanfit
 #' @export
 get_exposure_statistic_from_stanfit = function(
@@ -279,8 +273,6 @@ get_exposure_ss_from_stanfit = function(...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 get_test_data_from_stanfit = function(
   fit,
@@ -317,8 +309,6 @@ get_test_data_from_stanfit = function(
 #'
 #' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_constructor}}
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname get_original_variable_levels_from_stanfit
 #' @export
 get_original_variable_levels_from_stanfit = function(fit, variable = c("category", "group", "cue"), indices = NULL) {
@@ -368,8 +358,6 @@ get_cue_levels_from_stanfit <- function(fit, indices = NULL) {
 #'
 #' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_original_variable_levels_from_stanfit}}
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname get_constructor
 #' @export
 get_constructor = function(fit, variable = NULL) {
@@ -451,8 +439,6 @@ get_cue2_constructor = function(fit) {
 #' @seealso TBD
 #' @keywords TBD
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @examples
-#' TBD
 #' @rdname get_expected_category_statistic_from_stanfit
 #' @export
 get_expected_category_statistic_from_stanfit = function(
@@ -554,8 +540,10 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws <- function(fit, ...
 #' @seealso TBD
 #' @keywords TBD
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @examples
-#' TBD
+#'
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom tidyselect ends_with
 #' @export
 add_ibbu_stanfit_draws <- function(
   fit,
@@ -571,6 +559,10 @@ add_ibbu_stanfit_draws <- function(
   nest = TRUE,
   seed = NULL
 ) {
+  # Binding variables that RMD Check gets confused about otherwise
+  # (since they are in non-standard evaluations)
+  .chain <- .iteration <- .draw <- group <- category <- kappa <- nu <- m <- S <- lapse_rate <- NULL
+
   assert_that(is.NIW_ideal_adaptor_stanfit(fit))
   assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
   assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
@@ -686,13 +678,21 @@ add_ibbu_stanfit_draws <- function(
 
     if (wide) {
       if ("prior" %in% groups)
-        d.pars %<>% gather(variable, value, c(m, S))
+        d.pars %<>%
+        pivot_longer(
+          cols = c(m, S),
+          names_to = "variable",
+          values_to = "value")
       else
-        d.pars %<>% gather(variable, value, c(kappa, nu, m, S))
+        d.pars %<>%
+        pivot_longer(
+          cols = c(kappa, nu, m, S),
+          names_to = "variable",
+          values_to = "value")
 
       d.pars %<>%
         unite(temp, !!! rlang::syms(pars.index), variable) %>%
-        spread(temp, value)
+        pivot_wider(names_from = temp, values_from = value)
     }
 
     return(d.pars)

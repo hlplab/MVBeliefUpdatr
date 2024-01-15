@@ -40,9 +40,6 @@ is NULL, "marginalize" otherwise).}
 \description{
 Get likelihood of observation(s) x given the exemplar model.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

@@ -1,5 +1,3 @@
-#' @import Rcpp
-#' @import RcppParallel
 #' @import rstantools
 #' @import methods
 #' @import assertthat

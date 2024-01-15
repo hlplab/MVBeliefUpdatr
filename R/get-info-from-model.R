@@ -78,7 +78,7 @@ get_cue_labels_from_model <- function(x, indices = NULL) {
 #'
 #' @export
 get_category_labels_from_model <- function(x) {
-  if (is.MVG(x) | is.NIW_belief(x) | is.exemplars(x) | is.model(x)) {
+  if (is.MVBU_representation(x) | is.MVBU_model(x)) {
     return(sort(unique(x$category)))
   } else {
     error("Object not recognized.")
@@ -95,7 +95,7 @@ get_category_labels_from_model <- function(x) {
 #'
 #' @export
 get_nlevels_of_category_labels_from_model <- function(x) {
-  if (is.MVG(x) | is.NIW_belief(x) | is.exemplars(x) | is.model(x)) {
+  if (is.MVBU_representation(x) | is.MVBU_model(x)) {
     return(length(unique(x$category)))
   } else {
     error("Object not recognized.")
@@ -209,8 +209,14 @@ nest_cue_information_in_model <- function(model) {
 }
 
 #' @rdname nest_model
+#' @importFrom tidyr pivot_longer
+#' @importFrom dplyr across transmute
 #' @export
 unnest_cue_information_in_model <- function(model) {
+  # Binding variables that RMD Check gets confused about otherwise
+  # (since they are in non-standard evaluations)
+  cue <- cue2 <- NULL
+
   if (is.MVG(model) | is.MVG_ideal_observer(model)) {
     m <- "mu"
     S <- "Sigma"
@@ -269,8 +275,6 @@ format_input_for_likelihood_calculation <- function(x) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname get_posterior_from_model
 #' @export
 get_posterior_from_model <- function(model, ...) {
@@ -315,8 +319,6 @@ get_posterior_from_model <- function(model, ...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname get_categorization_from_model
 #' @export
 get_categorization_from_model <- function(model, ...) {
@@ -364,8 +366,6 @@ get_categorization_from_model <- function(model, ...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname evaluate_model
 #' @export
 evaluate_model <- function(model, x, response_category, method = "likelihood-up-to-constant", ..., return_by_x = F) {

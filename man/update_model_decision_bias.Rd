@@ -2,7 +2,6 @@
 % Please edit documentation in R/update-model.R
 \name{update_model_decision_bias_by_one_observation}
 \alias{update_model_decision_bias_by_one_observation}
-\alias{update_model_decision_bias_incrementally}
 \title{Update model's decision biases based on labelled input}
 \usage{
 update_model_decision_bias_by_one_observation(
@@ -14,20 +13,6 @@ update_model_decision_bias_by_one_observation(
   lapse_treatment = "no_lapses",
   update_prior = T,
   verbose = F
-)
-
-update_model_decision_bias_incrementally(
-  model,
-  beta,
-  exposure,
-  exposure.category = "category",
-  exposure.cues = get_cue_labels_from_model(model),
-  exposure.order = NULL,
-  noise_treatment = if (!is.null(first(model$Sigma_noise))) "marginalize" else "no_noise",
-  lapse_treatment = "no_lapses",
-  keep.update_history = TRUE,
-  keep.exposure_data = FALSE,
-  verbose = FALSE
 )
 }
 \arguments{
@@ -69,9 +54,6 @@ Returns model with updated decision biases. This updating process is order-sensi
 a posterior expectation for each category is obtained based on the specified noise and lapse treatment. This expectation
 is used to calculate the surprisal (in bits) of the category label x_category. The surprisal is weighted by the learning
 rate beta to increase the (log-odds of the) decision bias for that category.
-}
-\examples{
-TBD
 }
 \keyword{bias}
 \keyword{bias,}

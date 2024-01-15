@@ -14,12 +14,15 @@ get_expected_columns_for_MVG <- function() c("category", "mu", "Sigma")
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 is.MVG <- function(x, group = NULL, category = "category", is.long = T, verbose = F) {
   name_of_x <- deparse(substitute(x))
   assert_that(is.flag(is.long))
+
+  if (!is_tibble(x)) {
+    if (verbose) message("Object is not a tibble.")
+    return(FALSE)
+  }
 
   if (!is.null(group)) {
     if (verbose) message("Checking whether ", name_of_x, " is an MVG within each unique combination of group values.")

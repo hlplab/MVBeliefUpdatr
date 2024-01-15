@@ -30,12 +30,10 @@ NULL
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #'
 #' @rdname plot_ibbu_stanfit_parameters
 #' @export
-plot_ibbu_stanfit_parameters = function(
+plot_ibbu_stanfit_parameters <- function(
   model,
   categories = get_category_levels_from_stanfit(model),
   groups = get_group_levels_from_stanfit(model, include_prior = T),
@@ -45,6 +43,10 @@ plot_ibbu_stanfit_parameters = function(
   panel_scaling = F,
   group.colors = get_default_colors("group", groups)
 ) {
+  # Binding variables that RMD Check gets confused about otherwise
+  # (since they are in non-standard evaluations)
+  .draw <- group <- category <- cue <- cue2 <- kappa <- nu <- m <- S <- lapse_rate <- x.limits <- NULL
+
   d.pars <-
     model %>%
     add_ibbu_stanfit_draws(
@@ -53,7 +55,8 @@ plot_ibbu_stanfit_parameters = function(
       untransform_cues = untransform_cues,
       nest = F)
 
-  p.m <- d.pars %>%
+  p.m <-
+    d.pars %>%
     select(.draw, group, category, cue, m) %>%
     distinct() %T>%
     { get_limits(., "m") ->> x.limits } %>%
@@ -171,8 +174,6 @@ plot_ibbu_stanfit_parameters = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #'
 #' @export
 plot_ibbu_stanfit_parameter_correlations = function(
@@ -298,8 +299,8 @@ plot_ibbu_stanfit_parameter_correlations = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
+#'
+#' @importFrom purrr map_dbl
 #' @rdname plot_expected_ibbu_stanfit_categories_2D
 #' @export
 plot_expected_ibbu_stanfit_categories_2D = function(
@@ -362,8 +363,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
         data = . %>%
           distinct(group, category, centre),
         aes(
-          x = map(centre, ~ .x[1]) %>% unlist(),
-          y = map(centre, ~ .x[2]) %>% unlist(),
+          x = map_dbl(centre, ~ .x[1]),
+          y = map_dbl(centre, ~ .x[2]),
           color = category),
         inherit.aes = F) } +
     { if ("text" %in% annotate_inferred_category_means)
@@ -373,8 +374,8 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
             ungroup() %>%
             distinct(group, category, centre),
           aes(
-            x = map(centre, ~ .x[1]) %>% unlist(),
-            label= map(centre, ~ paste(signif(.x[1], 2))),
+            x = map_dbl(centre, ~ .x[1]),
+            label = map(centre, ~ paste(signif(.x[1], 2))),
             color = category),
           y = min.cue2,
           angle = 90,
@@ -385,7 +386,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
             ungroup() %>%
             distinct(group, category, centre),
           aes(
-            y = map(centre, ~ .x[2]) %>% unlist(),
+            y = map_dbl(centre, ~ .x[2]),
             label= map(centre, ~ paste(signif(.x[2], 2))),
             color = category),
           x = min.cue1,
@@ -587,9 +588,10 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
+#'
 #' @rdname plot_ibbu_stanfit_test_categorization
+#' @importFrom dplyr do right_join
+#' @importFrom purrr invoke_map
 #' @export
 plot_ibbu_stanfit_test_categorization = function(
   model,

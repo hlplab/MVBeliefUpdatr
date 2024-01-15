@@ -16,9 +16,6 @@ A list with element names and structures determined by the type of stanfit model
 Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
 object.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

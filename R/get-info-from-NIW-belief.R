@@ -31,11 +31,12 @@ get_D <- function(x) {
 #' @param mu expected category mean mu.
 #' @param m Mean of means m.
 #'
+#' @importFrom purrr map_lgl
 #' @rdname get_expected_mu_from_m
 #' @export
 get_expected_mu_from_m = function(m) {
   if (!is.list(m)) m <- list(m) # in case the input is not a list
-  if (all(unlist(map(m, ~ length(.x) == 1)))) mu <- unlist(m) else mu <- m
+  if (all(map_lgl(m, ~ length(.x) == 1))) mu <- unlist(m) else mu <- m
   if (length(mu) == 1) mu <- mu[[1]]
   return(mu)
 }
@@ -46,7 +47,7 @@ get_expected_mu_from_m = function(m) {
 #' @export
 get_m_from_expected_mu = function(mu) {
   if (!is.list(mu)) mu <- list(mu) # in case the input is not a list
-  if (all(unlist(map(mu, ~ length(.x) == 1)))) m <- unlist(mu) else m <- mu
+  if (all(map_lgl(mu, ~ length(.x) == 1))) m <- unlist(mu) else m <- mu
   if (length(m) == 1) m <- m[[1]]
   return(m)
 }
@@ -59,6 +60,7 @@ get_m_from_expected_mu = function(mu) {
 #' @param S Scatter matrix S.
 #' @param nu Strength of belief (pseudocount) about Sigma.
 #'
+#' @importFrom purrr map_lgl
 #' @rdname get_expected_Sigma_from_S
 #' @export
 get_expected_Sigma_from_S = function(S, nu) {
@@ -73,7 +75,7 @@ get_expected_Sigma_from_S = function(S, nu) {
     return(S / (nu - D - 1))
   })
 
-  if (all(unlist(map(Sigma, ~ length(.x) == 1)))) Sigma <- unlist(Sigma)
+  if (all(map_lgl(Sigma, ~ length(.x) == 1))) Sigma <- unlist(Sigma)
   if (length(Sigma) == 1) Sigma <- Sigma[[1]]
   return(Sigma)
 }
@@ -82,19 +84,27 @@ get_expected_Sigma_from_S = function(S, nu) {
 #'
 #' @rdname get_expected_Sigma_from_S
 #' @export
-get_S_from_expected_Sigma = function(Sigma, nu) {
+get_S_from_expected_Sigma <- function(Sigma, nu) {
   if (!is.list(Sigma)) {
     # in case the input is not a list
     Sigma <- list(Sigma)
     nu <- list(nu)
   }
 
-  S = map2(Sigma, nu, .f = function(Sigma, nu) {
+  S <-  map2(Sigma, nu, .f = function(Sigma, nu) {
     D = get_D(Sigma)
     return(Sigma * (nu - D - 1))
   })
 
-  if (all(unlist(map(S, ~ length(.x) == 1)))) S <- unlist(S)
+  # if (all(map_lgl(S, ~ length(.x) == 1))) {
+  #   S <- map(
+  #     S,
+  #     function(x) {
+  #       x <- as.vector(x)
+  #       names(x) <- dimnames(Sigma[[1]])[1][[1]]
+  #       return(x)
+  #     })
+  # }
   if (length(S) == 1) S <- S[[1]]
   return(S)
 }
@@ -131,7 +141,7 @@ get_S_from_expected_Sigma = function(Sigma, nu) {
 #' @seealso TBD
 #' @keywords TBD
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @examples TBD
+#'
 #' @rdname get_NIW_posterior_predictive
 #' @export
 get_NIW_posterior_predictive = function(
@@ -230,7 +240,7 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @rdname get_NIW_categorization_function
 #' @export
 get_NIW_categorization_function = function(

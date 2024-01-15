@@ -79,8 +79,6 @@ check_compatibility_between_NIW_belief_and_data = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 plot_NIW_belief_parameters = function(
   x,
@@ -206,8 +204,6 @@ plot_NIW_belief_parameters = function(
 #' @seealso TBD
 #' @keywords TBD
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @examples
-#' TBD
 #' @rdname plot_expected_categories_1D
 #' @export
 plot_expected_categories_density_1D <- function(
@@ -303,8 +299,6 @@ plot_expected_categories_density1D <- plot_expected_categories_density_1D
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname plot_expected_categorization_function_1D
 #' @export
 #'
@@ -410,8 +404,6 @@ plot_expected_categorization_function_1D <- function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname plot_expected_categories_2D
 #' @export
 plot_expected_categories_contour_2D <- function(
@@ -506,8 +498,6 @@ plot_expected_categories_contour2D <- plot_expected_categories_contour_2D
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @rdname plot_expected_categorization_function_2D
 #' @export
 #'

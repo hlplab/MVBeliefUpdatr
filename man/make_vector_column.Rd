@@ -21,7 +21,4 @@ Same as \code{data}.
 \description{
 Combine a number of columns into a new column in which each cell is the vector of values from the original columns.
 }
-\examples{
-TBD
-}
 \keyword{TBD}

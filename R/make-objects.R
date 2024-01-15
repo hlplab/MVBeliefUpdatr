@@ -1,6 +1,97 @@
 #' @importFrom dplyr rename_all
 NULL
 
+#' Example exemplar model.
+#'
+#' @export
+example_exemplar_model <- function(example = 1) {
+  if (example == 1) {
+    message("An example exemplar model for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
+            Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
+    example_MVG_ideal_observer(1) %>%
+      sample_MVG_data_from_model(Ns = 50) %>%
+      make_exemplar_model_from_data(
+        cues = c("cue1", "cue2"),
+        prior = c(.5, .5),
+        lapse_rate = .05,
+        lapse_bias = c(.5, .5),
+        Sigma_noise = NULL) %>%
+      mutate(across(category, factor))
+  }
+}
+
+
+#' Example MVG ideal observers.
+#'
+#' @export
+example_MVG_ideal_observer <- function(example = 1) {
+  if (example == 1) {
+    message("An example MVG ideal observer for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
+    tibble(
+      category = c("A", "B"),
+      mu = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
+      Sigma = list(
+        matrix(c(3, 2.4, 2.4, 3), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+        matrix(c(3, -2.4, -2.4, 3), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
+      prior = c(.5, .5),
+      lapse_rate = .05,
+      lapse_bias = c(.5, .5),
+      Sigma_noise = list(
+        matrix(rep(0, 4), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+        matrix(rep(0, 4), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))) %>%
+      mutate(across(category, factor))
+  } else if (example == 2) {
+    message("An example MVG ideal observer for two categories in a 1D cue continuum. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
+    tibble(
+      category = c("/d/", "/t/"),
+      mu = list(c("VOT" = 5), c("VOT" = 50)),
+      Sigma = list(matrix(c(80), nrow = 1, dimnames = list(c("VOT"), c("VOT"))),
+                   matrix(c(340), nrow = 1, dimnames = list(c("VOT"), c("VOT")))),
+      prior = c(.5, .5),
+      lapse_rate = .05,
+      lapse_bias = c(.5, .5),
+      Sigma_noise = list(
+        matrix(c(0), nrow = 1, dimnames = list(c("VOT"), c("VOT"))),
+        matrix(c(0), nrow = 1, dimnames = list(c("VOT"), c("VOT"))))) %>%
+      mutate(category = factor(category))
+  }
+}
+
+
+#' Example NIW priors.
+#'
+#' @export
+example_NIW_ideal_adaptor <- function(example = 1) {
+  if (example == 1) {
+    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.")
+    tibble(
+      category = c("A", "B"),
+      kappa = 10,
+      nu = 30,
+      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
+      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
+      lapse_rate = .05
+    ) %>%
+      mutate(category = factor(.data$category))
+  } else if (example == 2) {
+    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
+            Same as Example 1, but with independent perceptual noise along both cue dimensions.")
+    tibble(
+      category = c("A", "B"),
+      kappa = 10,
+      nu = 30,
+      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
+      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
+      lapse_rate = .05,
+      Sigma_noise = list(matrix(c(1, 0, 0, .25), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))
+    ) %>%
+      mutate(category = factor(.data$category))
+  }
+}
+
+
 #' Make exemplar models from data.
 #'
 #' Constructs an exemplar model for all categories found in the data.
@@ -24,8 +115,6 @@ NULL
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 make_exemplars_from_data = function(
     data,
@@ -144,7 +233,7 @@ make_exemplar_model_from_data = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @export
 make_MVG_from_data = function(
   data,
@@ -251,11 +340,8 @@ make_MVG_ideal_observer_from_data = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
-#'
-make_NIW_belief_from_data = function(
+make_NIW_belief_from_data <- function(
   data,
   group = NULL,
   category = "category",
@@ -275,15 +361,15 @@ make_NIW_belief_from_data = function(
   model <-
     data %>%
     make_MVG_from_data(group = group, category = category, cues = cues, verbose = verbose) %>%
-    rename(m = mu, S = Sigma)
+    rename(all_of(c(m = "mu", S = "Sigma")))
 
   message("S is set so that the expected category covariance matrix Sigma matches the category covariance in the sample (given nu). ",
           "It might be safer to fit an Inverse-Wishart distribution to the entire set of covariance matrices.")
   model %<>%
     mutate(
-      kappa = kappa,
-      nu = nu,
-      S = get_S_from_expected_Sigma(S, nu)) %>%
+      kappa = .env$kappa,
+      nu = .env$nu,
+      S = get_S_from_expected_Sigma(.data$S, .env$nu)) %>%
     ungroup()
 
   if (!is.NIW_belief(model, group = group, verbose = verbose))
@@ -318,40 +404,6 @@ make_NIW_ideal_adaptor_from_data = function(
 }
 
 
-#' Example NIW priors.
-#'
-#' @export
-make_NIW_example = function(example = 1) {
-  if (example == 1) {
-    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.")
-    tibble(
-      category = c("A", "B"),
-      kappa = 10,
-      nu = 30,
-      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
-      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
-               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
-      lapse_rate = .05
-    ) %>%
-      mutate(category = factor(category))
-  } else if (example == 2) {
-    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
-            Same as Example 1, but with independent perceptual noise along both cue dimensions.")
-    tibble(
-      category = c("A", "B"),
-      kappa = 10,
-      nu = 30,
-      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
-      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
-               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
-      lapse_rate = .05,
-      Sigma_noise = list(matrix(c(1, 0, 0, .25), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))
-    ) %>%
-      mutate(category = factor(category))
-  }
-}
-
-
 #' Turn an MVG/NIW_belief object into an ideal observer/adaptor
 #'
 #' Make an ideal observer or adaptor out of an MVG or NIW_belief object, respectively, by providing the missing
@@ -377,8 +429,6 @@ make_NIW_example = function(example = 1) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 #' @rdname lift_likelihood_to_model
 lift_likelihood_to_model <- function(
@@ -435,7 +485,7 @@ lift_likelihood_to_model <- function(
       lapse_bias = .env$lapse_bias[as.character(.data$category)],
       Sigma_noise = list(.env$Sigma_noise))
 
-  if (!is.model(x, group = group, verbose = verbose))
+  if (!is.MVBU_model(x, group = group, verbose = verbose))
     warning("NOTE: The returned object does not appear to be an MVBeliefUpdatr model. For more information, try again with verbose = T.")
 
   return(x)
@@ -453,6 +503,8 @@ lift_exemplars_to_exemplar_model <- function(
     Sigma_noise = NULL,
     verbose = F
 ) {
+  assert_that(is.exemplars(x, group = group, verbose = verbose))
+
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(!is.null(dimnames(first(x$Sigma_noise))),
@@ -479,6 +531,8 @@ lift_MVG_to_MVG_ideal_observer = function(
   Sigma_noise = NULL,
   verbose = F
 ) {
+  assert_that(is.MVG(x, group = group, verbose = verbose))
+
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(Sigma_noise) == dim(first(x$Sigma))),
@@ -497,7 +551,7 @@ lift_MVG_to_MVG_ideal_observer = function(
 
 #' @export
 #' @rdname lift_likelihood_to_model
-lift_NIW_belief_to_NIW_ideal_adaptor = function(
+lift_NIW_belief_to_NIW_ideal_adaptor <- function(
   x,
   group = NULL,
   prior = rep(1 / (n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
@@ -506,6 +560,8 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
   Sigma_noise = NULL,
   verbose = F
 ) {
+  assert_that(is.NIW_belief(x, group = group, verbose = verbose))
+
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   if (!is.null(first(x$Sigma_noise))) {
     assert_that(all(dim(Sigma_noise) == dim(first(x$S))),
@@ -524,21 +580,22 @@ lift_NIW_belief_to_NIW_ideal_adaptor = function(
 
 #' @export
 #' @rdname lift_likelihood_to_model
-lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
+lift_MVG_ideal_observer_to_NIW_ideal_adaptor <- function(
   x,
   group = NULL,
   kappa, nu,
   verbose = F
 ) {
+  assert_that(is.MVG_ideal_observer(x, group = group, verbose = verbose))
   assert_that(!is.null(kappa), !is.null(nu),
               msg = "kappa and nu must be provided.")
 
   x %<>%
-    rename(m = mu, S = Sigma) %>%
+    rename(all_of(c(m = "mu", S = "Sigma"))) %>%
     mutate(
-      kappa = kappa,
-      nu = nu,
-      S = get_S_from_expected_Sigma(S, nu))
+      kappa = .env$kappa,
+      nu = .env$nu,
+      S = get_S_from_expected_Sigma(.data$S, .env$nu))
 
   if (!is.NIW_ideal_adaptor(x, group = group, verbose = verbose))
     warning("NOTE: The returned object does not appear to be an NIW ideal adaptor. For more information, try again with verbose = T.")
@@ -562,8 +619,6 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor = function(
 #' @return The aggregated object.
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 aggregate_models_by_group_structure = function(
   x,
@@ -620,7 +675,7 @@ aggregate_models_by_group_structure = function(
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples TBD
+#'
 #' @importFrom rlang .data
 #' @importFrom tidyselect everything
 #' @importFrom dplyr slice_sample
@@ -632,6 +687,10 @@ sample_MVG_data <- function(
   randomize.order = F,
   keep.input_parameters = F
 ) {
+  # Binding variables that RMD Check gets confused about otherwise
+  # (since they are in non-standard evaluations)
+  category <- n <- mu <- Sigma <- NULL
+
   assert_that(!is.null(mus), !is.null(Sigmas))
   assert_that(is.null(category.labels) | length(mus) == length(category.labels),
               msg = "Number of category labels mismatch number of mus.")
@@ -642,7 +701,7 @@ sample_MVG_data <- function(
   if (is.null(cue.labels)) cue.labels = paste0("cue", 1:length(mus[[1]]))
 
   x <-
-    tibble(category = category.labels, n = Ns, mu = mus, Sigma = Sigmas) %>%
+    tibble("category" = category.labels, "n" = Ns, "mu" = mus, "Sigma" = Sigmas) %>%
     mutate(data = pmap(.l = list(.data$n, .data$mu, .data$Sigma), .f = rmvnorm)) %>%
     mutate(data = map(.data$data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
     unnest(data)

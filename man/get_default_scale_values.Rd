@@ -21,6 +21,3 @@ Character vector of color/linetype values in the order specified by `levels`.
 \description{
 Get default colors, linetype, etc.
 }
-\examples{
-TBD
-}

@@ -22,9 +22,6 @@ A logical.
 Check whether \code{x} is an exemplar model. Optionally, one can also check whether a lapse rate
 and lapse bias is part of the model.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

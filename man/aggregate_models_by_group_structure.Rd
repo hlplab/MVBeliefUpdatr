@@ -23,9 +23,6 @@ grouping variables; and so on. For this process to have a reasonable outcome, it
 organized from more specific to less specific: the second group variable should be a superset of the first group variable; the third group
 variable should be a superset of the second group variable; etc.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

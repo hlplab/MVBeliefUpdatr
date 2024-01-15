@@ -64,9 +64,6 @@ returned, but if `summarize=TRUE` then just the mean of each parameter is return
 By default, the category means and scatter matrices are nested, rather than each of their elements being
 stored separately (`nest=TRUE`).
 }
-\examples{
-TBD
-}
 \references{
 \insertRef{murphy2012}{MVBeliefUpdatr}
 }

@@ -134,9 +134,6 @@ unsupervised updating.
 }
 Please feel free to suggest additional features.
 }
-\examples{
-TBD
-}
 \references{
 \insertRef{murphy2012}{MVBeliefUpdatr}
 }

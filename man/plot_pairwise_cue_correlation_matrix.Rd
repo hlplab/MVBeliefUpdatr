@@ -27,10 +27,6 @@ A ggplot2 plot.
 Plots a n x n correlation matrix, using ggforce::facet_matrix, with univariate densities for each category on
 the diagonal, scatter plots in the lower triangle and 95% bivariate Gaussian ellipsoids on the upper diagonal.
 }
-\examples{
-TBD
-
-}
 \seealso{
 TBD
 }

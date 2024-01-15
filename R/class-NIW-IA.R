@@ -24,12 +24,14 @@ get_expected_columns_for_NIW_ideal_adaptor <- function()
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 is.NIW_ideal_adaptor = function(x, group = NULL, category = "category", is.long = T, with.prior = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
+
+  if (!is.MVBU_model(x, group = group, verbose = verbose, tolerance = tolerance)) {
+    return(FALSE)
+  }
 
   # When no groups are specified, infer groups from object.
   if (is.null(group)) {
@@ -61,10 +63,6 @@ is.NIW_ideal_adaptor = function(x, group = NULL, category = "category", is.long 
   }
 
   if (any(!is.factor(get(category, x)))) return(FALSE)
-
-  if (!is.model(x, group = group, verbose = verbose, tolerance = tolerance)) {
-    return(FALSE)
-  }
 
   return(TRUE)
 }

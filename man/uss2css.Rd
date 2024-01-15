@@ -29,9 +29,6 @@ A square matrix.
 Convert centered sum-of-square matrices (css), uncentered sum-of-square matrices (uss),
 and covariance matrices (cov) into each other.
 }
-\examples{
-TBD
-}
 \seealso{
 \code{\link{ss}}, \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}, \code{\link{cov2tau}}
 }

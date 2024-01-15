@@ -20,9 +20,6 @@ A logical.
 Check whether \code{x} is a tibble of post-warmup draws of parameters obtained from incremental
 conjugate Bayesian belief-updating (IBBU) over a Normal-Inverse-Wishart (NIW) prior.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

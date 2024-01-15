@@ -57,9 +57,6 @@ Returns a categorization function for the first category, based on a set of para
 distribution. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
 element of ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

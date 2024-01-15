@@ -44,7 +44,4 @@ Get sufficient statistics from data. Calculates functions for the specified cues
 any combination of groups (optional) and categories, and returns them as a tibble.
 Rows with missing values for cues will be ignored in the calculation of the sufficient statistics.
 }
-\examples{
-TBD
-}
 \keyword{TBD}

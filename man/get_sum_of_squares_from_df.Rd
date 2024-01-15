@@ -26,7 +26,4 @@ A matrix.
 Get sum of uncentered squares. This quantity is a sufficient statistic for, for example, multivariate Gaussian
 belief-updating under an Normal-Inverse-Wishart prior.
 }
-\examples{
-TBD
-}
 \keyword{TBD}

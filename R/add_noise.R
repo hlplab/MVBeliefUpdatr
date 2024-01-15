@@ -11,6 +11,8 @@
 #'
 #' @return Same as \code{data}.
 #'
+#' @importFrom assertthat assert_that
+#' @importFrom dplyr mutate
 #' @export
 add_noise = function(
   data,
@@ -26,7 +28,7 @@ add_noise = function(
               msg = 'method must be one of "sample" or "marginalize"')
   assert_that(!is.null(Sigma),
               msg = "No Sigma provided.")
-  asswer_that(is.matrix(Sigma),
+  assert_that(is.matrix(Sigma),
               msg = "Sigma must be a matrix.")
   assert_that(all(length(dim(Sigma)) == 2, dim(Sigma)[1] == dim(Sigma)[2], dim(Sigma)[1] == length(cues)),
               msg = "Sigma must be a square matrix of the same dimensionality as the length of cues.")

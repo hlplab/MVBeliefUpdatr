@@ -39,8 +39,6 @@ get_categorization_function_from_NIW_ideal_adaptor = function(model, ...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 #'
 get_categorization_from_NIW_ideal_adaptor = function(

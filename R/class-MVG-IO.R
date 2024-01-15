@@ -18,12 +18,14 @@ get_expected_columns_for_MVG_ideal_observer <- function() append(get_expected_co
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @examples
-#' TBD
 #' @export
 is.MVG_ideal_observer <- function(x, group = NULL, category = "category", is.long = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
+
+  if (!is.MVBU_model(x, group = group, verbose = verbose, tolerance = tolerance)) {
+    return(FALSE)
+  }
 
   # When no groups are specified, infer groups from object.
   if (is.null(group)) {
@@ -43,17 +45,13 @@ is.MVG_ideal_observer <- function(x, group = NULL, category = "category", is.lon
     return(FALSE)
   }
 
-  # Only need to test for MVG columns here since is.model is called below.
+  # Only need to test for MVG columns here since is.MVBU_model is called below.
   if (any(get_expected_columns_for_MVG() %nin% names(x))) {
     if (verbose) message(paste("x is missing a required column: ", paste(get_expected_columns_for_MVG, collapse = ",")))
     return(FALSE)
   }
 
   if (any(!is.factor(get(category, x)))) return(FALSE)
-
-  if (!is.model(x, group = group, verbose = verbose, tolerance = tolerance)) {
-    return(FALSE)
-  }
 
   return(TRUE)
 }

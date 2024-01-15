@@ -78,9 +78,6 @@ is determined by ndraws. If ndraws is NULL, all samples are used. Otherwise ndra
 samples will be used. If `summarize=FALSE`, separate categorization plots for all ndraws
 individual samples will be plotted in separate panels.
 }
-\examples{
-TBD
-}
 \seealso{
 TBD
 }

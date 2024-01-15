@@ -17,9 +17,6 @@ A square matrix.
 \description{
 Get sum-of-square matrix.
 }
-\examples{
-TBD
-}
 \seealso{
 \code{\link{css2cov}}, \code{\link{cov2css}}, \code{\link{uss2css}}
 }

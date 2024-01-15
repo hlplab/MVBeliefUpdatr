@@ -1,14 +1,30 @@
-context("get information from MVG - INITIAL TEST ONLY")
+#' @import curl
+#' @import remotes
+
+context("get information from MVG")
 
 library(curl)
 if (has_internet()) remotes::install_github("joeystanley/joeysvowels")
 library(joeysvowels)
 data("idahoans")
 
-my_model <- make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1", "F2"))
+my_model <- make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1", "F2"), verbose = T)
 x.1 <- idahoans %>% mutate(x = map(F1, ~ c(...))) %>% pull(x)
 x.2 <- idahoans %>% mutate(x = map2(F1, F2, ~ c(...))) %>% pull(x)
 x.3 <- idahoans %>% mutate(x = pmap(.l = list(F1, F2, F3), ~ c(...))) %>% pull(x)
+
+test_that("Test is.MVG_ideal_observer", {
+  expect_false(is.MVG_ideal_observer(NULL))
+  expect_false(is.MVG_ideal_observer(NA))
+  expect_false(is.MVG_ideal_observer(1))
+  expect_false(is.MVG_ideal_observer("1"))
+  expect_false(is.MVG_ideal_observer(TRUE))
+  expect_false(is.MVG_ideal_observer(list(1)))
+  expect_false(is.MVG_ideal_observer(example_exemplar_model(1)))
+  expect_true(is.MVG_ideal_observer(example_MVG_ideal_observer(1)))
+  expect_false(is.MVG_ideal_observer(example_NIW_ideal_adaptor(1)))
+#  expect_false(is.MVG_ideal_observer(example_NIW_ideal_adaptor_stanfit(1)))
+})
 
 test_that("Get MVG likelihood - input check x (single element, non-list)", {
   expect_error(get_MVG_likelihood(

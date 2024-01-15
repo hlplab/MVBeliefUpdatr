@@ -18,9 +18,6 @@ A square matrix.
 Get covariance matrix from correlation matrix and vector of standard deviations. Based on code recommended
 by Ben Bolder for efficiency.
 }
-\examples{
-TBD
-}
 \references{
 \url{https://stats.stackexchange.com/questions/62850/obtaining-covariance-matrix-from-correlation-matrix}
 }

@@ -33,9 +33,6 @@ Gets the tidybayes constructor function from the stanfit object. `get_category_c
 `get_group_constructor()` are convenience functions, calling `get_constructor()`. See \code{
 \link[tidybayes]{recover_types}}. If variable is
 }
-\examples{
-TBD
-}
 \seealso{
 \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_original_variable_levels_from_stanfit}}
 }
