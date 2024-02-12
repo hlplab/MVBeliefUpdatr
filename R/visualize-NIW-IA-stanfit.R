@@ -579,8 +579,10 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' relevant when `plot_in_cue_space = TRUE`.
 #' @param all_test_locations Should predictions be shown for all combinations of test locations and group, or should only
 #' combinations be shown that actually occurred in the data? (default: `FALSE`)
-#' @param plot_in_cue_space Should predictions be plotted in the cue space? If not, test tokens are essentially treated
+#' @param plot_in_cue_space Should predictions be plotted in the cue space? If not, test tokens are treated
 #' as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)
+#' @param untransform_cues Should the cues be untransformed before plotting? This should only have visual consequences
+#' if `plot_in_cue_space = T`. (default: `TRUE`)
 #' @param sort_by Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
 #' from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired. (default: `"prior"`)
 #'
@@ -593,13 +595,12 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
 #' @importFrom dplyr do right_join
 #' @importFrom purrr invoke_map
 #' @export
-plot_ibbu_stanfit_test_categorization = function(
+plot_ibbu_stanfit_test_categorization <- function(
   model,
   data.test = NULL,
   groups = get_group_levels_from_stanfit(model, include_prior = TRUE),
   summarize = T,
   ndraws = NULL,
-  untransform_cues = TRUE,
   confidence.intervals = c(.66, .95),
   target_category = 1,
   panel.group = if (plot_in_cue_space) TRUE else FALSE,
@@ -608,6 +609,7 @@ plot_ibbu_stanfit_test_categorization = function(
   category.colors = get_default_colors("category", categories),
   all_test_locations = TRUE,
   plot_in_cue_space = FALSE,
+  untransform_cues = TRUE,
   sort_by = if (plot_in_cue_space) NULL else "prior"
 ) {
   if (is.null(data.test)) data.test <- get_test_data_from_stanfit(model)

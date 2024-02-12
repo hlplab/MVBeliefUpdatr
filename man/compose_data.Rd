@@ -46,12 +46,20 @@ a variable identifying subjects/participants. Must exist in both exposure and te
 variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
 substantially more efficient if many groups share the same exposure. To ignore, set to `NULL`. (default: `NULL`)}
 
-\item{center.observations}{Should the data be centered? Centering will not affect the inferred correlation or
-covariance matrices but it will affect the absolute position of the inferred means. The relative position of
-the inferred means remains unaffected. If `TRUE` and `mu_0` is specified, `mu_0` will also be centered (`Sigma_0` is not
-affected by centering and thus not changed). (default: `TRUE`)}
+\item{center.observations}{Should the data be centered based on cues' means during exposure? Note that the cues' means
+used for centering are calculated after aggregating the data to all unique combinations specified by `group.unique`.
+These means are only expected to be the same as the standard deviations over the entire exposure data if the exposure data
+are perfectly balanced with regard to `group.unique`. Centering will not affect the inferred correlation
+or covariance matrices but it will affect the absolute position of the inferred means. The relative position of the inferred
+means remains unaffected.
+If `TRUE` and `mu_0` is specified, `mu_0` will also be centered (`Sigma_0` is not affected by centering and thus not changed).
+(default: `TRUE`)}
 
-\item{scale.observations}{Should the data be standardized? Scaling will not affect the inferred correlation matrix,
+\item{scale.observations}{Should the data be standardized based on cues' standard deviation during exposure? Note that the
+cues' standard deviations used for scaling are calculated after aggregating the data to all unique combinations specified
+by `group.unique`. These standard deviations are only expected to be the same as the standard deviations over the entire
+exposure data if the exposure data are perfectly balanced with regard to `group.unique`.
+Scaling will not affect the inferred correlation matrix,
 but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
 affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
 If `TRUE` and `mu_0` and `Sigma_0` are specified, `mu_0` and `Sigma_0` will also be scaled.
@@ -79,11 +87,8 @@ both the prior for m_0 and the prior for S_0. (default: vector of 5s of length o
 ignore. (default: 0)}
 }
 \value{
-A list that is an \code{NIW_ideal_adaptor_input}. In interpreting the inferred kappa_0 and nu_0, it should
-be kept in mind that the \emph{inferred} scatter matrix S_0 includes variability from internal perceptual and/or
-external environmental noise, \emph{in addition} to the motor noise that is reflected in production data. This also
-implies that, if Sigma_0 is given, Sigma_0 and nu_0 mutually constrain each other, because the expected value of
-Sigma_0 is determined by both S_0 and nu.
+A list consisting of a \code{data_list} and \code{transform_information}. The former that is an
+\code{NIW_ideal_adaptor_input}.
 }
 \description{
 Take exposure and test data as input, and prepare the data for input into an MVBeliefUpdatr Stan program.

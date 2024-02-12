@@ -209,11 +209,19 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' @param group.unique Name of column that uniquely identifies each group with identical exposure. This could be a
 #' variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
 #' substantially more efficient if many groups share the same exposure. To ignore, set to `NULL`. (default: `NULL`)
-#' @param center.observations Should the data be centered? Centering will not affect the inferred correlation or
-#' covariance matrices but it will affect the absolute position of the inferred means. The relative position of
-#' the inferred means remains unaffected. If `TRUE` and `mu_0` is specified, `mu_0` will also be centered (`Sigma_0` is not
-#' affected by centering and thus not changed). (default: `TRUE`)
-#' @param scale.observations Should the data be standardized? Scaling will not affect the inferred correlation matrix,
+#' @param center.observations Should the data be centered based on cues' means during exposure? Note that the cues' means
+#' used for centering are calculated after aggregating the data to all unique combinations specified by `group.unique`.
+#' These means are only expected to be the same as the standard deviations over the entire exposure data if the exposure data
+#' are perfectly balanced with regard to `group.unique`. Centering will not affect the inferred correlation
+#' or covariance matrices but it will affect the absolute position of the inferred means. The relative position of the inferred
+#' means remains unaffected.
+#' If `TRUE` and `mu_0` is specified, `mu_0` will also be centered (`Sigma_0` is not affected by centering and thus not changed).
+#' (default: `TRUE`)
+#' @param scale.observations Should the data be standardized based on cues' standard deviation during exposure? Note that the
+#' cues' standard deviations used for scaling are calculated after aggregating the data to all unique combinations specified
+#' by `group.unique`. These standard deviations are only expected to be the same as the standard deviations over the entire
+#' exposure data if the exposure data are perfectly balanced with regard to `group.unique`.
+#' Scaling will not affect the inferred correlation matrix,
 #' but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
 #' affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
 #' If `TRUE` and `mu_0` and `Sigma_0` are specified, `mu_0` and `Sigma_0` will also be scaled.
@@ -235,11 +243,8 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' @param omega_0_eta Optionally, etas the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
 #' ignore. (default: 0)
 #'
-#' @return A list that is an \code{NIW_ideal_adaptor_input}. In interpreting the inferred kappa_0 and nu_0, it should
-#' be kept in mind that the \emph{inferred} scatter matrix S_0 includes variability from internal perceptual and/or
-#' external environmental noise, \emph{in addition} to the motor noise that is reflected in production data. This also
-#' implies that, if Sigma_0 is given, Sigma_0 and nu_0 mutually constrain each other, because the expected value of
-#' Sigma_0 is determined by both S_0 and nu.
+#' @return A list consisting of a \code{data_list} and \code{transform_information}. The former that is an
+#' \code{NIW_ideal_adaptor_input}.
 #'
 #' @seealso \code{\link{is.NIW_ideal_adaptor_input}}
 #' @keywords TBD
@@ -247,7 +252,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' @importFrom purrr map_lgl map_int
 #' @rdname compose_data
 #' @export
-compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
+compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats <- function(
   exposure, test,
   cues, category = "category", response = "response", group = "group", group.unique = NULL,
   center.observations = T, scale.observations = T, pca.observations = F, pca.cutoff = 1,
@@ -263,6 +268,10 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   if (pca.observations)
     assert_that(between(pca.cutoff, 0, 1),
                 msg = "pca.cutoff must be between 0 and 1.")
+  if (!is.null(lapse_rate)) {
+    assert_that(is.number(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
+    assert_that(between(lapse_rate, 0, 1), msg = "If not NULL, lapse rate must be a number between 0 and 1.")
+  }
 
   exposure <-
     check_exposure_test_data(
@@ -286,7 +295,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       group_by(!! sym(group.unique), !! sym(category), !!! syms(cues)) %>%
       filter(!! sym(group) == unique(!! sym(group))[1])
 
-    group = group.unique
+    group <- group.unique
   }
 
   exposure %<>%
@@ -315,10 +324,6 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
   exposure %<>%
     mutate(across(all_of(group), ~ factor(.x, levels = levels(test[[!! group]]))))
 
-  if (!is.null(lapse_rate)) {
-    assert_that(is.number(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
-    assert_that(between(lapse_rate, 0, 1), msg = "If not NULL, lapse rate must be a number between 0 and 1.")
-  }
   if (!is.null(mu_0)) {
     if (nlevels(exposure[[category]]) == 1) {
       assert_that(is.vector(mu_0),
@@ -501,12 +506,10 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats = function(
       })
   }
 
-  if (verbose) {
-    print("In compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats():")
-    print(data_list)
-  }
-
-  return(data_list)
+  # remove data from transform (for storage efficiency)
+  transform$data <- NULL
+  input <- list(data_list = data_list, transform_information = transform)
+  return(input)
 }
 
 
