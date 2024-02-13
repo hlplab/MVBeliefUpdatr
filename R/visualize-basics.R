@@ -126,6 +126,7 @@ get_limits = function(data, measure, by = NULL, hdi.prob = .99, min = NULL, max 
     as.numeric()
 }
 
+#' @export
 ellipse.pmap = function(x, centre, level, ...)
   ellipse(x = x, centre = centre, level = level, ...)
 

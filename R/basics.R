@@ -409,7 +409,7 @@ transform_cues <- function(
     }
   }
 
-  transform.function = if (!return.transform.function) NULL else {
+  transform.function <- if (!return.transform.function) NULL else {
     function(data) {
       cues <- cues
       center <- center
@@ -426,7 +426,7 @@ transform_cues <- function(
     }
   }
 
-  untransform.function = if (!return.untransform.function) NULL else {
+  untransform.function <- if (!return.untransform.function) NULL else {
     untransform_cues(data, cues, uncenter = center, unscale = scale, unpca = pca,
                      attach = attach,
                      transform.parameters = transform.parameters,

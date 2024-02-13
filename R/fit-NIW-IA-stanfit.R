@@ -1,18 +1,14 @@
-#' Infer prior beliefs based on adaptation behavior
+#' Infer NIW ideal adaptor
 #'
-#' This function takes exposure and test data, the names of the cues, category, and response columns (and
-#' optionally group and/or block columns), and uses
-#' stan to draw samples from the prior beliefs that match the behavior.
+#' Infers a posterior distribution of \code{\link[NIW_ideal_adaptor]{NIW ideal adaptors}} from the input data using rstan/stan. The function can take
+#' two types of inputs: an input list, as prepared by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}},
+#' or the exposure and test data, the names of the cues, category, and response columns (and optionally group and/or block columns).
 #'
 #' @inheritParams compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats
-#' @param data_list A list of the type that would be returned by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.
-#' This list can be provided instead of the individual inputs that are handed to \code{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}.
 #' @param untransform_fit Logical flag indicating whether the samples of the model should be transformed back
 #' into the original cue space by applying the untransform function. (default: `TRUE`)
-#' @param transform_information Optionally, a list of transform paramters, transform function, and corresponding untransform
-#' function of the type returned by \code{\link[transform_cues]{transform_cues}}. These functions
-#' will be attached to the \code{NIW_ideal_adaptor_stanfit} object. This object will override any transform
-#' information that is created by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.
+#' @param input A list of the type that would be returned by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.
+#' This list can be provided *instead* of the arguments required by \code{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}.
 #' @param sample Should the model be fit and sampled from?
 #' @param file Either NULL or a character string. In the latter case, the fitted model object is saved
 #' via saveRDS in a file named after the string supplied in file. The .rds extension is added automatically.
@@ -25,21 +21,40 @@
 #' conjunction with multiple cues. (default: `FALSE`)
 #' @param ... Additional parameters are passed to \code{\link[rstan]{sampling}}
 #'
-#' @return \code{NIW_ideal_adaptor_stanfit} object with the fitted stan model.
+#' @return \code{NIW_ideal_adaptor_stanfit} object with the fitted stan model. In interpreting the inferred kappa_0 and nu_0, it should
+#' be kept in mind that the \emph{inferred} scatter matrix S_0 includes variability from internal perceptual and/or
+#' external environmental noise, \emph{in addition} to the motor noise that is reflected in production data. This also
+#' implies that, if Sigma_0 is given, Sigma_0 and nu_0 mutually constrain each other, because the expected value of
+#' Sigma_0 is determined by both S_0 and nu.
 #'
 #' @seealso \code{\link{is.NIW_ideal_adaptor_stanfit}} for information about NIW_ideal_adaptor_stanfit objects,
 #' \code{\link{add_ibbu_stanfit_draws}} to draw samples from the stanfit.
+#' @rdname infer_NIW_ideal_adaptor
 #' @export
-infer_prior_beliefs <- function(
-  exposure, test,
-  cues, category, response, group, group.unique = NULL,
-  center.observations = TRUE, scale.observations = TRUE, pca.observations = FALSE, pca.cutoff = 1, untransform_fit = TRUE,
-  lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
-  tau_scale = 0, L_omega_scale = 0,
-  data_list = NULL, transform_information = NULL,
-  sample = TRUE, file = NULL, model = NULL, use_univariate_updating = FALSE,
+infer_NIW_ideal_adaptor <- function(
+  exposure = NULL, test = NULL, cues = NULL, category = NULL, response = NULL, group = NULL, group.unique = NULL, center.observations = TRUE, scale.observations = TRUE, pca.observations = FALSE, pca.cutoff = 1, lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL, tau_scale = 0, L_omega_scale = 0,
+  untransform_fit = TRUE,
+  input = NULL,
+  sample = TRUE,
+  file = NULL,
+  model = NULL,
+  use_univariate_updating = FALSE,
   verbose = FALSE,
   ...) {
+  assert_that(
+    all(any(all(!is.null(exposure), !is.null(test)), !is.null(input)), !all(!is.null(exposure), !is.null(test), !is.null(input))),
+    msg = "You can either specify an input argument or exposure and test data, but not both.")
+
+  # Some initial checking of the input list information. This should probably be expanded and then collected into a function
+  # that checks what structure compose_ returns.
+  if (!is.null(input)) {
+    assert_that(all(!is.null(input$data_list), !is.null(input$transform_information)),
+                msg = "The input list must contain both data_list and transform_information.")
+    assert_that(is.list(input$transform_information))
+    assert_that(all(c("transform.function", "untransform.function") %in% names(input$transform_information)),
+                msg = "If not NULL, transform_information must be a list that contains both a transform and an untransform function.")
+  }
+
   assert_that(is.logical(use_univariate_updating))
   if (!is.null(file)) {
     fit <- read_NIW_ideal_adaptor_stanfit(file)
@@ -51,14 +66,9 @@ infer_prior_beliefs <- function(
     assert_that(!is.null(stanmodels[[model]]),
                 msg = paste("The specified stanmodel does not exist. Allowable models include:", names(MVBeliefUpdatr:::stanmodels)))
   }
-  if (!is.null(transform_information)) {
-    assert_that(is.list(transform_information))
-    assert_that(all(c("transform.function", "untransform.function") %in% names(transform_information)),
-                msg = "If not NULL, transform_information must be a list that contains both a transform and an untransform function.")
-  }
 
-  if (is.null(data_list)) {
-    data_list <-
+  if (is.null(input)) {
+    input <-
       compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats(
         exposure = exposure,
         test = test,
@@ -78,25 +88,11 @@ infer_prior_beliefs <- function(
         L_omega_scale = L_omega_scale,
         use_univariate_updating = use_univariate_updating,
         verbose = verbose)
-
-    if (is.null(transform_information)) {
-      transform_information <-
-        transform_cues(
-          data = exposure,
-          cues = cues,
-          center = center.observations,
-          scale = scale.observations,
-          pca = pca.observations,
-          return.transformed.data = F,
-          return.transform.parameters = T,
-          return.transform.function = T,
-          return.untransform.function = T)
-    }
   }
 
   if (use_univariate_updating)
     assert_that(
-      is.null(data_list$K),
+      is.null(input$data_list$K),
       msg = "Univariate updating cannot be used with multiple cues.")
 
   if (sample) {
@@ -105,18 +101,18 @@ infer_prior_beliefs <- function(
 
     if (!is.null(model)) {
       fit <- sampling(MVBeliefUpdatr:::stanmodels[[model]],
-                      data = data_list, ...)
+                      data = input$data_list, ...)
     } else if (use_univariate_updating) {
       message("There might be an issue with the compose_data function for univariate models. look into it.")
       fit <- sampling(MVBeliefUpdatr:::stanmodels[['uvg_conj_uninformative_priors_sufficient_stats_lapse']],
-                      data = data_list, ...)
+                      data = input$data_list, ...)
     } else {
       fit <- sampling(MVBeliefUpdatr:::stanmodels[['mvg_conj_sufficient_stats_lapse']],
-                      data = data_list, pars = pars, include = F, ...)
+                      data = input$data_list, pars = pars, include = F, ...)
     }
 
     if (is.null(fit)) stop("Sampling failed.")
-    fit %<>% as.NIW_ideal_adaptor_stanfit(input_data = data_list, transform_information = transform_information)
+    fit %<>% as.NIW_ideal_adaptor_stanfit(input_data = input$data_list, transform_information = input$transform_information)
   } else fit <- NULL
 
   if (untransform_fit) {
@@ -129,3 +125,7 @@ infer_prior_beliefs <- function(
 
   return(fit)
 }
+
+#' @rdname infer_NIW_ideal_adaptor
+#' @export
+infer_prior_beliefs <- infer_NIW_ideal_adaptor

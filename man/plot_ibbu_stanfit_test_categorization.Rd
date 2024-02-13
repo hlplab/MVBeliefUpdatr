@@ -10,7 +10,6 @@ plot_ibbu_stanfit_test_categorization(
   groups = get_group_levels_from_stanfit(model, include_prior = TRUE),
   summarize = T,
   ndraws = NULL,
-  untransform_cues = TRUE,
   confidence.intervals = c(0.66, 0.95),
   target_category = 1,
   panel.group = if (plot_in_cue_space) TRUE else FALSE,
@@ -19,6 +18,7 @@ plot_ibbu_stanfit_test_categorization(
   category.colors = get_default_colors("category", categories),
   all_test_locations = TRUE,
   plot_in_cue_space = FALSE,
+  untransform_cues = TRUE,
   sort_by = if (plot_in_cue_space) NULL else "prior"
 )
 }
@@ -54,8 +54,11 @@ relevant when `plot_in_cue_space = TRUE`.}
 \item{all_test_locations}{Should predictions be shown for all combinations of test locations and group, or should only
 combinations be shown that actually occurred in the data? (default: `FALSE`)}
 
-\item{plot_in_cue_space}{Should predictions be plotted in the cue space? If not, test tokens are essentially treated
+\item{plot_in_cue_space}{Should predictions be plotted in the cue space? If not, test tokens are treated
 as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)}
+
+\item{untransform_cues}{Should the cues be untransformed before plotting? This should only have visual consequences
+if `plot_in_cue_space = T`. (default: `TRUE`)}
 
 \item{sort_by}{Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
 from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired. (default: `"prior"`)}
