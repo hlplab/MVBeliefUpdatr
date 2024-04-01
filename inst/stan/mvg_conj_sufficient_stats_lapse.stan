@@ -189,7 +189,10 @@ model {
 
 generated quantities {
   /* Compute and store pointwise log-likelihood, in order to allow computation of LOOIC.
-     Doing so in generated quantities block, following help(rstan::loo) */
+     Doing so in generated quantities block, following help(rstan::loo). Note that currently,
+     each unique combination of test location and exposure group is treated as an observation
+     (rather than each individual response). In the future, this should probably changed to
+     treated each individual response as an observation. */
   vector[M] lapsing_probs = rep_vector(lapse_rate / M, M);
   vector[N_test] log_lik;
   real log_lik_sum = 0;
