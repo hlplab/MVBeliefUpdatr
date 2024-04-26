@@ -2,7 +2,7 @@ year <- sub("-.*", "", meta$Date)
 note <- sprintf("R package version %s", meta$Version)
 
 bibentry(bibtype = "Manual",
-         title = "{MVBeliefUpdatr}: Fitting, Summarizing, and Visualizing Multivariate Gaussian Ideal Observers and Adaptors.",
+         title = "{MVBeliefUpdatr}: Fitting, Summarizing, and Visualizing Multivariate Gaussian Ideal Observers and Adaptors",
          author = c(person("T. Florian", "Jaeger")),
          year = year,
          note = note,
