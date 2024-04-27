@@ -369,7 +369,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats <- function(
       pca = pca.observations,
       return.transformed.data = T,
       return.transform.parameters = T,
-      return.transform.function = T)
+      return.transform.function = T,
+      return.untransform.function = T)
 
   if (pca.observations) {
     assert_that(all(is.null(mu_0), is.null(Sigma_0)),
