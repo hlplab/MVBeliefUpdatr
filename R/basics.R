@@ -339,6 +339,7 @@ get_sufficient_category_statistics <- function(
 #' @rdname transform_cues
 #' @importFrom tidyselect all_of
 #' @importFrom dplyr across cross_join
+#' @importFrom rlang syms
 #' @export
 transform_cues <- function(
     data, cues,
@@ -349,6 +350,11 @@ transform_cues <- function(
     return.transform.function = F, return.untransform.function = F
 ) {
   assert_that(is.data.frame(data) | is_tibble(data))
+  assert_that(is.character(cues))
+  assert_that(all(cues %in% colnames(data)))
+  assert_that(all(is.logical(center), is.logical(scale), is.logical(pca), is.logical(attach),
+                  is.logical(return.transformed.data), is.logical(return.transform.parameters),
+                  is.logical(return.transform.function), is.logical(return.untransform.function)))
   assert_that(is.null(transform.parameters) | is.list(transform.parameters))
   old_data <- data
   groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
@@ -361,6 +367,8 @@ transform_cues <- function(
       transform.parameters[["pca"]] <-
         data %>%
         select(all_of(cues)) %>%
+        # If centering and scaling is requested in addition to PCA, do it as part of
+        # the PCA transformation
         prcomp(center = center, scale. = scale, retx = F)
     } else {
       if (center) {
@@ -427,7 +435,8 @@ transform_cues <- function(
   }
 
   untransform.function <- if (!return.untransform.function) NULL else {
-    untransform_cues(data, cues, uncenter = center, unscale = scale, unpca = pca,
+    untransform_cues(data = data, cues = if (pca) colnames(transform.parameters[["pca"]]$rotation) else cues,
+                     uncenter = center, unscale = scale, unpca = pca,
                      attach = attach,
                      transform.parameters = transform.parameters,
                      return.untransformed.data = F, return.untransform.function = T)
@@ -435,23 +444,24 @@ transform_cues <- function(
 
   if (!identical(groups, character())) data %<>% group_by(!! sym(groups))
   if (attach) {
-    data %<>%
+    data <-
       cbind(
         old_data %>%
           select(-intersect(names(old_data), names(data))),
-        .)
+        data)
   }
 
-  if (return.transformed.data & !return.transform.parameters & !return.transform.function & !return.untransform.function) return(data) else
-    if (!return.transformed.data & return.transform.parameters & !return.transform.function & !return.untransform.function) return(transform.parameters) else
-      if (!return.transformed.data & !return.transform.parameters & return.transform.function & !return.untransform.function) return(transform.function) else
-        if (!return.transformed.data & !return.transform.parameters & !return.transform.function & return.untransform.function) return(untransform.function) else
-          return(
-            list(
-              data = if (return.transformed.data) data else NULL,
-              transform.parameters = if (return.transform.parameters) transform.parameters else NULL,
-              transform.function = if (return.transform.function) transform.function else NULL,
-              untransform.function = if (return.untransform.function) untransform.function else NULL))
+  if (!any(return.transformed.data, return.transform.parameters, return.transform.function, return.untransform.function)) message("No return was requested.") else
+    if (return.transformed.data & !any(return.transform.parameters, return.transform.function, return.untransform.function)) return(data) else
+      if (return.transform.parameters & !any(return.transformed.data, return.transform.function, return.untransform.function)) return(transform.parameters) else
+        if (return.transform.function & !any(return.transformed.data, return.transform.parameters, return.untransform.function)) return(transform.function) else
+          if (return.untransform.function & !any(return.transformed.data, return.transform.parameters, return.transform.function)) return(untransform.function) else
+            return(
+              list(
+                data = if (return.transformed.data) data else NULL,
+                transform.parameters = if (return.transform.parameters) transform.parameters else NULL,
+                transform.function = if (return.transform.function) transform.function else NULL,
+                untransform.function = if (return.untransform.function) untransform.function else NULL))
 }
 
 
@@ -475,49 +485,56 @@ untransform_cues <- function(
   if (is.null(uncenter)) uncenter = !is.null(transform.parameters[["center"]])
   if (is.null(unscale)) unscale = !is.null(transform.parameters[["scale"]])
 
-  if (unpca) {
-    # https://stackoverflow.com/questions/29783790/how-to-reverse-pca-in-prcomp-to-get-original-data
-    newcues = data %>%
-      select(!!! rlang::syms(cues)) %>%
-      as.matrix() %>%
-      { . %*% t(transform.parameters[["pca"]]$rotation) } %>%
-      { if (unscale & uncenter)
-        t(t(.) * transform.parameters[["pca"]]$scale + transform.parameters[["pca"]]$center) else
-          if (unscale) t(t(.) * transform.parameters[["pca"]]$scale) else
-            if (uncenter) t(t(.) + transform.parameters[["pca"]]$center) }
-
-    data %<>%
-      select(-all_of(cues)) %>%
-      cbind(newcues)
-
-    data %<>%
-      rename_at(cues, ~ transform.parameters[["cue.labels"]])
-    cues = transform.parameters[["cue.labels"]]
-  } else {
-    if (unscale) {
-      data %<>%
-        ungroup() %>%
+  if (return.untransformed.data) {
+    if (unpca) {
+      # https://stackoverflow.com/questions/29783790/how-to-reverse-pca-in-prcomp-to-get-original-data
+      newcues <-
+        data %>%
         select(all_of(cues)) %>%
-        { . * (data %>%
-                 { if (length(groups) > 0) left_join(., transform.parameters[["scale"]], by = groups) else cross_join(., transform.parameters[["scale"]]) } %>%
-                 ungroup() %>%
-                 select(all_of(paste0(cues, "_sd"))))
-        }
+        as.matrix() %>%
+        { . %*% t(transform.parameters[["pca"]]$rotation) } %>%
+        { if (unscale & uncenter)
+          t(t(.) * transform.parameters[["pca"]]$scale + transform.parameters[["pca"]]$center) else
+            if (unscale) t(t(.) * transform.parameters[["pca"]]$scale) else
+              if (uncenter) t(t(.) + transform.parameters[["pca"]]$center) }
+
+      data %<>%
+        select(-all_of(cues)) %>%
+        cbind(newcues)
+    } else {
+      if (unscale) {
+        data %<>%
+          ungroup() %>%
+          select(all_of(cues)) %>%
+          { . * (data %>%
+                   { if (length(groups) > 0) left_join(., transform.parameters[["scale"]], by = groups) else cross_join(., transform.parameters[["scale"]]) } %>%
+                   ungroup() %>%
+                   select(all_of(paste0(cues, "_sd"))))
+          }
+      }
+
+      if (uncenter) {
+        data %<>%
+          ungroup() %>%
+          select(all_of(cues)) %>%
+          { . + (data %>%
+                   { if (length(groups) > 0) left_join(., transform.parameters[["center"]], by = groups) else cross_join(., transform.parameters[["center"]]) } %>%
+                   ungroup() %>%
+                   select(all_of(paste0(cues, "_mean"))))
+          }
+      }
     }
 
-    if (uncenter) {
+    if (attach) {
       data %<>%
-        ungroup() %>%
-        select(all_of(cues)) %>%
-        { . + (data %>%
-                 { if (length(groups) > 0) left_join(., transform.parameters[["center"]], by = groups) else cross_join(., transform.parameters[["center"]]) } %>%
-                 ungroup() %>%
-                 select(all_of(paste0(cues, "_mean"))))
-        }
+        cbind(
+          old_data %>%
+            select(-intersect(names(old_data), names(data))),
+          .)
     }
   }
 
-  untransform.function = if (!return.untransform.function) NULL else {
+  untransform.function <- if (!return.untransform.function) NULL else {
     function(data) {
       cues <- cues
       uncenter <- uncenter
@@ -533,17 +550,10 @@ untransform_cues <- function(
     }
   }
 
-  if (attach) {
-    data %<>%
-      cbind(
-        old_data %>%
-          select(-intersect(names(old_data), names(data))),
-        .)
-  }
-
-  if (return.untransformed.data & !return.untransform.function) return(data) else
-    if (!return.untransformed.data & return.untransform.function) return(untransform.function) else
-      return(list(data = data, untransform.function = untransform.function))
+  if (!any(return.untransformed.data, return.untransform.function)) message("No return was requested.") else
+    if (return.untransformed.data & !return.untransform.function) return(data) else
+      if (!return.untransformed.data & return.untransform.function) return(untransform.function) else
+        return(list(data = data, untransform.function = untransform.function))
 }
 
 #' Transform and untransform category means and covariance matrices of a model
