@@ -350,6 +350,11 @@ transform_cues <- function(
     return.transform.function = F, return.untransform.function = F
 ) {
   assert_that(is.data.frame(data) | is_tibble(data))
+  assert_that(is.character(cues))
+  assert_that(all(cues %in% colnames(data)))
+  assert_that(all(is.logical(center), is.logical(scale), is.logical(pca), is.logical(attach),
+                  is.logical(return.transformed.data), is.logical(return.transform.parameters),
+                  is.logical(return.transform.function), is.logical(return.untransform.function)))
   assert_that(is.null(transform.parameters) | is.list(transform.parameters))
   old_data <- data
   groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
@@ -359,7 +364,6 @@ transform_cues <- function(
     transform.parameters[["cue.labels"]] <- cues
 
     if (pca) {
-      assert_that(length(cues) > 1, msg = "PCA requires more than one cue variable.")
       transform.parameters[["pca"]] <-
         data %>%
         select(all_of(cues)) %>%
