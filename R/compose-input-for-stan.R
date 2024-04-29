@@ -136,16 +136,26 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 
     for (i in 1:n_category) {
       for (j in 1:n_group) {
-        temp.data_ss <- data_ss %>%
+        temp.data_ss <-
+          data_ss %>%
           ungroup() %>%
           filter(!! rlang::sym(category) == cats[i] &
                    !! rlang::sym(group) == groups[j])
 
+        # Catch cases in which there is no data for a particular group/category combination
+        # (this can happen for example, when the data contain a pre-exposure test, which has
+        # no matching exposure statistics).
         if (nrow(temp.data_ss) > 0) {
           N[i,j] = temp.data_ss$N[[1]]
           x_mean[i,j,] = temp.data_ss$x_mean[[1]]
           x_ss[i,j,,] = temp.data_ss$x_ss[[1]]
         } else {
+          # For groups without exposure data, we are setting the category means to 0 and the
+          # sum-of-squares matrix to the identity matrix. This is a bit of a hack, that is
+          # necessary because stan expects these variables to always be vectors/matrices of
+          # the same type and dimensionality (even though they should really be NAs). So, in
+          # order to avoid confusion, we're setting these quantities to NA *after* all required
+          # input has been handed to stan.
           N[i,j] = 0
           x_mean[i,j,] = rep(0, length(cues))
           x_ss[i,j,,] = diag(length(cues))
@@ -266,8 +276,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats <- function(
     message("The tau_scale and L_omega_scale parameters are not specified (using defaults). Since you also did not ask for the input to be centered *and* scaled, this puts the priors assumed in the model on a scale that has no relation to the input. Unless you have manually centered and scaled the cues, this is strongly discouraged.")
 
   if (pca.observations)
-    assert_that(between(pca.cutoff, 0, 1),
-                msg = "pca.cutoff must be between 0 and 1.")
+    assert_that(between(pca.cutoff, 0, 1), msg = "pca.cutoff must be between 0 and 1.")
   if (!is.null(lapse_rate)) {
     assert_that(is.number(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
     assert_that(between(lapse_rate, 0, 1), msg = "If not NULL, lapse rate must be a number between 0 and 1.")
@@ -298,8 +307,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats <- function(
     group <- group.unique
   }
 
+  # Make sure data is ungrouped so that transform_cues works correctly, and keep only the necessary columns
   exposure %<>%
-    # Make sure data is ungrouped so that transform_cues works correctly.
     ungroup() %>%
     select(c(all_of(group), all_of(cues), all_of(category)))
 
@@ -320,7 +329,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats <- function(
               msg = paste("All levels of the grouping variable", group, "found in exposure must also be present in test."))
   if (!all(levels(test[[group]]) %in% levels(exposure[[group]])))
     message(paste("Not all levels of the grouping variable", group, "that are present in test were found in exposure.
-    Creating 0 exposure data for those groups."))
+    This is expected if and only if the data contained a test prior to (or without any) exposure.
+    Creating 0 exposure data for these groups."))
   exposure %<>%
     mutate(across(all_of(group), ~ factor(.x, levels = levels(test[[!! group]]))))
 
@@ -507,7 +517,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats <- function(
       })
   }
 
-  # remove data from transform (for storage efficiency)
+  # Remove data from transform (for storage efficiency)
   transform$data <- NULL
   input <- list(data_list = data_list, transform_information = transform)
   return(input)

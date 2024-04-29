@@ -112,6 +112,13 @@ infer_NIW_ideal_adaptor <- function(
     }
 
     if (is.null(fit)) stop("Sampling failed.")
+    # Clean-up x_mean and x_ss for groups without exposure data. For reasons laid out in
+    # get_sufficient_statistics_as_list_of_arrays, we had to set these means and sums of
+    # squares to arbitrary values (since Stan doesn't accept typed NAs). But this can
+    # create confusion when users try to retrieve the exposure statistics for those groups.
+    # Here we're thus setting them to NAs.
+    input$data_list$x_mean[input$data_list$N == 0] <- NA
+    input$data_list$x_ss[input$data_list$N == 0] <- NA
     fit %<>% as.NIW_ideal_adaptor_stanfit(input_data = input$data_list, transform_information = input$transform_information)
   } else fit <- NULL
 

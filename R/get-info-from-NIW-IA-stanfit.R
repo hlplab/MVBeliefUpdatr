@@ -87,7 +87,7 @@ get_untransform_function_from_stanfit <- function(model) {
 #' @keywords TBD
 #' @rdname get_ibbu_input
 #' @export
-get_input_from_stanfit = function(fit) {
+get_input_from_stanfit <- function(fit) {
   assert_that(is.NIW_ideal_adaptor_stanfit(fit))
 
   return(fit@input_data)
@@ -115,9 +115,10 @@ get_input_from_stanfit = function(fit) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @rdname get_exposure_statistic_from_stanfit
+#' @rdname get_exposure_category_statistic_from_stanfit
+#' @importFrom magrittr %<>%
 #' @export
-get_exposure_statistic_from_stanfit = function(
+get_exposure_category_statistic_from_stanfit <- function(
   fit,
   categories = get_category_levels_from_stanfit(fit),
   groups = get_group_levels_from_stanfit(fit, include_prior = FALSE),
@@ -137,7 +138,11 @@ get_exposure_statistic_from_stanfit = function(
   x <- get_input_from_stanfit(fit)
 
   df <- NULL
-  if (any(c("n", "css", "cov") %in% statistic)) {
+  # (If untransform_cues is TRUE, all statistics first need to be calculated because of the approach
+  # taken below to untrasnform the statistics.)
+
+  # Get counts n
+  if (any(untransform_cues, c("n", "css", "cov") %in% statistic)) {
     n <- x$N
     d <- dim(n)
     dn <- dimnames(n)
@@ -145,9 +150,8 @@ get_exposure_statistic_from_stanfit = function(
     df.n <- tibble()
     for (c in 1:d[1]) { # category
       for (g in 1:d[2]) { # group/condition
-        df.n <-
-          rbind(
-            df.n,
+        df.n %<>%
+          bind_rows(
             tibble(
               group = dn[[2]][g],
               category = dn[[1]][c],
@@ -158,7 +162,8 @@ get_exposure_statistic_from_stanfit = function(
     df <- if (!is.null(df)) df %<>% left_join(df.n, by = c("group", "category")) else df.n
   }
 
-  if (any(c("mean", "css", "cov") %in% statistic)) {
+  # Get central tendencies m
+  if (any(untransform_cues, c("mean", "css", "cov") %in% statistic)) {
     m <- x$x_mean
     d <- dim(m)
     dn <- dimnames(m)
@@ -167,9 +172,8 @@ get_exposure_statistic_from_stanfit = function(
     for (c in 1:d[1]) { # category
       for (g in 1:d[2]) { # group/condition
         for (f in 1:d[3]) { # cue
-          df.m <-
-            rbind(
-              df.m,
+          df.m %<>%
+            bind_rows(
               tibble(
                 group = dn[[2]][g],
                 category = dn[[1]][c],
@@ -179,6 +183,8 @@ get_exposure_statistic_from_stanfit = function(
       }
     }
 
+    # Pivot wide to have mean for all cues in the same row for any unique combination of group and category
+    # (no additional grouping necessary)
     df.m %<>%
       pivot_wider(names_from = "cue", values_from = "value") %>%
       make_vector_column(cols = dn[[3]], vector_col = "mean", .keep = "unused")
@@ -186,7 +192,8 @@ get_exposure_statistic_from_stanfit = function(
     df <- if (!is.null(df)) df %<>% left_join(df.m, by = c("group", "category")) else df.m
   }
 
-  if (any(c("uss", "css", "cov") %in% statistic)) {
+  # Get scatter or covariance matrices s
+  if (any(untransform_cues, c("uss", "css", "cov") %in% statistic)) {
     s <- x$x_ss
     d <- dim(s)
     dn <- dimnames(s)
@@ -217,13 +224,13 @@ get_exposure_statistic_from_stanfit = function(
     df <- if (!is.null(df)) df %<>% left_join(df.s, by = c("group", "category")) else df.s
   }
 
-  if (any(c("css", "cov") %in% statistic)) {
-    df %<>% mutate(css = pmap(.l = list(uss, n, mean), uss2css))
+  if (any(untransform_cues, c("css", "cov") %in% statistic)) {
+    df %<>% mutate(css = pmap(.l = list(.data$uss, .data$n, .data$mean), uss2css))
   }
 
-  if (any(c("cov") %in% statistic)) {
+  if (any(untransform_cues, c("cov") %in% statistic)) {
     df %<>%
-      mutate(cov = map2(.data$css, n, css2cov))
+      mutate(cov = map2(.data$css, .data$n, css2cov))
   }
 
   df %<>%
@@ -233,7 +240,7 @@ get_exposure_statistic_from_stanfit = function(
     { if (untransform_cues & "cov" %in% statistic) mutate(., cov = map(.data$cov, ~ untransform_category_cov(.x, get_transform_information_from_stanfit(fit)))) else . } %>%
     { if (untransform_cues & any(c("css", "uss") %in% statistic)) mutate(., css = map2(.data$cov, n, cov2css)) else . } %>%
     { if (untransform_cues & any(c("uss", "mean") %in% statistic)) mutate(., mean = map(.data$mean, ~ untransform_category_mean(.x, get_transform_information_from_stanfit(fit)))) else . } %>%
-    { if (untransform_cues & "uss" %in% statistic) mutate(., uss = pmap(.l = list(cov, n, mean), css2uss)) else . } %>%
+    { if (untransform_cues & "uss" %in% statistic) mutate(., uss = pmap(.l = list(.data$cov, .data$n, .data$mean), css2uss)) else . } %>%
     select(group, category, !!! syms(statistic)) %>%
     filter(., .data[["group"]] %in% .env[["groups"]]) %>%
     filter(., .data[["category"]] %in% .env[["categories"]]) %>%
@@ -241,21 +248,35 @@ get_exposure_statistic_from_stanfit = function(
       category = factor(category, levels = .env[["categories"]]),
       group = factor(group, levels = .env[["groups"]]))
 
+  # If just one category, group, and statistic was requested, just return that object
+  # (rather than the tibble)
+  if (nrow(df) == 1 & length(statistic) == 1) df <- df[, statistic][[1]][[1]]
   return(df)
 }
 
-#' @rdname get_exposure_statistic_from_stanfit
+#' @rdname get_exposure_category_statistic_from_stanfit
 #' @export
-get_exposure_mean_from_stanfit = function(...) {
-  return(get_exposure_statistic_from_stanfit(..., statistic = "mean"))
+get_exposure_mean_from_stanfit <- function(...) {
+  return(get_exposure_category_statistic_from_stanfit(..., statistic = "mean"))
 }
 
-#' @rdname get_exposure_statistic_from_stanfit
+#' @rdname get_exposure_category_statistic_from_stanfit
 #' @export
-get_exposure_ss_from_stanfit = function(...) {
-  return(get_exposure_statistic_from_stanfit(..., statistic = "ss"))
+get_exposure_css_from_stanfit <- function(...) {
+  return(get_exposure_category_statistic_from_stanfit(..., statistic = "css"))
 }
 
+#' @rdname get_exposure_category_statistic_from_stanfit
+#' @export
+get_exposure_uss_from_stanfit <- function(...) {
+  return(get_exposure_category_statistic_from_stanfit(..., statistic = "uss"))
+}
+
+#' @rdname get_exposure_category_statistic_from_stanfit
+#' @export
+get_exposure_cov_from_stanfit <- function(...) {
+  return(get_exposure_category_statistic_from_stanfit(..., statistic = "cov"))
+}
 
 #' Get the test data from an NIW ideal adaptor stanfit.
 #'
@@ -274,7 +295,7 @@ get_exposure_ss_from_stanfit = function(...) {
 #' @seealso TBD
 #' @keywords TBD
 #' @export
-get_test_data_from_stanfit = function(
+get_test_data_from_stanfit <- function(
   fit,
   groups = get_group_levels_from_stanfit(fit, include_prior = FALSE)
 ) {
@@ -311,7 +332,7 @@ get_test_data_from_stanfit = function(
 #' @keywords TBD
 #' @rdname get_original_variable_levels_from_stanfit
 #' @export
-get_original_variable_levels_from_stanfit = function(fit, variable = c("category", "group", "cue"), indices = NULL) {
+get_original_variable_levels_from_stanfit <- function(fit, variable = c("category", "group", "cue"), indices = NULL) {
   assert_that(is.null(indices) | all(indices > 0))
   f = get_constructor(fit, variable)
 
@@ -321,7 +342,7 @@ get_original_variable_levels_from_stanfit = function(fit, variable = c("category
 
 #' @rdname get_original_variable_levels_from_stanfit
 #' @export
-get_category_levels_from_stanfit = function(fit, indices = NULL) {
+get_category_levels_from_stanfit <- function(fit, indices = NULL) {
   return(get_original_variable_levels_from_stanfit(fit, "category", indices))
 }
 
@@ -360,7 +381,7 @@ get_cue_levels_from_stanfit <- function(fit, indices = NULL) {
 #' @keywords TBD
 #' @rdname get_constructor
 #' @export
-get_constructor = function(fit, variable = NULL) {
+get_constructor <- function(fit, variable = NULL) {
   available_constructors <- c("category", "group", "cue", "cue2")
   assert_NIW_ideal_adaptor_stanfit(fit)
   if (is.null(variable)) return(attr(fit, "tidybayes_constructors"))
@@ -382,25 +403,25 @@ get_constructor = function(fit, variable = NULL) {
 
 #' @rdname get_constructor
 #' @export
-get_category_constructor = function(fit) {
+get_category_constructor <- function(fit) {
   return(get_constructor(fit, "category"))
 }
 
 #' @rdname get_constructor
 #' @export
-get_group_constructor = function(fit) {
+get_group_constructor <- function(fit) {
   return(get_constructor(fit, "group"))
 }
 
 #' @rdname get_constructor
 #' @export
-get_cue_constructor = function(fit) {
+get_cue_constructor <- function(fit) {
   return(get_constructor(fit, "cue"))
 }
 
 #' @rdname get_constructor
 #' @export
-get_cue2_constructor = function(fit) {
+get_cue2_constructor <- function(fit) {
   return(get_constructor(fit, "cue2"))
 }
 
@@ -441,7 +462,7 @@ get_cue2_constructor = function(fit) {
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #' @rdname get_expected_category_statistic_from_stanfit
 #' @export
-get_expected_category_statistic_from_stanfit = function(
+get_expected_category_statistic_from_stanfit <- function(
   x,
   categories = get_category_levels_from_stanfit(x),
   groups = get_group_levels_from_stanfit(x, include_prior = TRUE),
@@ -472,21 +493,21 @@ get_expected_category_statistic_from_stanfit = function(
       category = factor(category, levels = .env[["categories"]]),
       group = factor(group, levels = .env[["groups"]]))
 
-  # If just one category and group was requested, just return that object, rather
-  # than the tibble
-  if (nrow(x) == 1) x <- x[, paste0(statistic, ".mean")][[1]][[1]]
+  # If just one category, group, and statistic was requested, just return that object
+  # (rather than the tibble)
+  if (nrow(x) == 1 & length(statistic) == 1) x <- x[, paste0(statistic, ".mean")][[1]][[1]]
   return(x)
 }
 
 #' @rdname get_expected_category_statistic_from_stanfit
 #' @export
-get_expected_mu_from_stanfit = function(x, ...) {
+get_expected_mu_from_stanfit <- function(x, ...) {
   return(get_expected_category_statistic_from_stanfit(x, statistic = "mu", ...))
 }
 
 #' @rdname get_expected_category_statistic_from_stanfit
 #' @export
-get_expected_sigma_from_stanfit = function(x, ...) {
+get_expected_sigma_from_stanfit <- function(x, ...) {
   return(get_expected_category_statistic_from_stanfit(x, statistic = "Sigma", ...))
 }
 

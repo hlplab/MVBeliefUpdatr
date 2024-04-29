@@ -410,7 +410,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     # Optionally plot exposure data
     { if (plot.exposure)
       add_exposure_ellipse_to_2D_plot(
-        get_exposure_statistic_from_stanfit(
+        get_exposure_category_statistic_from_stanfit(
           model,
           categories = levels(d$category),
           groups = setdiff(groups_found, "prior"),
@@ -525,7 +525,7 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
     # Optionally plot exposure data
     { if (plot.exposure)
       add_exposure_ellipse_to_2D_plot(
-        get_exposure_statistic_from_stanfit(
+        get_exposure_category_statistic_from_stanfit(
           model,
           categories = levels(d$category),
           groups = setdiff(groups_found, "prior"),

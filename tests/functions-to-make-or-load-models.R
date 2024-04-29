@@ -1,7 +1,15 @@
-make_data_for_stanfit <- function() {
+make_data_for_stanfit <- function(example = 1) {
   require(tidyverse)
   require(MVBeliefUpdatr)
 
+  if (example == 1) {
+    return(make_data_for_stanfit_with_exposure())
+  } else if (example == 2) {
+    return(make_data_for_stanfit_without_exposure())
+  }
+}
+
+make_data_for_stanfit_with_exposure <- function() {
   n_subject <- 30
   # number of trials in exposure per category per subject
   # (and there will be 2 * n_trials trials in test per subject)
@@ -99,25 +107,175 @@ make_data_for_stanfit <- function() {
                  noise_treatment = "no_noise",
                  lapse_treatment = "no_lapses")))
 
+  return(.data %>%
+           crossing(Phase = c("exposure", "test")))
+}
+
+
+make_data_for_stanfit_without_exposure <- function() {
+  n_subject <- 60
+  # number of trials in exposure per category per subject
+  # (and there will be 2 * n_trials trials in test per subject)
+  n_trial.exposure <- 90
+  .cues <- c("cue1", "cue2")
+
+  # Make ideal adaptor for prior
+  .ia_0 <-
+    example_MVG_ideal_observer(1) %>%
+    lift_MVG_ideal_observer_to_NIW_ideal_adaptor(kappa = 10, nu = 100)
+  # Update that ideal adaptor with shifted exposure
+  # Shift 1
+  .exposure_1 <-
+    sample_MVG_data_from_model(
+      model =
+        example_MVG_ideal_observer(1) %>%
+        mutate(
+          mu = map(mu, ~ .x + c(-1, 3)),
+          Sigma = ifelse(category == "B", map(Sigma, ~ .x * 2), Sigma)),
+      Ns = n_trial.exposure,
+      keep.input_parameters = F) %>%
+    make_vector_column(cols = c("cue1", "cue2"), vector_col = "cue")
+  .ia_1 <-
+    .ia_0 %>%
+    update_NIW_ideal_adaptor_batch(
+      prior = .,
+      exposure = .exposure_1,
+      noise_treatment = "no_noise")
+  # Shift 2
+  .exposure_2 <-
+    sample_MVG_data_from_model(
+      model =
+        example_MVG_ideal_observer(1) %>%
+        mutate(mu = map(mu, ~ .x + c(4, -1))),
+      Ns = n_trial.exposure,
+      keep.input_parameters = F) %>%
+    make_vector_column(cols = c("cue1", "cue2"), vector_col = "cue")
+  .ia_2 <-
+    .ia_0 %>%
+    update_NIW_ideal_adaptor_batch(
+      prior = .,
+      exposure = .exposure_2,
+      noise_treatment = "no_noise")
+  # Shift 3
+  .exposure_3 <-
+    sample_MVG_data_from_model(
+      model =
+        example_MVG_ideal_observer(1) %>%
+        mutate(
+          mu = map(mu, ~ .x + c(-4, -2)),
+          Sigma = ifelse(category == "B", map(Sigma, ~ .x * 2), Sigma)),
+      Ns = n_trial.exposure,
+      keep.input_parameters = F) %>%
+    make_vector_column(cols = c("cue1", "cue2"), vector_col = "cue")
+  .ia_3 <-
+    .ia_0 %>%
+    update_NIW_ideal_adaptor_batch(
+      prior = .,
+      exposure = .exposure_3,
+      noise_treatment = "no_noise")
+
+  # store exposure data
+  df.exposure <-
+    bind_rows(
+      .exposure_1 %>% mutate(Condition = "shift_1"),
+      .exposure_2 %>% mutate(Condition = "shift_2"),
+      .exposure_3 %>% mutate(Condition = "shift_3")) %>%
+    mutate(Phase = "exposure")
+
+  # define a test grid
+  df.test <-
+    crossing(
+      cue1 = seq(-5, 5, length.out = 10),
+      cue2 = seq(-5, 5, length.out = 10),
+      category = NA) %>%
+    make_vector_column(cols = c("cue1", "cue2"), vector_col = "cue") %>%
+    mutate(Phase = "test")
+
+  plot_expected_categories_contour2D(.ia_0) +
+    geom_point(
+      data = df.exposure,
+      aes(x = cue1, y = cue2, shape = category, color = Condition)) +
+    geom_point(
+      data = df.test,
+      aes(x = cue1, y = cue2), shape = 3, color = "black") +
+    scale_color_manual(values = c("red", "blue", "green")) +
+    theme_bw()
+
+  # Sample tests responses for subjects after the four exposure conditions
+  # (one of which is no_exposure)
+  df.exposure %<>% crossing(Subject = 1:n_subject)
+  df.test %<>% crossing(Subject = 1:n_subject)
+  .data <-
+    df.exposure %>%
+    bind_rows(
+      df.test %>%
+        mutate(
+          Condition = "no_exposure",
+          Response =
+            get_categorization_from_NIW_ideal_adaptor(
+              x = cue,
+              model = .ia_0,
+              decision_rule = "sampling",
+              simplify = T,
+              noise_treatment = "no_noise",
+              lapse_treatment = "no_lapses")),
+      df.test %>%
+        mutate(
+          Condition = "shift_1",
+          Response =
+            get_categorization_from_NIW_ideal_adaptor(
+              x = cue,
+              model = .ia_1,
+              decision_rule = "sampling",
+              simplify = T,
+              noise_treatment = "no_noise",
+              lapse_treatment = "no_lapses")),
+      df.test %>%
+        mutate(
+          Condition = "shift_2",
+          Response =
+            get_categorization_from_NIW_ideal_adaptor(
+              x = cue,
+              model = .ia_2,
+              decision_rule = "sampling",
+              simplify = T,
+              noise_treatment = "no_noise",
+              lapse_treatment = "no_lapses")),
+      df.test %>%
+        mutate(
+          Condition = "shift_3",
+          Response =
+            get_categorization_from_NIW_ideal_adaptor(
+              x = cue,
+              model = .ia_3,
+              decision_rule = "sampling",
+              simplify = T,
+              noise_treatment = "no_noise",
+              lapse_treatment = "no_lapses")))
+
+  .data %<>%
+    arrange(Condition, Subject, Phase)
+
   return(.data)
 }
 
-get_example_stanfit <- function() {
-  filename <- "../example-stanfit.rds"
+get_example_stanfit <- function(example = 1) {
+  filename <- paste0("../example-stanfit", example, ".rds")
   if (file.exists(filename)) {
     fit <- readRDS(filename)
   } else {
-    .data <- make_data_for_stanfit
-    fit <- infer_prior_beliefs(
-      exposure = .data,
-      test = .data,
-      cues = c("cue1", "cue2"),
-      category = "category",
-      response = "Response",
-      group = "Subject",
-      group.unique = "Condition",
-      file = filename,
-      cores = 4)
+    .data <- make_data_for_stanfit(example)
+    fit <-
+      infer_prior_beliefs(
+        exposure = .data %>% filter(Phase == "exposure"),
+        test = .data %>% filter(Phase == "test"),
+        cues = c("cue1", "cue2"),
+        category = "category",
+        response = "Response",
+        group = "Subject",
+        group.unique = "Condition",
+        file = filename,
+        cores = 4)
   }
 
   return(fit)
