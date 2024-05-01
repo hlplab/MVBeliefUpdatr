@@ -1,14 +1,14 @@
 #' Infer NIW ideal adaptor
 #'
 #' Infers a posterior distribution of \code{\link[NIW_ideal_adaptor]{NIW ideal adaptors}} from the input data using rstan/stan. The function can take
-#' two types of inputs: an input list, as prepared by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}},
+#' two types of inputs: an input list, as prepared by \code{\link[compose_data]{compose_data_to_infer_NIW_ideal_adaptor}},
 #' or the exposure and test data, the names of the cues, category, and response columns (and optionally group and/or block columns).
 #'
-#' @inheritParams compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats
+#' @inheritParams compose_data_to_infer_NIW_ideal_adaptor
 #' @param untransform_fit Logical flag indicating whether the samples of the model should be transformed back
 #' into the original cue space by applying the untransform function. (default: `TRUE`)
-#' @param input A list of the type that would be returned by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.
-#' This list can be provided *instead* of the arguments required by \code{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}.
+#' @param input A list of the type that would be returned by \code{\link[compose_data]{compose_data_to_infer_NIW_ideal_adaptor}}.
+#' This list can be provided *instead* of the arguments required by \code{compose_data_to_infer_NIW_ideal_adaptor}.
 #' @param sample Should the model be fit and sampled from?
 #' @param file Either NULL or a character string. In the latter case, the fitted model object is saved
 #' via saveRDS in a file named after the string supplied in file. The .rds extension is added automatically.
@@ -24,8 +24,9 @@
 #' @return \code{NIW_ideal_adaptor_stanfit} object with the fitted stan model. In interpreting the inferred kappa_0 and nu_0, it should
 #' be kept in mind that the \emph{inferred} scatter matrix S_0 includes variability from internal perceptual and/or
 #' external environmental noise, \emph{in addition} to the motor noise that is reflected in production data. This also
-#' implies that, if Sigma_0 is given, Sigma_0 and nu_0 mutually constrain each other, because the expected value of
-#' Sigma_0 is determined by both S_0 and nu.
+#' implies that, if Sigma_0 is provided by the user, Sigma_0 and nu_0 mutually constrain each other, because the expected value of
+#' Sigma_0 is determined by both S_0 and nu. \emph{If you are providing Sigma_0 as input}, make sure to read the notes about this
+#' argument in the help page on \code{\link[compose_data]{compose_data_to_infer_NIW_ideal_adaptor}}.
 #'
 #' @seealso \code{\link{is.NIW_ideal_adaptor_stanfit}} for information about NIW_ideal_adaptor_stanfit objects,
 #' \code{\link{add_ibbu_stanfit_draws}} to draw samples from the stanfit.
@@ -69,7 +70,7 @@ infer_NIW_ideal_adaptor <- function(
 
   if (is.null(input)) {
     input <-
-      compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats(
+      compose_data_to_infer_NIW_ideal_adaptor(
         exposure = exposure,
         test = test,
         cues = cues,

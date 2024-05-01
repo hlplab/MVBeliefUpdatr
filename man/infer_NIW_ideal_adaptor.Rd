@@ -108,7 +108,9 @@ components necessary to explain at least the pca.cutoff of the total variance. (
 \item{lapse_rate, mu_0, Sigma_0}{Optionally, lapse rate, prior expected category means (mu_0) and/or prior expected
 category covariance matrices (Sigma_0) for all categories. Lapse rate should be a number between 0 and 1. For mu_0
 and Sigma_0, each should be a list, with each element being the expected mean/covariance matrix for a specific
-category prior to updating. Elements of mu_0 and Sigma_0 should be ordered in the same order as the levels of the
+category \emph{including perceptual noise} prior to updating (including noise is necessary since the stancode for the
+inference of the NIW ideal adaptor does currently \emph{not} infer category and noise variability separately.
+Elements of mu_0 and Sigma_0 should be ordered in the same order as the levels of the
 category variable in \code{exposure} and \code{test}. These prior expected means and covariance matrices could be
 estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_MVG_from_data}}
 for a convenient way to do so). Internally, m_0 is then set to mu_0 (so that the expected value of the prior
@@ -117,8 +119,8 @@ distribution of means is mu_0) and S_0 is set so that the expected value of the 
 \item{untransform_fit}{Logical flag indicating whether the samples of the model should be transformed back
 into the original cue space by applying the untransform function. (default: `TRUE`)}
 
-\item{input}{A list of the type that would be returned by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.
-This list can be provided *instead* of the arguments required by \code{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}.}
+\item{input}{A list of the type that would be returned by \code{\link[compose_data]{compose_data_to_infer_NIW_ideal_adaptor}}.
+This list can be provided *instead* of the arguments required by \code{compose_data_to_infer_NIW_ideal_adaptor}.}
 
 \item{sample}{Should the model be fit and sampled from?}
 
@@ -140,12 +142,13 @@ conjunction with multiple cues. (default: `FALSE`)}
 \code{NIW_ideal_adaptor_stanfit} object with the fitted stan model. In interpreting the inferred kappa_0 and nu_0, it should
 be kept in mind that the \emph{inferred} scatter matrix S_0 includes variability from internal perceptual and/or
 external environmental noise, \emph{in addition} to the motor noise that is reflected in production data. This also
-implies that, if Sigma_0 is given, Sigma_0 and nu_0 mutually constrain each other, because the expected value of
-Sigma_0 is determined by both S_0 and nu.
+implies that, if Sigma_0 is provided by the user, Sigma_0 and nu_0 mutually constrain each other, because the expected value of
+Sigma_0 is determined by both S_0 and nu. \emph{If you are providing Sigma_0 as input}, make sure to read the notes about this
+argument in the help page on \code{\link[compose_data]{compose_data_to_infer_NIW_ideal_adaptor}}.
 }
 \description{
 Infers a posterior distribution of \code{\link[NIW_ideal_adaptor]{NIW ideal adaptors}} from the input data using rstan/stan. The function can take
-two types of inputs: an input list, as prepared by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}},
+two types of inputs: an input list, as prepared by \code{\link[compose_data]{compose_data_to_infer_NIW_ideal_adaptor}},
 or the exposure and test data, the names of the cues, category, and response columns (and optionally group and/or block columns).
 }
 \seealso{

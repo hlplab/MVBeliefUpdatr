@@ -243,7 +243,9 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' @param lapse_rate,mu_0,Sigma_0 Optionally, lapse rate, prior expected category means (mu_0) and/or prior expected
 #' category covariance matrices (Sigma_0) for all categories. Lapse rate should be a number between 0 and 1. For mu_0
 #' and Sigma_0, each should be a list, with each element being the expected mean/covariance matrix for a specific
-#' category prior to updating. Elements of mu_0 and Sigma_0 should be ordered in the same order as the levels of the
+#' category \emph{including perceptual noise} prior to updating (including noise is necessary since the stancode for the
+#' inference of the NIW ideal adaptor does currently \emph{not} infer category and noise variability separately.
+#' Elements of mu_0 and Sigma_0 should be ordered in the same order as the levels of the
 #' category variable in \code{exposure} and \code{test}. These prior expected means and covariance matrices could be
 #' estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_MVG_from_data}}
 #' for a convenient way to do so). Internally, m_0 is then set to mu_0 (so that the expected value of the prior
@@ -262,7 +264,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' @importFrom purrr map_lgl map_int
 #' @rdname compose_data
 #' @export
-compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats <- function(
+compose_data_to_infer_NIW_ideal_adaptor <- function(
   exposure, test,
   cues, category = "category", response = "response", group = "group", group.unique = NULL,
   center.observations = T, scale.observations = T, pca.observations = F, pca.cutoff = 1,
