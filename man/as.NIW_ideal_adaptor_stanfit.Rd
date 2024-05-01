@@ -13,7 +13,7 @@ as.NIW_ideal_adaptor_stanfit(stanfit, input_data, transform_information = NULL)
 function of the type returned by \code{\link[transform_cues]{transform_cues}}.}
 
 \item{input}{Input for a call to rstan prepared for one of the acceptable
-stan programs. See \code{\link{compose_data}}.}
+stan programs. See \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.}
 }
 \value{
 NIW_ideal_adaptor_stanfit object

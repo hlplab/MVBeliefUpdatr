@@ -119,7 +119,7 @@ distribution of means is mu_0) and S_0 is set so that the expected value of the 
 \item{untransform_fit}{Logical flag indicating whether the samples of the model should be transformed back
 into the original cue space by applying the untransform function. (default: `TRUE`)}
 
-\item{input}{A list of the type that would be returned by \code{\link[compose_data]{compose_data_to_infer_NIW_ideal_adaptor}}.
+\item{input}{A list of the type that would be returned by \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
 This list can be provided *instead* of the arguments required by \code{compose_data_to_infer_NIW_ideal_adaptor}.}
 
 \item{sample}{Should the model be fit and sampled from?}
@@ -144,11 +144,11 @@ be kept in mind that the \emph{inferred} scatter matrix S_0 includes variability
 external environmental noise, \emph{in addition} to the motor noise that is reflected in production data. This also
 implies that, if Sigma_0 is provided by the user, Sigma_0 and nu_0 mutually constrain each other, because the expected value of
 Sigma_0 is determined by both S_0 and nu. \emph{If you are providing Sigma_0 as input}, make sure to read the notes about this
-argument in the help page on \code{\link[compose_data]{compose_data_to_infer_NIW_ideal_adaptor}}.
+argument in the help page on \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
 }
 \description{
 Infers a posterior distribution of \code{\link[NIW_ideal_adaptor]{NIW ideal adaptors}} from the input data using rstan/stan. The function can take
-two types of inputs: an input list, as prepared by \code{\link[compose_data]{compose_data_to_infer_NIW_ideal_adaptor}},
+two types of inputs: an input list, as prepared by \code{\link{compose_data_to_infer_NIW_ideal_adaptor}},
 or the exposure and test data, the names of the cues, category, and response columns (and optionally group and/or block columns).
 }
 \seealso{

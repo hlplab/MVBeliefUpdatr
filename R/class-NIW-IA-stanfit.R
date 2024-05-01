@@ -4,7 +4,7 @@ new_stanfit_class_name = "NIW_ideal_adaptor_stanfit"
 
 #' An S4 class for stanfit objects that use one of the NIW_ideal_adaptor stan programs.
 #'
-#' @slot input_data list containing the data handed to rstan through \code{compose_data} function.
+#' @slot input_data list containing the data handed to rstan through \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
 #' @slot transform_information list containing elements transform.parameters, transform.function, and
 #' untransform.function.
 #' @slot labels list
@@ -26,7 +26,7 @@ NIW_ideal_adaptor_stanfit
 #'
 #' @param stanfit stanfit object
 #' @param input Input for a call to rstan prepared for one of the acceptable
-#' stan programs. See \code{\link{compose_data}}.
+#' stan programs. See \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
 #' @param transform_information Optionally, a list of transform parameters, transform function, and corresponding untransform
 #' function of the type returned by \code{\link[transform_cues]{transform_cues}}.
 #'

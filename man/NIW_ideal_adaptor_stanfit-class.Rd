@@ -11,7 +11,7 @@ An S4 class for stanfit objects that use one of the NIW_ideal_adaptor stan progr
 \section{Slots}{
 
 \describe{
-\item{\code{input_data}}{list containing the data handed to rstan through \code{compose_data} function.}
+\item{\code{input_data}}{list containing the data handed to rstan through \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.}
 
 \item{\code{transform_information}}{list containing elements transform.parameters, transform.function, and
 untransform.function.}

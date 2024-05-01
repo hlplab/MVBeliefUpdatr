@@ -262,7 +262,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' @keywords TBD
 #'
 #' @importFrom purrr map_lgl map_int
-#' @rdname compose_data
+#' @rdname compose_data_to_infer_NIW_ideal_adaptor
 #' @export
 compose_data_to_infer_NIW_ideal_adaptor <- function(
   exposure, test,
