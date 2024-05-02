@@ -148,7 +148,7 @@ if the data you're fitting contains test phases without exposure (e.g., pre-expo
 \code{Sigma_0} argument in the help page on \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
 }
 \description{
-Infers a posterior distribution of \code{\link{NIW_ideal _adaptor}}s from the input data using rstan/stan. The function can take
+Infers a posterior distribution of NIW_ideal _adaptors from the input data using rstan/stan. The function can take
 two types of inputs: an input list, as prepared by \code{\link{compose_data_to_infer_NIW_ideal_adaptor}},
 or the exposure and test data, the names of the cues, category, and response columns (and optionally group and/or block columns).
 }
