@@ -1,25 +1,25 @@
 Package: MVBeliefUpdatr
 Title: Fitting, Summarizing, and Visualizing of Multivariate Gaussian Ideal Observers and Adaptors
 Version: 0.0.1.0005
-Authors@R: 
+Authors@R:
     person(given = "Florian",
            family = "Jaeger",
            role = c("aut", "cre"),
            email = "fjaeger@ur.rochester.edu",
            comment = c(ORCID = "0000-0002-1158-7308"))
-Description: A package to model and visualize incremental Bayesian categorization and belief-updating for multivariate Gaussian categories. 
+Description: A package to model and visualize incremental Bayesian categorization and belief-updating for multivariate Gaussian categories.
 License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.1
 RdMacros: Rdpack
-Suggests: 
+Suggests:
     testthat (>= 2.1.0),
     covr
 Biarch: true
-Depends: 
+Depends:
     R (>= 3.5.0)
-Imports: 
+Imports:
     methods,
     Rcpp (>= 0.12.0),
     RcppParallel (>= 5.0.1),
@@ -55,7 +55,7 @@ Imports:
     tidyr,
     tidyselect,
     viridis
-LinkingTo: 
+LinkingTo:
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),
     RcppEigen (>= 0.3.3.3.0),
