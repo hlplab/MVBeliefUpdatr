@@ -376,6 +376,9 @@ update_NIW_ideal_adaptor_batch <- function(
   exposure,
   exposure.category = "category",
   exposure.cues = get_cue_labels_from_model(prior),
+  # Could add lapse treatment here, though it would only make sense to interpret it in the limit
+  # as the fraction of trials that will be missed, changing only N, without affecting the other
+  # sufficient statistics.
   noise_treatment = if (is.NIW_ideal_adaptor(prior)) { if (!is.null(first(prior$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
   verbose = FALSE
 ){

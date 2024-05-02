@@ -68,7 +68,7 @@ about the cue values of the test stimulus and the participant's response.}
 
 \item{cues}{Names of columns with cue values. Must exist in both exposure and test data.}
 
-\item{category}{Name of column in exposure data that contains the category label. Can be `NULL` for unsupervised updating
+\item{category}{Name of column in exposure data that contains the category label. Can be \code{NULL} for unsupervised updating
 (not yet implemented). (default: "category")}
 
 \item{response}{Name of column in test data that contains participants' responses. (default: "response")}
@@ -78,47 +78,50 @@ a variable identifying subjects/participants. Must exist in both exposure and te
 
 \item{group.unique}{Name of column that uniquely identifies each group with identical exposure. This could be a
 variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
-substantially more efficient if many groups share the same exposure. To ignore, set to `NULL`. (default: `NULL`)}
+substantially more efficient if many groups share the same exposure. To ignore, set to \code{NULL}. (default: \code{NULL})}
 
 \item{center.observations}{Should the data be centered based on cues' means during exposure? Note that the cues' means
-used for centering are calculated after aggregating the data to all unique combinations specified by `group.unique`.
+used for centering are calculated after aggregating the data to all unique combinations specified by \code{group.unique}.
 These means are only expected to be the same as the standard deviations over the entire exposure data if the exposure data
-are perfectly balanced with regard to `group.unique`. Centering will not affect the inferred correlation
+are perfectly balanced with regard to \code{group.unique}. Centering will not affect the inferred correlation
 or covariance matrices but it will affect the absolute position of the inferred means. The relative position of the inferred
 means remains unaffected.
-If `TRUE` and `mu_0` is specified, `mu_0` will also be centered (`Sigma_0` is not affected by centering and thus not changed).
-(default: `TRUE`)}
+If \code{TRUE} and \code{mu_0} is specified, \code{mu_0} will also be centered (\code{Sigma_0} is not affected by centering and thus not changed).
+(default: \code{TRUE})}
 
 \item{scale.observations}{Should the data be standardized based on cues' standard deviation during exposure? Note that the
 cues' standard deviations used for scaling are calculated after aggregating the data to all unique combinations specified
-by `group.unique`. These standard deviations are only expected to be the same as the standard deviations over the entire
-exposure data if the exposure data are perfectly balanced with regard to `group.unique`.
+by \code{group.unique}. These standard deviations are only expected to be the same as the standard deviations over the entire
+exposure data if the exposure data are perfectly balanced with regard to \code{group.unique}.
 Scaling will not affect the inferred correlation matrix,
 but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
 affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
-If `TRUE` and `mu_0` and `Sigma_0` are specified, `mu_0` and `Sigma_0` will also be scaled.
+If \code{TRUE} and \code{mu_0} and \code{Sigma_0} are specified, \code{mu_0} and \code{Sigma_0} will also be scaled.
 (default: `TRUE`)}
 
-\item{pca.observations}{Should the data be transformed into orthogonal principal components? (default: `FALSE`)}
+\item{pca.observations}{Should the data be transformed into orthogonal principal components? (default: \code{FALSE})}
 
 \item{pca.cutoff}{Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
-`pca.observation = FALSE`. (default: 1)}
+\code{pca.observation = FALSE}. (default: 1)}
 
-\item{lapse_rate, mu_0, Sigma_0}{Optionally, lapse rate, prior expected category means (mu_0) and/or prior expected
-category covariance matrices (Sigma_0) for all categories. Lapse rate should be a number between 0 and 1. For mu_0
-and Sigma_0, each should be a list, with each element being the expected mean/covariance matrix for a specific
-category prior to updating. Elements of mu_0 and Sigma_0 should be ordered in the same order as the levels of the
+\item{lapse_rate, mu_0, Sigma_0}{Optionally, lapse rate, prior expected category means (\code{mu_0}) and/or prior expected
+category covariance matrices (\code{Sigma_0}) for all categories. Lapse rate should be a number between 0 and 1. For \code{mu_0}
+and \code{Sigma_0}, each should be a list, with each element being the expected mean/covariance matrix for a specific
+category prior to updating. Elements of \code{mu_0} and \code{Sigma_0} should be ordered in the same order as the levels of the
 category variable in \code{exposure} and \code{test}. These prior expected means and covariance matrices could be
 estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_MVG_from_data}}
-for a convenient way to do so). Internally, m_0 is then set to mu_0 (so that the expected value of the prior
-distribution of means is mu_0) and S_0 is set so that the expected value of the inverse-Wishart is Sigma_0 given nu_0.}
+for a convenient way to do so). Internally, m_0 is then set to \code{mu_0} (so that the expected value of the prior
+distribution of means is mu_0) and S_0 is set so that the expected value of the inverse-Wishart is \code{Sigma_0} given nu_0.
+Importantly, \strong{Sigma_0 should be convolved with perceptual noise (i.e., add perceptual noise covariance matrix to
+the category variability covariance matrices when you specify \code{Sigma_0})} since the stancode for the inference of the
+NIW ideal adaptor does \emph{not} infer category and noise variability separately.}
 
 \item{untransform_fit}{Logical flag indicating whether the samples of the model should be transformed back
-into the original cue space by applying the untransform function. (default: `TRUE`)}
+into the original cue space by applying the untransform function. (default: \code{TRUE})}
 
-\item{input}{A list of the type that would be returned by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}}.
-This list can be provided *instead* of the arguments required by \code{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}.}
+\item{input}{A list of the type that would be returned by \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
+This list can be provided *instead* of the arguments required by \code{compose_data_to_infer_NIW_ideal_adaptor}.}
 
 \item{sample}{Should the model be fit and sampled from?}
 
@@ -127,25 +130,26 @@ via saveRDS in a file named after the string supplied in file. The .rds extensio
 If the file already exists, the model from that file will be loaded and returned instead of refitting the model.
 As existing files won't be overwritten, you have to manually remove the file in order to refit and save the
 model under an existing file name. The file name is stored in the \code{NIW_ideal_adaptor_stanfit} object
-for later use. (default: `NULL`)}
+for later use. (default: \code{NULL})}
 
 \item{model}{Name of stanmodel that should be used. Overrides any default selection.}
 
 \item{use_univariate_updating}{Should legacy univariate updating be used? Will throw an error if used in
-conjunction with multiple cues. (default: `FALSE`)}
+conjunction with multiple cues. (default: \code{FALSE})}
 
 \item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}}
 }
 \value{
-\code{NIW_ideal_adaptor_stanfit} object with the fitted stan model. In interpreting the inferred kappa_0 and nu_0, it should
+\code{NIW_ideal_adaptor_stanfit} object with the fitted stan model. In interpreting the inferred parameters, it should
 be kept in mind that the \emph{inferred} scatter matrix S_0 includes variability from internal perceptual and/or
 external environmental noise, \emph{in addition} to the motor noise that is reflected in production data. This also
-implies that, if Sigma_0 is given, Sigma_0 and nu_0 mutually constrain each other, because the expected value of
-Sigma_0 is determined by both S_0 and nu.
+implies that, \strong{if \code{Sigma_0} is provided by the user it should be convolved with perceptual noise}. This is particularly important
+if the data you're fitting contains test phases without exposure (e.g., pre-exposure tests). Make sure to read the notes about the
+\code{Sigma_0} argument in the help page on \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
 }
 \description{
-Infers a posterior distribution of \code{\link[NIW_ideal_adaptor]{NIW ideal adaptors}} from the input data using rstan/stan. The function can take
-two types of inputs: an input list, as prepared by \code{\link[compose_data]{compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats}},
+Infers a posterior distribution of NIW_ideal _adaptors from the input data using rstan/stan. The function can take
+two types of inputs: an input list, as prepared by \code{\link{compose_data_to_infer_NIW_ideal_adaptor}},
 or the exposure and test data, the names of the cues, category, and response columns (and optionally group and/or block columns).
 }
 \seealso{

@@ -136,16 +136,26 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 
     for (i in 1:n_category) {
       for (j in 1:n_group) {
-        temp.data_ss <- data_ss %>%
+        temp.data_ss <-
+          data_ss %>%
           ungroup() %>%
           filter(!! rlang::sym(category) == cats[i] &
                    !! rlang::sym(group) == groups[j])
 
+        # Catch cases in which there is no data for a particular group/category combination
+        # (this can happen for example, when the data contain a pre-exposure test, which has
+        # no matching exposure statistics).
         if (nrow(temp.data_ss) > 0) {
           N[i,j] = temp.data_ss$N[[1]]
           x_mean[i,j,] = temp.data_ss$x_mean[[1]]
           x_ss[i,j,,] = temp.data_ss$x_ss[[1]]
         } else {
+          # For groups without exposure data, we are setting the category means to 0 and the
+          # sum-of-squares matrix to the identity matrix. This is a bit of a hack, that is
+          # necessary because stan expects these variables to always be vectors/matrices of
+          # the same type and dimensionality (even though they should really be NAs). So, in
+          # order to avoid confusion, we're setting these quantities to NA *after* all required
+          # input has been handed to stan.
           N[i,j] = 0
           x_mean[i,j,] = rep(0, length(cues))
           x_ss[i,j,,] = diag(length(cues))
@@ -201,46 +211,49 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' @param test `tibble` or `data.frame` with the test data. Each row should be an observation, and contain information
 #' about the cue values of the test stimulus and the participant's response.
 #' @param cues Names of columns with cue values. Must exist in both exposure and test data.
-#' @param category Name of column in exposure data that contains the category label. Can be `NULL` for unsupervised updating
+#' @param category Name of column in exposure data that contains the category label. Can be \code{NULL} for unsupervised updating
 #' (not yet implemented). (default: "category")
 #' @param response Name of column in test data that contains participants' responses. (default: "response")
 #' @param group Name of column that contains information about which observations form a group. Typically, this is
 #' a variable identifying subjects/participants. Must exist in both exposure and test data. (default: "group")
 #' @param group.unique Name of column that uniquely identifies each group with identical exposure. This could be a
 #' variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
-#' substantially more efficient if many groups share the same exposure. To ignore, set to `NULL`. (default: `NULL`)
+#' substantially more efficient if many groups share the same exposure. To ignore, set to \code{NULL}. (default: \code{NULL})
 #' @param center.observations Should the data be centered based on cues' means during exposure? Note that the cues' means
-#' used for centering are calculated after aggregating the data to all unique combinations specified by `group.unique`.
+#' used for centering are calculated after aggregating the data to all unique combinations specified by \code{group.unique}.
 #' These means are only expected to be the same as the standard deviations over the entire exposure data if the exposure data
-#' are perfectly balanced with regard to `group.unique`. Centering will not affect the inferred correlation
+#' are perfectly balanced with regard to \code{group.unique}. Centering will not affect the inferred correlation
 #' or covariance matrices but it will affect the absolute position of the inferred means. The relative position of the inferred
 #' means remains unaffected.
-#' If `TRUE` and `mu_0` is specified, `mu_0` will also be centered (`Sigma_0` is not affected by centering and thus not changed).
-#' (default: `TRUE`)
+#' If \code{TRUE} and \code{mu_0} is specified, \code{mu_0} will also be centered (\code{Sigma_0} is not affected by centering and thus not changed).
+#' (default: \code{TRUE})
 #' @param scale.observations Should the data be standardized based on cues' standard deviation during exposure? Note that the
 #' cues' standard deviations used for scaling are calculated after aggregating the data to all unique combinations specified
-#' by `group.unique`. These standard deviations are only expected to be the same as the standard deviations over the entire
-#' exposure data if the exposure data are perfectly balanced with regard to `group.unique`.
+#' by \code{group.unique}. These standard deviations are only expected to be the same as the standard deviations over the entire
+#' exposure data if the exposure data are perfectly balanced with regard to \code{group.unique}.
 #' Scaling will not affect the inferred correlation matrix,
 #' but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
 #' affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
-#' If `TRUE` and `mu_0` and `Sigma_0` are specified, `mu_0` and `Sigma_0` will also be scaled.
+#' If \code{TRUE} and \code{mu_0} and \code{Sigma_0} are specified, \code{mu_0} and \code{Sigma_0} will also be scaled.
 #' (default: `TRUE`)
-#' @param pca.observations Should the data be transformed into orthogonal principal components? (default: `FALSE`)
+#' @param pca.observations Should the data be transformed into orthogonal principal components? (default: \code{FALSE})
 #' @param pca.cutoff Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 #' components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
-#' `pca.observation = FALSE`. (default: 1)
-#' @param lapse_rate,mu_0,Sigma_0 Optionally, lapse rate, prior expected category means (mu_0) and/or prior expected
-#' category covariance matrices (Sigma_0) for all categories. Lapse rate should be a number between 0 and 1. For mu_0
-#' and Sigma_0, each should be a list, with each element being the expected mean/covariance matrix for a specific
-#' category prior to updating. Elements of mu_0 and Sigma_0 should be ordered in the same order as the levels of the
+#' \code{pca.observation = FALSE}. (default: 1)
+#' @param lapse_rate,mu_0,Sigma_0 Optionally, lapse rate, prior expected category means (\code{mu_0}) and/or prior expected
+#' category covariance matrices (\code{Sigma_0}) for all categories. Lapse rate should be a number between 0 and 1. For \code{mu_0}
+#' and \code{Sigma_0}, each should be a list, with each element being the expected mean/covariance matrix for a specific
+#' category prior to updating. Elements of \code{mu_0} and \code{Sigma_0} should be ordered in the same order as the levels of the
 #' category variable in \code{exposure} and \code{test}. These prior expected means and covariance matrices could be
 #' estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_MVG_from_data}}
-#' for a convenient way to do so). Internally, m_0 is then set to mu_0 (so that the expected value of the prior
-#' distribution of means is mu_0) and S_0 is set so that the expected value of the inverse-Wishart is Sigma_0 given nu_0.
+#' for a convenient way to do so). Internally, m_0 is then set to \code{mu_0} (so that the expected value of the prior
+#' distribution of means is mu_0) and S_0 is set so that the expected value of the inverse-Wishart is \code{Sigma_0} given nu_0.
+#' Importantly, \strong{Sigma_0 should be convolved with perceptual noise (i.e., add perceptual noise covariance matrix to
+#' the category variability covariance matrices when you specify \code{Sigma_0})} since the stancode for the inference of the
+#' NIW ideal adaptor does \emph{not} infer category and noise variability separately.
 #' @param tau_0_scales Optionally, a vector of scales for the Cauchy priors for each cue's standard deviations. Used in
 #' both the prior for m_0 and the prior for S_0. (default: vector of 5s of length of cues, assumes scaled input)
-#' @param omega_0_eta Optionally, etas the LKJ prior for the correlations of the covariance matrix of mu_0. Set to 0 to
+#' @param omega_0_eta Optionally, etas the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. Set to 0 to
 #' ignore. (default: 0)
 #'
 #' @return A list consisting of a \code{data_list} and \code{transform_information}. The former that is an
@@ -250,9 +263,9 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' @keywords TBD
 #'
 #' @importFrom purrr map_lgl map_int
-#' @rdname compose_data
+#' @rdname compose_data_to_infer_NIW_ideal_adaptor
 #' @export
-compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats <- function(
+compose_data_to_infer_NIW_ideal_adaptor <- function(
   exposure, test,
   cues, category = "category", response = "response", group = "group", group.unique = NULL,
   center.observations = T, scale.observations = T, pca.observations = F, pca.cutoff = 1,
@@ -266,8 +279,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats <- function(
     message("The tau_scale and L_omega_scale parameters are not specified (using defaults). Since you also did not ask for the input to be centered *and* scaled, this puts the priors assumed in the model on a scale that has no relation to the input. Unless you have manually centered and scaled the cues, this is strongly discouraged.")
 
   if (pca.observations)
-    assert_that(between(pca.cutoff, 0, 1),
-                msg = "pca.cutoff must be between 0 and 1.")
+    assert_that(between(pca.cutoff, 0, 1), msg = "pca.cutoff must be between 0 and 1.")
   if (!is.null(lapse_rate)) {
     assert_that(is.number(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
     assert_that(between(lapse_rate, 0, 1), msg = "If not NULL, lapse rate must be a number between 0 and 1.")
@@ -298,8 +310,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats <- function(
     group <- group.unique
   }
 
+  # Make sure data is ungrouped so that transform_cues works correctly, and keep only the necessary columns
   exposure %<>%
-    # Make sure data is ungrouped so that transform_cues works correctly.
     ungroup() %>%
     select(c(all_of(group), all_of(cues), all_of(category)))
 
@@ -320,7 +332,8 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats <- function(
               msg = paste("All levels of the grouping variable", group, "found in exposure must also be present in test."))
   if (!all(levels(test[[group]]) %in% levels(exposure[[group]])))
     message(paste("Not all levels of the grouping variable", group, "that are present in test were found in exposure.
-    Creating 0 exposure data for those groups."))
+    This is expected if and only if the data contained a test prior to (or without any) exposure.
+    Creating 0 exposure data for these groups."))
   exposure %<>%
     mutate(across(all_of(group), ~ factor(.x, levels = levels(test[[!! group]]))))
 
@@ -507,7 +520,7 @@ compose_data_to_infer_prior_via_conjugate_ibbu_w_sufficient_stats <- function(
       })
   }
 
-  # remove data from transform (for storage efficiency)
+  # Remove data from transform (for storage efficiency)
   transform$data <- NULL
   input <- list(data_list = data_list, transform_information = transform)
   return(input)

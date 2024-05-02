@@ -1,13 +1,15 @@
 context("fit stanfit")
 
 source("../functions-to-make-or-load-models.R")
-.data <- make_data_for_stanfit()
+.data <- make_data_for_stanfit(1)
+.exposure <- .data %>% filter(Phase == "exposure")
+.test <- .data %>% filter(Phase == "test")
 
 test_that("Test compose stanfit", {
   expect_no_error(
     infer_NIW_ideal_adaptor(
-      exposure = .data,
-      test = .data,
+      exposure = .exposure,
+      test = .test,
       cues = c("cue1"),
       category = "category",
       response = "Response",
@@ -16,8 +18,8 @@ test_that("Test compose stanfit", {
       sample = F))
   expect_no_error(
     infer_NIW_ideal_adaptor(
-      exposure = .data,
-      test = .data,
+      exposure = .exposure,
+      test = .test,
       cues = c("cue1", "cue2"),
       category = "category",
       response = "Response",
@@ -32,8 +34,8 @@ test_that("Test fitting stanfit", {
   expect_no_error(
     suppressMessages(suppressWarnings(
       infer_NIW_ideal_adaptor(
-        exposure = .data,
-        test = .data,
+        exposure = .exposure,
+        test = .test,
         cues = c("cue1"),
         category = "category",
         response = "Response",
@@ -46,8 +48,8 @@ test_that("Test fitting stanfit", {
   expect_no_error(
     suppressMessages(suppressWarnings(
       infer_NIW_ideal_adaptor(
-        exposure = .data,
-        test = .data,
+        exposure = .exposure,
+        test = .test,
         cues = c("cue1", "cue2"),
         category = "category",
         response = "Response",
@@ -61,8 +63,8 @@ test_that("Test fitting stanfit", {
   expect_no_error(
     suppressMessages(suppressWarnings(
       infer_NIW_ideal_adaptor(
-        exposure = .data,
-        test = .data,
+        exposure = .exposure,
+        test = .test,
         cues = c("cue1"),
         category = "category",
         response = "Response",
@@ -77,8 +79,8 @@ test_that("Test fitting stanfit", {
   expect_no_error(
     suppressMessages(suppressWarnings(
       infer_NIW_ideal_adaptor(
-        exposure = .data,
-        test = .data,
+        exposure = .exposure,
+        test = .test,
         cues = c("cue1"),
         category = "category",
         response = "Response",
@@ -92,8 +94,8 @@ test_that("Test fitting stanfit", {
   expect_error(
     suppressWarnings(
       infer_NIW_ideal_adaptor(
-        exposure = .data,
-        test = .data,
+        exposure = .exposure,
+        test = .test,
         cues = c("cue1", "cue2"),
         category = "category",
         response = "Response",
@@ -106,5 +108,22 @@ test_that("Test fitting stanfit", {
         iter = 100)))
   })
 
-
-
+.data <- make_data_for_stanfit(2)
+.exposure <- .data %>% filter(Phase == "exposure")
+.test <- .data %>% filter(Phase == "test")
+test_that("stanfit output", {
+  expect_no_error(
+    suppressMessages(suppressWarnings(
+      infer_NIW_ideal_adaptor(
+        exposure = .exposure,
+        test = .test,
+        cues = c("cue1", "cue2"),
+        category = "category",
+        response = "Response",
+        group = "Subject",
+        group.unique = "Condition",
+        sample = T,
+        cores = 4,
+        refresh = -1,
+        iter = 100))))
+})
