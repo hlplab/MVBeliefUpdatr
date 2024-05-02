@@ -1,12 +1,12 @@
 #' Infer NIW ideal adaptor
 #'
-#' Infers a posterior distribution of \code{\link[NIW_ideal_adaptor]{NIW ideal adaptors}} from the input data using rstan/stan. The function can take
+#' Infers a posterior distribution of \code{\link{NIW_ideal _adaptor}}s from the input data using rstan/stan. The function can take
 #' two types of inputs: an input list, as prepared by \code{\link{compose_data_to_infer_NIW_ideal_adaptor}},
 #' or the exposure and test data, the names of the cues, category, and response columns (and optionally group and/or block columns).
 #'
 #' @inheritParams compose_data_to_infer_NIW_ideal_adaptor
 #' @param untransform_fit Logical flag indicating whether the samples of the model should be transformed back
-#' into the original cue space by applying the untransform function. (default: `TRUE`)
+#' into the original cue space by applying the untransform function. (default: \code{TRUE})
 #' @param input A list of the type that would be returned by \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
 #' This list can be provided *instead* of the arguments required by \code{compose_data_to_infer_NIW_ideal_adaptor}.
 #' @param sample Should the model be fit and sampled from?
@@ -15,18 +15,18 @@
 #' If the file already exists, the model from that file will be loaded and returned instead of refitting the model.
 #' As existing files won't be overwritten, you have to manually remove the file in order to refit and save the
 #' model under an existing file name. The file name is stored in the \code{NIW_ideal_adaptor_stanfit} object
-#' for later use. (default: `NULL`)
+#' for later use. (default: \code{NULL})
 #' @param model Name of stanmodel that should be used. Overrides any default selection.
 #' @param use_univariate_updating Should legacy univariate updating be used? Will throw an error if used in
-#' conjunction with multiple cues. (default: `FALSE`)
+#' conjunction with multiple cues. (default: \code{FALSE})
 #' @param ... Additional parameters are passed to \code{\link[rstan]{sampling}}
 #'
-#' @return \code{NIW_ideal_adaptor_stanfit} object with the fitted stan model. In interpreting the inferred kappa_0 and nu_0, it should
+#' @return \code{NIW_ideal_adaptor_stanfit} object with the fitted stan model. In interpreting the inferred parameters, it should
 #' be kept in mind that the \emph{inferred} scatter matrix S_0 includes variability from internal perceptual and/or
 #' external environmental noise, \emph{in addition} to the motor noise that is reflected in production data. This also
-#' implies that, if Sigma_0 is provided by the user, Sigma_0 and nu_0 mutually constrain each other, because the expected value of
-#' Sigma_0 is determined by both S_0 and nu. \emph{If you are providing Sigma_0 as input}, make sure to read the notes about this
-#' argument in the help page on \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
+#' implies that, \strong{if \code{Sigma_0} is provided by the user it should be convolved with perceptual noise}. This is particularly important
+#' if the data you're fitting contains test phases without exposure (e.g., pre-exposure tests). Make sure to read the notes about the
+#' \code{Sigma_0} argument in the help page on \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
 #'
 #' @seealso \code{\link{is.NIW_ideal_adaptor_stanfit}} for information about NIW_ideal_adaptor_stanfit objects,
 #' \code{\link{add_ibbu_stanfit_draws}} to draw samples from the stanfit.
