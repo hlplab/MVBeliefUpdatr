@@ -2,13 +2,11 @@
 citation(auto = meta)
 
 # Cortex paper
-@article{xie2023,
-  title={What we do (not) know about the mechanisms underlying adaptive speech perception: A computational framework and review},
-  author={Xie, Xin and Jaeger, T Florian and Kurumada, Chigusa},
-  journal={Cortex},
-  year={2023},
-  volume={166},
-  pages={377-424},
-  publisher={Elsevier}
-}
+bibentry(bibtype = "article",
+         title = "What we do (not) know about the mechanisms underlying adaptive speech perception: A computational framework and review",
+         author = c(person("Xin", "Xie"),
+                    person("Chigusa", "Kurumada"),
+                    person(c("T.", "Florian"), "Jaeger")),
+         year = "2023", publisher = "Elsevier",
+         journal = "Cortex", volume = "166", pages = "377-424")
 

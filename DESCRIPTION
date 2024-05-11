@@ -1,8 +1,9 @@
 Package: MVBeliefUpdatr
 Title: Fitting, Summarizing, and Visualizing of Multivariate Gaussian Ideal Observers and Adaptors
 Version: 0.0.1.0006
+Date/Publication: 2024-05-11
 Authors@R:
-    person(given = "T. Florian",
+    person(given = c("T.", "Florian"),
            family = "Jaeger",
            role = c("aut", "cre"),
            email = "fjaeger@ur.rochester.edu",
