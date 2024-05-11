@@ -3,7 +3,7 @@ note <- sprintf("R package version %s", meta$Version)
 
 bibentry(bibtype = "Manual",
          title = "{MVBeliefUpdatr}: Fitting, Summarizing, and Visualizing Multivariate Gaussian Ideal Observers and Adaptors",
-         author = c(person("T. Florian", "Jaeger")),
+         author = c(person("Jaeger", "T. Florian")),
          year = year,
          note = note,
          url = "https://github.com/hlplab/MVBeliefUpdatr")
