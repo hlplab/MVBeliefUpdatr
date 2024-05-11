@@ -71,7 +71,7 @@ are gratefully acknowledged.
 TBD
 }
 \author{
-\strong{Maintainer}: Florian Jaeger \email{fjaeger@ur.rochester.edu} (\href{https://orcid.org/0000-0002-1158-7308}{ORCID})
+\strong{Maintainer}: T. Florian Jaeger \email{fjaeger@ur.rochester.edu} (\href{https://orcid.org/0000-0002-1158-7308}{ORCID})
 
 }
 \keyword{internal}

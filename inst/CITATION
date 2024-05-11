@@ -1,11 +1,12 @@
-year <- sub("-.*", "", meta$Date)
-note <- sprintf("R package version %s", meta$Version)
+## R package reference generated from DESCRIPTION metadata
+citation(auto = meta)
 
-bibentry(bibtype = "Manual",
-         title = "{MVBeliefUpdatr}: Fitting, Summarizing, and Visualizing Multivariate Gaussian Ideal Observers and Adaptors",
-         author = c(person("T. Florian", "Jaeger")),
-         year = year,
-         note = note,
-         url = "https://github.com/hlplab/MVBeliefUpdatr")
-
+# Cortex paper
+bibentry(bibtype = "article",
+         title = "What we do (not) know about the mechanisms underlying adaptive speech perception: A computational framework and review",
+         author = c(person("Xin", "Xie"),
+                    person("Chigusa", "Kurumada"),
+                    person(c("T.", "Florian"), "Jaeger")),
+         year = "2023", publisher = "Elsevier",
+         journal = "Cortex", volume = "166", pages = "377-424")
 
