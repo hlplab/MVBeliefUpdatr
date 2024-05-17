@@ -285,6 +285,7 @@ compose_data_to_infer_NIW_ideal_adaptor <- function(
     assert_that(between(lapse_rate, 0, 1), msg = "If not NULL, lapse rate must be a number between 0 and 1.")
   }
 
+  cues <- unique(cues)
   exposure <-
     check_exposure_test_data(
       data = exposure,
