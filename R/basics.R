@@ -277,8 +277,7 @@ get_sufficient_category_statistics <- function(
     { if(!is.null(groups)) filter(., !! sym(group) %in% groups) else . } %>%
     droplevels()
 
-  if (length(cues) > 1) {
-    # Multivariate observations
+  if (length(cues) >= 1) {
     data_ss %<>%
       drop_na(!!! syms(cues)) %>%
       summarise(
@@ -287,17 +286,19 @@ get_sufficient_category_statistics <- function(
         x_uss = list(get_sum_of_uncentered_squares_from_df(cbind(!!! syms(cues)), verbose = verbose)),
         x_css = list(get_sum_of_centered_squares_from_df(cbind(!!! syms(cues)), verbose = verbose)),
         x_cov = list(cov(cbind(!!! syms(cues)))))
-  } else {
-    # Univariate observations
-    data_ss %<>%
-      drop_na(!!! syms(cues)) %>%
-      summarise(
-        x_N = length(!! sym(cues)),
-        x_mean = mean(!! sym(cues)),
-        x_uss = as.numeric(get_sum_of_uncentered_squares_from_df(matrix(!! sym(cues)), verbose = verbose)),
-        x_css = as.numeric(get_sum_of_centered_squares_from_df(matrix(!! sym(cues)), verbose = verbose)),
-        x_sd = sd(!! sym(cues)))
   }
+  # deprecated as of Version: 0.0.1.0007
+  # else {
+  #   # Former handling of univariate observations
+  #   data_ss %<>%
+  #     drop_na(!!! syms(cues)) %>%
+  #     summarise(
+  #       x_N = length(!! sym(cues)),
+  #       x_mean = mean(!! sym(cues)),
+  #       x_uss = as.numeric(get_sum_of_uncentered_squares_from_df(matrix(!! sym(cues)), verbose = verbose)),
+  #       x_css = as.numeric(get_sum_of_centered_squares_from_df(matrix(!! sym(cues)), verbose = verbose)),
+  #       x_sd = sd(!! sym(cues)))
+  # }
 
   return(data_ss)
 }
@@ -659,7 +660,7 @@ untransform_category_cov <- function(S, transform) {
   if (!is.null(transform[["transform.parameters"]])) transform <- transform[["transform.parameters"]]
   if (!is.null(transform$scale)) {
     taus <- transform$scale %>% as.numeric()
-    COV <- diag(taus)
+    COV <- diag(taus, nrow = length(taus))
 
     S <- COV %*% S %*% COV
   }

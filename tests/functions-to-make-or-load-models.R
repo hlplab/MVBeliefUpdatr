@@ -1,5 +1,6 @@
 make_data_for_stanfit <- function(example = 1) {
   require(tidyverse)
+  require(magrittr)
   require(MVBeliefUpdatr)
 
   if (example == 1) {
@@ -209,10 +210,112 @@ make_data_for_2Dstanfit_with_exposure <- function() {
         keep.input_parameters = F) %>%
         make_vector_column(cols = .cues, vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "plus4.2",
+        mutate(Condition = "plus40.20",
                Response = get_categorization_from_MVG_ideal_observer(
                  x = cue,
                  model = .io.40.20,
+                 decision_rule = "sampling",
+                 simplify = T,
+                 noise_treatment = "no_noise",
+                 lapse_treatment = "no_lapses")))
+
+  return(.data %>%
+           crossing(Phase = c("exposure", "test")))
+}
+
+make_data_for_3Dstanfit_with_exposure <- function() {
+  n_subject <- 30
+  # number of trials in exposure per category per subject
+  # (and there will be 2 * n_trials trials in test per subject)
+  n_trial <- 50
+  .cues <- c("VOT", "f0_semitones", "vowel_duration")
+
+  # Make 5 ideal observers
+  .io <-
+    example_MVG_ideal_observer(3) %>%
+    mutate(Sigma = map(Sigma, ~ .x * 5))
+  .io.20.20.20 <-
+    .io %>%
+    mutate(mu = map(mu, ~ .x + c(20, 20, 20)))
+  .io.40.40.40 <-
+    .io %>%
+    mutate(mu = map(mu, ~ .x + c(40, 40, 40)))
+  .io.20.40.60 <-
+    .io %>%
+    mutate(mu = map(mu, ~ .x + c(20, 40, 60)))
+  .io.40.20.0 <-
+    .io %>%
+    mutate(mu = map(mu, ~ .x + c(40, 20, 0)))
+
+  # Sample responses for subjects that have converged against those five states
+  .data <-
+    bind_rows(
+      sample_MVG_data_from_model(
+        model = .io,
+        Ns = n_trial,
+        keep.input_parameters = F) %>%
+        make_vector_column(cols = .cues, vector_col = "cue") %>%
+        crossing(Subject = 1:n_subject) %>%
+        mutate(Condition = "baseline",
+               Response = get_categorization_from_MVG_ideal_observer(
+                 x = cue,
+                 model = .io,
+                 decision_rule = "sampling",
+                 simplify = T,
+                 noise_treatment = "no_noise",
+                 lapse_treatment = "no_lapses")),
+      sample_MVG_data_from_model(
+        model = .io.20.20.20,
+        Ns = n_trial,
+        keep.input_parameters = F) %>%
+        make_vector_column(cols = .cues, vector_col = "cue") %>%
+        crossing(Subject = 1:n_subject) %>%
+        mutate(Condition = "plus20.20.20",
+               Response = get_categorization_from_MVG_ideal_observer(
+                 x = cue,
+                 model = .io.20.20.20,
+                 decision_rule = "sampling",
+                 simplify = T,
+                 noise_treatment = "no_noise",
+                 lapse_treatment = "no_lapses")),
+      sample_MVG_data_from_model(
+        model = .io.40.40.40,
+        Ns = n_trial,
+        keep.input_parameters = F) %>%
+        make_vector_column(cols = .cues, vector_col = "cue") %>%
+        crossing(Subject = 1:n_subject) %>%
+        mutate(Condition = "plus40.40.40",
+               Response = get_categorization_from_MVG_ideal_observer(
+                 x = cue,
+                 model = .io.40.40.40,
+                 decision_rule = "sampling",
+                 simplify = T,
+                 noise_treatment = "no_noise",
+                 lapse_treatment = "no_lapses")),
+      sample_MVG_data_from_model(
+        model = .io.20.40.60,
+        Ns = n_trial,
+        keep.input_parameters = F) %>%
+        make_vector_column(cols = .cues, vector_col = "cue") %>%
+        crossing(Subject = 1:n_subject) %>%
+        mutate(Condition = "plus20.40.60",
+               Response = get_categorization_from_MVG_ideal_observer(
+                 x = cue,
+                 model = .io.20.40.60,
+                 decision_rule = "sampling",
+                 simplify = T,
+                 noise_treatment = "no_noise",
+                 lapse_treatment = "no_lapses")),
+      sample_MVG_data_from_model(
+        model = .io.40.20.0,
+        Ns = n_trial,
+        keep.input_parameters = F) %>%
+        make_vector_column(cols = .cues, vector_col = "cue") %>%
+        crossing(Subject = 1:n_subject) %>%
+        mutate(Condition = "plus40.20.0",
+               Response = get_categorization_from_MVG_ideal_observer(
+                 x = cue,
+                 model = .io.40.20.0,
                  decision_rule = "sampling",
                  simplify = T,
                  noise_treatment = "no_noise",
@@ -527,10 +630,13 @@ get_example_stanfit <- function(example = 1) {
       infer_prior_beliefs(
         exposure = .data %>% filter(Phase == "exposure"),
         test = .data %>% filter(Phase == "test"),
-        cues = unique(case_when(
-          example %in% 1:3 ~ c("VOT", "f0_semitones", "vowel_duration")[1:example],
-          example %in% 4:6 ~ c("cue1", "cue2", "cue3")[1:(example %% 3)],
-          T ~ "")),
+        cues =
+          if (example %in% 1:3)
+          {
+            c("VOT", "f0_semitones", "vowel_duration")[1:(example)]
+          } else if (example %in% 4:6) {
+            c("cue1", "cue2", "cue3")[1:(example %% 4 + 1)]
+          },
         category = "category",
         response = "Response",
         group = "Subject",

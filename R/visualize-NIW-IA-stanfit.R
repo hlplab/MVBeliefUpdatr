@@ -176,7 +176,7 @@ plot_ibbu_stanfit_parameters <- function(
 #' @keywords TBD
 #'
 #' @export
-plot_ibbu_stanfit_parameter_correlations = function(
+plot_ibbu_stanfit_parameter_correlations <- function(
   model,
   categories = get_category_levels_from_stanfit(model),
   groups = "prior",
@@ -251,10 +251,6 @@ plot_ibbu_stanfit_parameter_correlations = function(
 
   return(p)
 }
-
-
-
-
 
 
 #' Plot expected bivariate (2D) categories from MV IBBU stanfit.
@@ -428,7 +424,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
 
 #' @rdname plot_expected_ibbu_stanfit_categories_2D
 #' @export
-plot_expected_ibbu_stanfit_categories_density2D = function(
+plot_expected_ibbu_stanfit_categories_density2D <- function(
   model,
   categories = get_category_levels_from_stanfit(model),
   groups = get_group_levels_from_stanfit(model, include_prior = T),
@@ -539,8 +535,6 @@ plot_expected_ibbu_stanfit_categories_density2D = function(
     coord_fixed(xlim = xlim, ylim = ylim, ratio = 1) +
     facet_wrap(~ .data$group)
 }
-
-
 
 
 
