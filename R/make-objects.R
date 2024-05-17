@@ -54,6 +54,21 @@ example_MVG_ideal_observer <- function(example = 1) {
         matrix(c(0), nrow = 1, dimnames = list(c("VOT"), c("VOT"))),
         matrix(c(0), nrow = 1, dimnames = list(c("VOT"), c("VOT"))))) %>%
       mutate(category = factor(category))
+  } else if (example == 3) {
+    message("An example MVG ideal observer for two categories in a 3D cue continuum. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
+    tibble(
+      category = c("/d/", "/t/"),
+      mu = list(c("VOT" = 5, "f0" = 200), c("VOT" = 50, "f0" = 240)),
+      Sigma = list(
+        matrix(c(3, 2.4, 2.4, 3), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
+        matrix(c(3, -2.4, -2.4, 3), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
+      prior = c(.5, .5),
+      lapse_rate = .05,
+      lapse_bias = c(.5, .5),
+      Sigma_noise = list(
+        matrix(c(0), nrow = 1, dimnames = list(c("VOT"), c("VOT"))),
+        matrix(c(0), nrow = 1, dimnames = list(c("VOT"), c("VOT"))))) %>%
+      mutate(category = factor(category))
   }
 }
 
