@@ -18,10 +18,10 @@ contain annotations for three phonetic cues to stop-voicing: voice onset time (V
 vowel duration. For details, please see Chodroff & Wilson (2018), which should be cited if these data are used.
 }
 \details{
-Note that the present data are a {\em subset} of the data collected by Chodroff & Wilson (2018), and are not cleaned for issues
+Note that the present data are a \emph{subset} of the data collected by Chodroff & Wilson (2018), and are not cleaned for issues
 like pitch doubling or halving. The full data are available on Eleanor Chodroff's OSF repo at \url{https://osf.io/jt5mc/}.
 }
 \references{
-\insertRef{chodroff-wilson2018}{Rdpack}
+\insertRef{chodroff-wilson2018}{MVBeliefUpdatr}
 }
 \keyword{datasets}

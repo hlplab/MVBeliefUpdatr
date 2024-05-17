@@ -15,13 +15,14 @@ check_compatibility_between_input_and_model <- function(x, model) {
   stop("NOT YET COMPLETED.")
 }
 
+
 # Just for internal use
 get_cue_representation_from_model <- function(x) {
-  if (is.MVG(x) | is.MVG_ideal_observer(x)) {
+  if (is.MVG(x)) {
     x <- x$mu
-  } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x) | is.NIW_ideal_adaptor_MCMC(x)) {
+  } else if (is.NIW_belief(x)) {
     x <- x$m
-  } else if (is.exemplars(x) | is.exemplar_model(x)) {
+  } else if (is.exemplars(x)) {
     x <- x$exemplars[[1]]$cues
   } else {
     stop(paste("Model object", deparse(substitute(x)), "not recognized."))

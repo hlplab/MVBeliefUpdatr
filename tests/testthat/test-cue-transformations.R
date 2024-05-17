@@ -1,7 +1,7 @@
 context("Transforming and untransforming cues and sufficient statistics")
 
 .cues <- c("cue1", "cue2")
-.io <- example_MVG_ideal_observer(1)
+.io <- example_MVG_ideal_observer(5)
 .data <- sample_MVG_data_from_model(model = .io, Ns = 50, keep.input_parameters = F)
 
 test_that("transform_cues - input (data)", {

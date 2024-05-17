@@ -1,7 +1,7 @@
 context("fit stanfit")
 
 source("../functions-to-make-or-load-models.R")
-.data <- make_data_for_stanfit(1)
+.data <- make_data_for_stanfit(5)
 .exposure <- .data %>% filter(Phase == "exposure")
 .test <- .data %>% filter(Phase == "test")
 
@@ -117,7 +117,7 @@ test_that("stanfit output", {
       infer_NIW_ideal_adaptor(
         exposure = .exposure,
         test = .test,
-        cues = c("cue1", "cue2"),
+        cues = c("VOT", "f0_semitones"),
         category = "category",
         response = "Response",
         group = "Subject",
