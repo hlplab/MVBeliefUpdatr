@@ -162,29 +162,47 @@ plot_ibbu_stanfit_parameters <- function(
 #' Plot correlations between post-warmup MCMC samples for all parameters representing the prior and/or posterior beliefs.
 #'
 #' @param model mv-ibbu-stanfit object.
-#' @param categories,groups,cues Character vector of categories/groups/cues to be plotted. Typically, the levels of these factors
-#' are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
-#' \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
-#' (default: all categories and cues; `"prior"` for group since those are the only free parameters)
+#' @param categories,groups,cues,pars Character vector of categories, groups, cues, and/or parameters to be plotted. To
+#' subset to specific parameters, note the following naming conventions:
+#'
+#' (1) all `m` parameters are named `m_{cue_name}`
+#' (2) the `S` parameter is decomposed into a vector of standard deviations `tau` and a correlation matrix `rho`.
+#' (3) all `tau` parameters are named `tau_{cue_name}`
+#' (4) all `rho` parameters are named `rho_{cue_name1}__x__{cue_name2}`
+#'
+#' (default: all categories, cues, and parameters; `"prior"` for group since those are the only free parameters).
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
 #' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
 #' @param category.colors Vector of fill colors of same length as category or `NULL` to use defaults. (default: `NULL`)
 #'
 #' @return ggplot object.
 #'
+#' @details
+#' Typically, the categories, groups, and cues are automatically added to the fit during the creation of the fit. If necessary,
+#' however, it is possible to use \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+#'
+#'
 #' @seealso TBD
 #' @keywords TBD
 #'
+#' @import dplyr
+#' @import magrittr
+#' @importFrom ggforce facet_matrix geom_autodensity
+#' @importFrom ggnewscale new_scale
+#' @importFrom colorspace lighten
 #' @export
 plot_ibbu_stanfit_parameter_correlations <- function(
   model,
   categories = get_category_levels_from_stanfit(model),
   groups = "prior",
   cues = get_cue_levels_from_stanfit(model),
+  pars = NULL,
   ndraws = NULL,
   untransform_cues = TRUE,
   category.colors = get_default_colors("category", categories)
 ) {
+  assert_that(is.null(pars) || is.character(pars))
+
   d.pars <-
     model %>%
     add_ibbu_stanfit_draws(
@@ -192,35 +210,44 @@ plot_ibbu_stanfit_parameter_correlations <- function(
       groups = groups,
       ndraws = ndraws,
       untransform_cues = untransform_cues,
-      nest = T)
+      nest = T) %>%
+    group_by(across(-S)) %>%
+    transmute(
+      tau = map(S, cov2tau),
+      Rho = map(S, cov2cor))
+
+  if (length(cues) > 1) {
+    d.Rho <- d.pars %>% ungroup %>% select(-c(m, tau))
+    for (c in 2:length(cues)) {
+      for (c2 in 1:(c - 1)) {
+        d.Rho %<>%
+          mutate(!!sym(paste0("rho_", cues[c], "__x__", cues[c2])) := map_dbl(Rho, ~ .x[c, c2]))
+      }
+    }
+  }
 
   d.pars %<>%
-    mutate(
-      S_tau = map(S, cov2tau),
-      S_rho = map(S, cov2cor)) %>%
-    select(-S) %>%
-    unnest(c(m, S_tau, S_rho)) %>%
-    group_by(across(-c(m, S_tau, S_rho))) %>%
+    select(-Rho) %>%
+    unnest(c(m, tau)) %>%
+    group_by(across(-c(m, tau))) %>%
     mutate(cue1 = .env$cues) %>%
-    group_by(across(-c(S_rho))) %>%
-    transmute(!! sym(cues[1]) := S_rho[,1], !! sym(cues[2]) := S_rho[,2]) %>%
-    pivot_longer(cols = .env$cues, values_to = "S_rho", names_to = "cue2") %>%
-    ungroup() %>%
-    select(cue1, cue2, everything()) %>%
-    filter(cue1 != cue2)
+    pivot_wider(names_from = "cue1", values_from = c("m", "tau")) %>%
+    # join in info about Rho if there is any
+    { if (length(cues) > 1) {
+      left_join(
+        .,
+        d.Rho %>% select(-Rho),
+        by = join_by(.chain, .iteration, .draw, group, category, kappa, nu, lapse_rate))
+    } else . } %>%
+    ungroup()
 
-  # Removing redundant (duplicate) correlation information
-  d.pars %<>%
-    select(-c(cue2, S_rho)) %>%
-    pivot_wider(names_from = "cue1", values_from = c("m", "S_tau")) %>%
-    left_join(
-      d.pars %>%
-        group_by(.chain, .iteration, .draw, group, category) %>%
-        mutate(combination = map2(.data$cue1, .data$cue2, ~paste(sort(c(.x, .y)), collapse = "_")) %>% unlist()) %>%
-        distinct(combination, .keep_all = T) %>%
-        select(-c(cue1, cue2, m, S_tau)) %>%
-        pivot_wider(names_from = "combination", values_from = "S_rho", names_prefix = "S_rho_"),
-      by = c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate"))
+  if (!is.null(pars)) {
+    assert_that(
+      all(pars %in% colnames(d.pars)),
+      msg = paste0("The following parameter(s) could not be found in the stanfit object: ", paste(setdiff(pars, colnames(d.pars)), collapse = ", "), "."))
+
+    d.pars %<>% select(.chain, .iteration, .draw, group, category, !!! syms(pars))
+  }
 
   correlation_plot <-
     ggplot(data = NULL, aes(x = .panel_x, y = .panel_y)) +
@@ -237,7 +264,7 @@ plot_ibbu_stanfit_parameter_correlations <- function(
                        breaks = categories,
                        values = lighten(category.colors, amount = .5)) +
     facet_matrix(
-      vars(starts_with("kappa"), starts_with("nu"), starts_with("m_"), starts_with("S_")),
+      vars(starts_with("kappa"), starts_with("nu"), starts_with("m_"), starts_with("tau_"), starts_with("rho_")),
       layer.lower = c(3,4), layer.diag = 2, layer.upper = 1) +
     theme(panel.grid = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
 

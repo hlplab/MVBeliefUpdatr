@@ -11,8 +11,8 @@ example_MVG_ideal_observer(
   prior = rep(1/length(categories), length(categories)),
   lapse_rate = 0.05,
   lapse_bias = prior,
-  Sigma_noise = map(1:length(categories), ~matrix(rep(0, length(cues)^2), nrow =
-    length(cues), dimnames = list(cues, cues)))
+  Sigma_noise = matrix(rep(0, length(cues)^2), nrow = length(cues), dimnames = list(cues,
+    cues))
 )
 }
 \description{
