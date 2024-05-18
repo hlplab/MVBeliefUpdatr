@@ -213,7 +213,25 @@ add_test_data_to_2D_plot = function(data, cue.labels) {
 
 #' @rdname add_data_to_plot
 #' @export
-add_exposure_ellipse_to_2D_plot = function(
+add_exposure_summary_to_1D_plot <- function(
+    data
+) {
+  data %>%
+    group_by(category) %>%
+    summarise(mean = list(mean(.data$cue1)), sd = list(sd(.data$cue1))) %>%
+    group_map(
+      ~ stat_function(
+          fun = function(x) dnorm(x, mean = .x$mean, sd = .x$sd),
+          mapping = aes(
+            x = .data$cue1,
+            color = .data$category),
+          linetype = 2,
+          inherit.aes = F))
+}
+
+#' @rdname add_data_to_plot
+#' @export
+add_exposure_summary_to_2D_plot <- function(
   data,
   level = .95
 ) {

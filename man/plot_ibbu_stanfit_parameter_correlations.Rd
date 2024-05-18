@@ -26,7 +26,7 @@ subset to specific parameters, note the following naming conventions:
 (3) all `tau` parameters are named `tau_{cue_name}`
 (4) all `rho` parameters are named `rho_{cue_name1}__x__{cue_name2}`
 
-(default: all categories, cues, and parameters; `"prior"` for group since those are the only free parameters).}
+(default: all categories, cues, and parameters in the model; `"prior"` for group since those are the only free parameters).}
 
 \item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
 

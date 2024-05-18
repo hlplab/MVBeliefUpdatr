@@ -578,7 +578,7 @@ add_ibbu_stanfit_draws <- function(
   summarize = FALSE,
   wide = FALSE,
   nest = TRUE,
-  seed = NULL
+  seed = if (!is.null(ndraws)) runif(1, -1e6, 1e6) else NULL
 ) {
   # Binding variables that RMD Check gets confused about otherwise
   # (since they are in non-standard evaluations)
@@ -612,13 +612,13 @@ add_ibbu_stanfit_draws <- function(
     d.prior <-
       add_ibbu_stanfit_draws(
         fit = fit, categories = categories, groups = "prior",
-        ndraws = NULL,
+        ndraws = ndraws,
         untransform_cues = untransform_cues,
         summarize = summarize, wide = wide, nest = nest, seed = seed)
     d.posterior <-
       add_ibbu_stanfit_draws(
         fit = fit, categories = categories, groups = setdiff(groups, "prior"),
-        ndraws = NULL,
+        ndraws = ndraws,
         untransform_cues = untransform_cues,
         summarize = summarize, wide = wide, nest = nest, seed = seed)
     d.pars <-

@@ -20,8 +20,8 @@ test_that("add ibbu draws - input check (1 cue)", {
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "prior")))
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "plus20")))
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = c("prior", "plus20"))))
+  expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "prior", ndraws = 1)))
   expect_error(add_ibbu_stanfit_draws(fit, groups = "priors"))
-  expect_error(add_ibbu_stanfit_draws(fit, groups = "prior", ndraws = 1))
   expect_error(add_ibbu_stanfit_draws(fit, groups = "prior", ndraws = c(1, 2)))
 })
 
@@ -42,8 +42,8 @@ test_that("add ibbu draws - input check (2 cues)", {
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "prior")))
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "plus20.20")))
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = c("prior", "plus20.20"))))
+  expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "prior", ndraws = 1)))
   expect_error(add_ibbu_stanfit_draws(fit, groups = "priors"))
-  expect_error(add_ibbu_stanfit_draws(fit, groups = "prior", ndraws = 1))
   expect_error(add_ibbu_stanfit_draws(fit, groups = "prior", ndraws = c(1, 2)))
 })
 
@@ -64,8 +64,8 @@ test_that("add ibbu draws - input check (3 cues)", {
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "prior")))
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "plus20.20.20")))
   expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = c("prior", "plus20.20.20"))))
+  expect_true(is_tibble(add_ibbu_stanfit_draws(fit, groups = "prior", ndraws = 1)))
   expect_error(add_ibbu_stanfit_draws(fit, groups = "priors"))
-  expect_error(add_ibbu_stanfit_draws(fit, groups = "prior", ndraws = 1))
   expect_error(add_ibbu_stanfit_draws(fit, groups = "prior", ndraws = c(1, 2)))
 })
 
