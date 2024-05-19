@@ -11,9 +11,17 @@
 \usage{
 plot_expected_ibbu_stanfit_categories(model, type, ...)
 
-plot_expected_ibbu_stanfit_categories_contour(model, ...)
+plot_expected_ibbu_stanfit_categories_contour(
+  model,
+  cues = get_cue_levels_from_stanfit(model),
+  ...
+)
 
-plot_expected_ibbu_stanfit_categories_density(model, ...)
+plot_expected_ibbu_stanfit_categories_density(
+  model,
+  cues = get_cue_levels_from_stanfit(model),
+  ...
+)
 
 plot_expected_ibbu_stanfit_categories_contour2D(
   model,
@@ -39,9 +47,8 @@ plot_expected_ibbu_stanfit_categories_density1D(
   annotate_inferred_category_means = c("rug", "text"),
   untransform_cues = TRUE,
   category.colors = get_default_colors("category", categories),
-  xlim,
-  ylim,
-  resolution = 25
+  xlim = NULL,
+  resolution = 101
 )
 
 plot_expected_ibbu_stanfit_categories_density2D(
