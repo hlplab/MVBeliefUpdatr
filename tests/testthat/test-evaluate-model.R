@@ -1,6 +1,6 @@
 context("get information from model - INITIAL TEST ONLY")
 
-my_model <- example_MVG_ideal_observer(1)
+my_model <- example_MVG_ideal_observer(5)
 my_data <-
   crossing(cue1 = seq(-2, 2, .25), cue2 = seq(-2, 2, .25)) %>%
   mutate(cues = map2(cue1, cue2, ~ c(...))) %>%

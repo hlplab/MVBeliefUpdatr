@@ -4,7 +4,7 @@ require(tidyverse)
 context("cov, css, uss")
 
 .cues <- c("cue1", "cue2")
-.io <- example_MVG_ideal_observer(1)
+.io <- example_MVG_ideal_observer(5)
 .data <- sample_MVG_data_from_model(model = .io, Ns = 50, keep.input_parameters = F)
 
 test_that("uss2css, css2cov - does sum-of-square to cov conversion work?", {

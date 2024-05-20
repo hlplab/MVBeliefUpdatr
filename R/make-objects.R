@@ -4,17 +4,48 @@ NULL
 #' Example exemplar model.
 #'
 #' @export
-example_exemplar_model <- function(example = 1) {
-  if (example == 1) {
-    message("An example exemplar model for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
-            Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
-    example_MVG_ideal_observer(1) %>%
+example_exemplar_model <- function(
+    example = 1,
+    categories = c("/b/", "/p/"),
+    cues = c("VOT", "f0_semitones", "vowel_duration")[1:example],
+    prior = rep(1 / length(categories), length(categories)),
+    lapse_rate = .05,
+    lapse_bias = prior,
+    Sigma_noise = matrix(rep(0, length(cues)^2), nrow = length(cues), dimnames = list(cues, cues))
+) {
+  if (example %in% 1:3) {
+    message("An example exemplar model based on the data from Chodroff & Wilson (2018).\n",
+            "Using ", length(categories), " categories and ", length(cues), " cue(s). ",
+            "Lapse is set to ", lapse_rate, " with lapse biases ", paste(lapse_bias, collapse = ", "), ".")
+
+    suppressMessages(
+      make_MVG_ideal_observer_from_data(
+        data = ChodroffWilson2018 %>% filter(category %in% categories),
+        category = "category",
+        cues = cues,
+        prior = prior,
+        lapse_rate = lapse_rate,
+        lapse_bias = lapse_bias,
+        Sigma_noise = Sigma_noise)) %>%
+      sample_MVG_data_from_model(Ns = 50) %>%
+      make_exemplar_model_from_data(
+        cues = cues,
+        prior = prior,
+        lapse_rate = lapse_rate,
+        lapse_bias = lapse_bias,
+        Sigma_noise = NULL) %>%
+      mutate(across(category, factor))
+
+  } else if (example == 5) {
+    message(paste("An example exemplar model with two categories and two cues.\n",
+            "Lapse is set to ", lapse_rate, " with lapse biases ", paste(lapse_bias, collapse = ", "), "."))
+    suppressMessages(example_MVG_ideal_observer(4)) %>%
       sample_MVG_data_from_model(Ns = 50) %>%
       make_exemplar_model_from_data(
         cues = c("cue1", "cue2"),
-        prior = c(.5, .5),
-        lapse_rate = .05,
-        lapse_bias = c(.5, .5),
+        prior = prior,
+        lapse_rate = lapse_rate,
+        lapse_bias = lapse_bias,
         Sigma_noise = NULL) %>%
       mutate(across(category, factor))
   }
@@ -23,37 +54,48 @@ example_exemplar_model <- function(example = 1) {
 
 #' Example MVG ideal observers.
 #'
+#' @importFrom dplyr %>%
+#' @importFrom purrr map
 #' @export
-example_MVG_ideal_observer <- function(example = 1) {
-  if (example == 1) {
-    message("An example MVG ideal observer for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
+example_MVG_ideal_observer <- function(
+    example = 1,
+    categories = c("/b/", "/p/"),
+    cues = c("VOT", "f0_semitones", "vowel_duration")[1:example],
+    prior = rep(1 / length(categories), length(categories)),
+    lapse_rate = .05,
+    lapse_bias = prior,
+    Sigma_noise = matrix(rep(0, length(cues)^2), nrow = length(cues), dimnames = list(cues, cues))
+) {
+  if (example %in% 1:3) {
+    message("An example MVG ideal observer based on the data from Chodroff & Wilson (2018).\n",
+            "Using ", length(categories), " categories and ", length(cues), " cue(s). ",
+            "Lapse is set to ", lapse_rate, " with lapse biases ", paste(lapse_bias, collapse = ", "), ".")
+
+    make_MVG_ideal_observer_from_data(
+      data = ChodroffWilson2018 %>% filter(category %in% categories),
+      category = "category",
+      cues = cues,
+      prior = prior,
+      lapse_rate = lapse_rate,
+      lapse_bias = lapse_bias,
+      Sigma_noise = Sigma_noise)
+  } else if (example == 5) {
+    message("An example MVG ideal observer with two categories and two cues.\n",
+            "Lapse is set to ", lapse_rate, " with lapse biases ", paste(lapse_bias, collapse = ", "), ".")
+
     tibble(
       category = c("A", "B"),
       mu = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
       Sigma = list(
         matrix(c(3, 2.4, 2.4, 3), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
         matrix(c(3, -2.4, -2.4, 3), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
-      prior = c(.5, .5),
-      lapse_rate = .05,
-      lapse_bias = c(.5, .5),
+      prior = prior,
+      lapse_rate = lapse_rate,
+      lapse_bias = lapse_bias,
       Sigma_noise = list(
         matrix(rep(0, 4), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
         matrix(rep(0, 4), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))) %>%
       mutate(across(category, factor))
-  } else if (example == 2) {
-    message("An example MVG ideal observer for two categories in a 1D cue continuum. Lapse rate is .05 with uniform prior and lapse bias. No perceptual noise.")
-    tibble(
-      category = c("/d/", "/t/"),
-      mu = list(c("VOT" = 5), c("VOT" = 50)),
-      Sigma = list(matrix(c(80), nrow = 1, dimnames = list(c("VOT"), c("VOT"))),
-                   matrix(c(340), nrow = 1, dimnames = list(c("VOT"), c("VOT")))),
-      prior = c(.5, .5),
-      lapse_rate = .05,
-      lapse_bias = c(.5, .5),
-      Sigma_noise = list(
-        matrix(c(0), nrow = 1, dimnames = list(c("VOT"), c("VOT"))),
-        matrix(c(0), nrow = 1, dimnames = list(c("VOT"), c("VOT"))))) %>%
-      mutate(category = factor(category))
   }
 }
 
@@ -477,6 +519,18 @@ lift_likelihood_to_model <- function(
     lapse_rate <- 0
   }
 
+  assert_that(is.null(Sigma_noise) | is.matrix(Sigma_noise),
+              msg = "Sigma_noise must be NULL or a matrix (noise is independent of, and thus constant across, categories).")
+  if (!is.null(Sigma_noise)) {
+    assert_that(all(dim(Sigma_noise) == rep(get_cue_dimensionality_from_model(x), 2)),
+                msg = paste("If not NULL, Sigma_noise must match the dimensionality of other parameters in the model (here: a",
+                            get_cue_dimensionality_from_model(x), "x", get_cue_dimensionality_from_model(x), " matrix)."))
+    assert_that(!is.null(first(dimnames(Sigma_noise))),
+                msg = "If not NULL, Sigma_noise = must have non-NULL dimnames.")
+    assert_that(map(dimnames(Sigma_noise), ~ .x == get_cue_labels_from_model(x)) %>% reduce(all),
+                msg = "The dimnames of Sigma_noise must match those of the model to lift.")
+  }
+
   x %<>%
     group_by(!!! group) %>%
     mutate(
@@ -506,12 +560,6 @@ lift_exemplars_to_exemplar_model <- function(
   assert_that(is.exemplars(x, group = group, verbose = verbose))
 
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
-  if (!is.null(first(x$Sigma_noise))) {
-    assert_that(!is.null(dimnames(first(x$Sigma_noise))),
-                msg = "Sigma_noise = must have non-NULL dimnames.")
-    assert_that(map2(dimnames(Sigma_noise), dimnames(first(x$Sigma)), ~ .x == .y) %>% reduce(c) %>% all(),
-                msg = "The dimnames of Sigma_noise must match the cue names in the list of exemplars.")
-  }
 
   if (!is.exemplar_model(x, group = group, verbose = verbose))
     warning("NOTE: The returned object does not appear to be an exemplar model. For more information, try again with verbose = T.")
@@ -534,14 +582,6 @@ lift_MVG_to_MVG_ideal_observer = function(
   assert_that(is.MVG(x, group = group, verbose = verbose))
 
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
-  if (!is.null(first(x$Sigma_noise))) {
-    assert_that(all(dim(Sigma_noise) == dim(first(x$Sigma))),
-                msg = "Sigma_noise must be a matrix of the same dimensionality as Sigma.")
-    assert_that(!is.null(dimnames(first(x$Sigma_noise))),
-                msg = "Sigma_noise = must have non-NULL dimnames.")
-    assert_that(map2(dimnames(Sigma_noise), dimnames(first(x$Sigma)), ~ .x == .y) %>% reduce(c) %>% all(),
-                msg = "The dimnames of Sigma_noise and Sigma must match.")
-  }
 
   if (!is.MVG_ideal_observer(x, group = group, verbose = verbose))
     warning("NOTE: The returned object does not appear to be an MVG ideal observer. For more information, try again with verbose = T.")
@@ -563,14 +603,6 @@ lift_NIW_belief_to_NIW_ideal_adaptor <- function(
   assert_that(is.NIW_belief(x, group = group, verbose = verbose))
 
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
-  if (!is.null(first(x$Sigma_noise))) {
-    assert_that(all(dim(Sigma_noise) == dim(first(x$S))),
-                msg = "Sigma_noise must be a matrix of the same dimensionality as S.")
-    assert_that(!is.null(dimnames(first(x$Sigma_noise))),
-                msg = "Sigma_noise = must have non-NULL dimnames.")
-    assert_that(map2(dimnames(Sigma_noise), dimnames(first(x$S)), ~ .x == .y) %>% reduce(c) %>% all(),
-                msg = "The dimnames of Sigma_noise and S must match.")
-  }
 
   if (!is.NIW_ideal_adaptor(x, group = group, verbose = verbose))
     warning("NOTE: The returned object does not appear to be an NIW ideal adaptor. For more information, try again with verbose = T.")

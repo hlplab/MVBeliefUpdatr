@@ -5,7 +5,8 @@
 \alias{add_test_data_to_1D_plot}
 \alias{add_exposure_data_to_2D_plot}
 \alias{add_test_data_to_2D_plot}
-\alias{add_exposure_ellipse_to_2D_plot}
+\alias{add_exposure_summary_to_1D_plot}
+\alias{add_exposure_summary_to_2D_plot}
 \title{Add exposure/test data to a plot as points or ellipse}
 \usage{
 add_exposure_data_to_1D_plot(
@@ -28,7 +29,9 @@ add_exposure_data_to_2D_plot(
 
 add_test_data_to_2D_plot(data, cue.labels)
 
-add_exposure_ellipse_to_2D_plot(data, level = 0.95)
+add_exposure_summary_to_1D_plot(data)
+
+add_exposure_summary_to_2D_plot(data, level = 0.95)
 }
 \arguments{
 \item{data}{A `tibble` or `data.frame`. For plotting points, this table must contain columns

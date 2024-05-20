@@ -19,7 +19,7 @@ add_ibbu_stanfit_draws(
   summarize = FALSE,
   wide = FALSE,
   nest = TRUE,
-  seed = NULL
+  seed = if (!is.null(ndraws)) runif(1, -1e+06, 1e+06) else NULL
 )
 }
 \arguments{

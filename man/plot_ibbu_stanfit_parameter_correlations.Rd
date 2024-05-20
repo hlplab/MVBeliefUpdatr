@@ -9,6 +9,7 @@ plot_ibbu_stanfit_parameter_correlations(
   categories = get_category_levels_from_stanfit(model),
   groups = "prior",
   cues = get_cue_levels_from_stanfit(model),
+  pars = NULL,
   ndraws = NULL,
   untransform_cues = TRUE,
   category.colors = get_default_colors("category", categories)
@@ -17,10 +18,15 @@ plot_ibbu_stanfit_parameter_correlations(
 \arguments{
 \item{model}{mv-ibbu-stanfit object.}
 
-\item{categories, groups, cues}{Character vector of categories/groups/cues to be plotted. Typically, the levels of these factors
-are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
-\code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
-(default: all categories and cues; `"prior"` for group since those are the only free parameters)}
+\item{categories, groups, cues, pars}{Character vector of categories, groups, cues, and/or parameters to be plotted. To
+subset to specific parameters, note the following naming conventions:
+
+(1) all `m` parameters are named `m_{cue_name}`
+(2) the `S` parameter is decomposed into a vector of standard deviations `tau` and a correlation matrix `rho`.
+(3) all `tau` parameters are named `tau_{cue_name}`
+(4) all `rho` parameters are named `rho_{cue_name1}__x__{cue_name2}`
+
+(default: all categories, cues, and parameters in the model; `"prior"` for group since those are the only free parameters).}
 
 \item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
 
@@ -33,6 +39,10 @@ ggplot object.
 }
 \description{
 Plot correlations between post-warmup MCMC samples for all parameters representing the prior and/or posterior beliefs.
+}
+\details{
+Typically, the categories, groups, and cues are automatically added to the fit during the creation of the fit. If necessary,
+however, it is possible to use \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
 }
 \seealso{
 TBD

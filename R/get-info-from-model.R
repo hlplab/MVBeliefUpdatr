@@ -15,13 +15,14 @@ check_compatibility_between_input_and_model <- function(x, model) {
   stop("NOT YET COMPLETED.")
 }
 
+
 # Just for internal use
 get_cue_representation_from_model <- function(x) {
-  if (is.MVG(x) | is.MVG_ideal_observer(x)) {
+  if (is.MVG(x)) {
     x <- x$mu
-  } else if (is.NIW_belief(x) | is.NIW_ideal_adaptor(x) | is.NIW_ideal_adaptor_MCMC(x)) {
+  } else if (is.NIW_belief(x)) {
     x <- x$m
-  } else if (is.exemplars(x) | is.exemplar_model(x)) {
+  } else if (is.exemplars(x)) {
     x <- x$exemplars[[1]]$cues
   } else {
     stop(paste("Model object", deparse(substitute(x)), "not recognized."))
@@ -232,12 +233,17 @@ unnest_cue_information_in_model <- function(model) {
 
   cue.labels <- get_cue_labels_from_model(model)
 
-  model %>%
+  model %<>%
     unnest(c(!! sym(m), !! sym(S))) %>%
     group_by(across(-c(!! sym(m), !! sym(S)))) %>%
-    mutate(cue = cue.labels) %>%
-    group_by(across(-c(!! sym(S)))) %>%
-    transmute(!! sym(cue.labels[1]) := (!! sym(S))[,1], !! sym(cue.labels[2]) := (!! sym(S))[,2]) %>%
+    mutate(cue = cue.labels)
+
+  for (i in 1:length(cue.labels)) {
+      model %<>% mutate(., !! sym(cue.labels[i]) := (!! sym(S))[,i])
+  }
+
+  model %>%
+    select(-S) %>%
     pivot_longer(cols = all_of(cue.labels), values_to = S, names_to = "cue2") %>%
     ungroup() %>%
     select(cue, cue2, everything())
