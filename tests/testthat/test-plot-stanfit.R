@@ -30,7 +30,7 @@ test_that("plot_ibbu_stanfit_parameter_correlations", {
 
 test_that("plot_expected_ibbu_stanfit_categories_density", {
   expect_warning(plot_expected_ibbu_stanfit_categories(fit1, type = "contour"))
-  expect_error(plot_expected_ibbu_stanfit_categories(fit1, type = "density", resolution = 5, ndraws = 5))
+  expect_no_error(plot_expected_ibbu_stanfit_categories(fit1, type = "density", resolution = 5, ndraws = 5))
   expect_no_error(plot_expected_ibbu_stanfit_categories(fit2, type = "contour"))
   expect_no_error(plot_expected_ibbu_stanfit_categories(fit2, type = "density", resolution = 5, ndraws = 5))
   expect_warning(plot_expected_ibbu_stanfit_categories(fit3, type = "contour"))

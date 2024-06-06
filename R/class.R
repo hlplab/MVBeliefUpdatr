@@ -109,8 +109,8 @@ is.MVBU_model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
     assert_that(all(dim(Sigma_noise) == rep(get_cue_dimensionality_from_model(x), 2)),
                 msg = paste("If not NULL, Sigma_noise must match the dimensionality of other parameters in the model (here: a",
                             get_cue_dimensionality_from_model(x), "x", get_cue_dimensionality_from_model(x), " matrix)."))
-    assert_that(!is.null(first(dimnames(Sigma_noise))),
-                msg = "If not NULL, Sigma_noise = must have non-NULL dimnames.")
+    assert_that(!is.null(dimnames(Sigma_noise)),
+                msg = "If not NULL, Sigma_noise must have non-NULL dimnames.")
     assert_that(map(dimnames(Sigma_noise), ~ .x == get_cue_labels_from_model(x)) %>% reduce(all),
                 msg = "If not NULL, the dimnames of Sigma_noise must match the cue names used in the model.")
   }

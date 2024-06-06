@@ -3,6 +3,7 @@
 S3method(ellipse,pmap)
 S3method(print,MVBU_model)
 S3method(print,NIW_ideal_adaptor_stanfit)
+export(ChodroffWilson2018)
 export(NIW_ideal_adaptor_stanfit)
 export(add_exposure_data_to_1D_plot)
 export(add_exposure_data_to_2D_plot)

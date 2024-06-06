@@ -3,6 +3,7 @@ NULL
 
 #' Example exemplar model.
 #'
+#' @rdname example-model
 #' @export
 example_exemplar_model <- function(
     example = 1,
@@ -11,10 +12,12 @@ example_exemplar_model <- function(
     prior = rep(1 / length(categories), length(categories)),
     lapse_rate = .05,
     lapse_bias = prior,
-    Sigma_noise = matrix(rep(0, length(cues)^2), nrow = length(cues), dimnames = list(cues, cues))
+    Sigma_noise = matrix(rep(0, length(cues)^2), nrow = length(cues), dimnames = list(cues, cues)),
+    verbose = T
 ) {
   if (example %in% 1:3) {
-    message("An example exemplar model based on the data from Chodroff & Wilson (2018).\n",
+    if (verbose)
+      message("An example exemplar model based on the data from Chodroff & Wilson (2018).\n",
             "Using ", length(categories), " categories and ", length(cues), " cue(s). ",
             "Lapse is set to ", lapse_rate, " with lapse biases ", paste(lapse_bias, collapse = ", "), ".")
 
@@ -37,7 +40,8 @@ example_exemplar_model <- function(
       mutate(across(category, factor))
 
   } else if (example == 5) {
-    message(paste("An example exemplar model with two categories and two cues.\n",
+    if (verbose)
+      message(paste("An example exemplar model with two categories and two cues.\n",
             "Lapse is set to ", lapse_rate, " with lapse biases ", paste(lapse_bias, collapse = ", "), "."))
     suppressMessages(example_MVG_ideal_observer(4)) %>%
       sample_MVG_data_from_model(Ns = 50) %>%
@@ -56,6 +60,8 @@ example_exemplar_model <- function(
 #'
 #' @importFrom dplyr %>%
 #' @importFrom purrr map
+#'
+#' @rdname example-model
 #' @export
 example_MVG_ideal_observer <- function(
     example = 1,
@@ -64,10 +70,12 @@ example_MVG_ideal_observer <- function(
     prior = rep(1 / length(categories), length(categories)),
     lapse_rate = .05,
     lapse_bias = prior,
-    Sigma_noise = matrix(rep(0, length(cues)^2), nrow = length(cues), dimnames = list(cues, cues))
+    Sigma_noise = matrix(rep(0, length(cues)^2), nrow = length(cues), dimnames = list(cues, cues)),
+    verbose = T
 ) {
   if (example %in% 1:3) {
-    message("An example MVG ideal observer based on the data from Chodroff & Wilson (2018).\n",
+    if (verbose)
+      message("An example MVG ideal observer based on the data from Chodroff & Wilson (2018).\n",
             "Using ", length(categories), " categories and ", length(cues), " cue(s). ",
             "Lapse is set to ", lapse_rate, " with lapse biases ", paste(lapse_bias, collapse = ", "), ".")
 
@@ -80,7 +88,8 @@ example_MVG_ideal_observer <- function(
       lapse_bias = lapse_bias,
       Sigma_noise = Sigma_noise)
   } else if (example == 5) {
-    message("An example MVG ideal observer with two categories and two cues.\n",
+    if (verbose)
+      message("An example MVG ideal observer with two categories and two cues.\n",
             "Lapse is set to ", lapse_rate, " with lapse biases ", paste(lapse_bias, collapse = ", "), ".")
 
     tibble(
@@ -100,36 +109,46 @@ example_MVG_ideal_observer <- function(
 }
 
 
-#' Example NIW priors.
+#' Example NIW ideal adaptors.
 #'
+#' @rdname example-model
 #' @export
-example_NIW_ideal_adaptor <- function(example = 1) {
-  if (example == 1) {
-    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.")
-    tibble(
-      category = c("A", "B"),
-      kappa = 10,
-      nu = 30,
-      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
-      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
-               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
-      lapse_rate = .05
-    ) %>%
-      mutate(category = factor(.data$category))
-  } else if (example == 2) {
-    message("An example belief for two categories in a 2D cue continuum that differ in means and correlatation, but not standard deviations.
-            Same as Example 1, but with independent perceptual noise along both cue dimensions.")
-    tibble(
-      category = c("A", "B"),
-      kappa = 10,
-      nu = 30,
-      m = list(c("cue1" = -2, "cue2" = -2), c("cue1" = 2, "cue2" = 2)),
-      S = list(matrix(c(1, .3, .3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))),
-               matrix(c(1, -.3, -.3, 1), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2")))),
-      lapse_rate = .05,
-      Sigma_noise = list(matrix(c(1, 0, 0, .25), nrow = 2, dimnames = list(c("cue1", "cue2"), c("cue1", "cue2"))))
-    ) %>%
-      mutate(category = factor(.data$category))
+example_NIW_ideal_adaptor <- function(
+    example = 1,
+    categories = c("/b/", "/p/"),
+    cues = c("VOT", "f0_semitones", "vowel_duration")[1:example],
+    prior = rep(1 / length(categories), length(categories)),
+    lapse_rate = .05,
+    lapse_bias = prior,
+    Sigma_noise = matrix(rep(0, length(cues)^2), nrow = length(cues), dimnames = list(cues, cues)),
+    verbose = T
+) {
+  x <-
+    example_MVG_ideal_observer(
+      example = example,
+      categories = categories,
+      cues = cues,
+      prior = prior,
+      lapse_rate = lapse_rate,
+      lapse_bias = lapse_bias,
+      Sigma_noise = Sigma_noise,
+      verbose = verbose)
+
+  if (example %in% 1:3) {
+    if (verbose)
+      message("Lifted to an ideal adaptor with kappa = 10 and nu = 30.")
+
+     x %>%
+      lift_MVG_ideal_observer_to_NIW_ideal_adaptor(
+        kappa = 10,
+        nu = 30)
+  } else if (example == 5) {
+    message("Lifted to an ideal adaptor with kappa = 30 and nu = 10.")
+
+    x %>%
+      lift_MVG_ideal_observer_to_NIW_ideal_adaptor(
+        kappa = 30,
+        nu = 10)
   }
 }
 

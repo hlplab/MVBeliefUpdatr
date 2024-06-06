@@ -70,6 +70,13 @@ are gratefully acknowledged.
 \references{
 TBD
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/hlplab/MVBeliefUpdatr}
+}
+
+}
 \author{
 \strong{Maintainer}: T. Florian Jaeger \email{fjaeger@ur.rochester.edu} (\href{https://orcid.org/0000-0002-1158-7308}{ORCID})
 
