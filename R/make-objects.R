@@ -246,7 +246,7 @@ make_exemplar_model_from_data = function(
     sim_function = function(x, y, j = 2, k = 1) {
       # If j = 1, this uses Manhattan city block distances
       # If j = 2, this uses Euclidean distances
-      distance <- sum((x - y)^j)^-j
+      distance <- sum((x - y)^j)^(1/j)
       similarity <- exp(-distance * k) },
     # Alternatively, users might specify Mahanalobis distance
     # function(x, y, center, cov, k = 1) {
