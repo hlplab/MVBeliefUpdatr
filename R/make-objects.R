@@ -162,8 +162,11 @@ example_NIW_ideal_adaptor <- function(
 #' ideal observers will be derived for each level of \code{group}. (default: NULL)
 #' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param cues Name(s) of variables in \code{data} that contain the cue information.
-#' @param sim_function Similarity function that is used to calculate exemplar-to-examplar similarity. Defaults
-#' to \code{exp(-(x - y)^2)}.
+#' @param sim_function Similarity function that is used to calculate exemplar-to-exemplar similarity. If NULL,
+#' defaults to \code{sim_function = function(x, y, weights = w, distance_metric = 2, distance_decay_factor = 1) {
+#' distance <- sum(weights * abs(x - y)^distance_metric)^(1/distance_metric); similarity <- exp(-distance^distance_decay_factor) }},
+#' where each cue's weight \code{w} is set to the inverse of the cues variance. This general formula follows
+#' @afpelbaum-mcmurray2015, who cite @nosofsky196.
 #' @param prior Optionally specify a prior probability for each category (in each group). (default: a uniform
 #' prior over all categories).
 #' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
@@ -182,11 +185,12 @@ make_exemplars_from_data = function(
     group = NULL,
     category = "category",
     cues,
-    sim_function = function(x, y) {
-      j <- 2
-      k <- 1
-      distance <- (x - y)^j
-      similarity <- exp(-distance * k) },
+    # Following Nosofsky (1986) as cited in Apfelbaum & McMurray (2015)
+    sim_function = function(x, y, weights = 1, distance_metric = 2, distance_decay_factor = 1) {
+      # If distance_metric = 1, this uses Manhattan city block distances
+      # If distance_metric = 2, this uses Euclidean distances
+      distance <- sum(weights * abs(x - y)^distance_metric)^(1/distance_metric)
+      similarity <- exp(-distance^distance_decay_factor) },
     verbose = F
 ) {
   assert_that(is.data.frame(data) | is_tibble(data))
@@ -243,16 +247,7 @@ make_exemplar_model_from_data = function(
     group = NULL,
     category = "category",
     cues,
-    sim_function = function(x, y, j = 2, k = 1) {
-      # If j = 1, this uses Manhattan city block distances
-      # If j = 2, this uses Euclidean distances
-      distance <- sum((x - y)^j)^(1/j)
-      similarity <- exp(-distance * k) },
-    # Alternatively, users might specify Mahanalobis distance
-    # function(x, y, center, cov, k = 1) {
-    #
-    #   distance <- mahanalobis(x, center, cov)^-2 ...
-    #   similarity <- exp(-distance * k) }
+    sim_function = NULL,
     ...,
     verbose = F
 ) {
