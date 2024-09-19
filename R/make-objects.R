@@ -219,7 +219,7 @@ make_exemplars_from_data = function(
       function(
            x,
            y,
-           weights = data[[, cues]] %>% summarise(across(all_of(cues), sd)) %>% as.numeric() %>% . ^ distance_metric,
+           weights = data[, cues] %>% summarise(across(all_of(cues), sd)) %>% as.numeric() %>% . ^ distance_metric,
            distance_metric = 2, distance_decay_factor = 1) {
         # If distance_metric = 1, this uses Manhattan city block distances
         # If distance_metric = 2, this uses Euclidean distances
