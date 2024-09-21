@@ -180,7 +180,7 @@ example_NIW_ideal_adaptor <- function(
 #' @seealso TBD
 #' @keywords TBD
 #' @export
-make_exemplars_from_data = function(
+make_exemplars_from_data <- function(
     data,
     group = NULL,
     category = "category",
@@ -219,12 +219,24 @@ make_exemplars_from_data = function(
       function(
            x,
            y,
-           weights = data[, cues] %>% summarise(across(all_of(cues), sd)) %>% as.numeric() %>% . ^ distance_metric,
-           distance_metric = 2, distance_decay_factor = 1) {
-        # If distance_metric = 1, this uses Manhattan city block distances
-        # If distance_metric = 2, this uses Euclidean distances
-        distance <- sum(weights * abs(x - y)^distance_metric)^(1/distance_metric)
-        similarity <- exp(-distance^distance_decay_factor) }
+           # Get 1/SD as weight for each cue
+           # (we might later revisit this default approach)
+           weights =
+             data[, cues] %>%
+             summarise(across(all_of(cues), sd)) %>%
+             as.numeric() %>%
+             { 1 / . },
+           distance_metric = 2, distance_decay_factor = 1)
+        {
+           # If distance_metric = 1, this uses Manhattan city block distances
+           # If distance_metric = 2, this uses Euclidean distances
+           # (note that this differs from Apfelbaum & McMurray 2015, who find the optimal weights;
+           # here, we are instead just scaling each cue to avoid that cues with larger values
+           # dominate the calculation of the distance and similarity scores.)
+           distance <- sum((weights * abs(x - y))^distance_metric)^(1/distance_metric)
+           similarity <- exp(-distance^distance_decay_factor)
+           return(similarity)
+        }
   }
 
   model <-
@@ -253,7 +265,7 @@ make_exemplars_from_data = function(
 
 #' @export
 #' @rdname make_exemplars_from_data
-make_exemplar_model_from_data = function(
+make_exemplar_model_from_data <- function(
     data,
     group = NULL,
     category = "category",
