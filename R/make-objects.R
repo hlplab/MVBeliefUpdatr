@@ -214,19 +214,22 @@ make_exemplars_from_data <- function(
     ungroup() %>%
     select(!! category, !!! cues, !!! group)
 
+  # Get 1/SD as weight for each cue
+  # (we might later revisit this default approach)
+  weights <-
+    data[, as.character(cues)] %>%
+    summarise(across(all_of(as.character(cues)), sd)) %>%
+    as.numeric() %>%
+    { 1 / . }
+
   if (is.null(sim_function)) {
     sim_function <-
       function(
            x,
            y,
-           # Get 1/SD as weight for each cue
-           # (we might later revisit this default approach)
-           weights =
-             data[, cues] %>%
-             summarise(across(all_of(cues), sd)) %>%
-             as.numeric() %>%
-             { 1 / . },
-           distance_metric = 2, distance_decay_factor = 1)
+           distance_metric = 2,
+           distance_decay_factor = 1,
+           log = F)
         {
            # If distance_metric = 1, this uses Manhattan city block distances
            # If distance_metric = 2, this uses Euclidean distances
@@ -234,7 +237,7 @@ make_exemplars_from_data <- function(
            # here, we are instead just scaling each cue to avoid that cues with larger values
            # dominate the calculation of the distance and similarity scores.)
            distance <- sum((weights * abs(x - y))^distance_metric)^(1/distance_metric)
-           similarity <- exp(-distance^distance_decay_factor)
+           similarity <- if (log) -distance^distance_decay_factor else exp(-distance^distance_decay_factor)
            return(similarity)
         }
   }
