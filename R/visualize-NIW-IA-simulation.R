@@ -215,31 +215,31 @@ plot_expected_categories_density_1D <- function(
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   ...
 ) {
-  facet_rows_by = enquo(facet_rows_by)
-  facet_cols_by = enquo(facet_cols_by)
-  facet_wrap_by = enquo(facet_wrap_by)
-  animate_by = enquo(animate_by)
+  facet_rows_by <- enquo(facet_rows_by)
+  facet_cols_by <- enquo(facet_cols_by)
+  facet_wrap_by <- enquo(facet_wrap_by)
+  animate_by <- enquo(animate_by)
   check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                   !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
   # Remember groups
-  cue.labels = get_cue_labels_from_model(x)
+  cue.labels <- get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
 
   if (is_missing(xlim)) {
     if (!is.null(data.exposure) & !is.null(data.test))
-      xlim = range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
+      xlim <- range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
         if (!is.null(data.exposure))
-          xlim = range(data.exposure[[cue.labels[1]]]) else
+          xlim <- range(data.exposure[[cue.labels[1]]]) else
             if (!is.null(data.test))
-              xlim = range(data.test[[cue.labels[1]]])
+              xlim <- range(data.test[[cue.labels[1]]])
   }
   assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
 
   # Setting aes defaults
-  if (is.null(category.ids)) category.ids = levels(x$category)
-  if (is.null(category.labels)) category.labels = levels(x$category)
-  if (is.null(category.colors)) category.colors = get_default_colors("category", category.ids)
-  if (is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
+  if (is.null(category.ids)) category.ids <- levels(x$category)
+  if (is.null(category.labels)) category.labels <- levels(x$category)
+  if (is.null(category.colors)) category.colors <- get_default_colors("category", category.ids)
+  if (is.null(category.linetypes)) category.linetypes <- rep(1, length(category.ids))
 
   if (any(!quo_is_null(facet_rows_by),
           !quo_is_null(facet_cols_by),
@@ -262,7 +262,7 @@ plot_expected_categories_density_1D <- function(
           args = list(mean = .x$mu, sd = .x$Sigma^.5),
           ...))
 
-  p = ggplot(mapping = aes(color = category)) +
+  p <- ggplot(mapping = aes(color = category)) +
     stat_functions +
     { if (!is.null(data.test))
       add_test_locations_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
