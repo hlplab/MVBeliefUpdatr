@@ -4,6 +4,7 @@
 #' distribution. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
 #' element of ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
 #'
+#' @param target_category The index of the category for which categorization should be shown. (default: `1`)
 #' @param ms Means of the multivariate normal distributions over category means.
 #' @param Ss Scatter matrices of the inverse Wishart distribution over category covariance matrices.
 #' @param kappas Strength of the beliefs into the distribution over category means.
@@ -26,6 +27,7 @@
 #' @rdname get_NIW_categorization_function
 #' @export
 get_NIW_categorization_function = function(
+    target_category = 1,
     ms, Ss, kappas, nus,
     priors = rep(1 / length(ms), length(ms)),
     lapse_rate = NULL,
@@ -77,7 +79,7 @@ get_NIW_categorization_function = function(
     nus[[1]] >= D,
     msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
 
-  f <- function(x, target_category = 1) {
+  f <- function(x, target_category = target_category) {
     if (!is.list(x)) x <- list(x)
     log_p <- matrix(nrow = length(x), ncol = n.cat) # this seems to assume that x is a list
     for (cat in 1:n.cat) {

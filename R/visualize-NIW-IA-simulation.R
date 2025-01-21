@@ -350,7 +350,7 @@ plot_expected_categorization_function_1D <- function(
     group_map(
       .keep = T,
       .f = function(.x, .y) {
-        cat_function <- get_categorization_function_from_NIW_ideal_adaptor(.x, logit = logit)
+        cat_function <- get_categorization_function_from_NIW_ideal_adaptor(.x, target_category = target_category, logit = logit)
         stat_function(
           data = .x,
           fun = cat_function, ...) })
