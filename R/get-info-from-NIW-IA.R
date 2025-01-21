@@ -30,11 +30,8 @@ get_NIW_categorization_function = function(
     priors = rep(1 / length(ms), length(ms)),
     lapse_rate = NULL,
     lapse_biases = rep(1 / length(ms), length(ms)),
-    Sigma_noise = matrix(
-      0,
-      nrow = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])),
-      ncol = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]]))),
-    noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
+    Sigma_noise = NULL,
+    noise_treatment = if (any(is.null(Sigma_noise), all(is.null(Sigma_noise)), all(map_lgl(Sigma_noise, is.null)))) "no_noise" else "marginalize",
     logit = FALSE
 ) {
   tolerance = 1e-5
@@ -47,11 +44,32 @@ get_NIW_categorization_function = function(
 
   assert_that(all(between(priors, 0, 1), between(sum(priors), 1 - tolerance, 1 + tolerance)),
               msg = "priors must sum to 1.")
-  if (!is.null(lapse_rate)) assert_that(all(between(lapse_rate, 0, 1))) else lapse_rate = rep(0, n.cat)
-  if (!is.null(lapse_biases)) {
+  if (any(is.null(lapse_rate),
+          all(is.null(lapse_rate)),
+          all(map_lgl(lapse_rate, is.null)))) {
+    lapse_rate = rep(0, n.cat)
+  } else {
+    assert_that(all(between(lapse_rate, 0, 1)))
+  }
+  if (any(is.null(lapse_biases),
+          all(is.null(lapse_biases)),
+          all(map_lgl(lapse_biases, is.null)))) {
+    lapse_biases <- 1 / n.cat
+  } else {
     assert_that(all(between(lapse_biases, 0, 1), between(sum(lapse_biases), 1 - tolerance, 1 + tolerance)),
-                msg = "biases must sum to 1.")
-  } else lapse_biases <- 1 / n.cat
+                msg = "lapse biases must sum to 1.")
+  }
+  if (any(is.null(Sigma_noise),
+          all(is.null(Sigma_noise)),
+          all(map_lgl(Sigma_noise, is.null)))) {
+    Sigma_noise <-
+      matrix(
+        0,
+        nrow = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])),
+        ncol = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])))
+  } else {
+    assert_that(is.Sigma(Sigma_noise))
+  }
 
   # Get dimensions of multivariate category
   D = get_D(ms)
@@ -67,7 +85,7 @@ get_NIW_categorization_function = function(
         get_NIW_posterior_predictive(
           x, # can this handle lists?
           ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]],
-          Sigma_noise = Sigma_noise[[cat]], noise_treatment = noise_treatment,
+          Sigma_noise = Sigma_noise, noise_treatment = noise_treatment,
           log = T)
     }
 
