@@ -146,7 +146,7 @@ get_S_from_expected_Sigma <- function(Sigma, nu) {
 #' @export
 get_NIW_posterior_predictive = function(
     x, m, S, kappa, nu, Sigma_noise = NULL,
-    noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
+    noise_treatment = if (any(is.null(Sigma_noise), all(is.null(Sigma_noise)), all(map_lgl(Sigma_noise, is.null)))) "no_noise" else "marginalize",
     log = T
 ) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
@@ -154,9 +154,9 @@ get_NIW_posterior_predictive = function(
   assert_that(is.vector(m) | is.matrix(m) | is_scalar_double(m))
   assert_that(is.matrix(S) | is_scalar_double(S))
   # do not reorder these conditionals (go from more to less specific)
-  if (is.matrix(m)) m = as.vector(m)
+  if (is.matrix(m)) m <- as.vector(m)
 
-  x %<>% format_input_for_likelihood_calculation()
+  x %<>% format_input_for_likelihood_calculation(dim = length(m))
   assert_that(dim(x)[2] == length(m),
               msg = "Input x and m are not of compatible dimensions.")
 
@@ -170,7 +170,7 @@ get_NIW_posterior_predictive = function(
                 msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the scatter matrices S.')
   }
 
-  D = get_D(S)
+  D <- get_D(S)
   assert_that(nu >= D,
               msg = "nu must be at least as large as the number of dimensions of the multivariate
               Normal.")
@@ -213,93 +213,6 @@ get_NIW_posterior_predictive = function(
 #' @export
 get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
   get_NIW_posterior_predictive(x = x, m = m, S = S, kappa = kappa, nu = nu, ...)
-}
-
-
-#' Get NIW categorization function
-#'
-#' Returns a categorization function for the first category, based on a set of parameters for the Normal-Inverse-Wishart (NIW)
-#' distribution. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
-#' element of ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
-#'
-#' @param ms Means of the multivariate normal distributions over category means.
-#' @param Ss Scatter matrices of the inverse Wishart distribution over category covariance matrices.
-#' @param kappas Strength of the beliefs into the distribution over category means.
-#' @param nus Strength of the beliefs into the distribution over category covariance matrices.
-#' @param priors Vector of categories' prior probabilities. (default: uniform prior over categories)
-#' @param lapse_rate A lapse rate for the categorization responses.
-#' @param lapse_biases A lapse bias for the categorization responses. (default: uniform bias over categories)
-#' @param Sigma_noise A noise matrix. (default: a 0-matrix)
-#' @param noise_treatment How should the noise specified in \code{Sigma_noise} be considered in the categorization function?
-#' For details, see \code{\link{get_NIW_posterior_predictive}}.
-#' @param logit Should the function that is returned return log-odds (TRUE) or probabilities (FALSE)? (default: TRUE)
-#'
-#' @return A function that takes as input cue values and returns posterior probabilities of the first category,
-#' based on the posterior predictive of the cues given the (IBBU-derived parameters for the) categories' m, S,
-#' kappa, nu, and prior, as well as the lapse rate.
-#'
-#' @seealso TBD
-#' @keywords TBD
-#'
-#' @rdname get_NIW_categorization_function
-#' @export
-get_NIW_categorization_function = function(
-    ms, Ss, kappas, nus,
-    priors = rep(1 / length(ms), length(ms)),
-    lapse_rate = NULL,
-    lapse_biases = rep(1 / length(ms), length(ms)),
-    Sigma_noise = matrix(
-      0,
-      nrow = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])),
-      ncol = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]]))),
-    noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
-    logit = FALSE
-) {
-  tolerance = 1e-5
-  assert_that(are_equal(length(ms), length(Ss)),
-              are_equal(length(ms), length(priors)),
-              are_equal(length(ms), length(kappas)),
-              are_equal(length(ms), length(nus)),
-              msg = "The number of ms, Ss, kappas, nus, and priors must be identical.")
-  n.cat = length(ms)
-
-  assert_that(all(between(priors, 0, 1), between(sum(priors), 1 - tolerance, 1 + tolerance)),
-              msg = "priors must sum to 1.")
-  if (!is.null(lapse_rate)) assert_that(all(between(lapse_rate, 0, 1))) else lapse_rate = rep(0, n.cat)
-  if (!is.null(lapse_biases)) {
-    assert_that(all(between(lapse_biases, 0, 1), between(sum(lapse_biases), 1 - tolerance, 1 + tolerance)),
-                msg = "biases must sum to 1.")
-  } else lapse_biases <- 1 / n.cat
-
-  # Get dimensions of multivariate category
-  D = get_D(ms)
-  assert_that(
-    nus[[1]] >= D,
-    msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
-
-  f <- function(x, target_category = 1) {
-    if (!is.list(x)) x <- list(x)
-    log_p <- matrix(nrow = length(x), ncol = n.cat) # this seems to assume that x is a list
-    for (cat in 1:n.cat) {
-      log_p[, cat] <-
-        get_NIW_posterior_predictive(
-          x, # can this handle lists?
-          ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]],
-          Sigma_noise = Sigma_noise[[cat]], noise_treatment = noise_treatment,
-          log = T)
-    }
-
-    p_target <-
-      (1 - lapse_rate[target_category]) * exp(log_p[,target_category] + log(priors[target_category]) - log(rowSums(exp(log_p) * priors))) +
-      lapse_rate[target_category] * lapse_biases[target_category]
-
-    if (logit)
-      return(qlogis(p_target))
-    else
-      return(p_target)
-  }
-
-  return(f)
 }
 
 

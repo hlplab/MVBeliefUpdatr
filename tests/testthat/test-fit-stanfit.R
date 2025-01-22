@@ -106,7 +106,7 @@ test_that("Test fitting stanfit", {
         cores = 4,
         refresh = -1,
         iter = 100)))
-  })
+})
 
 .data <- make_data_for_stanfit(2)
 .exposure <- .data %>% filter(Phase == "exposure")

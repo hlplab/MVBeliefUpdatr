@@ -215,31 +215,31 @@ plot_expected_categories_density_1D <- function(
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   ...
 ) {
-  facet_rows_by = enquo(facet_rows_by)
-  facet_cols_by = enquo(facet_cols_by)
-  facet_wrap_by = enquo(facet_wrap_by)
-  animate_by = enquo(animate_by)
+  facet_rows_by <- enquo(facet_rows_by)
+  facet_cols_by <- enquo(facet_cols_by)
+  facet_wrap_by <- enquo(facet_wrap_by)
+  animate_by <- enquo(animate_by)
   check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                   !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
   # Remember groups
-  cue.labels = get_cue_labels_from_model(x)
+  cue.labels <- get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
 
   if (is_missing(xlim)) {
     if (!is.null(data.exposure) & !is.null(data.test))
-      xlim = range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
+      xlim <- range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
         if (!is.null(data.exposure))
-          xlim = range(data.exposure[[cue.labels[1]]]) else
+          xlim <- range(data.exposure[[cue.labels[1]]]) else
             if (!is.null(data.test))
-              xlim = range(data.test[[cue.labels[1]]])
+              xlim <- range(data.test[[cue.labels[1]]])
   }
   assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
 
   # Setting aes defaults
-  if (is.null(category.ids)) category.ids = levels(x$category)
-  if (is.null(category.labels)) category.labels = levels(x$category)
-  if (is.null(category.colors)) category.colors = get_default_colors("category", category.ids)
-  if (is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
+  if (is.null(category.ids)) category.ids <- levels(x$category)
+  if (is.null(category.labels)) category.labels <- levels(x$category)
+  if (is.null(category.colors)) category.colors <- get_default_colors("category", category.ids)
+  if (is.null(category.linetypes)) category.linetypes <- rep(1, length(category.ids))
 
   if (any(!quo_is_null(facet_rows_by),
           !quo_is_null(facet_cols_by),
@@ -262,7 +262,7 @@ plot_expected_categories_density_1D <- function(
           args = list(mean = .x$mu, sd = .x$Sigma^.5),
           ...))
 
-  p = ggplot(mapping = aes(color = category)) +
+  p <- ggplot(mapping = aes(color = category)) +
     stat_functions +
     { if (!is.null(data.test))
       add_test_locations_to_1D_plot(data = data.test, cue.labels = cue.labels) } +
@@ -276,7 +276,7 @@ plot_expected_categories_density_1D <- function(
                       labels = category.labels,
                       values = category.colors)
 
-  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
+  p <- facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
   return(p)
 }
 
@@ -315,30 +315,30 @@ plot_expected_categorization_function_1D <- function(
 ) {
   message("TO DO: implement noise and lapse rate handling. (already implemented in underling functions. just not integrated into plotting).")
 
-  facet_rows_by = enquo(facet_rows_by)
-  facet_cols_by = enquo(facet_cols_by)
-  facet_wrap_by = enquo(facet_wrap_by)
-  animate_by = enquo(animate_by)
+  facet_rows_by <- enquo(facet_rows_by)
+  facet_cols_by <- enquo(facet_cols_by)
+  facet_wrap_by <- enquo(facet_wrap_by)
+  animate_by <- enquo(animate_by)
   check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                   !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
-  cue.labels = get_cue_labels_from_model(x)
+  cue.labels <- get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
 
   if (is_missing(xlim)) {
     if (!is.null(data.exposure) & !is.null(data.test))
-      xlim = range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
+      xlim <- range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
         if (!is.null(data.exposure))
-          xlim = range(data.exposure[[cue.labels[1]]]) else
+          xlim <- range(data.exposure[[cue.labels[1]]]) else
             if (!is.null(data.test))
-              xlim = range(data.test[[cue.labels[1]]])
+              xlim <- range(data.test[[cue.labels[1]]])
   }
   assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
 
   # Setting aes defaults
-  if (is.null(category.ids)) category.ids = levels(x$category)
-  if (is.null(category.labels)) category.labels = levels(x$category)
-  if (is.null(category.colors)) category.colors = get_default_colors("category", category.ids)
-  if (is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
+  if (is.null(category.ids)) category.ids <- levels(x$category)
+  if (is.null(category.labels)) category.labels <- levels(x$category)
+  if (is.null(category.colors)) category.colors <- get_default_colors("category", category.ids)
+  if (is.null(category.linetypes)) category.linetypes <- rep(1, length(category.ids))
 
   if (any(!quo_is_null(facet_rows_by),
           !quo_is_null(facet_cols_by),
@@ -350,12 +350,13 @@ plot_expected_categorization_function_1D <- function(
     group_map(
       .keep = T,
       .f = function(.x, .y) {
-        cat_function <- get_categorization_function_from_NIW_ideal_adaptor(.x, logit = logit)
+        cat_function <- get_categorization_function_from_NIW_ideal_adaptor(.x)
         stat_function(
           data = .x,
-          fun = cat_function, ...) })
+          fun = cat_function,
+          args = list(target_category = target_category, logit = logit), ...) })
 
-  p =
+  p <-
     ggplot() +
     stat_functions +
     { if (!is.null(data.test))
@@ -369,7 +370,7 @@ plot_expected_categorization_function_1D <- function(
         paste0("p(resp = ", category.labels[target_category], ")")) +
     coord_cartesian(ylim = ylim)
 
-  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
+  p <- facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
   return(p)
 }
 
@@ -393,11 +394,12 @@ plot_expected_categorization_function_1D <- function(
 #' @param facet_rows_by,facet_cols_by,facet_wrap_by,animate_by Which group variables, if any, should be used for faceting and/or
 #' animation? (defaults: `NULL`)
 #' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
-#' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)
-#' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
+#' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`). Only relevant
+#' if `data.exposure` is provided.
+#' @param category.labels Vector of category labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
+#' Only relevant if `data.exposure` is provided.
 #' @param category.colors Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
-#' @param category.linetypes Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
-#' Currently being ignored.
+#' Only relevant if `data.exposure` is provided.
 #' @param ... additional arguments handed to geom_polygon.
 #'
 #' @return ggplot object.
@@ -412,7 +414,7 @@ plot_expected_categories_contour_2D <- function(
   data.exposure = NULL,
   data.test = NULL,
   facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
-  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
+  category.ids = NULL, category.labels = NULL, category.colors = NULL,
   ...
 ) {
   facet_rows_by = enquo(facet_rows_by)
@@ -429,7 +431,6 @@ plot_expected_categories_contour_2D <- function(
   if (is.null(category.ids)) category.ids = levels(x$category)
   if (is.null(category.labels)) category.labels = levels(x$category)
   if (is.null(category.colors)) category.colors = get_default_colors("category", category.ids)
-  if (is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   suppressMessages(
     x %<>%
@@ -509,69 +510,68 @@ plot_expected_categorization_function_2D <- function(
   logit = F,
   xlim, ylim, resolution = 25,
   facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
-  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
+  category.ids = NULL, category.labels = NULL, category.colors = NULL,
   ...
 ) {
   message("TO DO: implement noise and lapse rate handling. (already implemented in underling functions. just not integrated into plotting).")
-  facet_rows_by = enquo(facet_rows_by)
-  facet_cols_by = enquo(facet_cols_by)
-  facet_wrap_by = enquo(facet_wrap_by)
-  animate_by = enquo(animate_by)
+  facet_rows_by <- enquo(facet_rows_by)
+  facet_cols_by <- enquo(facet_cols_by)
+  facet_wrap_by <- enquo(facet_wrap_by)
+  animate_by <- enquo(animate_by)
   check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                   !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
-  cue.labels = get_cue_labels_from_model(x)
+  cue.labels <- get_cue_labels_from_model(x)
   assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
   if (is_missing(xlim)) {
     if (!is.null(data.exposure) & !is.null(data.test))
-      xlim = range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
+      xlim <- range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
         if (!is.null(data.exposure))
-          xlim = range(data.exposure[[cue.labels[1]]]) else
+          xlim <- range(data.exposure[[cue.labels[1]]]) else
             if (!is.null(data.test))
-              xlim = range(data.test[[cue.labels[1]]])
+              xlim <- range(data.test[[cue.labels[1]]])
   }
   if (is_missing(ylim)) {
     if (!is.null(data.exposure) & !is.null(data.test))
-      ylim = range(range(data.exposure[[cue.labels[2]]]), range(data.test[[cue.labels[2]]])) else
+      ylim <- range(range(data.exposure[[cue.labels[2]]]), range(data.test[[cue.labels[2]]])) else
         if (!is.null(data.exposure))
-          ylim = range(data.exposure[[cue.labels[2]]]) else
+          ylim <- range(data.exposure[[cue.labels[2]]]) else
             if (!is.null(data.test))
-              ylim = range(data.test[[cue.labels[2]]])
+              ylim <- range(data.test[[cue.labels[2]]])
   }
   assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
   assert_that(!is_missing(ylim), msg = "`ylim` must be specified")
 
   # Setting aes defaults
-  if (is.null(category.ids)) category.ids = levels(x$category)
-  if (is.null(category.labels)) category.labels = levels(x$category)
-  if (is.null(category.colors)) category.colors = get_default_colors("category", category.ids)
-  if (is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
+  if (is.null(category.ids)) category.ids <- levels(x$category)
+  if (is.null(category.labels)) category.labels <- levels(x$category)
+  if (is.null(category.colors)) category.colors <- get_default_colors("category", category.ids)
 
   if (any(!quo_is_null(facet_rows_by),
           !quo_is_null(facet_cols_by),
           !quo_is_null(animate_by))) x %<>% group_by(!! facet_rows_by, !! facet_cols_by, !! animate_by,
                                                      .add = TRUE)
 
-  d = crossing(
+  d <- crossing(
     !! sym(cue.labels[1]) := seq(min(xlim), max(xlim), length.out = resolution),
     !! sym(cue.labels[2]) := seq(min(ylim), max(ylim), length.out = resolution))
 
   x %<>%
     nest() %>%
-    mutate(f = map(data, get_categorization_function_from_NIW_ideal_adaptor, logit = logit)) %>%
+    mutate(f = map(data, get_categorization_function_from_NIW_ideal_adaptor)) %>%
     # Join in vectored cues
     cross_join(
       d %>%
         transmute(x = pmap(.l = list(!!! syms(cue.labels)), .f = ~ c(...))) %>%
         nest(cues = everything())) %>%
     mutate(
-      p_cat = invoke_map(.f = f, .x = cues, target_category = target_category),
+      p_cat = invoke_map(.f = f, .x = cues, target_category = target_category, logit = logit),
       cues = NULL,
       f = NULL) %>%
     # Join separate cues back in
     cross_join(d %>% nest(cues = everything())) %>%
     unnest(c(cues, p_cat))
 
-  p = ggplot(x,
+  p <- ggplot(x,
              mapping = aes(
                x = .data[[cue.labels[1]]],
                y = .data[[cue.labels[2]]])) +
@@ -593,6 +593,6 @@ plot_expected_categorization_function_2D <- function(
                          midpoint = if (logit) 0 else .5) +
     coord_cartesian(xlim = xlim, ylim = ylim)
 
-  p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
+  p <- facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
   return(p)
 }
