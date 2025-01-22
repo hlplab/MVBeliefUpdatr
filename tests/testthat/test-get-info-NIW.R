@@ -1,6 +1,48 @@
 context("get information from NIW - INITIAL TEST ONLY")
 
-test_that("Get posterior predictive - input check x (single element, non-list)", {
+test_that("Get posterior predictive - input check x (are single 1D inputs accepted?)", {
+  expect_no_error(get_NIW_posterior_predictive(
+    x = 1,
+    m = matrix(c(0), nrow = 1),
+    S = matrix(c(1), nrow = 1),
+    kappa = 1000,
+    nu = 1000))
+  expect_no_error(get_NIW_posterior_predictive(
+    x = matrix(1, nrow = 1),
+    m = matrix(c(0), nrow = 1),
+    S = matrix(c(1), nrow = 1),
+    kappa = 1000,
+    nu = 1000))
+  expect_no_error(get_NIW_posterior_predictive(
+    x = list(1),
+    m = matrix(c(0), nrow = 1),
+    S = matrix(c(1), nrow = 1),
+    kappa = 1000,
+    nu = 1000))
+})
+
+test_that("Get posterior predictive - input check x (are multiple 1D inputs accepted?)", {
+  expect_no_error(get_NIW_posterior_predictive(
+    x = c(1, 2, 1),
+    m = matrix(c(0), nrow = 1),
+    S = matrix(c(1), nrow = 1),
+    kappa = 1000,
+    nu = 1000))
+  expect_no_error(get_NIW_posterior_predictive(
+    x = matrix(c(1, 2, 1), nrow = 3),
+    m = matrix(c(0), nrow = 1),
+    S = matrix(c(1), nrow = 1),
+    kappa = 1000,
+    nu = 1000))
+  expect_no_error(get_NIW_posterior_predictive(
+    x = list(1, 2, 1),
+    m = matrix(c(0), nrow = 1),
+    S = matrix(c(1), nrow = 1),
+    kappa = 1000,
+    nu = 1000))
+})
+
+test_that("Get posterior predictive - input check x (multiple 2D inputs, non-list)", {
   expect_error(get_NIW_posterior_predictive(
     x = 1,
     m = matrix(c(0,0), nrow = 1),
@@ -27,7 +69,7 @@ test_that("Get posterior predictive - input check x (single element, non-list)",
     nu = 1000))
   })
 
-test_that("Get posterior predictive - input check x (single-element list)", {
+test_that("Get posterior predictive - input check x (multiple 2D inputs, list)", {
   expect_error(get_NIW_posterior_predictive(
     x = list(1),
     m = matrix(c(0,0), nrow = 1),

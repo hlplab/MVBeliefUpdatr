@@ -250,11 +250,15 @@ unnest_cue_information_in_model <- function(model) {
 }
 
 
-format_input_for_likelihood_calculation <- function(x) {
+format_input_for_likelihood_calculation <- function(x, dim = 1) {
   assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
-  if (is.list(x)) x %<>% reduce(x, .f = ~ rbind(.x, format_input_for_likelihood_calculation(.y)))
+  if (is.list(x)) x %<>% reduce(x, .f = ~ rbind(.x, format_input_for_likelihood_calculation(.y, dim = dim)))
   if (is_tibble(x)) x %<>% as.matrix() else
-    if (is.vector(x)) x %<>% matrix(nrow = 1)
+    if (is.vector(x)) {
+      assert_that(length(x) %% dim == 0,
+                  msg = paste("x cannot be coerced into matrix of observations with dimensionality", dim))
+      x %<>% matrix(ncol = dim)
+    }
 
   return(x)
 }

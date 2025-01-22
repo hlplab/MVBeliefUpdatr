@@ -140,3 +140,4 @@ test_that("Get categorization from MVG ideal observer - input check x", {
                                                              lapse_treatment = "no_lapses",
                                                              decision_rule = "sampling"))
 })
+

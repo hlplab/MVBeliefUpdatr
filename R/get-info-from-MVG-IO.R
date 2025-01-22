@@ -39,8 +39,8 @@ get_MVG_likelihood <- function(
   assert_that(is.Sigma(Sigma))
 
   # do not reorder these conditionals (go from more to less specific)
-  if (is.matrix(mu)) mu = as.vector(mu)
-  x %<>% format_input_for_likelihood_calculation()
+  if (is.matrix(mu)) mu <- as.vector(mu)
+  x %<>% format_input_for_likelihood_calculation(dim = length(mu))
   assert_that(dim(x)[2] == length(mu),
               msg = "Input x and m are not of compatible dimensions.")
 
@@ -54,7 +54,7 @@ get_MVG_likelihood <- function(
                 msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the category covariance matrices Sigma.')
   }
 
-  D = get_D(Sigma)
+  D <- get_D(Sigma)
   if (D == 1) {
     assert_that(is_scalar_double(mu), msg = "Sigma and mu are not of compatible dimensions.")
   } else {

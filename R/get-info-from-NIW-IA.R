@@ -4,7 +4,6 @@
 #' distribution. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
 #' element of ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
 #'
-#' @param target_category The index of the category for which categorization should be shown. (default: `1`)
 #' @param ms Means of the multivariate normal distributions over category means.
 #' @param Ss Scatter matrices of the inverse Wishart distribution over category covariance matrices.
 #' @param kappas Strength of the beliefs into the distribution over category means.
@@ -15,19 +14,22 @@
 #' @param Sigma_noise A noise matrix. (default: a 0-matrix)
 #' @param noise_treatment How should the noise specified in \code{Sigma_noise} be considered in the categorization function?
 #' For details, see \code{\link{get_NIW_posterior_predictive}}.
-#' @param logit Should the function that is returned return log-odds (TRUE) or probabilities (FALSE)? (default: TRUE)
 #'
 #' @return A function that takes as input cue values and returns posterior probabilities of the first category,
 #' based on the posterior predictive of the cues given the (IBBU-derived parameters for the) categories' m, S,
-#' kappa, nu, and prior, as well as the lapse rate.
+#' kappa, nu, and prior, as well as the lapse rate. The function will accept the following arguments.
+#' @param target_category The index of the category for which categorization should be shown. (default: `1`)
+#' @param logit Should the function return log-odds (TRUE) or probabilities (FALSE)? (default: FALSE)
 #'
 #' @seealso TBD
 #' @keywords TBD
 #'
 #' @rdname get_NIW_categorization_function
+#' @importFrom dplyr between
+#' @importFrom purrr map_lgl
+#' @importFrom assertthat assert_that
 #' @export
-get_NIW_categorization_function = function(
-    target_category = 1,
+get_NIW_categorization_function <- function(
     ms, Ss, kappas, nus,
     priors = rep(1 / length(ms), length(ms)),
     lapse_rate = NULL,
@@ -61,17 +63,9 @@ get_NIW_categorization_function = function(
     assert_that(all(between(lapse_biases, 0, 1), between(sum(lapse_biases), 1 - tolerance, 1 + tolerance)),
                 msg = "lapse biases must sum to 1.")
   }
-  if (any(is.null(Sigma_noise),
+  if (!any(is.null(Sigma_noise),
           all(is.null(Sigma_noise)),
-          all(map_lgl(Sigma_noise, is.null)))) {
-    Sigma_noise <-
-      matrix(
-        0,
-        nrow = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])),
-        ncol = if (is.null(dim(Ss[[1]]))) 1 else max(dim(Ss[[1]])))
-  } else {
-    assert_that(is.Sigma(Sigma_noise))
-  }
+          all(map_lgl(Sigma_noise, is.null)))) assert_that(is.Sigma(Sigma_noise))
 
   # Get dimensions of multivariate category
   D = get_D(ms)
@@ -79,13 +73,12 @@ get_NIW_categorization_function = function(
     nus[[1]] >= D,
     msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
 
-  f <- function(x, target_category = target_category) {
-    if (!is.list(x)) x <- list(x)
-    log_p <- matrix(nrow = length(x), ncol = n.cat) # this seems to assume that x is a list
+  f <- function(x, target_category = 1, logit = F) {
+    log_p <- matrix(nrow = length(x), ncol = n.cat)
     for (cat in 1:n.cat) {
       log_p[, cat] <-
         get_NIW_posterior_predictive(
-          x, # can this handle lists?
+          x,
           ms[[cat]], Ss[[cat]], kappas[[cat]], nus[[cat]],
           Sigma_noise = Sigma_noise, noise_treatment = noise_treatment,
           log = T)
@@ -95,10 +88,7 @@ get_NIW_categorization_function = function(
       (1 - lapse_rate[target_category]) * exp(log_p[,target_category] + log(priors[target_category]) - log(rowSums(exp(log_p) * priors))) +
       lapse_rate[target_category] * lapse_biases[target_category]
 
-    if (logit)
-      return(qlogis(p_target))
-    else
-      return(p_target)
+    if (logit) return(qlogis(p_target)) else return(p_target)
   }
 
   return(f)
@@ -107,7 +97,7 @@ get_NIW_categorization_function = function(
 
 #' @rdname get_NIW_categorization_function
 #' @export
-get_categorization_function_from_NIW_ideal_adaptor = function(model, ...) {
+get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
   get_NIW_categorization_function(
     ms = model$m,
     Ss = model$S,
@@ -148,7 +138,7 @@ get_categorization_function_from_NIW_ideal_adaptor = function(model, ...) {
 #' @keywords TBD
 #' @export
 #'
-get_categorization_from_NIW_ideal_adaptor = function(
+get_categorization_from_NIW_ideal_adaptor <- function(
   x,
   model,
   decision_rule,

@@ -146,7 +146,7 @@ get_S_from_expected_Sigma <- function(Sigma, nu) {
 #' @export
 get_NIW_posterior_predictive = function(
     x, m, S, kappa, nu, Sigma_noise = NULL,
-    noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
+    noise_treatment = if (any(is.null(Sigma_noise), all(is.null(Sigma_noise)), all(map_lgl(Sigma_noise, is.null)))) "no_noise" else "marginalize",
     log = T
 ) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
@@ -154,9 +154,9 @@ get_NIW_posterior_predictive = function(
   assert_that(is.vector(m) | is.matrix(m) | is_scalar_double(m))
   assert_that(is.matrix(S) | is_scalar_double(S))
   # do not reorder these conditionals (go from more to less specific)
-  if (is.matrix(m)) m = as.vector(m)
+  if (is.matrix(m)) m <- as.vector(m)
 
-  x %<>% format_input_for_likelihood_calculation()
+  x %<>% format_input_for_likelihood_calculation(dim = length(m))
   assert_that(dim(x)[2] == length(m),
               msg = "Input x and m are not of compatible dimensions.")
 
@@ -170,7 +170,7 @@ get_NIW_posterior_predictive = function(
                 msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the scatter matrices S.')
   }
 
-  D = get_D(S)
+  D <- get_D(S)
   assert_that(nu >= D,
               msg = "nu must be at least as large as the number of dimensions of the multivariate
               Normal.")

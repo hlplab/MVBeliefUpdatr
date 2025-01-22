@@ -350,10 +350,11 @@ plot_expected_categorization_function_1D <- function(
     group_map(
       .keep = T,
       .f = function(.x, .y) {
-        cat_function <- get_categorization_function_from_NIW_ideal_adaptor(.x, target_category = target_category, logit = logit)
+        cat_function <- get_categorization_function_from_NIW_ideal_adaptor(.x)
         stat_function(
           data = .x,
-          fun = cat_function, ...) })
+          fun = cat_function,
+          args = list(target_category = target_category, logit = logit), ...) })
 
   p <-
     ggplot() +
@@ -393,11 +394,12 @@ plot_expected_categorization_function_1D <- function(
 #' @param facet_rows_by,facet_cols_by,facet_wrap_by,animate_by Which group variables, if any, should be used for faceting and/or
 #' animation? (defaults: `NULL`)
 #' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
-#' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)
-#' @param category.labels Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
+#' @param category.ids Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`). Only relevant
+#' if `data.exposure` is provided.
+#' @param category.labels Vector of category labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
+#' Only relevant if `data.exposure` is provided.
 #' @param category.colors Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
-#' @param category.linetypes Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
-#' Currently being ignored.
+#' Only relevant if `data.exposure` is provided.
 #' @param ... additional arguments handed to geom_polygon.
 #'
 #' @return ggplot object.
@@ -412,7 +414,7 @@ plot_expected_categories_contour_2D <- function(
   data.exposure = NULL,
   data.test = NULL,
   facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
-  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
+  category.ids = NULL, category.labels = NULL, category.colors = NULL,
   ...
 ) {
   facet_rows_by = enquo(facet_rows_by)
@@ -429,7 +431,6 @@ plot_expected_categories_contour_2D <- function(
   if (is.null(category.ids)) category.ids = levels(x$category)
   if (is.null(category.labels)) category.labels = levels(x$category)
   if (is.null(category.colors)) category.colors = get_default_colors("category", category.ids)
-  if (is.null(category.linetypes)) category.linetypes = rep(1, length(category.ids))
 
   suppressMessages(
     x %<>%
@@ -509,7 +510,7 @@ plot_expected_categorization_function_2D <- function(
   logit = F,
   xlim, ylim, resolution = 25,
   facet_rows_by = NULL, facet_cols_by = NULL, facet_wrap_by = NULL, animate_by = NULL, animation_follow = F,
-  category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
+  category.ids = NULL, category.labels = NULL, category.colors = NULL,
   ...
 ) {
   message("TO DO: implement noise and lapse rate handling. (already implemented in underling functions. just not integrated into plotting).")
@@ -544,7 +545,6 @@ plot_expected_categorization_function_2D <- function(
   if (is.null(category.ids)) category.ids <- levels(x$category)
   if (is.null(category.labels)) category.labels <- levels(x$category)
   if (is.null(category.colors)) category.colors <- get_default_colors("category", category.ids)
-  if (is.null(category.linetypes)) category.linetypes <- rep(1, length(category.ids))
 
   if (any(!quo_is_null(facet_rows_by),
           !quo_is_null(facet_cols_by),
@@ -557,14 +557,14 @@ plot_expected_categorization_function_2D <- function(
 
   x %<>%
     nest() %>%
-    mutate(f = map(data, get_categorization_function_from_NIW_ideal_adaptor, logit = logit)) %>%
+    mutate(f = map(data, get_categorization_function_from_NIW_ideal_adaptor)) %>%
     # Join in vectored cues
     cross_join(
       d %>%
         transmute(x = pmap(.l = list(!!! syms(cue.labels)), .f = ~ c(...))) %>%
         nest(cues = everything())) %>%
     mutate(
-      p_cat = invoke_map(.f = f, .x = cues, target_category = target_category),
+      p_cat = invoke_map(.f = f, .x = cues, target_category = target_category, logit = logit),
       cues = NULL,
       f = NULL) %>%
     # Join separate cues back in
