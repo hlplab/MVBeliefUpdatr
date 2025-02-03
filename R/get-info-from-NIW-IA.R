@@ -85,7 +85,13 @@ get_NIW_categorization_function <- function(
     }
 
     p_target <-
-      (1 - lapse_rate[target_category]) * exp(log_p[,target_category] + log(priors[target_category]) - log(rowSums(exp(log_p) * priors))) +
+      (1 - lapse_rate[target_category]) *
+      exp(log_p[,target_category] + log(priors[target_category]) -
+            log(rowSums(
+              # multiply each row of the exponentiated log_p matrix (= the log densities of each category for each observation)
+              # with the vector of priors (must use this since simply multiplying by the vector will try to proceed elementwise
+              # through the matrix, through each column)
+              t(apply(exp(log_p), 1, function(row) { row * priors }))))) +
       lapse_rate[target_category] * lapse_biases[target_category]
 
     if (logit) return(qlogis(p_target)) else return(p_target)
