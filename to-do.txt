@@ -25,7 +25,7 @@ MVBU_representation <-
 MVBU_representation
 
 EASY
-+ consolidate forward ibbu plotting for 1d now that it's much more streamlined! (extract common components out of functions)
++ Check why get_IBBU_predicted_response leads to warning "Warning: Detected an unexpected many-to-many relationship between `x` and `y`."
 
 
 IMPORTANT
