@@ -40,7 +40,7 @@ assert_cols_in_data <- function(data, cols, which.data = "the", scalar = T) {
   }
 
   assert_that(all(cols %in% names(data)),
-              msg = paste("Column(s)", paste(cues[which(cols %nin% names(data))], collapse = ","), "not found in", which.data, "data." ))
+              msg = paste("Column(s)", paste(cols[which(cols %nin% names(data))], collapse = ","), "not found in", which.data, "data." ))
   if (nrow(drop_na(data, all_of(cols))) == 0)
     warning(paste("The column(s)", paste(cols, collapse = ", "), "are present in", which.data, "data, but all values are NAs."))
 }
