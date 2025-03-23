@@ -15,7 +15,8 @@ test_that("Test compose stanfit", {
       response = "Response",
       group = "Subject",
       group.unique = "Condition",
-      sample = F))
+      sample = F,
+      refresh = 0))
   expect_no_error(
     infer_NIW_ideal_adaptor(
       exposure = .exposure,
@@ -25,7 +26,8 @@ test_that("Test compose stanfit", {
       response = "Response",
       group = "Subject",
       group.unique = "Condition",
-      sample = F))
+      sample = F,
+      refresh = 0))
 })
 
 
@@ -43,7 +45,7 @@ test_that("Test fitting stanfit", {
         group.unique = "Condition",
         sample = T,
         cores = 4,
-        refresh = -1,
+        refresh = 0,
         iter = 100))))
   expect_no_error(
     suppressMessages(suppressWarnings(
@@ -57,7 +59,7 @@ test_that("Test fitting stanfit", {
         group.unique = "Condition",
         sample = T,
         cores = 4,
-        refresh = -1,
+        refresh = 0,
         iter = 100))))
   # check that forcing multivariate updating works even if there is only one cue
   expect_no_error(
@@ -73,7 +75,7 @@ test_that("Test fitting stanfit", {
         sample = T,
         use_univariate_updating = F,
         cores = 4,
-        refresh = -1,
+        refresh = 0,
         iter = 100))))
   # forcing univariate updating should throw an error if and only if there is more than 1 cue
   expect_no_error(
@@ -89,7 +91,7 @@ test_that("Test fitting stanfit", {
         sample = T,
         use_univariate_updating = T,
         cores = 4,
-        refresh = -1,
+        refresh = 0,
         iter = 100))))
   expect_error(
     suppressWarnings(
@@ -104,7 +106,7 @@ test_that("Test fitting stanfit", {
         sample = T,
         use_univariate_updating = T,
         cores = 4,
-        refresh = -1,
+        refresh = 0,
         iter = 100)))
 })
 
@@ -124,6 +126,6 @@ test_that("stanfit output", {
         group.unique = "Condition",
         sample = T,
         cores = 4,
-        refresh = -1,
+        refresh = 0,
         iter = 100))))
 })

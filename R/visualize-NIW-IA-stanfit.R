@@ -9,12 +9,14 @@
 NULL
 
 
-#' Plot distribution of IBBU parameters.
+#' Plot distribution of parameters of ideal adaptor stanfit
 #'
-#' Plot distribution of post-warmup MCMC samples for all parameters representing the
+#' Plot distribution of posterior MCMC samples for all parameters representing the
 #' prior and/or posterior beliefs.
 #'
-#' @param model mv-ibbu-stanfit object.
+#' @aliases plot_ibbu_stanfit_parameters
+#'
+#' @param model An ideal adaptor stanfit object.
 #' @param categories,groups,cues Character vector of categories/groups/cues to be plotted. Typically, the levels of these factors
 #' are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
 #' \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
@@ -32,13 +34,17 @@ NULL
 #' @keywords TBD
 #'
 #' @importFrom ggridges geom_density_ridges
-#' @rdname plot_ibbu_stanfit_parameters
+plot_parameters <- function(fit, ...) {
+  UseMethod("plot_parameters")
+}
+
+#' @rdname plot_parameters
 #' @export
-plot_ibbu_stanfit_parameters <- function(
+plot_parameters.NIW_ideal_adaptor_stanfit <- function(
   model,
-  categories = get_category_levels_from_stanfit(model),
-  groups = get_group_levels_from_stanfit(model, include_prior = T),
-  cues = get_cue_levels_from_stanfit(model),
+  categories = get_category_levels(model),
+  groups = get_group_levels(model, include_prior = T),
+  cues = get_cue_levels(model),
   ndraws = NULL,
   untransform_cues = TRUE,
   panel_scaling = F,
@@ -50,7 +56,7 @@ plot_ibbu_stanfit_parameters <- function(
 
   d.pars <-
     model %>%
-    add_ibbu_stanfit_draws(
+    get_draws(
       groups = groups,
       ndraws = ndraws,
       untransform_cues = untransform_cues,
@@ -159,11 +165,13 @@ plot_ibbu_stanfit_parameters <- function(
 
 
 
-#' Plot correlations between IBBU parameters.
+#' Plot correlations between parameters of ideal adaptor stanfit
 #'
-#' Plot correlations between post-warmup MCMC samples for all parameters representing the prior and/or posterior beliefs.
+#' Plot correlations between posterior MCMC samples for all parameters representing the prior and/or posterior beliefs.
 #'
-#' @param model mv-ibbu-stanfit object.
+#' @aliases plot_ibbu_stanfit_parameter_correlations
+#'
+#' @param model An ideal adaptor stanfit object.
 #' @param categories,groups,cues,pars Character vector of categories, groups, cues, and/or parameters to be plotted. To
 #' subset to specific parameters, note the following naming conventions:
 #'
@@ -190,12 +198,16 @@ plot_ibbu_stanfit_parameters <- function(
 #' @importFrom ggforce facet_matrix geom_autodensity
 #' @importFrom ggnewscale new_scale
 #' @importFrom colorspace lighten
-#' @export
-plot_ibbu_stanfit_parameter_correlations <- function(
+plot_parameter_correlations <- function(fit, ...) {
+  UseMethod("plot_parameter_correlations")
+}
+
+#' @export plot_parameter_correlations
+plot_parameter_correlations.NIW_ideal_adaptor_stanfit <- function(
   model,
-  categories = get_category_levels_from_stanfit(model),
+  categories = get_category_levels(model),
   groups = "prior",
-  cues = get_cue_levels_from_stanfit(model),
+  cues = get_cue_levels(model),
   pars = NULL,
   ndraws = NULL,
   untransform_cues = TRUE,
@@ -205,7 +217,7 @@ plot_ibbu_stanfit_parameter_correlations <- function(
 
   d.pars <-
     model %>%
-    add_ibbu_stanfit_draws(
+    get_draws(
       categories = categories,
       groups = groups,
       ndraws = ndraws,
@@ -280,14 +292,16 @@ plot_ibbu_stanfit_parameter_correlations <- function(
 }
 
 
-#' Plot expected bivariate (2D) categories from MV IBBU stanfit.
+#' Plot expected categories of ideal adaptor stanfit
 #'
 #' Plot bivariate Gaussian categories expected given the parameters inferred by incremental Bayesian belief-
-#' updating (IBBU). Specifically, the categories are derived by marginalizing over the uncertainty represented
-#' by the (post-warmup) MCMC samples. Two methods are available (specified by `type`), which differ in their
+#' updating (IBBU) for an ideal adaptor. Specifically, the categories are derived by marginalizing over the uncertainty represented
+#' by the posterior MCMC samples. Two methods are available (specified by `type`), which differ in their
 #' computational demands and speed.
 #'
-#' @param model An mv-ibbu-stanfit object.
+#' @aliases plot_expected_ibbu_stanfit_categories
+#'
+#' @param model An ideal adaptor stanfit object.
 #' @param type Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
 #' faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}
 #' (based on the NIW parameters \code{S} and \code{nu}) at each MCMC draw, and then averages over
@@ -329,60 +343,87 @@ plot_ibbu_stanfit_parameter_correlations <- function(
 #' @keywords TBD
 #'
 #' @importFrom purrr map_dbl
-#' @rdname plot_expected_ibbu_stanfit_categories
+plot_expected_categories <- function(fit, ...) {
+  UseMethod("plot_expected_categories")
+}
+
+plot_expected_categories_contour <- function(fit, ...) {
+  UseMethod("plot_expected_categories_contour")
+}
+
+plot_expected_categories_density <- function(fit, ...) {
+  UseMethod("plot_expected_categories_density")
+}
+
+plot_expected_categories_contour2D <- function(fit, ...) {
+  UseMethod("plot_expected_categories_contour2D")
+}
+
+plot_expected_categories_density1D <- function(fit, ...) {
+  UseMethod("plot_expected_categories_density1D")
+}
+
+plot_expected_categories_density2D <- function(fit, ...) {
+  UseMethod("plot_expected_categories_density2D")
+}
+
+#' @rdname plot_expected_categories
 #' @export
-plot_expected_ibbu_stanfit_categories = function(
+plot_expected_categories.NIW_ideal_adaptor_stanfit <- function(
   model,
   type,
   ...
 ) {
   assert_that(all(type %in% c("contour", "density"), length(type) == 1))
   if (type == "contour")
-    plot_expected_ibbu_stanfit_categories_contour(model = model, ...)
+    plot_expected_categories_contour(model = model, ...)
   else {
-    plot_expected_ibbu_stanfit_categories_density(model = model, ...)
+    plot_expected_categories_density(model = model, ...)
   }
 }
 
-#' @rdname plot_expected_ibbu_stanfit_categories
+#' @aliases plot_expected_ibbu_stanfit_categories_contour
+#' @rdname plot_expected_categories
 #' @export
-plot_expected_ibbu_stanfit_categories_contour = function(
+plot_expected_categories_contour.NIW_ideal_adaptor_stanfit <- function(
     model,
-    cues = get_cue_levels_from_stanfit(model),
+    cues = get_cue_levels(model),
     ...
 ) {
   if (length(cues) == 1) {
     warning("Contour plots are only supported when at least 2 cues are selected for plotting.")
   } else if (length(cues) == 2) {
-    plot_expected_ibbu_stanfit_categories_contour2D(model = model, cues = cues, ...)
+    plot_expected_categories_contour2D(model = model, cues = cues, ...)
   } else {
     warning("Contour plots for more than 2 are not yet supported.")
   }
 }
 
-#' @rdname plot_expected_ibbu_stanfit_categories
+#' @aliases plot_expected_ibbu_stanfit_categories_density
+#' @rdname plot_expected_categories
 #' @export
-plot_expected_ibbu_stanfit_categories_density = function(
+plot_expected_categories_density.NIW_ideal_adaptor_stanfit <- function(
     model,
-    cues = get_cue_levels_from_stanfit(model),
+    cues = get_cue_levels(model),
     ...
 ) {
   if (length(cues) == 1) {
-    plot_expected_ibbu_stanfit_categories_density1D(model = model, cues = cues, ...)
+    plot_expected_categories_density1D(model = model, cues = cues, ...)
   } else if (length(cues) == 2) {
-    plot_expected_ibbu_stanfit_categories_density2D(model = model, cues = cues, ...)
+    plot_expected_categories_density2D(model = model, cues = cues, ...)
   } else {
     warning("Density plots for more than 2 are not yet supported.")
   }
 }
 
-#' @rdname plot_expected_ibbu_stanfit_categories
+#' @aliases plot_expected_ibbu_stanfit_categories_contour2D
+#' @rdname plot_expected_categories
 #' @export
-plot_expected_ibbu_stanfit_categories_contour2D = function(
+plot_expected_categories_contour2D.NIW_ideal_adaptor_stanfit <- function(
   model,
-  categories = get_category_levels_from_stanfit(model),
-  groups = get_group_levels_from_stanfit(model, include_prior = T),
-  cues = get_cue_levels_from_stanfit(model),
+  categories = get_category_levels(model),
+  groups = get_group_levels(model, include_prior = T),
+  cues = get_cue_levels(model),
   plot.test = T,
   plot.exposure = F,
   annotate_inferred_category_means = c("rug", "text"),
@@ -395,7 +436,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
   assert_that(length(cues) == 2)
 
   d.pars <-
-    get_expected_category_statistic_from_stanfit(
+    get_expected_category_statistic(
       model,
       categories = categories,
       groups = groups,
@@ -464,7 +505,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     # Optionally plot test data
     { if (plot.test)
       add_test_data_to_2D_plot(
-        get_test_data_from_stanfit(model, groups = setdiff(groups_found, "prior")) %>%
+        get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
           { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
           ungroup() %>%
           distinct(group, !!! syms(cues)),
@@ -472,7 +513,7 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
     # Optionally plot exposure data
     { if (plot.exposure)
       add_exposure_summary_to_2D_plot(
-        get_exposure_category_statistic_from_stanfit(
+        get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(
           model,
           categories = levels(d.pars$category),
           groups = setdiff(groups_found, "prior"),
@@ -488,13 +529,14 @@ plot_expected_ibbu_stanfit_categories_contour2D = function(
 }
 
 
-#' @rdname plot_expected_ibbu_stanfit_categories
+#' @aliases plot_expected_ibbu_stanfit_categories_density1D
+#' @rdname plot_expected_categories
 #' @export
-plot_expected_ibbu_stanfit_categories_density1D <- function(
+plot_expected_categories_density1D.NIW_ideal_adaptor_stanfit <- function(
     model,
-    categories = get_category_levels_from_stanfit(model),
-    groups = get_group_levels_from_stanfit(model, include_prior = T),
-    cues = get_cue_levels_from_stanfit(model),
+    categories = get_category_levels(model),
+    groups = get_group_levels(model, include_prior = T),
+    cues = get_cue_levels(model),
     ndraws = NULL,
     plot.test = T,
     plot.exposure = F,
@@ -508,7 +550,7 @@ plot_expected_ibbu_stanfit_categories_density1D <- function(
   assert_that(length(cues) == 1)
 
   d.pars <-
-    add_ibbu_stanfit_draws(
+    get_draws(
       model,
       categories = categories,
       groups = groups,
@@ -521,7 +563,7 @@ plot_expected_ibbu_stanfit_categories_density1D <- function(
   # By default get plot dimensions that are centered around the test data
   xlim <-
     if (is.null(xlim)) {
-      get_test_data_from_stanfit(model, groups = setdiff(groups_found, "prior")) %>%
+      get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
         pull(cues[1]) %>%
         { (range(.) - mean(.) * 1.5) + mean(.) }
     } else xlim
@@ -574,7 +616,7 @@ plot_expected_ibbu_stanfit_categories_density1D <- function(
     # Optionally plot test data
     { if (plot.test)
       add_test_data_to_1D_plot(
-        get_test_data_from_stanfit(model, groups = setdiff(groups_found, "prior")) %>%
+        get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
           { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
           ungroup() %>%
           distinct(group, !!! syms(cues)),
@@ -582,7 +624,7 @@ plot_expected_ibbu_stanfit_categories_density1D <- function(
     # Optionally plot exposure data
     { if (plot.exposure)
       add_exposure_summary_to_1D_plot(
-        get_exposure_category_statistic_from_stanfit(
+        get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(
           model,
           categories = levels(d.pars$category),
           groups = setdiff(groups_found, "prior"),
@@ -597,13 +639,14 @@ plot_expected_ibbu_stanfit_categories_density1D <- function(
 }
 
 
-#' @rdname plot_expected_ibbu_stanfit_categories
+#' @aliases plot_expected_ibbu_stanfit_categories_density2D
+#' @rdname plot_expected_categories
 #' @export
-plot_expected_ibbu_stanfit_categories_density2D <- function(
+plot_expected_categories_density2D.NIW_ideal_adaptor_stanfit <- function(
   model,
-  categories = get_category_levels_from_stanfit(model),
-  groups = get_group_levels_from_stanfit(model, include_prior = T),
-  cues = get_cue_levels_from_stanfit(model),
+  categories = get_category_levels(model),
+  groups = get_group_levels(model, include_prior = T),
+  cues = get_cue_levels(model),
   ndraws = NULL,
   plot.test = T,
   plot.exposure = F,
@@ -617,7 +660,7 @@ plot_expected_ibbu_stanfit_categories_density2D <- function(
   assert_that(length(cues) == 2)
 
   d.pars <-
-    add_ibbu_stanfit_draws(
+    get_draws(
       model,
       categories = categories,
       groups = groups,
@@ -630,13 +673,13 @@ plot_expected_ibbu_stanfit_categories_density2D <- function(
   # By default get plot dimensions that are centered around the test data
   xlim <-
     if (is.null(xlim)) {
-      get_test_data_from_stanfit(model, groups = setdiff(groups_found, "prior")) %>%
+      get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
         pull(cues[1]) %>%
         { (range(.) - mean(.) * 1.5) + mean(.) }
     } else xlim
   ylim <-
     if (is.null(ylim)) {
-    get_test_data_from_stanfit(model, groups = setdiff(groups_found, "prior")) %>%
+    get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
       pull(cues[2]) %>%
       { (range(.) - mean(.) * 1.5) + mean(.) }
     } else ylim
@@ -704,7 +747,7 @@ plot_expected_ibbu_stanfit_categories_density2D <- function(
     # Optionally plot test data
     { if (plot.test)
       add_test_data_to_2D_plot(
-        get_test_data_from_stanfit(model, groups = setdiff(groups_found, "prior")) %>%
+        get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
           { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
           ungroup() %>%
           distinct(group, !!! syms(cues)),
@@ -712,7 +755,7 @@ plot_expected_ibbu_stanfit_categories_density2D <- function(
     # Optionally plot exposure data
     { if (plot.exposure)
       add_exposure_summary_to_2D_plot(
-        get_exposure_category_statistic_from_stanfit(
+        get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(
           model,
           categories = levels(d.pars$category),
           groups = setdiff(groups_found, "prior"),
@@ -727,9 +770,7 @@ plot_expected_ibbu_stanfit_categories_density2D <- function(
     facet_wrap(~ .data$group)
 }
 
-
-
-#' Plot prior and posterior categorization of test tokens.
+#' Plot prior and posterior categorization of test tokens for an NIW ideal adaptor stanfit
 #'
 #' Categorize test tokens by prior and/or posterior beliefs, and plot the resulting categorization function along
 #' a one-dimensional continuum (regardless of the dimensionality of the cue space in which categorization takes
@@ -743,6 +784,8 @@ plot_expected_ibbu_stanfit_categories_density2D <- function(
 #' is determined by ndraws. If ndraws is NULL, all samples are used. Otherwise ndraws random
 #' samples will be used. If `summarize=FALSE`, separate categorization plots for all ndraws
 #' individual samples will be plotted in separate panels.
+#'
+#' @aliases plot_ibbu_stanfit_test_categorization
 #'
 #' @param model \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param data.test Optionally, a \code{tibble} or \code{data.frame} with test data.
@@ -759,13 +802,13 @@ plot_expected_ibbu_stanfit_categories_density2D <- function(
 #' (default: `c(.66, .95)`)
 #' @param target_category The index of the category for which categorization should be shown. (default: `1`)
 #' @param panel.group Should the groups be plotted in separate panels? (default: `FALSE`)
-#' @param group.colors,group.linetypes Vector of colors and linetypes of same length as `groups` or `NULL` to use defaults.
+#' @param group.colors,group.shapes,group.linetypes Vector of colors, shapes, and linetypes of same length as `groups` or `NULL` to use defaults.
 #' @param category.colors Vector of colors and linetypes of same length as `categories` or `NULL` to use defaults. Only
 #' relevant when `plot_in_cue_space = TRUE`.
 #' @param all_test_locations Should predictions be shown for all combinations of test locations and group, or should only
 #' combinations be shown that actually occurred in the data? (default: `FALSE`)
-#' @param plot_in_cue_space Should predictions be plotted in the cue space? If not, test tokens are treated
-#' as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)
+#' @param plot_in_cue_space Currently only available if the model has one or two cues. Should predictions be plotted in the cue space?
+#' If not, test tokens are treated as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)
 #' @param untransform_cues Should the cues be untransformed before plotting? This should only have visual consequences
 #' if `plot_in_cue_space = T`. (default: `TRUE`)
 #' @param sort_by Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
@@ -776,28 +819,33 @@ plot_expected_ibbu_stanfit_categories_density2D <- function(
 #' @seealso TBD
 #' @keywords TBD
 #'
-#' @rdname plot_ibbu_stanfit_test_categorization
 #' @importFrom dplyr do right_join
 #' @importFrom purrr invoke_map
+plot_expected_categorization <- function(fit, ...) {
+  UseMethod("plot_expected_categorization")
+}
+
+#' @rdname plot_expected_categorization
 #' @export
-plot_ibbu_stanfit_test_categorization <- function(
+plot_expected_categorization.NIW_ideal_adaptor_stanfit <- function(
   model,
   data.test = NULL,
-  groups = get_group_levels_from_stanfit(model, include_prior = TRUE),
+  groups = get_group_levels(model, include_prior = TRUE),
   summarize = T,
   ndraws = NULL,
   confidence.intervals = c(.66, .95),
   target_category = 1,
   panel.group = if (plot_in_cue_space) TRUE else FALSE,
   group.colors = get_default_colors("group", groups),
+  group.shapes = get_default_shapes("group", groups),
   group.linetypes = get_default_linetypes("group", groups),
-  category.colors = get_default_colors("category", categories),
+  category.colors = get_default_colors("category", get_category_levels(model)),
   all_test_locations = TRUE,
   plot_in_cue_space = FALSE,
   untransform_cues = TRUE,
   sort_by = if (plot_in_cue_space) NULL else "prior"
 ) {
-  if (is.null(data.test)) data.test <- get_test_data_from_stanfit(model)
+  if (is.null(data.test)) data.test <- get_test_data(model)
   assert_that(is.flag(summarize))
   assert_that(is.null(confidence.intervals) |
                 all(is.numeric(confidence.intervals),
@@ -816,7 +864,7 @@ plot_ibbu_stanfit_test_categorization <- function(
 
   # Get prior and posterior parameters
   d.pars <-
-    add_ibbu_stanfit_draws(
+    get_draws(
       model,
       groups = groups,
       summarize = F,
@@ -837,7 +885,7 @@ plot_ibbu_stanfit_test_categorization <- function(
     filter(group %in% .env$groups)
 
   # Prepare test_data
-  cue.labels <- get_cue_levels_from_stanfit(model)
+  cue.labels <- get_cue_levels(model)
   if (all_test_locations) {
     test_data <-
       data.test %>%
@@ -856,14 +904,20 @@ plot_ibbu_stanfit_test_categorization <- function(
       nest(cues_joint = x, cues_separate = .env$cue.labels)
   }
 
+  # There are some issues with using exec instead of invoke_map in a mutate context since
+  # !!! takes precedence over the definition of the function in the map statement
+  # (see https://stackoverflow.com/questions/64356232/using-mutate-with-map2-and-exec-instead-of-invoke-map)
+  # This works around that issue
+  .fun <- function(fn, args) exec(fn, !!!args, target_category = target_category, logit = T)
   d.pars %<>%
     group_by(group, .draw) %>%
     do(f = get_categorization_function_from_grouped_ibbu_stanfit_draws(.)) %>%
     right_join(test_data, by = "group") %>%
     group_by(group, .draw) %>%
-    mutate(p_cat = invoke_map(.f = f, .x = cues_joint, target_category = target_category, logit = T)) %>%
+    mutate(p_cat = map2(f, cues_joint, .fun)) %>%
     select(-f) %>%
     unnest(c(cues_joint, cues_separate, p_cat))
+
 
   if (summarize) {
     d.pars %<>%
@@ -889,10 +943,10 @@ plot_ibbu_stanfit_test_categorization <- function(
     ungroup() %>%
     select(-c(x))
 
-  target_category_label <- if (is.null(get_category_levels_from_stanfit(model))) paste("category", target_category) else get_category_levels_from_stanfit(model, target_category)
+  target_category_label <- if (is.null(get_category_levels(model))) paste("category", target_category) else get_category_levels(model, target_category)
 
   if (plot_in_cue_space) {
-    if (length(get_cue_levels_from_stanfit(model)) > 2) stop("plot_in_cue_space = T not yet implemented for more than two cues.")
+    if (length(get_cue_levels(model)) == 2) stop("plot_in_cue_space = T not yet implemented for more than two cues (and makes no sense for a single cue).")
 
     p <-
       d.pars %>%
@@ -910,13 +964,14 @@ plot_ibbu_stanfit_test_categorization <- function(
         midpoint = .5,
         high = category.colors[target_category],
         mid = "white",
-        low = if (length(category.colors[which(get_category_levels_from_stanfit(model) != target_category_label)]) > 1) "gray" else category.colors[which(get_category_levels_from_stanfit(model) != target_category_label)],
+        low = if (length(category.colors[which(get_category_levels(model) != target_category_label)]) > 1) "gray" else category.colors[which(get_category_levels(model) != target_category_label)],
         limits = c(0,1)) +
       coord_cartesian(expand = F)
   } else {
     # If sort_by is specified, sort levels of x-axis by that group.
     if (!is.null(sort_by)) {
-      sort.levels <- d.pars %>%
+      sort.levels <-
+        d.pars %>%
         filter(group == sort_by) %>%
         group_by(token.cues) %>%
         summarise(p_cat = mean(p_cat)) %>%
@@ -931,15 +986,17 @@ plot_ibbu_stanfit_test_categorization <- function(
 
     p <-
       d.pars %>%
-      ggplot(aes(
-        x = .data$token,
-        y = .data$p_cat,
-        color = .data$group,
-        linetype = .data$group)) +
-      scale_x_discrete("Test token",
-                       breaks = levels(.data$token),
-                       labels = paste0(levels(.data$token), "\n",
-                                       levels(.data$token.cues))) +
+      ggplot(
+        aes(
+          x = .data$token,
+          y = .data$p_cat,
+          color = .data$group,
+          linetype = .data$group)) +
+      scale_x_discrete(
+        "Test token",
+        breaks = levels(d.pars$token),
+        labels = paste0(levels(d.pars$token), "\n",
+                        levels(d.pars$token.cues))) +
       scale_y_continuous(
         paste0("Predicted proportion of ", target_category_label, "-responses"),
         limits = c(0,1)) +

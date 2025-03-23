@@ -3,10 +3,13 @@
 #' @importFrom dplyr relocate
 NULL
 
+# Functions general to stanfit objects ----------------------------------------
 
-#' Get parameter names
+#' Get parameter names of stanfit
 #'
 #' Get the names for all parameters in `fit`.
+#'
+#' @param fit A \code{\link{stanfit}} object.
 #' @export
 get_params = function(fit) {
   return(fit@model_pars)
@@ -15,6 +18,8 @@ get_params = function(fit) {
 #' Get number of post-warmup MCMC samples from stanfit
 #'
 #' Get the total number of post-warmup MCMC samples in `fit`.
+#'
+#' @param fit A \code{\link{stanfit}} object.
 #' @export
 get_number_of_draws = function(fit) {
   return(length(fit@sim$samples[[1]][[1]]))
@@ -25,7 +30,7 @@ get_number_of_draws = function(fit) {
 #' Returns `ndraws` indices for random post-warmup MCMC draws (without replacement) from
 #' `fit`.
 #'
-#' @param fit mv_ibbu_stanfit object.
+#' @param fit A \code{\link{stanfit}} object.
 #' @param ndraws Number of indices to be returned. Can't be larger than total number of
 #' post-warmup samples across all MCMC chains in `fit`.
 #'
@@ -41,7 +46,9 @@ get_random_draw_indices <- function(fit, ndraws)
 }
 
 
-#' Get the transform/untransform information from an NIW ideal adaptor stanfit.
+# Functions general to NIW ideal adaptor stanfit objects ----------------------------------------
+
+#' Get the transform/untransform information from an NIW ideal adaptor stanfit
 #'
 #' Returns the transform/untransform information handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
 #' object.
@@ -52,31 +59,33 @@ get_random_draw_indices <- function(fit, ndraws)
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @rdname get_transform_information_from_stanfit
-#' @export
-get_transform_information_from_stanfit <- function(model) {
-  assert_that(is.NIW_ideal_adaptor_stanfit(model))
-
-  return(model@transform_information)
+get_transform_information <- function(fit, ...) {
+  UseMethod("get_transform_information")
 }
 
-#' @rdname get_transform_information_from_stanfit
+#' @rdname get_transform_information
 #' @export
-get_transform_function_from_stanfit <- function(model) {
-  return(get_transform_information_from_stanfit(model)$transform.function)
+get_transform_information.NIW_ideal_adaptor_stanfit <- function(fit) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(fit))
+
+  return(fit@transform_information)
 }
 
-#' @rdname get_transform_information_from_stanfit
+#' @rdname get_transform_information
 #' @export
-get_untransform_function_from_stanfit <- function(model) {
-  return(get_transform_information_from_stanfit(model)$untransform.function)
+get_transform_function.NIW_ideal_adaptor_stanfit <- function(fit) {
+  return(get_transform_information(fit)$transform.function)
 }
 
+#' @rdname get_transform_information
+#' @export
+get_untransform_function.NIW_ideal_adaptor_stanfit <- function(fit) {
+  return(get_transform_information(fit)$untransform.function)
+}
 
-
-#' Get the input data from an NIW ideal adaptor stanfit.
+#' Get the input data from an NIW ideal adaptor stanfit
 #'
-#' Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
+#' Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{\link{NIW_ideal_adaptor_stanfit}}
 #' object.
 #'
 #' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
@@ -85,19 +94,22 @@ get_untransform_function_from_stanfit <- function(model) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @rdname get_ibbu_input
+get_input <- function(fit, ...) {
+  UseMethod("get_input")
+}
+
+#' @rdname get_input
 #' @export
-get_input_from_stanfit <- function(fit) {
+get_input.NIW_ideal_adaptor_stanfit <- function(fit) {
   assert_that(is.NIW_ideal_adaptor_stanfit(fit))
 
   return(fit@input_data)
 }
 
-
-#' Get category sample mean or covariance matrix of exposure data from NIW IBBU stanfit.
+#' Get category sample mean or covariance matrix of exposure data from NIW ideal adaptor stanfit
 #'
-#' Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an incremental
-#' Bayesian belief-updating (IBBU) model from an NIW IBBU stanfit or NIW belief MCMC object.
+#' Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an
+#' \code{\link{NIW_ideal_adaptor_stanfit}}.
 #'
 #' @param fit An \code{\link{NIW_ideal_adaptor_stanfit}}.
 #' @param categories Character vector with categories for which category statistics are to be
@@ -115,13 +127,33 @@ get_input_from_stanfit <- function(fit) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @rdname get_exposure_category_statistic_from_stanfit
 #' @importFrom magrittr %<>%
+get_exposure_category_statistic <- function(fit, ...) {
+  UseMethod("get_exposure_category_statistic")
+}
+
+get_exposure_category_mean <- function(fit, ...) {
+  UseMethod("get_exposure_category_mean")
+}
+
+get_exposure_category_css <- function(fit, ...) {
+  UseMethod("get_exposure_category_css")
+}
+
+get_exposure_category_uss <- function(fit, ...) {
+  UseMethod("get_exposure_category_uss")
+}
+
+get_exposure_category_cov <- function(fit, ...) {
+  UseMethod("get_exposure_category_cov")
+}
+
+#' @rdname get_exposure_category_statistic
 #' @export
-get_exposure_category_statistic_from_stanfit <- function(
+get_exposure_category_statistic.NIW_ideal_adaptor_stanfit <- function(
   fit,
-  categories = get_category_levels_from_stanfit(fit),
-  groups = get_group_levels_from_stanfit(fit, include_prior = FALSE),
+  categories = get_category_levels(fit),
+  groups = get_group_levels(fit, include_prior = FALSE),
   statistic = c("n", "mean", "css", "uss", "cov"),
   untransform_cues = TRUE
 ) {
@@ -129,13 +161,13 @@ get_exposure_category_statistic_from_stanfit <- function(
               msg = "statistic must be one of 'n', mean', 'css', 'uss', or 'cov'.")
   assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
   assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
-  assert_that(all(categories %in% get_category_levels_from_stanfit(fit)),
+  assert_that(all(categories %in% get_category_levels(fit)),
               msg = paste("Some categories not found in the exposure data:",
-                          paste(setdiff(categories, get_category_levels_from_stanfit(fit)), collapse = ", ")))
-  assert_that(all(groups %in% get_group_levels_from_stanfit(fit)),
+                          paste(setdiff(categories, get_category_levels(fit)), collapse = ", ")))
+  assert_that(all(groups %in% get_group_levels(fit)),
               msg = paste("Some groups not found in the exposure data:",
-                          paste(setdiff(groups, get_group_levels_from_stanfit(fit, include_prior = FALSE)), collapse = ", ")))
-  x <- get_input_from_stanfit(fit)
+                          paste(setdiff(groups, get_group_levels(fit, include_prior = FALSE)), collapse = ", ")))
+  x <- get_input.NIW_ideal_adaptor_stanfit(fit)
 
   df <- NULL
   # (If untransform_cues is TRUE, all statistics first need to be calculated because of the approach
@@ -237,9 +269,9 @@ get_exposure_category_statistic_from_stanfit <- function(
     # Obtain untransformed uss and/or css from cov by walking back/undoing above steps
     # (direct transform of uss)
     # BE VERY CAREFUL IN CHANGING THIS ORDER OR MOVING PARTS OF THIS UP, BECAUSE OF THE DEPENDENCIES BETWEEN THE OPERATIONS
-    { if (untransform_cues & "cov" %in% statistic) mutate(., cov = map(.data$cov, ~ untransform_category_cov(.x, get_transform_information_from_stanfit(fit)))) else . } %>%
+    { if (untransform_cues & "cov" %in% statistic) mutate(., cov = map(.data$cov, ~ untransform_category_cov(.x, get_transform_information(fit)))) else . } %>%
     { if (untransform_cues & any(c("css", "uss") %in% statistic)) mutate(., css = map2(.data$cov, n, cov2css)) else . } %>%
-    { if (untransform_cues & any(c("uss", "mean") %in% statistic)) mutate(., mean = map(.data$mean, ~ untransform_category_mean(.x, get_transform_information_from_stanfit(fit)))) else . } %>%
+    { if (untransform_cues & any(c("uss", "mean") %in% statistic)) mutate(., mean = map(.data$mean, ~ untransform_category_mean(.x, get_transform_information(fit)))) else . } %>%
     { if (untransform_cues & "uss" %in% statistic) mutate(., uss = pmap(.l = list(.data$cov, .data$n, .data$mean), css2uss)) else . } %>%
     select(group, category, !!! syms(statistic)) %>%
     filter(., .data[["group"]] %in% .env[["groups"]]) %>%
@@ -254,29 +286,30 @@ get_exposure_category_statistic_from_stanfit <- function(
   return(df)
 }
 
-#' @rdname get_exposure_category_statistic_from_stanfit
+#' @rdname get_exposure_category_statistic
 #' @export
-get_exposure_mean_from_stanfit <- function(...) {
-  return(get_exposure_category_statistic_from_stanfit(..., statistic = "mean"))
+get_exposure_category_mean.NIW_ideal_adaptor_stanfit <- function(...) {
+  return(get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(..., statistic = "mean"))
 }
 
-#' @rdname get_exposure_category_statistic_from_stanfit
+#' @rdname get_exposure_category_statistic
 #' @export
-get_exposure_css_from_stanfit <- function(...) {
-  return(get_exposure_category_statistic_from_stanfit(..., statistic = "css"))
+get_exposure_category_css.NIW_ideal_adaptor_stanfit <- function(...) {
+  return(get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(..., statistic = "css"))
 }
 
-#' @rdname get_exposure_category_statistic_from_stanfit
+#' @rdname get_exposure_category_statistic
 #' @export
-get_exposure_uss_from_stanfit <- function(...) {
-  return(get_exposure_category_statistic_from_stanfit(..., statistic = "uss"))
+get_exposure_category_uss.NIW_ideal_adaptor_stanfit <- function(...) {
+  return(get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(..., statistic = "uss"))
 }
 
-#' @rdname get_exposure_category_statistic_from_stanfit
+#' @rdname get_exposure_category_statistic
 #' @export
-get_exposure_cov_from_stanfit <- function(...) {
-  return(get_exposure_category_statistic_from_stanfit(..., statistic = "cov"))
+get_exposure_category_cov.NIW_ideal_adaptor_stanfit <- function(...) {
+  return(get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(..., statistic = "cov"))
 }
+
 
 #' Get the test data from an NIW ideal adaptor stanfit.
 #'
@@ -294,12 +327,17 @@ get_exposure_cov_from_stanfit <- function(...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
+get_test_data <- function(x, ...) {
+  UseMethod("get_test_data")
+}
+
+#' @rdname get_test_data
 #' @export
-get_test_data_from_stanfit <- function(
+get_test_data.NIW_ideal_adaptor_stanfit <- function(
   fit,
-  groups = get_group_levels_from_stanfit(fit, include_prior = FALSE)
+  groups = get_group_levels(fit, include_prior = FALSE)
 ) {
-  data <- get_input_from_stanfit(fit)
+  data <- get_input.NIW_ideal_adaptor_stanfit(fit)
   data[["x_test"]] %>%
     cbind(data[["z_test_counts"]]) %>%
     as_tibble(.name_repair = "minimal") %>%
@@ -316,8 +354,8 @@ get_test_data_from_stanfit <- function(
 #' Checks if information is available about the original values and order of the factor levels
 #' for the category variable (for which beliefs about means and covariances are inferred) or
 #' group variable (e.g., subject or exposure group), respectively. If available,
-#' that information is returned. `get_category_levels_from_stanfit()` and `get_group_levels_from_stanfit()` are
-#' convenience functions, calling `get_original_variable_levels_from_stanfit()`.
+#' that information is returned. `get_category_levels()` and `get_group_levels()` are
+#' convenience functions, calling `get_input_variable_levels()`.
 #'
 #' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param variable Either "category" or "group".
@@ -330,41 +368,57 @@ get_test_data_from_stanfit <- function(
 #'
 #' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_constructor}}
 #' @keywords TBD
-#' @rdname get_original_variable_levels_from_stanfit
+get_input_variable_levels <- function(x, ...) {
+  UseMethod("get_input_variable_levels")
+}
+
+get_category_levels <- function(x, ...) {
+  UseMethod("get_category_levels")
+}
+
+get_group_levels <- function(x, ...) {
+  UseMethod("get_group_levels")
+}
+
+get_cue_levels <- function(x, ...) {
+  UseMethod("get_cue_levels")
+}
+
+#' @rdname get_input_variable_levels
 #' @export
-get_original_variable_levels_from_stanfit <- function(fit, variable = c("category", "group", "cue"), indices = NULL) {
+get_input_variable_levels.NIW_ideal_adaptor_stanfit <- function(fit, variable = c("category", "group", "cue"), indices = NULL) {
   assert_that(is.null(indices) | all(indices > 0))
-  f = get_constructor(fit, variable)
+  f <- get_constructor(fit, variable)
 
   if (is.null(indices)) return(levels(f(c()))) else return(f(indices))
 }
 
 
-#' @rdname get_original_variable_levels_from_stanfit
+#' @rdname get_input_variable_levels
 #' @export
-get_category_levels_from_stanfit <- function(fit, indices = NULL) {
-  return(get_original_variable_levels_from_stanfit(fit, "category", indices))
+get_category_levels.NIW_ideal_adaptor_stanfit <- function(fit, indices = NULL) {
+  return(get_input_variable_levels(fit, "category", indices))
 }
 
-#' @rdname get_original_variable_levels_from_stanfit
+#' @rdname get_input_variable_levels
 #' @export
-get_group_levels_from_stanfit <- function(fit, indices = NULL, include_prior = F) {
-  groups <- get_original_variable_levels_from_stanfit(fit, "group", indices)
+get_group_levels.NIW_ideal_adaptor_stanfit <- function(fit, indices = NULL, include_prior = F) {
+  groups <- get_input_variable_levels(fit, "group", indices)
   if (include_prior) groups <- append("prior", groups)
 
   return(groups)
 }
 
-#' @rdname get_original_variable_levels_from_stanfit
+#' @rdname get_input_variable_levels
 #' @export
-get_cue_levels_from_stanfit <- function(fit, indices = NULL) {
-  cues <- get_original_variable_levels_from_stanfit(fit, "cue", indices)
+get_cue_levels.NIW_ideal_adaptor_stanfit <- function(fit, indices = NULL) {
+  cues <- get_input_variable_levels(fit, "cue", indices)
 
   return(cues)
 }
 
 
-#' Get tidybayes constructor from an NIW IBBU stanfit.
+#' Get tidybayes constructor from an NIW ideal adaptor stanfit.
 #'
 #' Gets the tidybayes constructor function from the stanfit object. `get_category_constructor()` and
 #' `get_group_constructor()` are convenience functions, calling `get_constructor()`. See \code{
@@ -377,10 +431,11 @@ get_cue_levels_from_stanfit <- function(fit, indices = NULL) {
 #' @return A constructor function, a list of constructor functions, or `NULL`. If a specific constructor
 #' function is requested but not found, a warning is shown.
 #'
-#' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_original_variable_levels_from_stanfit}}
+#' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_input_variable_levels}}
 #' @keywords TBD
 #' @rdname get_constructor
 #' @export
+#' @importFrom rlang sym
 get_constructor <- function(fit, variable = NULL) {
   available_constructors <- c("category", "group", "cue", "cue2")
   assert_NIW_ideal_adaptor_stanfit(fit)
@@ -460,27 +515,39 @@ get_cue2_constructor <- function(fit) {
 #' @seealso TBD
 #' @keywords TBD
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @rdname get_expected_category_statistic_from_stanfit
+get_expected_category_statistic <- function(x, ...) {
+  UseMethod("get_expected_category_statistic")
+}
+
+get_expected_mu <- function(x, ...) {
+  UseMethod("get_expected_mu")
+}
+
+get_expected_sigma <- function(x, ...) {
+  UseMethod("get_expected_sigma")
+}
+
+#' @rdname get_expected_category_statistic
 #' @export
-get_expected_category_statistic_from_stanfit <- function(
+get_expected_category_statistic.NIW_ideal_adaptor_stanfit <- function(
   x,
-  categories = get_category_levels_from_stanfit(x),
-  groups = get_group_levels_from_stanfit(x, include_prior = TRUE),
+  categories = get_category_levels(x),
+  groups = get_group_levels(x, include_prior = TRUE),
   statistic = c("mu", "Sigma"),
   untransform_cues = TRUE
 ) {
   assert_that(all(statistic %in% c("mu", "Sigma")))
   assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
   assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
-  assert_that(all(categories %in% get_category_levels_from_stanfit(x)),
+  assert_that(all(categories %in% get_category_levels(x)),
               msg = paste("Some categories not found in model:",
-                          paste(setdiff(categories, get_category_levels_from_stanfit(x)), collapse = ", ")))
-  assert_that(all(groups %in% get_group_levels_from_stanfit(x, include_prior = T)),
+                          paste(setdiff(categories, get_category_levels(x)), collapse = ", ")))
+  assert_that(all(groups %in% get_group_levels(x, include_prior = T)),
               msg = paste("Some groups not found in model:",
-                          paste(setdiff(groups, get_group_levels_from_stanfit(x, include_prior = T)), collapse = ", ")))
+                          paste(setdiff(groups, get_group_levels(x, include_prior = T)), collapse = ", ")))
 
   x <-
-    add_ibbu_stanfit_draws(x, which = "both", wide = F, nest = T, untransform_cues = untransform_cues) %>%
+    get_draws(x, which = "both", wide = F, nest = T, untransform_cues = untransform_cues) %>%
     filter(group %in% .env[["groups"]], category %in% .env[["categories"]]) %>%
     mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
     group_by(group, category) %>%
@@ -499,18 +566,17 @@ get_expected_category_statistic_from_stanfit <- function(
   return(x)
 }
 
-#' @rdname get_expected_category_statistic_from_stanfit
+#' @rdname get_expected_category_statistic
 #' @export
-get_expected_mu_from_stanfit <- function(x, ...) {
-  return(get_expected_category_statistic_from_stanfit(x, statistic = "mu", ...))
+get_expected_mu.NIW_ideal_adaptor_stanfit <- function(x, ...) {
+  return(get_expected_category_statistic(x, statistic = "mu", ...))
 }
 
-#' @rdname get_expected_category_statistic_from_stanfit
+#' @rdname get_expected_category_statistic
 #' @export
-get_expected_sigma_from_stanfit <- function(x, ...) {
-  return(get_expected_category_statistic_from_stanfit(x, statistic = "Sigma", ...))
+get_expected_sigma.NIW_ideal_adaptor_stanfit <- function(x, ...) {
+  return(get_expected_category_statistic(x, statistic = "Sigma", ...))
 }
-
 
 
 #' @rdname get_NIW_categorization_function
@@ -565,11 +631,16 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws <- function(fit, ...
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom tidyselect ends_with
+get_draws <- function(fit, ...) {
+  UseMethod("get_draws")
+}
+
+#' @rdname get_draws
 #' @export
-add_ibbu_stanfit_draws <- function(
+get_draws.NIW_ideal_adaptor_stanfit <- function(
   fit,
-  categories = get_category_levels_from_stanfit(fit),
-  groups = get_group_levels_from_stanfit(fit, include_prior = TRUE),
+  categories = get_category_levels(fit),
+  groups = get_group_levels(fit, include_prior = TRUE),
   ##### SPECIAL HANDLING OF WHICH, WHICH IS NOW DEPRECATED.
   which = if ("prior" %in% groups) { if (length(groups) > 1) "both" else "prior" } else "posterior",
   ##### END OF SPECIAL HANDLING
@@ -587,12 +658,12 @@ add_ibbu_stanfit_draws <- function(
   assert_that(is.NIW_ideal_adaptor_stanfit(fit))
   assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
   assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
-  assert_that(all(categories %in% get_category_levels_from_stanfit(fit)),
+  assert_that(all(categories %in% get_category_levels(fit)),
               msg = paste("Some categories not found in model:",
-                          paste(setdiff(categories, get_category_levels_from_stanfit(fit)), collapse = ", ")))
-  assert_that(all(groups %in% get_group_levels_from_stanfit(fit, include_prior = T)),
+                          paste(setdiff(categories, get_category_levels(fit)), collapse = ", ")))
+  assert_that(all(groups %in% get_group_levels(fit, include_prior = T)),
               msg = paste("Some groups not found in model:",
-                          paste(setdiff(groups, get_group_levels_from_stanfit(fit, include_prior = T)), collapse = ", ")))
+                          paste(setdiff(groups, get_group_levels(fit, include_prior = T)), collapse = ", ")))
 
   ##### SPECIAL HANDLING OF WHICH, WHICH IS NOW DEPRECATED.
   assert_that(which %in% c("prior", "posterior", "both"),
@@ -610,13 +681,13 @@ add_ibbu_stanfit_draws <- function(
 
   if ("prior" %in% groups & length(groups) > 1) {
     d.prior <-
-      add_ibbu_stanfit_draws(
+      get_draws(
         fit = fit, categories = categories, groups = "prior",
         ndraws = ndraws,
         untransform_cues = untransform_cues,
         summarize = summarize, wide = wide, nest = nest, seed = seed)
     d.posterior <-
-      add_ibbu_stanfit_draws(
+      get_draws(
         fit = fit, categories = categories, groups = setdiff(groups, "prior"),
         ndraws = ndraws,
         untransform_cues = untransform_cues,
@@ -720,8 +791,30 @@ add_ibbu_stanfit_draws <- function(
   }
 }
 
+#' Deprecated
+get_transform_information_from_stanfit <- get_transform_information.NIW_ideal_adaptor_stanfit
+get_transform_function_from_stanfit <- get_transform_function.NIW_ideal_adaptor_stanfit
+get_untransform_function_from_stanfit <- get_untransform_function.NIW_ideal_adaptor_stanfit
 
+get_input_from_stanfit <- get_input.NIW_ideal_adaptor_stanfit
 
+get_exposure_category_statistic_from_stanfit <- get_exposure_category_statistic.NIW_ideal_adaptor_stanfit
+get_exposure_mean_from_stanfit <- get_exposure_category_mean.NIW_ideal_adaptor_stanfit
+get_exposure_css_from_stanfit <- get_exposure_category_css.NIW_ideal_adaptor_stanfit
+get_exposure_uss_from_stanfit <- get_exposure_category_uss.NIW_ideal_adaptor_stanfit
+get_exposure_cov_from_stanfit <- get_exposure_category_cov.NIW_ideal_adaptor_stanfit
 
+get_test_data_from_stanfit <- get_test_data
+
+get_original_variable_levels_from_stanfit <- get_input_variable_levels
+get_category_levels_from_stanfit <- get_category_levels
+get_group_levels_from_stanfit <- get_group_levels
+get_cue_levels_from_stanfit <- get_cue_levels
+
+get_expected_category_statistic_from_stanfit <- get_expected_category_statistic
+get_expected_mu_from_stanfit <- get_expected_mu
+get_expected_sigma_from_stanfit <- get_expected_sigma
+
+add_ibbu_stanfit_draw <- get_draws
 
 

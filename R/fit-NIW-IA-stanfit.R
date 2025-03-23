@@ -29,7 +29,7 @@
 #' \code{Sigma_0} argument in the help page on \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
 #'
 #' @seealso \code{\link{is.NIW_ideal_adaptor_stanfit}} for information about NIW_ideal_adaptor_stanfit objects,
-#' \code{\link{add_ibbu_stanfit_draws}} to draw samples from the stanfit.
+#' \code{\link{get_draws}} to draw samples from the stanfit.
 #' @rdname infer_NIW_ideal_adaptor
 #' @export
 infer_NIW_ideal_adaptor <- function(
