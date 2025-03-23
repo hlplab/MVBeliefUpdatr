@@ -2,7 +2,7 @@
 % Please edit documentation in R/class-NIW-IA-stanfit.R
 \name{is.NIW_ideal_adaptor_input}
 \alias{is.NIW_ideal_adaptor_input}
-\title{Is this a list of NIW IBBU inputs?}
+\title{Is this a list of NIW ideal adaptor stanfit inputs?}
 \usage{
 is.NIW_ideal_adaptor_input(x)
 }
@@ -10,7 +10,7 @@ is.NIW_ideal_adaptor_input(x)
 A logical.
 }
 \description{
-Check whether \code{x} is of class \code{NIW_ideal_adaptor_input}.
+Check whether \code{x} is of class \code{\link{NIW_ideal_adaptor_stanfit}}.
 }
 \seealso{
 TBD

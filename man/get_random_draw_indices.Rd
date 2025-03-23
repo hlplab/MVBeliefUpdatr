@@ -7,7 +7,7 @@
 get_random_draw_indices(fit, ndraws)
 }
 \arguments{
-\item{fit}{mv_ibbu_stanfit object.}
+\item{fit}{A \code{\link{stanfit}} object.}
 
 \item{ndraws}{Number of indices to be returned. Can't be larger than total number of
 post-warmup samples across all MCMC chains in `fit`.}

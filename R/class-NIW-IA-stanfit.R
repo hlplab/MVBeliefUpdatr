@@ -1,6 +1,4 @@
-#' @importFrom rstan summary
-
-new_stanfit_class_name = "NIW_ideal_adaptor_stanfit"
+new_stanfit_class_name <- "NIW_ideal_adaptor_stanfit"
 
 #' An S4 class for stanfit objects that use one of the NIW_ideal_adaptor stan programs.
 #'
@@ -60,9 +58,12 @@ as.NIW_ideal_adaptor_stanfit <- function(stanfit, input_data, transform_informat
   return(stanfit)
 }
 
-#' Is this an NIW IBBU stanfit?
+#' Is this an NIW ideal adaptor stanfit?
 #'
-#' Check whether \code{x} is of class \code{NIW_ideal_adaptor_stanfit}.
+#' Check whether \code{x} is of class \code{\link{NIW_ideal_adaptor_stanfit}}.
+#'
+#' @param x Object to be checked.
+#' @param verbose Currently being ignored.
 #'
 #' @return A logical.
 #'
@@ -70,8 +71,7 @@ as.NIW_ideal_adaptor_stanfit <- function(stanfit, input_data, transform_informat
 #' @keywords TBD
 #' @export
 is.NIW_ideal_adaptor_stanfit <- function(x, verbose = F) {
-  if (all(class(x) %in% c("stanfit", new_stanfit_class_name)))
-    return(TRUE) else return(FALSE)
+  inherits(x, new_stanfit_class_name)
 }
 
 
@@ -97,9 +97,9 @@ is.NIW_ideal_adaptor_MCMC <- function(x, is.nested = T, is.long = T, with.prior 
 }
 
 
-#' Is this a list of NIW IBBU inputs?
+#' Is this a list of NIW ideal adaptor stanfit inputs?
 #'
-#' Check whether \code{x} is of class \code{NIW_ideal_adaptor_input}.
+#' Check whether \code{x} is of class \code{\link{NIW_ideal_adaptor_stanfit}}.
 #'
 #' @return A logical.
 #'
@@ -120,25 +120,6 @@ is.NIW_ideal_adaptor_input <- function(x) {
   #   test_group (y_test)
 
   return(TRUE)
-}
-
-
-#' Print NIW ideal adaptor stanfit
-#'
-#' Specifies reasonable defaults for the parameters to be summarized for the stanfit object.
-#'
-#' @param x An \code{\link{NIW_ideal_adaptor_stanfit}} object.
-#'
-#' @export
-print.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
-  if (is.null(pars)) {
-    pars <- names(x)
-    pars <- grep("^((kappa|nu|m|S)_|lapse_rate)", pars, value = T)
-    pars <- grep("^m_0_(tau|L_omega)", pars, value = T, invert = T)
-    pars <- grep("^(m|S)_0_param", pars, value = T, invert = T)
-  }
-
-  rstan::summary(x, pars = pars, ...)$summary
 }
 
 

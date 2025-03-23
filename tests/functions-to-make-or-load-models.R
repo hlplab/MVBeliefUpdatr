@@ -405,15 +405,15 @@ make_data_for_2Dstanfit_without_exposure <- function() {
     make_vector_column(cols = c("cue1", "cue2"), vector_col = "cue") %>%
     mutate(Phase = "test")
 
-  plot_expected_categories_contour2D(.ia_0) +
-    geom_point(
-      data = df.exposure,
-      aes(x = cue1, y = cue2, shape = category, color = Condition)) +
-    geom_point(
-      data = df.test,
-      aes(x = cue1, y = cue2), shape = 3, color = "black") +
-    scale_color_manual(values = c("red", "blue", "green")) +
-    theme_bw()
+  # plot_expected_categories_contour2D(.ia_0) +
+  #   geom_point(
+  #     data = df.exposure,
+  #     aes(x = cue1, y = cue2, shape = category, color = Condition)) +
+  #   geom_point(
+  #     data = df.test,
+  #     aes(x = cue1, y = cue2), shape = 3, color = "black") +
+  #   scale_color_manual(values = c("red", "blue", "green")) +
+  #   theme_bw()
 
   # Sample tests responses for subjects after the four exposure conditions
   # (one of which is no_exposure)

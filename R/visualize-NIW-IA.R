@@ -6,7 +6,7 @@ NULL
 
 
 #' Checking that input to plotting function is compatible
-check_compatibility_between_NIW_belief_and_data = function(
+check_compatibility_between_NIW_belief_and_data <- function(
   x,
   data.exposure,
   data.test,
@@ -57,118 +57,6 @@ check_compatibility_between_NIW_belief_and_data = function(
 
   return(TRUE)
 }
-
-
-
-
-
-
-
-#' Plot NIW belief or NIW beliefs object.
-#'
-#' Plot the parameters of an NIW_belief or NIW_beliefs object.
-#'
-#' @param x An \code{\link{NIW_belief}} or \code{\link{NIW_beliefs}} object.
-#' @param group.colors Vector of fill colors of same length as the number of unique groups in the NIW_belief(s) object, or
-#' `NULL` to use defaults. (default: `NULL`)
-#' @param facet_rows_by,facet_cols_by,facet_wrap_by,animate_by Which group variables, if any, should be used for faceting and/or
-#' animation? (defaults: `NULL`)
-#' @param animation_follow Should the animation follow the data (zoom in and out)? (default: `FALSE`)
-#'
-#' @return ggplot object.
-#'
-#' @seealso TBD
-#' @keywords TBD
-#' @export
-plot_NIW_belief_parameters = function(
-  x,
-  group.colors = NULL,
-  facet_rows_by = NULL, facet_cols_by = NULL, animate_by = NULL, animation_follow = F
-) {
-  error("This function is not yet implemented.")
-
-  # Check out this function from another project:
-  # plot_VOT_NIW_belief_1D <- function(belief, sigma_max = NULL, prior = NULL) {
-  #   mu_sigma <- belief %>%
-  #     mutate(
-  #       mu = get_expected_mu_from_m(m),
-  #       sigma = get_expected_Sigma_from_S(S, nu))
-  #
-  #   if (is.null(sigma_max)) sigma_max = max(mu_sigma$sigma) * 2
-  #   if (!is.null(prior))
-  #     prior.mu_sigma <- prior %>%
-  #       mutate(
-  #         mu = get_expected_mu_from_m(m),
-  #         sigma = get_expected_Sigma_from_S(S, nu))
-  #
-  #   belief %>%
-  #     crossing(
-  #       mu = seq_range(VOT_range, n = VOT_resolution),
-  #       sigma = seq_range(1:sigma_max^.5, n = VOT_resolution)^2) %>%
-  #     { if ("Subject" %in% names(.)) group_by(., Subject) else . } %>%
-  #     # TO DO: Since mu and sigma can probably be vectors this can be made more efficient by first nesting and then unnesting
-  #     # (see what I did for the test_plot function below). The line above this has been in added in anticipation of that
-  #     # change (it's currently not required since the density is obtained line by line).
-  #     mutate(l = unlist(pmap(
-  #       .l = list(mu, m, kappa, sigma, S, nu),
-  #       .f = dnorminvwishart))) %>%
-  #     ggplot(aes(x = mu, y = sigma, color = category, group = category)) +
-  #     { if (is.null(prior))
-  #       list(
-  #         geom_raster(
-  #           data = ~ filter(., category == "/b/"),
-  #           mapping = aes(fill = category, alpha = l),
-  #           interpolate = T),
-  #         geom_raster(
-  #           data = ~ filter(., category == "/p/"),
-  #           mapping = aes(fill = category, alpha = l),
-  #           interpolate = T)) } +
-  #     geom_contour(aes(z = l, color = category), breaks = 10^(-10:-3), size = .5) +
-  #     { if (!is.null(prior))
-  #       geom_contour(
-  #         data = prior %>%
-  #           crossing(
-  #             mu = seq_range(VOT_range, n = VOT_resolution),
-  #             sigma = seq_range(1:sigma_max^.5, n = VOT_resolution)^2) %>%
-  #           mutate(l = unlist(pmap(
-  #             .l = list(mu, m, kappa, sigma, S, nu),
-  #             .f = dnorminvwishart))),
-  #         aes(z = l, color = category), breaks = 10^(-10:-3), size = .5, alpha = .1) } +
-  #     { if (is.null(prior))
-  #       geom_point(
-  #         data = mu_sigma,
-  #         aes(shape = category),
-  #         color = "black") } +
-  #     { if (!is.null(prior))
-  #       list(
-  #         geom_point(
-  #           data = prior.mu_sigma,
-  #           aes(shape = category),
-  #           color = "black",
-  #           alpha = .5),
-  #         geom_segment(
-  #           data =
-  #             mu_sigma %>%
-  #             left_join(
-  #               prior.mu_sigma %>%
-  #                 rename_at(vars(mu, sigma), ~ paste0("prior_", .x)),
-  #               by = "category"),
-  #           aes(x = prior_mu, y = prior_sigma, xend = mu, yend = sigma),
-  #           arrow = arrow(angle = 15, length = unit(0.1, "inches"), ends = "last", type = "closed"),
-  #           color = "black",
-  #           size = .5,
-  #           alpha = .75)) } +
-  #     scale_x_continuous(name = bquote(mu ~ "(msec VOT)")) +
-  #     scale_y_sqrt(name = bquote(sigma^2 ~ "(" ~ msec^2 ~ ")"), limits = c(0, sigma_max)) +
-  #     scale_color_discrete("Category") +
-  #     scale_fill_discrete("Category") +
-  #     scale_shape_discrete("Category") +
-  #     { if (is.null(prior)) scale_alpha_continuous("density", range = c(0,1), guide = "none") } +
-  #     coord_cartesian(expand = 0) +
-  #     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-  # }
-}
-
 
 
 #' Plot expected univariate (1D) category likelihoods

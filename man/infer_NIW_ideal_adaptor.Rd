@@ -154,5 +154,5 @@ or the exposure and test data, the names of the cues, category, and response col
 }
 \seealso{
 \code{\link{is.NIW_ideal_adaptor_stanfit}} for information about NIW_ideal_adaptor_stanfit objects,
-\code{\link{add_ibbu_stanfit_draws}} to draw samples from the stanfit.
+\code{\link{get_draws}} to draw samples from the stanfit.
 }

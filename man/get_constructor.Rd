@@ -6,7 +6,7 @@
 \alias{get_group_constructor}
 \alias{get_cue_constructor}
 \alias{get_cue2_constructor}
-\title{Get tidybayes constructor from an NIW IBBU stanfit.}
+\title{Get tidybayes constructor from an NIW ideal adaptor stanfit.}
 \usage{
 get_constructor(fit, variable = NULL)
 
@@ -34,6 +34,6 @@ Gets the tidybayes constructor function from the stanfit object. `get_category_c
 \link[tidybayes]{recover_types}}. If variable is
 }
 \seealso{
-\code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_original_variable_levels_from_stanfit}}
+\code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_input_variable_levels}}
 }
 \keyword{TBD}

@@ -2,15 +2,20 @@
 % Please edit documentation in R/class-NIW-IA-stanfit.R
 \name{is.NIW_ideal_adaptor_stanfit}
 \alias{is.NIW_ideal_adaptor_stanfit}
-\title{Is this an NIW IBBU stanfit?}
+\title{Is this an NIW ideal adaptor stanfit?}
 \usage{
 is.NIW_ideal_adaptor_stanfit(x, verbose = F)
+}
+\arguments{
+\item{x}{Object to be checked.}
+
+\item{verbose}{Currently being ignored.}
 }
 \value{
 A logical.
 }
 \description{
-Check whether \code{x} is of class \code{NIW_ideal_adaptor_stanfit}.
+Check whether \code{x} is of class \code{\link{NIW_ideal_adaptor_stanfit}}.
 }
 \seealso{
 TBD
