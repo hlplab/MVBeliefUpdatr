@@ -328,7 +328,7 @@ compose_data_to_infer_NIW_ideal_adaptor <- function(
     select(c(!! group, !!! cues, !! response))
 
   assert_that(all(levels(exposure[[category]]) == levels(test[[response]])),
-              msg = paste("category variable", category, "in exposure data and response variable", response, " in test data must be factors with the same levels in the same order. Either the levels do not match, or they are not in the same order."))
+              msg = paste("category variable", category, "in exposure data and response variable", response, "in test data must be factors with the same levels in the same order. Either the levels do not match, or they are not in the same order."))
   assert_that(all(levels(exposure[[group]]) %in% levels(test[[group]])),
               msg = paste("All levels of the grouping variable", group, "found in exposure must also be present in test."))
   if (!all(levels(test[[group]]) %in% levels(exposure[[group]])))

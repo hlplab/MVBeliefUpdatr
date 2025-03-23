@@ -6,7 +6,7 @@
 #'
 #' @inheritParams compose_data_to_infer_NIW_ideal_adaptor
 #' @param untransform_fit Logical flag indicating whether the samples of the model should be transformed back
-#' into the original cue space by applying the untransform function. (default: \code{TRUE})
+#' into the original cue space by applying the untransform function. (default: \code{FALSE})
 #' @param input A list of the type that would be returned by \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
 #' This list can be provided *instead* of the arguments required by \code{compose_data_to_infer_NIW_ideal_adaptor}.
 #' @param sample Should the model be fit and sampled from?
@@ -34,7 +34,8 @@
 #' @export
 infer_NIW_ideal_adaptor <- function(
   exposure = NULL, test = NULL, cues = NULL, category = NULL, response = NULL, group = NULL, group.unique = NULL, center.observations = TRUE, scale.observations = TRUE, pca.observations = FALSE, pca.cutoff = 1, lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL, tau_scale = 0, L_omega_scale = 0,
-  untransform_fit = TRUE,
+  # set to default TRUE (and change documentation accordingly) once implemented:
+  untransform_fit = FALSE,
   input = NULL,
   sample = TRUE,
   file = NULL,
