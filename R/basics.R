@@ -316,15 +316,17 @@ get_sufficient_category_statistics <- function(
 #'
 #' @param data `tibble` or `data.frame`.
 #' @param cues Vector of characters with names of cue variables.
-#' @param center,uncenter Should the data be (un)centered? (default: `TRUE` unless `pca = TRUE`)
-#' @param scale,unscale Should the data be (un)standardized? (default: `TRUE` unless `pca = TRUE`)
-#' @param pca,unpca Should the data be transformed into/back from orthogonal principal components? If `TRUE`
+#' @param center,uncenter Should each of the cues be (un)centered? (default: `TRUE` unless `pca = TRUE`) This does \emph{not}
+#' change the correlations between the cues.
+#' @param scale,unscale Should each of the cues be (un)standardized? (default: `TRUE` unless `pca = TRUE`) This does \emph{not}
+#' change the correlations between the cues.
+#' @param pca,unpca Should the cues be transformed into/back from orthogonal principal components? If `TRUE`
 #' then \code{center} and \code{scale} are default to `FALSE`. If PCA is applied, it is applied after
 #' centering and/or scaling. (default: `FALSE`)
 #' @param attach Should the transformed cues be attached to \code{data} or should just the transformed cues be
 #' returned? (default: `TRUE`)
 #' @param transform.parameters List of transforms (default: `NULL`)
-#' @param return.transformed.data,return.transformed.data Should the (un)transformed data be returned? (default: `TRUE`)
+#' @param return.transformed.data,return.transformed.data Should the (un)transformed cues be returned? (default: `TRUE`)
 #' @param return.transform.parameters Should the list of transforms be returned? (default: `FALSE`)
 #' @param return.transform.function,return.untransform.function Should a function that applies the (un)transform be
 #' returned? (default: `FALSE`)
@@ -373,6 +375,8 @@ transform_cues <- function(
         prcomp(center = center, scale. = scale, retx = F)
     } else {
       if (center) {
+        # This can probably be simplified by use of colMeans(data %>% select(all_of(cues)))
+        # but it's important to keep in mind that the data might be grouped.
         transform.parameters[["center"]] <-
           data %>%
           select(all_of(cues)) %>%
@@ -397,6 +401,8 @@ transform_cues <- function(
       if (!is.null(transform.parameters[["center"]])) {
         data %<>%
           ungroup() %>%
+          # This can probably be simpified by using data %>% as.matrix() %>% { . - transform.parameters[["center"]]} or similar
+          # but it's important to keep in mind that the data might be grouped.
           select(all_of(cues)) %>%
           { . - (data %>%
                    { if (length(groups) > 0) left_join(., transform.parameters[["center"]], by = groups) else cross_join(., transform.parameters[["center"]]) } %>%
@@ -646,9 +652,13 @@ untransform_category_mean <- function(m, transform) {
 #' @export
 transform_category_cov <- function(S, transform) {
   if (!is.null(transform[["transform.parameters"]])) transform <- transform[["transform.parameters"]]
+
+  # Centering does not affect the covariance matrix, so
   if (!is.null(transform$scale)) {
     taus <- transform$scale %>% as.numeric()
-    COVinv <- diag(taus) %>% solve()
+    # Take inverse of tau. The following is faster than solve()
+    COVinv <- diag(1 / taus)
+    # This operation does not change the correlation matrix of S
     S <- COVinv %*% S %*% COVinv
   }
   return(S)

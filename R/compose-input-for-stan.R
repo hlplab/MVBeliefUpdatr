@@ -219,7 +219,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' @param group.unique Name of column that uniquely identifies each group with identical exposure. This could be a
 #' variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
 #' substantially more efficient if many groups share the same exposure. To ignore, set to \code{NULL}. (default: \code{NULL})
-#' @param center.observations Should the data be centered based on cues' means during exposure? Note that the cues' means
+#' @param center.observations Should the cues be centered based on cues' means during exposure? Note that the cues' means
 #' used for centering are calculated after aggregating the data to all unique combinations specified by \code{group.unique}.
 #' These means are only expected to be the same as the standard deviations over the entire exposure data if the exposure data
 #' are perfectly balanced with regard to \code{group.unique}. Centering will not affect the inferred correlation
@@ -227,15 +227,19 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' means remains unaffected.
 #' If \code{TRUE} and \code{mu_0} is specified, \code{mu_0} will also be centered (\code{Sigma_0} is not affected by centering and thus not changed).
 #' (default: \code{TRUE})
-#' @param scale.observations Should the data be standardized based on cues' standard deviation during exposure? Note that the
-#' cues' standard deviations used for scaling are calculated after aggregating the data to all unique combinations specified
+#' @param scale.observations Should the cues be standardized based on each cue's standard deviation during exposure
+#' (marginal standardization)? Note that the cues' standard deviations used for scaling are calculated after aggregating the data to all unique combinations specified
 #' by \code{group.unique}. These standard deviations are only expected to be the same as the standard deviations over the entire
 #' exposure data if the exposure data are perfectly balanced with regard to \code{group.unique}.
 #' Scaling will not affect the inferred correlation matrix,
 #' but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
 #' affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
 #' If \code{TRUE} and \code{mu_0} and \code{Sigma_0} are specified, \code{mu_0} and \code{Sigma_0} will also be scaled.
-#' (default: `TRUE`)
+#' Note, however, that the log density of the scaled data under the scaled category covariances will differ from the log density
+#' of the original data under the original category covariance by a constant (the Jacobian). Since this constant only
+#' depends on the scaling factors of the data, it should be identical between categories and not affect calculations
+#' of the posterior probability of each category as long as the prior probability of each category is identical across
+#' categories. In practice, however, this equality is not always observed, presumably due to numerical instabilities. (default: `TRUE`)
 #' @param pca.observations Should the data be transformed into orthogonal principal components? (default: \code{FALSE})
 #' @param pca.cutoff Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 #' components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
@@ -252,7 +256,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' the category variability covariance matrices when you specify \code{Sigma_0})} since the stancode for the inference of the
 #' NIW ideal adaptor does \emph{not} infer category and noise variability separately.
 #' @param tau_0_scales Optionally, a vector of scales for the Cauchy priors for each cue's standard deviations. Used in
-#' both the prior for m_0 and the prior for S_0. (default: vector of 5s of length of cues, assumes scaled input)
+#' both the prior for m_0 and the prior for S_0. (default: vector of 5s of length of cues, \emph{assumes that cues are scaled!})
 #' @param omega_0_eta Optionally, etas the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. Set to 0 to
 #' ignore. (default: 0)
 #'
@@ -276,7 +280,7 @@ compose_data_to_infer_NIW_ideal_adaptor <- function(
   verbose = F
 ) {
   if ((!center.observations | !scale.observations) & (tau_scale == 0 | L_omega_scale == 0))
-    message("The tau_scale and L_omega_scale parameters are not specified (using defaults). Since you also did not ask for the input to be centered *and* scaled, this puts the priors assumed in the model on a scale that has no relation to the input. Unless you have manually centered and scaled the cues, this is strongly discouraged.")
+    message("You did not specify a tau_scale (using defaults). Since you also did not ask for the input to be centered *and* scaled, this puts the priors assumed in the model on a scale that has no relation to the input. Unless you have manually centered and scaled the cues, this is strongly discouraged.")
 
   if (pca.observations)
     assert_that(between(pca.cutoff, 0, 1), msg = "pca.cutoff must be between 0 and 1.")
