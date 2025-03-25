@@ -11,12 +11,12 @@ get_transform_information(fit, ...)
 
 \method{get_transform_information}{NIW_ideal_adaptor_stanfit}(fit)
 
-get_transform_function.NIW_ideal_adaptor_stanfit(fit)
+\method{get_transform_function}{NIW_ideal_adaptor_stanfit}(fit)
 
-get_untransform_function.NIW_ideal_adaptor_stanfit(fit)
+\method{get_untransform_function}{NIW_ideal_adaptor_stanfit}(fit)
 }
 \arguments{
-\item{fit}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
+\item{fit}{An \code{\link{NIW_ideal_adaptor_stanfit}} object.}
 }
 \value{
 A function.

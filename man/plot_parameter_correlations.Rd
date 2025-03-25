@@ -3,9 +3,21 @@
 \name{plot_parameter_correlations}
 \alias{plot_parameter_correlations}
 \alias{plot_ibbu_stanfit_parameter_correlations}
+\alias{plot_parameter_correlations.NIW_ideal_adaptor_stanfit}
 \title{Plot correlations between parameters of ideal adaptor stanfit}
 \usage{
-plot_parameter_correlations(fit, ...)
+plot_parameter_correlations(model, ...)
+
+\method{plot_parameter_correlations}{NIW_ideal_adaptor_stanfit}(
+  model,
+  categories = get_category_levels(model),
+  groups = "prior",
+  cues = get_cue_levels(model),
+  pars = NULL,
+  ndraws = NULL,
+  untransform_cues = TRUE,
+  category.colors = get_default_colors("category", categories)
+)
 }
 \arguments{
 \item{model}{An ideal adaptor stanfit object.}
