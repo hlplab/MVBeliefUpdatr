@@ -4,9 +4,9 @@
 \name{NIW_ideal_adaptor_stanfit-class}
 \alias{NIW_ideal_adaptor_stanfit-class}
 \alias{NIW_ideal_adaptor_stanfit}
-\title{An S4 class for stanfit objects that use one of the NIW_ideal_adaptor stan programs.}
+\title{An S4 class for NIW_ideal_adaptor stanfit objects that use one of the NIW_ideal_adaptor stan programs.}
 \description{
-An S4 class for stanfit objects that use one of the NIW_ideal_adaptor stan programs.
+An S4 class for NIW_ideal_adaptor stanfit objects that use one of the NIW_ideal_adaptor stan programs.
 }
 \section{Slots}{
 

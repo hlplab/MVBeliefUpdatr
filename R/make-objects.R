@@ -651,6 +651,7 @@ lift_NIW_belief_to_NIW_ideal_adaptor <- function(
 
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
 
+  class(x) <- c("NIW_ideal_adaptor", class(x))
   if (!is.NIW_ideal_adaptor(x, group = group, verbose = verbose))
     warning("NOTE: The returned object does not appear to be an NIW ideal adaptor. For more information, try again with verbose = T.")
 
@@ -676,6 +677,7 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor <- function(
       nu = .env$nu,
       S = get_S_from_expected_Sigma(.data$S, .env$nu))
 
+  class(x) <- c("NIW_ideal_adaptor", class(x))
   if (!is.NIW_ideal_adaptor(x, group = group, verbose = verbose))
     warning("NOTE: The returned object does not appear to be an NIW ideal adaptor. For more information, try again with verbose = T.")
 

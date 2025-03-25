@@ -1,6 +1,4 @@
-new_stanfit_class_name <- "NIW_ideal_adaptor_stanfit"
-
-#' An S4 class for stanfit objects that use one of the NIW_ideal_adaptor stan programs.
+#' An S4 class for NIW_ideal_adaptor stanfit objects that use one of the NIW_ideal_adaptor stan programs.
 #'
 #' @slot input_data list containing the data handed to rstan through \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
 #' @slot transform_information list containing elements transform.parameters, transform.function, and
@@ -9,7 +7,7 @@ new_stanfit_class_name <- "NIW_ideal_adaptor_stanfit"
 #' @export
 NIW_ideal_adaptor_stanfit <-
   setClass(
-    new_stanfit_class_name,
+    "NIW_ideal_adaptor_stanfit",
     slots = c(input_data = "list", transform_information = "list", labels = "list"),
     contains = "stanfit",
     package = "MVBeliefUpdatr")
@@ -34,13 +32,13 @@ NIW_ideal_adaptor_stanfit
 #' @export
 as.NIW_ideal_adaptor_stanfit <- function(stanfit, input_data, transform_information = NULL) {
   assert_that(class(stanfit) %in% c("stanfit", "NIW_ideal_adaptor_stanfit"),
-              msg = paste0("Only stanfit and NIW_ideal_adaptor_stanfit objects can be converted into ", new_stanfit_class_name, " objects."))
+              msg = paste0("Only stanfit and NIW_ideal_adaptor_stanfit objects can be converted into ", "NIW_ideal_adaptor_stanfit", " objects."))
   assert_that(stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels),
               msg = paste0("stanfit object was not created by one of the accepted stancodes:\n\t",
                            paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),
                            "\n(you can get the name of your model from your_stanfit@model_name)."))
 
-  class(stanfit) <- new_stanfit_class_name
+  class(stanfit) <- c("NIW_ideal_adaptor_stanfit", class(stanfit))
   stanfit %<>% attach_stanfit_input_data(input_data)
 
   if (!is.null(transform_information)) stanfit %<>% attach_stanfit_transform(transform_information)
@@ -71,7 +69,7 @@ as.NIW_ideal_adaptor_stanfit <- function(stanfit, input_data, transform_informat
 #' @keywords TBD
 #' @export
 is.NIW_ideal_adaptor_stanfit <- function(x, verbose = F) {
-  inherits(x, new_stanfit_class_name)
+  inherits(x, "NIW_ideal_adaptor_stanfit")
 }
 
 
