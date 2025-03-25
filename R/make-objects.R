@@ -21,6 +21,7 @@ example_exemplar_model <- function(
             "Using ", length(categories), " categories and ", length(cues), " cue(s). ",
             "Lapse is set to ", lapse_rate, " with lapse biases ", paste(lapse_bias, collapse = ", "), ".")
 
+    data("ChodroffWilson2018", package = "MVBeliefUpdatr", envir = environment())
     suppressMessages(
       make_MVG_ideal_observer_from_data(
         data = ChodroffWilson2018 %>% filter(category %in% categories),
@@ -79,6 +80,7 @@ example_MVG_ideal_observer <- function(
             "Using ", length(categories), " categories and ", length(cues), " cue(s). ",
             "Lapse is set to ", lapse_rate, " with lapse biases ", paste(lapse_bias, collapse = ", "), ".")
 
+    data("ChodroffWilson2018", package = "MVBeliefUpdatr", envir = environment())
     make_MVG_ideal_observer_from_data(
       data = ChodroffWilson2018 %>% filter(category %in% categories),
       category = "category",

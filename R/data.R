@@ -1,6 +1,8 @@
 #'
 NULL
 
+ChodroffWilson2018 <- NULL
+
 #' Chodroff & Wilson (2018) data on word-initial stop-voicing in native US English
 #'
 #' A subset of the data collected and annotated by Chodroff & Wilson (2018) of word-initial stop-voicing in native US English.
@@ -12,9 +14,11 @@ NULL
 #' Note that the present data are a \emph{subset} of the data collected by Chodroff & Wilson (2018), and are not cleaned for issues
 #' like pitch doubling or halving. The full data are available on Eleanor Chodroff's OSF repo at \url{https://osf.io/jt5mc/}.
 #'
+#' @docType data
+#' @name ChodroffWilson2018
+#' @usage data(ChodroffWilson2018)
+#' @keywords data
 #' @references
 #' \insertRef{chodroff-wilson2018}{MVBeliefUpdatr}
-#' @importFrom Rdpack reprompt
 #' @export
-"ChodroffWilson2018"
-
+NULL
