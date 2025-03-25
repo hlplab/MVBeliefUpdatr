@@ -6,8 +6,11 @@
 \alias{plot_expected_categories_contour}
 \alias{plot_expected_categories_density}
 \alias{plot_expected_categories_contour2D}
+\alias{plot_expected_categories_contour_2D}
 \alias{plot_expected_categories_density1D}
+\alias{plot_expected_categories_density_1D}
 \alias{plot_expected_categories_density2D}
+\alias{plot_expected_categories_density_2D}
 \alias{plot_expected_categories.NIW_ideal_adaptor_stanfit}
 \alias{plot_expected_categories_contour.NIW_ideal_adaptor_stanfit}
 \alias{plot_expected_ibbu_stanfit_categories_contour}
@@ -16,6 +19,7 @@
 \alias{plot_expected_categories_contour2D.NIW_ideal_adaptor}
 \alias{plot_expected_categories_contour2D.NIW_ideal_adaptor_stanfit}
 \alias{plot_expected_ibbu_stanfit_categories_contour2D}
+\alias{plot_expected_categories_density1D.NIW_ideal_adaptor}
 \alias{plot_expected_categories_density1D.NIW_ideal_adaptor_stanfit}
 \alias{plot_expected_ibbu_stanfit_categories_density1D}
 \alias{plot_expected_categories_density2D.NIW_ideal_adaptor_stanfit}
@@ -69,6 +73,25 @@ plot_expected_categories_density2D(model, ...)
   category.colors = get_default_colors("category", categories)
 )
 
+\method{plot_expected_categories_density1D}{NIW_ideal_adaptor}(
+  x,
+  data.exposure = NULL,
+  data.test = NULL,
+  facet_rows_by = NULL,
+  facet_cols_by = NULL,
+  facet_wrap_by = NULL,
+  animate_by = NULL,
+  animation_follow = F,
+  xlim,
+  ylim = NULL,
+  x.expand = c(0, 0),
+  category.ids = NULL,
+  category.labels = NULL,
+  category.colors = NULL,
+  category.linetypes = NULL,
+  ...
+)
+
 \method{plot_expected_categories_density1D}{NIW_ideal_adaptor_stanfit}(
   model,
   categories = get_category_levels(model),
@@ -103,7 +126,7 @@ plot_expected_categories_density2D(model, ...)
 \arguments{
 \item{model}{An ideal adaptor stanfit object.}
 
-\item{...}{additional arguments handed to geom_polygon.}
+\item{...}{additional arguments to geom_line.}
 
 \item{type}{Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
 faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}
@@ -126,14 +149,11 @@ animation? (defaults: `NULL`)}
 
 \item{animation_follow}{Should the animation follow the data (zoom in and out)? (default: `FALSE`)}
 
-\item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`). Only relevant
-if `data.exposure` is provided.}
+\item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)}
 
-\item{category.labels}{Vector of category labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
-Only relevant if `data.exposure` is provided.}
+\item{category.labels}{Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)}
 
-\item{category.colors}{Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
-Only relevant if `data.exposure` is provided.}
+\item{category.colors}{Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)}
 
 \item{categories, groups, cues}{Character vector of categories, groups, and cues to be plotted.
 (default: all categories, groups, and cues in the model will be plotted)}
@@ -148,9 +168,12 @@ indicated through data rugs (`"rug"`) and/or text labels (`"text"`)? Set to NULL
 
 \item{untransform_cues}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
 
-\item{ndraws}{Number of draws from posterior to use for plot, or `NULL` if all draws are to be returned. (default: `NULL`)}
+\item{xlim, ylim}{Limits for the x- and y-axis.}
 
-\item{xlim, ylim}{For density plots. Limits for the x- and y-axis.}
+\item{category.linetypes}{Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
+Currently being ignored.}
+
+\item{ndraws}{Number of draws from posterior to use for plot, or `NULL` if all draws are to be returned. (default: `NULL`)}
 
 \item{resolution}{For density plots. How many steps along x and y should be calculated? Note that computational
 complexity increases quadratically with resolution. (default: 25)}
@@ -164,6 +187,8 @@ for `data.grid.resolution` is 10, corresponding to 100 densities to be calculate
 ggplot object.
 
 ggplot object.
+
+ggplot object.
 }
 \description{
 Plot bivariate Gaussian categories expected given the parameters inferred by incremental Bayesian belief-
@@ -174,6 +199,11 @@ computational demands and speed.
 Plot bivariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
 category statistics of all categories. This includes the m (the mean of category means \eqn{\mu}), S (the scattermatrix),
 kappa (the strength of the belief in m) and nu (the strength of the belief in S).
+
+Plot univariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
+category statistics of all categories. This includes the m (the mean of category means \eqn{\mu}), S (the scattermatrix),
+kappa (the strength of the belief in m) and nu (the strength of the belief in S). For the univariate case, m and S are
+scalars \insertCite{@see @murphy2012 p. 136}{MVBeliefUpdatr}.
 }
 \details{
 Typically, the categories, groups, and cues
@@ -185,8 +215,19 @@ identify the different beliefs. For example, one can plot
 different priors for different talkers (grouping by talker), or different posteriors for different exposure conditions
 (grouping by exposure condition), the incremental updating of NIW beliefs (grouping by observations), or any combinations
 of these.
+
+It is possible to hand more than one NIW belief to this function, and to facet or animate by variables that uniquely
+identify the different beliefs. For example, one can plot
+different priors for different talkers (grouping by talker), or different posteriors for different exposure conditions
+(grouping by exposure condition), the incremental updating of NIW beliefs (grouping by observations), or any combinations
+of these.
+}
+\references{
+\insertRef{murphy2012}{MVBeliefUpdatr}
 }
 \seealso{
+TBD
+
 TBD
 
 TBD
