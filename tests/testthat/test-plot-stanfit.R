@@ -16,6 +16,9 @@ test_that("summary.NIW_ideal_adaptor_stanfit", {
 })
 
 test_that("plot_parameters.NIW_ideal_adaptor_stanfit", {
+  expect_no_error(plot_parameters(fit1))
+  expect_no_error(plot_parameters(fit2))
+  expect_no_error(plot_parameters(fit3))
   expect_no_error(plot_parameters.NIW_ideal_adaptor_stanfit(fit1))
   expect_no_error(plot_parameters.NIW_ideal_adaptor_stanfit(fit2))
   expect_no_error(plot_parameters.NIW_ideal_adaptor_stanfit(fit3))
@@ -23,18 +26,21 @@ test_that("plot_parameters.NIW_ideal_adaptor_stanfit", {
 
 # TO DO: add more tests of selecting categories, groups, cues, and/or parameters to plot
 test_that("plot_parameter_correlations.NIW_ideal_adaptor_stanfit", {
+  expect_no_error(plot_parameter_correlations(fit1))
+  expect_no_error(plot_parameter_correlations(fit2))
+  expect_no_error(plot_parameter_correlations(fit3))
   expect_no_error(plot_parameter_correlations.NIW_ideal_adaptor_stanfit(fit1))
   expect_no_error(plot_parameter_correlations.NIW_ideal_adaptor_stanfit(fit2))
   expect_no_error(plot_parameter_correlations.NIW_ideal_adaptor_stanfit(fit3))
 })
 
 test_that("plot_expected_categories.NIW_ideal_adaptor_stanfit", {
-  expect_warning(plot_expected_categories.NIW_ideal_adaptor_stanfit(fit1, type = "contour"))
-  expect_no_error(plot_expected_categories.NIW_ideal_adaptor_stanfit(fit1, type = "density", resolution = 5, ndraws = 5))
-  expect_no_error(plot_expected_categories.NIW_ideal_adaptor_stanfit(fit2, type = "contour"))
-  expect_no_error(plot_expected_categories.NIW_ideal_adaptor_stanfit(fit2, type = "density", resolution = 5, ndraws = 5))
-  expect_warning(plot_expected_categories.NIW_ideal_adaptor_stanfit(fit3, type = "contour"))
-  expect_warning(plot_expected_categories.NIW_ideal_adaptor_stanfit(fit3, type = "density"))
+  expect_warning(plot_expected_categories(fit1, type = "contour"))
+  expect_no_error(plot_expected_categories(fit1, type = "density", resolution = 5, ndraws = 5))
+  expect_no_error(plot_expected_categories(fit2, type = "contour"))
+  expect_no_error(plot_expected_categories(fit2, type = "density", resolution = 5, ndraws = 5))
+  expect_warning(plot_expected_categories(fit3, type = "contour"))
+  expect_warning(plot_expected_categories(fit3, type = "density"))
 })
 
 test_that("plot_expected_categories_contour.NIW_ideal_adaptor_stanfit", {

@@ -2,13 +2,22 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{get_input_variable_levels}
 \alias{get_input_variable_levels}
+\alias{get_category_levels}
+\alias{get_group_levels}
+\alias{get_cue_levels}
 \alias{get_input_variable_levels.NIW_ideal_adaptor_stanfit}
 \alias{get_category_levels.NIW_ideal_adaptor_stanfit}
 \alias{get_group_levels.NIW_ideal_adaptor_stanfit}
 \alias{get_cue_levels.NIW_ideal_adaptor_stanfit}
 \title{Get or restore the original group or category levels from an NIW ideal adaptor stanfit.}
 \usage{
-get_input_variable_levels(x, ...)
+get_input_variable_levels(fit, ...)
+
+get_category_levels(fit, ...)
+
+get_group_levels(fit, ...)
+
+get_cue_levels(fit, ...)
 
 \method{get_input_variable_levels}{NIW_ideal_adaptor_stanfit}(
   fit,

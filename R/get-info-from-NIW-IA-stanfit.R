@@ -53,14 +53,25 @@ get_random_draw_indices <- function(fit, ndraws)
 #' Returns the transform/untransform information handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
 #' object.
 #'
-#' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param fit An \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #'
 #' @return A function.
 #'
 #' @seealso TBD
 #' @keywords TBD
+#' @export
 get_transform_information <- function(fit, ...) {
   UseMethod("get_transform_information")
+}
+
+#' @export
+get_transform_function <- function(fit, ...) {
+  UseMethod("get_transform_function")
+}
+
+#' @export
+get_untransform_function <- function(fit, ...) {
+  UseMethod("get_untransform_function")
 }
 
 #' @rdname get_transform_information
@@ -94,6 +105,7 @@ get_untransform_function.NIW_ideal_adaptor_stanfit <- function(fit) {
 #'
 #' @seealso TBD
 #' @keywords TBD
+#' @export
 get_input <- function(fit, ...) {
   UseMethod("get_input")
 }
@@ -128,22 +140,31 @@ get_input.NIW_ideal_adaptor_stanfit <- function(fit) {
 #' @seealso TBD
 #' @keywords TBD
 #' @importFrom magrittr %<>%
+#' @export
 get_exposure_category_statistic <- function(fit, ...) {
   UseMethod("get_exposure_category_statistic")
 }
 
+#' @rdname get_exposure_category_statistic
+#' @export
 get_exposure_category_mean <- function(fit, ...) {
   UseMethod("get_exposure_category_mean")
 }
 
+#' @rdname get_exposure_category_statistic
+#' @export
 get_exposure_category_css <- function(fit, ...) {
   UseMethod("get_exposure_category_css")
 }
 
+#' @rdname get_exposure_category_statistic
+#' @export
 get_exposure_category_uss <- function(fit, ...) {
   UseMethod("get_exposure_category_uss")
 }
 
+#' @rdname get_exposure_category_statistic
+#' @export
 get_exposure_category_cov <- function(fit, ...) {
   UseMethod("get_exposure_category_cov")
 }
@@ -327,7 +348,8 @@ get_exposure_category_cov.NIW_ideal_adaptor_stanfit <- function(...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-get_test_data <- function(x, ...) {
+#' @export
+get_test_data <- function(fit, ...) {
   UseMethod("get_test_data")
 }
 
@@ -368,19 +390,26 @@ get_test_data.NIW_ideal_adaptor_stanfit <- function(
 #'
 #' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_constructor}}
 #' @keywords TBD
-get_input_variable_levels <- function(x, ...) {
+#' @export
+get_input_variable_levels <- function(fit, ...) {
   UseMethod("get_input_variable_levels")
 }
 
-get_category_levels <- function(x, ...) {
+#' @rdname get_input_variable_levels
+#' @export
+get_category_levels <- function(fit, ...) {
   UseMethod("get_category_levels")
 }
 
-get_group_levels <- function(x, ...) {
+#' @rdname get_input_variable_levels
+#' @export
+get_group_levels <- function(fit, ...) {
   UseMethod("get_group_levels")
 }
 
-get_cue_levels <- function(x, ...) {
+#' @rdname get_input_variable_levels
+#' @export
+get_cue_levels <- function(fit, ...) {
   UseMethod("get_cue_levels")
 }
 
@@ -392,7 +421,6 @@ get_input_variable_levels.NIW_ideal_adaptor_stanfit <- function(fit, variable = 
 
   if (is.null(indices)) return(levels(f(c()))) else return(f(indices))
 }
-
 
 #' @rdname get_input_variable_levels
 #' @export
@@ -631,6 +659,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws <- function(fit, ...
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom tidyselect ends_with
+#' @export
 get_draws <- function(fit, ...) {
   UseMethod("get_draws")
 }

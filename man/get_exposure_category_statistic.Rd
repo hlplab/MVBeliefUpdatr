@@ -2,6 +2,10 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{get_exposure_category_statistic}
 \alias{get_exposure_category_statistic}
+\alias{get_exposure_category_mean}
+\alias{get_exposure_category_css}
+\alias{get_exposure_category_uss}
+\alias{get_exposure_category_cov}
 \alias{get_exposure_category_statistic.NIW_ideal_adaptor_stanfit}
 \alias{get_exposure_category_mean.NIW_ideal_adaptor_stanfit}
 \alias{get_exposure_category_css.NIW_ideal_adaptor_stanfit}
@@ -10,6 +14,14 @@
 \title{Get category sample mean or covariance matrix of exposure data from NIW ideal adaptor stanfit}
 \usage{
 get_exposure_category_statistic(fit, ...)
+
+get_exposure_category_mean(fit, ...)
+
+get_exposure_category_css(fit, ...)
+
+get_exposure_category_uss(fit, ...)
+
+get_exposure_category_cov(fit, ...)
 
 \method{get_exposure_category_statistic}{NIW_ideal_adaptor_stanfit}(
   fit,
