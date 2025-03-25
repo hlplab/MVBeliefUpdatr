@@ -125,18 +125,21 @@ plot_expected_categories_density <- function(model, ...) {
   UseMethod("plot_expected_categories_density")
 }
 
+#' @aliases plot_expected_categories_contour_2D
 #' @rdname plot_expected_categories
 #' @export
 plot_expected_categories_contour2D <- function(model, ...) {
   UseMethod("plot_expected_categories_contour2D")
 }
 
+#' @aliases plot_expected_categories_density_1D
 #' @rdname plot_expected_categories
 #' @export
 plot_expected_categories_density1D <- function(model, ...) {
   UseMethod("plot_expected_categories_density1D")
 }
 
+#' @aliases plot_expected_categories_density_2D
 #' @rdname plot_expected_categories
 #' @export
 plot_expected_categories_density2D <- function(model, ...) {
@@ -441,9 +444,9 @@ plot_expected_categories_contour2D.NIW_ideal_adaptor_stanfit <- function(
 #' @seealso TBD
 #' @keywords TBD
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @rdname plot_expected_categories_1D
+#' @rdname plot_expected_categories
 #' @export
-plot_expected_categories_density_1D.NIW_ideal_adaptor <- function(
+plot_expected_categories_density1D.NIW_ideal_adaptor <- function(
     x,
     data.exposure = NULL,
     data.test = NULL,
