@@ -11,7 +11,7 @@ get_class <- function(x) {
       is.MVG(x) ~ "MVG",
       is.exemplar_model(x) ~ "exemplar_model",
       is.exemplars(x) ~ "exemplars",
-      is.NIW_ideal_adaptor_stanfit(x) ~ new_stanfit_class_name,
+      is.NIW_ideal_adaptor_stanfit(x) ~ "NIW_ideal_adaptor_stanfit",
       T ~ "Unrecognized class")
 
   return(class)

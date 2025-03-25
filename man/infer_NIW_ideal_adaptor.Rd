@@ -31,33 +31,6 @@ infer_NIW_ideal_adaptor(
   verbose = FALSE,
   ...
 )
-
-infer_prior_beliefs(
-  exposure = NULL,
-  test = NULL,
-  cues = NULL,
-  category = NULL,
-  response = NULL,
-  group = NULL,
-  group.unique = NULL,
-  center.observations = TRUE,
-  scale.observations = TRUE,
-  pca.observations = FALSE,
-  pca.cutoff = 1,
-  lapse_rate = NULL,
-  mu_0 = NULL,
-  Sigma_0 = NULL,
-  tau_scale = 0,
-  L_omega_scale = 0,
-  untransform_fit = FALSE,
-  input = NULL,
-  sample = TRUE,
-  file = NULL,
-  model = NULL,
-  use_univariate_updating = FALSE,
-  verbose = FALSE,
-  ...
-)
 }
 \arguments{
 \item{exposure}{`tibble` or `data.frame` with the exposure data. Each row should be an observation of a category,

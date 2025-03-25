@@ -327,7 +327,7 @@ update_NIW_ideal_adaptor_incrementally <- function(
               msg = "exposure.order variable must be numeric.")
   assert_that(length(method) == 1 | length(method) == nrow(exposure),
               msg = paste0("Length of method argument must be either 1 or the number of rows in exposure (", nrow(exposure),")."))
-  if (length(method) == 1) method = rep(method, nrow(exposure))
+  if (length(method) == 1) method <- rep(method, nrow(exposure))
 
   # Prepare exposure data
   exposure %<>%

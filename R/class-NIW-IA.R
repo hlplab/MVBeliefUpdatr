@@ -1,3 +1,15 @@
+#' An S4 class for NIW ideal adaptor objects.
+#'
+#' @export
+NIW_ideal_adaptor <-
+  setClass(
+    "NIW_ideal_adaptor",
+    contains = "tbl_df",
+    package = "MVBeliefUpdatr")
+
+# Call class constructor function
+NIW_ideal_adaptor
+
 get_expected_columns_for_NIW_ideal_adaptor <- function()
   c(get_expected_columns_for_NIW_belief(), get_expected_columns_for_model())
 
