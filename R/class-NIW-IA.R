@@ -37,7 +37,7 @@ get_expected_columns_for_NIW_ideal_adaptor <- function()
 #' @seealso TBD
 #' @keywords TBD
 #' @export
-is.NIW_ideal_adaptor = function(x, group = NULL, category = "category", is.long = T, with.prior = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = 1e-5) {
+is.NIW_ideal_adaptor <- function(x, group = NULL, category = "category", is.long = T, with.prior = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
 

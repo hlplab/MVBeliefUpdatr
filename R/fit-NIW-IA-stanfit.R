@@ -4,8 +4,6 @@
 #' two types of inputs: an input list, as prepared by \code{\link{compose_data_to_infer_NIW_ideal_adaptor}},
 #' or the exposure and test data, the names of the cues, category, and response columns (and optionally group and/or block columns).
 #'
-#' @aliases infer_prior_beliefs
-#'
 #' @inheritParams compose_data_to_infer_NIW_ideal_adaptor
 #' @param untransform_fit Logical flag indicating whether the samples of the model should be transformed back
 #' into the original cue space by applying the untransform function. (default: \code{FALSE})
@@ -137,3 +135,4 @@ infer_NIW_ideal_adaptor <- function(
   return(fit)
 }
 
+infer_prior_beliefs <- infer_NIW_ideal_adaptor
