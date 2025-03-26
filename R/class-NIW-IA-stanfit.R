@@ -38,7 +38,7 @@ as.NIW_ideal_adaptor_stanfit <- function(stanfit, input_data, transform_informat
                            paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),
                            "\n(you can get the name of your model from your_stanfit@model_name)."))
 
-  class(stanfit) <- c("NIW_ideal_adaptor_stanfit", class(stanfit))
+  class(stanfit) <- "NIW_ideal_adaptor_stanfit"
   stanfit %<>% attach_stanfit_input_data(input_data)
 
   if (!is.null(transform_information)) stanfit %<>% attach_stanfit_transform(transform_information)
