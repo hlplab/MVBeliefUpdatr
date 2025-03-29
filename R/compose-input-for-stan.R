@@ -255,6 +255,8 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' both the prior for m_0 and the prior for S_0. (default: vector of 5s of length of cues, assumes scaled input)
 #' @param omega_0_eta Optionally, etas the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. Set to 0 to
 #' ignore. (default: 0)
+#' @param split_loglik_per_observation Optionally, split the log likelihood per observation. This can be helpful of leave-one-out
+#' estimation in order to avoid high Pareto k, but it also makes the stored stanfit object much larger. (default: 0)
 #'
 #' @return A list consisting of a \code{data_list} and \code{transform_information}. The former that is an
 #' \code{NIW_ideal_adaptor_input}.
@@ -272,6 +274,7 @@ compose_data_to_infer_NIW_ideal_adaptor <- function(
   lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
   tau_scale = 0, # rep(5, length(cues)),
   L_omega_scale = 0,
+  split_loglik_per_observation = 0,
   use_univariate_updating = FALSE,
   verbose = F
 ) {
@@ -490,6 +493,7 @@ compose_data_to_infer_NIW_ideal_adaptor <- function(
 
         tau_scale <- tau_scale
         L_omega_scale <- L_omega_scale
+        split_loglik_per_observation <- split_loglik_per_observation
       })
   } else {
     data_list <- exposure %>%
