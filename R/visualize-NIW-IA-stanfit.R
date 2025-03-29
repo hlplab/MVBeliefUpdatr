@@ -464,12 +464,7 @@ plot_expected_categorization.NIW_ideal_adaptor_stanfit <- function(
       mutate(p_cat = plogis(p_cat))
   }
 
-  d.pars %<>%
-    # Get cues as character strings (just in case)
-    mutate(token.cues = map(x, ~paste(.x, collapse = ",\n"))) %>%
-    ungroup() %>%
-    select(-c(x))
-
+  d.pars %<>% ungroup()
   target_category_label <- if (is.null(get_category_levels(model))) paste("category", target_category) else get_category_levels(model, target_category)
 
   if (plot_in_cue_space) {
@@ -495,6 +490,9 @@ plot_expected_categorization.NIW_ideal_adaptor_stanfit <- function(
         limits = c(0,1)) +
       coord_cartesian(expand = F)
   } else {
+    # Get cues as rounded character strings (for the x-axis)
+    d.pars %<>% mutate(token.cues = map(x, ~ paste(signif(.x), collapse = ",\n"))) %>% select(-c(x))
+
     # If sort_by is specified, sort levels of x-axis by that group.
     if (!is.null(sort_by)) {
       sort.levels <-
@@ -502,12 +500,16 @@ plot_expected_categorization.NIW_ideal_adaptor_stanfit <- function(
         filter(group == sort_by) %>%
         group_by(token.cues) %>%
         summarise(p_cat = mean(p_cat)) %>%
-        arrange(p_cat) %>% pull(token.cues)
+        arrange(p_cat) %>%
+        pull(token.cues)
 
       d.pars %<>%
+        # Get cues as rounded character strings (for the x-axis)
         mutate(
-          token.cues = factor(token.cues,
-                              levels = sort.levels),
+          token.cues =
+            factor(
+              token.cues,
+              levels = sort.levels),
           token = factor(as.numeric(token.cues), levels = 1:length(levels(token.cues))))
     }
 
@@ -515,15 +517,16 @@ plot_expected_categorization.NIW_ideal_adaptor_stanfit <- function(
       d.pars %>%
       ggplot(
         aes(
-          x = .data$token,
+          x = .data$token.cues,
           y = .data$p_cat,
           color = .data$group,
           linetype = .data$group)) +
-      scale_x_discrete(
-        "Test token",
-        breaks = levels(d.pars$token),
-        labels = paste0(levels(d.pars$token), "\n",
-                        levels(d.pars$token.cues))) +
+      scale_x_discrete("Test token") +
+      # scale_x_discrete(
+      #   "Test token",
+      #   breaks = levels(d.pars$token),
+      #   labels = paste0(levels(d.pars$token), "\n",
+      #                   levels(d.pars$token.cues))) +
       scale_y_continuous(
         paste0("Predicted proportion of ", target_category_label, "-responses"),
         limits = c(0,1)) +
