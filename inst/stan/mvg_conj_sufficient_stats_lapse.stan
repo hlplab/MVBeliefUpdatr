@@ -190,7 +190,22 @@ model {
 }
 
 generated quantities {
-  /* Compute and store pointwise log-likelihood, in order to allow computation of LOOIC. This is
+  /* Compute and store pointwise log-likelihood, in order to allow computation of LOOIC.
+     Doing so in generated quantities block, following help(rstan::loo). Note that currently,
+     each unique combination of test location and exposure group is treated as an observation
+     (rather than each individual response).
+  */
+  vector[M] lapsing_probs = rep_vector(lapse_rate / M, M);
+  real log_lik_sum = 0;
+  vector[N_test] log_lik;
+
+  for (n in 1:N_test) {
+    log_lik[n] = multinomial_lpmf(z_test_counts[n] | p_test_conj[n] * (1-lapse_rate) + lapsing_probs);
+    log_lik_sum += log_lik[n];
+  }
+
+  /* If requested by user:
+     Compute and store pointwise log-likelihood, in order to allow computation of LOOIC. This is
      done in the generated quantities block, following help(rstan::loo). Note that each unqiue
      combination of test location and exposure group is treated as an observation in z_test_counts.
      So calculating pointwise log-likelihoods based on the vectorized z_test_counts, which would be
@@ -210,58 +225,25 @@ generated quantities {
      the information z_test_counts.
 
      The downside of this revised approach is that it makes the object very large to store, and slow to
-     work with. THIS NEEDS ATTENTION.
-
-     CHANGE THIS SO THAT USERS CAN PROVIDE UNIQUE IDENTIFIER FOR TEST CONTINUUM THAT SPECIFIES WHAT
-     CONSTITUTES AN OBSERVATION?
+     work with.
   */
-
-  vector[M] lapsing_probs = rep_vector(lapse_rate / M, M);
-  real log_lik_sum = 0;
-
-  if (split_loglik_per_observation == 0) {
-    /* Compute and store pointwise log-likelihood, in order to allow computation of LOOIC.
-       Doing so in generated quantities block, following help(rstan::loo). Note that currently,
-       each unique combination of test location and exposure group is treated as an observation
-       (rather than each individual response). In the future, this should probably changed to
-       treated each individual response as an observation.
-    */
-    vector[N_test] log_lik;
-
-    for (n in 1:N_test) {
-      log_lik[n] = multinomial_lpmf(z_test_counts[n] | p_test_conj[n] * (1-lapse_rate) + lapsing_probs);
-      log_lik_sum += log_lik[n];
-    }
-  } else {
-    vector[sum(to_array_1d(z_test_counts))] log_lik;
+  vector[split_loglik_per_observation ? sum(to_array_1d(z_test_counts)) : 0] log_lik_split;
+  if (split_loglik_per_observation == 1) {
     int idx = 1;
 
     for (n in 1:N_test) {
-      // Since stan does not allow provide vectorized addition of integer arrays, we do the following
-      // as part of obtaining the multinomial coefficient (the constant that only depends on the data)
-      int z_test_counts_inc[M] = z_test_counts[n];
-      for (m in 1:M) {
-        z_test_counts_inc[m] += 1;
-      }
-      real multinomial_coeff = lgamma(sum(z_test_counts[n]) + 1) - sum(lgamma(z_test_counts_inc));
-
       for (m in 1:M) {
         for (i in 1:z_test_counts[n, m]) {
-          log_lik[idx] = log(p_test_conj[n, m] * (1 - lapse_rate) + lapsing_probs[m]);
-          log_lik_sum += log_lik[idx];
+          log_lik_split[idx] = log(p_test_conj[n, m] * (1 - lapse_rate) + lapsing_probs[m]);
           idx += 1;
         }
       }
-      // for the log_lik_sum add the multinomial coefficient (which is not included in the individual log likelihoods
-      // calculated above).
-      log_lik_sum += multinomial_coeff;
     }
   }
 
+  matrix[mu_0_known ? 0 : K,mu_0_known ? 0 : K] m_0_cor;
+  matrix[mu_0_known ? 0 : K,mu_0_known ? 0 : K] m_0_cov;
   if (!mu_0_known) {
-    matrix[K,K] m_0_cor;
-    matrix[K,K] m_0_cov;
-
     m_0_cor = multiply_lower_tri_self_transpose(m_0_L_omega);
     m_0_cov = quad_form_diag(m_0_cor, m_0_tau);
   }
