@@ -33,7 +33,13 @@
 #' @rdname infer_NIW_ideal_adaptor
 #' @export
 infer_NIW_ideal_adaptor <- function(
-  exposure = NULL, test = NULL, cues = NULL, category = NULL, response = NULL, group = NULL, group.unique = NULL, center.observations = TRUE, scale.observations = TRUE, pca.observations = FALSE, pca.cutoff = 1, lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL, tau_scale = 0, L_omega_scale = 0,
+  exposure = NULL, test = NULL,
+  cues = NULL,  category = NULL, response = NULL,
+  group = NULL, group.unique = NULL,
+  center.observations = TRUE, scale.observations = TRUE, pca.observations = FALSE, pca.cutoff = 1,
+  lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
+  tau_scale = 0, L_omega_scale = 0,
+  split_loglik_per_observation = 0,
   # set to default TRUE (and change documentation accordingly) once implemented:
   untransform_fit = FALSE,
   input = NULL,
@@ -88,6 +94,7 @@ infer_NIW_ideal_adaptor <- function(
         Sigma_0 = Sigma_0,
         tau_scale = tau_scale,
         L_omega_scale = L_omega_scale,
+        split_loglik_per_observation = split_loglik_per_observation,
         use_univariate_updating = use_univariate_updating,
         verbose = verbose)
   }
