@@ -1,24 +1,3 @@
-#' Summarize NIW ideal adaptor stanfit
-#'
-#' \code{summary} method for \code{\link{NIW_ideal_adaptor_stanfit}} objects. Specifies reasonable defaults for the parameters to be summarized for the stanfit object.
-#'
-#' @param x An \code{\link{NIW_ideal_adaptor_stanfit}} object.
-#'
-#' @method summary NIW_ideal_adaptor_stanfit
-#'
-#' @importFrom rstan summary
-#' @export
-summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
-  if (is.null(pars)) {
-    pars <- names(x)
-    pars <- grep("^((kappa|nu|m|S)_|lapse_rate)", pars, value = T)
-    pars <- grep("^m_0_(tau|L_omega)", pars, value = T, invert = T)
-    pars <- grep("^(m|S)_0_param", pars, value = T, invert = T)
-  }
-
-  rstan::summary(x, pars = pars, ...)$summary
-}
-
 #' loo for NIW ideal adaptor stanfit
 #'
 #' \code{loo} method for \code{\link{NIW_ideal_adaptor_stanfit}} objects.
@@ -49,6 +28,27 @@ loo.NIW_ideal_adaptor_stanfit <- function(
                  save_psis = save_psis)
 }
 
+
+#' Summarize NIW ideal adaptor stanfit
+#'
+#' \code{summary} method for \code{\link{NIW_ideal_adaptor_stanfit}} objects. Specifies reasonable defaults for the parameters to be summarized for the stanfit object.
+#'
+#' @param x An \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#'
+#' @method summary NIW_ideal_adaptor_stanfit
+#'
+#' @importFrom rstan summary
+#' @export
+summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
+  if (is.null(pars)) {
+    pars <- names(x)
+    pars <- grep("^((kappa|nu|m|S)_|lapse_rate)", pars, value = T)
+    pars <- grep("^m_0_(tau|L_omega)", pars, value = T, invert = T)
+    pars <- grep("^(m|S)_0_param", pars, value = T, invert = T)
+  }
+
+  rstan::summary(x, pars = pars, ...)$summary
+}
 
 #' #' loo moment matching for NIW ideal adaptor stanfit
 #' #'
@@ -120,7 +120,7 @@ loo.NIW_ideal_adaptor_stanfit <- function(
 #'   }
 #'
 #'   if (is.null(newdata)) {
-#'     newdata <- get_input(model)
+#'     newdata <- get_staninput(model)
 #'   } else {
 #'     newdata <- as.data.frame(newdata)
 #'   }
