@@ -1,147 +1,23 @@
 context("fit stanfit")
 
 source("../functions-to-make-or-load-models.R")
-.data <- make_data_for_stanfit(5)
-.exposure <- .data %>% filter(Phase == "exposure")
-.test <- .data %>% filter(Phase == "test")
-
-test_that("Test compose stanfit", {
-  expect_no_error(
-    infer_NIW_ideal_adaptor(
-      exposure = .exposure,
-      test = .test,
-      cues = c("cue1"),
-      category = "category",
-      response = "Response",
-      group = "Subject",
-      group.unique = "Condition",
-      sample = F,
-      refresh = 0))
-  expect_no_error(
-    infer_NIW_ideal_adaptor(
-      exposure = .exposure,
-      test = .test,
-      cues = c("cue1", "cue2"),
-      category = "category",
-      response = "Response",
-      group = "Subject",
-      group.unique = "Condition",
-      sample = F,
-      refresh = 0))
-})
-
 
 test_that("Test fitting stanfit", {
-  # check that default works
-  expect_no_error(
-    suppressMessages(suppressWarnings(
-      infer_NIW_ideal_adaptor(
-        exposure = .exposure,
-        test = .test,
-        cues = c("cue1"),
-        category = "category",
-        response = "Response",
-        group = "Subject",
-        group.unique = "Condition",
-        sample = T,
-        cores = 4,
-        refresh = 0,
-        iter = 100))))
-  expect_no_error(
-    suppressMessages(suppressWarnings(
-      infer_NIW_ideal_adaptor(
-        exposure = .exposure,
-        test = .test,
-        cues = c("cue1"),
-        category = "category",
-        response = "Response",
-        group = "Subject",
-        group.unique = "Condition",
-        sample = T,
-        center.observations = T,
-        scale.observations = T,
-        cores = 4,
-        refresh = 0,
-        iter = 100))))
-  expect_no_error(
-    suppressMessages(suppressWarnings(
-      infer_NIW_ideal_adaptor(
-        exposure = .exposure,
-        test = .test,
-        cues = c("cue1", "cue2"),
-        category = "category",
-        response = "Response",
-        group = "Subject",
-        group.unique = "Condition",
-        sample = T,
-        cores = 4,
-        refresh = 0,
-        iter = 100))))
+  # Testing default model storage
+  expect_no_error(get_example_stanfit(1, center.observations = T, scale.observations = T, stanmodel = NULL))
+  # With scaling
+  expect_no_error(get_example_stanfit(1, center.observations = T, scale.observations = T))
+  expect_no_error(get_example_stanfit(2, center.observations = T, scale.observations = T))
+  expect_no_error(get_example_stanfit(3, center.observations = T, scale.observations = T))
+  # Without scaling
+  expect_no_error(get_example_stanfit(1, center.observations = T, scale.observations = F))
+  expect_no_error(get_example_stanfit(2, center.observations = T, scale.observations = F))
+  expect_no_error(get_example_stanfit(3, center.observations = T, scale.observations = F))
+  # Without scaling, old stanmodel
+  expect_no_error(get_example_stanfit(2, center.observations = T, scale.observations = F, stanmodel = "mvg_conj_sufficient_stats_lapse"))
   # check that forcing multivariate updating works even if there is only one cue
-  expect_no_error(
-    suppressMessages(suppressWarnings(
-      infer_NIW_ideal_adaptor(
-        exposure = .exposure,
-        test = .test,
-        cues = c("cue1"),
-        category = "category",
-        response = "Response",
-        group = "Subject",
-        group.unique = "Condition",
-        sample = T,
-        use_univariate_updating = F,
-        cores = 4,
-        refresh = 0,
-        iter = 100))))
+  expect_no_error(get_example_stanfit(1, center.observations = T, scale.observations = T, use_univariate_updating = F, iter = 100))
   # forcing univariate updating should throw an error if and only if there is more than 1 cue
-  expect_no_error(
-    suppressMessages(suppressWarnings(
-      infer_NIW_ideal_adaptor(
-        exposure = .exposure,
-        test = .test,
-        cues = c("cue1"),
-        category = "category",
-        response = "Response",
-        group = "Subject",
-        group.unique = "Condition",
-        sample = T,
-        use_univariate_updating = T,
-        cores = 4,
-        refresh = 0,
-        iter = 100))))
-  expect_error(
-    suppressWarnings(
-      infer_NIW_ideal_adaptor(
-        exposure = .exposure,
-        test = .test,
-        cues = c("cue1", "cue2"),
-        category = "category",
-        response = "Response",
-        group = "Subject",
-        group.unique = "Condition",
-        sample = T,
-        use_univariate_updating = T,
-        cores = 4,
-        refresh = 0,
-        iter = 100)))
+  expect_no_error(get_example_stanfit(2, center.observations = T, scale.observations = T, use_univariate_updating = F, iter = 100))
 })
 
-.data <- make_data_for_stanfit(2)
-.exposure <- .data %>% filter(Phase == "exposure")
-.test <- .data %>% filter(Phase == "test")
-test_that("stanfit output", {
-  expect_no_error(
-    suppressMessages(suppressWarnings(
-      infer_NIW_ideal_adaptor(
-        exposure = .exposure,
-        test = .test,
-        cues = c("VOT", "f0_semitones"),
-        category = "category",
-        response = "Response",
-        group = "Subject",
-        group.unique = "Condition",
-        sample = T,
-        cores = 4,
-        refresh = 0,
-        iter = 100))))
-})

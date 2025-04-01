@@ -388,7 +388,7 @@ plot_expected_categories_contour2D.NIW_ideal_adaptor_stanfit <- function(
     { if (plot.test)
       add_test_data_to_2D_plot(
         get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
-          { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
+          { if (untransform_cues) get_untransform_function(model)(.) else . } %>%
           ungroup() %>%
           distinct(group, !!! syms(cues)),
         cue.labels = cues) } +
@@ -608,7 +608,7 @@ plot_expected_categories_density1D.NIW_ideal_adaptor_stanfit <- function(
     { if (plot.test)
       add_test_data_to_1D_plot(
         get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
-          { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
+          { if (untransform_cues) get_untransform_function(model)(.) else . } %>%
           ungroup() %>%
           distinct(group, !!! syms(cues)),
         cue.labels = cues) } +
@@ -739,7 +739,7 @@ plot_expected_categories_density2D.NIW_ideal_adaptor_stanfit <- function(
     { if (plot.test)
       add_test_data_to_2D_plot(
         get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
-          { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
+          { if (untransform_cues) get_untransform_function(model)(.) else . } %>%
           ungroup() %>%
           distinct(group, !!! syms(cues)),
         cue.labels = cues) } +

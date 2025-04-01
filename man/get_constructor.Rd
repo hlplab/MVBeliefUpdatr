@@ -34,6 +34,6 @@ Gets the tidybayes constructor function from the stanfit object. `get_category_c
 \link[tidybayes]{recover_types}}. If variable is
 }
 \seealso{
-\code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_input_variable_levels}}
+\code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_staninput_variable_levels}}
 }
 \keyword{TBD}

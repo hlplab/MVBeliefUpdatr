@@ -622,8 +622,20 @@ make_data_for_3Dstanfit_without_exposure <- function() {
   return(.data)
 }
 
-get_example_stanfit <- function(example = 1, seed = 42) {
-  filename <- paste0("../example-stanfit", example, ".rds")
+get_example_stanfit <- function(
+    example = 1,
+    center.observations = T, scale.observations = F,
+    stanmodel = "mvg_conj_sufficient_stats_lapse_cholesky",
+    silent = 2, refresh = 100,
+    seed = 42,
+    ...
+) {
+  filename <-
+    paste0(
+      "../example-stanfit", example, "-",
+      paste(c(if (!is.null(stanmodel)) stanmodel else "", seed, center.observations, scale.observations), collapse = "-"),
+      ".rds")
+
   if (file.exists(filename)) {
     fit <- readRDS(filename)
   } else {
@@ -643,12 +655,14 @@ get_example_stanfit <- function(example = 1, seed = 42) {
         response = "Response",
         group = "Subject",
         group.unique = "Condition",
-        # For now scale to avoid issues with numerical precision
-        # scale.observations = T,
+        center.observations = center.observations, scale.observations = scale.observations,
+        stanmodel = stanmodel,
         control = list(adapt_delta = 0.9),
         file = filename,
-        silent = 2,
-        cores = 4)
+        refresh = refresh,
+        silent = silent,
+        cores = 4,
+        ...)
   }
 
   return(fit)

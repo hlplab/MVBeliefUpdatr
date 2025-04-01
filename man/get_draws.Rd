@@ -2,6 +2,7 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{get_draws}
 \alias{get_draws}
+\alias{add_draws}
 \alias{get_draws.NIW_ideal_adaptor_stanfit}
 \title{Add MCMC draws from an NIW IBBU stanfit to a tibble.}
 \usage{
