@@ -52,6 +52,22 @@ test_that("Test fitting stanfit", {
       infer_NIW_ideal_adaptor(
         exposure = .exposure,
         test = .test,
+        cues = c("cue1"),
+        category = "category",
+        response = "Response",
+        group = "Subject",
+        group.unique = "Condition",
+        sample = T,
+        center.observations = T,
+        scale.observations = T,
+        cores = 4,
+        refresh = 0,
+        iter = 100))))
+  expect_no_error(
+    suppressMessages(suppressWarnings(
+      infer_NIW_ideal_adaptor(
+        exposure = .exposure,
+        test = .test,
         cues = c("cue1", "cue2"),
         category = "category",
         response = "Response",

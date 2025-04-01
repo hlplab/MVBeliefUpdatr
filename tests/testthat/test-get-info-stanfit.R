@@ -16,7 +16,7 @@ test_that("Test is.NIW_ideal_adaptor_stanfit", {
   expect_true(is.NIW_ideal_adaptor_stanfit(fit))
 })
 
-test_that("add ibbu draws - input check (1 cue)", {
+test_that("add draws - input check (1 cue)", {
   expect_true(is_tibble(get_draws(fit, groups = "prior")))
   expect_true(is_tibble(get_draws(fit, groups = "plus20")))
   expect_true(is_tibble(get_draws(fit, groups = c("prior", "plus20"))))
@@ -25,7 +25,7 @@ test_that("add ibbu draws - input check (1 cue)", {
   expect_error(get_draws(fit, groups = "prior", ndraws = c(1, 2)))
 })
 
-test_that("add ibbu draws - output check (1 cue)", {
+test_that("add draws - output check (1 cue)", {
   expect_equal(nrow(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F) %>% distinct(.draw)), 10)
   expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), 2)
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T)),
@@ -38,7 +38,7 @@ test_that("add ibbu draws - output check (1 cue)", {
 
 
 fit <- get_example_stanfit(2)
-test_that("add ibbu draws - input check (2 cues)", {
+test_that("add draws - input check (2 cues)", {
   expect_true(is_tibble(get_draws(fit, groups = "prior")))
   expect_true(is_tibble(get_draws(fit, groups = "plus20.20")))
   expect_true(is_tibble(get_draws(fit, groups = c("prior", "plus20.20"))))
@@ -47,7 +47,7 @@ test_that("add ibbu draws - input check (2 cues)", {
   expect_error(get_draws(fit, groups = "prior", ndraws = c(1, 2)))
 })
 
-test_that("add ibbu draws - output check (2 cues)", {
+test_that("add draws - output check (2 cues)", {
   expect_equal(nrow(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F) %>% distinct(.draw)), 10)
   expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), 2)
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T)),
@@ -69,7 +69,7 @@ test_that("add ibbu draws - input check (3 cues)", {
   expect_error(get_draws(fit, groups = "prior", ndraws = c(1, 2)))
 })
 
-test_that("add ibbu draws - output check (3 cues)", {
+test_that("add draws - output check (3 cues)", {
   expect_equal(nrow(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F) %>% distinct(.draw)), 10)
   expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), 2)
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T)),
@@ -80,7 +80,7 @@ test_that("add ibbu draws - output check (3 cues)", {
                c("cue", "cue2", ".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
 })
 
-# test_that("Add ibbu draws - check wide = T", {
+# test_that("Add draws - check wide = T", {
 #   expect_equal(nrow(get_draws(fit, groups = "prior", wide = T, summarize = T)), 1)
 #   expect_equal(nrow(get_draws(fit, groups = "prior", wide = T, summarize = F)), 10)
 # })

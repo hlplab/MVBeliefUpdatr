@@ -1,7 +1,9 @@
-make_data_for_stanfit <- function(example = 1) {
+make_data_for_stanfit <- function(example = 1, seed = NULL) {
   require(tidyverse)
   require(magrittr)
   require(MVBeliefUpdatr)
+
+  if (!is.null(seed)) set.seed(seed)
 
   if (example == 1) {
     return(make_data_for_1Dstanfit_with_exposure())
@@ -620,12 +622,12 @@ make_data_for_3Dstanfit_without_exposure <- function() {
   return(.data)
 }
 
-get_example_stanfit <- function(example = 1) {
+get_example_stanfit <- function(example = 1, seed = 42) {
   filename <- paste0("../example-stanfit", example, ".rds")
   if (file.exists(filename)) {
     fit <- readRDS(filename)
   } else {
-    .data <- make_data_for_stanfit(example)
+    .data <- make_data_for_stanfit(example, seed = seed)
     fit <-
       infer_prior_beliefs(
         exposure = .data %>% filter(Phase == "exposure"),
@@ -641,7 +643,11 @@ get_example_stanfit <- function(example = 1) {
         response = "Response",
         group = "Subject",
         group.unique = "Condition",
+        # For now scale to avoid issues with numerical precision
+        # scale.observations = T,
+        control = list(adapt_delta = 0.9),
         file = filename,
+        silent = 2,
         cores = 4)
   }
 
