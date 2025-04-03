@@ -228,16 +228,16 @@ generated quantities {
     }
   }
 
-  matrix[mu_0_known ? 0 : K,mu_0_known ? 0 : K] m_0_cor;
+
   matrix[mu_0_known ? 0 : K,mu_0_known ? 0 : K] m_0_cov;
   if (!mu_0_known) {
-    m_0_cor = multiply_lower_tri_self_transpose(m_0_L_omega);
+    matrix[mu_0_known ? 0 : K,mu_0_known ? 0 : K] m_0_cor = multiply_lower_tri_self_transpose(m_0_L_omega);
     m_0_cov = quad_form_diag(m_0_cor, m_0_tau);
   }
 
   // Get S_0 and S_n from their Cholesky factors
   array[M] cov_matrix[K] S_0;         // prior scatter matrix S_0
-  array[M,L] cov_matrix[K] S_n;              // Updated expected scatter matrix
+  array[M,L] cov_matrix[K] S_n;       // Updated expected scatter matrix
   for (cat in 1:M) {
     S_0[cat] = multiply_lower_tri_self_transpose(L_S_0[cat]);
     for (group in 1:L) {

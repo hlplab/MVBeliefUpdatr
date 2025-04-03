@@ -1,5 +1,11 @@
 #' An S4 class for NIW ideal adaptor objects.
 #'
+#' @name NIW_ideal_adaptor-class
+#' @aliases NIW_ideal_adaptor
+#'
+#' @details
+#' See \code{methods(class = "NIW_ideal_adaptor")} for an overview of available methods.
+#'
 #' @export
 NIW_ideal_adaptor <-
   setClass(

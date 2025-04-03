@@ -8,18 +8,18 @@
 \alias{get_cue2_constructor}
 \title{Get tidybayes constructor from an NIW ideal adaptor stanfit.}
 \usage{
-get_constructor(fit, variable = NULL)
+get_constructor(x, variable = NULL)
 
-get_category_constructor(fit)
+get_category_constructor(x)
 
-get_group_constructor(fit)
+get_group_constructor(x)
 
-get_cue_constructor(fit)
+get_cue_constructor(x)
 
-get_cue2_constructor(fit)
+get_cue2_constructor(x)
 }
 \arguments{
-\item{fit}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
+\item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
 
 \item{variable}{Either "category" or "group". If set to `NULL` then a list of all constructors is
 returned. That list is `NULL` if not tidybayes constructors are found in fit. (default: c("category", "group"))}

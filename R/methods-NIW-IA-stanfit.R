@@ -38,16 +38,21 @@ loo.NIW_ideal_adaptor_stanfit <- function(
 #' @method summary NIW_ideal_adaptor_stanfit
 #'
 #' @importFrom rstan summary
+#' @importFrom tibble rownames_to_column
 #' @export
 summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
+  stanfit <- get_stanfit(x)
   if (is.null(pars)) {
-    pars <- names(x)
+    pars <- names(stanfit)
     pars <- grep("^((kappa|nu|m|S)_|lapse_rate)", pars, value = T)
-    pars <- grep("^m_0_(tau|L_omega)", pars, value = T, invert = T)
-    pars <- grep("^(m|S)_0_param", pars, value = T, invert = T)
+    pars <- grep("^m_0_(tau|L_omega|cov)", pars, value = T, invert = T)
+    pars <- grep("^((m|S)_0|lapse_rate)_param", pars, value = T, invert = T)
   }
 
-  rstan::summary(x, pars = pars, ...)$summary
+  rstan::summary(stanfit, pars = pars, ...)$summary %>%
+    as.data.frame() %>%
+    rownames_to_column("Parameter") %>%
+    arrange(Parameter)
 }
 
 #' #' loo moment matching for NIW ideal adaptor stanfit
@@ -110,7 +115,7 @@ summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
 #'     recompile = FALSE,
 #'     ...
 #' ) {
-#'   stopifnot(is.brmsfit(model))
+#'   stopifnot(is.NIW_ideal_adaptor_stanfit(model))
 #'   loo <- loo %||% x$criteria[["loo"]]
 #'
 #'   if (is.null(loo)) {

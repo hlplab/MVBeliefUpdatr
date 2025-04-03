@@ -7,16 +7,16 @@
 \alias{get_untransform_function.NIW_ideal_adaptor_stanfit}
 \title{Get the transform/untransform information from an NIW ideal adaptor stanfit}
 \usage{
-get_transform_information(fit, ...)
+get_transform_information(x, ...)
 
-\method{get_transform_information}{NIW_ideal_adaptor_stanfit}(fit)
+\method{get_transform_information}{NIW_ideal_adaptor_stanfit}(x)
 
-\method{get_transform_function}{NIW_ideal_adaptor_stanfit}(fit)
+\method{get_transform_function}{NIW_ideal_adaptor_stanfit}(x)
 
-\method{get_untransform_function}{NIW_ideal_adaptor_stanfit}(fit)
+\method{get_untransform_function}{NIW_ideal_adaptor_stanfit}(x)
 }
 \arguments{
-\item{fit}{An \code{\link{NIW_ideal_adaptor_stanfit}} object.}
+\item{x}{An \code{\link{NIW_ideal_adaptor_stanfit}} object.}
 }
 \value{
 A function.

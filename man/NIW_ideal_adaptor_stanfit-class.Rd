@@ -8,13 +8,41 @@
 \description{
 An S4 class for NIW_ideal_adaptor stanfit objects that use one of the NIW_ideal_adaptor stan programs.
 }
+\details{
+See \code{methods(class = "NIW_ideal_adaptor_stanfit")} for an overview of available methods.
+}
 \section{Slots}{
 
 \describe{
-\item{\code{input_data}}{list containing the data handed to rstan through \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.}
+\item{\code{data}}{A \code{data.frame} containing the data used to fit the model.}
+
+\item{\code{staninput}}{A named \code{list} containing the data handed to rstan through
+\code{\link{make_staninput}}.}
+
+\item{\code{stanvars}}{A \code{\link{stanvars}} object.}
+
+\item{\code{backend}}{The name of the backend used to fit the model.}
+
+\item{\code{stan_args}}{Named list of additional control arguments that were passed
+to the Stan backend directly. NOT YET USED}
+
+\item{\code{stanfit}}{An object of class \code{\link[rstan:stanfit-class]{stanfit}}
+among others containing the posterior draws.}
+
+\item{\code{basis}}{An object that contains a small subset of the Stan data
+created at fitting time, which is needed to process new data correctly. NOT YET USED}
 
 \item{\code{transform_information}}{list containing elements transform.parameters, transform.function, and
 untransform.function.}
+
+\item{\code{criteria}}{An empty \code{list} for adding model fit criteria
+after estimation of the model. NOT YET USED}
+
+\item{\code{file}}{Optional name of a file in which the model object was stored in
+or loaded from. NOT YET USED}
+
+\item{\code{version}}{The versions of \pkg{brms} and \pkg{rstan} with
+which the model was fitted.}
 
 \item{\code{labels}}{list}
 }}

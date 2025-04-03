@@ -93,7 +93,7 @@ plot_parameters.NIW_ideal_adaptor_stanfit <- function(
     coord_cartesian(default = T) +
     facet_grid(~ .data$cue, scales = "free_x") +
     theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
-  legend = cowplot::get_legend(p.m)
+  legend <- suppressWarnings(cowplot::get_legend(p.m))
 
   p.m <- p.m + theme(legend.position = "none")
   p.S <- suppressMessages(
@@ -417,7 +417,7 @@ plot_expected_categorization.NIW_ideal_adaptor_stanfit <- function(
     test_data <-
       data.test %>%
       distinct(!!! syms(cue.labels)) %>%
-      { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
+      { if (untransform_cues) get_untransform_function(model)(.) else . } %>%
       make_vector_column(cols = cue.labels, vector_col = "x", .keep = "all") %>%
       nest(cues_joint = x, cues_separate = .env$cue.labels) %>%
       crossing(group = levels(d.pars$group))
@@ -425,7 +425,7 @@ plot_expected_categorization.NIW_ideal_adaptor_stanfit <- function(
     test_data <-
       data.test %>%
       distinct(!!! syms(cue.labels), group) %>%
-      { if (untransform_cues) get_untransform_function_from_stanfit(model)(.) else . } %>%
+      { if (untransform_cues) get_untransform_function(model)(.) else . } %>%
       make_vector_column(cols = cue.labels, vector_col = "x", .keep = "all") %>%
       group_by(group) %>%
       nest(cues_joint = x, cues_separate = .env$cue.labels)

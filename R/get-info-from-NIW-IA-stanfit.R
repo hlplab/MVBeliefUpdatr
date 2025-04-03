@@ -12,7 +12,8 @@ NULL
 #' @param fit A \code{\link{stanfit}} object.
 #' @export
 get_params = function(fit) {
-  return(fit@model_pars)
+  stanfit <- get_stanfit(fit)
+  return(stanfit@model_pars)
 }
 
 #' Get number of post-warmup MCMC samples from stanfit
@@ -22,7 +23,8 @@ get_params = function(fit) {
 #' @param fit A \code{\link{stanfit}} object.
 #' @export
 get_number_of_draws = function(fit) {
-  return(length(fit@sim$samples[[1]][[1]]))
+  stanfit <- get_stanfit(fit)
+  return(length(stanfit@sim$samples[[1]][[1]]))
 }
 
 #' Get indices for random MCMC draws from stanfit
@@ -48,50 +50,119 @@ get_random_draw_indices <- function(fit, ndraws)
 
 # Functions general to NIW ideal adaptor stanfit objects ----------------------------------------
 
+#' Get the stanfit from an NIW ideal adaptor stanfit
+#'
+#' Returns the stanfit created by \code{stan} during the creation of the \code{\link{NIW_ideal_adaptor_stanfit}}
+#' object.
+#'
+#' @param x \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#'
+#' @return An \code{\link{rstan::stanfit}} object.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @export
+get_stanfit <- function(x, ...) {
+  UseMethod("get_stanfit")
+}
+
+#' @rdname get_stanfit
+#' @export
+get_stanfit.NIW_ideal_adaptor_stanfit <- function(x) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(x))
+
+  # Check if the stanfit is older than version 0.0.1.0015 when we introduced the version slot
+  if (hasSlot(x, "version")) {
+    return(x$stanfit)
+  } else {
+    stop("It appears that the model was fit with an old version of MVBeliefUpdatr (< 0.0.1.0015). Please refit the model.")
+  }
+}
+
+#' Set the stanfit of an NIW ideal adaptor stanfit
+#'
+#' Sets the stanfit of an the \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#'
+#' @param x \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param stanfit An \code{\link{rstan::stanfit}} object of adequate structure.
+#'
+#' @return An \code{\link{NIW_ideal_adaptor_stanfit}} object with the updated stanfit.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @export
+set_stanfit <- function(x, ...) {
+  UseMethod("set_stanfit")
+}
+
+#' @rdname set_stanfit
+#' @export
+set_stanfit.NIW_ideal_adaptor_stanfit <- function(x, stanfit = NULL) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(x))
+
+  if (!is.null(stanfit)) {
+    assert_that(is.stanfit(stanfit))
+    assert_that(
+      stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels),
+      msg = paste0("stanfit object was not created by one of the accepted stancodes:\n\t",
+                   paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),
+                   "\n(you can get the name of your model from your_stanfit@model_name)."))
+  }
+
+  # Check if the stanfit is older than version 0.0.1.0015 when we introduced the version slot
+  if (hasSlot(x, "version")) {
+    x$stanfit <- stanfit
+    return(x)
+  } else {
+    stop("It appears that the model was fit with an old version of MVBeliefUpdatr (< 0.0.1.0015). Please refit the model.")
+  }
+}
+
+
 #' Get the transform/untransform information from an NIW ideal adaptor stanfit
 #'
 #' Returns the transform/untransform information handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
 #' object.
 #'
-#' @param fit An \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param x An \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #'
 #' @return A function.
 #'
 #' @seealso TBD
 #' @keywords TBD
 #' @export
-get_transform_information <- function(fit, ...) {
+get_transform_information <- function(x, ...) {
   UseMethod("get_transform_information")
 }
 
 #' @export
-get_transform_function <- function(fit, ...) {
+get_transform_function <- function(x, ...) {
   UseMethod("get_transform_function")
 }
 
 #' @export
-get_untransform_function <- function(fit, ...) {
+get_untransform_function <- function(x, ...) {
   UseMethod("get_untransform_function")
 }
 
 #' @rdname get_transform_information
 #' @export
-get_transform_information.NIW_ideal_adaptor_stanfit <- function(fit) {
-  assert_that(is.NIW_ideal_adaptor_stanfit(fit))
+get_transform_information.NIW_ideal_adaptor_stanfit <- function(x) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(x))
 
-  return(fit@transform_information)
+  return(x$transform_information)
 }
 
 #' @rdname get_transform_information
 #' @export
-get_transform_function.NIW_ideal_adaptor_stanfit <- function(fit) {
-  return(get_transform_information(fit)$transform.function)
+get_transform_function.NIW_ideal_adaptor_stanfit <- function(x) {
+  return(get_transform_information(x)$transform.function)
 }
 
 #' @rdname get_transform_information
 #' @export
-get_untransform_function.NIW_ideal_adaptor_stanfit <- function(fit) {
-  return(get_transform_information(fit)$untransform.function)
+get_untransform_function.NIW_ideal_adaptor_stanfit <- function(x) {
+  return(get_transform_information(x)$untransform.function)
 }
 
 #' Get the input data from an NIW ideal adaptor stanfit
@@ -99,23 +170,49 @@ get_untransform_function.NIW_ideal_adaptor_stanfit <- function(fit) {
 #' Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{\link{NIW_ideal_adaptor_stanfit}}
 #' object.
 #'
-#' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param x \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #'
 #' @return A list with element names and structures determined by the type of stanfit model.
 #'
 #' @seealso TBD
 #' @keywords TBD
 #' @export
-get_input <- function(fit, ...) {
-  UseMethod("get_input")
+get_staninput <- function(x, ...) {
+  UseMethod("get_staninput")
 }
 
-#' @rdname get_input
+#' @rdname get_staninput
 #' @export
-get_input.NIW_ideal_adaptor_stanfit <- function(fit) {
-  assert_that(is.NIW_ideal_adaptor_stanfit(fit))
+get_staninput.NIW_ideal_adaptor_stanfit <- function(x) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(x))
 
-  return(fit@input_data)
+  return(x$staninput)
+}
+
+#' Set the input data from an NIW ideal adaptor stanfit
+#'
+#' Sets the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{\link{NIW_ideal_adaptor_stanfit}}
+#' object.
+#'
+#' @param x \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param staninput A list with element names and structures determined by the type of stanfit model.
+#'
+#' @return An \code{\link{NIW_ideal_adaptor_stanfit}} object with the updated staninput.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @export
+set_staninput <- function(x, ...) {
+  UseMethod("set_staninput")
+}
+
+#' @rdname set_staninput
+#' @export
+set_staninput.NIW_ideal_adaptor_stanfit <- function(x, staninput) {
+  assert_that(is.NIW_ideal_adaptor_stanfit(x))
+  x$staninput <- staninput
+
+  return(x)
 }
 
 #' Get category sample mean or covariance matrix of exposure data from NIW ideal adaptor stanfit
@@ -188,7 +285,7 @@ get_exposure_category_statistic.NIW_ideal_adaptor_stanfit <- function(
   assert_that(all(groups %in% get_group_levels(fit)),
               msg = paste("Some groups not found in the exposure data:",
                           paste(setdiff(groups, get_group_levels(fit, include_prior = FALSE)), collapse = ", ")))
-  x <- get_input.NIW_ideal_adaptor_stanfit(fit)
+  x <- get_staninput.NIW_ideal_adaptor_stanfit(fit)
 
   df <- NULL
   # (If untransform_cues is TRUE, all statistics first need to be calculated because of the approach
@@ -359,7 +456,7 @@ get_test_data.NIW_ideal_adaptor_stanfit <- function(
   fit,
   groups = get_group_levels(fit, include_prior = FALSE)
 ) {
-  data <- get_input.NIW_ideal_adaptor_stanfit(fit)
+  data <- get_staninput.NIW_ideal_adaptor_stanfit(fit)
   data[["x_test"]] %>%
     cbind(data[["z_test_counts"]]) %>%
     as_tibble(.name_repair = "minimal") %>%
@@ -377,9 +474,9 @@ get_test_data.NIW_ideal_adaptor_stanfit <- function(
 #' for the category variable (for which beliefs about means and covariances are inferred) or
 #' group variable (e.g., subject or exposure group), respectively. If available,
 #' that information is returned. `get_category_levels()` and `get_group_levels()` are
-#' convenience functions, calling `get_input_variable_levels()`.
+#' convenience functions, calling `get_staninput_variable_levels()`.
 #'
-#' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param x \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param variable Either "category" or "group".
 #' @param indeces A vector of category or group indices that should be turned into the original
 #' category levels, or `NULL` if only the unique levels in their original order (as vector of characters)
@@ -391,56 +488,56 @@ get_test_data.NIW_ideal_adaptor_stanfit <- function(
 #' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_constructor}}
 #' @keywords TBD
 #' @export
-get_input_variable_levels <- function(fit, ...) {
-  UseMethod("get_input_variable_levels")
+get_staninput_variable_levels <- function(x, ...) {
+  UseMethod("get_staninput_variable_levels")
 }
 
-#' @rdname get_input_variable_levels
+#' @rdname get_staninput_variable_levels
 #' @export
-get_category_levels <- function(fit, ...) {
+get_category_levels <- function(x, ...) {
   UseMethod("get_category_levels")
 }
 
-#' @rdname get_input_variable_levels
+#' @rdname get_staninput_variable_levels
 #' @export
-get_group_levels <- function(fit, ...) {
+get_group_levels <- function(x, ...) {
   UseMethod("get_group_levels")
 }
 
-#' @rdname get_input_variable_levels
+#' @rdname get_staninput_variable_levels
 #' @export
-get_cue_levels <- function(fit, ...) {
+get_cue_levels <- function(x, ...) {
   UseMethod("get_cue_levels")
 }
 
-#' @rdname get_input_variable_levels
+#' @rdname get_staninput_variable_levels
 #' @export
-get_input_variable_levels.NIW_ideal_adaptor_stanfit <- function(fit, variable = c("category", "group", "cue"), indices = NULL) {
+get_staninput_variable_levels.NIW_ideal_adaptor_stanfit <- function(x, variable = c("category", "group", "cue"), indices = NULL) {
   assert_that(is.null(indices) | all(indices > 0))
-  f <- get_constructor(fit, variable)
+  f <- get_constructor(x, variable)
 
   if (is.null(indices)) return(levels(f(c()))) else return(f(indices))
 }
 
-#' @rdname get_input_variable_levels
+#' @rdname get_staninput_variable_levels
 #' @export
-get_category_levels.NIW_ideal_adaptor_stanfit <- function(fit, indices = NULL) {
-  return(get_input_variable_levels(fit, "category", indices))
+get_category_levels.NIW_ideal_adaptor_stanfit <- function(x, indices = NULL) {
+  return(get_staninput_variable_levels(x, "category", indices))
 }
 
-#' @rdname get_input_variable_levels
+#' @rdname get_staninput_variable_levels
 #' @export
-get_group_levels.NIW_ideal_adaptor_stanfit <- function(fit, indices = NULL, include_prior = F) {
-  groups <- get_input_variable_levels(fit, "group", indices)
+get_group_levels.NIW_ideal_adaptor_stanfit <- function(x, indices = NULL, include_prior = F) {
+  groups <- get_staninput_variable_levels(x, "group", indices)
   if (include_prior) groups <- append("prior", groups)
 
   return(groups)
 }
 
-#' @rdname get_input_variable_levels
+#' @rdname get_staninput_variable_levels
 #' @export
-get_cue_levels.NIW_ideal_adaptor_stanfit <- function(fit, indices = NULL) {
-  cues <- get_input_variable_levels(fit, "cue", indices)
+get_cue_levels.NIW_ideal_adaptor_stanfit <- function(x, indices = NULL) {
+  cues <- get_staninput_variable_levels(x, "cue", indices)
 
   return(cues)
 }
@@ -452,60 +549,61 @@ get_cue_levels.NIW_ideal_adaptor_stanfit <- function(fit, indices = NULL) {
 #' `get_group_constructor()` are convenience functions, calling `get_constructor()`. See \code{
 #' \link[tidybayes]{recover_types}}. If variable is
 #'
-#' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param x \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param variable Either "category" or "group". If set to `NULL` then a list of all constructors is
 #' returned. That list is `NULL` if not tidybayes constructors are found in fit. (default: c("category", "group"))
 #'
 #' @return A constructor function, a list of constructor functions, or `NULL`. If a specific constructor
 #' function is requested but not found, a warning is shown.
 #'
-#' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_input_variable_levels}}
+#' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_staninput_variable_levels}}
 #' @keywords TBD
 #' @rdname get_constructor
 #' @export
 #' @importFrom rlang sym
-get_constructor <- function(fit, variable = NULL) {
+get_constructor <- function(x, variable = NULL) {
+  assert_that(class(x) %in% c("stanfit", "NIW_ideal_adaptor_stanfit"))
+  if (class(x) == "NIW_ideal_adaptor_stanfit") stanfit <- get_stanfit(x) else stanfit <- x
+
   available_constructors <- c("category", "group", "cue", "cue2")
-  assert_NIW_ideal_adaptor_stanfit(fit)
-  if (is.null(variable)) return(attr(fit, "tidybayes_constructors"))
+  if (is.null(variable)) return(attr(stanfit, "tidybayes_constructors"))
 
   assert_that(variable %in% available_constructors,
               msg = paste0("Variable name must be one of ", paste(available_constructors, collapse = "or"), "."))
 
-  if (is.null(attr(fit, "tidybayes_constructors")[[rlang::sym(variable)]])) {
-    warning(paste0(class_name, " object does not contain type information about the variable ", variable,
-                   ". Applying tidybayes::recover_types() to the object might fix this."))
+  if (is.null(attr(stanfit, "tidybayes_constructors")[[rlang::sym(variable)]])) {
+    warning(paste0(class(fit), " object ", deparse(substitute(fit)), " does not contain type information about the variable ", variable,
+                   ". Applying recover_types() to the object might fix this."))
     return(NULL)
   }
 
-  f <- attr(fit, "tidybayes_constructors")[[rlang::sym(variable)]]
+  f <- attr(stanfit, "tidybayes_constructors")[[rlang::sym(variable)]]
 
   return(f)
 }
 
-
 #' @rdname get_constructor
 #' @export
-get_category_constructor <- function(fit) {
-  return(get_constructor(fit, "category"))
+get_category_constructor <- function(x) {
+  return(get_constructor(x, "category"))
 }
 
 #' @rdname get_constructor
 #' @export
-get_group_constructor <- function(fit) {
-  return(get_constructor(fit, "group"))
+get_group_constructor <- function(x) {
+  return(get_constructor(x, "group"))
 }
 
 #' @rdname get_constructor
 #' @export
-get_cue_constructor <- function(fit) {
-  return(get_constructor(fit, "cue"))
+get_cue_constructor <- function(x) {
+  return(get_constructor(x, "cue"))
 }
 
 #' @rdname get_constructor
 #' @export
-get_cue2_constructor <- function(fit) {
-  return(get_constructor(fit, "cue2"))
+get_cue2_constructor <- function(x) {
+  return(get_constructor(x, "cue2"))
 }
 
 
@@ -630,6 +728,8 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws <- function(fit, ...
 #' By default, the category means and scatter matrices are nested, rather than each of their elements being
 #' stored separately (`nest=TRUE`).
 #'
+#' @aliases add_draws
+#'
 #' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param which DEPRECATED. Use `groups` instead. Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)
 #' @param ndraws Number of random draws or `NULL` if all draws are to be returned. Only `draws` or `ndraws` should be non-zero. (default: `NULL`)
@@ -711,7 +811,8 @@ get_draws.NIW_ideal_adaptor_stanfit <- function(
   if ("prior" %in% groups & length(groups) > 1) {
     d.prior <-
       get_draws(
-        fit = fit, categories = categories, groups = "prior",
+        fit = fit,
+        categories = categories, groups = "prior",
         ndraws = ndraws,
         untransform_cues = untransform_cues,
         summarize = summarize, wide = wide, nest = nest, seed = seed)
@@ -737,10 +838,11 @@ get_draws.NIW_ideal_adaptor_stanfit <- function(
     # Variables by which parameters are indexed
     pars.index <- if ("prior" %in% groups) "category" else c("category", "group")
 
+    stanfit <- get_stanfit.NIW_ideal_adaptor_stanfit(fit)
     # Get non-nested draws
     if ("prior" %in% groups) {
       d.pars <-
-        fit %>%
+        stanfit %>%
         spread_draws(
           !! rlang::sym(kappa),
           !! rlang::sym(nu),
@@ -751,7 +853,7 @@ get_draws.NIW_ideal_adaptor_stanfit <- function(
           seed = seed)
     } else {
       d.pars <-
-        fit %>%
+        stanfit %>%
         spread_draws(
           (!! rlang::sym(kappa))[!!! rlang::syms(pars.index)],
           (!! rlang::sym(nu))[!!! rlang::syms(pars.index)],
@@ -781,7 +883,7 @@ get_draws.NIW_ideal_adaptor_stanfit <- function(
     if (untransform_cues) {
       d.pars %<>%
         nest_cue_information_in_model() %>%
-        untransform_model(transform = fit@transform_information)
+        untransform_model(transform = fit$transform_information)
 
       if (!nest) d.pars %<>% unnest_cue_information_in_model()
     } else if (nest) {
@@ -820,30 +922,5 @@ get_draws.NIW_ideal_adaptor_stanfit <- function(
   }
 }
 
-#' Deprecated
-get_transform_information_from_stanfit <- get_transform_information.NIW_ideal_adaptor_stanfit
-get_transform_function_from_stanfit <- get_transform_function.NIW_ideal_adaptor_stanfit
-get_untransform_function_from_stanfit <- get_untransform_function.NIW_ideal_adaptor_stanfit
-
-get_input_from_stanfit <- get_input.NIW_ideal_adaptor_stanfit
-
-get_exposure_category_statistic_from_stanfit <- get_exposure_category_statistic.NIW_ideal_adaptor_stanfit
-get_exposure_mean_from_stanfit <- get_exposure_category_mean.NIW_ideal_adaptor_stanfit
-get_exposure_css_from_stanfit <- get_exposure_category_css.NIW_ideal_adaptor_stanfit
-get_exposure_uss_from_stanfit <- get_exposure_category_uss.NIW_ideal_adaptor_stanfit
-get_exposure_cov_from_stanfit <- get_exposure_category_cov.NIW_ideal_adaptor_stanfit
-
-get_test_data_from_stanfit <- get_test_data
-
-get_original_variable_levels_from_stanfit <- get_input_variable_levels
-get_category_levels_from_stanfit <- get_category_levels
-get_group_levels_from_stanfit <- get_group_levels
-get_cue_levels_from_stanfit <- get_cue_levels
-
-get_expected_category_statistic_from_stanfit <- get_expected_category_statistic
-get_expected_mu_from_stanfit <- get_expected_mu
-get_expected_sigma_from_stanfit <- get_expected_sigma
-
-add_ibbu_stanfit_draw <- get_draws
 
 

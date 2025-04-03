@@ -626,7 +626,7 @@ get_example_stanfit <- function(
     example = 1,
     center.observations = T, scale.observations = F,
     stanmodel = "mvg_conj_sufficient_stats_lapse_cholesky",
-    silent = 2, refresh = 100,
+    silent = 2, refresh = 0,
     seed = 42,
     ...
 ) {

@@ -8,3 +8,6 @@
 \description{
 An S4 class for NIW ideal adaptor objects.
 }
+\details{
+See \code{methods(class = "NIW_ideal_adaptor")} for an overview of available methods.
+}

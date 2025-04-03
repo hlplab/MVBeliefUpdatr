@@ -511,7 +511,9 @@ make_staninput_for_NIW_ideal_adaptor <- function(
         L_omega_eta <- L_omega_eta
         split_loglik_per_observation <- split_loglik_per_observation
       })
-  } else {
+  } else if (use_univariate_updating) {
+    if (length(cues) > 1) stop2("Univariate updating is only implemented for univariate data.")
+
     staninput <-
       exposure %>%
       get_sufficient_statistics_as_list_of_arrays(
