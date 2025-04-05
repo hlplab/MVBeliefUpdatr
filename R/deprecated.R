@@ -38,5 +38,49 @@ get_test_data_from_stanfit <- function(...) get_test_data(...)
 add_ibbu_stanfit_draw <- function(...) get_draws(...)
 
 #' DEPRECATED: Infer prior beliefs
+#'
+#' Use \code{\link{infer_NIW_ideal_adaptor()}} instead, together with \code{\link{make_staninput_for_NIW_ideal_adaptor()}}.
+#' @inheritParams make_staninput
+#' @inheritParams fit_NIW_ideal_adaptor
 #' @export
-infer_prior_beliefs <- function(...) infer_NIW_ideal_adaptor(...)
+infer_prior_beliefs <- function(
+  # arguments for make_staninput
+  exposure, test,
+  cues, category, response,
+  group, group.unique = NULL,
+  center.observations = TRUE, scale.observations = FALSE, pca.observations = FALSE, pca.cutoff = 1,
+  lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
+  tau_scale = NULL, L_omega_eta = 1,
+  split_loglik_per_observation = 0,
+  stanmodel = NULL,
+  verbose = FALSE,
+  ...
+) {
+  # Currently the make_staninput function is creating both the transforms *and* the data.
+  # That's a bit confusing and should probably be split up in the future into separate
+  # functions.
+  staninput <-
+    make_staninput(
+      exposure = exposure,
+      test = test,
+      cues = cues,
+      category = category,
+      response = response,
+      group = group,
+      group.unique = group.unique,
+      center.observations = center.observations,
+      scale.observations = scale.observations,
+      pca.observations = pca.observations,
+      pca.cutoff = pca.cutoff,
+      lapse_rate = lapse_rate,
+      mu_0 = mu_0,
+      Sigma_0 = Sigma_0,
+      tau_scale = tau_scale,
+      L_omega_eta = L_omega_eta,
+      split_loglik_per_observation = split_loglik_per_observation,
+      use_univariate_updating = if (is.null(stanmodel)) { FALSE } else { stanmodel == 'uvg_conj_uninformative_priors_sufficient_stats_lapse'},
+      verbose = verbose,
+      model_type = "NIW_ideal_adaptor")
+
+  fit_NIW_ideal_adaptor(staninput = staninput, stanmodel = stanmodel, ...)
+}

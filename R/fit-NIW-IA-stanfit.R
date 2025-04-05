@@ -1,15 +1,10 @@
-#' Infer NIW ideal adaptor
+#' Fit NIW ideal adaptor
 #'
-#' Infers a posterior distribution of NIW_ideal _adaptors from the input data using rstan/stan. The function can take
-#' two types of inputs: an staninput list, as prepared by \code{\link{make_staninput}},
-#' or the exposure and test data, the names of the cues, category, and response columns (and optionally group and/or block columns).
+#' Infers a posterior distribution of NIW_ideal _adaptors from the input data using Stan.
 #'
-#' @inheritParams make_staninput
-#' @param staninput A list of the type that would be returned by \code{\link{make_staninput}}.
-#'   This list can be provided *instead* of the arguments required by \code{make_staninput}.
+#' @param staninput A list of the type that would be returned by \code{\link{make_staninput_for_NIW_ideal_adaptor}}.
 #' @param untransform_fit Logical flag indicating whether the samples of the model should be transformed back
 #'   into the original cue space by applying the untransform function. (default: \code{FALSE})
-#' @param sample Should the model be fit and sampled from?
 #' @param backend Character string naming the package to use as the backend for
 #'   fitting the Stan model. Options are \code{"rstan"} (the default) or
 #'   \code{"cmdstanr"}. Details on the
@@ -61,19 +56,9 @@
 #' \code{\link{get_draws}} to draw samples from the stanfit.
 #'
 #' @importFrom rstan nlist
-#' @rdname infer_NIW_ideal_adaptor
 #' @export
-infer_NIW_ideal_adaptor <- function(
-  # arguments for make_staninput
-  exposure = NULL, test = NULL,
-  cues = NULL, category = NULL, response = NULL, group = NULL, group.unique = NULL,
-  center.observations = TRUE, scale.observations = FALSE, pca.observations = FALSE, pca.cutoff = 1,
-  lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
-  tau_scale = NULL, L_omega_eta = 1,
-  split_loglik_per_observation = 0,
-  # additional arguments:
-  staninput = NULL,
-  # set to default TRUE (and change documentation accordingly) once implemented:
+fit_NIW_ideal_adaptor <- function(
+  staninput,
   untransform_fit = FALSE,
   sample = TRUE,
   file = NULL, file_refit = "never", file_compress = T,
@@ -82,7 +67,6 @@ infer_NIW_ideal_adaptor <- function(
   init = NULL, control = NULL, silent = 1, stan_model_args = list(),
   # Stuff to be deprecated in the future
   stanmodel = NULL,
-  verbose = FALSE,
   ...
 ) {
   # optionally load NIW_ideal_adaptor_stanfit from file
@@ -96,62 +80,17 @@ infer_NIW_ideal_adaptor <- function(
     }
   }
 
-  assert_that(
-    all(any(all(!is.null(exposure), !is.null(test)), !is.null(staninput)), !all(!is.null(exposure), !is.null(test), !is.null(staninput))),
-    msg = "You can either specify an staninput argument or exposure and test data, but not both.")
-
-  # Some initial checking of the staninput list information. This should probably be expanded and then collected into a function
-  # that checks what structure compose_ returns.
-  if (!is.null(staninput)) {
-    assert_that(all(!is.null(staninput$staninput), !is.null(staninput$transform_information)),
-                msg = "The staninput list must contain both staninput and transform_information.")
-    assert_that(is.list(staninput$transform_information))
-    assert_that(all(c("transform.function", "untransform.function") %in% names(staninput$transform_information)),
-                msg = "If not NULL, transform_information must be a list that contains both a transform and an untransform function.")
-  }
+  # extract information from staninput
+  assert_that(is.NIW_ideal_adaptor_staninput(staninput))
+  data <- staninput$data
+  transform_information <- staninput$transform_information
+  staninput <- staninput$staninput
 
   if (!is.null(stanmodel)) {
     assert_that(!is.null(stanmodels[[stanmodel]]),
                 msg = paste("The specified stanmodel does not exist. Allowable models include:", names(MVBeliefUpdatr:::stanmodels)))
   }
 
-  if (is.null(staninput)) {
-    staninput <-
-      # Currently the make_staninput function is creating both the transforms *and* the data.
-      # That's a bit confusing and should probably be split up in the future into separate
-      # functions.
-      make_staninput(
-        exposure = exposure,
-        test = test,
-        cues = cues,
-        category = category,
-        response = response,
-        group = group,
-        group.unique = group.unique,
-        center.observations = center.observations,
-        scale.observations = scale.observations,
-        pca.observations = pca.observations,
-        pca.cutoff = pca.cutoff,
-        lapse_rate = lapse_rate,
-        mu_0 = mu_0,
-        Sigma_0 = Sigma_0,
-        tau_scale = tau_scale,
-        L_omega_eta = L_omega_eta,
-        split_loglik_per_observation = split_loglik_per_observation,
-        use_univariate_updating = if (is.null(stanmodel)) { FALSE } else { stanmodel == 'uvg_conj_uninformative_priors_sufficient_stats_lapse'},
-        verbose = verbose,
-        model_type = "NIW_ideal_adaptor")
-  }
-
-  data <-
-    bind_rows(
-      exposure[, c(group.unique, group, category, cues)] %>%
-        drop_na() %>%
-        mutate(Phase = "exposure"),
-      exposure[, c(group.unique, group, response, cues)] %>%
-        drop_na() %>%
-        mutate(Phase = "test")) %>%
-    relocate(Phase, all_of(c(group.unique, group, category, cues, response)))
 
   # Check whether model actually needs to be refit
   if (!is.null(file) && file_refit == "on_change") {
@@ -169,23 +108,15 @@ infer_NIW_ideal_adaptor <- function(
     }
   }
 
-
-  # Clean-up x_mean and x_ss for groups without exposure data. For reasons laid out in
-  # get_sufficient_statistics_as_list_of_arrays, we had to set these means and sums of
-  # squares to arbitrary values (since Stan doesn't accept typed NAs). But this can
-  # create confusion when users try to retrieve the exposure statistics for those groups.
-  # Here we're thus setting them to NAs.
-  staninput$staninput$x_mean[staninput$staninput$N == 0] <- NA
-  staninput$staninput$x_ss[staninput$staninput$N == 0] <- NA
   fit <-
     NIW_ideal_adaptor_stanfit(
       data = data,
-      staninput = staninput$staninput,
+      staninput = staninput,
       stanvars = stanvars,
       save_pars = save_pars,
       backend = backend,
       stan_args = nlist(init, silent, control, stan_model_args),
-      transform_information = staninput$transform_information,
+      transform_information = transform_information,
       basis = basis,
       file = file)
 
@@ -203,7 +134,7 @@ infer_NIW_ideal_adaptor <- function(
       stanfit <-
         sampling(
           MVBeliefUpdatr:::stanmodels[[current_default_modelname]],
-          data = staninput$staninput,
+          data = staninput,
           pars = exclude_pars, include = FALSE,
           show_messages = !silent,
           ...)
@@ -211,7 +142,7 @@ infer_NIW_ideal_adaptor <- function(
         stanfit <-
           sampling(
             MVBeliefUpdatr:::stanmodels[[stanmodel]],
-            data = staninput$staninput,
+            data = staninput,
             show_messages = !silent,
             ...)
 

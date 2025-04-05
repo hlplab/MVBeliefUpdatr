@@ -4,8 +4,100 @@
 \alias{infer_prior_beliefs}
 \title{DEPRECATED: Infer prior beliefs}
 \usage{
-infer_prior_beliefs(...)
+infer_prior_beliefs(
+  exposure,
+  test,
+  cues,
+  category,
+  response,
+  group,
+  group.unique = NULL,
+  center.observations = TRUE,
+  scale.observations = FALSE,
+  pca.observations = FALSE,
+  pca.cutoff = 1,
+  lapse_rate = NULL,
+  mu_0 = NULL,
+  Sigma_0 = NULL,
+  tau_scale = NULL,
+  L_omega_eta = 1,
+  split_loglik_per_observation = 0,
+  stanmodel = NULL,
+  verbose = FALSE,
+  ...
+)
+}
+\arguments{
+\item{exposure}{`tibble` or `data.frame` with the exposure data. Each row should be an observation of a category,
+and contain information about the category label, the cue values of the observation, and optionally grouping variables.}
+
+\item{test}{`tibble` or `data.frame` with the test data. Each row should be an observation, and contain information
+about the cue values of the test stimulus and the participant's response.}
+
+\item{cues}{Names of columns with cue values. Must exist in both exposure and test data.}
+
+\item{category}{Name of column in exposure data that contains the category label. Can be \code{NULL} for unsupervised updating
+(not yet implemented). (default: "category")}
+
+\item{response}{Name of column in test data that contains participants' responses. (default: "response")}
+
+\item{group}{Name of column that contains information about which observations form a group. Typically, this is
+a variable identifying subjects/participants. Must exist in both exposure and test data. (default: "group")}
+
+\item{group.unique}{Name of column that uniquely identifies each group with identical exposure. This could be a
+variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
+substantially more efficient if many groups share the same exposure. To ignore, set to \code{NULL}. (default: \code{NULL})}
+
+\item{center.observations}{Should the data be centered based on cues' means during exposure? Note that the cues' means
+used for centering are calculated after aggregating the data to all unique combinations specified by \code{group.unique}.
+These means are only expected to be the same as the standard deviations over the entire exposure data if the exposure data
+are perfectly balanced with regard to \code{group.unique}. Centering will not affect the inferred correlation
+or covariance matrices but it will affect the absolute position of the inferred means. The relative position of the inferred
+means remains unaffected.
+If \code{TRUE} and \code{mu_0} is specified, \code{mu_0} will also be centered (\code{Sigma_0} is not affected by centering and thus not changed).
+(default: \code{TRUE})}
+
+\item{scale.observations}{Should the data be standardized based on cues' standard deviation during exposure? Note that the
+cues' standard deviations used for scaling are calculated after aggregating the data to all unique combinations specified
+by \code{group.unique}. These standard deviations are only expected to be the same as the standard deviations over the entire
+exposure data if the exposure data are perfectly balanced with regard to \code{group.unique}.
+Scaling will not affect the inferred correlation matrix,
+but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
+affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
+If \code{TRUE} and \code{mu_0} and \code{Sigma_0} are specified, \code{mu_0} and \code{Sigma_0} will also be scaled.
+(default: `FALSE`)}
+
+\item{pca.observations}{Should the data be transformed into orthogonal principal components? (default: \code{FALSE})}
+
+\item{pca.cutoff}{Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
+components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
+\code{pca.observation = FALSE}. (default: 1)}
+
+\item{lapse_rate, mu_0, Sigma_0}{Optionally, lapse rate, prior expected category means (\code{mu_0}) and/or prior expected
+category covariance matrices (\code{Sigma_0}) for all categories. Lapse rate should be a number between 0 and 1. For \code{mu_0}
+and \code{Sigma_0}, each should be a list, with each element being the expected mean/covariance matrix for a specific
+category prior to updating. Elements of \code{mu_0} and \code{Sigma_0} should be ordered in the same order as the levels of the
+category variable in \code{exposure} and \code{test}. These prior expected means and covariance matrices could be
+estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_MVG_from_data}}
+for a convenient way to do so). Internally, m_0 is then set to \code{mu_0} (so that the expected value of the prior
+distribution of means is mu_0) and S_0 is set so that the expected value of the inverse-Wishart is \code{Sigma_0} given nu_0.
+Importantly, \strong{Sigma_0 should be convolved with perceptual noise (i.e., add perceptual noise covariance matrix to
+the category variability covariance matrices when you specify \code{Sigma_0})} since the stancode for the inference of the
+NIW ideal adaptor does \emph{not} infer category and noise variability separately.}
+
+\item{tau_scale}{A vector of scales for the Cauchy priors for each cue's standard deviations. Used in
+both the prior for m_0 and the prior for S_0. (default: vector of 5s if scale.observations = TRUE, SD of each cue otherwise).}
+
+\item{L_omega_eta}{A vector of etas of the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. (default: 1,
+which corresponds to a uniform prior of correlation matrices)}
+
+\item{split_loglik_per_observation}{Optionally, split the log likelihood per observation. This can be helpful of leave-one-out
+estimation in order to avoid high Pareto k, but it also makes the stored stanfit object much larger. (default: 0)}
+
+\item{stanmodel}{Name of stanmodel that should be used. Overrides any default selection.}
+
+\item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}}
 }
 \description{
-DEPRECATED: Infer prior beliefs
+Use \code{\link{infer_NIW_ideal_adaptor()}} instead, together with \code{\link{make_staninput_for_NIW_ideal_adaptor()}}.
 }

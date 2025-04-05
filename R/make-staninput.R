@@ -278,7 +278,8 @@ make_staninput <- function(..., model_type = "NIW_ideal_adaptor") {
 #' @export
 make_staninput_for_NIW_ideal_adaptor <- function(
   exposure, test,
-  cues, category = "category", response = "response", group = "group", group.unique = NULL,
+  cues, category = "category", response = "response",
+  group = "group", group.unique = NULL,
   center.observations = T, scale.observations = F, pca.observations = F, pca.cutoff = 1,
   lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
   tau_scale = NULL,
@@ -511,6 +512,14 @@ make_staninput_for_NIW_ideal_adaptor <- function(
         L_omega_eta <- L_omega_eta
         split_loglik_per_observation <- split_loglik_per_observation
       })
+
+    # Clean-up x_mean and x_ss for groups without exposure data. For reasons laid out in
+    # get_sufficient_statistics_as_list_of_arrays, we had to set these means and sums of
+    # squares to arbitrary values (since Stan doesn't accept typed NAs). But this can
+    # create confusion when users try to retrieve the exposure statistics for those groups.
+    # Here we're thus setting them to NAs.
+    staninput$x_mean[staninput$N == 0] <- NA
+    staninput$x_ss[staninput$N == 0] <- NA
   } else if (use_univariate_updating) {
     if (length(cues) > 1) stop2("Univariate updating is only implemented for univariate data.")
 
@@ -544,10 +553,20 @@ make_staninput_for_NIW_ideal_adaptor <- function(
       })
   }
 
+  data <-
+    bind_rows(
+      exposure[, c(group.unique, if (group == group.unique) NULL else group, category, cues)] %>%
+        drop_na() %>%
+        mutate(Phase = "exposure"),
+      test[, c(group.unique, if (group == group.unique) NULL else group, response, cues)] %>%
+        drop_na() %>%
+        mutate(Phase = "test")) %>%
+    relocate(Phase, all_of(c(group.unique, group, category, cues, response)))
+
   # Remove data from transform (for storage efficiency)
   transform$data <- NULL
 
-  return(list(staninput = staninput, transform_information = transform))
+  return(list(staninput = staninput, data = data, transform_information = transform))
 }
 
 #' Compose data to fit NIW_ideal_adaptor_stanfit via rstan

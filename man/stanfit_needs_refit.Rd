@@ -37,7 +37,6 @@ Checks whether a given cached fit can be used without refitting when
 \code{file_refit = "on_change"} is used.
 }
 \details{
-Use with \code{verbose = TRUE} to get additional info on how the stored
 fit differs from the given data and code.
 }
 \keyword{internal}

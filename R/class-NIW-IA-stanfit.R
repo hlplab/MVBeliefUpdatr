@@ -54,9 +54,13 @@ NIW_ideal_adaptor_stanfit <- function(
                    paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),
                    "\n(you can get the name of your model from your_stanfit@model_name)."))
   }
-  assert_that(
-    is.NIW_ideal_adaptor_staninput(staninput),
-    msg = paste("staninput is not an acceptable input for NIW_ideal_adaptor_stanfit stan program."))
+
+  # Add check here that staninput is a valid staninput object. But don't confuse it with
+  # is.NIW_ideal_adaptor_staninput, which is the currently confusingly named list of
+  # staninput, data, and transform_information
+  # assert_that(
+  #   is.NIW_ideal_adaptor_staninput(staninput),
+  #   msg = paste("staninput is not an acceptable input for NIW_ideal_adaptor_stanfit stan program."))
 
   version <- get_current_versions()
 
@@ -179,17 +183,14 @@ is.NIW_ideal_adaptor_MCMC <- function(x, is.nested = T, is.long = T, with.prior 
 #' @keywords TBD
 #' @export
 is.NIW_ideal_adaptor_staninput <- function(x) {
-  # Test of NIW_ideal_adaptor_staninput class not yet implemented. Always returning T.
+  if (!is.list(x)) return(FALSE)
+  if (!all(c("staninput", "data", "transform_information") %in% names(x))) return(FALSE)
+  if (!is.list(x$staninput)) return(FALSE)
+  if (!is.data.frame(x$data)) return(FALSE)
+  if (!is.list(x$transform_information)) return(FALSE)
 
-  # Proposed names for slots in input object (at least internally / not necessarily handed to stan like this:
-  #
-  #   exposure_N (N)
-  #   exposure_category_mean (x_mean)
-  #   exposure_cue_ss (x_ss)
-  #   test_N (N_test)
-  #   test_cue (x_test)
-  #   test_response (z_test_counts)
-  #   test_group (y_test)
+  # could add more checks here
+  if(!all(c("transform.function", "untransform.function") %in% names(x$transform_information))) return(FALSE)
 
   return(TRUE)
 }
