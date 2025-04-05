@@ -41,7 +41,7 @@ after estimation of the model. NOT YET USED}
 \item{\code{file}}{Optional name of a file in which the model object was stored in
 or loaded from. NOT YET USED}
 
-\item{\code{version}}{The versions of \pkg{brms} and \pkg{rstan} with
+\item{\code{version}}{The versions of \pkg{MVBeliefUpdatr} and \pkg{rstan} with
 which the model was fitted.}
 
 \item{\code{labels}}{list}

@@ -5,7 +5,7 @@
 \title{Check if cached \code{NIW_ideal_adaptor_stanfit} can be used.}
 \usage{
 stanfit_needs_refit(
-  fit,
+  x,
   current_version = get_current_versions(),
   data = NULL,
   staninput = NULL,
@@ -14,20 +14,20 @@ stanfit_needs_refit(
 )
 }
 \arguments{
-\item{fit}{Old \code{NIW_ideal_adaptor_stanfit} object (e.g., loaded from file).}
+\item{x}{Old \code{NIW_ideal_adaptor_stanfit} object (e.g., loaded from file).}
 
-\item{current_version}{Current version of relevant packages.}
+\item{current_version}{Current version of relevant packages. (default: will be automatically
+obtained from current packages).}
 
-\item{data}{New data to check consistency of factor level names.
-Pass \code{NULL} to avoid this data check.}
+\item{data}{New data to check consistency of factor level names. (default: \code{NULL}))}
 
 \item{staninput}{New Stan data (result of a call to \code{\link[standata.default]{standata}}).
-Pass \code{NULL} to avoid this data check.}
+Pass \code{NULL} to avoid this data check. (default: \code{NULL}))}
 
-\item{silent}{Logical. If \code{TRUE}, no messages will be given.}
+\item{silent}{Logical. If \code{TRUE}, no messages will be given. (default: \code{FALSE}))}
 
 \item{verbose}{Logical. If \code{TRUE} detailed report of the differences
-is printed to the console.}
+is printed to the console. (default: \code{FALSE}))}
 }
 \value{
 A boolean indicating whether a refit is needed.

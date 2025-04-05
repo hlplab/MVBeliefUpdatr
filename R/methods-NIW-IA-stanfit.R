@@ -18,7 +18,8 @@ loo.NIW_ideal_adaptor_stanfit <- function(
     cores = getOption("mc.cores", 1)
 ) {
   stopifnot(length(pars) == 1L)
-  LLarray <- loo::extract_log_lik(stanfit = x,
+  stanfit <- get_stanfit(x)
+  LLarray <- loo::extract_log_lik(stanfit = stanfit,
                                   parameter_name = pars,
                                   merge_chains = FALSE)
   r_eff <- loo::relative_eff(x = exp(LLarray), cores = cores)

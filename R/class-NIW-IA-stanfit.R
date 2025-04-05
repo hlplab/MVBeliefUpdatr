@@ -219,18 +219,17 @@ file_refit_options <- function() {
 #' \code{file_refit = "on_change"} is used.
 #'
 #' @param x Old \code{NIW_ideal_adaptor_stanfit} object (e.g., loaded from file).
-#' @param current_version Current version of relevant packages.
-#' @param data New data to check consistency of factor level names.
-#'   Pass \code{NULL} to avoid this data check.
+#' @param current_version Current version of relevant packages. (default: will be automatically
+#'  obtained from current packages).
+#' @param data New data to check consistency of factor level names. (default: \code{NULL}))
 #' @param staninput New Stan data (result of a call to \code{\link[standata.default]{standata}}).
-#'   Pass \code{NULL} to avoid this data check.
-#' @param silent Logical. If \code{TRUE}, no messages will be given.
+#'   Pass \code{NULL} to avoid this data check. (default: \code{NULL}))
+#' @param silent Logical. If \code{TRUE}, no messages will be given. (default: \code{FALSE}))
 #' @param verbose Logical. If \code{TRUE} detailed report of the differences
-#'   is printed to the console.
+#'   is printed to the console. (default: \code{FALSE}))
 #' @return A boolean indicating whether a refit is needed.
 #'
 #' @details
-#' Use with \code{verbose = TRUE} to get additional info on how the stored
 #' fit differs from the given data and code.
 #'
 #' @keywords internal
@@ -268,7 +267,7 @@ stanfit_needs_refit <- function(
   # }
   if (!is.null(staninput)) {
     stopifnot(is.list(staninput))
-    cached_staninput <- standata(x)
+    cached_staninput <- get_staninput(x)
   }
   if (!is.null(data)) {
     stopifnot(is.data.frame(data))
@@ -288,7 +287,7 @@ stanfit_needs_refit <- function(
   #     refit <- TRUE
   #   }
   # }
-  if (!is.null(sdata)) {
+  if (!is.null(staninput)) {
     staninput_equality <- all.equal(staninput, cached_staninput, check.attributes = FALSE)
     if (!isTRUE(staninput_equality)) {
       if (!silent) {
@@ -302,7 +301,6 @@ stanfit_needs_refit <- function(
   }
   if (!is.null(data)) {
     # check consistency of factor names
-    # as they are only stored as attributes in sdata (#1128)
     factor_level_message <- FALSE
     for (var in names(cached_data)) {
       if (is_like_factor(cached_data[[var]])) {

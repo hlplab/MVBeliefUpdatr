@@ -37,7 +37,6 @@ infer_NIW_ideal_adaptor(
   silent = 1,
   stan_model_args = list(),
   stanmodel = NULL,
-  use_univariate_updating = FALSE,
   verbose = FALSE,
   ...
 )
@@ -127,8 +126,8 @@ for later use. (default: \code{NULL})}
 \item{file_refit}{Modifies when the fit stored via the \code{file} argument
 is re-used. For \code{"never"} (default) the fit is always loaded if it
 exists and fitting is skipped. For \code{"always"} the model is always
-refitted. If set to \code{"on_change"}, brms will
-refit the model if data passed to Stan differ from
+refitted. If set to \code{"on_change"}, model will be refit if data passed to
+Stan differ from
 what is stored in the file. Refit will not be triggered for changes in
 additional parameters of the fit (e.g., initial values, number of iterations,
 control arguments, ...).}
@@ -159,9 +158,6 @@ as well. If using \code{backend = "rstan"} you can also set
 "cmdstanr"}, which allows to change how models are compiled.}
 
 \item{stanmodel}{Name of stanmodel that should be used. Overrides any default selection.}
-
-\item{use_univariate_updating}{Should legacy univariate updating be used? Will throw an error if used in
-conjunction with multiple cues. (default: \code{FALSE})}
 
 \item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}}
 }
