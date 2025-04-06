@@ -32,16 +32,21 @@ loo.NIW_ideal_adaptor_stanfit <- function(
 
 #' Summarize NIW ideal adaptor stanfit
 #'
-#' \code{summary} method for \code{\link{NIW_ideal_adaptor_stanfit}} objects. Specifies reasonable defaults for the parameters to be summarized for the stanfit object.
+#' \code{summary} method for \code{\link{NIW_ideal_adaptor_stanfit}} objects. Specifies reasonable defaults
+#' for the parameters to be summarized for the stanfit object.
 #'
 #' @param x An \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param pars A character vector of parameter names to be summarized. If `NULL`, all parameters of the
+#' NIW_ideal_adaptor are summarized. (default: `NULL`)
+#' @param prior_only Should only the priors and other sufficient parameters be summarized? (default: `FALSE`)
+#' @param ... Additional arguments passed to \code{\link[rstan]{summary}}.
 #'
 #' @method summary NIW_ideal_adaptor_stanfit
 #'
 #' @importFrom rstan summary
 #' @importFrom tibble rownames_to_column
 #' @export
-summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
+summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE, ...) {
   stanfit <- get_stanfit(x)
   if (is.null(pars)) {
     pars <- names(stanfit)
@@ -50,10 +55,20 @@ summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
     pars <- grep("^((m|S)_0|lapse_rate)_param", pars, value = T, invert = T)
   }
 
+  # Sort and filter output
   rstan::summary(stanfit, pars = pars, ...)$summary %>%
     as.data.frame() %>%
     rownames_to_column("Parameter") %>%
-    arrange(Parameter)
+    mutate(
+      name = factor(gsub("^(.*)_(0|n).*$", "\\1", Parameter), levels = c("kappa", "nu", "m", "S", "lapse_rate")),
+      distribution = gsub("^(.*)_(0|n).*$", "\\2", Parameter),
+      distribution = factor(ifelse(distribution == Parameter, "0", distribution), levels = c("0", "n")),
+      index = gsub("^.*_(0|n)\\[(.*)\\]$", "\\2", Parameter),
+      index = ifelse(index == Parameter, 1, index)) %>%
+    { if (prior_only) filter(., distribution == "0") else . } %>%
+    separate(index, into = c("i1", "i2", "i3", "i4"), sep = ",", fill = "right") %>%
+    arrange(distribution, name, i1, i2, i3, i4) %>%
+    select(-c(name, distribution, i1, i2, i3, i4))
 }
 
 #' #' loo moment matching for NIW ideal adaptor stanfit
