@@ -15,7 +15,7 @@ plot_parameter_correlations(model, ...)
   cues = get_cue_levels(model),
   pars = NULL,
   ndraws = NULL,
-  untransform_cues = TRUE,
+  untransform_cues = FALSE,
   category.colors = get_default_colors("category", categories)
 )
 }
@@ -34,7 +34,7 @@ subset to specific parameters, note the following naming conventions:
 
 \item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
 
-\item{untransform_cues}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
+\item{untransform_cues}{DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)}
 
 \item{category.colors}{Vector of fill colors of same length as category or `NULL` to use defaults. (default: `NULL`)}
 }

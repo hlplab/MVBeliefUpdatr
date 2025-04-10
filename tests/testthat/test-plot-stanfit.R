@@ -9,12 +9,6 @@ fit2 <- get_example_stanfit(2)
 # 3D stanfit with a condition without exposure
 fit3 <- get_example_stanfit(3)
 
-test_that("summary.NIW_ideal_adaptor_stanfit", {
-  expect_no_error(summary(fit1))
-  expect_no_error(summary(fit2))
-  expect_no_error(summary(fit3))
-})
-
 test_that("plot_parameters.NIW_ideal_adaptor_stanfit", {
   expect_no_error(plot_parameters(fit1))
   expect_no_error(plot_parameters(fit2))

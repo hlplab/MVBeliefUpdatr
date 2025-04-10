@@ -206,7 +206,8 @@ nest_cue_information_in_model <- function(model) {
     arrange(cue, cue2, .by_group = T) %>%
     summarise(
       !! sym(m) := list(make_named_vector(unique(!! sym(m)), unique(cue))),
-      !! sym(S) := list(make_named_square_matrix(!! sym(S), unique(cue))))
+      !! sym(S) := list(make_named_square_matrix(!! sym(S), unique(cue)))) %>%
+    relocate(starts_with(c("lapse_", "prior")), .after = !! sym(S))
 }
 
 #' @rdname nest_model
@@ -246,7 +247,7 @@ unnest_cue_information_in_model <- function(model) {
     select(-S) %>%
     pivot_longer(cols = all_of(cue.labels), values_to = S, names_to = "cue2") %>%
     ungroup() %>%
-    select(cue, cue2, everything())
+    relocate(cue, cue2, .after = nu)
 }
 
 

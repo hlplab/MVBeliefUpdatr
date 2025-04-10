@@ -205,59 +205,42 @@ get_sufficient_statistics_as_list_of_arrays <- function(
 #' observations that any level of \code{group} receives during exposure.
 #'
 #' @param exposure `tibble` or `data.frame` with the exposure data. Each row should be an observation of a category,
-#' and contain information about the category label, the cue values of the observation, and optionally grouping variables.
+#'   and contain information about the category label, the cue values of the observation, and optionally grouping variables.
 #' @param test `tibble` or `data.frame` with the test data. Each row should be an observation, and contain information
-#' about the cue values of the test stimulus and the participant's response.
+#'   about the cue values of the test stimulus and the participant's response.
 #' @param cues Names of columns with cue values. Must exist in both exposure and test data.
 #' @param category Name of column in exposure data that contains the category label. Can be \code{NULL} for unsupervised updating
-#' (not yet implemented). (default: "category")
+#'   (not yet implemented). (default: "category")
 #' @param response Name of column in test data that contains participants' responses. (default: "response")
 #' @param group Name of column that contains information about which observations form a group. Typically, this is
-#' a variable identifying subjects/participants. Must exist in both exposure and test data. (default: "group")
+#'   a variable identifying subjects/participants. Must exist in both exposure and test data. (default: "group")
 #' @param group.unique Name of column that uniquely identifies each group with identical exposure. This could be a
-#' variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
-#' substantially more efficient if many groups share the same exposure. To ignore, set to \code{NULL}. (default: \code{NULL})
-#' @param center.observations Should the data be centered based on cues' means during exposure? Note that the cues' means
-#' used for centering are calculated after aggregating the data to all unique combinations specified by \code{group.unique}.
-#' These means are only expected to be the same as the standard deviations over the entire exposure data if the exposure data
-#' are perfectly balanced with regard to \code{group.unique}. Centering will not affect the inferred correlation
-#' or covariance matrices but it will affect the absolute position of the inferred means. The relative position of the inferred
-#' means remains unaffected.
-#' If \code{TRUE} and \code{mu_0} is specified, \code{mu_0} will also be centered (\code{Sigma_0} is not affected by centering and thus not changed).
-#' (default: \code{TRUE})
-#' @param scale.observations Should the data be standardized based on cues' standard deviation during exposure? Note that the
-#' cues' standard deviations used for scaling are calculated after aggregating the data to all unique combinations specified
-#' by \code{group.unique}. These standard deviations are only expected to be the same as the standard deviations over the entire
-#' exposure data if the exposure data are perfectly balanced with regard to \code{group.unique}.
-#' Scaling will not affect the inferred correlation matrix,
-#' but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
-#' affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
-#' If \code{TRUE} and \code{mu_0} and \code{Sigma_0} are specified, \code{mu_0} and \code{Sigma_0} will also be scaled.
-#' (default: `FALSE`)
-#' @param pca.observations Should the data be transformed into orthogonal principal components? (default: \code{FALSE})
-#' @param pca.cutoff Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
-#' components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
-#' \code{pca.observation = FALSE}. (default: 1)
+#'   variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
+#'   substantially more efficient if many groups share the same exposure. To ignore, set to \code{NULL}. (default: \code{NULL})
+#' @param transform_type An affine transformation that can be applied to the data. See `type` in \code{\link{get_affine_transform}}
+#'    for details. (default: "PCA whiten")
 #' @param lapse_rate,mu_0,Sigma_0 Optionally, lapse rate, prior expected category means (\code{mu_0}) and/or prior expected
-#' category covariance matrices (\code{Sigma_0}) for all categories. Lapse rate should be a number between 0 and 1. For \code{mu_0}
-#' and \code{Sigma_0}, each should be a list, with each element being the expected mean/covariance matrix for a specific
-#' category prior to updating. Elements of \code{mu_0} and \code{Sigma_0} should be ordered in the same order as the levels of the
-#' category variable in \code{exposure} and \code{test}. These prior expected means and covariance matrices could be
-#' estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_MVG_from_data}}
-#' for a convenient way to do so). Internally, m_0 is then set to \code{mu_0} (so that the expected value of the prior
-#' distribution of means is mu_0) and S_0 is set so that the expected value of the inverse-Wishart is \code{Sigma_0} given nu_0.
-#' Importantly, \strong{Sigma_0 should be convolved with perceptual noise (i.e., add perceptual noise covariance matrix to
-#' the category variability covariance matrices when you specify \code{Sigma_0})} since the stancode for the inference of the
-#' NIW ideal adaptor does \emph{not} infer category and noise variability separately.
+#'   category covariance matrices (\code{Sigma_0}) for all categories. Lapse rate should be a number between 0 and 1. For \code{mu_0}
+#'   and \code{Sigma_0}, each should be a list, with each element being the expected mean/covariance matrix for a specific
+#'   category prior to updating. Elements of \code{mu_0} and \code{Sigma_0} should be ordered in the same order as the levels of the
+#'   category variable in \code{exposure} and \code{test}. These prior expected means and covariance matrices could be
+#'   estimated, for example, from phonetically annotated speech recordings (see \code{\link{make_MVG_from_data}}
+#'   for a convenient way to do so). Internally, m_0 is then set to \code{mu_0} (so that the expected value of the prior
+#'   distribution of means is mu_0) and S_0 is set so that the expected value of the inverse-Wishart is \code{Sigma_0} given nu_0.
+#'   Importantly, \strong{Sigma_0 should be convolved with perceptual noise (i.e., add perceptual noise covariance matrix to
+#'   the category variability covariance matrices when you specify \code{Sigma_0})} since the stancode for the inference of the
+#'   NIW ideal adaptor does \emph{not} infer category and noise variability separately.
 #' @param tau_scale A vector of scales for the Cauchy priors for each cue's standard deviations. Used in
-#' both the prior for m_0 and the prior for S_0. (default: vector of 5s if scale.observations = TRUE, SD of each cue otherwise).
+#'   both the prior for m_0 and the prior for S_0. (default: vector of 5s if scale.observations = TRUE, SD of each cue otherwise).
 #' @param L_omega_eta A vector of etas of the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. (default: 1,
-#' which corresponds to a uniform prior of correlation matrices)
+#'   which corresponds to a uniform prior of correlation matrices)
 #' @param split_loglik_per_observation Optionally, split the log likelihood per observation. This can be helpful of leave-one-out
-#' estimation in order to avoid high Pareto k, but it also makes the stored stanfit object much larger. (default: 0)
+#'   estimation in order to avoid high Pareto k, but it also makes the stored stanfit object much larger. (default: 0)
 #'
-#' @return A list consisting of a \code{data_list} and \code{transform_information}. The former that is an
-#' \code{NIW_ideal_adaptor_staninput}.
+#' @return A list consisting of:
+#'   * `data`: A data.frame with the exposure and test data after exclusion of NAs and other checks.
+#'   * `staninput`: A named list of variables and values to be handed to Stan.
+#'   * `transform_information`: A list with information about the transformation that was applied to the data.
 #'
 #' @seealso \code{\link{is.NIW_ideal_adaptor_staninput}}
 #' @keywords TBD
@@ -274,29 +257,34 @@ make_staninput <- function(..., model_type = "NIW_ideal_adaptor") {
   }
 }
 
+
 #' @rdname make_staninput
 #' @export
 make_staninput_for_NIW_ideal_adaptor <- function(
-  exposure, test,
-  cues, category = "category", response = "response",
-  group = "group", group.unique = NULL,
-  center.observations = T, scale.observations = F, pca.observations = F, pca.cutoff = 1,
-  lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
-  tau_scale = NULL,
-  L_omega_eta = 1,
-  split_loglik_per_observation = 0,
-  use_univariate_updating = FALSE,
-  verbose = F
+    exposure, test,
+    cues, category = "category", response = "response",
+    group = "group", group.unique = NULL,
+    lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
+    tau_scale = rep(5, length(cues)), L_omega_eta = 1,
+    # THIS IS KEPT HERE JUST FOR NOW UNTIL I HAVE DETERMINED WHICH TRANSFORM IS BEST SUITED FOR FITTING.
+    # (also remove the documentation for this once it's no longer needed AND remove transform_information
+    # from the returned information AND change the documentation for the returned object above.)
+    transform_type = c("identity", "center", "standardize", "PCA whiten", "ZCA whiten")[4],
+    use_univariate_updating = F,
+    split_loglik_per_observation = 0,
+    verbose = F
 ) {
-  if (!center.observations)
-    message("You did not center observations. Note that the prior of category means is symmetric around 0.")
-
-  if (pca.observations)
-    assert_that(between(pca.cutoff, 0, 1), msg = "pca.cutoff must be between 0 and 1.")
   if (!is.null(lapse_rate)) {
     assert_that(is.number(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
     assert_that(between(lapse_rate, 0, 1), msg = "If not NULL, lapse rate must be a number between 0 and 1.")
   }
+
+  assert_that(
+    length(tau_scale) == length(cues),
+    msg = paste0("tau_scale must be a vector with the same number of elements as cues (", length(cues), ")."))
+  assert_that(
+    transform_type %in% c("identity", "center", "standardize", "PCA whiten", "ZCA whiten"),
+    msg = paste("transform_type must be one of the following: identity, center, standardize, PCA whiten, ZCA whiten."))
 
   cues <- unique(cues)
   exposure <-
@@ -357,7 +345,7 @@ make_staninput_for_NIW_ideal_adaptor <- function(
                   msg = "If mu_0 is not NULL and there is only one category, mu_0 must be a vector.")
     } else {
       assert_that(is.list(mu_0) & length(mu_0) == nlevels(exposure[[category]]),
-                msg = "If mu_0 is not NULL, mu_0 must be a list of vectors with as many elements as there are categories.")
+                  msg = "If mu_0 is not NULL, mu_0 must be a list of vectors with as many elements as there are categories.")
     }
     assert_that(all(map_lgl(mu_0, is.numeric), map_lgl(mu_0, ~ is.null(dim(.x)) | length(dim(.x)) == 1)),
                 msg = "If mu_0 is a list, each element must be a vector.")
@@ -371,10 +359,10 @@ make_staninput_for_NIW_ideal_adaptor <- function(
   if (!is.null(Sigma_0)) {
     if (nlevels(exposure[[category]]) == 1) {
       assert_that(is.array(Sigma_0),
-                msg = "If Sigma_0 is not NULL and there is only one category, Sigma_0 must be a positive-definite  matrix.")
+                  msg = "If Sigma_0 is not NULL and there is only one category, Sigma_0 must be a positive-definite  matrix.")
     } else {
       assert_that(is.list(Sigma_0) & length(Sigma_0) == nlevels(exposure[[category]]),
-                 msg = "If Sigma_0 not NULL, Sigma_0 must be a list of positive-definite matrices with as many elements as there are categories.")
+                  msg = "If Sigma_0 not NULL, Sigma_0 must be a list of positive-definite matrices with as many elements as there are categories.")
     }
     assert_that(all(map_lgl(Sigma_0, is.numeric), map_lgl(Sigma_0, ~ length(dim(.x)) == 2)),
                 msg = "If Sigma_0 is a list, each element must be a k x k matrix.")
@@ -386,42 +374,12 @@ make_staninput_for_NIW_ideal_adaptor <- function(
                   paste(paste(map(Sigma_0, ~ dim(.x) %>% paste(collapse = " x "))) %>% unique(), collapse = ", ")))
   }
 
-  # Transform data
-  transform <-
-    transform_cues(
-      data = exposure,
-      cues = cues,
-      center = center.observations,
-      scale = scale.observations,
-      pca = pca.observations,
-      return.transformed.data = T,
-      return.transform.parameters = T,
-      return.transform.function = T,
-      return.untransform.function = T)
-
-  if (pca.observations) {
-    assert_that(all(is.null(mu_0), is.null(Sigma_0)),
-                msg = "PCA is not yet implemented when mu_0 or Sigma_0 are specified.")
-    s = summary(transform[["transform.parameters"]][["pca"]])$importance
-    l = min(which(s["Cumulative Proportion",] >= pca.cutoff))
-    assert_that(l >= 1, msg = "Specified pca.cutoff does not yield to any PCA component being included. Increase the
-                pca.cutoff value.")
-    if (length(cues) > l)
-      message(paste("Given the specified pca.cutoff, only the first", l, "principal component(s) will be used as cues."))
-    cues = colnames(s)[1:l]
-  }
-
-  # If data is not scaled, set tau_scale based on SD of cues in data
-  if (is.null(tau_scale))
-    tau_scale <- if (scale.observations) rep(5, length(cues)) else sapply(exposure[cues], sd) * 5
-
-  # Stan doesn't recognize vectors of length 1
-  if (length(tau_scale) == 1) tau_scale <- array(tau_scale, dim = 1)
-
-  exposure <- transform[["data"]]
-  test <- transform[["transform.function"]](test)
-  if (!is.null(mu_0)) mu_0 <- map(mu_0, ~ transform_category_mean(m = .x, transform))
-  if (!is.null(Sigma_0) & scale.observations) Sigma_0 <- map(Sigma_0, ~ transform_category_cov(S = .x, transform))
+  # Transform data and category representations (if provided)
+  transform <- get_affine_transform(exposure, cues, transform_type)
+  exposure_transformed <- transform[["transform.function"]](exposure)
+  test_transformed <- transform[["transform.function"]](test)
+  if (!is.null(mu_0)) mu_0_transformed <- map(mu_0, ~ transform_category_mean(m = .x, transform)) else mu_0_transformed <- mu_0
+  if (!is.null(Sigma_0)) Sigma_0_transformed <- map(Sigma_0, ~ transform_category_cov(S = .x, transform)) else Sigma_0_transformed <- Sigma_0
 
   test_counts <-
     get_test_counts(
@@ -431,6 +389,16 @@ make_staninput_for_NIW_ideal_adaptor <- function(
       group = group,
       verbose = verbose)
 
+  test_counts_transformed <-
+    get_test_counts(
+      test = test_transformed,
+      cues = cues,
+      response = response,
+      group = group,
+      verbose = verbose)
+
+  # Make sure that scales are converted into arrays for Stan
+  # and check that any null values are set correctly.
   if (is.null(lapse_rate)) {
     lapse_rate <- numeric()
     lapse_rate_known <- 0
@@ -441,39 +409,55 @@ make_staninput_for_NIW_ideal_adaptor <- function(
 
   n.cats <- nlevels(exposure[[category]])
   n.cues <- length(cues)
-  if (is.null(mu_0)) {
+  if (is.null(mu_0_transformed)) {
     mu_0 <- array(numeric(), dim = c(0,0))
+    mu_0_transformed <- array(numeric(), dim = c(0,0))
     mu_0_known <- 0
   } else {
     mu_0_known <- 1
-    if (is.list(mu_0)) {
+    if (is.list(mu_0_transformed)) {
       temp <- array(dim = c(n.cats, n.cues))
       for (i in 1:length(mu_0)) temp[i,] <- mu_0[[i]]
       mu_0 <- temp
+
+      temp <- array(dim = c(n.cats, n.cues))
+      for (i in 1:length(mu_0_transformed)) temp[i,] <- mu_0[[i]]
+      mu_0_transformed <- temp
       rm(temp)
     }
   }
 
-  if (is.null(Sigma_0)) {
+  if (is.null(Sigma_0_transformed)) {
     Sigma_0 <- array(numeric(), dim = c(0,0,0))
+    Sigma_0_transformed <- array(numeric(), dim = c(0,0,0))
     Sigma_0_known <- 0
   } else {
     Sigma_0_known <- 1
-    if (is.list(Sigma_0)) {
+    if (is.list(Sigma_0_transformed)) {
       temp <- array(dim = c(n.cats, n.cues, n.cues))
       for (i in 1:length(Sigma_0)) temp[i,,] <- Sigma_0[[i]]
       Sigma_0 <- temp
+
+      temp <- array(dim = c(n.cats, n.cues, n.cues))
+      for (i in 1:length(Sigma_0_transformed)) temp[i,,] <- Sigma_0[[i]]
+      Sigma_0_transformed <- temp
       rm(temp)
     }
   }
 
-  if (length(cues) > 1 || !use_univariate_updating) {
+  if (length(tau_scale) == 1) tau_scale <- array(tau_scale, dim = 1)
+  shift <- transform$transform.parameters[["shift"]]
+  if (length(shift) == 1) shift <- array(shift, dim = 1)
+  INV_SCALE <- transform$transform.parameters[["INV_SCALE"]]
+  if (!is.matrix(INV_SCALE)) INV_SCALE <- as.matrix(INV_SCALE, ncol = length(cues))
+
+  if (length(cues) > 1 | !use_univariate_updating) {
+    # First get untransform input (to be stored in fit since it's helpful for plotting), and then get
+    # transformed input below.
     staninput <-
       exposure %>%
       get_sufficient_statistics_as_list_of_arrays(
-        cues = cues,
-        category = category,
-        group = group,
+        cues = cues, category = category, group = group,
         use_univariate_updating = F,
         verbose = verbose,
         # The part below currently is ignored by get_sufficient_statistics_as_list_of_arrays. If the same syntax as for univariate input could
@@ -481,10 +465,6 @@ make_staninput_for_NIW_ideal_adaptor <- function(
         # elegant.
         x_mean = colMeans, N = length, x_ss = get_sum_of_uncentered_squares_from_df) %>%
       within({
-        M <- dim(x_mean)[1]
-        L <- dim(x_mean)[2]
-        K <- length(cues)
-
         x_test <-
           test_counts %>%
           select(all_of(cues)) %>%
@@ -501,16 +481,9 @@ make_staninput_for_NIW_ideal_adaptor <- function(
           as.matrix()
         N_test <- nrow(x_test)
 
-        lapse_rate_known <- lapse_rate_known
-        lapse_rate_data <- lapse_rate
         mu_0_known <- mu_0_known
         mu_0_data <- mu_0
-        Sigma_0_known <- Sigma_0_known
         Sigma_0_data <- Sigma_0
-
-        tau_scale <- tau_scale
-        L_omega_eta <- L_omega_eta
-        split_loglik_per_observation <- split_loglik_per_observation
       })
 
     # Clean-up x_mean and x_ss for groups without exposure data. For reasons laid out in
@@ -520,9 +493,66 @@ make_staninput_for_NIW_ideal_adaptor <- function(
     # Here we're thus setting them to NAs.
     staninput$x_mean[staninput$N == 0] <- NA
     staninput$x_ss[staninput$N == 0] <- NA
+
+    staninput_transformed <-
+      exposure_transformed %>%
+      get_sufficient_statistics_as_list_of_arrays(
+        cues = cues, category = category, group = group,
+        use_univariate_updating = F,
+        verbose = verbose,
+        # The part below currently is ignored by get_sufficient_statistics_as_list_of_arrays. If the same syntax as for univariate input could
+        # also work for multivariate input to get_sufficient_statistics_as_list_of_arrays that would be more
+        # elegant.
+        x_mean = colMeans, N = length, x_ss = get_sum_of_uncentered_squares_from_df) %>%
+      within({
+        M <- dim(x_mean)[1]
+        L <- dim(x_mean)[2]
+        K <- length(cues)
+
+        x_test <-
+          test_counts_transformed %>%
+          select(all_of(cues)) %>%
+          as.matrix()
+        y_test <-
+          test_counts_transformed[[group]] %>%
+          as.numeric() %T>%
+          { attr(., which = "levels") <- levels(test_transformed[[group]]) }
+        z_test_counts <-
+          test_counts_transformed %>%
+          mutate(rownames = paste0("group=", !! sym(group), "; ", paste(cues, collapse = "-"), "=", paste(!!! syms(cues), sep = ","))) %>%
+          column_to_rownames("rownames") %>%
+          select(levels(test_transformed[[response]])) %>%
+          as.matrix()
+        N_test <- nrow(x_test)
+
+        lapse_rate_known <- lapse_rate_known
+        lapse_rate_data <- lapse_rate
+        mu_0_known <- mu_0_known
+        mu_0_data <- mu_0_transformed
+        Sigma_0_known <- Sigma_0_known
+        Sigma_0_data <- Sigma_0_transformed
+
+        tau_scale <- tau_scale
+        L_omega_eta <- L_omega_eta
+
+        shift <- shift
+        INV_SCALE <- INV_SCALE
+
+        split_loglik_per_observation <- split_loglik_per_observation
+      })
+
+    # Clean-up x_mean and x_ss for groups without exposure data. For reasons laid out in
+    # get_sufficient_statistics_as_list_of_arrays, we had to set these means and sums of
+    # squares to arbitrary values (since Stan doesn't accept typed NAs). But this can
+    # create confusion when users try to retrieve the exposure statistics for those groups.
+    # Here we're thus setting them to NAs.
+    staninput_transformed$x_mean[staninput_transformed$N == 0] <- NA
+    staninput_transformed$x_ss[staninput_transformed$N == 0] <- NA
   } else if (use_univariate_updating) {
     if (length(cues) > 1) stop2("Univariate updating is only implemented for univariate data.")
+    if (transform_type != "identity") stop2('Univariate updating is only implemented for transform_type = "identity".')
 
+    staninput_transformed <- NULL
     staninput <-
       exposure %>%
       get_sufficient_statistics_as_list_of_arrays(
@@ -551,6 +581,8 @@ make_staninput_for_NIW_ideal_adaptor <- function(
         mu_0_sd <- 0
         sigma_0_sd <- 0
       })
+  } else {
+    stop2("use_univariate_updating not specified.")
   }
 
   data <-
@@ -563,10 +595,13 @@ make_staninput_for_NIW_ideal_adaptor <- function(
         mutate(Phase = "test")) %>%
     relocate(Phase, all_of(c(group.unique, group, category, cues, response)))
 
-  # Remove data from transform (for storage efficiency)
-  transform$data <- NULL
-
-  return(list(staninput = staninput, data = data, transform_information = transform))
+  return(
+    list(
+      staninput = list(
+        transformed = staninput_transformed,
+        untransformed = staninput),
+      data = data,
+      transform_information = transform))
 }
 
 #' Compose data to fit NIW_ideal_adaptor_stanfit via rstan

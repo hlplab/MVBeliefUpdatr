@@ -4,11 +4,21 @@
 \alias{summary.NIW_ideal_adaptor_stanfit}
 \title{Summarize NIW ideal adaptor stanfit}
 \usage{
-\method{summary}{NIW_ideal_adaptor_stanfit}(x, pars = NULL, ...)
+\method{summary}{NIW_ideal_adaptor_stanfit}(x, pars = NULL, prior_only = FALSE, include_transformed_pars = F, ...)
 }
 \arguments{
 \item{x}{An \code{\link{NIW_ideal_adaptor_stanfit}} object.}
+
+\item{pars}{A character vector of parameter names to be summarized. If `NULL`, all parameters of the
+NIW_ideal_adaptor are summarized. (default: `NULL`)}
+
+\item{prior_only}{Should only the priors and other sufficient parameters be summarized? (default: `FALSE`)}
+
+\item{include_transformed_pars}{Should transformed parameters be included in the summary? (default: `FALSE`)}
+
+\item{...}{Additional arguments passed to \code{\link[rstan]{summary}}.}
 }
 \description{
-\code{summary} method for \code{\link{NIW_ideal_adaptor_stanfit}} objects. Specifies reasonable defaults for the parameters to be summarized for the stanfit object.
+\code{summary} method for \code{\link{NIW_ideal_adaptor_stanfit}} objects. Specifies reasonable defaults
+for the parameters to be summarized for the stanfit object.
 }

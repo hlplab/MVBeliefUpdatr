@@ -13,22 +13,23 @@
 \alias{get_exposure_category_cov.NIW_ideal_adaptor_stanfit}
 \title{Get category sample mean or covariance matrix of exposure data from NIW ideal adaptor stanfit}
 \usage{
-get_exposure_category_statistic(fit, ...)
+get_exposure_category_statistic(x, ...)
 
-get_exposure_category_mean(fit, ...)
+get_exposure_category_mean(x, ...)
 
-get_exposure_category_css(fit, ...)
+get_exposure_category_css(x, ...)
 
-get_exposure_category_uss(fit, ...)
+get_exposure_category_uss(x, ...)
 
-get_exposure_category_cov(fit, ...)
+get_exposure_category_cov(x, ...)
 
 \method{get_exposure_category_statistic}{NIW_ideal_adaptor_stanfit}(
-  fit,
-  categories = get_category_levels(fit),
-  groups = get_group_levels(fit, include_prior = FALSE),
+  x,
+  categories = get_category_levels(x),
+  groups = get_group_levels(x, include_prior = FALSE),
   statistic = c("n", "mean", "css", "uss", "cov"),
-  untransform_cues = TRUE
+  untransform_cues = FALSE,
+  ...
 )
 
 \method{get_exposure_category_mean}{NIW_ideal_adaptor_stanfit}(...)
@@ -40,7 +41,9 @@ get_exposure_category_cov(fit, ...)
 \method{get_exposure_category_cov}{NIW_ideal_adaptor_stanfit}(...)
 }
 \arguments{
-\item{fit}{An \code{\link{NIW_ideal_adaptor_stanfit}}.}
+\item{x}{An \code{\link{NIW_ideal_adaptor_stanfit}}.}
+
+\item{...}{additional arguments to \code{\link{get_staninput}}.}
 
 \item{categories}{Character vector with categories for which category statistics are to be
 returned. (default: all categories)}
@@ -52,7 +55,7 @@ returned. (default: all groups except `"prior"`)}
 category mean, `css` or `uss` for centered or uncentered category sum-of-square matrix, `cov` for the
 category covariance matrix, or a character vector with any combination thereof. (default: all)}
 
-\item{untransform_cues}{Should statistics be transformed back into the original cue space? (default: `TRUE`)}
+\item{untransform_cues}{DEPRECATED. Should statistics be transformed back into the original cue space? (default: `FALSE`)}
 }
 \value{
 If just one group and category was requested, a vector (for the mean) or matrix (for the covariance

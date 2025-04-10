@@ -39,6 +39,7 @@ loo.NIW_ideal_adaptor_stanfit <- function(
 #' @param pars A character vector of parameter names to be summarized. If `NULL`, all parameters of the
 #' NIW_ideal_adaptor are summarized. (default: `NULL`)
 #' @param prior_only Should only the priors and other sufficient parameters be summarized? (default: `FALSE`)
+#' @param include_transformed_pars Should transformed parameters be included in the summary? (default: `FALSE`)
 #' @param ... Additional arguments passed to \code{\link[rstan]{summary}}.
 #'
 #' @method summary NIW_ideal_adaptor_stanfit
@@ -46,17 +47,19 @@ loo.NIW_ideal_adaptor_stanfit <- function(
 #' @importFrom rstan summary
 #' @importFrom tibble rownames_to_column
 #' @export
-summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE, ...) {
+summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE, include_transformed_pars = F, ...) {
   stanfit <- get_stanfit(x)
   if (is.null(pars)) {
     pars <- names(stanfit)
     pars <- grep("^((kappa|nu|m|S)_|lapse_rate)", pars, value = T)
     pars <- grep("^m_0_(tau|L_omega|cov)", pars, value = T, invert = T)
     pars <- grep("^((m|S)_0|lapse_rate)_param", pars, value = T, invert = T)
+    if (!include_transformed_pars) pars <- grep("^_transformed", pars, value = T, invert = T)
   }
 
   # Sort and filter output
-  rstan::summary(stanfit, pars = pars, ...)$summary %>%
+  full_summary <-
+    rstan::summary(stanfit, pars = pars, ...)$summary %>%
     as.data.frame() %>%
     rownames_to_column("Parameter") %>%
     mutate(
@@ -69,6 +72,27 @@ summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE
     separate(index, into = c("i1", "i2", "i3", "i4"), sep = ",", fill = "right") %>%
     arrange(distribution, name, i1, i2, i3, i4) %>%
     select(-c(name, distribution, i1, i2, i3, i4))
+
+
+  Rhats <- full_summary[, "Rhat"]
+  if (any(Rhats > 1.05, na.rm = TRUE)) {
+    warning2(
+      "Parts of the model have not converged (some Rhats are > 1.05). ",
+      "Be careful when analysing the results! We recommend running ",
+      "more iterations and/or setting stronger priors."
+    )
+  }
+  div_trans <- sum(nuts_params(x, pars = "divergent__")$Value)
+  adapt_delta <- control_params(x)$adapt_delta
+  if (div_trans > 0) {
+    warning2(
+      "There were ", div_trans, " divergent transitions after warmup. ",
+      "Increasing adapt_delta above ", adapt_delta, " may help. See ",
+      "http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup"
+    )
+  }
+
+  return(full_summary)
 }
 
 #' #' loo moment matching for NIW ideal adaptor stanfit

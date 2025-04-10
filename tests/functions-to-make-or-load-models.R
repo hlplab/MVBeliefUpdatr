@@ -624,16 +624,28 @@ make_data_for_3Dstanfit_without_exposure <- function() {
 
 get_example_stanfit <- function(
     example = 1,
-    center.observations = T, scale.observations = F,
-    stanmodel = "mvg_conj_sufficient_stats_lapse_cholesky",
     silent = 2, refresh = 0,
     seed = 42,
+    file_refit = "on_change",
+    stanmodel = NULL,
+    center.observations = NULL,
+    scale.observations = NULL,
+    pca.observations = NULL,
+    transform_type = "PCA whiten",
     ...
 ) {
   filename <-
     paste0(
       "../example-stanfit", example, "-",
-      paste(c(if (!is.null(stanmodel)) stanmodel else "", seed, center.observations, scale.observations), collapse = "-"),
+      paste(
+        c(
+          if (!is.null(stanmodel)) stanmodel else "",
+          seed,
+          if (!is.null(center.observations)) center.observations else "",
+          if (!is.null(scale.observations)) scale.observations else "",
+          if (!is.null(pca.observations)) pca.observations else "",
+          if (!is.null(transform_type)) transform_type else ""),
+        collapse = "-"),
       ".rds")
 
   if (file.exists(filename)) {
@@ -655,10 +667,12 @@ get_example_stanfit <- function(
         response = "Response",
         group = "Subject",
         group.unique = "Condition",
-        center.observations = center.observations, scale.observations = scale.observations,
+        center.observations = center.observations,
+        scale.observations = scale.observations,
+        pca.observations = pca.observations,
+        transform_type = transform_type,
         stanmodel = stanmodel,
-        control = list(adapt_delta = 0.9),
-        file = filename,
+        file = filename, file_refit = file_refit,
         refresh = refresh,
         silent = silent,
         cores = 4,

@@ -14,7 +14,7 @@ plot_parameters(fit, ...)
   groups = get_group_levels(model, include_prior = T),
   cues = get_cue_levels(model),
   ndraws = NULL,
-  untransform_cues = TRUE,
+  untransform_cues = FALSE,
   panel_scaling = F,
   group.colors = get_default_colors("group", groups)
 )
@@ -29,7 +29,7 @@ are automatically added to the fit during the creation of the fit. If necessary,
 
 \item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
 
-\item{untransform_cues}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
+\item{untransform_cues}{DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)}
 
 \item{panel_scaling}{Should the relative scaling be calculated separately for each panel? If not the scaling is calculated
 globally. (default: `FALSE`)}

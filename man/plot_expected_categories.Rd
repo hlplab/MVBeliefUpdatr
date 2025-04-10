@@ -68,7 +68,7 @@ plot_expected_categories_density2D(model, ...)
   plot.test = T,
   plot.exposure = F,
   annotate_inferred_category_means = c("rug", "text"),
-  untransform_cues = TRUE,
+  untransform_cues = FALSE,
   levels = plogis(seq(-15, qlogis(0.95), length.out = 20)),
   category.colors = get_default_colors("category", categories)
 )
@@ -101,7 +101,7 @@ plot_expected_categories_density2D(model, ...)
   plot.test = T,
   plot.exposure = F,
   annotate_inferred_category_means = c("rug", "text"),
-  untransform_cues = TRUE,
+  untransform_cues = FALSE,
   category.colors = get_default_colors("category", categories),
   xlim = NULL,
   resolution = 101
@@ -116,7 +116,7 @@ plot_expected_categories_density2D(model, ...)
   plot.test = T,
   plot.exposure = F,
   annotate_inferred_category_means = c("rug", "text"),
-  untransform_cues = TRUE,
+  untransform_cues = FALSE,
   category.colors = get_default_colors("category", categories),
   xlim = NULL,
   ylim = NULL,
@@ -166,7 +166,7 @@ expected categories.}
 \item{annotate_inferred_category_means}{Character vector indicating whether the location and value of the mean be
 indicated through data rugs (`"rug"`) and/or text labels (`"text"`)? Set to NULL to ignore. (default: `c("rug", "text")`)}
 
-\item{untransform_cues}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
+\item{untransform_cues}{DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)}
 
 \item{xlim, ylim}{Limits for the x- and y-axis.}
 

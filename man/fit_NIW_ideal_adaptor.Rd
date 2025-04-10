@@ -6,8 +6,6 @@
 \usage{
 fit_NIW_ideal_adaptor(
   staninput,
-  untransform_fit = FALSE,
-  sample = TRUE,
   file = NULL,
   file_refit = "never",
   file_compress = T,
@@ -15,19 +13,20 @@ fit_NIW_ideal_adaptor(
   backend = "rstan",
   save_pars = NULL,
   basis = NULL,
-  init = NULL,
+  chains = 4,
+  iter = 2000,
+  warmup = 1000,
+  init = "random",
   control = NULL,
   silent = 1,
   stan_model_args = list(),
   stanmodel = NULL,
+  rename = T,
   ...
 )
 }
 \arguments{
 \item{staninput}{A list of the type that would be returned by \code{\link{make_staninput_for_NIW_ideal_adaptor}}.}
-
-\item{untransform_fit}{Logical flag indicating whether the samples of the model should be transformed back
-into the original cue space by applying the untransform function. (default: \code{FALSE})}
 
 \item{file}{Either NULL or a character string. In the latter case, the fitted model object is saved
 via saveRDS in a file named after the string supplied in file. The .rds extension is added automatically.
@@ -72,7 +71,9 @@ as well. If using \code{backend = "rstan"} you can also set
 
 \item{stanmodel}{Name of stanmodel that should be used. Overrides any default selection.}
 
-\item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}}
+\item{rename}{For internal use only.}
+
+\item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}.}
 }
 \value{
 An object of class \code{NIW_ideal_adaptor_stanfit} with the fitted stan model. In interpreting the

@@ -23,7 +23,7 @@ plot_expected_categorization(model, ...)
   category.colors = get_default_colors("category", get_category_levels(model)),
   all_test_locations = TRUE,
   plot_in_cue_space = FALSE,
-  untransform_cues = TRUE,
+  untransform_cues = FALSE,
   sort_by = if (plot_in_cue_space) NULL else "prior"
 )
 }
@@ -62,8 +62,8 @@ combinations be shown that actually occurred in the data? (default: `FALSE`)}
 \item{plot_in_cue_space}{Currently only available if the model has one or two cues. Should predictions be plotted in the cue space?
 If not, test tokens are treated as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)}
 
-\item{untransform_cues}{Should the cues be untransformed before plotting? This should only have visual consequences
-if `plot_in_cue_space = T`. (default: `TRUE`)}
+\item{untransform_cues}{DEPRECATED. Should the cues be untransformed before plotting? This should only have visual consequences
+if `plot_in_cue_space = T`. (default: `FALSE`)}
 
 \item{sort_by}{Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
 from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired. (default: `"prior"`)}

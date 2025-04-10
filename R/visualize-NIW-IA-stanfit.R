@@ -25,7 +25,7 @@ NULL
 #' (default: all categories/groups/cues will be plotted)
 #' @param which Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
-#' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
+#' @param untransform_cues DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)
 #' @param group.colors Vector of fill colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)
 #' @param panel_scaling Should the relative scaling be calculated separately for each panel? If not the scaling is calculated
 #' globally. (default: `FALSE`)
@@ -49,7 +49,7 @@ plot_parameters.NIW_ideal_adaptor_stanfit <- function(
   groups = get_group_levels(model, include_prior = T),
   cues = get_cue_levels(model),
   ndraws = NULL,
-  untransform_cues = TRUE,
+  untransform_cues = FALSE,
   panel_scaling = F,
   group.colors = get_default_colors("group", groups)
 ) {
@@ -185,7 +185,7 @@ plot_parameters.NIW_ideal_adaptor_stanfit <- function(
 #'
 #' (default: all categories, cues, and parameters in the model; `"prior"` for group since those are the only free parameters).
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
-#' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
+#' @param untransform_cues DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)
 #' @param category.colors Vector of fill colors of same length as category or `NULL` to use defaults. (default: `NULL`)
 #'
 #' @return ggplot object.
@@ -215,7 +215,7 @@ plot_parameter_correlations.NIW_ideal_adaptor_stanfit <- function(
   cues = get_cue_levels(model),
   pars = NULL,
   ndraws = NULL,
-  untransform_cues = TRUE,
+  untransform_cues = FALSE,
   category.colors = get_default_colors("category", categories)
 ) {
   assert_that(is.null(pars) || is.character(pars))
@@ -335,8 +335,8 @@ plot_parameter_correlations.NIW_ideal_adaptor_stanfit <- function(
 #' combinations be shown that actually occurred in the data? (default: `FALSE`)
 #' @param plot_in_cue_space Currently only available if the model has one or two cues. Should predictions be plotted in the cue space?
 #' If not, test tokens are treated as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)
-#' @param untransform_cues Should the cues be untransformed before plotting? This should only have visual consequences
-#' if `plot_in_cue_space = T`. (default: `TRUE`)
+#' @param untransform_cues DEPRECATED. Should the cues be untransformed before plotting? This should only have visual consequences
+#' if `plot_in_cue_space = T`. (default: `FALSE`)
 #' @param sort_by Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
 #' from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired. (default: `"prior"`)
 #'
@@ -369,7 +369,7 @@ plot_expected_categorization.NIW_ideal_adaptor_stanfit <- function(
   category.colors = get_default_colors("category", get_category_levels(model)),
   all_test_locations = TRUE,
   plot_in_cue_space = FALSE,
-  untransform_cues = TRUE,
+  untransform_cues = FALSE,
   sort_by = if (plot_in_cue_space) NULL else "prior"
 ) {
   if (is.null(data.test)) data.test <- get_test_data(model)

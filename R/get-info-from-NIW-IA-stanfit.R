@@ -171,6 +171,7 @@ get_untransform_function.NIW_ideal_adaptor_stanfit <- function(x) {
 #' object.
 #'
 #' @param x \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param which Should "transformed" or "untransformed" staninput be returned or "both"? (default: `"untransformed"`)
 #'
 #' @return A list with element names and structures determined by the type of stanfit model.
 #'
@@ -183,10 +184,18 @@ get_staninput <- function(x, ...) {
 
 #' @rdname get_staninput
 #' @export
-get_staninput.NIW_ideal_adaptor_stanfit <- function(x) {
+get_staninput.NIW_ideal_adaptor_stanfit <- function(x, which = c("untransformed", "transformed", "both")[1]) {
   assert_that(is.NIW_ideal_adaptor_stanfit(x))
 
-  return(x$staninput)
+  if (which == "untransformed") {
+    return(x$staninput$untransformed)
+  } else if (which == "transformed") {
+    return(x$staninput$transformed)
+  } else if (which == "both") {
+    return(x$staninput)
+  } else {
+    stop2('which must be one of "untransformed", "transformed", or "both".')
+  }
 }
 
 #' Set the input data from an NIW ideal adaptor stanfit
@@ -196,6 +205,9 @@ get_staninput.NIW_ideal_adaptor_stanfit <- function(x) {
 #'
 #' @param x \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param staninput A list with element names and structures determined by the type of stanfit model.
+#' @param which Should "transformed" or "untransformed" staninput be set or "both"? (default: `"both"`)
+#'
+#' @return A list with element names and structures determined by the type of stanfit model.
 #'
 #' @return An \code{\link{NIW_ideal_adaptor_stanfit}} object with the updated staninput.
 #'
@@ -208,9 +220,18 @@ set_staninput <- function(x, ...) {
 
 #' @rdname set_staninput
 #' @export
-set_staninput.NIW_ideal_adaptor_stanfit <- function(x, staninput) {
+set_staninput.NIW_ideal_adaptor_stanfit <- function(x, staninput, which = c("untransformed", "transformed", "both")[3]) {
   assert_that(is.NIW_ideal_adaptor_stanfit(x))
-  x$staninput <- staninput
+
+  if (which == "both") {
+    x$staninput <- staninput
+  } else if (which == "transformed") {
+    x$staninput$transformed <- staninput
+  } else if (which == "untransformed") {
+    x$staninput$untransformed <- staninput
+  } else {
+    stop2('which must be one of "untransformed", "transformed", or "both".')
+  }
 
   return(x)
 }
@@ -220,7 +241,7 @@ set_staninput.NIW_ideal_adaptor_stanfit <- function(x, staninput) {
 #' Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an
 #' \code{\link{NIW_ideal_adaptor_stanfit}}.
 #'
-#' @param fit An \code{\link{NIW_ideal_adaptor_stanfit}}.
+#' @param x An \code{\link{NIW_ideal_adaptor_stanfit}}.
 #' @param categories Character vector with categories for which category statistics are to be
 #' returned. (default: all categories)
 #' @param groups Character vector with groups for which category statistics are to be
@@ -228,7 +249,8 @@ set_staninput.NIW_ideal_adaptor_stanfit <- function(x, staninput) {
 #' @param statistic Which exposure statistic should be returned? `n` for number of observations, `mean` for
 #' category mean, `css` or `uss` for centered or uncentered category sum-of-square matrix, `cov` for the
 #' category covariance matrix, or a character vector with any combination thereof. (default: all)
-#' @param untransform_cues Should statistics be transformed back into the original cue space? (default: `TRUE`)
+#' @param untransform_cues DEPRECATED. Should statistics be transformed back into the original cue space? (default: `FALSE`)
+#' @param ... additional arguments to \code{\link{get_staninput}}.
 #'
 #' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
 #' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
@@ -238,58 +260,59 @@ set_staninput.NIW_ideal_adaptor_stanfit <- function(x, staninput) {
 #' @keywords TBD
 #' @importFrom magrittr %<>%
 #' @export
-get_exposure_category_statistic <- function(fit, ...) {
+get_exposure_category_statistic <- function(x, ...) {
   UseMethod("get_exposure_category_statistic")
 }
 
 #' @rdname get_exposure_category_statistic
 #' @export
-get_exposure_category_mean <- function(fit, ...) {
+get_exposure_category_mean <- function(x, ...) {
   UseMethod("get_exposure_category_mean")
 }
 
 #' @rdname get_exposure_category_statistic
 #' @export
-get_exposure_category_css <- function(fit, ...) {
+get_exposure_category_css <- function(x, ...) {
   UseMethod("get_exposure_category_css")
 }
 
 #' @rdname get_exposure_category_statistic
 #' @export
-get_exposure_category_uss <- function(fit, ...) {
+get_exposure_category_uss <- function(x, ...) {
   UseMethod("get_exposure_category_uss")
 }
 
 #' @rdname get_exposure_category_statistic
 #' @export
-get_exposure_category_cov <- function(fit, ...) {
+get_exposure_category_cov <- function(x, ...) {
   UseMethod("get_exposure_category_cov")
 }
 
 #' @rdname get_exposure_category_statistic
 #' @export
 get_exposure_category_statistic.NIW_ideal_adaptor_stanfit <- function(
-  fit,
-  categories = get_category_levels(fit),
-  groups = get_group_levels(fit, include_prior = FALSE),
+  x,
+  categories = get_category_levels(x),
+  groups = get_group_levels(x, include_prior = FALSE),
   statistic = c("n", "mean", "css", "uss", "cov"),
-  untransform_cues = TRUE
+  untransform_cues = FALSE,
+  ...
 ) {
   assert_that(all(statistic %in% c("n", "mean", "css", "uss", "cov")),
               msg = "statistic must be one of 'n', mean', 'css', 'uss', or 'cov'.")
   assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
   assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
-  assert_that(all(categories %in% get_category_levels(fit)),
+  assert_that(all(categories %in% get_category_levels(x)),
               msg = paste("Some categories not found in the exposure data:",
-                          paste(setdiff(categories, get_category_levels(fit)), collapse = ", ")))
-  assert_that(all(groups %in% get_group_levels(fit)),
+                          paste(setdiff(categories, get_category_levels(x)), collapse = ", ")))
+  assert_that(all(groups %in% get_group_levels(x)),
               msg = paste("Some groups not found in the exposure data:",
-                          paste(setdiff(groups, get_group_levels(fit, include_prior = FALSE)), collapse = ", ")))
-  x <- get_staninput.NIW_ideal_adaptor_stanfit(fit)
+                          paste(setdiff(groups, get_group_levels(x, include_prior = FALSE)), collapse = ", ")))
+  x <- get_staninput(x, ...)
 
   df <- NULL
   # (If untransform_cues is TRUE, all statistics first need to be calculated because of the approach
-  # taken below to untrasnform the statistics.)
+  # taken below to untransform the statistics.)
 
   # Get counts n
   if (any(untransform_cues, c("n", "css", "cov") %in% statistic)) {
@@ -387,9 +410,9 @@ get_exposure_category_statistic.NIW_ideal_adaptor_stanfit <- function(
     # Obtain untransformed uss and/or css from cov by walking back/undoing above steps
     # (direct transform of uss)
     # BE VERY CAREFUL IN CHANGING THIS ORDER OR MOVING PARTS OF THIS UP, BECAUSE OF THE DEPENDENCIES BETWEEN THE OPERATIONS
-    { if (untransform_cues & "cov" %in% statistic) mutate(., cov = map(.data$cov, ~ untransform_category_cov(.x, get_transform_information(fit)))) else . } %>%
+    { if (untransform_cues & "cov" %in% statistic) mutate(., cov = map(.data$cov, ~ untransform_category_cov(.x, get_transform_information(x)))) else . } %>%
     { if (untransform_cues & any(c("css", "uss") %in% statistic)) mutate(., css = map2(.data$cov, n, cov2css)) else . } %>%
-    { if (untransform_cues & any(c("uss", "mean") %in% statistic)) mutate(., mean = map(.data$mean, ~ untransform_category_mean(.x, get_transform_information(fit)))) else . } %>%
+    { if (untransform_cues & any(c("uss", "mean") %in% statistic)) mutate(., mean = map(.data$mean, ~ untransform_category_mean(.x, get_transform_information(x)))) else . } %>%
     { if (untransform_cues & "uss" %in% statistic) mutate(., uss = pmap(.l = list(.data$cov, .data$n, .data$mean), css2uss)) else . } %>%
     select(group, category, !!! syms(statistic)) %>%
     filter(., .data[["group"]] %in% .env[["groups"]]) %>%
@@ -439,6 +462,7 @@ get_exposure_category_cov.NIW_ideal_adaptor_stanfit <- function(...) {
 #' are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
 #' \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
 #' (default: all categories/groups will be selected)
+#' @param ... additional arguments to \code{\link{get_staninput}}.
 #'
 #' @return A \code{tibble} in which each row is a test token. Columns include the cues
 #' and the response counts (one column per category) for all test tokens and all groups.
@@ -454,9 +478,10 @@ get_test_data <- function(fit, ...) {
 #' @export
 get_test_data.NIW_ideal_adaptor_stanfit <- function(
   fit,
-  groups = get_group_levels(fit, include_prior = FALSE)
+  groups = get_group_levels(fit, include_prior = FALSE),
+  ...
 ) {
-  data <- get_staninput.NIW_ideal_adaptor_stanfit(fit)
+  data <- get_staninput(fit, ...)
   data[["x_test"]] %>%
     cbind(data[["z_test_counts"]]) %>%
     as_tibble(.name_repair = "minimal") %>%
@@ -632,7 +657,7 @@ get_cue2_constructor <- function(x) {
 #' (default: all groups)
 #' @param statistic Which category statistic should be returned? `mu` for category mean or `Sigma` for category
 #' covariance matrix, or `c("mu", "Sigma")` for both. (default: both)
-#' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
+#' @param untransform_cues DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)
 #'
 #' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
 #' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
@@ -660,7 +685,7 @@ get_expected_category_statistic.NIW_ideal_adaptor_stanfit <- function(
   categories = get_category_levels(x),
   groups = get_group_levels(x, include_prior = TRUE),
   statistic = c("mu", "Sigma"),
-  untransform_cues = TRUE
+  untransform_cues = FALSE
 ) {
   assert_that(all(statistic %in% c("mu", "Sigma")))
   assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
@@ -733,7 +758,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws <- function(fit, ...
 #' @param fit \code{\link{NIW_ideal_adaptor_stanfit}} object.
 #' @param which DEPRECATED. Use `groups` instead. Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)
 #' @param ndraws Number of random draws or `NULL` if all draws are to be returned. Only `draws` or `ndraws` should be non-zero. (default: `NULL`)
-#' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
+#' @param untransform_cues DEPRECATED Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)
 #' @param wide Should all parameters be returned in one row? (default: `FALSE`)
 #' @param nest Should the category mean vectors and scatter matrices be nested into one cell each, or should each element
@@ -774,7 +799,11 @@ get_draws.NIW_ideal_adaptor_stanfit <- function(
   which = if ("prior" %in% groups) { if (length(groups) > 1) "both" else "prior" } else "posterior",
   ##### END OF SPECIAL HANDLING
   ndraws = NULL,
-  untransform_cues = TRUE,
+  ##### UNTRANSFORM_CUES (HERE AND ELSEWHERE) IS NO LONGER NEEDED, NOW THAT CUES ARE UNTRANSFORMED
+  # WITHIN STAN. BUT WE CAN CHANGE THIS ARGUMENT TO TRANSFORM, AND ALLOW USERS TO HAND AN AFFINE
+  # TRANSFORM THAT IS THEN APPLIED TO THE CUES?
+  untransform_cues = FALSE,
+  #####
   summarize = FALSE,
   wide = FALSE,
   nest = TRUE,
@@ -838,7 +867,7 @@ get_draws.NIW_ideal_adaptor_stanfit <- function(
     # Variables by which parameters are indexed
     pars.index <- if ("prior" %in% groups) "category" else c("category", "group")
 
-    stanfit <- get_stanfit.NIW_ideal_adaptor_stanfit(fit)
+    stanfit <- get_stanfit(fit)
     # Get non-nested draws
     if ("prior" %in% groups) {
       d.pars <-
@@ -878,7 +907,16 @@ get_draws.NIW_ideal_adaptor_stanfit <- function(
       } else . } %>%
       { if ("prior" %in% groups) mutate(., group = "prior") else . } %>%
       filter(.data$group %in% .env$groups, .data$category %in% .env$categories) %>%
-      relocate(.chain, .iteration, .draw, group, category, kappa, nu, m, S, lapse_rate)
+      relocate(.chain, .iteration, .draw, group, category, kappa, nu, cue, cue2, m, S, lapse_rate)
+
+    # Check that all samples are well-formed
+    d.pars %>%
+      ungroup() %>%
+      summarise(
+        across(
+          c(kappa, nu, m, S, lapse_rate),
+          ~ all(!is.na(.x) & !is.nan(.x) & !is.infinite(.x)))) %>%
+      { if (!all(.)) stop2("Some draws are not well-formed (NA, NaN, infinite values). This likely means that there was an issue during the fitting of the stanfit object") }
 
     if (untransform_cues) {
       d.pars %<>%

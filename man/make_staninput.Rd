@@ -15,17 +15,14 @@ make_staninput_for_NIW_ideal_adaptor(
   response = "response",
   group = "group",
   group.unique = NULL,
-  center.observations = T,
-  scale.observations = F,
-  pca.observations = F,
-  pca.cutoff = 1,
   lapse_rate = NULL,
   mu_0 = NULL,
   Sigma_0 = NULL,
-  tau_scale = NULL,
+  tau_scale = rep(5, length(cues)),
   L_omega_eta = 1,
+  transform_type = c("identity", "center", "standardize", "PCA whiten", "ZCA whiten")[4],
+  use_univariate_updating = F,
   split_loglik_per_observation = 0,
-  use_univariate_updating = FALSE,
   verbose = F
 )
 }
@@ -50,31 +47,6 @@ a variable identifying subjects/participants. Must exist in both exposure and te
 variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
 substantially more efficient if many groups share the same exposure. To ignore, set to \code{NULL}. (default: \code{NULL})}
 
-\item{center.observations}{Should the data be centered based on cues' means during exposure? Note that the cues' means
-used for centering are calculated after aggregating the data to all unique combinations specified by \code{group.unique}.
-These means are only expected to be the same as the standard deviations over the entire exposure data if the exposure data
-are perfectly balanced with regard to \code{group.unique}. Centering will not affect the inferred correlation
-or covariance matrices but it will affect the absolute position of the inferred means. The relative position of the inferred
-means remains unaffected.
-If \code{TRUE} and \code{mu_0} is specified, \code{mu_0} will also be centered (\code{Sigma_0} is not affected by centering and thus not changed).
-(default: \code{TRUE})}
-
-\item{scale.observations}{Should the data be standardized based on cues' standard deviation during exposure? Note that the
-cues' standard deviations used for scaling are calculated after aggregating the data to all unique combinations specified
-by \code{group.unique}. These standard deviations are only expected to be the same as the standard deviations over the entire
-exposure data if the exposure data are perfectly balanced with regard to \code{group.unique}.
-Scaling will not affect the inferred correlation matrix,
-but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
-affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
-If \code{TRUE} and \code{mu_0} and \code{Sigma_0} are specified, \code{mu_0} and \code{Sigma_0} will also be scaled.
-(default: `FALSE`)}
-
-\item{pca.observations}{Should the data be transformed into orthogonal principal components? (default: \code{FALSE})}
-
-\item{pca.cutoff}{Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
-components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
-\code{pca.observation = FALSE}. (default: 1)}
-
 \item{lapse_rate, mu_0, Sigma_0}{Optionally, lapse rate, prior expected category means (\code{mu_0}) and/or prior expected
 category covariance matrices (\code{Sigma_0}) for all categories. Lapse rate should be a number between 0 and 1. For \code{mu_0}
 and \code{Sigma_0}, each should be a list, with each element being the expected mean/covariance matrix for a specific
@@ -93,12 +65,17 @@ both the prior for m_0 and the prior for S_0. (default: vector of 5s if scale.ob
 \item{L_omega_eta}{A vector of etas of the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. (default: 1,
 which corresponds to a uniform prior of correlation matrices)}
 
+\item{transform_type}{An affine transformation that can be applied to the data. See `type` in \code{\link{get_affine_transform}}
+for details. (default: "PCA whiten")}
+
 \item{split_loglik_per_observation}{Optionally, split the log likelihood per observation. This can be helpful of leave-one-out
 estimation in order to avoid high Pareto k, but it also makes the stored stanfit object much larger. (default: 0)}
 }
 \value{
-A list consisting of a \code{data_list} and \code{transform_information}. The former that is an
-\code{NIW_ideal_adaptor_staninput}.
+A list consisting of:
+  * `data`: A data.frame with the exposure and test data after exclusion of NAs and other checks.
+  * `staninput`: A named list of variables and values to be handed to Stan.
+  * `transform_information`: A list with information about the transformation that was applied to the data.
 }
 \description{
 Take exposure and test data as input, and prepare the data for input into an MVBeliefUpdatr Stan program.

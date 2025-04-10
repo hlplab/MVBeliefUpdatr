@@ -16,6 +16,7 @@ infer_prior_beliefs(
   scale.observations = FALSE,
   pca.observations = FALSE,
   pca.cutoff = 1,
+  transform_type = NULL,
   lapse_rate = NULL,
   mu_0 = NULL,
   Sigma_0 = NULL,
@@ -24,6 +25,7 @@ infer_prior_beliefs(
   split_loglik_per_observation = 0,
   stanmodel = NULL,
   verbose = FALSE,
+  silent = 1,
   ...
 )
 }
@@ -48,30 +50,8 @@ a variable identifying subjects/participants. Must exist in both exposure and te
 variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
 substantially more efficient if many groups share the same exposure. To ignore, set to \code{NULL}. (default: \code{NULL})}
 
-\item{center.observations}{Should the data be centered based on cues' means during exposure? Note that the cues' means
-used for centering are calculated after aggregating the data to all unique combinations specified by \code{group.unique}.
-These means are only expected to be the same as the standard deviations over the entire exposure data if the exposure data
-are perfectly balanced with regard to \code{group.unique}. Centering will not affect the inferred correlation
-or covariance matrices but it will affect the absolute position of the inferred means. The relative position of the inferred
-means remains unaffected.
-If \code{TRUE} and \code{mu_0} is specified, \code{mu_0} will also be centered (\code{Sigma_0} is not affected by centering and thus not changed).
-(default: \code{TRUE})}
-
-\item{scale.observations}{Should the data be standardized based on cues' standard deviation during exposure? Note that the
-cues' standard deviations used for scaling are calculated after aggregating the data to all unique combinations specified
-by \code{group.unique}. These standard deviations are only expected to be the same as the standard deviations over the entire
-exposure data if the exposure data are perfectly balanced with regard to \code{group.unique}.
-Scaling will not affect the inferred correlation matrix,
-but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
-affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
-If \code{TRUE} and \code{mu_0} and \code{Sigma_0} are specified, \code{mu_0} and \code{Sigma_0} will also be scaled.
-(default: `FALSE`)}
-
-\item{pca.observations}{Should the data be transformed into orthogonal principal components? (default: \code{FALSE})}
-
-\item{pca.cutoff}{Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
-components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
-\code{pca.observation = FALSE}. (default: 1)}
+\item{transform_type}{An affine transformation that can be applied to the data. See `type` in \code{\link{get_affine_transform}}
+for details. (default: "PCA whiten")}
 
 \item{lapse_rate, mu_0, Sigma_0}{Optionally, lapse rate, prior expected category means (\code{mu_0}) and/or prior expected
 category covariance matrices (\code{Sigma_0}) for all categories. Lapse rate should be a number between 0 and 1. For \code{mu_0}
@@ -96,7 +76,15 @@ estimation in order to avoid high Pareto k, but it also makes the stored stanfit
 
 \item{stanmodel}{Name of stanmodel that should be used. Overrides any default selection.}
 
-\item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}}
+\item{silent}{Verbosity level between \code{0} and \code{2}.
+If \code{1} (the default), most of the
+informational messages of compiler and sampler are suppressed.
+If \code{2}, even more messages are suppressed. The actual
+sampling progress is still printed. Set \code{refresh = 0} to turn this off
+as well. If using \code{backend = "rstan"} you can also set
+\code{open_progress = FALSE} to prevent opening additional progress bars.}
+
+\item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}.}
 }
 \description{
 Use \code{\link{infer_NIW_ideal_adaptor()}} instead, together with \code{\link{make_staninput_for_NIW_ideal_adaptor()}}.

@@ -4,14 +4,16 @@
 * that the subject knows the true labels of all the input stimuli (e.g.,
 * doesn't model any uncertainty in classification.
 *
-* This version has a lapse rate parameter (probability of random guessing)
+* Sufficient statistics and (if provided) prior mu_0 and Sigma_0 are assumed
+* to be in the space defined by an affine transformation f(x) = SCALE(x + shift).
+* Typically, that's the space obtained by whitening or standardizing the exposure
+* data.
 *
-* Input is in the form of raw data points for observations.
-*
+* This version operates in Cholesky space.
 *
 * Modified by
 * Florian Jaeger
-* May 2025
+* April 2025
 */
 
 data {
@@ -42,6 +44,13 @@ data {
   */
   vector<lower=0>[mu_0_known ? 0 : K] tau_scale;           // separate taus for each of the K features to capture that features can be on separate scales
   real<lower=0> L_omega_eta;                                // eta of LKJ prior for correlation of variance of m_0
+
+  /* The data above are assumed to have been transformed by a sensible affine transformation f(x) = A(x - center)
+     (e.g., by scaling or whitening the data) in order to improve numerical stability. A_inv and center are used
+     below in order to transform the parameters of interest back into the original space.
+  */
+  matrix[K, K] INV_SCALE;                                  // Inverse of transformation matrix (must be invertible) that was applied to data
+  vector[K] shift;                                         // Center of affine transformation that was applied to data
 
   int<lower=0, upper=1> split_loglik_per_observation;
 }
@@ -228,20 +237,25 @@ generated quantities {
     }
   }
 
-
-  matrix[mu_0_known ? 0 : K,mu_0_known ? 0 : K] m_0_cov;
-  if (!mu_0_known) {
-    matrix[mu_0_known ? 0 : K,mu_0_known ? 0 : K] m_0_cor = multiply_lower_tri_self_transpose(m_0_L_omega);
-    m_0_cov = quad_form_diag(m_0_cor, m_0_tau);
+  // Inverse transform parameters back into the original space
+  array[M] vector[K] m_0_original;
+  array[M] cov_matrix[K] S_0_original;
+  array[M,L] vector[K] m_n_original;
+  array[M,L] cov_matrix[K] S_n_original;
+  for (cat in 1:M) {
+    m_0_original[cat] = INV_SCALE * m_0[cat] - shift;
+    // Get S_0 from its Cholesky factors
+    S_0_original[cat] = INV_SCALE * multiply_lower_tri_self_transpose(L_S_0[cat]) * INV_SCALE';
+    for (group in 1:L) {
+      m_n_original[cat,group] = INV_SCALE * m_n[cat,group] - shift;
+      // Get S_n from its Cholesky factors
+      S_n_original[cat,group] = INV_SCALE * multiply_lower_tri_self_transpose(L_S_n[cat,group]) * INV_SCALE';
+    }
   }
 
-  // Get S_0 and S_n from their Cholesky factors
-  array[M] cov_matrix[K] S_0;         // prior scatter matrix S_0
-  array[M,L] cov_matrix[K] S_n;       // Updated expected scatter matrix
-  for (cat in 1:M) {
-    S_0[cat] = multiply_lower_tri_self_transpose(L_S_0[cat]);
-    for (group in 1:L) {
-      S_n[cat,group] = multiply_lower_tri_self_transpose(L_S_n[cat,group]);
-    }
+  matrix[mu_0_known ? 0 : K,mu_0_known ? 0 : K] m_0_cov_original;
+  if (!mu_0_known) {
+    matrix[K,K] m_0_cor = multiply_lower_tri_self_transpose(m_0_L_omega);
+    m_0_cov_original = INV_SCALE * quad_form_diag(m_0_cor, m_0_tau) * INV_SCALE';
   }
 }

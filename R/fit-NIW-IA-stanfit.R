@@ -3,8 +3,6 @@
 #' Infers a posterior distribution of NIW_ideal _adaptors from the input data using Stan.
 #'
 #' @param staninput A list of the type that would be returned by \code{\link{make_staninput_for_NIW_ideal_adaptor}}.
-#' @param untransform_fit Logical flag indicating whether the samples of the model should be transformed back
-#'   into the original cue space by applying the untransform function. (default: \code{FALSE})
 #' @param backend Character string naming the package to use as the backend for
 #'   fitting the Stan model. Options are \code{"rstan"} (the default) or
 #'   \code{"cmdstanr"}. Details on the
@@ -41,7 +39,8 @@
 #'   "rstan"} or to \code{cmdstanr::cmdstan_model} for \code{backend =
 #'   "cmdstanr"}, which allows to change how models are compiled.
 #' @param stanmodel Name of stanmodel that should be used. Overrides any default selection.
-#' @param ... Additional parameters are passed to \code{\link[rstan]{sampling}}
+#' @param rename For internal use only.
+#' @param ... Additional parameters are passed to \code{\link[rstan]{sampling}}.
 #'
 #' @return An object of class \code{NIW_ideal_adaptor_stanfit} with the fitted stan model. In interpreting the
 #'   inferred parameters, it should be kept in mind that the \emph{inferred} scatter matrix S_0 includes
@@ -59,14 +58,13 @@
 #' @export
 fit_NIW_ideal_adaptor <- function(
   staninput,
-  untransform_fit = FALSE,
-  sample = TRUE,
   file = NULL, file_refit = "never", file_compress = T,
   # included for later use
   stanvars = NULL, backend = "rstan", save_pars = NULL, basis = NULL,
-  init = NULL, control = NULL, silent = 1, stan_model_args = list(),
+  chains = 4, iter = 2000, warmup = 1000,
+  init = "random", control = NULL, silent = 1, stan_model_args = list(),
   # Stuff to be deprecated in the future
-  stanmodel = NULL,
+  stanmodel = NULL, rename = T,
   ...
 ) {
   # optionally load NIW_ideal_adaptor_stanfit from file
@@ -88,7 +86,7 @@ fit_NIW_ideal_adaptor <- function(
 
   if (!is.null(stanmodel)) {
     assert_that(!is.null(stanmodels[[stanmodel]]),
-                msg = paste("The specified stanmodel does not exist. Allowable models include:", names(MVBeliefUpdatr:::stanmodels)))
+                msg = paste("The specified stanmodel does not exist. Allowable models include:", paste(names(MVBeliefUpdatr:::stanmodels), collapse = ", ")))
   }
 
 
@@ -120,29 +118,34 @@ fit_NIW_ideal_adaptor <- function(
       basis = basis,
       file = file)
 
-  current_default_modelname <- 'mvg_conj_sufficient_stats_lapse_cholesky'
   stanfit <- NULL
-  if (sample) {
-    if (is.null(stanmodel) || stanmodel == current_default_modelname) {
-      # Parameters *not* to store
-      exclude_pars <-
-        c("lapse_rate_param",
-          "m_0_param", "m_0_tau", "m_0_tau_param", "m_0_L_omega", "m_0_L_omega_param",
-          "tau_0_param", "L_omega_0_param", "L_S_0", "L_S_n", "L_t_scale",
-          "p_test_conj", "log_p_test_conj")
+  if (chains > 0 & iter > 0) {
+    # Parameters *not* to store
+    exclude_pars <-
+      c("lapse_rate_param",
+        "m_0_param", "m_0_tau", "m_0_tau_param", "m_0_L_omega", "m_0_L_omega_param",
+        "tau_0_param", "L_omega_0_param", "L_S_0", "L_S_n", "L_t_scale",
+        "p_test_conj", "log_p_test_conj")
 
+    if (is.null(stanmodel)) {
+      current_default_modelname <- 'mvg_conj_sufficient_stats_lapse'
       stanfit <-
         sampling(
           MVBeliefUpdatr:::stanmodels[[current_default_modelname]],
-          data = staninput,
+          data = get_staninput(fit, which = "transformed"),
           pars = exclude_pars, include = FALSE,
+          chains = chains, iter = iter, warmup = warmup,
+          init = init, control = control,
           show_messages = !silent,
           ...)
     } else if (stanmodel %in% names(MVBeliefUpdatr:::stanmodels)) {
         stanfit <-
           sampling(
             MVBeliefUpdatr:::stanmodels[[stanmodel]],
-            data = staninput,
+            data = get_staninput(fit, which = "transformed"),
+            pars = exclude_pars, include = FALSE,
+            chains = chains, iter = iter, warmup = warmup,
+            init = init, control = control,
             show_messages = !silent,
             ...)
 
@@ -153,12 +156,10 @@ fit_NIW_ideal_adaptor <- function(
     } else {
       fit %<>% set_stanfit(stanfit)
       fit %<>% recover_types.NIW_ideal_adaptor_stanfit()
-    }
-  }
 
-  if (untransform_fit) {
-    message("untransform_fit has not yet been implemented. Returning unchanged fit.")
-  }
+      if (rename) fit %<>% rename_pars()
+    }
+  } else message("No sampling requested. Returning empty model object.")
 
   if (!is.null(fit) & !is.null(file)) {
     fit <- write_NIW_ideal_adaptor_stanfit(fit, file, compress = file_compress)

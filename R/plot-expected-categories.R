@@ -83,7 +83,7 @@ check_compatibility_between_NIW_belief_and_data <- function(
 #' @param ndraws Number of draws from posterior to use for plot, or `NULL` if all draws are to be returned. (default: `NULL`)
 #' @param annotate_inferred_category_means Character vector indicating whether the location and value of the mean be
 #' indicated through data rugs (`"rug"`) and/or text labels (`"text"`)? Set to NULL to ignore. (default: `c("rug", "text")`)
-#' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)
+#' @param untransform_cues DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)
 #' @param levels Used only if `type` is `"contour"`. levels The cumulative probability levels that should be plotted (using
 #' `geom_polygon()`) around the mean. By default the most transparent ellipse still drawn corresponds to .95.
 #' @param xlim,ylim For density plots. Limits for the x- and y-axis.
@@ -309,7 +309,7 @@ plot_expected_categories_contour2D.NIW_ideal_adaptor_stanfit <- function(
     plot.test = T,
     plot.exposure = F,
     annotate_inferred_category_means = c("rug", "text"),
-    untransform_cues = TRUE,
+    untransform_cues = FALSE,
     levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
     category.colors = get_default_colors("category", categories)
 ) {
@@ -532,7 +532,7 @@ plot_expected_categories_density1D.NIW_ideal_adaptor_stanfit <- function(
     plot.test = T,
     plot.exposure = F,
     annotate_inferred_category_means = c("rug", "text"),
-    untransform_cues = TRUE,
+    untransform_cues = FALSE,
     category.colors = get_default_colors("category", categories),
     xlim = NULL, resolution = 101
 ) {
@@ -642,7 +642,7 @@ plot_expected_categories_density2D.NIW_ideal_adaptor_stanfit <- function(
     plot.test = T,
     plot.exposure = F,
     annotate_inferred_category_means = c("rug", "text"),
-    untransform_cues = TRUE,
+    untransform_cues = FALSE,
     category.colors = get_default_colors("category", categories),
     xlim = NULL, ylim = NULL, resolution = 25
 ) {

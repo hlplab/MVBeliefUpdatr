@@ -7,14 +7,22 @@
 \usage{
 set_staninput(x, ...)
 
-\method{set_staninput}{NIW_ideal_adaptor_stanfit}(x, staninput)
+\method{set_staninput}{NIW_ideal_adaptor_stanfit}(
+  x,
+  staninput,
+  which = c("untransformed", "transformed", "both")[3]
+)
 }
 \arguments{
 \item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
 
 \item{staninput}{A list with element names and structures determined by the type of stanfit model.}
+
+\item{which}{Should "transformed" or "untransformed" staninput be set or "both"? (default: `"both"`)}
 }
 \value{
+A list with element names and structures determined by the type of stanfit model.
+
 An \code{\link{NIW_ideal_adaptor_stanfit}} object with the updated staninput.
 }
 \description{

@@ -130,6 +130,25 @@ make_parnames <- function(prefix, ...) {
   paste0(prefix, "[", apply(combinations, 1, paste0, collapse = ","), "]")
 }
 
+# modified from brms
+# https://github.com/paul-buerkner/brms/blob/315c7874d6e1b58eb9082e5e07521682f0dc2ca9/R/rename_pars.R
+rename_pars <- function(x) {
+  stopifnot(is.NIW_ideal_adaptor_stanfit(x))
+
+  chains <- length(x$stanfit@sim$samples)
+
+  x$stanfit@sim$fnames_oi <- gsub("(m|S)(_(0|n))\\[", "\\1\\2_transformed\\[", x$stanfit@sim$fnames_oi)
+  x$stanfit@sim$fnames_oi <- gsub("(m|S)(_(0|n))_original\\[", "\\1\\2\\[", x$stanfit@sim$fnames_oi)
+
+  for (i in seq_len(chains)) {
+    names(x$stanfit@sim$samples[[i]]) <- gsub("(m|S)(_(0|n))\\[", "\\1\\2_transformed\\[", names(x$stanfit@sim$samples[[i]]))
+    names(x$stanfit@sim$samples[[i]]) <- gsub("(m|S)(_(0|n))_original\\[", "\\1\\2\\[", names(x$stanfit@sim$samples[[i]]))
+  }
+
+  return(x)
+}
+
+
 
 #' Is this an NIW ideal adaptor stanfit?
 #'
@@ -189,13 +208,24 @@ is.NIW_ideal_adaptor_staninput <- function(x) {
   if (!is.data.frame(x$data)) return(FALSE)
   if (!is.list(x$transform_information)) return(FALSE)
 
-  # could add more checks here
+  # Checking presence of critical components
+  if(!all(c("transformed", "untransformed") %in% names(x$staninput))) return(FALSE)
   if(!all(c("transform.function", "untransform.function") %in% names(x$transform_information))) return(FALSE)
+
+  # Checking types of critical components
+  if(!all(map_lgl(x$staninput, is.list))) return(FALSE)
+  if(!all(map_lgl(list(x$transform_information$transform.function), is.function))) return(FALSE)
 
   return(TRUE)
 }
 
-
+# from brms
+contains_draws <- function(x) {
+  if (!(is.NIW_ideal_adaptor_stanfit(x) && length(get_stanfit(x)@sim))) {
+    stop2("The model does not contain posterior draws.")
+  }
+  invisible(TRUE)
+}
 
 # from brms
 # check validity of file name to store a stanfit object in

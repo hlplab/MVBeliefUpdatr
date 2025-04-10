@@ -7,9 +7,11 @@
 \usage{
 get_test_data(fit, ...)
 
-\method{get_test_data}{NIW_ideal_adaptor_stanfit}(fit, groups = get_group_levels(fit, include_prior = FALSE))
+\method{get_test_data}{NIW_ideal_adaptor_stanfit}(fit, groups = get_group_levels(fit, include_prior = FALSE), ...)
 }
 \arguments{
+\item{...}{additional arguments to \code{\link{get_staninput}}.}
+
 \item{groups}{Character vector of groups for which test data is requested. Typically, the levels of these factors
 are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
 \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.

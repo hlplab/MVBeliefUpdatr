@@ -14,7 +14,7 @@ get_expected_category_statistic(x, ...)
   categories = get_category_levels(x),
   groups = get_group_levels(x, include_prior = TRUE),
   statistic = c("mu", "Sigma"),
-  untransform_cues = TRUE
+  untransform_cues = FALSE
 )
 
 \method{get_expected_mu}{NIW_ideal_adaptor_stanfit}(x, ...)
@@ -33,7 +33,7 @@ returned. (default: all categories)}
 \item{statistic}{Which category statistic should be returned? `mu` for category mean or `Sigma` for category
 covariance matrix, or `c("mu", "Sigma")` for both. (default: both)}
 
-\item{untransform_cues}{Should m_0 and S_0 be transformed back into the original cue space? (default: `TRUE`)}
+\item{untransform_cues}{DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)}
 }
 \value{
 If just one group and category was requested, a vector (for the mean) or matrix (for the covariance

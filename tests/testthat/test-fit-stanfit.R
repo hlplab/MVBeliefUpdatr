@@ -2,22 +2,17 @@ context("fit stanfit")
 
 source("../functions-to-make-or-load-models.R")
 
-test_that("Test fitting stanfit", {
-  # Testing default model storage
-  expect_no_error(fit <- get_example_stanfit(1, center.observations = T, scale.observations = T, stanmodel = NULL))
-  # With scaling
-  expect_no_error(fit <- get_example_stanfit(1, center.observations = T, scale.observations = T))
-  expect_no_error(fit <- get_example_stanfit(2, center.observations = T, scale.observations = T))
-  expect_no_error(fit <- get_example_stanfit(3, center.observations = T, scale.observations = T))
-  # Without scaling
-  expect_no_error(fit <- get_example_stanfit(1, center.observations = T, scale.observations = F))
-  expect_no_error(fit <- get_example_stanfit(2, center.observations = T, scale.observations = F))
-  expect_no_error(fit <- get_example_stanfit(3, center.observations = T, scale.observations = F))
-  # Without scaling, old stanmodel
-  expect_no_error(fit <- get_example_stanfit(2, center.observations = T, scale.observations = F, stanmodel = "mvg_conj_sufficient_stats_lapse"))
-  # check that forcing multivariate updating works even if there is only one cue
-  expect_no_error(fit <- get_example_stanfit(1, center.observations = T, scale.observations = T, use_univariate_updating = F, iter = 100))
-  # forcing univariate updating should throw an error if and only if there is more than 1 cue
-  expect_no_error(fit <- get_example_stanfit(2, center.observations = T, scale.observations = T, use_univariate_updating = F, iter = 100))
+test_that("Test fitting transformations (one cue)", {
+  expect_no_error(fit <- get_example_stanfit(1, transform_type = "identity", control = list(adapt_delta = .95)))
+  expect_no_error(fit <- get_example_stanfit(1, transform_type = "center", control = list(adapt_delta = .95)))
+  expect_no_error(fit <- get_example_stanfit(1, transform_type = "standardize", control = list(adapt_delta = .95)))
+  expect_no_error(fit <- get_example_stanfit(1, transform_type = "PCA whiten", control = list(adapt_delta = .95)))
+  expect_no_error(fit <- get_example_stanfit(1, transform_type = "ZCA whiten", control = list(adapt_delta = .95)))
+  expect_error(fit <- get_example_stanfit(1, transform_type = "other"))
+})
+
+test_that("Test fitting for more than one cue", {
+  expect_no_error(fit <- get_example_stanfit(2, transform_type = "PCA whiten", control = list(adapt_delta = .975)))
+  expect_no_error(fit <- get_example_stanfit(3, transform_type = "PCA whiten", tau_scale = rep(2.5, 3), warmup = 1500, iter = 2500, control = list(adapt_delta = .995, max_treedepth = 15)))
 })
 

@@ -1,4 +1,4 @@
-context("get information from NIW - INITIAL TEST ONLY")
+context("get information from NIW")
 
 test_that("Get posterior predictive - input check x (are single 1D inputs accepted?)", {
   expect_no_error(get_NIW_posterior_predictive(

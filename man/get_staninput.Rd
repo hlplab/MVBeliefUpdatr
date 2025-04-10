@@ -7,10 +7,12 @@
 \usage{
 get_staninput(x, ...)
 
-\method{get_staninput}{NIW_ideal_adaptor_stanfit}(x)
+\method{get_staninput}{NIW_ideal_adaptor_stanfit}(x, which = c("untransformed", "transformed", "both")[1])
 }
 \arguments{
 \item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
+
+\item{which}{Should "transformed" or "untransformed" staninput be returned or "both"? (default: `"untransformed"`)}
 }
 \value{
 A list with element names and structures determined by the type of stanfit model.

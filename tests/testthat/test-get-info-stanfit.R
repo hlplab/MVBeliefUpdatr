@@ -29,11 +29,11 @@ test_that("add draws - output check (1 cue)", {
   expect_equal(nrow(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F) %>% distinct(.draw)), 10)
   expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), 2)
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T)),
-               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
+               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "m", "S", "lapse_rate"))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T, nest = T)),
-               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
+               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "m", "S", "lapse_rate"))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T, nest = F)),
-               c("cue", "cue2", ".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
+               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "cue", "cue2", "m", "S", "lapse_rate"))
 })
 
 
@@ -51,41 +51,41 @@ test_that("add draws - output check (2 cues)", {
   expect_equal(nrow(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F) %>% distinct(.draw)), 10)
   expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), 2)
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T)),
-               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
+               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "m", "S", "lapse_rate"))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T, nest = T)),
-               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
+               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "m", "S", "lapse_rate"))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T, nest = F)),
-               c("cue", "cue2", ".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
+               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "cue", "cue2", "m", "S", "lapse_rate"))
 })
 
 test_that("get exposure category statistic", {
   # Get error when *exposure* statistics is requested for *prior*
-  expect_error(get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(fit, groups = "prior"))
-  expect_error(get_exposure_category_mean.NIW_ideal_adaptor_stanfit(fit, groups = "prior"))
-  expect_error(get_exposure_ss_from_stanfit(fit, groups = "prior"))
+  expect_error(get_exposure_category_statistic(fit, groups = "prior"))
+  expect_error(get_exposure_category_mean(fit, groups = "prior"))
+  expect_error(get_exposure_category_cov(fit, groups = "prior"))
   # When prior is not requested
   # get_exposure_mean
-  expect_true(is.vector(get_exposure_category_mean.NIW_ideal_adaptor_stanfit(fit, "/b/", "baseline")))
-  expect_error(is.vector(get_exposure_category_mean.NIW_ideal_adaptor_stanfit(fit, "wrong", "baseline")))
-  expect_error(is.vector(get_exposure_category_mean.NIW_ideal_adaptor_stanfit(fit, "/b/", "wrong")))
-  expect_true(is_tibble(get_exposure_category_mean.NIW_ideal_adaptor_stanfit(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
+  expect_true(is.vector(get_exposure_category_mean(fit, "/b/", "baseline")))
+  expect_error(is.vector(get_exposure_category_mean(fit, "wrong", "baseline")))
+  expect_error(is.vector(get_exposure_category_mean(fit, "/b/", "wrong")))
+  expect_true(is_tibble(get_exposure_category_mean(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
   # get_exposure_css
-  expect_true(is.matrix(get_exposure_category_css.NIW_ideal_adaptor_stanfit(fit, "/b/", "baseline")))
-  expect_error(is.matrix(get_exposure_category_css.NIW_ideal_adaptor_stanfit(fit, "wrong", "baseline")))
-  expect_error(is.matrix(get_exposure_category_css.NIW_ideal_adaptor_stanfit(fit, "/b/", "wrong")))
-  expect_true(is_tibble(get_exposure_category_css.NIW_ideal_adaptor_stanfit(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
+  expect_true(is.matrix(get_exposure_category_css(fit, "/b/", "baseline")))
+  expect_error(is.matrix(get_exposure_category_css(fit, "wrong", "baseline")))
+  expect_error(is.matrix(get_exposure_category_css(fit, "/b/", "wrong")))
+  expect_true(is_tibble(get_exposure_category_css(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
   # get_exposure_uss
-  expect_true(is.matrix(get_exposure_category_uss.NIW_ideal_adaptor_stanfit(fit, "/b/", "baseline")))
-  expect_error(is.matrix(get_exposure_category_uss.NIW_ideal_adaptor_stanfit(fit, "wrong", "baseline")))
-  expect_error(is.matrix(get_exposure_category_uss.NIW_ideal_adaptor_stanfit(fit, "/b/", "wrong")))
-  expect_true(is_tibble(get_exposure_category_uss.NIW_ideal_adaptor_stanfit(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
+  expect_true(is.matrix(get_exposure_category_uss(fit, "/b/", "baseline")))
+  expect_error(is.matrix(get_exposure_category_uss(fit, "wrong", "baseline")))
+  expect_error(is.matrix(get_exposure_category_uss(fit, "/b/", "wrong")))
+  expect_true(is_tibble(get_exposure_category_uss(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
   # get_exposure_cov
-  expect_true(is.matrix(get_exposure_category_cov.NIW_ideal_adaptor_stanfit(fit, "/b/", "baseline")))
-  expect_error(is.matrix(get_exposure_category_cov.NIW_ideal_adaptor_stanfit(fit, "wrong", "baseline")))
-  expect_error(is.matrix(get_exposure_category_cov.NIW_ideal_adaptor_stanfit(fit, "/b/", "wrong")))
-  expect_true(is_tibble(get_exposure_category_cov.NIW_ideal_adaptor_stanfit(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
+  expect_true(is.matrix(get_exposure_category_cov(fit, "/b/", "baseline")))
+  expect_error(is.matrix(get_exposure_category_cov(fit, "wrong", "baseline")))
+  expect_error(is.matrix(get_exposure_category_cov(fit, "/b/", "wrong")))
+  expect_true(is_tibble(get_exposure_category_cov(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
   # get multiple exposure statistics
-  expect_true(is_tibble(get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(fit, c("/b/", "/p/"), c("baseline", "plus20.20"), c("n", "mean", "cov"))))
+  expect_true(is_tibble(get_exposure_category_statistic(fit, c("/b/", "/p/"), c("baseline", "plus20.20"), c("n", "mean", "cov"))))
 })
 
 test_that("get expected category statistic", {
@@ -101,32 +101,32 @@ test_that("get expected category statistic", {
 
 test_that("get exposure category statistic", {
   # Get error when *exposure* statistics is requested for *prior*
-  expect_error(get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(fit, groups = "prior"))
-  expect_error(get_exposure_category_mean.NIW_ideal_adaptor_stanfit(fit, groups = "prior"))
-  expect_error(get_exposure_ss_from_stanfit(fit, groups = "prior"))
+  expect_error(get_exposure_category_statistic(fit, groups = "prior"))
+  expect_error(get_exposure_category_mean(fit, groups = "prior"))
+  expect_error(get_exposure_category_cov(fit, groups = "prior"))
   # When prior is not requested
   # get_exposure_mean
-  expect_true(is.vector(get_exposure_category_mean.NIW_ideal_adaptor_stanfit(fit, "/b/", "baseline")))
-  expect_error(is.vector(get_exposure_category_mean.NIW_ideal_adaptor_stanfit(fit, "wrong", "baseline")))
-  expect_error(is.vector(get_exposure_category_mean.NIW_ideal_adaptor_stanfit(fit, "/b/", "wrong")))
-  expect_true(is_tibble(get_exposure_category_mean.NIW_ideal_adaptor_stanfit(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
+  expect_true(is.vector(get_exposure_category_mean(fit, "/b/", "baseline")))
+  expect_error(is.vector(get_exposure_category_mean(fit, "wrong", "baseline")))
+  expect_error(is.vector(get_exposure_category_mean(fit, "/b/", "wrong")))
+  expect_true(is_tibble(get_exposure_category_mean(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
   # get_exposure_css
-  expect_true(is.matrix(get_exposure_category_css.NIW_ideal_adaptor_stanfit(fit, "/b/", "baseline")))
-  expect_error(is.matrix(get_exposure_category_css.NIW_ideal_adaptor_stanfit(fit, "wrong", "baseline")))
-  expect_error(is.matrix(get_exposure_category_css.NIW_ideal_adaptor_stanfit(fit, "/b/", "wrong")))
-  expect_true(is_tibble(get_exposure_category_css.NIW_ideal_adaptor_stanfit(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
+  expect_true(is.matrix(get_exposure_category_css(fit, "/b/", "baseline")))
+  expect_error(is.matrix(get_exposure_category_css(fit, "wrong", "baseline")))
+  expect_error(is.matrix(get_exposure_category_css(fit, "/b/", "wrong")))
+  expect_true(is_tibble(get_exposure_category_css(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
   # get_exposure_uss
-  expect_true(is.matrix(get_exposure_category_uss.NIW_ideal_adaptor_stanfit(fit, "/b/", "baseline")))
-  expect_error(is.matrix(get_exposure_category_uss.NIW_ideal_adaptor_stanfit(fit, "wrong", "baseline")))
-  expect_error(is.matrix(get_exposure_category_uss.NIW_ideal_adaptor_stanfit(fit, "/b/", "wrong")))
-  expect_true(is_tibble(get_exposure_category_uss.NIW_ideal_adaptor_stanfit(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
+  expect_true(is.matrix(get_exposure_category_uss(fit, "/b/", "baseline")))
+  expect_error(is.matrix(get_exposure_category_uss(fit, "wrong", "baseline")))
+  expect_error(is.matrix(get_exposure_category_uss(fit, "/b/", "wrong")))
+  expect_true(is_tibble(get_exposure_category_uss(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
   # get_exposure_cov
-  expect_true(is.matrix(get_exposure_category_cov.NIW_ideal_adaptor_stanfit(fit, "/b/", "baseline")))
-  expect_error(is.matrix(get_exposure_category_cov.NIW_ideal_adaptor_stanfit(fit, "wrong", "baseline")))
-  expect_error(is.matrix(get_exposure_category_cov.NIW_ideal_adaptor_stanfit(fit, "/b/", "wrong")))
-  expect_true(is_tibble(get_exposure_category_cov.NIW_ideal_adaptor_stanfit(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
+  expect_true(is.matrix(get_exposure_category_cov(fit, "/b/", "baseline")))
+  expect_error(is.matrix(get_exposure_category_cov(fit, "wrong", "baseline")))
+  expect_error(is.matrix(get_exposure_category_cov(fit, "/b/", "wrong")))
+  expect_true(is_tibble(get_exposure_category_cov(fit, c("/b/", "/p/"), c("baseline", "plus20.20"))))
   # get multiple exposure statistics
-  expect_true(is_tibble(get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(fit, c("/b/", "/p/"), c("baseline", "plus20.20"), c("n", "mean", "cov"))))
+  expect_true(is_tibble(get_exposure_category_statistic(fit, c("/b/", "/p/"), c("baseline", "plus20.20"), c("n", "mean", "cov"))))
 })
 
 test_that("get expected category statistic", {
@@ -154,11 +154,11 @@ test_that("add draws - output check (3 cues)", {
   expect_equal(nrow(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F) %>% distinct(.draw)), 10)
   expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), 2)
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T)),
-               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
+               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "m", "S", "lapse_rate"))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T, nest = T)),
-               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
+               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "m", "S", "lapse_rate"))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T, nest = F)),
-               c("cue", "cue2", ".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate", "m", "S"))
+               c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "cue", "cue2", "m", "S", "lapse_rate"))
 })
 
 # test_that("Add draws - check wide = T", {
