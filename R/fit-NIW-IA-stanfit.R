@@ -142,7 +142,7 @@ fit_NIW_ideal_adaptor <- function(
         stanfit <-
           sampling(
             MVBeliefUpdatr:::stanmodels[[stanmodel]],
-            data = get_staninput(fit, which = "transformed"),
+            data = staninput,
             pars = exclude_pars, include = FALSE,
             chains = chains, iter = iter, warmup = warmup,
             init = init, control = control,
@@ -167,4 +167,3 @@ fit_NIW_ideal_adaptor <- function(
 
   return(fit)
 }
-

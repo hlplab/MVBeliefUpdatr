@@ -959,6 +959,3 @@ get_draws.NIW_ideal_adaptor_stanfit <- function(
     return(d.pars)
   }
 }
-
-
-

@@ -611,5 +611,3 @@ make_staninput_for_NIW_ideal_adaptor <- function(
 #' @export
 compose_data_to_infer_NIW_ideal_adaptor <- function(model_type = "NIW_ideal_adaptor", ...)
   make_staninput(..., model_type = "NIW_ideal_adaptor")
-
-
