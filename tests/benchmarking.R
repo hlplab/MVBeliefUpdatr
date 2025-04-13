@@ -7,7 +7,7 @@ seed <- 42
 .data <- make_data_for_stanfit(example, seed = seed)
 
 make_staninput_for_NIW_ideal_adaptor_with_transform <-
-  function(transform_type)
+  function(transform_type, example = 1)
     make_staninput_for_NIW_ideal_adaptor(
       exposure = .data %>% filter(Phase == "exposure"),
       test = .data %>% filter(Phase == "test"),
@@ -24,53 +24,87 @@ make_staninput_for_NIW_ideal_adaptor_with_transform <-
       group.unique = "Condition",
       transform_type = transform_type)
 
-mb <-
+mb1 <-
   microbenchmark(
     # Cholesky with transformation and back-transformation
     "Cholesky, center" =
       fit_NIW_ideal_adaptor(
         staninput = make_staninput_for_NIW_ideal_adaptor_with_transform(transform_type = "center"),
         stanmodel = "mvg_conj_sufficient_stats_lapse_cholesky",
-        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.85)),
+        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.92)),
     "Cholesky, standardize" =
       fit_NIW_ideal_adaptor(
         staninput = make_staninput_for_NIW_ideal_adaptor_with_transform(transform_type = "standardize"),
         stanmodel = "mvg_conj_sufficient_stats_lapse_cholesky",
-        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.85)),
+        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.92)),
     "Cholesky, PCA whiten" =
       fit_NIW_ideal_adaptor(
         staninput = make_staninput_for_NIW_ideal_adaptor_with_transform(transform_type = "PCA whiten"),
         stanmodel = "mvg_conj_sufficient_stats_lapse_cholesky",
-        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.85)),
+        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.92)),
     # No Cholesky with transformation and back-transformation
     "no cholesky, no transform" =
       fit_NIW_ideal_adaptor(
         staninput = make_staninput_for_NIW_ideal_adaptor_with_transform(transform_type = "identity"),
         stanmodel = "mvg_conj_sufficient_stats_lapse",
-        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.85)),
+        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.92)),
     "no cholesky, center" =
       fit_NIW_ideal_adaptor(
         staninput = make_staninput_for_NIW_ideal_adaptor_with_transform(transform_type = "center"),
         stanmodel = "mvg_conj_sufficient_stats_lapse",
-        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.85)),
+        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.92)),
     "no cholesky, standardize" =
       fit_NIW_ideal_adaptor(
         staninput = make_staninput_for_NIW_ideal_adaptor_with_transform(transform_type = "standardize"),
         stanmodel = "mvg_conj_sufficient_stats_lapse",
-        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.85)),
+        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.92)),
     "no cholesky, PCA whiten" =
       fit_NIW_ideal_adaptor(
         staninput = make_staninput_for_NIW_ideal_adaptor_with_transform(transform_type = "PCA whiten"),
         stanmodel = "mvg_conj_sufficient_stats_lapse",
-        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.85)),
+        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.92)),
     "no cholesky, ZCA whiten" =
       fit_NIW_ideal_adaptor(
         staninput = make_staninput_for_NIW_ideal_adaptor_with_transform(transform_type = "ZCA whiten"),
         stanmodel = "mvg_conj_sufficient_stats_lapse",
-        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.85)),
+        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.92)),
     times = 25,
     control = list(order = "random"))
 
-plot(mb)
-autoplot(mb)
-print(mb)
+plot(mb1)
+autoplot(mb1)
+print(mb1)
+
+
+example <- 3
+mb3 <-
+  microbenchmark(
+    # Cholesky with transformation and back-transformation
+    "Cholesky, center" =
+      fit_NIW_ideal_adaptor(
+        staninput = make_staninput_for_NIW_ideal_adaptor_with_transform(transform_type = "center", example = 3),
+        stanmodel = "mvg_conj_sufficient_stats_lapse_cholesky",
+        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.999)),
+    "Cholesky, standardize" =
+      fit_NIW_ideal_adaptor(
+        staninput = make_staninput_for_NIW_ideal_adaptor_with_transform(transform_type = "standardize", example = 3),
+        stanmodel = "mvg_conj_sufficient_stats_lapse_cholesky",
+        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.999)),
+    # No Cholesky with transformation and back-transformation
+    "no cholesky, standardize" =
+      fit_NIW_ideal_adaptor(
+        staninput = make_staninput_for_NIW_ideal_adaptor_with_transform(transform_type = "standardize", example = 3),
+        stanmodel = "mvg_conj_sufficient_stats_lapse",
+        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.999)),
+    "no cholesky, PCA whiten" =
+      fit_NIW_ideal_adaptor(
+        staninput = make_staninput_for_NIW_ideal_adaptor_with_transform(transform_type = "PCA whiten", example = 3),
+        stanmodel = "mvg_conj_sufficient_stats_lapse",
+        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.999)),
+    "no cholesky, ZCA whiten" =
+      fit_NIW_ideal_adaptor(
+        staninput = make_staninput_for_NIW_ideal_adaptor_with_transform(transform_type = "ZCA whiten", example = 3),
+        stanmodel = "mvg_conj_sufficient_stats_lapse",
+        file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.999)),
+    times = 25,
+    control = list(order = "random"))
