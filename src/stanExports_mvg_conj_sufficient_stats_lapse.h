@@ -48,98 +48,98 @@ static constexpr std::array<const char*, 189> locations_array__ =
   " (in 'mvg_conj_sufficient_stats_lapse', line 79, column 2 to column 35)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 80, column 2 to column 39)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 81, column 2 to column 42)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 152, column 2 to column 23)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 153, column 2 to column 25)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 177, column 2 to column 91)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 190, column 2 to column 34)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 191, column 2 to column 38)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 192, column 2 to column 36)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 193, column 2 to column 40)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 202, column 2 to column 65)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 155, column 2 to column 23)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 156, column 2 to column 25)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 180, column 2 to column 91)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 193, column 2 to column 34)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 194, column 2 to column 38)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 195, column 2 to column 36)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 196, column 2 to column 40)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 205, column 2 to column 65)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 87, column 4 to column 158)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 99, column 8 to column 37)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 100, column 8 to column 31)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 101, column 8 to column 34)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 102, column 8 to column 34)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 98, column 13 to line 103, column 7)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 90, column 8 to column 52)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 91, column 8 to column 46)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 92, column 8 to line 93, column 29)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 94, column 8 to line 97, column 78)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 89, column 29 to line 98, column 7)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 89, column 6 to line 103, column 7)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 104, column 6 to line 105, column 57)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 88, column 23 to line 106, column 5)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 88, column 4 to line 106, column 5)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 85, column 19 to line 107, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 85, column 2 to line 107, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 110, column 4 to column 14)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 111, column 4 to column 22)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 118, column 6 to line 121, column 72)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 116, column 21 to line 122, column 5)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 116, column 4 to line 122, column 5)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 124, column 4 to column 79)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 109, column 22 to line 125, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 109, column 2 to line 125, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 155, column 4 to column 102)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 156, column 4 to column 30)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 154, column 22 to line 157, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 154, column 2 to line 157, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 179, column 4 to column 16)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 183, column 10 to column 92)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 184, column 10 to column 19)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 182, column 41 to line 185, column 9)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 182, column 8 to line 185, column 9)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 181, column 21 to line 186, column 7)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 181, column 6 to line 186, column 7)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 180, column 24 to line 187, column 5)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 180, column 4 to line 187, column 5)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 178, column 41 to line 188, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 178, column 2 to line 188, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 195, column 4 to column 53)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 196, column 4 to column 58)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 198, column 6 to column 67)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 199, column 6 to column 72)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 197, column 23 to line 200, column 5)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 197, column 4 to line 200, column 5)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 194, column 19 to line 201, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 194, column 2 to line 201, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 204, column 11 to column 12)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 204, column 13 to column 14)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 204, column 4 to column 73)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 205, column 4 to column 81)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 203, column 19 to line 206, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 203, column 2 to line 206, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 128, column 2 to column 37)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 129, column 2 to column 34)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 131, column 6 to column 37)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 132, column 6 to column 51)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 133, column 6 to column 89)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 130, column 19 to line 134, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 130, column 2 to line 134, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 138, column 6 to column 46)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 139, column 6 to column 60)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 137, column 21 to line 140, column 5)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 137, column 4 to line 140, column 5)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 136, column 22 to line 141, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 136, column 2 to line 141, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 143, column 4 to column 86)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 142, column 22 to line 144, column 3)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 142, column 2 to line 144, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 101, column 8 to column 37)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 102, column 8 to column 31)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 103, column 8 to column 34)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 104, column 8 to column 34)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 100, column 13 to line 105, column 7)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 90, column 8 to column 61)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 91, column 8 to column 55)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 92, column 8 to line 94, column 29)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 95, column 8 to line 99, column 64)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 89, column 38 to line 100, column 7)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 89, column 6 to line 105, column 7)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 106, column 6 to line 108, column 57)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 88, column 23 to line 109, column 5)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 88, column 4 to line 109, column 5)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 85, column 19 to line 110, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 85, column 2 to line 110, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 113, column 4 to column 14)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 114, column 4 to column 22)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 121, column 6 to line 124, column 72)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 119, column 21 to line 125, column 5)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 119, column 4 to line 125, column 5)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 127, column 4 to column 79)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 112, column 22 to line 128, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 112, column 2 to line 128, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 158, column 4 to column 102)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 159, column 4 to column 30)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 157, column 22 to line 160, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 157, column 2 to line 160, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 182, column 4 to column 16)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 186, column 10 to column 92)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 187, column 10 to column 19)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 185, column 41 to line 188, column 9)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 185, column 8 to line 188, column 9)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 184, column 21 to line 189, column 7)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 184, column 6 to line 189, column 7)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 183, column 24 to line 190, column 5)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 183, column 4 to line 190, column 5)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 181, column 41 to line 191, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 181, column 2 to line 191, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 198, column 4 to column 53)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 199, column 4 to column 58)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 201, column 6 to column 67)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 202, column 6 to column 72)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 200, column 23 to line 203, column 5)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 200, column 4 to line 203, column 5)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 197, column 19 to line 204, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 197, column 2 to line 204, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 207, column 11 to column 12)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 207, column 13 to column 14)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 207, column 4 to column 73)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 208, column 4 to column 81)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 206, column 19 to line 209, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 206, column 2 to line 209, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 131, column 2 to column 37)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 132, column 2 to column 34)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 134, column 6 to column 37)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 135, column 6 to column 51)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 136, column 6 to column 89)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 133, column 19 to line 137, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 133, column 2 to line 137, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 141, column 6 to column 46)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 142, column 6 to column 60)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 140, column 21 to line 143, column 5)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 140, column 4 to line 143, column 5)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 139, column 22 to line 144, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 139, column 2 to line 144, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 146, column 4 to column 86)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 145, column 22 to line 147, column 3)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 145, column 2 to line 147, column 3)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 17, column 2 to column 8)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 18, column 2 to column 8)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 19, column 2 to column 8)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 20, column 8 to column 9)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 20, column 10 to column 11)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 20, column 2 to column 28)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 20, column 2 to column 37)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 21, column 8 to column 9)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 21, column 10 to column 11)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 21, column 20 to column 21)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 21, column 2 to column 30)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 21, column 2 to column 39)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 22, column 8 to column 9)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 22, column 10 to column 11)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 22, column 24 to column 25)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 22, column 2 to column 32)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 22, column 2 to column 41)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 23, column 2 to column 13)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 24, column 8 to column 14)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 24, column 23 to column 24)",
@@ -169,7 +169,7 @@ static constexpr std::array<const char*, 189> locations_array__ =
   " (in 'mvg_conj_sufficient_stats_lapse', line 45, column 9 to column 10)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 45, column 2 to column 18)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 46, column 2 to column 53)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 52, column 2 to column 65)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 52, column 2 to column 74)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 53, column 9 to column 10)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 53, column 2 to column 38)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 59, column 8 to column 32)",
@@ -203,29 +203,29 @@ static constexpr std::array<const char*, 189> locations_array__ =
   " (in 'mvg_conj_sufficient_stats_lapse', line 80, column 24 to column 25)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 81, column 8 to column 14)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 81, column 23 to column 24)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 153, column 9 to column 15)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 177, column 9 to column 75)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 190, column 8 to column 9)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 190, column 18 to column 19)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 191, column 8 to column 9)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 191, column 22 to column 23)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 192, column 8 to column 9)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 192, column 10 to column 11)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 192, column 20 to column 21)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 156, column 9 to column 15)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 180, column 9 to column 75)",
   " (in 'mvg_conj_sufficient_stats_lapse', line 193, column 8 to column 9)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 193, column 10 to column 11)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 193, column 24 to column 25)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 202, column 9 to column 27)",
-  " (in 'mvg_conj_sufficient_stats_lapse', line 202, column 28 to column 46)"};
+  " (in 'mvg_conj_sufficient_stats_lapse', line 193, column 18 to column 19)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 194, column 8 to column 9)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 194, column 22 to column 23)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 195, column 8 to column 9)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 195, column 10 to column 11)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 195, column 20 to column 21)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 196, column 8 to column 9)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 196, column 10 to column 11)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 196, column 24 to column 25)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 205, column 9 to column 27)",
+  " (in 'mvg_conj_sufficient_stats_lapse', line 205, column 28 to column 46)"};
 #include <stan_meta_header.hpp>
 class model_mvg_conj_sufficient_stats_lapse final : public model_base_crtp<model_mvg_conj_sufficient_stats_lapse> {
 private:
   int M;
   int L;
   int K;
-  std::vector<std::vector<int>> N;
-  std::vector<std::vector<Eigen::Matrix<double,-1,1>>> x_mean;
-  std::vector<std::vector<Eigen::Matrix<double,-1,-1>>> x_ss;
+  std::vector<std::vector<int>> N_exposure;
+  std::vector<std::vector<Eigen::Matrix<double,-1,1>>> x_mean_exposure;
+  std::vector<std::vector<Eigen::Matrix<double,-1,-1>>> x_ss_exposure;
   int N_test;
   std::vector<Eigen::Matrix<double,-1,1>> x_test;
   std::vector<int> y_test;
@@ -299,54 +299,58 @@ public:
       current_statement__ = 100;
       K = context__.vals_i("K")[(1 - 1)];
       current_statement__ = 101;
-      stan::math::validate_non_negative_index("N", "M", M);
+      stan::math::validate_non_negative_index("N_exposure", "M", M);
       current_statement__ = 102;
-      stan::math::validate_non_negative_index("N", "L", L);
+      stan::math::validate_non_negative_index("N_exposure", "L", L);
       current_statement__ = 103;
-      context__.validate_dims("data initialization", "N", "int",
+      context__.validate_dims("data initialization", "N_exposure", "int",
         std::vector<size_t>{static_cast<size_t>(M), static_cast<size_t>(L)});
-      N = std::vector<std::vector<int>>(M,
-            std::vector<int>(L, std::numeric_limits<int>::min()));
+      N_exposure = std::vector<std::vector<int>>(M,
+                     std::vector<int>(L, std::numeric_limits<int>::min()));
       {
-        std::vector<int> N_flat__;
+        std::vector<int> N_exposure_flat__;
         current_statement__ = 103;
-        N_flat__ = context__.vals_i("N");
+        N_exposure_flat__ = context__.vals_i("N_exposure");
         pos__ = 1;
         for (int sym1__ = 1; sym1__ <= L; ++sym1__) {
           for (int sym2__ = 1; sym2__ <= M; ++sym2__) {
-            stan::model::assign(N, N_flat__[(pos__ - 1)],
-              "assigning variable N", stan::model::index_uni(sym2__),
-              stan::model::index_uni(sym1__));
+            stan::model::assign(N_exposure, N_exposure_flat__[(pos__ - 1)],
+              "assigning variable N_exposure",
+              stan::model::index_uni(sym2__), stan::model::index_uni(sym1__));
             pos__ = (pos__ + 1);
           }
         }
       }
       current_statement__ = 103;
-      stan::math::check_greater_or_equal(function__, "N", N, 0);
+      stan::math::check_greater_or_equal(function__, "N_exposure",
+        N_exposure, 0);
       current_statement__ = 104;
-      stan::math::validate_non_negative_index("x_mean", "M", M);
+      stan::math::validate_non_negative_index("x_mean_exposure", "M", M);
       current_statement__ = 105;
-      stan::math::validate_non_negative_index("x_mean", "L", L);
+      stan::math::validate_non_negative_index("x_mean_exposure", "L", L);
       current_statement__ = 106;
-      stan::math::validate_non_negative_index("x_mean", "K", K);
+      stan::math::validate_non_negative_index("x_mean_exposure", "K", K);
       current_statement__ = 107;
-      context__.validate_dims("data initialization", "x_mean", "double",
+      context__.validate_dims("data initialization", "x_mean_exposure",
+        "double",
         std::vector<size_t>{static_cast<size_t>(M), static_cast<size_t>(L),
           static_cast<size_t>(K)});
-      x_mean = std::vector<std::vector<Eigen::Matrix<double,-1,1>>>(M,
-                 std::vector<Eigen::Matrix<double,-1,1>>(L,
-                   Eigen::Matrix<double,-1,1>::Constant(K,
-                     std::numeric_limits<double>::quiet_NaN())));
+      x_mean_exposure = std::vector<std::vector<Eigen::Matrix<double,-1,1>>>(M,
+                          std::vector<Eigen::Matrix<double,-1,1>>(L,
+                            Eigen::Matrix<double,-1,1>::Constant(K,
+                              std::numeric_limits<double>::quiet_NaN())));
       {
-        std::vector<local_scalar_t__> x_mean_flat__;
+        std::vector<local_scalar_t__> x_mean_exposure_flat__;
         current_statement__ = 107;
-        x_mean_flat__ = context__.vals_r("x_mean");
+        x_mean_exposure_flat__ = context__.vals_r("x_mean_exposure");
         pos__ = 1;
         for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
           for (int sym2__ = 1; sym2__ <= L; ++sym2__) {
             for (int sym3__ = 1; sym3__ <= M; ++sym3__) {
-              stan::model::assign(x_mean, x_mean_flat__[(pos__ - 1)],
-                "assigning variable x_mean", stan::model::index_uni(sym3__),
+              stan::model::assign(x_mean_exposure,
+                x_mean_exposure_flat__[(pos__ - 1)],
+                "assigning variable x_mean_exposure",
+                stan::model::index_uni(sym3__),
                 stan::model::index_uni(sym2__),
                 stan::model::index_uni(sym1__));
               pos__ = (pos__ + 1);
@@ -355,32 +359,35 @@ public:
         }
       }
       current_statement__ = 108;
-      stan::math::validate_non_negative_index("x_ss", "M", M);
+      stan::math::validate_non_negative_index("x_ss_exposure", "M", M);
       current_statement__ = 109;
-      stan::math::validate_non_negative_index("x_ss", "L", L);
+      stan::math::validate_non_negative_index("x_ss_exposure", "L", L);
       current_statement__ = 110;
-      stan::math::validate_non_negative_index("x_ss", "K", K);
+      stan::math::validate_non_negative_index("x_ss_exposure", "K", K);
       current_statement__ = 110;
-      stan::math::validate_non_negative_index("x_ss", "K", K);
+      stan::math::validate_non_negative_index("x_ss_exposure", "K", K);
       current_statement__ = 111;
-      context__.validate_dims("data initialization", "x_ss", "double",
+      context__.validate_dims("data initialization", "x_ss_exposure",
+        "double",
         std::vector<size_t>{static_cast<size_t>(M), static_cast<size_t>(L),
           static_cast<size_t>(K), static_cast<size_t>(K)});
-      x_ss = std::vector<std::vector<Eigen::Matrix<double,-1,-1>>>(M,
-               std::vector<Eigen::Matrix<double,-1,-1>>(L,
-                 Eigen::Matrix<double,-1,-1>::Constant(K, K,
-                   std::numeric_limits<double>::quiet_NaN())));
+      x_ss_exposure = std::vector<std::vector<Eigen::Matrix<double,-1,-1>>>(M,
+                        std::vector<Eigen::Matrix<double,-1,-1>>(L,
+                          Eigen::Matrix<double,-1,-1>::Constant(K, K,
+                            std::numeric_limits<double>::quiet_NaN())));
       {
-        std::vector<local_scalar_t__> x_ss_flat__;
+        std::vector<local_scalar_t__> x_ss_exposure_flat__;
         current_statement__ = 111;
-        x_ss_flat__ = context__.vals_r("x_ss");
+        x_ss_exposure_flat__ = context__.vals_r("x_ss_exposure");
         pos__ = 1;
         for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
           for (int sym2__ = 1; sym2__ <= K; ++sym2__) {
             for (int sym3__ = 1; sym3__ <= L; ++sym3__) {
               for (int sym4__ = 1; sym4__ <= M; ++sym4__) {
-                stan::model::assign(x_ss, x_ss_flat__[(pos__ - 1)],
-                  "assigning variable x_ss", stan::model::index_uni(sym4__),
+                stan::model::assign(x_ss_exposure,
+                  x_ss_exposure_flat__[(pos__ - 1)],
+                  "assigning variable x_ss_exposure",
+                  stan::model::index_uni(sym4__),
                   stan::model::index_uni(sym3__),
                   stan::model::index_uni(sym2__),
                   stan::model::index_uni(sym1__));
@@ -391,7 +398,7 @@ public:
         }
       }
       current_statement__ = 111;
-      stan::math::check_cov_matrix(function__, "x_ss", x_ss);
+      stan::math::check_cov_matrix(function__, "x_ss_exposure", x_ss_exposure);
       current_statement__ = 112;
       context__.validate_dims("data initialization", "N_test", "int",
         std::vector<size_t>{});
@@ -671,7 +678,8 @@ public:
       sigma_kappanu = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 141;
       sigma_kappanu = stan::math::min(
-                        (stan::math::max(stan::math::to_array_1d(N)) * 4), 10);
+                        (stan::math::max(stan::math::to_array_1d(N_exposure))
+                        * 4), 10);
       current_statement__ = 142;
       stan::math::validate_non_negative_index("m_0_mu", "K", K);
       current_statement__ = 143;
@@ -994,19 +1002,21 @@ public:
         for (int group = 1; group <= L; ++group) {
           current_statement__ = 39;
           if (stan::math::logical_gt(
-                stan::model::rvalue(N, "N", stan::model::index_uni(cat),
-                  stan::model::index_uni(group)), 0)) {
+                stan::model::rvalue(N_exposure, "N_exposure",
+                  stan::model::index_uni(cat), stan::model::index_uni(group)),
+                0)) {
             current_statement__ = 34;
             stan::model::assign(kappa_n, (kappa_0 +
-              stan::model::rvalue(N, "N", stan::model::index_uni(cat),
-                stan::model::index_uni(group))),
+              stan::model::rvalue(N_exposure, "N_exposure",
+                stan::model::index_uni(cat), stan::model::index_uni(group))),
               "assigning variable kappa_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
             current_statement__ = 35;
             stan::model::assign(nu_n, (nu_0 +
-              stan::model::rvalue(N, "N", stan::model::index_uni(cat),
-                stan::model::index_uni(group))), "assigning variable nu_n",
-              stan::model::index_uni(cat), stan::model::index_uni(group));
+              stan::model::rvalue(N_exposure, "N_exposure",
+                stan::model::index_uni(cat), stan::model::index_uni(group))),
+              "assigning variable nu_n", stan::model::index_uni(cat),
+              stan::model::index_uni(group));
             current_statement__ = 36;
             stan::model::assign(m_n,
               stan::math::divide(
@@ -1015,9 +1025,10 @@ public:
                     stan::model::rvalue(m_0, "m_0",
                       stan::model::index_uni(cat))),
                   stan::math::multiply(
-                    stan::model::rvalue(N, "N", stan::model::index_uni(cat),
+                    stan::model::rvalue(N_exposure, "N_exposure",
+                      stan::model::index_uni(cat),
                       stan::model::index_uni(group)),
-                    stan::model::rvalue(x_mean, "x_mean",
+                    stan::model::rvalue(x_mean_exposure, "x_mean_exposure",
                       stan::model::index_uni(cat),
                       stan::model::index_uni(group)))),
                 stan::model::rvalue(kappa_n, "kappa_n",
@@ -1031,7 +1042,7 @@ public:
                   stan::math::add(
                     stan::model::rvalue(S_0, "S_0",
                       stan::model::index_uni(cat)),
-                    stan::model::rvalue(x_ss, "x_ss",
+                    stan::model::rvalue(x_ss_exposure, "x_ss_exposure",
                       stan::model::index_uni(cat),
                       stan::model::index_uni(group))),
                   stan::math::multiply(
@@ -1327,19 +1338,21 @@ public:
         for (int group = 1; group <= L; ++group) {
           current_statement__ = 39;
           if (stan::math::logical_gt(
-                stan::model::rvalue(N, "N", stan::model::index_uni(cat),
-                  stan::model::index_uni(group)), 0)) {
+                stan::model::rvalue(N_exposure, "N_exposure",
+                  stan::model::index_uni(cat), stan::model::index_uni(group)),
+                0)) {
             current_statement__ = 34;
             stan::model::assign(kappa_n, (kappa_0 +
-              stan::model::rvalue(N, "N", stan::model::index_uni(cat),
-                stan::model::index_uni(group))),
+              stan::model::rvalue(N_exposure, "N_exposure",
+                stan::model::index_uni(cat), stan::model::index_uni(group))),
               "assigning variable kappa_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
             current_statement__ = 35;
             stan::model::assign(nu_n, (nu_0 +
-              stan::model::rvalue(N, "N", stan::model::index_uni(cat),
-                stan::model::index_uni(group))), "assigning variable nu_n",
-              stan::model::index_uni(cat), stan::model::index_uni(group));
+              stan::model::rvalue(N_exposure, "N_exposure",
+                stan::model::index_uni(cat), stan::model::index_uni(group))),
+              "assigning variable nu_n", stan::model::index_uni(cat),
+              stan::model::index_uni(group));
             current_statement__ = 36;
             stan::model::assign(m_n,
               stan::math::divide(
@@ -1348,9 +1361,10 @@ public:
                     stan::model::rvalue(m_0, "m_0",
                       stan::model::index_uni(cat))),
                   stan::math::multiply(
-                    stan::model::rvalue(N, "N", stan::model::index_uni(cat),
+                    stan::model::rvalue(N_exposure, "N_exposure",
+                      stan::model::index_uni(cat),
                       stan::model::index_uni(group)),
-                    stan::model::rvalue(x_mean, "x_mean",
+                    stan::model::rvalue(x_mean_exposure, "x_mean_exposure",
                       stan::model::index_uni(cat),
                       stan::model::index_uni(group)))),
                 stan::model::rvalue(kappa_n, "kappa_n",
@@ -1364,7 +1378,7 @@ public:
                   stan::math::add(
                     stan::model::rvalue(S_0, "S_0",
                       stan::model::index_uni(cat)),
-                    stan::model::rvalue(x_ss, "x_ss",
+                    stan::model::rvalue(x_ss_exposure, "x_ss_exposure",
                       stan::model::index_uni(cat),
                       stan::model::index_uni(group))),
                   stan::math::multiply(
@@ -1709,19 +1723,21 @@ public:
         for (int group = 1; group <= L; ++group) {
           current_statement__ = 39;
           if (stan::math::logical_gt(
-                stan::model::rvalue(N, "N", stan::model::index_uni(cat),
-                  stan::model::index_uni(group)), 0)) {
+                stan::model::rvalue(N_exposure, "N_exposure",
+                  stan::model::index_uni(cat), stan::model::index_uni(group)),
+                0)) {
             current_statement__ = 34;
             stan::model::assign(kappa_n, (kappa_0 +
-              stan::model::rvalue(N, "N", stan::model::index_uni(cat),
-                stan::model::index_uni(group))),
+              stan::model::rvalue(N_exposure, "N_exposure",
+                stan::model::index_uni(cat), stan::model::index_uni(group))),
               "assigning variable kappa_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
             current_statement__ = 35;
             stan::model::assign(nu_n, (nu_0 +
-              stan::model::rvalue(N, "N", stan::model::index_uni(cat),
-                stan::model::index_uni(group))), "assigning variable nu_n",
-              stan::model::index_uni(cat), stan::model::index_uni(group));
+              stan::model::rvalue(N_exposure, "N_exposure",
+                stan::model::index_uni(cat), stan::model::index_uni(group))),
+              "assigning variable nu_n", stan::model::index_uni(cat),
+              stan::model::index_uni(group));
             current_statement__ = 36;
             stan::model::assign(m_n,
               stan::math::divide(
@@ -1730,9 +1746,10 @@ public:
                     stan::model::rvalue(m_0, "m_0",
                       stan::model::index_uni(cat))),
                   stan::math::multiply(
-                    stan::model::rvalue(N, "N", stan::model::index_uni(cat),
+                    stan::model::rvalue(N_exposure, "N_exposure",
+                      stan::model::index_uni(cat),
                       stan::model::index_uni(group)),
-                    stan::model::rvalue(x_mean, "x_mean",
+                    stan::model::rvalue(x_mean_exposure, "x_mean_exposure",
                       stan::model::index_uni(cat),
                       stan::model::index_uni(group)))),
                 stan::model::rvalue(kappa_n, "kappa_n",
@@ -1746,7 +1763,7 @@ public:
                   stan::math::add(
                     stan::model::rvalue(S_0, "S_0",
                       stan::model::index_uni(cat)),
-                    stan::model::rvalue(x_ss, "x_ss",
+                    stan::model::rvalue(x_ss_exposure, "x_ss_exposure",
                       stan::model::index_uni(cat),
                       stan::model::index_uni(group))),
                   stan::math::multiply(

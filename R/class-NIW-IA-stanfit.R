@@ -298,7 +298,7 @@ stanfit_needs_refit <- function(
   # }
   if (!is.null(staninput)) {
     stopifnot(is.list(staninput))
-    cached_staninput <- get_staninput(x)
+    cached_staninput <- get_staninput(x, which = "both")
   }
   if (!is.null(data)) {
     stopifnot(is.data.frame(data))
@@ -319,10 +319,10 @@ stanfit_needs_refit <- function(
   #   }
   # }
   if (!is.null(staninput)) {
-    staninput_equality <- all.equal(staninput, cached_staninput, check.attributes = FALSE)
+    staninput_equality <- all.equal(staninput, cached_staninput, check.attributes = FALSE, use.names = TRUE)
     if (!isTRUE(staninput_equality)) {
       if (!silent) {
-        message("The processed data for Stan has changed.")
+        message("The processed input for Stan has changed.")
         if (verbose) {
           print(staninput_equality)
         }
@@ -342,7 +342,7 @@ stanfit_needs_refit <- function(
             factor_level_message <- TRUE
             if (verbose) {
               cat(paste0(
-                "Names of factor levels have changed for variable '", var, "' ",
+                "Names of factor levels in data have changed for variable '", var, "' ",
                 "with cached levels (", collapse_comma(cached_levels), ") ",
                 "but new levels (", collapse_comma(new_levels), ").\n"
               ))
@@ -357,9 +357,11 @@ stanfit_needs_refit <- function(
       }
     }
     if (factor_level_message) {
-      message("Names of factor levels have changed.")
+      message("Names of factor levels in data have changed.")
     }
   }
+
+  if (!silent && refit) message("Model needs to be refit.")
   refit
 }
 

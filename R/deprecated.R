@@ -57,6 +57,8 @@ infer_prior_beliefs <- function(
   silent = 1,
   ...
 ) {
+  if (verbose) message("Entering verbose mode.")
+
   # Currently the make_staninput function is creating both the transforms *and* the data.
   # That's a bit confusing and should probably be split up in the future into separate
   # functions.
@@ -106,7 +108,7 @@ infer_prior_beliefs <- function(
     stop2("Either transform or center.observations, scale.observations, or pca.observations must be specified.")
   }
 
-  fit_NIW_ideal_adaptor(staninput = staninput, stanmodel = stanmodel, silent = if (verbose) 0 else 1, ...)
+  fit_NIW_ideal_adaptor(staninput = staninput, stanmodel = stanmodel, silent = silent, verbose = verbose, ...)
 }
 
 #' DEPRECATED: make_staninput

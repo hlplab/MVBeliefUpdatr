@@ -62,7 +62,9 @@ fit_NIW_ideal_adaptor <- function(
   # included for later use
   stanvars = NULL, backend = "rstan", save_pars = NULL, basis = NULL,
   chains = 4, iter = 2000, warmup = 1000,
-  init = "random", control = NULL, silent = 1, stan_model_args = list(),
+  init = "random", control = NULL,
+  silent = 1, verbose = F,
+  stan_model_args = list(),
   # Stuff to be deprecated in the future
   stanmodel = NULL, rename = T,
   ...
@@ -74,6 +76,7 @@ fit_NIW_ideal_adaptor <- function(
   if (!is.null(file) && file_refit == "never") {
     fit <- read_NIW_ideal_adaptor_stanfit(file)
     if (!is.null(fit)) {
+      if (silent == 0) message("Loading existing model from file.")
       return(fit)
     }
   }
@@ -89,7 +92,6 @@ fit_NIW_ideal_adaptor <- function(
                 msg = paste("The specified stanmodel does not exist. Allowable models include:", paste(names(MVBeliefUpdatr:::stanmodels), collapse = ", ")))
   }
 
-
   # Check whether model actually needs to be refit
   if (!is.null(file) && file_refit == "on_change") {
     x_from_file <- read_NIW_ideal_adaptor_stanfit(file)
@@ -99,8 +101,9 @@ fit_NIW_ideal_adaptor <- function(
           x_from_file,
           current_version = get_current_versions(),
           data = data, staninput = staninput,
-          silent = silent)
+          silent = silent, verbose = verbose)
       if (!needs_refit) {
+        if (silent == 0) message("No refitting needed. Loading existing model from file.")
         return(x_from_file)
       }
     }
@@ -159,10 +162,10 @@ fit_NIW_ideal_adaptor <- function(
 
       if (rename) fit %<>% rename_pars()
     }
-  } else message("No sampling requested. Returning empty model object.")
+  } else if (!silent) message("No sampling requested. Returning empty model object.")
 
-  if (!is.null(fit) & !is.null(file)) {
-    fit <- write_NIW_ideal_adaptor_stanfit(fit, file, compress = file_compress)
+  if (!is.null(fit) && !is.null(file)) {
+    fit <- write_NIW_ideal_adaptor_stanfit(x = fit, file = file, compress = file_compress)
   }
 
   return(fit)

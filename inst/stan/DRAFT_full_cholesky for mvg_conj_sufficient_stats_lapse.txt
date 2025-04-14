@@ -4,14 +4,14 @@
 * that the subject knows the true labels of all the input stimuli (e.g.,
 * doesn't model any uncertainty in classification.
 *
-* This version has a lapse rate parameter (probability of random guessing)
-*
-* Input is in the form of raw data points for observations.
-*
+* THIS IS A DRAFT OF AN ATTEMPT TO DO THE BELIEF-UPDATING OVER THE CHOLESKY
+* OF THE SCATTER MATRICES (IN ORDER TO NOT HAVE TO GO FROM CHOLESKY TO COV
+* AND BACK TO CHOLESKY FORM IN EACH UPDATING STEP, WHICH IS COMPUTATIONALLY
+* INEFFICIENT.)
 *
 * Modified by
 * Florian Jaeger
-* May 2025
+* April 2025
 */
 
 // functions {

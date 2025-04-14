@@ -648,36 +648,32 @@ get_example_stanfit <- function(
         collapse = "-"),
       ".rds")
 
-  if (file.exists(filename)) {
-    fit <- readRDS(filename)
-  } else {
-    .data <- make_data_for_stanfit(example, seed = seed)
-    fit <-
-      infer_prior_beliefs(
-        exposure = .data %>% filter(Phase == "exposure"),
-        test = .data %>% filter(Phase == "test"),
-        cues =
-          if (example %in% 1:3)
-          {
-            c("VOT", "f0_semitones", "vowel_duration")[1:(example)]
-          } else if (example %in% 4:6) {
-            c("cue1", "cue2", "cue3")[1:(example %% 4 + 1)]
-          },
-        category = "category",
-        response = "Response",
-        group = "Subject",
-        group.unique = "Condition",
-        center.observations = center.observations,
-        scale.observations = scale.observations,
-        pca.observations = pca.observations,
-        transform_type = transform_type,
-        stanmodel = stanmodel,
-        file = filename, file_refit = file_refit,
-        refresh = refresh,
-        silent = silent,
-        cores = 4,
-        ...)
-  }
+  .data <- make_data_for_stanfit(example, seed = seed)
+  fit <-
+    infer_prior_beliefs(
+      exposure = .data %>% filter(Phase == "exposure"),
+      test = .data %>% filter(Phase == "test"),
+      cues =
+        if (example %in% 1:3)
+        {
+          c("VOT", "f0_semitones", "vowel_duration")[1:(example)]
+        } else if (example %in% 4:6) {
+          c("cue1", "cue2", "cue3")[1:(example %% 4 + 1)]
+        },
+      category = "category",
+      response = "Response",
+      group = "Subject",
+      group.unique = "Condition",
+      center.observations = center.observations,
+      scale.observations = scale.observations,
+      pca.observations = pca.observations,
+      transform_type = transform_type,
+      stanmodel = stanmodel,
+      file = filename, file_refit = file_refit,
+      refresh = refresh,
+      silent = silent,
+      cores = 4,
+      ...)
 
   return(fit)
 }

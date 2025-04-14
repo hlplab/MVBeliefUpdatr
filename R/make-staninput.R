@@ -164,7 +164,7 @@ get_sufficient_statistics_as_list_of_arrays <- function(
     dimnames(N) <- list(cats, groups)
     dimnames(x_mean) <- list(cats, groups, cues)
     dimnames(x_ss) <- list(cats, groups, cues, cues)
-    data_ss <- list(N = N, x_mean = x_mean, x_ss = x_ss)
+    data_ss <- list(N_exposure = N, x_mean_exposure = x_mean, x_ss_exposure = x_ss)
   } else {
     # Univariate observations
     data_ss %<>%
@@ -463,7 +463,7 @@ make_staninput_for_NIW_ideal_adaptor <- function(
         # The part below currently is ignored by get_sufficient_statistics_as_list_of_arrays. If the same syntax as for univariate input could
         # also work for multivariate input to get_sufficient_statistics_as_list_of_arrays that would be more
         # elegant.
-        x_mean = colMeans, N = length, x_ss = get_sum_of_uncentered_squares_from_df) %>%
+        N = length, x_mean = colMeans, x_ss = get_sum_of_uncentered_squares_from_df) %>%
       within({
         x_test <-
           test_counts %>%
@@ -491,8 +491,8 @@ make_staninput_for_NIW_ideal_adaptor <- function(
     # squares to arbitrary values (since Stan doesn't accept typed NAs). But this can
     # create confusion when users try to retrieve the exposure statistics for those groups.
     # Here we're thus setting them to NAs.
-    staninput$x_mean[staninput$N == 0] <- NA
-    staninput$x_ss[staninput$N == 0] <- NA
+    staninput$x_mean_exposure[staninput$N_exposure == 0] <- NA
+    staninput$x_ss_exposure[staninput$N_exposure == 0] <- NA
 
     staninput_transformed <-
       exposure_transformed %>%
@@ -503,10 +503,10 @@ make_staninput_for_NIW_ideal_adaptor <- function(
         # The part below currently is ignored by get_sufficient_statistics_as_list_of_arrays. If the same syntax as for univariate input could
         # also work for multivariate input to get_sufficient_statistics_as_list_of_arrays that would be more
         # elegant.
-        x_mean = colMeans, N = length, x_ss = get_sum_of_uncentered_squares_from_df) %>%
+        N = length, x_mean = colMeans, x_ss = get_sum_of_uncentered_squares_from_df) %>%
       within({
-        M <- dim(x_mean)[1]
-        L <- dim(x_mean)[2]
+        M <- dim(x_mean_exposure)[1]
+        L <- dim(x_mean_exposure)[2]
         K <- length(cues)
 
         x_test <-
@@ -546,8 +546,8 @@ make_staninput_for_NIW_ideal_adaptor <- function(
     # squares to arbitrary values (since Stan doesn't accept typed NAs). But this can
     # create confusion when users try to retrieve the exposure statistics for those groups.
     # Here we're thus setting them to NAs.
-    staninput_transformed$x_mean[staninput_transformed$N == 0] <- NA
-    staninput_transformed$x_ss[staninput_transformed$N == 0] <- NA
+    staninput_transformed$x_mean_exposure[staninput_transformed$N_exposure == 0] <- NA
+    staninput_transformed$x_ss_exposure[staninput_transformed$N_exposure == 0] <- NA
   } else if (use_univariate_updating) {
     if (length(cues) > 1) stop2("Univariate updating is only implemented for univariate data.")
     if (transform_type != "identity") stop2('Univariate updating is only implemented for transform_type = "identity".')

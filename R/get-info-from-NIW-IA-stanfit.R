@@ -316,7 +316,7 @@ get_exposure_category_statistic.NIW_ideal_adaptor_stanfit <- function(
 
   # Get counts n
   if (any(untransform_cues, c("n", "css", "cov") %in% statistic)) {
-    n <- x$N
+    n <- x$N_exposure
     d <- dim(n)
     dn <- dimnames(n)
 
@@ -337,7 +337,7 @@ get_exposure_category_statistic.NIW_ideal_adaptor_stanfit <- function(
 
   # Get central tendencies m
   if (any(untransform_cues, c("mean", "css", "cov") %in% statistic)) {
-    m <- x$x_mean
+    m <- x$x_mean_exposure
     d <- dim(m)
     dn <- dimnames(m)
 
@@ -367,7 +367,7 @@ get_exposure_category_statistic.NIW_ideal_adaptor_stanfit <- function(
 
   # Get scatter or covariance matrices s
   if (any(untransform_cues, c("uss", "css", "cov") %in% statistic)) {
-    s <- x$x_ss
+    s <- x$x_ss_exposure
     d <- dim(s)
     dn <- dimnames(s)
 

@@ -21,9 +21,9 @@ data {
   int L;                                                   // number of exposure groups (e.g. subjects)
   int K;                                                   // number of features
 
-  array[M,L] int<lower=0> N;                               // number of observations per category (M) and exposure group (L)
-  array[M,L] vector[K] x_mean;                             // means for each category (M) and exposure group (L)
-  array[M,L] cov_matrix[K] x_ss;                           // sum of uncentered squares matrix for each category (M) and group (L)
+  array[M,L] int<lower=0> N_exposure;                      // number of observations per category (M) and exposure group (L)
+  array[M,L] vector[K] x_mean_exposure;                    // means for each category (M) and exposure group (L)
+  array[M,L] cov_matrix[K] x_ss_exposure;                  // sum of uncentered squares matrix for each category (M) and group (L)
 
   int N_test;                                              // number of unique combinations of test locations & exposure groups
   array[N_test] vector[K] x_test;                          // locations (in cue space) of test trials
@@ -59,7 +59,7 @@ transformed data {
   /* Scale for the prior of kappa/nu_0. In order to deal with input that does not contain observations
      (in which case n_each == 0), we set the minimum value for SD to 10.
   */
-  real<lower=0> sigma_kappanu = min(max(to_array_1d(N)) * 4, 10);
+  real<lower=0> sigma_kappanu = min(max(to_array_1d(N_exposure)) * 4, 10);
   vector[K] m_0_mu = rep_vector(0, K);         // center of prior of m_0
 }
 
@@ -113,17 +113,19 @@ transformed parameters {
     L_S_0[cat] = Sigma_0_known ? cholesky_decompose(Sigma_0_data[cat] * (nu_0 - K - 1)) :
                             diag_pre_multiply(tau_0_param[cat], L_omega_0_param[cat]);
     for (group in 1:L) {
-      if (N[cat,group] > 0 ) {
-        kappa_n[cat,group] = kappa_0 + N[cat,group];
-        nu_n[cat,group] = nu_0 + N[cat,group];
-        m_n[cat,group] = (kappa_0 * m_0[cat] + N[cat,group] * x_mean[cat,group]) /
+      if (N_exposure[cat,group] > 0 ) {
+        kappa_n[cat,group] = kappa_0 + N_exposure[cat,group];
+        nu_n[cat,group] = nu_0 + N_exposure[cat,group];
+        m_n[cat,group] =
+          (kappa_0 * m_0[cat] + N_exposure[cat,group] * x_mean_exposure[cat,group]) /
           kappa_n[cat,group];
-        L_S_n[cat, group] = cholesky_decompose(
-          symmetrize_from_lower_tri(
-            multiply_lower_tri_self_transpose(L_S_0[cat]) +
-            x_ss[cat, group] +
-            kappa_0 * m_0[cat] * m_0[cat]' -
-            kappa_n[cat, group] * m_n[cat, group] * m_n[cat, group]'
+          L_S_n[cat, group] =
+          cholesky_decompose(
+            symmetrize_from_lower_tri(
+              multiply_lower_tri_self_transpose(L_S_0[cat]) +
+              x_ss_exposure[cat, group] +
+              kappa_0 * m_0[cat] * m_0[cat]' -
+              kappa_n[cat, group] * m_n[cat, group] * m_n[cat, group]'
           )
         );
 
@@ -136,8 +138,9 @@ transformed parameters {
 
       // Instead of computing t_scale as in Murphy, we calculate the Cholesky factor of that
       // scale, and then use the Cholesky-based form of the multivariate T-density below:
-      L_t_scale[cat, group] = L_S_n[cat, group] * sqrt((kappa_n[cat, group] + 1) /
-                               (kappa_n[cat, group] * (nu_n[cat, group] - K + 1)));
+      L_t_scale[cat, group] =
+        L_S_n[cat, group] * sqrt((kappa_n[cat, group] + 1) /
+        (kappa_n[cat, group] * (nu_n[cat, group] - K + 1)));
     }
   }
 
