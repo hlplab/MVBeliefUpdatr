@@ -149,7 +149,14 @@ get_categorization_from_NIW_ideal_adaptor <- function(
   x,
   model,
   decision_rule,
-  noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+  #noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+  noise_treatment = if (decision_rule == "sampling") {
+      "sample"
+      } else if (is.NIW_ideal_adaptor(model)) {
+        if (!is.null(first(model$Sigma_noise)))
+            "marginalize"
+        else "no_noise"
+    } else "no_noise",
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F,
   verbose = F
