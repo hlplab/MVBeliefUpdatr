@@ -75,6 +75,8 @@ plot(mb1)
 autoplot(mb1)
 print(mb1)
 
+saveRDS(mb1, "benchmark-1cue.rds", compress = T)
+
 
 example <- 3
 mb3 <-
@@ -108,3 +110,9 @@ mb3 <-
         file = NULL, refresh = 400, iter = 2000, cores = 4, control = list(adapt_delta = 0.999)),
     times = 25,
     control = list(order = "random"))
+
+plot(mb3)
+autoplot(mb3)
+print(mb3)
+
+saveRDS(mb3, "benchmark-3cues.rds", compress = T)
