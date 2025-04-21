@@ -1,8 +1,21 @@
-#' Fit NIW ideal adaptor
+#' Fit ideal adaptor
 #'
-#' Infers a posterior distribution of NIW_ideal _adaptors from the input data using Stan.
+#' Infers a prior and posterior distribution of ideal adaptors from the input data using Stan. Currently, three
+#' types of ideal adaptor models are available, each using a conjugate prior over Gaussian or multivariate
+#' Gaussian categories:
 #'
-#' @param staninput A list of the type that would be returned by \code{\link{make_staninput_for_NIW_ideal_adaptor}}.
+#' \itemize{
+#'  \item{\code{NIW_ideal_adaptor}:} A Normal-Inverse-Wishart (NIW) prior over the ideal adaptor. This is the
+#'    default model with multivariate Gaussian categories. Accepts univariate and multivariate input, though
+#'    the NIX model should be faster for univariate input.
+#'  \item{\code{NIX_ideal_adaptor}:} A Normal-Inverse-Chisquare (NIX) prior over the ideal adaptor with with
+#'    univariate Gaussian categories. Accepts only univariate input.
+#'  \item{\code{MNIX_ideal_adaptor}:} Separate NIXs for each of multiple cues that are integrated over during
+#'    categorization(cue integration) assuming ideal cue weights based on the relative informativity of each cue.
+#'    Accepts univariate and multivariate input, though the NIX model should be faster for univariate input.
+#' }
+#'
+#' @param staninput A list of the type returned by \code{\link{make_staninput}}.
 #' @param backend Character string naming the package to use as the backend for
 #'   fitting the Stan model. Options are \code{"rstan"} (the default) or
 #'   \code{"cmdstanr"}. Details on the
@@ -13,7 +26,7 @@
 #'   via saveRDS in a file named after the string supplied in file. The .rds extension is added automatically.
 #'   If the file already exists, the model from that file will be loaded and returned instead of refitting the model.
 #'   As existing files won't be overwritten, you have to manually remove the file in order to refit and save the
-#'   model under an existing file name. The file name is stored in the \code{NIW_ideal_adaptor_stanfit} object
+#'   model under an existing file name. The file name is stored in the \code{ideal_adaptor_stanfit} object
 #'   for later use. (default: \code{NULL})
 #' @param file_compress Logical or a character string, specifying one of the
 #'   compression algorithms supported by \code{\link{saveRDS}}. If the
@@ -42,21 +55,25 @@
 #' @param rename For internal use only.
 #' @param ... Additional parameters are passed to \code{\link[rstan]{sampling}}.
 #'
-#' @return An object of class \code{NIW_ideal_adaptor_stanfit} with the fitted stan model. In interpreting the
-#'   inferred parameters, it should be kept in mind that the \emph{inferred} scatter matrix S_0 includes
+#' @return An object of class \code{ideal_adaptor_stanfit} with the fitted stan model.
+#'
+#' @details
+#'   In interpreting the inferred parameters, it should be kept in mind that the \emph{inferred} scatter matrix
+#'   (e.g., S_0) for the NIW model) includes
 #'   variability from internal perceptual and/or external environmental noise, \emph{in addition} to the motor
 #'   noise that is reflected in production data. This also implies that, \strong{if \code{Sigma_0} is provided
-#'   by the user it should be convolved with perceptual noise}. This is particularly important if the data you're
-#'   fitting contains test phases without exposure (e.g., pre-exposure tests). Make sure to read the notes about
-#'   the \code{Sigma_0} argument in the help page on \code{\link{make_staninput}}. Use
-#'   \code{methods(class = "NIW_ideal_adaptor_stanfit")} for an overview on available methods.
+#'   by the user it should be arguably convolved with an estimate of perceptual noise}. This is particularly
+#'   important if the data you're fitting contains test phases without exposure (e.g., pre-exposure tests).
 #'
-#' @seealso \code{\link{is.NIW_ideal_adaptor_stanfit}} for information about NIW_ideal_adaptor_stanfit objects,
+#'   Make sure to read the notes about the \code{Sigma_0} argument in the help page on \code{\link{make_staninput}}.
+#'   Use \code{methods(class = "ideal_adaptor_stanfit")} for an overview on available methods.
+#'
+#' @seealso \code{\link{is.ideal_adaptor_stanfit}} for information about ideal_adaptor_stanfit objects,
 #' \code{\link{get_draws}} to draw samples from the stanfit.
 #'
 #' @importFrom rstan nlist
 #' @export
-fit_NIW_ideal_adaptor <- function(
+fit_ideal_adaptor <- function(
   staninput,
   file = NULL, file_refit = "never", file_compress = T,
   # included for later use
@@ -65,16 +82,17 @@ fit_NIW_ideal_adaptor <- function(
   init = "random", control = NULL,
   silent = 1, verbose = F,
   stan_model_args = list(),
+  stanmodel = NULL,
   # Stuff to be deprecated in the future
-  stanmodel = NULL, rename = T,
+  rename = T,
   ...
 ) {
-  # optionally load NIW_ideal_adaptor_stanfit from file
+  # optionally load ideal_adaptor_stanfit from file
   # Loading here only when we should directly load the file.
   # The "on_change" option needs more information
   file_refit <- match.arg(file_refit, file_refit_options())
   if (!is.null(file) && file_refit == "never") {
-    fit <- read_NIW_ideal_adaptor_stanfit(file)
+    fit <- read_ideal_adaptor_stanfit(file)
     if (!is.null(fit)) {
       if (silent == 0) message("Loading existing model from file.")
       return(fit)
@@ -82,7 +100,7 @@ fit_NIW_ideal_adaptor <- function(
   }
 
   # extract information from staninput
-  assert_that(is.NIW_ideal_adaptor_staninput(staninput))
+  assert_that(is.ideal_adaptor_staninput(staninput))
   data <- staninput$data
   transform_information <- staninput$transform_information
   staninput <- staninput$staninput
@@ -94,7 +112,7 @@ fit_NIW_ideal_adaptor <- function(
 
   # Check whether model actually needs to be refit
   if (!is.null(file) && file_refit == "on_change") {
-    x_from_file <- read_NIW_ideal_adaptor_stanfit(file)
+    x_from_file <- read_ideal_adaptor_stanfit(file)
     if (!is.null(x_from_file)) {
       needs_refit <-
         stanfit_needs_refit(
@@ -110,7 +128,7 @@ fit_NIW_ideal_adaptor <- function(
   }
 
   fit <-
-    NIW_ideal_adaptor_stanfit(
+    ideal_adaptor_stanfit(
       data = data,
       staninput = staninput,
       stanvars = stanvars,
@@ -131,7 +149,7 @@ fit_NIW_ideal_adaptor <- function(
         "p_test_conj", "log_p_test_conj")
 
     if (is.null(stanmodel)) {
-      current_default_modelname <- 'mvg_conj_sufficient_stats_lapse'
+      current_default_modelname <- 'NIW_ideal_adaptor'
       stanfit <-
         sampling(
           MVBeliefUpdatr:::stanmodels[[current_default_modelname]],
@@ -158,14 +176,14 @@ fit_NIW_ideal_adaptor <- function(
       stop("Sampling failed.")
     } else {
       fit %<>% set_stanfit(stanfit)
-      fit %<>% recover_types.NIW_ideal_adaptor_stanfit()
+      fit %<>% recover_types.ideal_adaptor_stanfit()
 
       if (rename) fit %<>% rename_pars()
     }
   } else if (!silent) message("No sampling requested. Returning empty model object.")
 
   if (!is.null(fit) && !is.null(file)) {
-    fit <- write_NIW_ideal_adaptor_stanfit(x = fit, file = file, compress = file_compress)
+    fit <- write_ideal_adaptor_stanfit(x = fit, file = file, compress = file_compress)
   }
 
   return(fit)

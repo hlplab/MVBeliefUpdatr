@@ -2,7 +2,7 @@
 % Please edit documentation in R/class-NIW-IA-stanfit.R
 \name{stanfit_needs_refit}
 \alias{stanfit_needs_refit}
-\title{Check if cached \code{NIW_ideal_adaptor_stanfit} can be used.}
+\title{Check if cached \code{ideal_adaptor_stanfit} can be used.}
 \usage{
 stanfit_needs_refit(
   x,
@@ -14,7 +14,7 @@ stanfit_needs_refit(
 )
 }
 \arguments{
-\item{x}{Old \code{NIW_ideal_adaptor_stanfit} object (e.g., loaded from file).}
+\item{x}{Old \code{ideal_adaptor_stanfit} object (e.g., loaded from file).}
 
 \item{current_version}{Current version of relevant packages. (default: will be automatically
 obtained from current packages).}

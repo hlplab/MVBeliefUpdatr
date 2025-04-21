@@ -31,7 +31,7 @@ example_exemplar_model <- function(
         lapse_rate = lapse_rate,
         lapse_bias = lapse_bias,
         Sigma_noise = Sigma_noise)) %>%
-      sample_MVG_data_from_model(Ns = 50) %>%
+      sample_data_from_model(Ns = 50) %>%
       make_exemplar_model_from_data(
         cues = cues,
         prior = prior,
@@ -45,7 +45,7 @@ example_exemplar_model <- function(
       message(paste("An example exemplar model with two categories and two cues.\n",
             "Lapse is set to ", lapse_rate, " with lapse biases ", paste(lapse_bias, collapse = ", "), "."))
     suppressMessages(example_MVG_ideal_observer(4)) %>%
-      sample_MVG_data_from_model(Ns = 50) %>%
+      sample_data_from_model(Ns = 50) %>%
       make_exemplar_model_from_data(
         cues = c("cue1", "cue2"),
         prior = prior,
@@ -152,6 +152,27 @@ example_NIW_ideal_adaptor <- function(
         kappa = 30,
         nu = 10)
   }
+}
+
+
+#' Example data for different types of models.
+#'
+#' @rdname example-data
+#' @export
+example_data <- function(
+    model_type,
+    example = 1,
+    ...,
+    Ns = 20
+) {
+  assert_that(is_scalar_character(model_type))
+  assert_that(model_type %in% c("exemplar_model", "MVG_ideal_observer", "NIX_ideal_adaptor", "MNIX_ideal_adaptor", "NIW_ideal_adaptor"),
+              msg = paste0("model_type must be one of: exemplar_model, MVG_ideal_observer, NIX_ideal_adaptor, MNIX_ideal_adaptor, NIW_ideal_adaptor."))
+
+  model <- example_model(example = example, model_type = model_type, ...)
+  df <- sample_data_from_mdoel(model = model, Ns = Ns, randomize.order = F)
+
+  return(df)
 }
 
 
@@ -731,26 +752,21 @@ aggregate_models_by_group_structure = function(
 }
 
 
-#' Sample multivariate Gaussian exposure data.
+#' Sample data from model.
 #'
-#' Returns a tibble of observations drawn from multivariate Gaussians, with one observation per row. Each row
-#' provides the category label and cue values. If \code{keep.input_parameters = T} then the parameters (\code{N, mean, sigma})
-#' are also returned.
+#' Returns a tibble of observations drawn from one of the models defined in \code{MVBeliefUpdatr}, with one observation per row. Each row
+#' provides the category label and cue values. Lapse rate and lapse bias are currently not considered while sampling.
 #'
-#' The input is expected to be lists/vectors of parameters with the n-th element of each list/vector specifying the
-#' category label, number of observations, \code{mu}, and \code{Sigma} of the n-th Gaussian.
-#'
-#' @param Ns Integer vector, with each number specifying the number of observations to be drawn from the corresponding
-#' Gaussian.
-#' @param mus List of mean vectors, each specifying the mean of a multivariate Gaussian.
-#' @param sigmas List of covariance matrices, each specifying the covariance of a multivariate Gaussian.
-#' @param category.labels Character vector of category names, each specifying the category label of a multivariate Gaussian. If \code{NULL}
-#' (default) then Gaussians will be numbered from 1:N.
-#' @param cue.labels Character vector of cue names. If \code{NULL} (default) then the cues will be numbered cue1, cue2, ...
 #' @param model \code{\link{MVG}}, \code{\link{MVG_ideal_observer}}, \code{\link{NIW_belief}}, or \code{\link{NIW_ideal_adaptor}} object.
-#' @param randomize.order Should the order of the data be randomized? (default: FALSE) This won't affect the final outcome of
-#' NIW belief updating, but it will change the incremental updates (and thus, for example, visualizations of the update process).
-#' @param keep.input_parameters Should the parameters handed to this function be included in the output? (default: FALSE)
+#' @param Ns Integer vector, with each number specifying the number of observations to be drawn from the corresponding
+#'   Gaussian.
+#' @param category.labels Character vector of category names, each specifying the category label of a multivariate Gaussian. (default: extracted
+#'   from \code{model} if available, otherwise 1:N)
+#' @param cue.labels Character vector of cue names. If \code{NULL} (default) then the cues will be numbered cue1, cue2, ... (default: extracted
+#'   from \code{model} if available, otherwise cue1, cue2, ...)
+#' @param mus,sigmas,nus, etc.  Lists of parameters with the n-th element of each list specifying relevant parameter necessary to characterize
+#'   the model's representations of the n-th category.
+#' @param randomize.order Should the order of the data be randomized? If not, samples are sorted by category (default: TRUE)
 #'
 #' @return A tibble.
 #'
@@ -760,13 +776,47 @@ aggregate_models_by_group_structure = function(
 #' @importFrom rlang .data
 #' @importFrom tidyselect everything
 #' @importFrom dplyr slice_sample
+#' @rdname sample_data
+#' @export
+sample_data_from_model <- function(
+  model,
+  Ns,
+  randomize.order = T
+) {
+  if (is.MVG(model) | is.MVG_ideal_observer(model)) {
+    df <-
+      sample_MVG_data(
+        Ns = Ns,
+        mus = model$mu,
+        Sigmas = model$Sigma,
+        category.labels = get_category_labels_from_model(model),
+        cue.labels = get_cue_labels_from_model(model),
+        randomize.order = randomize.order)
+    return(df)
+  } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model)) {
+    df <-
+      sample_NIW_data(
+        Ns = Ns,
+        ms = model$m,
+        Ss = model$S,
+        kappas = model$kappa,
+        nus = model$nu,
+        category.labels = get_category_labels_from_model(model),
+        cue.labels = get_cue_labels_from_model(model),
+        randomize.order = randomize.order)
+    return(df)
+  } else
+    message(paste("Unrecognized model class:", class(model)))
+}
+
+
+#' @rdname sample_data
 #' @export
 sample_MVG_data <- function(
-  Ns, mus, Sigmas,
-  category.labels = NULL,
-  cue.labels = NULL,
-  randomize.order = F,
-  keep.input_parameters = F
+    Ns, mus, Sigmas,
+    category.labels = NULL,
+    cue.labels = NULL,
+    randomize.order = T
 ) {
   # Binding variables that RMD Check gets confused about otherwise
   # (since they are in non-standard evaluations)
@@ -790,36 +840,59 @@ sample_MVG_data <- function(
   if (randomize.order)
     x %<>% slice_sample(prop = 1, replace = FALSE)
 
-  if (keep.input_parameters) return(x) else return(x %>% select(category, everything(), -c(n, mu, Sigma)))
+  return(x %>% select(category, everything(), -c(n, mu, Sigma)))
 }
 
 
-#' @rdname sample_MVG_data
+#' @rdname sample_data
 #' @export
-sample_MVG_data_from_model = function(
-  Ns,
-  model = NULL,
-  randomize.order = F,
-  keep.input_parameters = F
+sample_NIW_data <- function(
+    Ns, ms, Ss, kappas, nus,
+    category.labels = NULL,
+    cue.labels = NULL,
+    randomize.order = T
 ) {
-  if (is.MVG(model) | is.MVG_ideal_observer(model)) {
-    return(sample_MVG_data(
-      Ns = Ns,
-      mus = model$mu,
-      Sigmas = model$Sigma,
-      category.labels = get_category_labels_from_model(model),
-      cue.labels = get_cue_labels_from_model(model),
-      randomize.order = randomize.order,
-      keep.input_parameters = keep.input_parameters))
-  } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model)) {
-    return(sample_MVG_data(
-      Ns = Ns,
-      mus = model$m,
-      Sigmas = get_expected_Sigma_from_S(model$S, model$nu),
-      category.labels = get_category_labels_from_model(model),
-      cue.labels = get_cue_labels_from_model(model),
-      randomize.order = randomize.order,
-      keep.input_parameters = keep.input_parameters))
-  } else
-    message(paste("Unrecognized model class:", class(model)))
+  # Binding variables that RMD Check gets confused about otherwise
+  # (since they are in non-standard evaluations)
+  category <- n <- m <- S <- kappa <- nu <- NULL
+
+  assert_that(!is.null(ms), !is.null(Ss))
+  assert_that(is.null(category.labels) | length(ms) == length(category.labels),
+              msg = "Number of category labels mismatch number of ms.")
+  assert_that(is.null(cue.labels) | length(ms[[1]]) == length(cue.labels),
+              msg = "Number of cue labels mismatches dimensionality of ms.")
+
+  if (is.null(category.labels)) category.labels = 1:length(ms)
+  if (is.null(cue.labels)) cue.labels = paste0("cue", 1:length(ms[[1]]))
+
+  x <-
+    tibble("category" = category.labels, "n" = Ns, "m" = ms, "S" = Ss, "kappa" = kappas, "nu" = nus) %>%
+    mutate(
+      data =
+        pmap(
+          .l = list(.data$n, .data$m, .data$S, .data$kappa, .data$nu),
+          .f = function(n, m, S, kappa, nu) rmvt(
+            n,
+            df = nu - length(cue.labels) + 1,
+            delta = m,
+            sigma = S * (kappa +1) / (kappa * (nu - length(cue.labels) + 1))))) %>%
+    mutate(data = map(.data$data, ~ .x %>% as.data.frame() %>% rename_all(~ cue.labels))) %>%
+    unnest(data)
+
+  if (randomize.order)
+    x %<>% slice_sample(prop = 1, replace = FALSE)
+
+  return(x %>% select(category, everything(), -c(n, m, S, kappa, nu)))
+}
+
+
+#' @rdname sample_data
+#' @export
+sample_exemplar_data <- function(
+    Ns,
+    category.labels = NULL,
+    cue.labels = NULL,
+    randomize.order = T
+) {
+  stop2("sample_exemplar_data is not yet defined.")
 }

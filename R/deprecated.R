@@ -1,24 +1,24 @@
 #' DEPRECATED: get_transform_information_from_stanfit
 #' @export
-get_transform_information_from_stanfit <- function(...) get_transform_information.NIW_ideal_adaptor_stanfit(...)
+get_transform_information_from_stanfit <- function(...) get_transform_information.ideal_adaptor_stanfit(...)
 
 #' DEPRECATED: get_transform_function_from_stanfit
 #' @export
-get_transform_function_from_stanfit <- function(...) get_transform_function.NIW_ideal_adaptor_stanfit(...)
+get_transform_function_from_stanfit <- function(...) get_transform_function.ideal_adaptor_stanfit(...)
 
 #' DEPRECATED: get_untransform_function_from_stanfit
 #' @export
-get_untransform_function_from_stanfit <- function(...) get_untransform_function.NIW_ideal_adaptor_stanfit(...)
+get_untransform_function_from_stanfit <- function(...) get_untransform_function.ideal_adaptor_stanfit(...)
 
 #' DEPRECATED: get_staninput_from_stanfit
 #' @export
-get_staninput_from_stanfit <- function(...) get_staninput.NIW_ideal_adaptor_stanfit(...)
+get_staninput_from_stanfit <- function(...) get_staninput.ideal_adaptor_stanfit(...)
 
-# get_exposure_category_statistic_from_stanfit <- get_exposure_category_statistic.NIW_ideal_adaptor_stanfit
-# get_exposure_mean_from_stanfit <- get_exposure_category_mean.NIW_ideal_adaptor_stanfit
-# get_exposure_css_from_stanfit <- get_exposure_category_css.NIW_ideal_adaptor_stanfit
-# get_exposure_uss_from_stanfit <- get_exposure_category_uss.NIW_ideal_adaptor_stanfit
-# get_exposure_cov_from_stanfit <- get_exposure_category_cov.NIW_ideal_adaptor_stanfit
+# get_exposure_category_statistic_from_stanfit <- get_exposure_category_statistic.ideal_adaptor_stanfit
+# get_exposure_mean_from_stanfit <- get_exposure_category_mean.ideal_adaptor_stanfit
+# get_exposure_css_from_stanfit <- get_exposure_category_css.ideal_adaptor_stanfit
+# get_exposure_uss_from_stanfit <- get_exposure_category_uss.ideal_adaptor_stanfit
+# get_exposure_cov_from_stanfit <- get_exposure_category_cov.ideal_adaptor_stanfit
 
 #' DEPRECATED: get_test_data_from_stanfit
 #' @export
@@ -41,7 +41,7 @@ add_ibbu_stanfit_draw <- function(...) get_draws(...)
 #'
 #' Use \code{\link{infer_NIW_ideal_adaptor()}} instead, together with \code{\link{make_staninput_for_NIW_ideal_adaptor()}}.
 #' @inheritParams make_staninput
-#' @inheritParams fit_NIW_ideal_adaptor
+#' @inheritParams fit_ideal_adaptor
 #' @export
 infer_prior_beliefs <- function(
   # arguments for make_staninput
@@ -82,7 +82,7 @@ infer_prior_beliefs <- function(
         tau_scale = tau_scale,
         L_omega_eta = L_omega_eta,
         split_loglik_per_observation = split_loglik_per_observation,
-        use_univariate_updating = if (is.null(stanmodel)) { FALSE } else { stanmodel == 'uvg_conj_uninformative_priors_sufficient_stats_lapse'},
+        use_univariate_updating = if (is.null(stanmodel)) { FALSE } else { stanmodel == 'NIX_ideal_adaptor'},
         verbose = verbose)
   } else  if (!is.null(transform_type)) {
     staninput <-
@@ -101,14 +101,13 @@ infer_prior_beliefs <- function(
         tau_scale = if (is.null(tau_scale)) rep(5, length(cues)) else tau_scale,
         L_omega_eta = L_omega_eta,
         split_loglik_per_observation = split_loglik_per_observation,
-        use_univariate_updating = if (is.null(stanmodel)) { FALSE } else { stanmodel == 'uvg_conj_uninformative_priors_sufficient_stats_lapse'},
         verbose = verbose,
         model_type = "NIW_ideal_adaptor")
   } else {
     stop2("Either transform or center.observations, scale.observations, or pca.observations must be specified.")
   }
 
-  fit_NIW_ideal_adaptor(staninput = staninput, stanmodel = stanmodel, silent = silent, verbose = verbose, ...)
+  fit_ideal_adaptor(staninput = staninput, stanmodel = stanmodel, silent = silent, verbose = verbose, ...)
 }
 
 #' DEPRECATED: make_staninput
@@ -147,7 +146,7 @@ make_staninput_deprecated <- function(
     verbose = F
 ) {
   message("This variant of make_staninput() is DEPRECATED and is called internally because you used the DEPRECATED function infer_prior_beliefs().
-          This function will be removed in a future version of MVBeliefUpdatr. Please use fit_NIW_ideal_adaptor() instead.")
+          This function will be removed in a future version of MVBeliefUpdatr. Please use fit_ideal_adaptor() instead.")
   if (!center.observations)
     message("You did not center observations. Note that the prior of category means is symmetric around 0.")
 

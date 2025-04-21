@@ -2,19 +2,19 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{set_staninput}
 \alias{set_staninput}
-\alias{set_staninput.NIW_ideal_adaptor_stanfit}
+\alias{set_staninput.ideal_adaptor_stanfit}
 \title{Set the input data from an NIW ideal adaptor stanfit}
 \usage{
 set_staninput(x, ...)
 
-\method{set_staninput}{NIW_ideal_adaptor_stanfit}(
+\method{set_staninput}{ideal_adaptor_stanfit}(
   x,
   staninput,
   which = c("untransformed", "transformed", "both")[3]
 )
 }
 \arguments{
-\item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
+\item{x}{\code{\link{ideal_adaptor_stanfit}} object.}
 
 \item{staninput}{A list with element names and structures determined by the type of stanfit model.}
 
@@ -23,10 +23,10 @@ set_staninput(x, ...)
 \value{
 A list with element names and structures determined by the type of stanfit model.
 
-An \code{\link{NIW_ideal_adaptor_stanfit}} object with the updated staninput.
+An \code{\link{ideal_adaptor_stanfit}} object with the updated staninput.
 }
 \description{
-Sets the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{\link{NIW_ideal_adaptor_stanfit}}
+Sets the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{\link{ideal_adaptor_stanfit}}
 object.
 }
 \seealso{

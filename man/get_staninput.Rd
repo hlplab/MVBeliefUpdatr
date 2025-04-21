@@ -2,15 +2,15 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{get_staninput}
 \alias{get_staninput}
-\alias{get_staninput.NIW_ideal_adaptor_stanfit}
+\alias{get_staninput.ideal_adaptor_stanfit}
 \title{Get the input data from an NIW ideal adaptor stanfit}
 \usage{
 get_staninput(x, ...)
 
-\method{get_staninput}{NIW_ideal_adaptor_stanfit}(x, which = c("untransformed", "transformed", "both")[1])
+\method{get_staninput}{ideal_adaptor_stanfit}(x, which = c("untransformed", "transformed", "both")[1])
 }
 \arguments{
-\item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
+\item{x}{\code{\link{ideal_adaptor_stanfit}} object.}
 
 \item{which}{Should "transformed" or "untransformed" staninput be returned or "both"? (default: `"untransformed"`)}
 }
@@ -18,7 +18,7 @@ get_staninput(x, ...)
 A list with element names and structures determined by the type of stanfit model.
 }
 \description{
-Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{\link{NIW_ideal_adaptor_stanfit}}
+Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{\link{ideal_adaptor_stanfit}}
 object.
 }
 \seealso{

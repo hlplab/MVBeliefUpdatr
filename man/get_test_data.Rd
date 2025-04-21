@@ -2,12 +2,12 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{get_test_data}
 \alias{get_test_data}
-\alias{get_test_data.NIW_ideal_adaptor_stanfit}
+\alias{get_test_data.ideal_adaptor_stanfit}
 \title{Get the test data from an NIW ideal adaptor stanfit.}
 \usage{
 get_test_data(fit, ...)
 
-\method{get_test_data}{NIW_ideal_adaptor_stanfit}(fit, groups = get_group_levels(fit, include_prior = FALSE), ...)
+\method{get_test_data}{ideal_adaptor_stanfit}(fit, groups = get_group_levels(fit, include_prior = FALSE), ...)
 }
 \arguments{
 \item{...}{additional arguments to \code{\link{get_staninput}}.}
@@ -17,7 +17,7 @@ are automatically added to the fit during the creation of the fit. If necessary,
 \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
 (default: all categories/groups will be selected)}
 
-\item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
+\item{x}{\code{\link{ideal_adaptor_stanfit}} object.}
 }
 \value{
 A \code{tibble} in which each row is a test token. Columns include the cues

@@ -2,21 +2,21 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{get_transform_information}
 \alias{get_transform_information}
-\alias{get_transform_information.NIW_ideal_adaptor_stanfit}
-\alias{get_transform_function.NIW_ideal_adaptor_stanfit}
-\alias{get_untransform_function.NIW_ideal_adaptor_stanfit}
+\alias{get_transform_information.ideal_adaptor_stanfit}
+\alias{get_transform_function.ideal_adaptor_stanfit}
+\alias{get_untransform_function.ideal_adaptor_stanfit}
 \title{Get the transform/untransform information from an NIW ideal adaptor stanfit}
 \usage{
 get_transform_information(x, ...)
 
-\method{get_transform_information}{NIW_ideal_adaptor_stanfit}(x)
+\method{get_transform_information}{ideal_adaptor_stanfit}(x)
 
-\method{get_transform_function}{NIW_ideal_adaptor_stanfit}(x)
+\method{get_transform_function}{ideal_adaptor_stanfit}(x)
 
-\method{get_untransform_function}{NIW_ideal_adaptor_stanfit}(x)
+\method{get_untransform_function}{ideal_adaptor_stanfit}(x)
 }
 \arguments{
-\item{x}{An \code{\link{NIW_ideal_adaptor_stanfit}} object.}
+\item{x}{An \code{\link{ideal_adaptor_stanfit}} object.}
 }
 \value{
 A function.

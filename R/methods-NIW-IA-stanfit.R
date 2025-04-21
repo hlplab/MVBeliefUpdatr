@@ -1,16 +1,16 @@
 #' loo for NIW ideal adaptor stanfit
 #'
-#' \code{loo} method for \code{\link{NIW_ideal_adaptor_stanfit}} objects.
+#' \code{loo} method for \code{\link{ideal_adaptor_stanfit}} objects.
 #'
-#' @param x An \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param x An \code{\link{ideal_adaptor_stanfit}} object.
 #'
 #' @return A \code{loo} object.
 #'
-#' @method loo NIW_ideal_adaptor_stanfit
+#' @method loo ideal_adaptor_stanfit
 #'
 #' @importFrom loo loo extract_log_lik relative_eff loo.array
 #' @export
-loo.NIW_ideal_adaptor_stanfit <- function(
+loo.ideal_adaptor_stanfit <- function(
     x,
     pars = "log_lik",
     ...,
@@ -32,22 +32,22 @@ loo.NIW_ideal_adaptor_stanfit <- function(
 
 #' Summarize NIW ideal adaptor stanfit
 #'
-#' \code{summary} method for \code{\link{NIW_ideal_adaptor_stanfit}} objects. Specifies reasonable defaults
+#' \code{summary} method for \code{\link{ideal_adaptor_stanfit}} objects. Specifies reasonable defaults
 #' for the parameters to be summarized for the stanfit object.
 #'
-#' @param x An \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param x An \code{\link{ideal_adaptor_stanfit}} object.
 #' @param pars A character vector of parameter names to be summarized. If `NULL`, all parameters of the
 #' NIW_ideal_adaptor are summarized. (default: `NULL`)
 #' @param prior_only Should only the priors and other sufficient parameters be summarized? (default: `FALSE`)
 #' @param include_transformed_pars Should transformed parameters be included in the summary? (default: `FALSE`)
 #' @param ... Additional arguments passed to \code{\link[rstan]{summary}}.
 #'
-#' @method summary NIW_ideal_adaptor_stanfit
+#' @method summary ideal_adaptor_stanfit
 #'
 #' @importFrom rstan summary
 #' @importFrom tibble rownames_to_column
 #' @export
-summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE, include_transformed_pars = F, ...) {
+summary.ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE, include_transformed_pars = F, ...) {
   stanfit <- get_stanfit(x)
   if (is.null(pars)) {
     pars <- names(stanfit)
@@ -97,13 +97,13 @@ summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE
 
 #' #' loo moment matching for NIW ideal adaptor stanfit
 #' #'
-#' #' \code{loo_moment_match} method for \code{\link{NIW_ideal_adaptor_stanfit}} objects. For detaisl,
+#' #' \code{loo_moment_match} method for \code{\link{ideal_adaptor_stanfit}} objects. For detaisl,
 #' #' see \code{\link{loo::loo_moment_match}}.
 #' #'
-#' #' @param x An \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' #' @param x An \code{\link{ideal_adaptor_stanfit}} object.
 #' #' @param loo A `loo` object.
 #' #' @param post_draws,log_lik_i,unconstrain_pars,log_prob_upars,log_lik_i_upars User-defined functions.
-#' #' @method loo NIW_ideal_adaptor_stanfit
+#' #' @method loo ideal_adaptor_stanfit
 #' #'
 #' #' @importFrom loo loo_moment_match.default
 #' #' @export
@@ -147,7 +147,7 @@ summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE
 #'
 #'
 #' # Copied and modified from https://github.com/paul-buerkner/brms/blob/master/R/loo_moment_match.R
-#' loo_moment_match.NIW_ideal_adaptor_stanfit <- function(
+#' loo_moment_match.ideal_adaptor_stanfit <- function(
 #'     model,
 #'     loo = NULL,
 #'     k_threshold = 0.7,
@@ -155,7 +155,7 @@ summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE
 #'     recompile = FALSE,
 #'     ...
 #' ) {
-#'   stopifnot(is.NIW_ideal_adaptor_stanfit(model))
+#'   stopifnot(is.ideal_adaptor_stanfit(model))
 #'   loo <- loo %||% x$criteria[["loo"]]
 #'
 #'   if (is.null(loo)) {
@@ -231,7 +231,7 @@ summary.NIW_ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE
 #'                                      k_threshold = NULL, split = TRUE,
 #'                                      cov = TRUE, cores = getOption("mc.cores", 1),
 #'                                      ...) {
-#'   assert_that(is.NIW_ideal_adaptor_stanfit(x))
+#'   assert_that(is.ideal_adaptor_stanfit(x))
 #'   assert_that(class(loo) == "loo")
 #'
 #'   # input checks

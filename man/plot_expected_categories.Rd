@@ -11,18 +11,18 @@
 \alias{plot_expected_categories_density_1D}
 \alias{plot_expected_categories_density2D}
 \alias{plot_expected_categories_density_2D}
-\alias{plot_expected_categories.NIW_ideal_adaptor_stanfit}
-\alias{plot_expected_categories_contour.NIW_ideal_adaptor_stanfit}
+\alias{plot_expected_categories.ideal_adaptor_stanfit}
+\alias{plot_expected_categories_contour.ideal_adaptor_stanfit}
 \alias{plot_expected_ibbu_stanfit_categories_contour}
-\alias{plot_expected_categories_density.NIW_ideal_adaptor_stanfit}
+\alias{plot_expected_categories_density.ideal_adaptor_stanfit}
 \alias{plot_expected_ibbu_stanfit_categories_density}
 \alias{plot_expected_categories_contour2D.NIW_ideal_adaptor}
-\alias{plot_expected_categories_contour2D.NIW_ideal_adaptor_stanfit}
+\alias{plot_expected_categories_contour2D.ideal_adaptor_stanfit}
 \alias{plot_expected_ibbu_stanfit_categories_contour2D}
 \alias{plot_expected_categories_density1D.NIW_ideal_adaptor}
-\alias{plot_expected_categories_density1D.NIW_ideal_adaptor_stanfit}
+\alias{plot_expected_categories_density1D.ideal_adaptor_stanfit}
 \alias{plot_expected_ibbu_stanfit_categories_density1D}
-\alias{plot_expected_categories_density2D.NIW_ideal_adaptor_stanfit}
+\alias{plot_expected_categories_density2D.ideal_adaptor_stanfit}
 \alias{plot_expected_ibbu_stanfit_categories_density2D}
 \title{Plot expected categories of ideal adaptor stanfit}
 \usage{
@@ -38,11 +38,11 @@ plot_expected_categories_density1D(model, ...)
 
 plot_expected_categories_density2D(model, ...)
 
-\method{plot_expected_categories}{NIW_ideal_adaptor_stanfit}(model, type, ...)
+\method{plot_expected_categories}{ideal_adaptor_stanfit}(model, type, ...)
 
-\method{plot_expected_categories_contour}{NIW_ideal_adaptor_stanfit}(model, cues = get_cue_levels(model), ...)
+\method{plot_expected_categories_contour}{ideal_adaptor_stanfit}(model, cues = get_cue_levels(model), ...)
 
-\method{plot_expected_categories_density}{NIW_ideal_adaptor_stanfit}(model, cues = get_cue_levels(model), ...)
+\method{plot_expected_categories_density}{ideal_adaptor_stanfit}(model, cues = get_cue_levels(model), ...)
 
 \method{plot_expected_categories_contour2D}{NIW_ideal_adaptor}(
   x,
@@ -60,7 +60,7 @@ plot_expected_categories_density2D(model, ...)
   ...
 )
 
-\method{plot_expected_categories_contour2D}{NIW_ideal_adaptor_stanfit}(
+\method{plot_expected_categories_contour2D}{ideal_adaptor_stanfit}(
   model,
   categories = get_category_levels(model),
   groups = get_group_levels(model, include_prior = T),
@@ -92,7 +92,7 @@ plot_expected_categories_density2D(model, ...)
   ...
 )
 
-\method{plot_expected_categories_density1D}{NIW_ideal_adaptor_stanfit}(
+\method{plot_expected_categories_density1D}{ideal_adaptor_stanfit}(
   model,
   categories = get_category_levels(model),
   groups = get_group_levels(model, include_prior = T),
@@ -107,7 +107,7 @@ plot_expected_categories_density2D(model, ...)
   resolution = 101
 )
 
-\method{plot_expected_categories_density2D}{NIW_ideal_adaptor_stanfit}(
+\method{plot_expected_categories_density2D}{ideal_adaptor_stanfit}(
   model,
   categories = get_category_levels(model),
   groups = get_group_levels(model, include_prior = T),

@@ -6,11 +6,11 @@
 \alias{get_exposure_category_css}
 \alias{get_exposure_category_uss}
 \alias{get_exposure_category_cov}
-\alias{get_exposure_category_statistic.NIW_ideal_adaptor_stanfit}
-\alias{get_exposure_category_mean.NIW_ideal_adaptor_stanfit}
-\alias{get_exposure_category_css.NIW_ideal_adaptor_stanfit}
-\alias{get_exposure_category_uss.NIW_ideal_adaptor_stanfit}
-\alias{get_exposure_category_cov.NIW_ideal_adaptor_stanfit}
+\alias{get_exposure_category_statistic.ideal_adaptor_stanfit}
+\alias{get_exposure_category_mean.ideal_adaptor_stanfit}
+\alias{get_exposure_category_css.ideal_adaptor_stanfit}
+\alias{get_exposure_category_uss.ideal_adaptor_stanfit}
+\alias{get_exposure_category_cov.ideal_adaptor_stanfit}
 \title{Get category sample mean or covariance matrix of exposure data from NIW ideal adaptor stanfit}
 \usage{
 get_exposure_category_statistic(x, ...)
@@ -23,7 +23,7 @@ get_exposure_category_uss(x, ...)
 
 get_exposure_category_cov(x, ...)
 
-\method{get_exposure_category_statistic}{NIW_ideal_adaptor_stanfit}(
+\method{get_exposure_category_statistic}{ideal_adaptor_stanfit}(
   x,
   categories = get_category_levels(x),
   groups = get_group_levels(x, include_prior = FALSE),
@@ -32,16 +32,16 @@ get_exposure_category_cov(x, ...)
   ...
 )
 
-\method{get_exposure_category_mean}{NIW_ideal_adaptor_stanfit}(...)
+\method{get_exposure_category_mean}{ideal_adaptor_stanfit}(...)
 
-\method{get_exposure_category_css}{NIW_ideal_adaptor_stanfit}(...)
+\method{get_exposure_category_css}{ideal_adaptor_stanfit}(...)
 
-\method{get_exposure_category_uss}{NIW_ideal_adaptor_stanfit}(...)
+\method{get_exposure_category_uss}{ideal_adaptor_stanfit}(...)
 
-\method{get_exposure_category_cov}{NIW_ideal_adaptor_stanfit}(...)
+\method{get_exposure_category_cov}{ideal_adaptor_stanfit}(...)
 }
 \arguments{
-\item{x}{An \code{\link{NIW_ideal_adaptor_stanfit}}.}
+\item{x}{An \code{\link{ideal_adaptor_stanfit}}.}
 
 \item{...}{additional arguments to \code{\link{get_staninput}}.}
 
@@ -64,7 +64,7 @@ of group and category.
 }
 \description{
 Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an
-\code{\link{NIW_ideal_adaptor_stanfit}}.
+\code{\link{ideal_adaptor_stanfit}}.
 }
 \seealso{
 TBD

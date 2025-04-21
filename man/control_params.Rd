@@ -2,12 +2,12 @@
 % Please edit documentation in R/diagnostics.R
 \name{control_params}
 \alias{control_params}
-\alias{control_params.NIW_ideal_adaptor_stanfit}
+\alias{control_params.ideal_adaptor_stanfit}
 \title{Extract Control Parameters of the NUTS Sampler}
 \usage{
 control_params(x, ...)
 
-\method{control_params}{NIW_ideal_adaptor_stanfit}(x, pars = NULL, ...)
+\method{control_params}{ideal_adaptor_stanfit}(x, pars = NULL, ...)
 }
 \arguments{
 \item{x}{An \R object}

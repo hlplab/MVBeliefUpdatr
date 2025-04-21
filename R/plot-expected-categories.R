@@ -148,7 +148,7 @@ plot_expected_categories_density2D <- function(model, ...) {
 
 #' @rdname plot_expected_categories
 #' @export
-plot_expected_categories.NIW_ideal_adaptor_stanfit <- function(
+plot_expected_categories.ideal_adaptor_stanfit <- function(
     model,
     type,
     ...
@@ -164,7 +164,7 @@ plot_expected_categories.NIW_ideal_adaptor_stanfit <- function(
 #' @aliases plot_expected_ibbu_stanfit_categories_contour
 #' @rdname plot_expected_categories
 #' @export
-plot_expected_categories_contour.NIW_ideal_adaptor_stanfit <- function(
+plot_expected_categories_contour.ideal_adaptor_stanfit <- function(
     model,
     cues = get_cue_levels(model),
     ...
@@ -181,7 +181,7 @@ plot_expected_categories_contour.NIW_ideal_adaptor_stanfit <- function(
 #' @aliases plot_expected_ibbu_stanfit_categories_density
 #' @rdname plot_expected_categories
 #' @export
-plot_expected_categories_density.NIW_ideal_adaptor_stanfit <- function(
+plot_expected_categories_density.ideal_adaptor_stanfit <- function(
     model,
     cues = get_cue_levels(model),
     ...
@@ -301,7 +301,7 @@ plot_expected_categories_contour2D.NIW_ideal_adaptor <- function(
 #' @aliases plot_expected_ibbu_stanfit_categories_contour2D
 #' @rdname plot_expected_categories
 #' @export
-plot_expected_categories_contour2D.NIW_ideal_adaptor_stanfit <- function(
+plot_expected_categories_contour2D.ideal_adaptor_stanfit <- function(
     model,
     categories = get_category_levels(model),
     groups = get_group_levels(model, include_prior = T),
@@ -395,7 +395,7 @@ plot_expected_categories_contour2D.NIW_ideal_adaptor_stanfit <- function(
     # Optionally plot exposure data
     { if (plot.exposure)
       add_exposure_summary_to_2D_plot(
-        get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(
+        get_exposure_category_statistic.ideal_adaptor_stanfit(
           model,
           categories = levels(d.pars$category),
           groups = setdiff(groups_found, "prior"),
@@ -523,7 +523,7 @@ plot_expected_categories_density1D.NIW_ideal_adaptor <- function(
 #' @aliases plot_expected_ibbu_stanfit_categories_density1D
 #' @rdname plot_expected_categories
 #' @export
-plot_expected_categories_density1D.NIW_ideal_adaptor_stanfit <- function(
+plot_expected_categories_density1D.ideal_adaptor_stanfit <- function(
     model,
     categories = get_category_levels(model),
     groups = get_group_levels(model, include_prior = T),
@@ -615,7 +615,7 @@ plot_expected_categories_density1D.NIW_ideal_adaptor_stanfit <- function(
     # Optionally plot exposure data
     { if (plot.exposure)
       add_exposure_summary_to_1D_plot(
-        get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(
+        get_exposure_category_statistic.ideal_adaptor_stanfit(
           model,
           categories = levels(d.pars$category),
           groups = setdiff(groups_found, "prior"),
@@ -633,7 +633,7 @@ plot_expected_categories_density1D.NIW_ideal_adaptor_stanfit <- function(
 #' @aliases plot_expected_ibbu_stanfit_categories_density2D
 #' @rdname plot_expected_categories
 #' @export
-plot_expected_categories_density2D.NIW_ideal_adaptor_stanfit <- function(
+plot_expected_categories_density2D.ideal_adaptor_stanfit <- function(
     model,
     categories = get_category_levels(model),
     groups = get_group_levels(model, include_prior = T),
@@ -746,7 +746,7 @@ plot_expected_categories_density2D.NIW_ideal_adaptor_stanfit <- function(
     # Optionally plot exposure data
     { if (plot.exposure)
       add_exposure_summary_to_2D_plot(
-        get_exposure_category_statistic.NIW_ideal_adaptor_stanfit(
+        get_exposure_category_statistic.ideal_adaptor_stanfit(
           model,
           categories = levels(d.pars$category),
           groups = setdiff(groups_found, "prior"),

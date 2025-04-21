@@ -47,10 +47,9 @@ make_data_for_1Dstanfit_with_exposure <- function() {
   # Sample responses for subjects that have converged against those five states
   .data <-
     bind_rows(
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = c("VOT"), vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "baseline",
@@ -61,10 +60,9 @@ make_data_for_1Dstanfit_with_exposure <- function() {
                  simplify = T,
                  noise_treatment = "no_noise",
                  lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io.p20,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = c("VOT"), vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "plus20",
@@ -75,10 +73,9 @@ make_data_for_1Dstanfit_with_exposure <- function() {
                  simplify = T,
                  noise_treatment = "no_noise",
                  lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io.p40,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = c("VOT"), vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "plus40",
@@ -89,10 +86,9 @@ make_data_for_1Dstanfit_with_exposure <- function() {
                  simplify = T,
                  noise_treatment = "no_noise",
                  lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io.m20,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = c("VOT"), vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "minus20",
@@ -103,10 +99,9 @@ make_data_for_1Dstanfit_with_exposure <- function() {
                  simplify = T,
                  noise_treatment = "no_noise",
                  lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io.m40,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = c("VOT"), vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "minus40",
@@ -150,10 +145,9 @@ make_data_for_2Dstanfit_with_exposure <- function() {
   # Sample responses for subjects that have converged against those five states
   .data <-
     bind_rows(
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = .cues, vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "baseline",
@@ -164,10 +158,9 @@ make_data_for_2Dstanfit_with_exposure <- function() {
                  simplify = T,
                  noise_treatment = "no_noise",
                  lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io.20.20,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = .cues, vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "plus20.20",
@@ -178,10 +171,9 @@ make_data_for_2Dstanfit_with_exposure <- function() {
                  simplify = T,
                  noise_treatment = "no_noise",
                  lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io.40.40,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = .cues, vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "plus40.40",
@@ -192,10 +184,9 @@ make_data_for_2Dstanfit_with_exposure <- function() {
                  simplify = T,
                  noise_treatment = "no_noise",
                  lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io.20.40,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = .cues, vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "plus20.40",
@@ -206,10 +197,9 @@ make_data_for_2Dstanfit_with_exposure <- function() {
                  simplify = T,
                  noise_treatment = "no_noise",
                  lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io.40.20,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = .cues, vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "plus40.20",
@@ -252,10 +242,9 @@ make_data_for_3Dstanfit_with_exposure <- function() {
   # Sample responses for subjects that have converged against those five states
   .data <-
     bind_rows(
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = .cues, vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "baseline",
@@ -266,10 +255,9 @@ make_data_for_3Dstanfit_with_exposure <- function() {
                  simplify = T,
                  noise_treatment = "no_noise",
                  lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io.20.20.20,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = .cues, vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "plus20.20.20",
@@ -280,10 +268,9 @@ make_data_for_3Dstanfit_with_exposure <- function() {
                  simplify = T,
                  noise_treatment = "no_noise",
                  lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io.40.40.40,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = .cues, vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "plus40.40.40",
@@ -294,10 +281,9 @@ make_data_for_3Dstanfit_with_exposure <- function() {
                  simplify = T,
                  noise_treatment = "no_noise",
                  lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io.20.40.60,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = .cues, vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "plus20.40.60",
@@ -308,10 +294,9 @@ make_data_for_3Dstanfit_with_exposure <- function() {
                  simplify = T,
                  noise_treatment = "no_noise",
                  lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
+      sample_data_from_model(
         model = .io.40.20.0,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
+        Ns = n_trial) %>%
         make_vector_column(cols = .cues, vector_col = "cue") %>%
         crossing(Subject = 1:n_subject) %>%
         mutate(Condition = "plus40.20.0",
@@ -342,14 +327,13 @@ make_data_for_2Dstanfit_without_exposure <- function() {
   # Update that ideal adaptor with shifted exposure
   # Shift 1
   .exposure_1 <-
-    sample_MVG_data_from_model(
+    sample_data_from_model(
       model =
         example_MVG_ideal_observer(5) %>%
         mutate(
           mu = map(mu, ~ .x + c(-1, 3)),
           Sigma = ifelse(category == "B", map(Sigma, ~ .x * 2), Sigma)),
-      Ns = n_trial.exposure,
-      keep.input_parameters = F) %>%
+      Ns = n_trial.exposure) %>%
     make_vector_column(cols = .cues, vector_col = "cue")
   .ia_1 <-
     .ia_0 %>%
@@ -359,12 +343,11 @@ make_data_for_2Dstanfit_without_exposure <- function() {
       noise_treatment = "no_noise")
   # Shift 2
   .exposure_2 <-
-    sample_MVG_data_from_model(
+    sample_data_from_model(
       model =
         example_MVG_ideal_observer(5) %>%
         mutate(mu = map(mu, ~ .x + c(4, -1))),
-      Ns = n_trial.exposure,
-      keep.input_parameters = F) %>%
+      Ns = n_trial.exposure) %>%
     make_vector_column(cols = .cues, vector_col = "cue")
   .ia_2 <-
     .ia_0 %>%
@@ -374,14 +357,13 @@ make_data_for_2Dstanfit_without_exposure <- function() {
       noise_treatment = "no_noise")
   # Shift 3
   .exposure_3 <-
-    sample_MVG_data_from_model(
+    sample_data_from_model(
       model =
         example_MVG_ideal_observer(5) %>%
         mutate(
           mu = map(mu, ~ .x + c(-4, -2)),
           Sigma = ifelse(category == "B", map(Sigma, ~ .x * 2), Sigma)),
-      Ns = n_trial.exposure,
-      keep.input_parameters = F) %>%
+      Ns = n_trial.exposure) %>%
     make_vector_column(cols = .cues, vector_col = "cue")
   .ia_3 <-
     .ia_0 %>%
@@ -489,14 +471,13 @@ make_data_for_3Dstanfit_without_exposure <- function() {
   # Update that ideal adaptor with shifted exposure
   # Shift 1
   .exposure_1 <-
-    sample_MVG_data_from_model(
+    sample_data_from_model(
       model =
         example_MVG_ideal_observer(3) %>%
         mutate(
           mu = map(mu, ~ .x + c(-1, 3, 2)),
           Sigma = ifelse(category == "B", map(Sigma, ~ .x * 2), Sigma)),
-      Ns = n_trial.exposure,
-      keep.input_parameters = F) %>%
+      Ns = n_trial.exposure) %>%
     make_vector_column(cols = .cues, vector_col = "cue")
   .ia_1 <-
     .ia_0 %>%
@@ -506,12 +487,11 @@ make_data_for_3Dstanfit_without_exposure <- function() {
       noise_treatment = "no_noise")
   # Shift 2
   .exposure_2 <-
-    sample_MVG_data_from_model(
+    sample_data_from_model(
       model =
         example_MVG_ideal_observer(3) %>%
         mutate(mu = map(mu, ~ .x + c(4, -1))),
-      Ns = n_trial.exposure,
-      keep.input_parameters = F) %>%
+      Ns = n_trial.exposure) %>%
     make_vector_column(cols = .cues, vector_col = "cue")
   .ia_2 <-
     .ia_0 %>%
@@ -521,14 +501,13 @@ make_data_for_3Dstanfit_without_exposure <- function() {
       noise_treatment = "no_noise")
   # Shift 3
   .exposure_3 <-
-    sample_MVG_data_from_model(
+    sample_data_from_model(
       model =
         example_MVG_ideal_observer(3) %>%
         mutate(
           mu = map(mu, ~ .x + c(-4, -2)),
           Sigma = ifelse(category == "B", map(Sigma, ~ .x * 2), Sigma)),
-      Ns = n_trial.exposure,
-      keep.input_parameters = F) %>%
+      Ns = n_trial.exposure) %>%
     make_vector_column(cols = .cues, vector_col = "cue")
   .ia_3 <-
     .ia_0 %>%
@@ -624,33 +603,27 @@ make_data_for_3Dstanfit_without_exposure <- function() {
 
 get_example_stanfit <- function(
     example = 1,
-    silent = 2, refresh = 0,
-    seed = 42,
+    silent = 2, refresh = 0, seed = 42,
     file_refit = "on_change",
-    stanmodel = NULL,
-    center.observations = NULL,
-    scale.observations = NULL,
-    pca.observations = NULL,
+    stanmodel = "NIW_ideal_adaptor",
     transform_type = "PCA whiten",
     ...
 ) {
   filename <-
     paste0(
-      "../example-stanfit", example, "-",
+      "../example-stanfit-",
       paste(
         c(
           if (!is.null(stanmodel)) stanmodel else "",
-          seed,
-          if (!is.null(center.observations)) center.observations else "",
-          if (!is.null(scale.observations)) scale.observations else "",
-          if (!is.null(pca.observations)) pca.observations else "",
-          if (!is.null(transform_type)) transform_type else ""),
+          example,
+          if (!is.null(transform_type)) transform_type else "",
+          seed),
         collapse = "-"),
       ".rds")
 
   .data <- make_data_for_stanfit(example, seed = seed)
-  fit <-
-    infer_prior_beliefs(
+  .staninput <-
+    make_staninput(
       exposure = .data %>% filter(Phase == "exposure"),
       test = .data %>% filter(Phase == "test"),
       cues =
@@ -664,10 +637,11 @@ get_example_stanfit <- function(
       response = "Response",
       group = "Subject",
       group.unique = "Condition",
-      center.observations = center.observations,
-      scale.observations = scale.observations,
-      pca.observations = pca.observations,
-      transform_type = transform_type,
+      stanmodel = stanmodel,
+      transform_type = transform_type)
+  fit <-
+    fit_ideal_adaptor(
+      staninput = .staninput,
       stanmodel = stanmodel,
       file = filename, file_refit = file_refit,
       refresh = refresh,

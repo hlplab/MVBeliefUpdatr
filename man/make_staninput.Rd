@@ -2,12 +2,9 @@
 % Please edit documentation in R/make-staninput.R
 \name{make_staninput}
 \alias{make_staninput}
-\alias{make_staninput_for_NIW_ideal_adaptor}
-\title{Prepare data to fit NIW_ideal_adaptor_stanfit via rstan}
+\title{Prepare data to fit ideal_adaptor_stanfit via rstan}
 \usage{
-make_staninput(..., model_type = "NIW_ideal_adaptor")
-
-make_staninput_for_NIW_ideal_adaptor(
+make_staninput(
   exposure,
   test,
   cues,
@@ -19,10 +16,9 @@ make_staninput_for_NIW_ideal_adaptor(
   mu_0 = NULL,
   Sigma_0 = NULL,
   tau_scale = rep(5, length(cues)),
-  L_omega_eta = 1,
   transform_type = c("identity", "center", "standardize", "PCA whiten", "ZCA whiten")[4],
-  use_univariate_updating = F,
-  split_loglik_per_observation = 0,
+  ...,
+  stanmodel = "NIW_ideal_adaptor",
   verbose = F
 )
 }
@@ -62,11 +58,12 @@ NIW ideal adaptor does \emph{not} infer category and noise variability separatel
 \item{tau_scale}{A vector of scales for the Cauchy priors for each cue's standard deviations. Used in
 both the prior for m_0 and the prior for S_0. (default: vector of 5s if scale.observations = TRUE, SD of each cue otherwise).}
 
-\item{L_omega_eta}{A vector of etas of the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. (default: 1,
-which corresponds to a uniform prior of correlation matrices)}
-
 \item{transform_type}{An affine transformation that can be applied to the data. See `type` in \code{\link{get_affine_transform}}
 for details. (default: "PCA whiten")}
+
+\item{L_omega_eta}{A vector of etas of the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. Only used for
+models with multivariate categories (e.g., NIW_ideal_adaptor). (default: 1,
+  which corresponds to a uniform prior of correlation matrices)}
 
 \item{split_loglik_per_observation}{Optionally, split the log likelihood per observation. This can be helpful of leave-one-out
 estimation in order to avoid high Pareto k, but it also makes the stored stanfit object much larger. (default: 0)}
@@ -90,6 +87,6 @@ exposure to one set of those exposure tokens. To achieve this intended outcome, 
 observations that any level of \code{group} receives during exposure.
 }
 \seealso{
-\code{\link{is.NIW_ideal_adaptor_staninput}}
+\code{\link{is.ideal_adaptor_staninput}}
 }
 \keyword{TBD}

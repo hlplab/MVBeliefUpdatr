@@ -68,8 +68,9 @@ NIW ideal adaptor does \emph{not} infer category and noise variability separatel
 \item{tau_scale}{A vector of scales for the Cauchy priors for each cue's standard deviations. Used in
 both the prior for m_0 and the prior for S_0. (default: vector of 5s if scale.observations = TRUE, SD of each cue otherwise).}
 
-\item{L_omega_eta}{A vector of etas of the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. (default: 1,
-which corresponds to a uniform prior of correlation matrices)}
+\item{L_omega_eta}{A vector of etas of the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. Only used for
+models with multivariate categories (e.g., NIW_ideal_adaptor). (default: 1,
+  which corresponds to a uniform prior of correlation matrices)}
 
 \item{split_loglik_per_observation}{Optionally, split the log likelihood per observation. This can be helpful of leave-one-out
 estimation in order to avoid high Pareto k, but it also makes the stored stanfit object much larger. (default: 0)}

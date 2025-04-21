@@ -3,12 +3,12 @@
 \name{plot_parameters}
 \alias{plot_parameters}
 \alias{plot_ibbu_stanfit_parameters}
-\alias{plot_parameters.NIW_ideal_adaptor_stanfit}
+\alias{plot_parameters.ideal_adaptor_stanfit}
 \title{Plot distribution of parameters of ideal adaptor stanfit}
 \usage{
 plot_parameters(fit, ...)
 
-\method{plot_parameters}{NIW_ideal_adaptor_stanfit}(
+\method{plot_parameters}{ideal_adaptor_stanfit}(
   model,
   categories = get_category_levels(model),
   groups = get_group_levels(model, include_prior = T),

@@ -24,9 +24,9 @@ assert_NIW_ideal_adaptor = function(x, category = "category", verbose = F) {
               msg = paste(deparse(substitute(x)), "must be an NIW_ideal_adaptor object."))
 }
 
-assert_NIW_ideal_adaptor_stanfit <- function(x, verbose = F) {
-  assert_that(is.NIW_ideal_adaptor_stanfit(x, verbose = verbose),
-              msg = paste(deparse(substitute(x)), "must be of class", "NIW_ideal_adaptor_stanfit"))
+assert_ideal_adaptor_stanfit <- function(x, verbose = F) {
+  assert_that(is.ideal_adaptor_stanfit(x, verbose = verbose),
+              msg = paste(deparse(substitute(x)), "must be of class", "ideal_adaptor_stanfit"))
 }
 
 #' @export

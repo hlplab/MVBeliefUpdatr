@@ -2,12 +2,12 @@
 
 #include <Rcpp.h>
 using namespace Rcpp ;
-#include "stanExports_mvg_conj_sufficient_stats_lapse.h"
+#include "stanExports_NIW_ideal_adaptor_cholesky.h"
 
-RCPP_MODULE(stan_fit4mvg_conj_sufficient_stats_lapse_mod) {
+RCPP_MODULE(stan_fit4NIW_ideal_adaptor_cholesky_mod) {
 
 
-    class_<rstan::stan_fit<stan_model, boost::random::ecuyer1988> >("rstantools_model_mvg_conj_sufficient_stats_lapse")
+    class_<rstan::stan_fit<stan_model, boost::random::ecuyer1988> >("rstantools_model_NIW_ideal_adaptor_cholesky")
 
     .constructor<SEXP,SEXP,SEXP>()
 

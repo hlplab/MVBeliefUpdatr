@@ -18,7 +18,7 @@ test_that("Test is.exemplar_model", {
   expect_true(is.exemplar_model(example_exemplar_model(1)))
   expect_false(is.exemplar_model(example_MVG_ideal_observer(1)))
   expect_false(is.exemplar_model(example_NIW_ideal_adaptor(1)))
-  #  expect_false(is.exemplar_model(example_NIW_ideal_adaptor_stanfit(1)))
+  #  expect_false(is.exemplar_model(example_ideal_adaptor_stanfit(1)))
 })
 
 test_that("make exemplars", {

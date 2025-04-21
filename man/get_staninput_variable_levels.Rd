@@ -5,10 +5,10 @@
 \alias{get_category_levels}
 \alias{get_group_levels}
 \alias{get_cue_levels}
-\alias{get_staninput_variable_levels.NIW_ideal_adaptor_stanfit}
-\alias{get_category_levels.NIW_ideal_adaptor_stanfit}
-\alias{get_group_levels.NIW_ideal_adaptor_stanfit}
-\alias{get_cue_levels.NIW_ideal_adaptor_stanfit}
+\alias{get_staninput_variable_levels.ideal_adaptor_stanfit}
+\alias{get_category_levels.ideal_adaptor_stanfit}
+\alias{get_group_levels.ideal_adaptor_stanfit}
+\alias{get_cue_levels.ideal_adaptor_stanfit}
 \title{Get or restore the original group or category levels from an NIW ideal adaptor stanfit.}
 \usage{
 get_staninput_variable_levels(x, ...)
@@ -19,20 +19,20 @@ get_group_levels(x, ...)
 
 get_cue_levels(x, ...)
 
-\method{get_staninput_variable_levels}{NIW_ideal_adaptor_stanfit}(
+\method{get_staninput_variable_levels}{ideal_adaptor_stanfit}(
   x,
   variable = c("category", "group", "cue"),
   indices = NULL
 )
 
-\method{get_category_levels}{NIW_ideal_adaptor_stanfit}(x, indices = NULL)
+\method{get_category_levels}{ideal_adaptor_stanfit}(x, indices = NULL)
 
-\method{get_group_levels}{NIW_ideal_adaptor_stanfit}(x, indices = NULL, include_prior = F)
+\method{get_group_levels}{ideal_adaptor_stanfit}(x, indices = NULL, include_prior = F)
 
-\method{get_cue_levels}{NIW_ideal_adaptor_stanfit}(x, indices = NULL)
+\method{get_cue_levels}{ideal_adaptor_stanfit}(x, indices = NULL)
 }
 \arguments{
-\item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
+\item{x}{\code{\link{ideal_adaptor_stanfit}} object.}
 
 \item{variable}{Either "category" or "group".}
 

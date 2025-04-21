@@ -1,11 +1,11 @@
-#' An S4 class for NIW_ideal_adaptor stanfit objects that use one of the NIW_ideal_adaptor stan programs.
+#' An S4 class for ideal_adaptor stanfit objects that use one of the ideal_adaptor Stan programs.
 #'
-#' @name NIW_ideal_adaptor_stanfit-class
+#' @name ideal_adaptor_stanfit-class
 #' @aliases NIW_ideal_adaptor_stanfit
 #' @docType class
 #'
 #' @details
-#' See \code{methods(class = "NIW_ideal_adaptor_stanfit")} for an overview of available methods.
+#' See \code{methods(class = "ideal_adaptor_stanfit")} for an overview of available methods.
 #'
 #' @slot data A \code{data.frame} containing the data used to fit the model.
 #' @slot staninput A named \code{list} containing the data handed to rstan through
@@ -23,7 +23,7 @@
 #' @slot criteria An empty \code{list} for adding model fit criteria
 #'   after estimation of the model. NOT YET USED
 #' @slot file Optional name of a file in which the model object was stored in
-#'   or loaded from. NOT YET USED
+#'   or loaded from.
 #' @slot version The versions of \pkg{MVBeliefUpdatr} and \pkg{rstan} with
 #'   which the model was fitted.
 #' @slot labels list
@@ -32,8 +32,8 @@
 #' @importFrom utils packageVersion
 NULL
 
-# NIW_ideal_adaptor_stanfit class
-NIW_ideal_adaptor_stanfit <- function(
+# ideal_adaptor_stanfit class
+ideal_adaptor_stanfit <- function(
     data = data.frame(),
     staninput = list(),
     stanvars = NULL,
@@ -56,11 +56,11 @@ NIW_ideal_adaptor_stanfit <- function(
   }
 
   # Add check here that staninput is a valid staninput object. But don't confuse it with
-  # is.NIW_ideal_adaptor_staninput, which is the currently confusingly named list of
+  # is.ideal_adaptor_staninput, which is the currently confusingly named list of
   # staninput, data, and transform_information
   # assert_that(
-  #   is.NIW_ideal_adaptor_staninput(staninput),
-  #   msg = paste("staninput is not an acceptable input for NIW_ideal_adaptor_stanfit stan program."))
+  #   is.ideal_adaptor_staninput(staninput),
+  #   msg = paste("staninput is not an acceptable input for ideal_adaptor_stanfit stan program."))
 
   version <- get_current_versions()
 
@@ -80,11 +80,11 @@ NIW_ideal_adaptor_stanfit <- function(
       version)
 
   # setClass(
-  #   "NIW_ideal_adaptor_stanfit",
+  #   "ideal_adaptor_stanfit",
   #   slots = c(input_data = "list", transform_information = "list", labels = "list"),
   #   contains = "stanfit",
   #   package = "MVBeliefUpdatr")
-  class(x) <- "NIW_ideal_adaptor_stanfit"
+  class(x) <- "ideal_adaptor_stanfit"
 
   x
 }
@@ -92,7 +92,7 @@ NIW_ideal_adaptor_stanfit <- function(
 # Ultimately, this could be turned into a method, but care would have to be taken to still make tidybayes::recover_types()
 # work since that applies to objects of class "stanfit" (but is not defined as a method, I think)
 #' @export
-recover_types.NIW_ideal_adaptor_stanfit <- function(fit, staninput = NULL) {
+recover_types.ideal_adaptor_stanfit <- function(fit, staninput = NULL) {
   stanfit <- get_stanfit(fit)
   if (is.null(staninput)) staninput <- get_staninput(fit)
 
@@ -133,7 +133,7 @@ make_parnames <- function(prefix, ...) {
 # modified from brms
 # https://github.com/paul-buerkner/brms/blob/315c7874d6e1b58eb9082e5e07521682f0dc2ca9/R/rename_pars.R
 rename_pars <- function(x) {
-  stopifnot(is.NIW_ideal_adaptor_stanfit(x))
+  stopifnot(is.ideal_adaptor_stanfit(x))
 
   chains <- length(x$stanfit@sim$samples)
 
@@ -152,7 +152,7 @@ rename_pars <- function(x) {
 
 #' Is this an NIW ideal adaptor stanfit?
 #'
-#' Check whether \code{x} is of class \code{\link{NIW_ideal_adaptor_stanfit}}.
+#' Check whether \code{x} is of class \code{\link{ideal_adaptor_stanfit}}.
 #'
 #' @param x Object to be checked.
 #' @param verbose Currently being ignored.
@@ -162,8 +162,8 @@ rename_pars <- function(x) {
 #' @seealso TBD
 #' @keywords TBD
 #' @export
-is.NIW_ideal_adaptor_stanfit <- function(x, verbose = F) {
-  inherits(x, "NIW_ideal_adaptor_stanfit")
+is.ideal_adaptor_stanfit <- function(x, verbose = F) {
+  inherits(x, "ideal_adaptor_stanfit")
 }
 
 is.stanfit <- function(x) {
@@ -194,14 +194,14 @@ is.NIW_ideal_adaptor_MCMC <- function(x, is.nested = T, is.long = T, with.prior 
 
 #' Is this a list of NIW ideal adaptor stanfit inputs?
 #'
-#' Check whether \code{x} is of class \code{\link{NIW_ideal_adaptor_stanfit}}.
+#' Check whether \code{x} is of class \code{\link{ideal_adaptor_stanfit}}.
 #'
 #' @return A logical.
 #'
 #' @seealso TBD
 #' @keywords TBD
 #' @export
-is.NIW_ideal_adaptor_staninput <- function(x) {
+is.ideal_adaptor_staninput <- function(x) {
   if (!is.list(x)) return(FALSE)
   if (!all(c("staninput", "data", "transform_information") %in% names(x))) return(FALSE)
   if (!is.list(x$staninput)) return(FALSE)
@@ -221,7 +221,7 @@ is.NIW_ideal_adaptor_staninput <- function(x) {
 
 # from brms
 contains_draws <- function(x) {
-  if (!(is.NIW_ideal_adaptor_stanfit(x) && length(get_stanfit(x)@sim))) {
+  if (!(is.ideal_adaptor_stanfit(x) && length(get_stanfit(x)@sim))) {
     stop2("The model does not contain posterior draws.")
   }
   invisible(TRUE)
@@ -244,12 +244,12 @@ file_refit_options <- function() {
 }
 
 # Modified from brms
-#' Check if cached \code{NIW_ideal_adaptor_stanfit} can be used.
+#' Check if cached \code{ideal_adaptor_stanfit} can be used.
 #'
 #' Checks whether a given cached fit can be used without refitting when
 #' \code{file_refit = "on_change"} is used.
 #'
-#' @param x Old \code{NIW_ideal_adaptor_stanfit} object (e.g., loaded from file).
+#' @param x Old \code{ideal_adaptor_stanfit} object (e.g., loaded from file).
 #' @param current_version Current version of relevant packages. (default: will be automatically
 #'  obtained from current packages).
 #' @param data New data to check consistency of factor level names. (default: \code{NULL}))
@@ -270,7 +270,7 @@ stanfit_needs_refit <- function(
     data = NULL, staninput = NULL,
     silent = FALSE, verbose = FALSE
 ) {
-  stopifnot(is.NIW_ideal_adaptor_stanfit(x))
+  stopifnot(is.ideal_adaptor_stanfit(x))
   silent <- as_one_logical(silent)
   verbose <- as_one_logical(verbose)
 
@@ -366,10 +366,10 @@ stanfit_needs_refit <- function(
 }
 
 # modified from brms
-# read a NIW_ideal_adaptor_stanfit object from a file
+# read a ideal_adaptor_stanfit object from a file
 # @param file path to an rds file
-# @return a NIW_ideal_adaptor_stanfit object or NULL
-read_NIW_ideal_adaptor_stanfit <- function(file) {
+# @return a ideal_adaptor_stanfit object or NULL
+read_ideal_adaptor_stanfit <- function(file) {
   file <- check_stanfit_file(file)
   dir <- dirname(file)
   if (!dir.exists(dir)) {
@@ -381,8 +381,8 @@ read_NIW_ideal_adaptor_stanfit <- function(file) {
 
   x <- suppressWarnings(try(readRDS(file), silent = TRUE))
   if (!is_try_error(x)) {
-    if (!is.NIW_ideal_adaptor_stanfit(x)) {
-      stop2("Object loaded via 'file' is not of class 'NIW_ideal_adaptor_stanfit'.")
+    if (!is.ideal_adaptor_stanfit(x)) {
+      stop2("Object loaded via 'file' is not of class 'ideal_adaptor_stanfit'.")
     }
     x$file <- file
   } else {
@@ -392,13 +392,13 @@ read_NIW_ideal_adaptor_stanfit <- function(file) {
 }
 
 # modified from brms
-# write an NIW_ideal_adaptor_stanfit object to a file.
-# @param x an NIW_ideal_adaptor_stanfit object
+# write an ideal_adaptor_stanfit object to a file.
+# @param x an ideal_adaptor_stanfit object
 # @param file path to an rds file
 # @param compress compression format supported by saveRDS
 # @return NULL
-write_NIW_ideal_adaptor_stanfit <- function(x, file, compress = TRUE) {
-  stopifnot(is.NIW_ideal_adaptor_stanfit(x))
+write_ideal_adaptor_stanfit <- function(x, file, compress = TRUE) {
+  stopifnot(is.ideal_adaptor_stanfit(x))
   file <- check_stanfit_file(file)
   x$file <- file
   saveRDS(x, file = file, compress = compress)

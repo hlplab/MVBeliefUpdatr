@@ -2,14 +2,14 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{get_expected_category_statistic}
 \alias{get_expected_category_statistic}
-\alias{get_expected_category_statistic.NIW_ideal_adaptor_stanfit}
-\alias{get_expected_mu.NIW_ideal_adaptor_stanfit}
-\alias{get_expected_sigma.NIW_ideal_adaptor_stanfit}
+\alias{get_expected_category_statistic.ideal_adaptor_stanfit}
+\alias{get_expected_mu.ideal_adaptor_stanfit}
+\alias{get_expected_sigma.ideal_adaptor_stanfit}
 \title{Get expected category mean mu or covariance matrix sigma}
 \usage{
 get_expected_category_statistic(x, ...)
 
-\method{get_expected_category_statistic}{NIW_ideal_adaptor_stanfit}(
+\method{get_expected_category_statistic}{ideal_adaptor_stanfit}(
   x,
   categories = get_category_levels(x),
   groups = get_group_levels(x, include_prior = TRUE),
@@ -17,12 +17,12 @@ get_expected_category_statistic(x, ...)
   untransform_cues = FALSE
 )
 
-\method{get_expected_mu}{NIW_ideal_adaptor_stanfit}(x, ...)
+\method{get_expected_mu}{ideal_adaptor_stanfit}(x, ...)
 
-\method{get_expected_sigma}{NIW_ideal_adaptor_stanfit}(x, ...)
+\method{get_expected_sigma}{ideal_adaptor_stanfit}(x, ...)
 }
 \arguments{
-\item{x}{An \code{\link[=is.NIW_ideal_adaptor_stanfit]{mv_ibbu_stanfit}} object.}
+\item{x}{An \code{\link[=is.ideal_adaptor_stanfit]{mv_ibbu_stanfit}} object.}
 
 \item{categories}{Character vector with categories for which category statistics are to be
 returned. (default: all categories)}

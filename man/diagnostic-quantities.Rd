@@ -6,19 +6,19 @@
 \alias{nuts_params}
 \alias{rhat}
 \alias{neff_ratio}
-\alias{log_posterior.NIW_ideal_adaptor_stanfit}
-\alias{nuts_params.NIW_ideal_adaptor_stanfit}
-\alias{rhat.NIW_ideal_adaptor_stanfit}
-\alias{neff_ratio.NIW_ideal_adaptor_stanfit}
+\alias{log_posterior.ideal_adaptor_stanfit}
+\alias{nuts_params.ideal_adaptor_stanfit}
+\alias{rhat.ideal_adaptor_stanfit}
+\alias{neff_ratio.ideal_adaptor_stanfit}
 \title{Extract Diagnostic Quantities of \pkg{MVBeliefUpdatr} Models}
 \usage{
-\method{log_posterior}{NIW_ideal_adaptor_stanfit}(x, ...)
+\method{log_posterior}{ideal_adaptor_stanfit}(x, ...)
 
-\method{nuts_params}{NIW_ideal_adaptor_stanfit}(x, pars = NULL, ...)
+\method{nuts_params}{ideal_adaptor_stanfit}(x, pars = NULL, ...)
 
-\method{rhat}{NIW_ideal_adaptor_stanfit}(x, pars = NULL, ...)
+\method{rhat}{ideal_adaptor_stanfit}(x, pars = NULL, ...)
 
-\method{neff_ratio}{NIW_ideal_adaptor_stanfit}(x, pars = NULL, ...)
+\method{neff_ratio}{ideal_adaptor_stanfit}(x, pars = NULL, ...)
 }
 \arguments{
 \item{x}{An \code{MVBeliefUpdatr} object.}

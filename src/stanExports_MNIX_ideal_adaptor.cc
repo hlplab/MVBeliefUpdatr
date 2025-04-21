@@ -2,12 +2,12 @@
 
 #include <Rcpp.h>
 using namespace Rcpp ;
-#include "stanExports_uvg_conj_uninformative_priors_sufficient_stats_lapse.h"
+#include "stanExports_MNIX_ideal_adaptor.h"
 
-RCPP_MODULE(stan_fit4uvg_conj_uninformative_priors_sufficient_stats_lapse_mod) {
+RCPP_MODULE(stan_fit4MNIX_ideal_adaptor_mod) {
 
 
-    class_<rstan::stan_fit<stan_model, boost::random::ecuyer1988> >("rstantools_model_uvg_conj_uninformative_priors_sufficient_stats_lapse")
+    class_<rstan::stan_fit<stan_model, boost::random::ecuyer1988> >("rstantools_model_MNIX_ideal_adaptor")
 
     .constructor<SEXP,SEXP,SEXP>()
 

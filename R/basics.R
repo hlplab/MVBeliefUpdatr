@@ -754,7 +754,7 @@ transform_model <- function(model, transform) {
   if (is.MVG(model) | is.MVG_ideal_observer(model)) {
     m = "mu"
     S = "Sigma"
-  } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model) | is.NIW_ideal_adaptor_stanfit(model) | is.NIW_ideal_adaptor_MCMC(model)) {
+  } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model) | is.ideal_adaptor_stanfit(model) | is.NIW_ideal_adaptor_MCMC(model)) {
     m = "m"
     S = "S"
   } else {
@@ -773,7 +773,7 @@ untransform_model <- function(model, transform) {
   if (is.MVG(model) | is.MVG_ideal_observer(model)) {
     m = "mu"
     S = "Sigma"
-  } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model) | is.NIW_ideal_adaptor_stanfit(model) | is.NIW_ideal_adaptor_MCMC(model)) {
+  } else if (is.NIW_belief(model) | is.NIW_ideal_adaptor(model) | is.ideal_adaptor_stanfit(model) | is.NIW_ideal_adaptor_MCMC(model)) {
     m = "m"
     S = "S"
   } else {

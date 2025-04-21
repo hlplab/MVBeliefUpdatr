@@ -43,7 +43,7 @@ plot_parameters <- function(fit, ...) {
 
 #' @rdname plot_parameters
 #' @export
-plot_parameters.NIW_ideal_adaptor_stanfit <- function(
+plot_parameters.ideal_adaptor_stanfit <- function(
   model,
   categories = get_category_levels(model),
   groups = get_group_levels(model, include_prior = T),
@@ -208,7 +208,7 @@ plot_parameter_correlations <- function(model, ...) {
 
 #' @export
 #' @rdname plot_parameter_correlations
-plot_parameter_correlations.NIW_ideal_adaptor_stanfit <- function(
+plot_parameter_correlations.ideal_adaptor_stanfit <- function(
   model,
   categories = get_category_levels(model),
   groups = "prior",
@@ -313,7 +313,7 @@ plot_parameter_correlations.NIW_ideal_adaptor_stanfit <- function(
 #'
 #' @aliases plot_ibbu_stanfit_test_categorization
 #'
-#' @param model \code{\link{NIW_ideal_adaptor_stanfit}} object.
+#' @param model \code{\link{ideal_adaptor_stanfit}} object.
 #' @param data.test Optionally, a \code{tibble} or \code{data.frame} with test data.
 #' If `NULL` the input will be extracted from fit. (default: `NULL`).
 #' @param groups Character vector of groups to be plotted. Typically, the levels of these factors
@@ -354,7 +354,7 @@ plot_expected_categorization <- function(model, ...) {
 
 #' @rdname plot_expected_categorization
 #' @export
-plot_expected_categorization.NIW_ideal_adaptor_stanfit <- function(
+plot_expected_categorization.ideal_adaptor_stanfit <- function(
   model,
   data.test = NULL,
   groups = get_group_levels(model, include_prior = TRUE),

@@ -3,12 +3,12 @@
 \name{get_draws}
 \alias{get_draws}
 \alias{add_draws}
-\alias{get_draws.NIW_ideal_adaptor_stanfit}
+\alias{get_draws.ideal_adaptor_stanfit}
 \title{Add MCMC draws from an NIW IBBU stanfit to a tibble.}
 \usage{
 get_draws(fit, ...)
 
-\method{get_draws}{NIW_ideal_adaptor_stanfit}(
+\method{get_draws}{ideal_adaptor_stanfit}(
   fit,
   categories = get_category_levels(fit),
   groups = get_group_levels(fit, include_prior = TRUE),
@@ -27,7 +27,7 @@ get_draws(fit, ...)
 )
 }
 \arguments{
-\item{fit}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
+\item{fit}{\code{\link{ideal_adaptor_stanfit}} object.}
 
 \item{categories}{Character vector of categories for which draws are to be returned. (default: all categories)}
 

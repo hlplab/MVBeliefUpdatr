@@ -2,7 +2,7 @@
 % Please edit documentation in R/make-staninput.R
 \name{compose_data_to_infer_NIW_ideal_adaptor}
 \alias{compose_data_to_infer_NIW_ideal_adaptor}
-\title{Compose data to fit NIW_ideal_adaptor_stanfit via rstan}
+\title{Compose data to fit ideal_adaptor_stanfit via rstan}
 \usage{
 compose_data_to_infer_NIW_ideal_adaptor(model_type = "NIW_ideal_adaptor", ...)
 }

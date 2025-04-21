@@ -9,19 +9,21 @@
 * Typically, that's the space obtained by whitening or standardizing the exposure
 * data.
 *
+* This version operates in Cholesky space.
+*
 * Modified by
 * Florian Jaeger
 * April 2025
 */
 
 data {
-  int M;                                                   // number of categories
-  int L;                                                   // number of exposure groups (e.g. subjects)
   int K;                                                   // number of features
+  int L;                                                   // number of exposure groups (e.g. subjects)
+  int M;                                                   // number of categories
 
   array[M,L] int<lower=0> N_exposure;                      // number of observations per category (M) and exposure group (L)
   array[M,L] vector[K] x_mean_exposure;                    // means for each category (M) and exposure group (L)
-  array[M,L] cov_matrix[K] x_ss_exposure;                  // sum of uncentered squares matrix for each category (M) and group (L)
+  array[M,L] cov_matrix[K] x_ss_exposure;                  // sum of *un*centered squares matrix for each category (M) and group (L)
 
   int N_test;                                              // number of unique combinations of test locations & exposure groups
   array[N_test] vector[K] x_test;                          // locations (in cue space) of test trials
@@ -32,8 +34,8 @@ data {
   int<lower=0, upper=1> mu_0_known;
   int<lower=0, upper=1> Sigma_0_known;
   array[lapse_rate_known ? 1 : 0] real<lower=0, upper=1> lapse_rate_data;       // optional: user provided lapse_rate
-  array[mu_0_known ? M : 0] vector[mu_0_known ? K : 0] mu_0_data;               // optional: user provided expected mu_0 (prior category means) in space of affine transformation defined by INV_SCALE^-1 and shift
-  array[Sigma_0_known ? M : 0] cov_matrix[Sigma_0_known ? K : 0] Sigma_0_data;  // optional: user provided expected Sigma_0 (prior category covariance matrices) in space of affine transformation defined by INV_SCALE^-1 and shift
+  array[mu_0_known ? M : 0] vector[mu_0_known ? K : 0] mu_0_data;               // optional: user provided expected mu_0 (prior category means)
+  array[Sigma_0_known ? M : 0] cov_matrix[Sigma_0_known ? K : 0] Sigma_0_data;  // optional: user provided expected Sigma_0 (prior category covariance matrices)
 
   /* For now, this script assumes that the observations (cue vectors) are centered. The prior
      mean of m_0 is set to 0. In the future, one could automatically adjust the location based
@@ -41,7 +43,7 @@ data {
      exposure data).
   */
   vector<lower=0>[mu_0_known ? 0 : K] tau_scale;           // separate taus for each of the K features to capture that features can be on separate scales
-  real<lower=0> L_omega_eta;                               // scale of LKJ prior for correlation of variance of m_0
+  real<lower=0> L_omega_eta;                                // eta of LKJ prior for correlation of variance of m_0
 
   /* The data above are assumed to have been transformed by a sensible affine transformation f(x) = A(x - center)
      (e.g., by scaling or whitening the data) in order to improve numerical stability. A_inv and center are used
@@ -58,51 +60,64 @@ transformed data {
      (in which case n_each == 0), we set the minimum value for SD to 10.
   */
   real<lower=0> sigma_kappanu = min(max(to_array_1d(N_exposure)) * 4, 10);
-  vector[K] m_0_mu = rep_vector(0, K);                     // center of prior of m_0
+  vector[K] m_0_mu = rep_vector(0, K);         // center of prior of m_0
 }
 
 parameters {
-  // these are all shared across groups (same prior beliefs):
+    /* The strength of the prior beliefs is currently assumed to be shared across groups, categories, and cues.
+     Any of these assumptions could be revisited in the future. For example, different groups could differ in
+     the strength of their prior beliefs because of differences in prior experience. Different categories could
+     be associated with weaker or stronger prior beliefs because of differences in the amount of exposure
+     (overall frequency of the category) or because differences in e.g., the cross-talker variability in the
+     realization of the category. Similar reasoning can be applied to cues.
+  */
   real<lower=K> kappa_0;                                   // prior pseudocount for category mu
   real<lower=K+1> nu_0;                                    // prior pseudocount for category Sigma
 
   array[lapse_rate_known ? 0 : 1] real<lower=0, upper=1> lapse_rate_param;
 
-  array[mu_0_known ? 0 : M] vector[K] m_0_param;           // prior mean of means
-  vector<lower=0>[mu_0_known ? 0 : K] m_0_tau;             // prior variances of m_0
-  cholesky_factor_corr[mu_0_known ? 0 : K] m_0_L_omega;    // prior correlations of variances of m_0 (in cholesky form)
+  array[mu_0_known ? 0 : M] vector[K] m_0_param;           // prior expected means
+  vector<lower=0>[mu_0_known ? 0 : K] m_0_tau;             // prior variances of expected means (m_0)
+  cholesky_factor_corr[mu_0_known ? 0 : K] m_0_L_omega;    // prior correlations of variances of expected means (in cholesky form)
 
   array[Sigma_0_known ? 0 : M] vector<lower=0>[K] tau_0_param;          // standard deviations of prior scatter matrix S_0
   array[Sigma_0_known ? 0 : M] cholesky_factor_corr[K] L_omega_0_param; // correlation matrix of prior scatter matrix S_0 (in cholesky form)
 }
 
 transformed parameters {
-  array[M] vector[K] m_0 = mu_0_known ? mu_0_data : m_0_param;                    // prior mean of means m_0
-  array[M] cov_matrix[K] S_0;                                                     // prior scatter matrix S_0
+  array[M] vector[K] m_0 = mu_0_known ? mu_0_data : m_0_param;                    // prior expected means m_0
+  array[M] cholesky_factor_cov[K] L_S_0;                                          // Cholesky factor of prior scatter matrix S_0
   real lapse_rate = lapse_rate_known ? lapse_rate_data[1] : lapse_rate_param[1];  // lapse rate
-
-  /* Assuming unifom bias, so that lapsing_prob = probability of each category prior to
-     taking into account stimulus is 1/M
-  */
+  // Assuming unifom bias, so that lapsing_prob = probability of each category prior to
+  // taking into account stimulus is 1/M
   vector[M] lapsing_probs = rep_vector(lapse_rate / M, M);
 
   // updated beliefs depend on input and group
-  array[M,L] real<lower=K> kappa_n;          // updated mean pseudocount
-  array[M,L] real<lower=K> nu_n;             // updated sd pseudocount
-  array[M,L] vector[K] m_n;                  // updated expected mean
-  array[M,L] cov_matrix[K] S_n;              // updated expected scatter matrix
-  array[M,L] cov_matrix[K] t_scale;          // scale matrix of predictive t distribution
+  array[M,L] real<lower=K> kappa_n;             // updated mean pseudocount
+  array[M,L] real<lower=K> nu_n;                // updated sd pseudocount
+  array[M,L] vector[K] m_n;                     // updated m_0
+  array[M,L] cholesky_factor_cov[K] L_S_n;      // Cholesky factor of updated scatter matrix
+  array[M,L] cholesky_factor_cov[K] L_t_scale;  // Cholesky factor of scale matrix of predictive t distribution
 
   array[N_test] simplex[M] p_test_conj;
   array[N_test] vector[M] log_p_test_conj;
 
-  /* Update NIW parameters according to conjugate updating rules are taken from
-     Murphy (2007, p. 136)
-  */
+  // update NIW parameters according to conjugate updating rules are taken from
+  // Murphy (2007, p. 134)
   for (cat in 1:M) {
-    // Get S_0 from expected Sigma given nu_0
-    S_0[cat] = Sigma_0_known ? Sigma_0_data[cat] * (nu_0 - K - 1) : quad_form_diag(multiply_lower_tri_self_transpose(L_omega_0_param[cat]), tau_0_param[cat]);
+    /* Get S_0 from expected Sigma given nu_0
 
+       Using Cholesky factor representation of S_0 in order to avoid issues with numerical
+       instability that would otherwise arise for S_0s with large values (leading to exceptions
+       caused by non-symmetrical S_0). The use of Cholesky factors should also make the
+       computation faster.
+
+       The idea was provided by Bob Carpenter (thanks!) and implemented below with the help
+       of ChatGPT.
+       https://discourse.mc-stan.org/t/exception-s-n-cov-matrix-not-symmetric-for-large-value-elements/39184/2
+    */
+    L_S_0[cat] = Sigma_0_known ? cholesky_decompose(Sigma_0_data[cat] * (nu_0 - K - 1)) :
+                            diag_pre_multiply(tau_0_param[cat], L_omega_0_param[cat]);
     for (group in 1:L) {
       if (N_exposure[cat,group] > 0 ) {
         kappa_n[cat,group] = kappa_0 + N_exposure[cat,group];
@@ -110,21 +125,28 @@ transformed parameters {
         m_n[cat,group] =
           (kappa_0 * m_0[cat] + N_exposure[cat,group] * x_mean_exposure[cat,group]) /
           kappa_n[cat,group];
-        S_n[cat,group] =
-          S_0[cat] +
-          x_ss_exposure[cat,group] +
-          kappa_0 * m_0[cat] * m_0[cat]' -
-          kappa_n[cat,group] * m_n[cat,group] * m_n[cat,group]';
+          L_S_n[cat, group] =
+          cholesky_decompose(
+            symmetrize_from_lower_tri(
+              multiply_lower_tri_self_transpose(L_S_0[cat]) +
+              x_ss_exposure[cat, group] +
+              kappa_0 * m_0[cat] * m_0[cat]' -
+              kappa_n[cat, group] * m_n[cat, group] * m_n[cat, group]'
+          )
+        );
+
       } else {
         kappa_n[cat,group] = kappa_0;
         nu_n[cat,group] = nu_0;
         m_n[cat,group] = m_0[cat];
-        S_n[cat,group] = S_0[cat];
+        L_S_n[cat,group] = L_S_0[cat];
       }
 
-      t_scale[cat,group] =
-        S_n[cat,group] * (kappa_n[cat,group] + 1) /
-        (kappa_n[cat,group] * (nu_n[cat,group] - K + 1));
+      // Instead of computing t_scale as in Murphy, we calculate the Cholesky factor of that
+      // scale, and then use the Cholesky-based form of the multivariate T-density below:
+      L_t_scale[cat, group] =
+        L_S_n[cat, group] * sqrt((kappa_n[cat, group] + 1) /
+        (kappa_n[cat, group] * (nu_n[cat, group] - K + 1)));
     }
   }
 
@@ -135,13 +157,16 @@ transformed parameters {
     /* calculate un-normalized log posterior probability for each category. Under the assumption
        of uniform prior probabilities for each category, the log probabilities identical to the
        normalized log likelihoods. If we ever were to change this assumption, we'd have to add
-       the log prior probabilities of categories here. */
+       the log prior probabilities of categories here.
+    */
     for (cat in 1:M) {
-      // log likelihood of the test stimulus given the category
-      log_p_test_conj[j,cat] = multi_student_t_lpdf(x_test[j] |
-                                                    nu_n[cat,group] - K + 1,
-                                                    m_n[cat,group],
-                                                    t_scale[cat,group]);
+      // Use Cholesky form of multivariate T-density
+      log_p_test_conj[j,cat] =
+          multi_student_t_cholesky_lpdf(
+              x_test[j] |
+              nu_n[cat,group] - K + 1,
+              m_n[cat,group],
+              L_t_scale[cat,group]);
     }
     // normalize to get actual posterior probs in simplex
     p_test_conj[j] = exp(log_p_test_conj[j] - log_sum_exp(log_p_test_conj[j]));
@@ -169,7 +194,6 @@ model {
   for (i in 1:N_test) {
     z_test_counts[i] ~ multinomial(p_test_conj[i] * (1 - lapse_rate) + lapsing_probs);
   }
-
 }
 
 generated quantities {
@@ -230,10 +254,12 @@ generated quantities {
   array[M,L] cov_matrix[K] S_n_original;
   for (cat in 1:M) {
     m_0_original[cat] = INV_SCALE * m_0[cat] - shift;
-    S_0_original[cat] = INV_SCALE * S_0[cat] * INV_SCALE';
+    // Get S_0 from its Cholesky factors
+    S_0_original[cat] = INV_SCALE * multiply_lower_tri_self_transpose(L_S_0[cat]) * INV_SCALE';
     for (group in 1:L) {
       m_n_original[cat,group] = INV_SCALE * m_n[cat,group] - shift;
-      S_n_original[cat,group] = INV_SCALE * S_n[cat,group] * INV_SCALE';
+      // Get S_n from its Cholesky factors
+      S_n_original[cat,group] = INV_SCALE * multiply_lower_tri_self_transpose(L_S_n[cat,group]) * INV_SCALE';
     }
   }
 

@@ -3,12 +3,12 @@
 \name{plot_expected_categorization}
 \alias{plot_expected_categorization}
 \alias{plot_ibbu_stanfit_test_categorization}
-\alias{plot_expected_categorization.NIW_ideal_adaptor_stanfit}
+\alias{plot_expected_categorization.ideal_adaptor_stanfit}
 \title{Plot prior and posterior categorization of test tokens for an NIW ideal adaptor stanfit}
 \usage{
 plot_expected_categorization(model, ...)
 
-\method{plot_expected_categorization}{NIW_ideal_adaptor_stanfit}(
+\method{plot_expected_categorization}{ideal_adaptor_stanfit}(
   model,
   data.test = NULL,
   groups = get_group_levels(model, include_prior = TRUE),
@@ -28,7 +28,7 @@ plot_expected_categorization(model, ...)
 )
 }
 \arguments{
-\item{model}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
+\item{model}{\code{\link{ideal_adaptor_stanfit}} object.}
 
 \item{data.test}{Optionally, a \code{tibble} or \code{data.frame} with test data.
 If `NULL` the input will be extracted from fit. (default: `NULL`).}

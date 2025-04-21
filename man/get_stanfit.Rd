@@ -2,21 +2,21 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{get_stanfit}
 \alias{get_stanfit}
-\alias{get_stanfit.NIW_ideal_adaptor_stanfit}
+\alias{get_stanfit.ideal_adaptor_stanfit}
 \title{Get the stanfit from an NIW ideal adaptor stanfit}
 \usage{
 get_stanfit(x, ...)
 
-\method{get_stanfit}{NIW_ideal_adaptor_stanfit}(x)
+\method{get_stanfit}{ideal_adaptor_stanfit}(x)
 }
 \arguments{
-\item{x}{\code{\link{NIW_ideal_adaptor_stanfit}} object.}
+\item{x}{\code{\link{ideal_adaptor_stanfit}} object.}
 }
 \value{
 An \code{\link{rstan::stanfit}} object.
 }
 \description{
-Returns the stanfit created by \code{stan} during the creation of the \code{\link{NIW_ideal_adaptor_stanfit}}
+Returns the stanfit created by \code{stan} during the creation of the \code{\link{ideal_adaptor_stanfit}}
 object.
 }
 \seealso{
