@@ -22,9 +22,9 @@ data {
   matrix[m,l] xsd;              // sample standard deviation of training obs
 
   int n_test;                   // number of test trials
-  real x_test[n_test];          // locations of test trials
-  int y_test[n_test];           // group labels for test trials
-  int z_test_counts[n_test,m];  // responses for test trials
+  array[n_test] real x_test;          // locations of test trials
+  array[n_test] int y_test;           // group labels for test trials
+  array[n_test,m] int z_test_counts;  // responses for test trials
 }
 
 transformed data {
@@ -38,22 +38,22 @@ transformed data {
 
 parameters {
   // these are all shared across groups (same prior beliefs):
-  real<lower=0> kappa_0;        // prior pseudocount for mean
-  real<lower=0> nu_0;           // prior pseudocount for sd
-  real m_0[m];                 // prior expected mean
-  real<lower=0> S_0[m];     // prior expected standard deviation
+  real<lower=0> kappa_0;       // prior pseudocount for mean
+  real<lower=0> nu_0;          // prior pseudocount for sd
+  array[m] real m_0;                 // prior expected mean
+  array[m] real<lower=0> S_0;        // prior expected standard deviation
   real<lower=0, upper=1> lapse_rate;
 }
 
 transformed parameters {
   // updated beliefs depend on input/group
-  real m_n[m,l];                 // updated expected mean
-  real<lower=0> kappa_n[m,l];     // updated mean pseudocount
-  real<lower=0> S_n[m,l];     // updated expected sd
-  real<lower=0> nu_n[m,l];        // updated sd pseudocount
-  real<lower=0> t_scale[m,l];     // scale parameter of predictive t distribution
-  simplex[m] p_test_conj[n_test];
-  vector[m] log_p_test_conj[n_test];
+  array[m,l] real m_n;                 // updated expected mean
+  array[m,l] real<lower=0> kappa_n;    // updated mean pseudocount
+  array[m,l] real<lower=0> S_n;        // updated expected sd
+  array[m,l] real<lower=0> nu_n;       // updated sd pseudocount
+  array[m,l] real<lower=0> t_scale;    // scale parameter of predictive t distribution
+  array[n_test] simplex[m] p_test_conj;
+  array[n_test] vector[m] log_p_test_conj;
 
   // update NIX2 parameters according to conjuate updating rules are taken from
   // Murphy (2007)
