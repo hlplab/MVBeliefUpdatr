@@ -65,7 +65,7 @@ get_NIW_categorization_function <- function(
   }
   if (!any(is.null(Sigma_noise),
           all(is.null(Sigma_noise)),
-          all(map_lgl(Sigma_noise, is.null)))) assert_that(is.Sigma(Sigma_noise))
+          all(map_lgl(Sigma_noise, is.null)))) assert_that(all(map_lgl(Sigma_noise, is.Sigma)), msg = "Not all Sigma_noise are covariance matrices.")
 
   # Get dimensions of multivariate category
   D = get_D(ms)

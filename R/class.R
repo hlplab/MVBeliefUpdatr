@@ -19,6 +19,7 @@ get_class <- function(x) {
 
 #' @export
 is.Sigma <- function(x) {
+  if (is.null(x)) stop2("Expected a covariance matrix, but got NULL.")
   if (is.matrix(x)) {
     if (all(x == 0) | is.positive.definite(x)) return(T) else return(F)
   } else {
