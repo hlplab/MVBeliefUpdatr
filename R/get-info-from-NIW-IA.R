@@ -129,7 +129,7 @@ get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
 #' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
 #' @param noise_treatment Determines whether and how multivariate Gaussian noise is considered during categorization.
 #' See \code{\link[=get_NIW_posterior_predictive]{get_NIW_posterior_predictive}}. (default: "sample" if decision_rule is
-#' "sample"; "marginalize" otherwise).
+#' "sample"; "marginalize" otherwise, provided Sigma_noise is not NULL; "no_noise" otherwise).
 #' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
 #' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
 #' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
@@ -146,20 +146,13 @@ get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
 #' @export
 #'
 get_categorization_from_NIW_ideal_adaptor <- function(
-  x,
-  model,
-  decision_rule,
-  #noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
-  noise_treatment = if (decision_rule == "sampling") {
-      "sample"
-      } else if (is.NIW_ideal_adaptor(model)) {
-        if (!is.null(first(model$Sigma_noise)))
-            "marginalize"
-        else "no_noise"
-    } else "no_noise",
-  lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
-  simplify = F,
-  verbose = F
+    x,
+    model,
+    decision_rule,
+    noise_treatment = if (decision_rule == "sampling") "sample" else { if (all(! map_lgl(model$Sigma_noise, is.null))) "marginalize" else "no_noise" },
+    lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+    simplify = F,
+    verbose = F
 ) {
   # TO DO: check dimensionality of x with regard to model.
   assert_NIW_ideal_adaptor(model, verbose = verbose)
