@@ -166,7 +166,7 @@ example_NIW_ideal_adaptor <- function(
 #' defaults to \code{sim_function = function(x, y, weights = w, distance_metric = 2, distance_decay_factor = 1) {
 #' distance <- sum(weights * abs(x - y)^distance_metric)^(1/distance_metric); similarity <- exp(-distance^distance_decay_factor) }},
 #' where each cue's weight \code{w} is the inverse of the cues SD^distance_metric. Except for the setting of the weights, this general formula follows
-#' @afpelbaum-mcmurray2015, who cite @nosofsky196.
+#' \insertCite{afpelbaum-mcmurray2015}, who cite \insertCite{nosofsky1986}.
 #' @param prior Optionally specify a prior probability for each category (in each group). (default: a uniform
 #' prior over all categories).
 #' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
