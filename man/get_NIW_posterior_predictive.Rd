@@ -13,7 +13,8 @@ get_NIW_posterior_predictive(
   kappa,
   nu,
   Sigma_noise = NULL,
-  noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
+  noise_treatment = if (any(is.null(Sigma_noise), all(is.null(Sigma_noise)),
+    all(map_lgl(Sigma_noise, is.null)))) "no_noise" else "marginalize",
   log = T
 )
 
