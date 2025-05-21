@@ -32,7 +32,7 @@
 get_NIW_categorization_function <- function(
     ms, Ss, kappas, nus,
     priors = rep(1 / length(ms), length(ms)),
-    lapse_rate = NULL,
+    lapse_rate = 0,
     lapse_biases = rep(1 / length(ms), length(ms)),
     Sigma_noise = NULL,
     noise_treatment = if (any(is.null(Sigma_noise), all(is.null(Sigma_noise)), all(map_lgl(Sigma_noise, is.null)))) "no_noise" else "marginalize",
@@ -48,13 +48,9 @@ get_NIW_categorization_function <- function(
 
   assert_that(all(between(priors, 0, 1), between(sum(priors), 1 - tolerance, 1 + tolerance)),
               msg = "priors must sum to 1.")
-  if (any(is.null(lapse_rate),
-          all(is.null(lapse_rate)),
-          all(map_lgl(lapse_rate, is.null)))) {
-    lapse_rate = rep(0, n.cat)
-  } else {
-    assert_that(all(between(lapse_rate, 0, 1)))
-  }
+  assert_that(is_scalar_double(lapse_rate),
+              msg = "lapse_rate must be a scalar.")
+  assert_that(between(lapse_rate, 0, 1))
   if (any(is.null(lapse_biases),
           all(is.null(lapse_biases)),
           all(map_lgl(lapse_biases, is.null)))) {
@@ -63,9 +59,6 @@ get_NIW_categorization_function <- function(
     assert_that(all(between(lapse_biases, 0, 1), between(sum(lapse_biases), 1 - tolerance, 1 + tolerance)),
                 msg = "lapse biases must sum to 1.")
   }
-  if (!any(is.null(Sigma_noise),
-          all(is.null(Sigma_noise)),
-          all(map_lgl(Sigma_noise, is.null)))) assert_that(all(map_lgl(Sigma_noise, is.Sigma)), msg = "Not all Sigma_noise are covariance matrices.")
 
   # Get dimensions of multivariate category
   D = get_D(ms)
@@ -89,10 +82,10 @@ get_NIW_categorization_function <- function(
       exp(log_p[,target_category] + log(priors[target_category]) -
             log(rowSums(
               # multiply each row of the exponentiated log_p matrix (= the log densities of each category for each observation)
-              # with the vector of priors (must use this since simply multiplying by the vector will try to proceed elementwise
+              # with the vector of priors (must use this since simply multiplying by the vector will try to proceed element-wise
               # through the matrix, through each column)
               t(apply(exp(log_p), 1, function(row) { row * priors }))))) +
-      lapse_rate[target_category] * lapse_biases[target_category]
+      lapse_rate * lapse_biases[target_category]
 
     if (logit) return(qlogis(p_target)) else return(p_target)
   }
@@ -104,15 +97,23 @@ get_NIW_categorization_function <- function(
 #' @rdname get_NIW_categorization_function
 #' @export
 get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
+  # Could be used later in a function that checks internal consistency of model
+  # if (nunique(model$lapse_rate) > 1) stop2("Model has more than one unique lapse_rate.")
+  #
+  # .is_identical_to_first <- function(x, first_matrix) {
+  #   identical(x, first_matrix)
+  # }
+  # if (nunique(model$lapse_rate) > 1) stop2("Model has more than one unique Sigma_noise.")
+
   get_NIW_categorization_function(
     ms = model$m,
     Ss = model$S,
     kappas = model$kappa,
     nus = model$nu,
     priors = model$prior,
-    lapse_rate = model$lapse_rate,
+    lapse_rate = model$lapse_rate[[1]],
     lapse_biases = model$lapse_bias,
-    Sigma_noise = model$Sigma_noise,
+    Sigma_noise = model$Sigma_noise[[1]],
     ...
   )
 }

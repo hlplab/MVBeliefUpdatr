@@ -521,7 +521,7 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws <- function(fit, ...
     Ss = fit$S,
     kappas = fit$kappa,
     nus = fit$nu,
-    lapse_rate = rep(unique(unlist(fit$lapse_rate)), length(fit$kappa)),
+    lapse_rate = unlist(fit$lapse_rate)[1],
     ...
   )
 }
