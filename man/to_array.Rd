@@ -2,32 +2,41 @@
 % Please edit documentation in R/make-staninput.R
 \name{to_array}
 \alias{to_array}
-\title{Turn list into array (for Stan input)}
+\title{Turn (lists of) numerics into arrays (for Stan input)}
 \usage{
-to_array(x, inner_dims = 1, outer_dims = NULL)
+to_array(
+  x,
+  inner_dims = if (is.null(x)) 1 else NULL,
+  outer_dims = NULL,
+  simplify = T
+)
 }
 \arguments{
 \item{x}{The input to be turned into an array.}
 
-\item{inner_dims}{Intended dimensions of x. Will be used for checks and to enforce the correct dimensions when `x` is `NULL`.
-(default: 1)}
+\item{inner_dims}{Intended dimensions of x. Will be used for checks and to enforce the correct dimensions of `x`. If `NULL`,
+`inner_dims` will be inferred from the input. (default: `1` if `x` is `NULL`, else `NULL`)}
 
 \item{outer_dims}{A vector of outer dimensions for the array. If `x` is not a list, an array of `x` will be repeated for each
 outer dimension. If `x` is list, the outer dimensions will each index one element of `x`.
 The total length of `x` must match the product of outer dimensions. The first dimension will be iterated
 over first (and thus alternating fastest), the second dimension will be iterated over second, etc. See details.}
+
+\item{simplify}{Should the array be simplified by removing inner dimensions whenever the inner element(s) are just scalars?
+(e.g., if the inner elements are a one-element vector or a 1x1 matrix). This is currently checked only when `x` is `NULL`
+or when `x` is a list. (default: `TRUE`)}
 }
 \value{
 An array.
 }
 \description{
-Takes `NULL`, scalars, or lists as inputs and turns them into numeric arrays.
+Takes `NULL`, numeric atomics (single scalars, vectors, matrices) or lists of numeric elements as inputs and turns them into numeric arrays.
 }
 \details{
 \itemize{
   \item{`NULL` will be turned in a `array(numeric(0), dim = c(.outer_dims, .inner_dims))`. This is sometimes required for
   optional Stan inputs.}
-  \item{Scalars and vectors will be turned into arrays of appropriate dimensions.}
+  \item{Atomics (scalars, vectors, and matrices) will be turned into arrays of appropriate dimensions.}
   \item{Lists will be turned into arrays of appropriate dimensions.}
 }
 

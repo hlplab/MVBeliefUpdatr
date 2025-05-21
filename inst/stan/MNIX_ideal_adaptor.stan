@@ -39,11 +39,14 @@ data {
   array[N_test] int y_test;                                // exposure group indicator of test trials
   array[N_test,M] int z_test_counts;                       // responses for test trials (for each category M)
 
-  simplex[M] phi;                                          // prior category probabilities
+  // NEEDS REVIEW: Currently, p_cat is only used during the calculation of the cue weights but it should probably
+  // also be considered when calculating the posterior probabilities of each category (for the calculation of the
+  // likelihood of listeners' responses)
+  simplex[M] p_cat;                                        // prior category probabilities (phi in the Toscano & McMurray formulation)
 
   int<lower=0, upper=1> lapse_rate_known;
   int<lower=0, upper=1> mu_0_known;
-  int<lower=0, upper=1> sigma_0_known;
+  int<lower=0, upper=1> Sigma_0_known;
   /* Potential extension in the future: allow user-provided (weights_known = 1 & user_ideal_weights = 0) or
      inferred (weights_known = 0 & user_ideal_weights = 0) cue weights. Some lines below that are commented
      out contain drafts of this idea. Note, however, that those weights would be fixed (unless an updating
@@ -54,7 +57,7 @@ data {
   // int<lower=0, upper=1> use_ideal_weights;                 // 0 = user-provided weights, 1 = ideal
   array[lapse_rate_known ? 1 : 0] real<lower=0, upper=1> lapse_rate_data;  // optional: user-provided lapse_rate
   array[mu_0_known ? M : 0] vector[mu_0_known ? K : 0] mu_0_data;          // optional: user-provided expected mu (prior category means) in space of affine transformation defined by INV_SCALE^-1 and shift
-  array[sigma_0_known ? M : 0] vector[sigma_0_known ? K : 0] sigma_0_data; // optional: user-provided expected SD (prior category SD) in space of affine transformation defined by INV_SCALE^-1 and shift
+  array[Sigma_0_known ? M : 0] vector[Sigma_0_known ? K : 0] Sigma_0_data; // optional: user-provided expected SD (prior category SD) in space of affine transformation defined by INV_SCALE^-1 and shift
   // simplex[use_ideal_weights || !weights_known ? 0 : K] cue_weights_data;   // optional: user-provided cue weights (used only if use_ideal_weights == 0 and weights are known)
 
   vector<lower=0>[mu_0_known ? 0 : K] tau_scale;           // separate taus for each of the K features to capture that features can be on separate scales
@@ -100,7 +103,7 @@ parameters {
   array[mu_0_known ? 0 : M] vector[K] m_0_param;                // prior expected means
   vector<lower=0>[mu_0_known ? 0 : K] m_0_tau;                  // prior SD of m_0
 
-  array[sigma_0_known ? 0 : M] vector<lower=0>[K] s_0_param;    // square root of prior scale of Inverse Chisquare, s_0
+  array[Sigma_0_known ? 0 : M] vector<lower=0>[K] s_0_param;    // square root of prior scale of Inverse Chisquare, s_0
 }
 
 transformed parameters {
@@ -132,7 +135,7 @@ transformed parameters {
   for (cat in 1:M) {
     // Get s_0 from expected Sigma given nu_0
     // E[sigma_c^2] = nu  / (nu - 2) * sigma_0^2 <==> sigma_0^2 = (E[sigma_c^2] * (nu_0 - 2)) / nu_0
-    s_0[cat] = sigma_0_known ? sigma_0_data[cat] * sqrt((nu_0 - 2) / nu_0): s_0_param[cat];
+    s_0[cat] = Sigma_0_known ? Sigma_0_data[cat] * sqrt((nu_0 - 2) / nu_0): s_0_param[cat];
 
     for (group in 1:L) {
       if (N_exposure[cat,group] > 0 ) {
@@ -167,7 +170,7 @@ transformed parameters {
       for (cat2 in 1:M) {
         // NEEDS REVIEW: ARE IDEAL WEIGHTS REALLY A FUNCTION OF SIGMA_N (RATHER THAN, E.G., THE EXPECTED CATEGORY SD)?
         // Using element-wise operations ./ and .* so that this can all be done without looping over K
-        raw_weights += phi[cat1] * phi[cat2] * ((m_n[cat1,group] - m_n[cat2,group])^2 ./ (s_n[cat1,group] .* s_n[cat2,group]));
+        raw_weights += p_cat[cat1] * p_cat[cat2] * ((m_n[cat1,group] - m_n[cat2,group])^2 ./ (s_n[cat1,group] .* s_n[cat2,group]));
       }
     }
     raw_weights ./= rep_vector(2.0, K);
@@ -184,6 +187,8 @@ transformed parameters {
        of uniform prior probabilities for each category, the log probabilities identical to the
        normalized log likelihoods. If we ever were to change this assumption, we'd have to add
        the log prior probabilities of categories here.
+
+       FOR LATER REVIEW: for the MNIX model, this would seem to be p_cat defined above?
     */
     for (cat in 1:M) {
       // log likelihood of the test stimulus given the category
@@ -212,7 +217,7 @@ model {
   }
 
   // Specifying prior for components of S_0:
-  if (!sigma_0_known) {
+  if (!Sigma_0_known) {
     for (cat in 1:M) {
       s_0_param[cat] ~ cauchy(0, tau_scale);
     }

@@ -1,5 +1,11 @@
 NULL
 
+# dim that returns length of vector for vector
+dim2 <- function(x) {
+  if (is.null(dim(x))) return(length(x))
+  return(dim(x))
+}
+
 #' Get sum-of-squares matrix
 #'
 #' Get sum-of-square matrix.
@@ -197,7 +203,7 @@ make_vector_column = function(data, cols, vector_col, .keep = "all") {
 #'
 #' @param data A `tibble`, `data.frame`, or `matrix`. If data is a `tibble` or `data.frame`, the columns for
 #' specified variables are extracted and (together) converted into a matrix with as many colums as there are
-#' variables.
+#' variables. If `NULL`, `NA` is returned.
 #' @param variables Only required if data is not already a `matrix`.
 #'
 #' @return A matrix.
@@ -206,6 +212,8 @@ make_vector_column = function(data, cols, vector_col, .keep = "all") {
 #' @rdname get_sum_of_squares_from_df
 #' @export
 get_sum_of_squares_from_df <- function(data, variables = NULL, center = T, verbose = F) {
+  if (is.null(data)) return(NA)
+
   assert_that(is_tibble(data) | is.data.frame(data) | is.matrix(data))
   if (is_tibble(data) | is.data.frame(data))
     assert_that(all(variables %in% names(data)),
@@ -214,7 +222,7 @@ get_sum_of_squares_from_df <- function(data, variables = NULL, center = T, verbo
   data.matrix <- if (is_tibble(data) | is.data.frame(data)) {
     # Assume that the variables are to be combined into a data.matrix
     data %>%
-      mutate(across(!!! syms(variables), unlist)) %>%
+      mutate(across(c(!!! syms(variables)), unlist)) %>%
       select(all_of(variables)) %>%
       as.matrix()
   } else data
@@ -610,17 +618,17 @@ get_affine_transform <- function(
   transform.parameters <- list()
   transform.parameters[["cue.labels"]] <- cues
 
-  l <- length(cues)
+  n.cues <- length(cues)
   data <- as.matrix(data[, cues])
 
   if (type == "identity") {
-    transform.parameters[["shift"]] <- rep(0, length(cues))
+    transform.parameters[["shift"]] <- rep(0, n.cues)
   } else {
     data <- scale(data, scale = F)
     transform.parameters[["shift"]] <- -(attr(data, "scaled:center"))
   }
 
-  if (l == 1) {
+  if (n.cues == 1) {
     if (type %in% c("identity", "center")) {
       transform.parameters[["SCALE"]] <- 1
     } else if (type %in% c("standardize", "PCA whiten", "ZCA whiten")) {
@@ -630,7 +638,7 @@ get_affine_transform <- function(
     }
   } else {
     if (type %in% c("identity", "center")) {
-      transform.parameters[["SCALE"]] <- diag(length(cues))
+      transform.parameters[["SCALE"]] <- diag(n.cues)
     } else if (type == "standardize") {
       transform.parameters[["SCALE"]] <- diag(1 / apply(data[, cues], 2, sd))
     } else if (type %in% c("PCA whiten", "ZCA whiten")) {
@@ -650,7 +658,7 @@ get_affine_transform <- function(
     }
   }
 
-  transform.parameters[["INV_SCALE"]] <- if (l == 1) 1 / transform.parameters[["SCALE"]] else solve(transform.parameters[["SCALE"]])
+  transform.parameters[["INV_SCALE"]] <- if (n.cues == 1) 1 / transform.parameters[["SCALE"]] else solve(transform.parameters[["SCALE"]])
 
   # Defining function that handles return of data that gets repeated below in the
   # different transform and untransform functions
@@ -672,7 +680,7 @@ get_affine_transform <- function(
     return(data)
   }
 
-  if (l == 1) {
+  if (n.cues == 1) {
     transform.function <-
       function(data, return_type = c("replace", "add", "cues only")[1]) {
         get_return_data <- get_return_data

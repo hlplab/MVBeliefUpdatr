@@ -139,6 +139,9 @@ fit_ideal_adaptor <- function(
       basis = basis,
       file = file)
 
+  # Check that staninput has at least two categories (fitting with one category makes no sense)
+  if (get_staninput(fit, which = "transformed")$M < 2) stop("staninput must have at least two categories.")
+
   stanfit <- NULL
   if (chains > 0 & iter > 0) {
     # Parameters *not* to store
@@ -154,6 +157,7 @@ fit_ideal_adaptor <- function(
         sampling(
           MVBeliefUpdatr:::stanmodels[[current_default_modelname]],
           data = get_staninput(fit, which = "transformed"),
+          check_data = TRUE,
           pars = exclude_pars, include = FALSE,
           chains = chains, iter = iter, warmup = warmup,
           init = init, control = control,
@@ -163,7 +167,8 @@ fit_ideal_adaptor <- function(
         stanfit <-
           sampling(
             MVBeliefUpdatr:::stanmodels[[stanmodel]],
-            data = staninput,
+            data = get_staninput(fit, which = "transformed"),
+            check_data = TRUE,
             pars = exclude_pars, include = FALSE,
             chains = chains, iter = iter, warmup = warmup,
             init = init, control = control,

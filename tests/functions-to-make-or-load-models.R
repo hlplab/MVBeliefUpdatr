@@ -312,6 +312,11 @@ make_data_for_3Dstanfit_with_exposure <- function() {
            crossing(Phase = c("exposure", "test")))
 }
 
+make_data_for_1Dstanfit_without_exposure <- function() {
+  make_data_for_1Dstanfit_with_exposure() %>%
+    ungroup() %>%
+    filter(Condition != "minus40" | Phase == "test")
+}
 
 make_data_for_2Dstanfit_without_exposure <- function() {
   n_subject <- 60
@@ -601,6 +606,37 @@ make_data_for_3Dstanfit_without_exposure <- function() {
   return(.data)
 }
 
+
+get_example_staninput <- function(
+    example = 1,
+    stanmodel = "NIW_ideal_adaptor",
+    transform_type = "PCA whiten",
+    seed = 42
+) {
+  .data <- make_data_for_stanfit(example, seed = seed)
+  .staninput <-
+    make_staninput(
+      exposure = .data %>% filter(Phase == "exposure"),
+      test = .data %>% filter(Phase == "test"),
+      cues =
+        if (example %in% 1:3)
+        {
+          c("VOT", "f0_semitones", "vowel_duration")[1:(example)]
+        } else if (example %in% 4) {
+          c("VOT", "f0_semitones", "vowel_duration")[1:(example - 3)]
+        } else if (example %in% 5:6) {
+          c("cue1", "cue2", "cue3")[1:(example %% 4 + 1)]
+        },
+      category = "category",
+      response = "Response",
+      group = "Subject",
+      group.unique = "Condition",
+      stanmodel = stanmodel,
+      transform_type = transform_type)
+
+  return(.staninput)
+}
+
 get_example_stanfit <- function(
     example = 1,
     silent = 2, refresh = 0, seed = 42,
@@ -609,6 +645,13 @@ get_example_stanfit <- function(
     transform_type = "PCA whiten",
     ...
 ) {
+  .staninput <-
+    get_example_staninput(
+      example = example,
+      stanmodel = stanmodel,
+      transform_type = transform_type,
+      seed = seed)
+
   filename <-
     paste0(
       "../example-stanfit-",
@@ -621,24 +664,6 @@ get_example_stanfit <- function(
         collapse = "-"),
       ".rds")
 
-  .data <- make_data_for_stanfit(example, seed = seed)
-  .staninput <-
-    make_staninput(
-      exposure = .data %>% filter(Phase == "exposure"),
-      test = .data %>% filter(Phase == "test"),
-      cues =
-        if (example %in% 1:3)
-        {
-          c("VOT", "f0_semitones", "vowel_duration")[1:(example)]
-        } else if (example %in% 4:6) {
-          c("cue1", "cue2", "cue3")[1:(example %% 4 + 1)]
-        },
-      category = "category",
-      response = "Response",
-      group = "Subject",
-      group.unique = "Condition",
-      stanmodel = stanmodel,
-      transform_type = transform_type)
   fit <-
     fit_ideal_adaptor(
       staninput = .staninput,

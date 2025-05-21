@@ -29,7 +29,9 @@ data {
   // NOT YET USED
   int<lower=0, upper=1> lapse_rate_known;
   int<lower=0, upper=1> mu_0_known;
-  int<lower=0, upper=1> sigma_0_known;
+  int<lower=0, upper=1> Sigma_0_known;
+  // If known parameters are allowed, additional code would have to be added here, paralleling the NIW code
+  // (and code below would have to be adjusted accordingly)
 }
 
 transformed data {

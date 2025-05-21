@@ -29,43 +29,43 @@ using namespace stan::math;
 stan::math::profile_map profiles__;
 static constexpr std::array<const char*, 81> locations_array__ =
   {" (found before start of program)",
-  " (in 'NIX_ideal_adaptor', line 36, column 2 to column 24)",
-  " (in 'NIX_ideal_adaptor', line 37, column 2 to column 21)",
-  " (in 'NIX_ideal_adaptor', line 38, column 2 to column 20)",
-  " (in 'NIX_ideal_adaptor', line 39, column 2 to column 29)",
-  " (in 'NIX_ideal_adaptor', line 40, column 2 to column 36)",
-  " (in 'NIX_ideal_adaptor', line 44, column 2 to column 22)",
-  " (in 'NIX_ideal_adaptor', line 45, column 2 to column 35)",
-  " (in 'NIX_ideal_adaptor', line 46, column 2 to column 31)",
-  " (in 'NIX_ideal_adaptor', line 47, column 2 to column 32)",
-  " (in 'NIX_ideal_adaptor', line 48, column 2 to column 35)",
-  " (in 'NIX_ideal_adaptor', line 52, column 2 to column 58)",
-  " (in 'NIX_ideal_adaptor', line 53, column 2 to column 39)",
-  " (in 'NIX_ideal_adaptor', line 54, column 2 to column 42)",
-  " (in 'NIX_ideal_adaptor', line 59, column 6 to column 59)",
-  " (in 'NIX_ideal_adaptor', line 60, column 6 to column 53)",
-  " (in 'NIX_ideal_adaptor', line 61, column 6 to column 118)",
-  " (in 'NIX_ideal_adaptor', line 62, column 6 to line 67, column 49)",
-  " (in 'NIX_ideal_adaptor', line 68, column 6 to column 96)",
-  " (in 'NIX_ideal_adaptor', line 58, column 23 to line 69, column 5)",
-  " (in 'NIX_ideal_adaptor', line 58, column 4 to line 69, column 5)",
-  " (in 'NIX_ideal_adaptor', line 57, column 19 to line 70, column 3)",
-  " (in 'NIX_ideal_adaptor', line 57, column 2 to line 70, column 3)",
-  " (in 'NIX_ideal_adaptor', line 73, column 4 to column 14)",
-  " (in 'NIX_ideal_adaptor', line 74, column 4 to column 22)",
-  " (in 'NIX_ideal_adaptor', line 77, column 6 to line 80, column 66)",
-  " (in 'NIX_ideal_adaptor', line 76, column 21 to line 81, column 5)",
-  " (in 'NIX_ideal_adaptor', line 76, column 4 to line 81, column 5)",
-  " (in 'NIX_ideal_adaptor', line 83, column 4 to column 79)",
-  " (in 'NIX_ideal_adaptor', line 72, column 22 to line 84, column 3)",
-  " (in 'NIX_ideal_adaptor', line 72, column 2 to line 84, column 3)",
-  " (in 'NIX_ideal_adaptor', line 87, column 2 to column 37)",
-  " (in 'NIX_ideal_adaptor', line 88, column 2 to column 34)",
-  " (in 'NIX_ideal_adaptor', line 89, column 2 to column 23)",
-  " (in 'NIX_ideal_adaptor', line 90, column 2 to column 24)",
-  " (in 'NIX_ideal_adaptor', line 92, column 4 to column 84)",
-  " (in 'NIX_ideal_adaptor', line 91, column 22 to line 93, column 3)",
-  " (in 'NIX_ideal_adaptor', line 91, column 2 to line 93, column 3)",
+  " (in 'NIX_ideal_adaptor', line 38, column 2 to column 24)",
+  " (in 'NIX_ideal_adaptor', line 39, column 2 to column 21)",
+  " (in 'NIX_ideal_adaptor', line 40, column 2 to column 20)",
+  " (in 'NIX_ideal_adaptor', line 41, column 2 to column 29)",
+  " (in 'NIX_ideal_adaptor', line 42, column 2 to column 36)",
+  " (in 'NIX_ideal_adaptor', line 46, column 2 to column 22)",
+  " (in 'NIX_ideal_adaptor', line 47, column 2 to column 35)",
+  " (in 'NIX_ideal_adaptor', line 48, column 2 to column 31)",
+  " (in 'NIX_ideal_adaptor', line 49, column 2 to column 32)",
+  " (in 'NIX_ideal_adaptor', line 50, column 2 to column 35)",
+  " (in 'NIX_ideal_adaptor', line 54, column 2 to column 58)",
+  " (in 'NIX_ideal_adaptor', line 55, column 2 to column 39)",
+  " (in 'NIX_ideal_adaptor', line 56, column 2 to column 42)",
+  " (in 'NIX_ideal_adaptor', line 61, column 6 to column 59)",
+  " (in 'NIX_ideal_adaptor', line 62, column 6 to column 53)",
+  " (in 'NIX_ideal_adaptor', line 63, column 6 to column 118)",
+  " (in 'NIX_ideal_adaptor', line 64, column 6 to line 69, column 49)",
+  " (in 'NIX_ideal_adaptor', line 70, column 6 to column 96)",
+  " (in 'NIX_ideal_adaptor', line 60, column 23 to line 71, column 5)",
+  " (in 'NIX_ideal_adaptor', line 60, column 4 to line 71, column 5)",
+  " (in 'NIX_ideal_adaptor', line 59, column 19 to line 72, column 3)",
+  " (in 'NIX_ideal_adaptor', line 59, column 2 to line 72, column 3)",
+  " (in 'NIX_ideal_adaptor', line 75, column 4 to column 14)",
+  " (in 'NIX_ideal_adaptor', line 76, column 4 to column 22)",
+  " (in 'NIX_ideal_adaptor', line 79, column 6 to line 82, column 66)",
+  " (in 'NIX_ideal_adaptor', line 78, column 21 to line 83, column 5)",
+  " (in 'NIX_ideal_adaptor', line 78, column 4 to line 83, column 5)",
+  " (in 'NIX_ideal_adaptor', line 85, column 4 to column 79)",
+  " (in 'NIX_ideal_adaptor', line 74, column 22 to line 86, column 3)",
+  " (in 'NIX_ideal_adaptor', line 74, column 2 to line 86, column 3)",
+  " (in 'NIX_ideal_adaptor', line 89, column 2 to column 37)",
+  " (in 'NIX_ideal_adaptor', line 90, column 2 to column 34)",
+  " (in 'NIX_ideal_adaptor', line 91, column 2 to column 23)",
+  " (in 'NIX_ideal_adaptor', line 92, column 2 to column 24)",
+  " (in 'NIX_ideal_adaptor', line 94, column 4 to column 84)",
+  " (in 'NIX_ideal_adaptor', line 93, column 22 to line 95, column 3)",
+  " (in 'NIX_ideal_adaptor', line 93, column 2 to line 95, column 3)",
   " (in 'NIX_ideal_adaptor', line 16, column 2 to column 8)",
   " (in 'NIX_ideal_adaptor', line 17, column 2 to column 8)",
   " (in 'NIX_ideal_adaptor', line 18, column 9 to column 10)",
@@ -88,27 +88,27 @@ static constexpr std::array<const char*, 81> locations_array__ =
   " (in 'NIX_ideal_adaptor', line 26, column 2 to column 41)",
   " (in 'NIX_ideal_adaptor', line 27, column 2 to column 35)",
   " (in 'NIX_ideal_adaptor', line 28, column 2 to column 38)",
-  " (in 'NIX_ideal_adaptor', line 31, column 9 to column 10)",
-  " (in 'NIX_ideal_adaptor', line 31, column 11 to column 12)",
-  " (in 'NIX_ideal_adaptor', line 31, column 2 to column 64)",
-  " (in 'NIX_ideal_adaptor', line 32, column 2 to column 66)",
-  " (in 'NIX_ideal_adaptor', line 38, column 8 to column 9)",
-  " (in 'NIX_ideal_adaptor', line 39, column 8 to column 9)",
-  " (in 'NIX_ideal_adaptor', line 44, column 8 to column 9)",
-  " (in 'NIX_ideal_adaptor', line 44, column 10 to column 11)",
-  " (in 'NIX_ideal_adaptor', line 45, column 8 to column 9)",
-  " (in 'NIX_ideal_adaptor', line 45, column 10 to column 11)",
+  " (in 'NIX_ideal_adaptor', line 33, column 9 to column 10)",
+  " (in 'NIX_ideal_adaptor', line 33, column 11 to column 12)",
+  " (in 'NIX_ideal_adaptor', line 33, column 2 to column 64)",
+  " (in 'NIX_ideal_adaptor', line 34, column 2 to column 66)",
+  " (in 'NIX_ideal_adaptor', line 40, column 8 to column 9)",
+  " (in 'NIX_ideal_adaptor', line 41, column 8 to column 9)",
   " (in 'NIX_ideal_adaptor', line 46, column 8 to column 9)",
   " (in 'NIX_ideal_adaptor', line 46, column 10 to column 11)",
   " (in 'NIX_ideal_adaptor', line 47, column 8 to column 9)",
   " (in 'NIX_ideal_adaptor', line 47, column 10 to column 11)",
   " (in 'NIX_ideal_adaptor', line 48, column 8 to column 9)",
   " (in 'NIX_ideal_adaptor', line 48, column 10 to column 11)",
-  " (in 'NIX_ideal_adaptor', line 52, column 9 to column 10)",
-  " (in 'NIX_ideal_adaptor', line 53, column 8 to column 14)",
-  " (in 'NIX_ideal_adaptor', line 53, column 24 to column 25)",
-  " (in 'NIX_ideal_adaptor', line 54, column 8 to column 14)",
-  " (in 'NIX_ideal_adaptor', line 54, column 23 to column 24)"};
+  " (in 'NIX_ideal_adaptor', line 49, column 8 to column 9)",
+  " (in 'NIX_ideal_adaptor', line 49, column 10 to column 11)",
+  " (in 'NIX_ideal_adaptor', line 50, column 8 to column 9)",
+  " (in 'NIX_ideal_adaptor', line 50, column 10 to column 11)",
+  " (in 'NIX_ideal_adaptor', line 54, column 9 to column 10)",
+  " (in 'NIX_ideal_adaptor', line 55, column 8 to column 14)",
+  " (in 'NIX_ideal_adaptor', line 55, column 24 to column 25)",
+  " (in 'NIX_ideal_adaptor', line 56, column 8 to column 14)",
+  " (in 'NIX_ideal_adaptor', line 56, column 23 to column 24)"};
 #include <stan_meta_header.hpp>
 class model_NIX_ideal_adaptor final : public model_base_crtp<model_NIX_ideal_adaptor> {
 private:
@@ -123,7 +123,7 @@ private:
   std::vector<std::vector<int>> z_test_counts;
   int lapse_rate_known;
   int mu_0_known;
-  int sigma_0_known;
+  int Sigma_0_known;
   Eigen::Matrix<double,-1,-1> x_ss_exposure_data__;
   double sigma_kappanu;
   Eigen::Map<Eigen::Matrix<double,-1,-1>> N_exposure{nullptr, 0, 0};
@@ -317,17 +317,17 @@ public:
       current_statement__ = 58;
       stan::math::check_less_or_equal(function__, "mu_0_known", mu_0_known, 1);
       current_statement__ = 59;
-      context__.validate_dims("data initialization", "sigma_0_known", "int",
+      context__.validate_dims("data initialization", "Sigma_0_known", "int",
         std::vector<size_t>{});
-      sigma_0_known = std::numeric_limits<int>::min();
+      Sigma_0_known = std::numeric_limits<int>::min();
       current_statement__ = 59;
-      sigma_0_known = context__.vals_i("sigma_0_known")[(1 - 1)];
+      Sigma_0_known = context__.vals_i("Sigma_0_known")[(1 - 1)];
       current_statement__ = 59;
-      stan::math::check_greater_or_equal(function__, "sigma_0_known",
-        sigma_0_known, 0);
+      stan::math::check_greater_or_equal(function__, "Sigma_0_known",
+        Sigma_0_known, 0);
       current_statement__ = 59;
-      stan::math::check_less_or_equal(function__, "sigma_0_known",
-        sigma_0_known, 1);
+      stan::math::check_less_or_equal(function__, "Sigma_0_known",
+        Sigma_0_known, 1);
       current_statement__ = 60;
       stan::math::validate_non_negative_index("x_ss_exposure", "M", M);
       current_statement__ = 61;

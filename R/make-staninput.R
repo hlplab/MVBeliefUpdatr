@@ -59,28 +59,36 @@ get_test_counts <- function(test, cues, response, group, verbose = F) {
 
 
 
-#' Get statistics from a data set
+#' Get category statistics (functions) from data as list of lists or list of arrays
 #'
-#' Get statistics from data. Calculates the means and sum of squares matrices for the specified cues for
-#' any combination of groups (optional) and categories, and returns them as a list.
+#' Get category statistics (aggregate functions) over `cues` in a data frame. Each function is calculated for each unique combination
+#' of values in the columns `category` and (optionally) `group`.
 #'
 #' @param data `tibble` or `data.frame` with the data. Each row should be an observation of a category,
-#' and contain information about the category label, the cue values of the observation, and optionally grouping variables.
+#'   and contain information about the category label, the cue values of the observation, and optionally grouping variables.
 #' @param cues Names of columns with cue values.
 #' @param category Name of column that contains the category label for the exposure data. This column must be a factor.
-#' Can be `NULL` for unsupervised updating (not yet implemented). (default: "category")
+#'   Can be `NULL` for unsupervised updating (not yet implemented). (default: "category")
 #' @param group Name of column that contains information about which observations form a group. This column must be
-#' a factor.
+#'   a factor.
+#' @param simplify A list of logicals of the same length as `...` indicating whether the array resulting from each function
+#'   should be simplified? See \code{\link{to_array}} for more detail. (default: `TRUE` for all functions)
 #' @param ... A named list of functions (statistics) of `cues` to calculate for each unique combination of `group` and
-#' `category`.
+#'   `category`. Functions must return `NA` for any combination `category` and `group` for which `data` does not contain
+#'   any observations.
 #'
 #' @return A named list of length `...` (names are the names of the functions that have been computed). The list will be
-#' sorted first by `group` and then by `category`, in ascending order of the levels of those variables.
+#'   sorted first by `group` and then by `category`, in ascending order of the levels of those variables. The elements of
+#'   the list will either be lists (for `get_category_statistics_as_list_of_lists`) or arrays (for `get_category_statistics_as_list_of_arrays`).
+#'   Missing values---resulting from combinations of `group` and `category` for which there is no data---will be filled
+#'   with `NA`s coerced into the same structure as all other outputs for that function (e.g., if the function f results
+#'   in a 2-element vector for all combinations of `group` and `category` for which there is data, then unobserved data
+#'   results in a 2-element vector of `NA`s).
 #'
 #' @keywords TBD
-#' @rdname get_statistics_as_list_of_arrays
+#' @rdname get_category_statistics_as_list
 #' @export
-get_statistics_as_list_of_arrays <- function(
+get_category_statistics_as_list_of_lists <- function(
     data,
     group,
     category,
@@ -100,7 +108,15 @@ get_statistics_as_list_of_arrays <- function(
   }
 
   data %<>%
-    select(all_of(group), all_of(category), all_of(cues), )
+    select(all_of(group), all_of(category), all_of(cues)) %>%
+    # Remove "." from group or category names to prevent it from leading to issues below
+    # (since split uses "." as a separator)
+    mutate(
+      across(
+        all_of(c(group, category)),
+        ~ factor(
+          gsub("\\.", "_", .x),
+          levels = gsub("\\.", "_", levels(.x)))))
 
   # Get sorted levels
   group_levels <- levels(data[[group]])
@@ -109,12 +125,16 @@ get_statistics_as_list_of_arrays <- function(
   # Split the data by group and category
   split_data <- split(data, list(data[[group]], data[[category]]), drop = FALSE)
 
-  # Sort the split list by factor levels of group (first) and category (second)
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  REVIEW ORDERING (GROUPING MORE BY GROUP SEEMS RIGHT THOUGH)
+
+    # Sort the split list by factor levels of group (first) and category (second)
   split_keys <- names(split_data)
   split_order <- order(
     match(sapply(strsplit(split_keys, "\\."), `[`, 1), group_levels),
     match(sapply(strsplit(split_keys, "\\."), `[`, 2), category_levels))
   split_data <- split_data[split_order]
+
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  REVIEW ORDERING
 
   # Initialize result list
   result <- lapply(fn_list, function(f) vector("list", length(split_data)))
@@ -126,124 +146,82 @@ get_statistics_as_list_of_arrays <- function(
       as.numeric(split_data[[i]][j, cues, drop = FALSE])
     }))
     for (fname in names(fn_list)) {
-      result[[fname]][[i]] <- fn_list[[fname]](x)
+      # Call function and make sure that NA is returned instead if x is empty data frame
+      result[[fname]][[i]] <- if (is.null(x)) NA else fn_list[[fname]](x)
     }
   }
 
-  result %<>% map(~ to_array(.x, inner_dims = 1, outer_dims = c(nlevels(data[[category]]), nlevels(data[[group]]))))
+  # For each function, get the highest dimensionality of any of its outputs, and then coerce
+  # NA outputs into that same dimensionality.
+  dim_target <- result %>% map(~ reduce((map(.x, dim2)), pmax))
+  result %<>%
+    map2(
+      .y = dim_target,
+      ~ map(
+        .x,
+        function(x) {
+          if (any(is.na(x))) {
+            x <-
+              if (length(.y) == 1) {
+                # Coerce NA into vector
+                rep(NA, .y)
+              } else if (length(.y) == 2) {
+                # Coerce NA into matrix
+                matrix(rep(NA, prod(.y)), nrow = .y[1], ncol = .y[2])
+              } else if (length(.y) > 2) {
+                # Coerce NA into array
+                array(rep(NA, prod(.y)), dim = .y)
+              } else NA
+
+            return(x)
+          } else return(x)
+        }))
 
   return(result)
 }
 
-# stranded: remove once the function above is finished and used by all make_staninput functions
-get_sufficient_statistics_as_list_of_arrays <- function(data, model_type, ..., verbose = F) {
-  if (verbose) {
-    print("In get_sufficient_statistics_as_list_of_arrays(), input data is:")
-    print(data)
-  }
-
-  if (model_type == "NIX_ideal_adaptor") {
-    sufficient_stats <- get_sufficient_statistics_for_NIX_as_list_of_arrays(data = data, verbose = verbose, ...)
-  } else if (model_type == "NIW_ideal_adaptor") {
-    sufficient_stats <- get_sufficient_statistics_for_NIW_as_list_of_arrays(data = data, verbose = verbose, ...)
-  } else if (model_type == "MNIX_ideal_adaptor") {
-    sufficient_stats <- get_sufficient_statistics_for_MNIX_as_list_of_arrays(data = data, verbose = verbose, ...)
-  } else {
-    stop2("Model type ", model_type, " not recognized.")
-  }
-
-  return(sufficient_stats)
-}
-
-get_sufficient_statistics_for_NIW_as_list_of_arrays <- function(
-  data,
-  cues,
-  category,
-  group,
-  verbose = F,
-  ...
+#' @rdname get_category_statistics_as_list
+#' @export
+get_category_statistics_as_list_of_arrays <- function(
+    data,
+    group,
+    category,
+    cues,
+    simplify = as.list(rep(T, length(list(...)))),
+    verbose = F,
+    ...
 ) {
-  data_ss <-
-    data %>%
-    as_tibble(.name_repair = "minimal") %>%
-    group_by(!! sym(category), !! sym(group)) %>%
-    summarise(
-      N = length(!! sym(cues[1])),
-      x_mean = list(colMeans(cbind(!!! syms(cues)))),
-      x_ss = list(get_sum_of_uncentered_squares_from_df(cbind(!!! syms(cues)), verbose = verbose)))
+  if (!is.list(simplify) || !all(map_lgl(simplify, is.logical))) stop2("Argument simplify must be a list of logicals.")
+  if (length(simplify) != length(list(...))) stop2("Simplify must be a list of equal length as the number of functions provided in `...`.")
 
-    if (verbose) {
-      print("In get_sufficient_statistics_as_list_of_arrays(), multivariate sum-of-uncentered-squares matrix:")
-      print(data_ss)
-    }
+  result <-
+    get_category_statistics_as_list_of_lists(
+      data = data,
+      group = group,
+      category = category,
+      cues = cues,
+      verbose = verbose,
+      ...)
 
-    ## -------------------------------------------------------------------------------
-    # This is intended to map the elements of the tibble into arrays of the required
-    # dimensionality. THERE PROBABLY IS A MUCH MORE CONCISE AND PERHAPS MORE EFFICIENT
-    # WAY TO DO THIS. CHECK BACK.
-    #
-    # For helpful concise info on tibbles, see
-    #   https://cran.r-project.org/web/packages/tibble/vignettes/tibble.html
-    ## -------------------------------------------------------------------------------
-    cats <- levels(data[[category]])
-    groups <- levels(data[[group]])
-    n_category <- length(cats)
-    n_group <- length(groups)
-    n_cues <- length(cues)
+  result %<>% map2(.y = simplify, .f = ~ to_array(.x, outer_dims = c(nlevels(data[[category]]), nlevels(data[[group]])), simplify = .y))
 
-    N = array(dim = c(n_category,n_group))
-    x_mean = array(dim = c(n_category,n_group,n_cues))
-    x_ss = array(dim = c(n_category,n_group,n_cues,n_cues))
-
-    for (i in 1:n_category) {
-      for (j in 1:n_group) {
-        temp.data_ss <-
-          data_ss %>%
-          ungroup() %>%
-          filter(!! rlang::sym(category) == cats[i] &
-                   !! rlang::sym(group) == groups[j])
-
-        # Catch cases in which there is no data for a particular group/category combination
-        # (this can happen for example, when the data contain a pre-exposure test, which has
-        # no matching exposure statistics).
-        if (nrow(temp.data_ss) > 0) {
-          N[i,j] = temp.data_ss$N[[1]]
-          x_mean[i,j,] = temp.data_ss$x_mean[[1]]
-          x_ss[i,j,,] = temp.data_ss$x_ss[[1]]
-        } else {
-          # For groups without exposure data, we are setting the category means to 0 and the
-          # sum-of-squares matrix to the identity matrix. This is a bit of a hack, that is
-          # necessary because stan expects these variables to always be vectors/matrices of
-          # the same type and dimensionality (even though they should really be NAs). So, in
-          # order to avoid confusion, we're setting these quantities to NA *after* all required
-          # input has been handed to stan.
-          N[i,j] = 0
-          x_mean[i,j,] = rep(0, length(cues))
-          x_ss[i,j,,] = diag(length(cues))
-        }
-      }
-    }
-
-    dimnames(N) <- list(cats, groups)
-    dimnames(x_mean) <- list(cats, groups, cues)
-    dimnames(x_ss) <- list(cats, groups, cues, cues)
-    sufficient_stats <- list(N_exposure = N, x_mean_exposure = x_mean, x_ss_exposure = x_ss)
-
-  return(sufficient_stats)
+  return(result)
 }
 
-
-#' Turn list into array (for Stan input)
+#' Turn (lists of) numerics into arrays (for Stan input)
 #'
-#' Takes `NULL`, scalars, or lists as inputs and turns them into numeric arrays.
+#' Takes `NULL`, numeric atomics (single scalars, vectors, matrices) or lists of numeric elements as inputs and turns them into numeric arrays.
 #'
 #' @param x The input to be turned into an array.
-#' @param inner_dims Intended dimensions of x. Will be used for checks and to enforce the correct dimensions when `x` is `NULL`.
-#'   (default: 1)
+#' @param inner_dims Intended dimensions of x. Will be used for checks and to enforce the correct dimensions of `x`. If `NULL`,
+#'   `inner_dims` will be inferred from the input. (default: `1` if `x` is `NULL`, else `NULL`)
 #' @param outer_dims A vector of outer dimensions for the array. If `x` is not a list, an array of `x` will be repeated for each
 #'   outer dimension. If `x` is list, the outer dimensions will each index one element of `x`.
 #'   The total length of `x` must match the product of outer dimensions. The first dimension will be iterated
 #'   over first (and thus alternating fastest), the second dimension will be iterated over second, etc. See details.
+#' @param simplify Should the array be simplified by removing inner dimensions whenever the inner element(s) are just scalars?
+#'   (e.g., if the inner elements are a one-element vector or a 1x1 matrix). This is currently checked only when `x` is `NULL`
+#'   or when `x` is a list. (default: `TRUE`)
 #'
 #' @return An array.
 #'
@@ -251,7 +229,7 @@ get_sufficient_statistics_for_NIW_as_list_of_arrays <- function(
 #' \itemize{
 #'   \item{`NULL` will be turned in a `array(numeric(0), dim = c(.outer_dims, .inner_dims))`. This is sometimes required for
 #'   optional Stan inputs.}
-#'   \item{Scalars and vectors will be turned into arrays of appropriate dimensions.}
+#'   \item{Atomics (scalars, vectors, and matrices) will be turned into arrays of appropriate dimensions.}
 #'   \item{Lists will be turned into arrays of appropriate dimensions.}
 #' }
 #'
@@ -261,27 +239,58 @@ get_sufficient_statistics_for_NIW_as_list_of_arrays <- function(
 #'
 #' @keywords TBD
 #' @export
-to_array <- function(x, inner_dims = 1, outer_dims = NULL) {
-  if (is.null(x)) return(array(numeric(), dim = rep(0, max(1, length(inner_dims) - 1 + length(outer_dims)))))
+to_array <- function(x, inner_dims = if (is.null(x)) 1 else NULL, outer_dims = NULL, simplify = T) {
+  if (is.null(x)) {
+    if (is.null(inner_dims)) stop2("If x is NULL, inner_dims must be an integer >= 1.")
 
-  # Handle scalar input
+    # optionally simplify by removing inner_dims if there only is one such dimension of length 1 (i.e., if all elements are scalars)
+    if (simplify) { inner_dims <- if (all(inner_dims == 1)) 0 else inner_dims }
+
+    return(array(numeric(), dim = rep(0, max(1, length(inner_dims) + length(outer_dims)))))
+  }
+
+  # Handle scalar, vector, and matrix input
   if (is.atomic(x)) {
-    if (length(inner_dims) > 1 || inner_dims != length(x)) stop2(paste0("Input dimensions (", length(x), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
-    return(array(rep(x, prod(outer_dims)), dim = c(outer_dims, length(x))))
+    # NOTE: no simplification is currently being applied for atomic elements.
+    found_inner_dims <- dim2(x)
+
+    if (is.null(inner_dims)) inner_dims <- found_inner_dims
+    if (any(found_inner_dims != inner_dims))
+      stop2(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ", "), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
+
+    # If desired inner_dims don't match found inner_dims, see whether the input can be coerced into the desired inner_dims format
+    if (length(found_inner_dims) != length(inner_dims)) {
+      if (prod(inner_dims) == prod(found_inner_dims)) {
+        if (length(inner_dims) == 1) {
+          # Coerce into scalar or vector format
+          x <- as.vector(x)
+        } else if (length(inner_dims) > 1) {
+          # Coerce into matrix format
+          x <- matrix(x, nrow = inner_dims[1], ncol = inner_dims[2])
+        }
+      } else {
+        stop2(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ", "), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
+      }
+    }
+
+
+    # First cast an array with outer_dims on the outside (necessary to get correct handling of matrices when outer_dims are requested)
+    arr <- rep(x, prod(outer_dims)) %>% array(dim = c(inner_dims, outer_dims))
+    # Move outer dimensions to the front
+    total_dims <- dim2(arr)
+    perm <- c(if (length(total_dims) <= length(inner_dims)) NULL else seq(length(inner_dims) + 1, length(total_dims)), 1:length(inner_dims))
+    arr <- aperm(a = arr, perm = perm)
+
+    return(arr)
   }
 
   # Handle list input
   if (is.list(x)) {
-    first_elem <- x[[1]]
-    found_inner_dims <- dim(first_elem)
+    # Use first list element to infer detected dimensions
+    found_inner_dims <- dim2(x[[1]])
 
-    # If it's a vector (not a matrix or array), dim will be NULL
-    # (also transpose vectors for uniform handling downstream)
-    if (is.null(found_inner_dims)) {
-      found_inner_dims <- length(first_elem)
-    }
-
-    if (any(found_inner_dims != inner_dims)) stop2(paste0("Input dimensions (", paste(found_inner_dims, collapse = ","), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
+    if (is.null(inner_dims)) inner_dims <- found_inner_dims
+    if (any(found_inner_dims != inner_dims)) stop2(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ","), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
 
     # Check that x has the right number of elements
     expected_len <- if (length(outer_dims) == 0) 1 else prod(outer_dims)
@@ -294,11 +303,13 @@ to_array <- function(x, inner_dims = 1, outer_dims = NULL) {
 
     # Move last dimensions to the front
     total_dims <- dim(arr)
-    perm <- c(length(total_dims), 1:length(inner_dims))
+    perm <- c(length(total_dims), 1:(length(total_dims) - 1))
     arr <- aperm(a = arr, perm = perm)
+
+    # optionally simplify by removing inner_dims if there only is one such dimension of length 1 (i.e., if all elements are scalars)
+    if (simplify) { inner_dims <- if (all(inner_dims == 1)) NULL else inner_dims }
     # split first dimension into all outer dimensions
     arr <- array(arr, dim = c(outer_dims, inner_dims))
-
     return(arr)
   }
 
@@ -387,10 +398,17 @@ make_staninput <- function(
     msg = paste("transform_type must be one of the following: identity, center, standardize, PCA whiten, ZCA whiten."))
 
   cues <- unique(cues)
+  n.cues <- length(cues)
+  if (stanmodel == "NIX_ideal_adaptor") {
+    assert_that(n.cues == 1, msg = paste0("NIX_ideal_adaptor requires univariate data (!= ", n.cues, " cues found)."))
+    assert_that(transform_type == "identity", msg = 'NIX_ideal_adaptor is only implemented for transform_type = "identity".')
+  } else if (stanmodel == "MNIX_ideal_adaptor") {
+    assert_that(n.cues >= 2, msg = paste0("MNIX_ideal_adaptor requires multivariate data (!= ", n.cues, " cue found)."))
+  }
 
   assert_that(
-    length(tau_scale) == length(cues),
-    msg = paste0("tau_scale must be a vector with the same number of elements as cues (", length(cues), ")."))
+    length(tau_scale) == n.cues,
+    msg = paste0("tau_scale must be a vector with the same number of elements as cues (", n.cues, ")."))
 
   exposure <-
     check_exposure_test_data(
@@ -405,9 +423,10 @@ make_staninput <- function(
   if (!is.null(group.unique)) {
     assert_that(group.unique %in% names(exposure),
                 msg = paste("Column for group.unique ", group.unique, "not found in exposure data."))
-    message(paste0("Collapsing *exposure* observations to unique values of group.unique (", group.unique, ") by
-    discarding the data from all but the first group member. This means that each unique exposure condition will
-    only be counted once. All test observations are still counted, but aggregated for each unique value of group.unique."))
+    if (verbose)
+      message(paste0("Collapsing *exposure* observations to unique values of group.unique (", group.unique, ") by
+      discarding the data from all but the first group member. This means that each unique exposure condition will
+      only be counted once. All test observations are still counted, but aggregated for each unique value of group.unique."))
 
     exposure %<>%
       mutate(across(all_of(group.unique), as.factor)) %>%
@@ -437,7 +456,7 @@ make_staninput <- function(
               msg = paste("category variable", category, "in exposure data and response variable", response, "in test data must be factors with the same levels in the same order. Either the levels do not match, or they are not in the same order."))
   assert_that(all(levels(exposure[[group]]) %in% levels(test[[group]])),
               msg = paste("All levels of the grouping variable", group, "found in exposure must also be present in test."))
-  if (!all(levels(test[[group]]) %in% levels(exposure[[group]])))
+  if (verbose && !all(levels(test[[group]]) %in% levels(exposure[[group]])))
     message(paste("Not all levels of the grouping variable", group, "that are present in test were found in exposure.
     This is expected if and only if the data contained a test prior to (or without any) exposure.
     Creating 0 exposure data for these groups."))
@@ -454,10 +473,10 @@ make_staninput <- function(
     }
     assert_that(all(map_lgl(mu_0, is.numeric), map_lgl(mu_0, ~ is.null(dim(.x)) | length(dim(.x)) == 1)),
                 msg = "If mu_0 is a list, each element must be a vector.")
-    assert_that(all((map_int(mu_0, length)) == length(cues)),
+    assert_that(all((map_int(mu_0, length)) == n.cues),
                 msg = paste(
                   "At least one element of mu_0 does not have the correct dimensionality. Observations have",
-                  length(cues),
+                  n.cues,
                   "dimensions. Dimensionality of mu_0 ranges from",
                   paste(map_int(mu_0, length) %>% range(), collapse = " to ")))
   }
@@ -471,10 +490,10 @@ make_staninput <- function(
     }
     assert_that(all(map_lgl(Sigma_0, is.numeric), map_lgl(Sigma_0, ~ length(dim(.x)) == 2)),
                 msg = "If Sigma_0 is a list, each element must be a k x k matrix.")
-    assert_that(all(map_lgl(Sigma_0, ~ all(dim(.x) == length(cues)))),
+    assert_that(all(map_lgl(Sigma_0, ~ all(dim(.x) == n.cues))),
                 msg = paste(
                   "At least one element of Sigma_0 does not have the correct dimensionality. Observations have",
-                  length(cues),
+                  n.cues,
                   "dimensions. Sigma_0 includes matrices of dimension",
                   paste(paste(map(Sigma_0, ~ dim(.x) %>% paste(collapse = " x "))) %>% unique(), collapse = ", ")))
   }
@@ -503,9 +522,6 @@ make_staninput <- function(
       verbose = verbose)
 
   if (stanmodel == "NIX_ideal_adaptor") {
-    if (transform$type != "identity") stop2('NIX_ideal_adaptor is only implemented for transform_type = "identity".')
-    if (length(cues) > 1) stop2("NIX_ideal_adaptor requires univariate data.")
-
     staninput <-
       make_staninput_for_NIX_ideal_adaptor(
         exposure = exposure, test = test, test_counts = test_counts,
@@ -587,34 +603,33 @@ make_staninput_for_NIX_ideal_adaptor <- function(
 
   lapse_rate_known <- if (is.null(lapse_rate)) 0 else 1
   mu_0_known <- if (is.null(mu_0_transformed)) 0 else 1
-  sigma_0_known <- if (is.null(Sigma_0_transformed)) 0 else 1
+  Sigma_0_known <- if (is.null(Sigma_0_transformed)) 0 else 1
 
   lapse_rate %<>% to_array()
+  tau_scale %<>% to_array(inner_dims = n.cues)
+
   mu_0 %<>% to_array(inner_dims = n.cues, outer_dims = n.cats)
   mu_0_transformed %<>% to_array(inner_dims = n.cues, outer_dims = n.cats)
   Sigma_0 %<>% to_array(inner_dims = c(n.cues, n.cues), outer_dims = n.cats)
   Sigma_0_transformed %<>% to_array(inner_dims = c(n.cues, n.cues), outer_dims = n.cats)
 
-  tau_scale %<>% to_array(outer_dims = n.cues)
-
-  shift <- transform$transform.parameters[["shift"]]
-  INV_SCALE <- transform$transform.parameters[["INV_SCALE"]]
-  if (length(shift) == 1) shift <- array(shift, dim = 1)
-  if (!is.matrix(INV_SCALE)) INV_SCALE <- as.matrix(INV_SCALE, ncol = length(cues))
+  shift <- transform$transform.parameters[["shift"]] %>% to_array(inner_dims = n.cues)
+  INV_SCALE <- transform$transform.parameters[["INV_SCALE"]] %>% to_array(inner_dims = c(n.cues, n.cues))
 
   staninput <-
     exposure %>%
-    get_statistics_as_list_of_arrays(
+    get_category_statistics_as_list_of_arrays(
       cues = cues, category = category, group = group,
       N_exposure = length, x_mean_exposure = mean, x_sd_exposure = sd) %>%
     within({
       M <- dim(x_mean_exposure)[1]
       L <- dim(x_mean_exposure)[2]
 
+      # x_test is different from definition in make_staninput_for_NIW_ideal_adaptor (since vector, rather than matrix, is expected)
+      # could be changed if stan program instead is changed to accept matrix and then turn it into vector.
       x_test <-
-        test_counts %>%
-        select(all_of(cues)) %>%
-        as.matrix()
+        test_counts[[cues]] %>%
+        as.numeric()
       y_test <-
         test_counts[[group]] %>%
         as.numeric() %T>%
@@ -625,18 +640,16 @@ make_staninput_for_NIX_ideal_adaptor <- function(
         as.matrix()
       N_test <- length(x_test)
 
+      # NOT YET USED
       lapse_rate_known <- lapse_rate_known
+      lapse_rate_data <- lapse_rate
       mu_0_known <- mu_0_known
-      sigma_0_known <- sigma_0_known
-    })
+      mu_0_data <- mu_0_transformed
+      Sigma_0_known <- Sigma_0_known
+      Sigma_0_data <- Sigma_0_transformed
 
-  # Clean-up x_mean and x_ss for groups without exposure data. For reasons laid out in
-  # get_sufficient_statistics_as_list_of_arrays, we had to set these means and sums of
-  # squares to arbitrary values (since Stan doesn't accept typed NAs). But this can
-  # create confusion when users try to retrieve the exposure statistics for those groups.
-  # Here we're thus setting them to NAs.
-  staninput$x_mean_exposure[staninput$N_exposure == 0] <- NA
-  staninput$x_sd_exposure[staninput$N_exposure == 0] <- NA
+      tau_scale <- tau_scale
+    })
 
   staninput_transformed <- staninput
   return(
@@ -653,76 +666,45 @@ make_staninput_for_NIW_ideal_adaptor <- function(
     lapse_rate,
     mu_0, Sigma_0,
     mu_0_transformed, Sigma_0_transformed,
-    tau_scale, L_omega_eta = 1,
+    tau_scale,
+    # arguments beyond make_staninput_for_NIX_ideal_adaptor (except for verbose):
+    L_omega_eta = 1,
     split_loglik_per_observation = 0,
     verbose = F
 ) {
-  # Make sure that scales are converted into arrays for Stan
-  # and check that any null values are set correctly.
-  if (is.null(lapse_rate)) {
-    lapse_rate <- numeric()
-    lapse_rate_known <- 0
-  } else {
-    lapse_rate <- array(lapse_rate, dim = c(1))
-    lapse_rate_known <- 1
-  }
-
+  # It might be possible to collapse the different make_staninput functions even further since they seem to only differ in
+  # a) the agregate functions, b) that the multivariate models need simplify = F in a few places where to_array() is used.
+  ## BELOW: SAME AS FOR make_staninput_for_NIX()
   n.cats <- nlevels(exposure[[category]])
   n.cues <- length(cues)
-  if (is.null(mu_0_transformed)) {
-    mu_0 <- array(numeric(), dim = c(0,0))
-    mu_0_transformed <- array(numeric(), dim = c(0,0))
-    mu_0_known <- 0
-  } else {
-    if (is.list(mu_0_transformed)) {
-      temp <- array(dim = c(n.cats, n.cues))
-      for (i in 1:length(mu_0)) temp[i,] <- mu_0[[i]]
-      mu_0 <- temp
 
-      temp <- array(dim = c(n.cats, n.cues))
-      for (i in 1:length(mu_0_transformed)) temp[i,] <- mu_0[[i]]
-      mu_0_transformed <- temp
-      rm(temp)
-    }
-    mu_0_known <- 1
-  }
+  lapse_rate_known <- if (is.null(lapse_rate)) 0 else 1
+  mu_0_known <- if (is.null(mu_0_transformed)) 0 else 1
+  Sigma_0_known <- if (is.null(Sigma_0_transformed)) 0 else 1
 
-  if (is.null(Sigma_0_transformed)) {
-    Sigma_0 <- array(numeric(), dim = c(0,0,0))
-    Sigma_0_transformed <- array(numeric(), dim = c(0,0,0))
-    Sigma_0_known <- 0
-  } else {
-      if (is.list(Sigma_0_transformed)) {
-      temp <- array(dim = c(n.cats, n.cues, n.cues))
-      for (i in 1:length(Sigma_0)) temp[i,,] <- Sigma_0[[i]]
-      Sigma_0 <- temp
+  lapse_rate %<>% to_array()
+  tau_scale %<>% to_array(inner_dims = n.cues)
+  ## ABOVE: SAME AS FOR make_staninput_for_NIX()
 
-      temp <- array(dim = c(n.cats, n.cues, n.cues))
-      for (i in 1:length(Sigma_0_transformed)) temp[i,,] <- Sigma_0[[i]]
-      Sigma_0_transformed <- temp
-      rm(temp)
-    }
-    Sigma_0_known <- 1
-  }
+  # Next six lines are different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix)
+  mu_0 %<>% to_array(inner_dims = n.cues, outer_dims = n.cats, simplify = F)
+  mu_0_transformed %<>% to_array(inner_dims = n.cues, outer_dims = n.cats, simplify = F)
+  Sigma_0 %<>% to_array(inner_dims = c(n.cues, n.cues), outer_dims = n.cats, simplify = F)
+  Sigma_0_transformed %<>% to_array(inner_dims = c(n.cues, n.cues), outer_dims = n.cats, simplify = F)
 
-  if (length(tau_scale) == 1) tau_scale <- array(tau_scale, dim = 1)
-  shift <- transform$transform.parameters[["shift"]]
-  if (length(shift) == 1) shift <- array(shift, dim = 1)
-  INV_SCALE <- transform$transform.parameters[["INV_SCALE"]]
-  if (!is.matrix(INV_SCALE)) INV_SCALE <- as.matrix(INV_SCALE, ncol = length(cues))
+  shift <- transform$transform.parameters[["shift"]] %>% to_array(inner_dims = n.cues, simplify = F)
+  INV_SCALE <- transform$transform.parameters[["INV_SCALE"]] %>% to_array(inner_dims = c(n.cues, n.cues), simplify = F)
 
   # First get untransform input (to be stored in fit since it's helpful for plotting), and then get
   # transformed input below.
   staninput <-
     exposure %>%
-    get_statistics_as_list_of_arrays(
+    get_category_statistics_as_list_of_arrays(
       cues = cues, category = category, group = group,
-      model_type = "NIW_ideal_adaptor",
+      # Different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix):
+      simplify = list(T, F, F),
       verbose = verbose,
-      # The part below currently is ignored by get_sufficient_statistics_as_list_of_arrays. If the same syntax as for univariate input could
-      # also work for multivariate input to get_sufficient_statistics_as_list_of_arrays that would be more
-      # elegant.
-      N = length, x_mean = colMeans, x_ss = get_sum_of_uncentered_squares_from_df) %>%
+      N_exposure = length, x_mean_exposure = colMeans, x_ss_exposure = get_sum_of_uncentered_squares_from_df) %>%
     within({
       x_test <-
         test_counts %>%
@@ -740,29 +722,22 @@ make_staninput_for_NIW_ideal_adaptor <- function(
         as.matrix()
       N_test <- nrow(x_test)
 
+      lapse_rate_known <- lapse_rate_known
+      lapse_rate_data <- lapse_rate
       mu_0_known <- mu_0_known
       mu_0_data <- mu_0
+      Sigma_0_known <- Sigma_0_known
       Sigma_0_data <- Sigma_0
     })
 
-  # Clean-up x_mean and x_ss for groups without exposure data. For reasons laid out in
-  # get_sufficient_statistics_as_list_of_arrays, we had to set these means and sums of
-  # squares to arbitrary values (since Stan doesn't accept typed NAs). But this can
-  # create confusion when users try to retrieve the exposure statistics for those groups.
-  # Here we're thus setting them to NAs.
-  staninput$x_mean_exposure[staninput$N_exposure == 0] <- NA
-  staninput$x_ss_exposure[staninput$N_exposure == 0] <- NA
-
   staninput_transformed <-
     exposure_transformed %>%
-    get_statistics_as_list_of_arrays(
+    get_category_statistics_as_list_of_arrays(
       cues = cues, category = category, group = group,
-      model_type = "NIW_ideal_adaptor",
+      # Different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix):
+      simplify = list(T, F, F),
       verbose = verbose,
-      # The part below currently is ignored by get_sufficient_statistics_as_list_of_arrays. If the same syntax as for univariate input could
-      # also work for multivariate input to get_sufficient_statistics_as_list_of_arrays that would be more
-      # elegant.
-      N = length, x_mean = colMeans, x_ss = get_sum_of_uncentered_squares_from_df) %>%
+      N_exposure = length, x_mean_exposure = colMeans, x_ss_exposure = get_sum_of_uncentered_squares_from_df) %>%
     within({
       M <- dim(x_mean_exposure)[1]
       L <- dim(x_mean_exposure)[2]
@@ -800,14 +775,6 @@ make_staninput_for_NIW_ideal_adaptor <- function(
       split_loglik_per_observation <- split_loglik_per_observation
     })
 
-  # Clean-up x_mean and x_ss for groups without exposure data. For reasons laid out in
-  # get_sufficient_statistics_as_list_of_arrays, we had to set these means and sums of
-  # squares to arbitrary values (since Stan doesn't accept typed NAs). But this can
-  # create confusion when users try to retrieve the exposure statistics for those groups.
-  # Here we're thus setting them to NAs.
-  staninput_transformed$x_mean_exposure[staninput_transformed$N_exposure == 0] <- NA
-  staninput_transformed$x_ss_exposure[staninput_transformed$N_exposure == 0] <- NA
-
   return(
     list(
         transformed = staninput_transformed,
@@ -826,55 +793,35 @@ make_staninput_for_MNIX_ideal_adaptor <- function(
     split_loglik_per_observation = 0,
     verbose = F
 ) {
-  # Make sure that scales are converted into arrays for Stan
-  # and check that any null values are set correctly.
-  if (is.null(lapse_rate)) {
-    lapse_rate <- numeric()
-    lapse_rate_known <- 0
-  } else {
-    lapse_rate <- array(lapse_rate, dim = c(1))
-    lapse_rate_known <- 1
-  }
-
+  # It might be possible to collapse the different make_staninput functions even further since they seem to only differ in
+  # a) the agregate functions, b) that the multivariate models need simplify = F in a few places where to_array() is used.
+  ## BELOW: SAME AS FOR make_staninput_for_NIX()
   n.cats <- nlevels(exposure[[category]])
   n.cues <- length(cues)
-  if (is.null(mu_0)) {
-    mu_0 <- array(numeric(), dim = c(0,0))
-    mu_0_known <- 0
-  } else {
-    if (is.list(mu_0)) {
-      temp <- array(dim = c(n.cats, n.cues))
-      for (i in 1:length(mu_0)) temp[i,] <- mu_0[[i]]
-      mu_0 <- temp
-    }
-    mu_0_known <- 1
-  }
 
-  if (is.null(Sigma_0)) {
-    Sigma_0 <- array(numeric(), dim = c(0,0,0))
-    Sigma_0_known <- 0
-  } else {
-    if (is.list(Sigma_0)) {
-      temp <- array(dim = c(n.cats, n.cues, n.cues))
-      for (i in 1:length(Sigma_0)) temp[i,,] <- Sigma_0[[i]]
-      Sigma_0 <- temp
-    }
-    Sigma_0_known <- 1
-  }
+  lapse_rate_known <- if (is.null(lapse_rate)) 0 else 1
+  mu_0_known <- if (is.null(mu_0_transformed)) 0 else 1
+  Sigma_0_known <- if (is.null(Sigma_0_transformed)) 0 else 1
 
-  if (length(tau_scale) == 1) tau_scale <- array(tau_scale, dim = 1)
+  lapse_rate %<>% to_array()
+  tau_scale %<>% to_array(inner_dims = n.cues)
+  ## ABOVE: SAME AS FOR make_staninput_for_NIX()
 
-  shift <- transform$transform.parameters[["shift"]]
-  if (length(shift) == 1) shift <- array(shift, dim = 1)
+  # Next six lines are different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix)
+  mu_0 %<>% to_array(inner_dims = n.cues, outer_dims = n.cats, simplify = F)
+  mu_0_transformed %<>% to_array(inner_dims = n.cues, outer_dims = n.cats, simplify = F)
+  Sigma_0 %<>% to_array(inner_dims = c(n.cues, n.cues), outer_dims = n.cats, simplify = F)
+  Sigma_0_transformed %<>% to_array(inner_dims = c(n.cues, n.cues), outer_dims = n.cats, simplify = F)
 
-  INV_SCALE <- transform$transform.parameters[["INV_SCALE"]]
-  if (!is.matrix(INV_SCALE)) INV_SCALE <- as.matrix(INV_SCALE, ncol = length(cues))
+  shift <- transform$transform.parameters[["shift"]] %>% to_array(inner_dims = n.cues, simplify = F)
+  INV_SCALE <- transform$transform.parameters[["INV_SCALE"]] %>% to_array(inner_dims = c(n.cues, n.cues), simplify = F)
 
   staninput <-
-    get_statistics_as_list_of_arrays(
-      exposure = exposure,
+    get_category_statistics_as_list_of_arrays(
+      data = exposure,
       cues = cues, category = category, group = group,
-      model_type = "NIX_ideal_adaptor",
+      # Different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix):
+      simplify = list(T, F, F),
       verbose = verbose,
       N_exposure = length, x_mean_exposure = colMeans, x_cov_exposure = cov) %>%
     within({
@@ -905,6 +852,9 @@ make_staninput_for_MNIX_ideal_adaptor <- function(
       Sigma_0_known <- Sigma_0_known
       Sigma_0_data <- Sigma_0
 
+      # Different from all other functions so far (but that might change if the priors are added to those function, too)
+      p_cat <- rep(1/n.cats, n.cats)
+
       tau_scale <- tau_scale
 
       shift <- shift
@@ -913,17 +863,11 @@ make_staninput_for_MNIX_ideal_adaptor <- function(
       split_loglik_per_observation <- split_loglik_per_observation
     })
 
-  # Clean-up x_mean and x_ss for groups without exposure data. For reasons laid out in
-  # get_sufficient_statistics_as_list_of_arrays, we had to set these means and sums of
-  # squares to arbitrary values (since Stan doesn't accept typed NAs). But this can
-  # create confusion when users try to retrieve the exposure statistics for those groups.
-  # Here we're thus setting them to NAs.
-  staninput$x_mean_exposure[staninput$N_exposure == 0] <- NA
-  staninput$x_ss_exposure[staninput$N_exposure == 0] <- NA
-
-  return(staninput)
-
-
+  staninput_transformed <- staninput
+  return(
+    list(
+      transformed = staninput_transformed,
+      untransformed = staninput))
 }
 
 
