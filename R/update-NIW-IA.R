@@ -174,6 +174,8 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
           x_Ns <-
             get_categorization_from_NIW_ideal_adaptor(
               x = x_mean, model = prior,
+              noise_treatment = noise_treatment,
+              lapse_treatment = lapse_treatment,
               decision_rule = gsub("nolabel-", "", method),
               simplify = F) %>%
             pull(response) * x_N %>%
@@ -182,6 +184,8 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
           x_Ns <-
             get_categorization_from_NIW_ideal_adaptor(
               x = x_mean, model = prior,
+              noise_treatment = noise_treatment,
+              lapse_treatment = lapse_treatment,
               decision_rule = "proportional", # perhaps decision_rule = "sampling" could be used here with simplify = T, pre-empting the remaining rows?
               simplify = F) %>%
             pull(response) %>%
