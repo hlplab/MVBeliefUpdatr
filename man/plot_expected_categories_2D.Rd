@@ -18,7 +18,6 @@ plot_expected_categories_contour_2D(
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
-  category.linetypes = NULL,
   ...
 )
 
@@ -35,7 +34,6 @@ plot_expected_categories_contour2D(
   category.ids = NULL,
   category.labels = NULL,
   category.colors = NULL,
-  category.linetypes = NULL,
   ...
 )
 }
@@ -53,14 +51,14 @@ animation? (defaults: `NULL`)}
 
 \item{animation_follow}{Should the animation follow the data (zoom in and out)? (default: `FALSE`)}
 
-\item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)}
+\item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`). Only relevant
+if `data.exposure` is provided.}
 
-\item{category.labels}{Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)}
+\item{category.labels}{Vector of category labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)
+Only relevant if `data.exposure` is provided.}
 
-\item{category.colors}{Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)}
-
-\item{category.linetypes}{Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
-Currently being ignored.}
+\item{category.colors}{Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
+Only relevant if `data.exposure` is provided.}
 
 \item{...}{additional arguments handed to geom_polygon.}
 }
