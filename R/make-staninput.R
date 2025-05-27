@@ -125,16 +125,12 @@ get_category_statistics_as_list_of_lists <- function(
   # Split the data by group and category
   split_data <- split(data, list(data[[group]], data[[category]]), drop = FALSE)
 
-  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  REVIEW ORDERING (GROUPING MORE BY GROUP SEEMS RIGHT THOUGH)
-
     # Sort the split list by factor levels of group (first) and category (second)
   split_keys <- names(split_data)
   split_order <- order(
     match(sapply(strsplit(split_keys, "\\."), `[`, 1), group_levels),
     match(sapply(strsplit(split_keys, "\\."), `[`, 2), category_levels))
   split_data <- split_data[split_order]
-
-  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  REVIEW ORDERING
 
   # Initialize result list
   result <- lapply(fn_list, function(f) vector("list", length(split_data)))
