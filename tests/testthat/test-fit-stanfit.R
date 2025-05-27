@@ -181,7 +181,6 @@ test_that("matrix inputs with simplify = FALSE", {
 
 # ADD LIST INPUT TEST
 
-
 context("make_staninput_for_ideal_adaptor")
 
 # Test whether input formatting works before testing fitting
@@ -255,6 +254,53 @@ test_that("MNIX - test make_staninput_for_MNIX_ideal_adaptor (two cues)", {
   expect_no_error(get_example_staninput(5, stanmodel = "MNIX_ideal_adaptor", transform_type = "ZCA whiten"))
 })
 
+
+context("get_category_statistics_as_list_of_arrays")
+
+# FOR NOW, ONLY SOME VALUE CHECKS ARE INCLUDED HERE, AND ONLY FOR NIW_IDEAL_ADAPTORS
+# COULD ADD MORE TESTS OF THIS TYPE BELOW, E.G., FOR NIX AND MNIX
+.staninput <- get_example_staninput(2, stanmodel = "NIW_ideal_adaptor", transform_type = "identity")
+test_that("test return values of get_category_statistics_as_list_of_arrays (NIW_ideal_adaptor)", {
+  expect_true(
+    {
+      .x_mean_exposure <-
+        .staninput$data %>%
+        filter(Phase == "exposure") %>%
+        group_by(Condition, category) %>%
+        summarise(x_mean_exposure = list(c(mean(VOT), mean(f0_semitones)))) %>%
+        ungroup() %>%
+        pull(x_mean_exposure)
+      .match <- c()
+      for (j in 1:.staninput$staninput$transformed$L)
+        for (i in 1:.staninput$staninput$transformed$M) {
+          .match %<>%
+            append(
+              all.equal(
+                .staninput$staninput$untransformed$x_mean_exposure[i,j,],
+                .x_mean_exposure[[(j - 1) * 2 + i]]))
+        }
+      all(.match)
+    })
+  expect_true(
+    {
+      .x_ss_exposure <-
+        .staninput$data %>%
+        filter(Phase == "exposure") %>%
+        group_by(Condition, category) %>%
+        group_map(.f = ~ get_sum_of_uncentered_squares_from_df(.x %>% select(VOT, f0_semitones) %>% as.matrix()))
+      .match <- c()
+      for (j in 1:.staninput$staninput$transformed$L)
+        for (i in 1:.staninput$staninput$transformed$M) {
+          .match %<>%
+            append(
+              all.equal(
+                .staninput$staninput$untransformed$x_ss_exposure[i,j,,],
+                .x_ss_exposure[[(j - 1) * 2 + i]]))
+        }
+      all(.match)
+    })
+})
+
 # Test fitting
 context("fit_ideal_adaptor")
 
@@ -283,13 +329,15 @@ test_that("NIX - test fitting for more than one cue", {
 })
 
 test_that("NIW - test fitting for more than one cue", {
-  expect_no_error(fit <- get_example_stanfit(2, stanmodel = "NIW_ideal_adaptor", transform_type = "PCA whiten", control = list(adapt_delta = .975), silent = 0, verbose = F))
+  expect_no_error(fit <- get_example_stanfit(2, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize", control = list(adapt_delta = .975), silent = 0, verbose = F))
+  expect_no_error(fit <- get_example_stanfit(3, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize", control = list(adapt_delta = .975), silent = 0, verbose = F))
   expect_no_error(fit <- get_example_stanfit(3, stanmodel = "NIW_ideal_adaptor", transform_type = "PCA whiten", tau_scale = rep(2.5, 3), warmup = 1500, iter = 2500,
                                              control = list(adapt_delta = .995, max_treedepth = 15), silent = 0, verbose = F))
 })
 
 test_that("MNIX - test fitting for more than one cue", {
-  expect_no_error(fit <- get_example_stanfit(2, stanmodel = "MNIX_ideal_adaptor", transform_type = "PCA whiten", control = list(adapt_delta = .975), silent = 0, verbose = F))
+  expect_no_error(fit <- get_example_stanfit(2, stanmodel = "MNIX_ideal_adaptor", transform_type = "standardize", control = list(adapt_delta = .975), silent = 0, verbose = F))
+  expect_no_error(fit <- get_example_stanfit(3, stanmodel = "MNIX_ideal_adaptor", transform_type = "standardize", control = list(adapt_delta = .975), silent = 0, verbose = F))
   expect_no_error(fit <- get_example_stanfit(3, stanmodel = "MNIX_ideal_adaptor", transform_type = "PCA whiten", tau_scale = rep(2.5, 3), warmup = 1500, iter = 2500,
                                              control = list(adapt_delta = .995, max_treedepth = 15), silent = 0, verbose = F))
 })
