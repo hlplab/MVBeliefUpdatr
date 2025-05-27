@@ -10,13 +10,7 @@ make_exemplars_from_data(
   group = NULL,
   category = "category",
   cues,
-  sim_function = function(x, y) {
-     j <- 2
-     k <- 1
-     distance <- (x - y)^j
-    
-    similarity <- exp(-distance * k)
- },
+  sim_function = NULL,
   verbose = F
 )
 
@@ -25,13 +19,7 @@ make_exemplar_model_from_data(
   group = NULL,
   category = "category",
   cues,
-  sim_function = function(x, y) {
-     j <- 2
-     k <- 1
-     distance <- (x - y)^j
-    
-    similarity <- exp(-distance * k)
- },
+  sim_function = NULL,
   ...,
   verbose = F
 )
@@ -46,8 +34,11 @@ ideal observers will be derived for each level of \code{group}. (default: NULL)}
 
 \item{cues}{Name(s) of variables in \code{data} that contain the cue information.}
 
-\item{sim_function}{Similarity function that is used to calculate exemplar-to-examplar similarity. Defaults
-to \code{exp(-(x - y)^2)}.}
+\item{sim_function}{Similarity function that is used to calculate exemplar-to-exemplar similarity. If NULL,
+defaults to \code{sim_function = function(x, y, weights = w, distance_metric = 2, distance_decay_factor = 1) {
+distance <- sum(weights * abs(x - y)^distance_metric)^(1/distance_metric); similarity <- exp(-distance^distance_decay_factor) }},
+where each cue's weight \code{w} is the inverse of the cues SD^distance_metric. Except for the setting of the weights, this general formula follows
+\insertCite{afpelbaum-mcmurray2015}, who cite \insertCite{nosofsky1986}.}
 
 \item{verbose}{If true provides more information. (default: FALSE)}
 

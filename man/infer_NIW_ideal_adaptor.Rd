@@ -22,7 +22,7 @@ infer_NIW_ideal_adaptor(
   Sigma_0 = NULL,
   tau_scale = 0,
   L_omega_scale = 0,
-  untransform_fit = TRUE,
+  untransform_fit = FALSE,
   input = NULL,
   sample = TRUE,
   file = NULL,
@@ -49,7 +49,7 @@ infer_prior_beliefs(
   Sigma_0 = NULL,
   tau_scale = 0,
   L_omega_scale = 0,
-  untransform_fit = TRUE,
+  untransform_fit = FALSE,
   input = NULL,
   sample = TRUE,
   file = NULL,
@@ -118,7 +118,7 @@ the category variability covariance matrices when you specify \code{Sigma_0})} s
 NIW ideal adaptor does \emph{not} infer category and noise variability separately.}
 
 \item{untransform_fit}{Logical flag indicating whether the samples of the model should be transformed back
-into the original cue space by applying the untransform function. (default: \code{TRUE})}
+into the original cue space by applying the untransform function. (default: \code{FALSE})}
 
 \item{input}{A list of the type that would be returned by \code{\link{compose_data_to_infer_NIW_ideal_adaptor}}.
 This list can be provided *instead* of the arguments required by \code{compose_data_to_infer_NIW_ideal_adaptor}.}

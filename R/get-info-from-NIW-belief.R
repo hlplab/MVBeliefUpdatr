@@ -144,7 +144,7 @@ get_S_from_expected_Sigma <- function(Sigma, nu) {
 #'
 #' @rdname get_NIW_posterior_predictive
 #' @export
-get_NIW_posterior_predictive = function(
+get_NIW_posterior_predictive <- function(
     x, m, S, kappa, nu, Sigma_noise = NULL,
     noise_treatment = if (any(is.null(Sigma_noise), all(is.null(Sigma_noise)), all(map_lgl(Sigma_noise, is.null)))) "no_noise" else "marginalize",
     log = T
