@@ -128,13 +128,13 @@ transformed parameters {
       t_scale[cat,group] =
         S_n[cat,group] * (kappa_n[cat,group] + 1) /
         (kappa_n[cat,group] * (nu_n[cat,group] - K + 1));
+      print(t_scale);
     }
   }
 
   // compute posterior probabilities of all categories for each of the test stimuli
   for (j in 1:N_test) {
-    int group;
-    group = y_test[j];
+    int group = y_test[j];
     /* calculate un-normalized log posterior probability for each category. Under the assumption
        of uniform prior probabilities for each category, the log probabilities identical to the
        normalized log likelihoods. If we ever were to change this assumption, we'd have to add

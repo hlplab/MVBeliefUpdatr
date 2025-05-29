@@ -219,13 +219,36 @@ is.ideal_adaptor_staninput <- function(x) {
   return(TRUE)
 }
 
-# from brms
-contains_draws <- function(x) {
-  if (!(is.ideal_adaptor_stanfit(x) && length(get_stanfit(x)@sim))) {
-    stop2("The model does not contain posterior draws.")
-  }
-  invisible(TRUE)
+#' Check whether a stanfit object contains samples
+#'
+#' @param x A \code{\link[rstan]{stanfit}} object.
+#'
+#' @return A logical.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @export
+#' @rdname contains_draws
+#' @export
+contains_draws <- function(x, ...) {
+  UseMethod("contains_draws")
 }
+
+#' @rdname contains_draws
+#' @export
+contains_draws.stanfit <- function(x) {
+  if (!(length(x@sim))) return(FALSE)
+  return(TRUE)
+}
+
+
+#' @rdname contains_draws
+#' @export
+contains_samples.ideal_adaptor_stanfit <- function(x) {
+  stanfit <- get_stanfit(x)
+  return(contains_draws(stanfit))
+}
+
 
 # from brms
 # check validity of file name to store a stanfit object in

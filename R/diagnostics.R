@@ -26,7 +26,7 @@ NULL
 #' @export log_posterior
 #' @export
 log_posterior.ideal_adaptor_stanfit <- function(x, ...) {
-  contains_draws(x)
+  assert_contains_draws(x)
   bayesplot::log_posterior(x$stanfit, ...)
 }
 
@@ -35,7 +35,7 @@ log_posterior.ideal_adaptor_stanfit <- function(x, ...) {
 #' @export nuts_params
 #' @export
 nuts_params.ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
-  contains_draws(x)
+  assert_contains_draws(x)
   bayesplot::nuts_params(x$stanfit, pars = pars, ...)
 }
 
@@ -44,7 +44,7 @@ nuts_params.ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
 #' @export rhat
 #' @export
 rhat.ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
-  contains_draws(x)
+  assert_contains_draws(x)
   # bayesplot uses outdated rhat code from rstan
   # bayesplot::rhat(x$stanfit, pars = pars, ...)
   draws <- as_draws_array(x, variable = pars, ...)
@@ -59,7 +59,7 @@ rhat.ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
 #' @export neff_ratio
 #' @export
 neff_ratio.ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
-  contains_draws(x)
+  assert_contains_draws(x)
   # bayesplot uses outdated ess code from rstan
   # bayesplot::neff_ratio(x$stanfit, pars = pars, ...)
   draws <- as_draws_array(x, variable = pars, ...)
@@ -93,7 +93,8 @@ control_params <- function(x, ...) {
 #' @rdname control_params
 #' @export
 control_params.ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
-  contains_draws(x)
+  assert_contains_draws(x)
+
   if (is_equal(x$backend, "cmdstanr")) {
     out <- attr(x$stanfit, "metadata")$metadata
   } else {
