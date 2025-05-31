@@ -57,28 +57,34 @@ ss <- function(x, center = TRUE) {
 #' @keywords TBD
 #'
 #' @rdname uss2css
+#' @importFrom LaplacesDemon is.positive.semidefinite
 #' @export
 uss2css <- function(uss, n, mean) {
-  assert_that(is.matrix(uss))
-  assert_that(length(dim(uss)) == 2)
-  assert_that(dim(uss)[[1]] == dim(uss)[[2]],
-              msg = "uss must be a square matrix.")
+  if (!is.numeric(uss)) stop2("uss must be a numeric matrix.")
+  if (is.scalar(uss)) uss <- matrix(uss, nrow = 1, ncol = 1)
+  if (!is.positive.semidefinite(uss)) stop2("uss must be positive definite.")
   assert_that(length(mean) == dim(uss)[[1]],
               msg = "uss and mean are not of compatible dimensions.")
 
-  xm <- matrix(mean, nrow = n, ncol = length(mean), byrow = T)
-  css <- uss - ss(xm, center = F)
+  css <- uss - n * mean %*% t(mean)
   return(css)
 }
 
 
 #' @rdname uss2css
 #' @export
+uss2cov <- function(uss, n, mean) {
+  css <- uss2css(uss, n, mean)
+  cov <- css2cov(css, n)
+  return(css)
+}
+
+#' @rdname uss2css
+#' @export
 css2uss <- function(css, n, mean) {
-  assert_that(is.matrix(css))
-  assert_that(length(dim(css)) == 2)
-  assert_that(dim(css)[[1]] == dim(css)[[2]],
-              msg = "uss must be a square matrix.")
+  if (!is.numeric(css)) stop2("css must be a numeric matrix.")
+  if (is.scalar(css)) css <- matrix(css, nrow = 1, ncol = 1)
+  if (!is.positive.semidefinite(css)) stop2("css must be positive definite.")
   assert_that(length(mean) == dim(css)[[1]],
               msg = "uss and mean are not of compatible dimensions.")
 
@@ -90,10 +96,9 @@ css2uss <- function(css, n, mean) {
 #' @rdname uss2css
 #' @export
 css2cov <- function(css, n) {
-  assert_that(is.matrix(css))
-  assert_that(length(dim(css)) == 2)
-  assert_that(dim(css)[[1]] == dim(css)[[2]],
-              msg = "css must be a square matrix.")
+  if (!is.numeric(css)) stop2("css must be a numeric matrix.")
+  if (is.scalar(css)) css <- matrix(css, nrow = 1, ncol = 1)
+  if (!is.positive.semidefinite(css)) stop2("css must be positive definite.")
 
   return(css / (n - 1))
 }
@@ -101,10 +106,9 @@ css2cov <- function(css, n) {
 #' @rdname uss2css
 #' @export
 cov2css <- function(cov, n) {
-  assert_that(is.matrix(cov))
-  assert_that(length(dim(cov)) == 2)
-  assert_that(dim(cov)[[1]] == dim(cov)[[2]],
-              msg = "uss must be a square matrix.")
+  if (!is.numeric(cov)) stop2("cov must be a numeric matrix.")
+  if (is.scalar(cov)) cov <- matrix(cov, nrow = 1, ncol = 1)
+  if (!is.positive.semidefinite(cov)) stop2("cov must be positive definite.")
 
   return(cov * (n - 1))
 }
@@ -748,6 +752,11 @@ get_affine_transform <- function(
 #' Applies the transformation specified in \code{transform} object (e.g., centering, scaling, PCA) to the category
 #' mean(s) and/or covariance(s) in the model.
 #'
+#' Note that \code{(un)transform_category_cov} can also be used for centered sums-of-squares matrices, but not for
+#' uncentered sums-of-squares matrices. The latter require additional adjustments that might be implemented in the
+#' future (see https://chatgpt.com/c/683b3ed6-4924-800c-8f22-e61680f3360f).
+#'
+#'
 #' @param model A model with columns that specify category means (mu or m) and covariance information (Sigma or S).
 #' @param m A single category mean or alike.
 #' @param S A single covariance matrix or alike.
@@ -810,6 +819,7 @@ transform_category_mean <- function(m, transform) {
     m <- m / taus
   }
 
+  # For affine transforms
   if (!is.null(transform$shift)) {
     m <- m + transform$shift
   }
@@ -841,6 +851,7 @@ untransform_category_mean <- function(m, transform) {
     m <- m + mean
   }
 
+  # For affine transforms
   if (!is.null(transform$SCALE)) {
     m <- m %*% t(transform$INV_SCALE)
   }
@@ -868,6 +879,7 @@ transform_category_cov <- function(S, transform) {
     S <- COVinv %*% S %*% COVinv
   }
 
+  # For affine transforms
   if (!is.null(transform$SCALE)) {
     S <- transform$SCALE %*% S %*% t(transform$SCALE)
   }
@@ -890,6 +902,7 @@ untransform_category_cov <- function(S, transform) {
     S <- COV %*% S %*% COV
   }
 
+  # For affine transforms
   if (!is.null(transform$SCALE)) {
     S <- transform$INV_SCALE %*% S %*% t(transform$INV_SCALE)
   }

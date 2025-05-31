@@ -2,12 +2,15 @@
 % Please edit documentation in R/basics.R
 \name{uss2css}
 \alias{uss2css}
+\alias{uss2cov}
 \alias{css2uss}
 \alias{css2cov}
 \alias{cov2css}
 \title{Convert sum-of-square and covariance matrices}
 \usage{
 uss2css(uss, n, mean)
+
+uss2cov(uss, n, mean)
 
 css2uss(css, n, mean)
 

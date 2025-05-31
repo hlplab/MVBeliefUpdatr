@@ -37,4 +37,9 @@ A model, category mean, or covariance matrix of the same type as the input.
 Applies the transformation specified in \code{transform} object (e.g., centering, scaling, PCA) to the category
 mean(s) and/or covariance(s) in the model.
 }
+\details{
+Note that \code{(un)transform_category_cov} can also be used for centered sums-of-squares matrices, but not for
+uncentered sums-of-squares matrices. The latter require additional adjustments that might be implemented in the
+future (see https://chatgpt.com/c/683b3ed6-4924-800c-8f22-e61680f3360f).
+}
 \keyword{TBD}
