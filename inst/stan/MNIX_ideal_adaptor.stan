@@ -55,9 +55,9 @@ data {
   */
   // int<lower=0, upper=1> weights_known;
   // int<lower=0, upper=1> use_ideal_weights;                 // 0 = user-provided weights, 1 = ideal
-  array[lapse_rate_known ? 1 : 0] real<lower=0, upper=1> lapse_rate_data;  // optional: user-provided lapse_rate
-  array[mu_0_known ? M : 0] vector[mu_0_known ? K : 0] mu_0_data;          // optional: user-provided expected mu (prior category means) in space of affine transformation defined by INV_SCALE^-1 and shift
-  array[Sigma_0_known ? M : 0] vector[Sigma_0_known ? K : 0] Sigma_0_data; // optional: user-provided expected SD (prior category SD) in space of affine transformation defined by INV_SCALE^-1 and shift
+  array[lapse_rate_known ? 1 : 0] real<lower=0, upper=1> lapse_rate_data;       // optional: user provided lapse_rate
+  array[mu_0_known ? M : 0] vector[mu_0_known ? K : 0] mu_0_data;               // optional: user provided expected mu_0 (prior category means) in space of affine transformation defined by INV_SCALE^-1 and shift
+  array[Sigma_0_known ? M : 0] cov_matrix[Sigma_0_known ? K : 0] Sigma_0_data;  // optional: user provided expected Sigma_0 (prior category covariance matrices) in space of affine transformation defined by INV_SCALE^-1 and shift
   // simplex[use_ideal_weights || !weights_known ? 0 : K] cue_weights_data;   // optional: user-provided cue weights (used only if use_ideal_weights == 0 and weights are known)
 
   vector<lower=0>[mu_0_known ? 0 : K] tau_scale;           // separate taus for each of the K features to capture that features can be on separate scales
@@ -82,6 +82,13 @@ transformed data {
     }
   }
 
+  // Extract vector of expected SDs from user-provided expected cov_matrix of categories
+  array[Sigma_0_known ? M : 0] vector[Sigma_0_known ? K : 0] tau_0_data;
+  if (Sigma_0_known) {
+    for (cat in 1:M) {
+      tau_0_data[cat] = sqrt(diagonal(Sigma_0_data[cat]));
+    }
+  }
   real<lower=0> sigma_kappanu = max(max(to_array_1d(N_exposure)) * 4, 10); // scale for the prior of kappa/nu_0 (at least 10)
   vector[K] m_0_mu = rep_vector(0, K);                     // center of prior of m_0
 }
@@ -112,7 +119,7 @@ transformed parameters {
   // simplex[use_ideal_weights ? 0 : K] cue_weights = weights_known ? cue_weights_data : cue_weights_param;
   real lapse_rate = lapse_rate_known ? lapse_rate_data[1] : lapse_rate_param[1];   // lapse rate
 
-   /* Assuming unifom bias, so that lapsing_prob = probability of each category prior to
+   /* Assuming uniform bias, so that lapsing_prob = probability of each category prior to
      taking into account stimulus is 1/M
   */
   vector[M] lapsing_probs = rep_vector(lapse_rate / M, M);
@@ -134,8 +141,8 @@ transformed parameters {
   */
   for (cat in 1:M) {
     // Get s_0 from expected Sigma given nu_0
-    // E[sigma_c^2] = nu  / (nu - 2) * sigma_0^2 <==> sigma_0^2 = (E[sigma_c^2] * (nu_0 - 2)) / nu_0
-    s_0[cat] = Sigma_0_known ? Sigma_0_data[cat] * sqrt((nu_0 - 2) / nu_0): s_0_param[cat];
+    // E[sigma_c^2] = nu  / (nu - 2) * s_0^2 <==> s_0^2 = E[sigma_c^2] * ((nu_0 - 2) / nu_0) <==> s_0 = E[sigma_c] * sqrt((nu_0 - 2)) / nu_0)
+    s_0[cat] = Sigma_0_known ? tau_0_data[cat] * sqrt((nu_0 - 2) / nu_0): s_0_param[cat];
 
     for (group in 1:L) {
       if (N_exposure[cat,group] > 0 ) {

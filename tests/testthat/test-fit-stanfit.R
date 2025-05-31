@@ -1,5 +1,10 @@
 source("../functions-to-make-or-load-models.R")
 
+.silent = 0
+.verbose = F
+.warmup = 200
+.iter = 400
+
 context("to_array")
 
 x <- NULL
@@ -302,44 +307,96 @@ test_that("test return values of get_category_statistics_as_list_of_arrays (NIW_
 })
 
 # Test fitting
-context("fit_ideal_adaptor")
+context("fit_ideal_adaptor (unknown parameters)")
 
-test_that("NIX - test fitting transformations", {
-  expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "identity", control = list(adapt_delta = .95), silent = 0, verbose = F))
-  # expect_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "center", control = list(adapt_delta = .95), silent = 0, verbose = F))
-  # expect_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "standardize", control = list(adapt_delta = .95), silent = 0, verbose = F))
-  # expect_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "PCA whiten", control = list(adapt_delta = .95), silent = 0, verbose = F))
-  # expect_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "ZCA whiten", control = list(adapt_delta = .95), silent = 0, verbose = F))
-  # expect_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "other", silent = 0, verbose = T))
+# Running with low sampling sizes, which should elicit warnings (insufficient samples but no errors)
+
+test_that("NIX - test fitting (one cue)", {
+  expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "identity",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+  expect_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "center",
+                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose))
+  expect_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "standardize",
+                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose))
+  expect_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "PCA whiten",
+                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose))
+  expect_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "ZCA whiten",
+                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose))
 })
 
-test_that("NIW - test fitting transformations (one cue)", {
-  expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "identity", control = list(adapt_delta = .95), silent = 0, verbose = F))
-  expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "center", control = list(adapt_delta = .95), silent = 0, verbose = F))
-  expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize", control = list(adapt_delta = .95), silent = 0, verbose = F))
-  expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "PCA whiten", control = list(adapt_delta = .95), silent = 0, verbose = F))
-  expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "ZCA whiten", control = list(adapt_delta = .95), silent = 0, verbose = F))
-  expect_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "other", silent = 0, verbose = T))
+test_that("NIW - test fitting (one cue)", {
+  expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "identity",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+  expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "center",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+  expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+  expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "PCA whiten",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+  expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "ZCA whiten",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
 })
 
-test_that("NIX - test fitting for more than one cue", {
-  expect_error(fit <- get_example_stanfit(2, stanmodel = "NIX_ideal_adaptor", transform_type = "PCA whiten", control = list(adapt_delta = .975), silent = 0, verbose = F))
-  expect_error(fit <- get_example_stanfit(3, stanmodel = "NIX_ideal_adaptor", transform_type = "PCA whiten", tau_scale = rep(2.5, 3), warmup = 1500, iter = 2500,
-                                             control = list(adapt_delta = .995, max_treedepth = 15), silent = 0, verbose = F))
+test_that("NIX - test fitting (two+ cues)", {
+  expect_error(fit <- get_example_stanfit(2, stanmodel = "NIX_ideal_adaptor", transform_type = "identity",
+                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose))
+  expect_error(fit <- get_example_stanfit(3, stanmodel = "NIX_ideal_adaptor", transform_type = "identity",
+                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose))
 })
 
-test_that("NIW - test fitting for more than one cue", {
-  expect_no_error(fit <- get_example_stanfit(2, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize", control = list(adapt_delta = .975), silent = 0, verbose = F))
-  expect_no_error(fit <- get_example_stanfit(3, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize", control = list(adapt_delta = .975), silent = 0, verbose = F))
-  expect_no_error(fit <- get_example_stanfit(3, stanmodel = "NIW_ideal_adaptor", transform_type = "PCA whiten", tau_scale = rep(2.5, 3), warmup = 1500, iter = 2500,
-                                             control = list(adapt_delta = .995, max_treedepth = 15), silent = 0, verbose = F))
+test_that("NIW - test fitting (two+ cues)", {
+  expect_warning(expect_no_error(fit <- get_example_stanfit(2, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+  expect_warning(expect_no_error(fit <- get_example_stanfit(2, stanmodel = "NIW_ideal_adaptor", transform_type = "PCA whiten",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+  expect_warning(expect_no_error(fit <- get_example_stanfit(3, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+  expect_warning(expect_no_error(fit <- get_example_stanfit(3, stanmodel = "NIW_ideal_adaptor", transform_type = "PCA whiten",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
 })
 
-test_that("MNIX - test fitting for more than one cue", {
-  expect_no_error(fit <- get_example_stanfit(2, stanmodel = "MNIX_ideal_adaptor", transform_type = "standardize", control = list(adapt_delta = .975), silent = 0, verbose = F))
-  expect_no_error(fit <- get_example_stanfit(3, stanmodel = "MNIX_ideal_adaptor", transform_type = "standardize", control = list(adapt_delta = .975), silent = 0, verbose = F))
-  expect_no_error(fit <- get_example_stanfit(3, stanmodel = "MNIX_ideal_adaptor", transform_type = "PCA whiten", tau_scale = rep(2.5, 3), warmup = 1500, iter = 2500,
-                                             control = list(adapt_delta = .995, max_treedepth = 15), silent = 0, verbose = F))
+test_that("MNIX - test fitting (two+ cues)", {
+  expect_warning(expect_no_error(fit <- get_example_stanfit(2, stanmodel = "MNIX_ideal_adaptor", transform_type = "standardize",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+  expect_warning(expect_no_error(fit <- get_example_stanfit(2, stanmodel = "MNIX_ideal_adaptor", transform_type = "PCA whiten",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+  expect_warning(expect_no_error(fit <- get_example_stanfit(3, stanmodel = "MNIX_ideal_adaptor", transform_type = "standardize",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+  expect_warning(expect_no_error(fit <- get_example_stanfit(3, stanmodel = "MNIX_ideal_adaptor", transform_type = "PCA whiten",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
 })
 
-# TO DO: add testing for known mu_0 etc.
+
+
+context("fit_ideal_adaptor (known lapse rate)")
+
+# Get MVG ideal observer that the example data is generated from to get the ground truth for the parameters
+m_prior <- example_MVG_ideal_observer(1)
+
+test_that("NIX - test fitting (one cue)", {
+  expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "identity",
+                                                            lapse_rate = unique(m_prior$lapse_rate),
+                                                            file_refit = "always", filename = "temp",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+})
+
+test_that("NIW - test fitting (one cue)", {
+  expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize",
+                                                            lapse_rate = unique(m_prior$lapse_rate),
+                                                            file_refit = "always", filename = "temp",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+})
+
+test_that("NIW - test fitting (two cues)", {
+  expect_warning(expect_no_error(fit <- get_example_stanfit(2, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize",
+                                                            lapse_rate = unique(m_prior$lapse_rate),
+                                                            file_refit = "always", filename = "temp",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+})
+
+test_that("MNIX - test fitting  (two cues)", {
+  expect_warning(expect_no_error(fit <- get_example_stanfit(2, stanmodel = "MNIX_ideal_adaptor", transform_type = "standardize",
+                                                            lapse_rate = unique(m_prior$lapse_rate),
+                                                            file_refit = "always", filename = "temp",
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+})

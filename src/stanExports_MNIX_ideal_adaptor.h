@@ -27,109 +27,109 @@ namespace model_MNIX_ideal_adaptor_namespace {
 using stan::model::model_base_crtp;
 using namespace stan::math;
 stan::math::profile_map profiles__;
-static constexpr std::array<const char*, 202> locations_array__ =
+static constexpr std::array<const char*, 210> locations_array__ =
   {" (found before start of program)",
-  " (in 'MNIX_ideal_adaptor', line 82, column 2 to column 24)",
-  " (in 'MNIX_ideal_adaptor', line 83, column 2 to column 23)",
-  " (in 'MNIX_ideal_adaptor', line 85, column 2 to column 74)",
-  " (in 'MNIX_ideal_adaptor', line 86, column 2 to column 48)",
-  " (in 'MNIX_ideal_adaptor', line 87, column 2 to column 46)",
-  " (in 'MNIX_ideal_adaptor', line 88, column 2 to column 60)",
-  " (in 'MNIX_ideal_adaptor', line 91, column 2 to column 62)",
-  " (in 'MNIX_ideal_adaptor', line 92, column 2 to column 34)",
-  " (in 'MNIX_ideal_adaptor', line 94, column 2 to column 80)",
-  " (in 'MNIX_ideal_adaptor', line 98, column 2 to column 58)",
-  " (in 'MNIX_ideal_adaptor', line 100, column 2 to column 35)",
-  " (in 'MNIX_ideal_adaptor', line 101, column 2 to column 32)",
-  " (in 'MNIX_ideal_adaptor', line 102, column 2 to column 27)",
-  " (in 'MNIX_ideal_adaptor', line 103, column 2 to column 27)",
-  " (in 'MNIX_ideal_adaptor', line 104, column 2 to column 31)",
-  " (in 'MNIX_ideal_adaptor', line 105, column 2 to column 34)",
-  " (in 'MNIX_ideal_adaptor', line 106, column 2 to column 39)",
-  " (in 'MNIX_ideal_adaptor', line 107, column 2 to column 42)",
-  " (in 'MNIX_ideal_adaptor', line 200, column 2 to column 23)",
-  " (in 'MNIX_ideal_adaptor', line 201, column 2 to column 25)",
-  " (in 'MNIX_ideal_adaptor', line 225, column 2 to column 91)",
-  " (in 'MNIX_ideal_adaptor', line 238, column 2 to column 34)",
-  " (in 'MNIX_ideal_adaptor', line 239, column 2 to column 34)",
-  " (in 'MNIX_ideal_adaptor', line 240, column 2 to column 36)",
-  " (in 'MNIX_ideal_adaptor', line 241, column 2 to column 36)",
-  " (in 'MNIX_ideal_adaptor', line 114, column 4 to column 91)",
-  " (in 'MNIX_ideal_adaptor', line 130, column 8 to column 37)",
-  " (in 'MNIX_ideal_adaptor', line 131, column 8 to column 31)",
-  " (in 'MNIX_ideal_adaptor', line 132, column 8 to column 34)",
-  " (in 'MNIX_ideal_adaptor', line 133, column 8 to column 34)",
-  " (in 'MNIX_ideal_adaptor', line 129, column 13 to line 134, column 7)",
-  " (in 'MNIX_ideal_adaptor', line 117, column 8 to column 61)",
-  " (in 'MNIX_ideal_adaptor', line 118, column 8 to column 55)",
-  " (in 'MNIX_ideal_adaptor', line 119, column 8 to line 121, column 29)",
-  " (in 'MNIX_ideal_adaptor', line 122, column 8 to line 128, column 10)",
-  " (in 'MNIX_ideal_adaptor', line 116, column 38 to line 129, column 7)",
-  " (in 'MNIX_ideal_adaptor', line 116, column 6 to line 134, column 7)",
-  " (in 'MNIX_ideal_adaptor', line 135, column 6 to line 136, column 77)",
-  " (in 'MNIX_ideal_adaptor', line 115, column 23 to line 137, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 115, column 4 to line 137, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 111, column 19 to line 138, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 111, column 2 to line 138, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 141, column 11 to column 12)",
-  " (in 'MNIX_ideal_adaptor', line 141, column 4 to column 45)",
-  " (in 'MNIX_ideal_adaptor', line 146, column 8 to column 131)",
-  " (in 'MNIX_ideal_adaptor', line 143, column 24 to line 147, column 7)",
-  " (in 'MNIX_ideal_adaptor', line 143, column 6 to line 147, column 7)",
-  " (in 'MNIX_ideal_adaptor', line 142, column 22 to line 148, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 142, column 4 to line 148, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 149, column 4 to column 39)",
-  " (in 'MNIX_ideal_adaptor', line 150, column 4 to column 46)",
-  " (in 'MNIX_ideal_adaptor', line 140, column 21 to line 151, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 140, column 2 to line 151, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 154, column 4 to column 14)",
-  " (in 'MNIX_ideal_adaptor', line 155, column 4 to column 22)",
-  " (in 'MNIX_ideal_adaptor', line 164, column 6 to line 167, column 66)",
-  " (in 'MNIX_ideal_adaptor', line 169, column 6 to column 80)",
-  " (in 'MNIX_ideal_adaptor', line 162, column 21 to line 170, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 162, column 4 to line 170, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 172, column 4 to column 79)",
-  " (in 'MNIX_ideal_adaptor', line 153, column 22 to line 173, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 153, column 2 to line 173, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 203, column 4 to column 102)",
-  " (in 'MNIX_ideal_adaptor', line 204, column 4 to column 30)",
-  " (in 'MNIX_ideal_adaptor', line 202, column 22 to line 205, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 202, column 2 to line 205, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 227, column 4 to column 16)",
-  " (in 'MNIX_ideal_adaptor', line 231, column 10 to column 92)",
-  " (in 'MNIX_ideal_adaptor', line 232, column 10 to column 19)",
-  " (in 'MNIX_ideal_adaptor', line 230, column 41 to line 233, column 9)",
-  " (in 'MNIX_ideal_adaptor', line 230, column 8 to line 233, column 9)",
-  " (in 'MNIX_ideal_adaptor', line 229, column 21 to line 234, column 7)",
-  " (in 'MNIX_ideal_adaptor', line 229, column 6 to line 234, column 7)",
-  " (in 'MNIX_ideal_adaptor', line 228, column 24 to line 235, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 228, column 4 to line 235, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 226, column 41 to line 236, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 226, column 2 to line 236, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 243, column 4 to column 53)",
-  " (in 'MNIX_ideal_adaptor', line 245, column 4 to column 83)",
-  " (in 'MNIX_ideal_adaptor', line 247, column 6 to column 67)",
-  " (in 'MNIX_ideal_adaptor', line 249, column 6 to column 97)",
-  " (in 'MNIX_ideal_adaptor', line 246, column 23 to line 250, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 246, column 4 to line 250, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 242, column 19 to line 251, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 242, column 2 to line 251, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 176, column 2 to column 37)",
-  " (in 'MNIX_ideal_adaptor', line 177, column 2 to column 34)",
-  " (in 'MNIX_ideal_adaptor', line 179, column 6 to column 37)",
-  " (in 'MNIX_ideal_adaptor', line 181, column 8 to column 54)",
-  " (in 'MNIX_ideal_adaptor', line 180, column 23 to line 182, column 7)",
-  " (in 'MNIX_ideal_adaptor', line 180, column 6 to line 182, column 7)",
-  " (in 'MNIX_ideal_adaptor', line 178, column 19 to line 183, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 178, column 2 to line 183, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 187, column 6 to column 44)",
-  " (in 'MNIX_ideal_adaptor', line 186, column 21 to line 188, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 186, column 4 to line 188, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 185, column 22 to line 189, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 185, column 2 to line 189, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 191, column 4 to column 86)",
-  " (in 'MNIX_ideal_adaptor', line 190, column 22 to line 192, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 190, column 2 to line 192, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 89, column 2 to column 24)",
+  " (in 'MNIX_ideal_adaptor', line 90, column 2 to column 23)",
+  " (in 'MNIX_ideal_adaptor', line 92, column 2 to column 74)",
+  " (in 'MNIX_ideal_adaptor', line 93, column 2 to column 48)",
+  " (in 'MNIX_ideal_adaptor', line 94, column 2 to column 46)",
+  " (in 'MNIX_ideal_adaptor', line 95, column 2 to column 60)",
+  " (in 'MNIX_ideal_adaptor', line 98, column 2 to column 62)",
+  " (in 'MNIX_ideal_adaptor', line 99, column 2 to column 34)",
+  " (in 'MNIX_ideal_adaptor', line 101, column 2 to column 80)",
+  " (in 'MNIX_ideal_adaptor', line 105, column 2 to column 58)",
+  " (in 'MNIX_ideal_adaptor', line 107, column 2 to column 35)",
+  " (in 'MNIX_ideal_adaptor', line 108, column 2 to column 32)",
+  " (in 'MNIX_ideal_adaptor', line 109, column 2 to column 27)",
+  " (in 'MNIX_ideal_adaptor', line 110, column 2 to column 27)",
+  " (in 'MNIX_ideal_adaptor', line 111, column 2 to column 31)",
+  " (in 'MNIX_ideal_adaptor', line 112, column 2 to column 34)",
+  " (in 'MNIX_ideal_adaptor', line 113, column 2 to column 39)",
+  " (in 'MNIX_ideal_adaptor', line 114, column 2 to column 42)",
+  " (in 'MNIX_ideal_adaptor', line 207, column 2 to column 23)",
+  " (in 'MNIX_ideal_adaptor', line 208, column 2 to column 25)",
+  " (in 'MNIX_ideal_adaptor', line 232, column 2 to column 91)",
+  " (in 'MNIX_ideal_adaptor', line 245, column 2 to column 34)",
+  " (in 'MNIX_ideal_adaptor', line 246, column 2 to column 34)",
+  " (in 'MNIX_ideal_adaptor', line 247, column 2 to column 36)",
+  " (in 'MNIX_ideal_adaptor', line 248, column 2 to column 36)",
+  " (in 'MNIX_ideal_adaptor', line 121, column 4 to column 89)",
+  " (in 'MNIX_ideal_adaptor', line 137, column 8 to column 37)",
+  " (in 'MNIX_ideal_adaptor', line 138, column 8 to column 31)",
+  " (in 'MNIX_ideal_adaptor', line 139, column 8 to column 34)",
+  " (in 'MNIX_ideal_adaptor', line 140, column 8 to column 34)",
+  " (in 'MNIX_ideal_adaptor', line 136, column 13 to line 141, column 7)",
+  " (in 'MNIX_ideal_adaptor', line 124, column 8 to column 61)",
+  " (in 'MNIX_ideal_adaptor', line 125, column 8 to column 55)",
+  " (in 'MNIX_ideal_adaptor', line 126, column 8 to line 128, column 29)",
+  " (in 'MNIX_ideal_adaptor', line 129, column 8 to line 135, column 10)",
+  " (in 'MNIX_ideal_adaptor', line 123, column 38 to line 136, column 7)",
+  " (in 'MNIX_ideal_adaptor', line 123, column 6 to line 141, column 7)",
+  " (in 'MNIX_ideal_adaptor', line 142, column 6 to line 143, column 77)",
+  " (in 'MNIX_ideal_adaptor', line 122, column 23 to line 144, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 122, column 4 to line 144, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 118, column 19 to line 145, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 118, column 2 to line 145, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 148, column 11 to column 12)",
+  " (in 'MNIX_ideal_adaptor', line 148, column 4 to column 45)",
+  " (in 'MNIX_ideal_adaptor', line 153, column 8 to column 131)",
+  " (in 'MNIX_ideal_adaptor', line 150, column 24 to line 154, column 7)",
+  " (in 'MNIX_ideal_adaptor', line 150, column 6 to line 154, column 7)",
+  " (in 'MNIX_ideal_adaptor', line 149, column 22 to line 155, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 149, column 4 to line 155, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 156, column 4 to column 39)",
+  " (in 'MNIX_ideal_adaptor', line 157, column 4 to column 46)",
+  " (in 'MNIX_ideal_adaptor', line 147, column 21 to line 158, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 147, column 2 to line 158, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 161, column 4 to column 14)",
+  " (in 'MNIX_ideal_adaptor', line 162, column 4 to column 22)",
+  " (in 'MNIX_ideal_adaptor', line 171, column 6 to line 174, column 66)",
+  " (in 'MNIX_ideal_adaptor', line 176, column 6 to column 80)",
+  " (in 'MNIX_ideal_adaptor', line 169, column 21 to line 177, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 169, column 4 to line 177, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 179, column 4 to column 79)",
+  " (in 'MNIX_ideal_adaptor', line 160, column 22 to line 180, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 160, column 2 to line 180, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 210, column 4 to column 102)",
+  " (in 'MNIX_ideal_adaptor', line 211, column 4 to column 30)",
+  " (in 'MNIX_ideal_adaptor', line 209, column 22 to line 212, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 209, column 2 to line 212, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 234, column 4 to column 16)",
+  " (in 'MNIX_ideal_adaptor', line 238, column 10 to column 92)",
+  " (in 'MNIX_ideal_adaptor', line 239, column 10 to column 19)",
+  " (in 'MNIX_ideal_adaptor', line 237, column 41 to line 240, column 9)",
+  " (in 'MNIX_ideal_adaptor', line 237, column 8 to line 240, column 9)",
+  " (in 'MNIX_ideal_adaptor', line 236, column 21 to line 241, column 7)",
+  " (in 'MNIX_ideal_adaptor', line 236, column 6 to line 241, column 7)",
+  " (in 'MNIX_ideal_adaptor', line 235, column 24 to line 242, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 235, column 4 to line 242, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 233, column 41 to line 243, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 233, column 2 to line 243, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 250, column 4 to column 53)",
+  " (in 'MNIX_ideal_adaptor', line 252, column 4 to column 83)",
+  " (in 'MNIX_ideal_adaptor', line 254, column 6 to column 67)",
+  " (in 'MNIX_ideal_adaptor', line 256, column 6 to column 97)",
+  " (in 'MNIX_ideal_adaptor', line 253, column 23 to line 257, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 253, column 4 to line 257, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 249, column 19 to line 258, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 249, column 2 to line 258, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 183, column 2 to column 37)",
+  " (in 'MNIX_ideal_adaptor', line 184, column 2 to column 34)",
+  " (in 'MNIX_ideal_adaptor', line 186, column 6 to column 37)",
+  " (in 'MNIX_ideal_adaptor', line 188, column 8 to column 54)",
+  " (in 'MNIX_ideal_adaptor', line 187, column 23 to line 189, column 7)",
+  " (in 'MNIX_ideal_adaptor', line 187, column 6 to line 189, column 7)",
+  " (in 'MNIX_ideal_adaptor', line 185, column 19 to line 190, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 185, column 2 to line 190, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 194, column 6 to column 44)",
+  " (in 'MNIX_ideal_adaptor', line 193, column 21 to line 195, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 193, column 4 to line 195, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 192, column 22 to line 196, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 192, column 2 to line 196, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 198, column 4 to column 86)",
+  " (in 'MNIX_ideal_adaptor', line 197, column 22 to line 199, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 197, column 2 to line 199, column 3)",
   " (in 'MNIX_ideal_adaptor', line 24, column 2 to column 8)",
   " (in 'MNIX_ideal_adaptor', line 25, column 2 to column 8)",
   " (in 'MNIX_ideal_adaptor', line 26, column 2 to column 8)",
@@ -164,8 +164,8 @@ static constexpr std::array<const char*, 202> locations_array__ =
   " (in 'MNIX_ideal_adaptor', line 50, column 35 to column 53)",
   " (in 'MNIX_ideal_adaptor', line 50, column 2 to column 65)",
   " (in 'MNIX_ideal_adaptor', line 51, column 8 to column 29)",
-  " (in 'MNIX_ideal_adaptor', line 51, column 38 to column 59)",
-  " (in 'MNIX_ideal_adaptor', line 51, column 2 to column 74)",
+  " (in 'MNIX_ideal_adaptor', line 51, column 42 to column 63)",
+  " (in 'MNIX_ideal_adaptor', line 51, column 2 to column 78)",
   " (in 'MNIX_ideal_adaptor', line 53, column 18 to column 36)",
   " (in 'MNIX_ideal_adaptor', line 53, column 2 to column 48)",
   " (in 'MNIX_ideal_adaptor', line 58, column 9 to column 10)",
@@ -185,51 +185,59 @@ static constexpr std::array<const char*, 202> locations_array__ =
   " (in 'MNIX_ideal_adaptor', line 65, column 4 to line 69, column 5)",
   " (in 'MNIX_ideal_adaptor', line 64, column 24 to line 70, column 3)",
   " (in 'MNIX_ideal_adaptor', line 64, column 2 to line 70, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 71, column 2 to column 74)",
-  " (in 'MNIX_ideal_adaptor', line 72, column 9 to column 10)",
-  " (in 'MNIX_ideal_adaptor', line 72, column 2 to column 38)",
-  " (in 'MNIX_ideal_adaptor', line 85, column 8 to column 32)",
-  " (in 'MNIX_ideal_adaptor', line 86, column 8 to column 26)",
-  " (in 'MNIX_ideal_adaptor', line 86, column 35 to column 36)",
-  " (in 'MNIX_ideal_adaptor', line 87, column 18 to column 36)",
-  " (in 'MNIX_ideal_adaptor', line 88, column 8 to column 29)",
-  " (in 'MNIX_ideal_adaptor', line 88, column 47 to column 48)",
-  " (in 'MNIX_ideal_adaptor', line 91, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 91, column 18 to column 19)",
-  " (in 'MNIX_ideal_adaptor', line 92, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 92, column 27 to column 28)",
-  " (in 'MNIX_ideal_adaptor', line 98, column 9 to column 10)",
-  " (in 'MNIX_ideal_adaptor', line 100, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 100, column 10 to column 11)",
-  " (in 'MNIX_ideal_adaptor', line 101, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 101, column 10 to column 11)",
-  " (in 'MNIX_ideal_adaptor', line 102, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 102, column 10 to column 11)",
-  " (in 'MNIX_ideal_adaptor', line 102, column 20 to column 21)",
-  " (in 'MNIX_ideal_adaptor', line 103, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 103, column 10 to column 11)",
-  " (in 'MNIX_ideal_adaptor', line 103, column 20 to column 21)",
-  " (in 'MNIX_ideal_adaptor', line 104, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 104, column 10 to column 11)",
-  " (in 'MNIX_ideal_adaptor', line 104, column 20 to column 21)",
-  " (in 'MNIX_ideal_adaptor', line 105, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 105, column 19 to column 20)",
-  " (in 'MNIX_ideal_adaptor', line 106, column 8 to column 14)",
-  " (in 'MNIX_ideal_adaptor', line 106, column 24 to column 25)",
-  " (in 'MNIX_ideal_adaptor', line 107, column 8 to column 14)",
-  " (in 'MNIX_ideal_adaptor', line 107, column 23 to column 24)",
-  " (in 'MNIX_ideal_adaptor', line 201, column 9 to column 15)",
-  " (in 'MNIX_ideal_adaptor', line 225, column 9 to column 75)",
-  " (in 'MNIX_ideal_adaptor', line 238, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 238, column 18 to column 19)",
-  " (in 'MNIX_ideal_adaptor', line 239, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 239, column 18 to column 19)",
-  " (in 'MNIX_ideal_adaptor', line 240, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 240, column 10 to column 11)",
-  " (in 'MNIX_ideal_adaptor', line 240, column 20 to column 21)",
-  " (in 'MNIX_ideal_adaptor', line 241, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 241, column 10 to column 11)",
-  " (in 'MNIX_ideal_adaptor', line 241, column 20 to column 21)"};
+  " (in 'MNIX_ideal_adaptor', line 72, column 8 to column 29)",
+  " (in 'MNIX_ideal_adaptor', line 72, column 38 to column 59)",
+  " (in 'MNIX_ideal_adaptor', line 72, column 2 to column 72)",
+  " (in 'MNIX_ideal_adaptor', line 75, column 6 to column 58)",
+  " (in 'MNIX_ideal_adaptor', line 74, column 21 to line 76, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 74, column 4 to line 76, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 73, column 21 to line 77, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 73, column 2 to line 77, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 78, column 2 to column 74)",
+  " (in 'MNIX_ideal_adaptor', line 79, column 9 to column 10)",
+  " (in 'MNIX_ideal_adaptor', line 79, column 2 to column 38)",
+  " (in 'MNIX_ideal_adaptor', line 92, column 8 to column 32)",
+  " (in 'MNIX_ideal_adaptor', line 93, column 8 to column 26)",
+  " (in 'MNIX_ideal_adaptor', line 93, column 35 to column 36)",
+  " (in 'MNIX_ideal_adaptor', line 94, column 18 to column 36)",
+  " (in 'MNIX_ideal_adaptor', line 95, column 8 to column 29)",
+  " (in 'MNIX_ideal_adaptor', line 95, column 47 to column 48)",
+  " (in 'MNIX_ideal_adaptor', line 98, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 98, column 18 to column 19)",
+  " (in 'MNIX_ideal_adaptor', line 99, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 99, column 27 to column 28)",
+  " (in 'MNIX_ideal_adaptor', line 105, column 9 to column 10)",
+  " (in 'MNIX_ideal_adaptor', line 107, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 107, column 10 to column 11)",
+  " (in 'MNIX_ideal_adaptor', line 108, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 108, column 10 to column 11)",
+  " (in 'MNIX_ideal_adaptor', line 109, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 109, column 10 to column 11)",
+  " (in 'MNIX_ideal_adaptor', line 109, column 20 to column 21)",
+  " (in 'MNIX_ideal_adaptor', line 110, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 110, column 10 to column 11)",
+  " (in 'MNIX_ideal_adaptor', line 110, column 20 to column 21)",
+  " (in 'MNIX_ideal_adaptor', line 111, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 111, column 10 to column 11)",
+  " (in 'MNIX_ideal_adaptor', line 111, column 20 to column 21)",
+  " (in 'MNIX_ideal_adaptor', line 112, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 112, column 19 to column 20)",
+  " (in 'MNIX_ideal_adaptor', line 113, column 8 to column 14)",
+  " (in 'MNIX_ideal_adaptor', line 113, column 24 to column 25)",
+  " (in 'MNIX_ideal_adaptor', line 114, column 8 to column 14)",
+  " (in 'MNIX_ideal_adaptor', line 114, column 23 to column 24)",
+  " (in 'MNIX_ideal_adaptor', line 208, column 9 to column 15)",
+  " (in 'MNIX_ideal_adaptor', line 232, column 9 to column 75)",
+  " (in 'MNIX_ideal_adaptor', line 245, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 245, column 18 to column 19)",
+  " (in 'MNIX_ideal_adaptor', line 246, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 246, column 18 to column 19)",
+  " (in 'MNIX_ideal_adaptor', line 247, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 247, column 10 to column 11)",
+  " (in 'MNIX_ideal_adaptor', line 247, column 20 to column 21)",
+  " (in 'MNIX_ideal_adaptor', line 248, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 248, column 10 to column 11)",
+  " (in 'MNIX_ideal_adaptor', line 248, column 20 to column 21)"};
 #include <stan_meta_header.hpp>
 class model_MNIX_ideal_adaptor final : public model_base_crtp<model_MNIX_ideal_adaptor> {
 private:
@@ -249,12 +257,13 @@ private:
   int Sigma_0_known;
   std::vector<double> lapse_rate_data;
   std::vector<Eigen::Matrix<double,-1,1>> mu_0_data;
-  std::vector<Eigen::Matrix<double,-1,1>> Sigma_0_data;
+  std::vector<Eigen::Matrix<double,-1,-1>> Sigma_0_data;
   Eigen::Matrix<double,-1,1> tau_scale_data__;
   Eigen::Matrix<double,-1,-1> INV_SCALE_data__;
   Eigen::Matrix<double,-1,1> shift_data__;
   int split_loglik_per_observation;
   std::vector<std::vector<Eigen::Matrix<double,-1,1>>> x_ss_exposure;
+  std::vector<Eigen::Matrix<double,-1,1>> tau_0_data;
   double sigma_kappanu;
   Eigen::Matrix<double,-1,1> m_0_mu_data__;
   int lapse_rate_param_1dim__;
@@ -580,13 +589,18 @@ public:
       current_statement__ = 136;
       stan::math::validate_non_negative_index("Sigma_0_data",
         "Sigma_0_known ? K : 0", (Sigma_0_known ? K : 0));
+      current_statement__ = 136;
+      stan::math::validate_non_negative_index("Sigma_0_data",
+        "Sigma_0_known ? K : 0", (Sigma_0_known ? K : 0));
       current_statement__ = 137;
       context__.validate_dims("data initialization", "Sigma_0_data",
         "double",
         std::vector<size_t>{static_cast<size_t>((Sigma_0_known ? M : 0)),
+          static_cast<size_t>((Sigma_0_known ? K : 0)),
           static_cast<size_t>((Sigma_0_known ? K : 0))});
-      Sigma_0_data = std::vector<Eigen::Matrix<double,-1,1>>((Sigma_0_known ? M : 0),
-                       Eigen::Matrix<double,-1,1>::Constant((Sigma_0_known ? K : 0),
+      Sigma_0_data = std::vector<Eigen::Matrix<double,-1,-1>>((Sigma_0_known ? M : 0),
+                       Eigen::Matrix<double,-1,-1>::Constant((Sigma_0_known ? K : 0),
+                         (Sigma_0_known ? K : 0),
                          std::numeric_limits<double>::quiet_NaN()));
       {
         std::vector<local_scalar_t__> Sigma_0_data_flat__;
@@ -594,14 +608,20 @@ public:
         Sigma_0_data_flat__ = context__.vals_r("Sigma_0_data");
         pos__ = 1;
         for (int sym1__ = 1; sym1__ <= (Sigma_0_known ? K : 0); ++sym1__) {
-          for (int sym2__ = 1; sym2__ <= (Sigma_0_known ? M : 0); ++sym2__) {
-            stan::model::assign(Sigma_0_data, Sigma_0_data_flat__[(pos__ -
-              1)], "assigning variable Sigma_0_data",
-              stan::model::index_uni(sym2__), stan::model::index_uni(sym1__));
-            pos__ = (pos__ + 1);
+          for (int sym2__ = 1; sym2__ <= (Sigma_0_known ? K : 0); ++sym2__) {
+            for (int sym3__ = 1; sym3__ <= (Sigma_0_known ? M : 0); ++sym3__) {
+              stan::model::assign(Sigma_0_data, Sigma_0_data_flat__[(pos__ -
+                1)], "assigning variable Sigma_0_data",
+                stan::model::index_uni(sym3__),
+                stan::model::index_uni(sym2__),
+                stan::model::index_uni(sym1__));
+              pos__ = (pos__ + 1);
+            }
           }
         }
       }
+      current_statement__ = 137;
+      stan::math::check_cov_matrix(function__, "Sigma_0_data", Sigma_0_data);
       current_statement__ = 138;
       stan::math::validate_non_negative_index("tau_scale",
         "mu_0_known ? 0 : K", (mu_0_known ? 0 : K));
@@ -719,136 +739,159 @@ public:
         }
       }
       current_statement__ = 157;
+      stan::math::validate_non_negative_index("tau_0_data",
+        "Sigma_0_known ? M : 0", (Sigma_0_known ? M : 0));
+      current_statement__ = 158;
+      stan::math::validate_non_negative_index("tau_0_data",
+        "Sigma_0_known ? K : 0", (Sigma_0_known ? K : 0));
+      current_statement__ = 159;
+      tau_0_data = std::vector<Eigen::Matrix<double,-1,1>>((Sigma_0_known ? M : 0),
+                     Eigen::Matrix<double,-1,1>::Constant((Sigma_0_known ? K : 0),
+                       std::numeric_limits<double>::quiet_NaN()));
+      current_statement__ = 164;
+      if (Sigma_0_known) {
+        current_statement__ = 162;
+        for (int cat = 1; cat <= M; ++cat) {
+          current_statement__ = 160;
+          stan::model::assign(tau_0_data,
+            stan::math::sqrt(
+              stan::math::diagonal(
+                stan::model::rvalue(Sigma_0_data, "Sigma_0_data",
+                  stan::model::index_uni(cat)))),
+            "assigning variable tau_0_data", stan::model::index_uni(cat));
+        }
+      }
+      current_statement__ = 165;
       sigma_kappanu = std::numeric_limits<double>::quiet_NaN();
-      current_statement__ = 157;
+      current_statement__ = 165;
       sigma_kappanu = stan::math::max(
                         (stan::math::max(stan::math::to_array_1d(N_exposure))
                         * 4), 10);
-      current_statement__ = 158;
+      current_statement__ = 166;
       stan::math::validate_non_negative_index("m_0_mu", "K", K);
-      current_statement__ = 159;
+      current_statement__ = 167;
       m_0_mu_data__ = Eigen::Matrix<double,-1,1>::Constant(K,
                         std::numeric_limits<double>::quiet_NaN());
       new (&m_0_mu)
         Eigen::Map<Eigen::Matrix<double,-1,1>>(m_0_mu_data__.data(), K);
-      current_statement__ = 159;
+      current_statement__ = 167;
       stan::model::assign(m_0_mu, stan::math::rep_vector(0, K),
         "assigning variable m_0_mu");
-      current_statement__ = 157;
+      current_statement__ = 165;
       stan::math::check_greater_or_equal(function__, "sigma_kappanu",
         sigma_kappanu, 0);
-      current_statement__ = 160;
+      current_statement__ = 168;
       lapse_rate_param_1dim__ = std::numeric_limits<int>::min();
-      current_statement__ = 160;
+      current_statement__ = 168;
       lapse_rate_param_1dim__ = (lapse_rate_known ? 0 : 1);
-      current_statement__ = 160;
+      current_statement__ = 168;
       stan::math::validate_non_negative_index("lapse_rate_param",
         "lapse_rate_known ? 0 : 1", lapse_rate_param_1dim__);
-      current_statement__ = 161;
+      current_statement__ = 169;
       m_0_param_1dim__ = std::numeric_limits<int>::min();
-      current_statement__ = 161;
+      current_statement__ = 169;
       m_0_param_1dim__ = (mu_0_known ? 0 : M);
-      current_statement__ = 161;
+      current_statement__ = 169;
       stan::math::validate_non_negative_index("m_0_param",
         "mu_0_known ? 0 : M", m_0_param_1dim__);
-      current_statement__ = 162;
+      current_statement__ = 170;
       stan::math::validate_non_negative_index("m_0_param", "K", K);
-      current_statement__ = 163;
+      current_statement__ = 171;
       m_0_tau_1dim__ = std::numeric_limits<int>::min();
-      current_statement__ = 163;
+      current_statement__ = 171;
       m_0_tau_1dim__ = (mu_0_known ? 0 : K);
-      current_statement__ = 163;
+      current_statement__ = 171;
       stan::math::validate_non_negative_index("m_0_tau",
         "mu_0_known ? 0 : K", m_0_tau_1dim__);
-      current_statement__ = 164;
+      current_statement__ = 172;
       s_0_param_1dim__ = std::numeric_limits<int>::min();
-      current_statement__ = 164;
+      current_statement__ = 172;
       s_0_param_1dim__ = (Sigma_0_known ? 0 : M);
-      current_statement__ = 164;
+      current_statement__ = 172;
       stan::math::validate_non_negative_index("s_0_param",
         "Sigma_0_known ? 0 : M", s_0_param_1dim__);
-      current_statement__ = 165;
-      stan::math::validate_non_negative_index("s_0_param", "K", K);
-      current_statement__ = 166;
-      stan::math::validate_non_negative_index("m_0", "M", M);
-      current_statement__ = 167;
-      stan::math::validate_non_negative_index("m_0", "K", K);
-      current_statement__ = 168;
-      stan::math::validate_non_negative_index("s_0", "M", M);
-      current_statement__ = 169;
-      stan::math::validate_non_negative_index("s_0", "K", K);
-      current_statement__ = 170;
-      stan::math::validate_non_negative_index("lapsing_probs", "M", M);
-      current_statement__ = 171;
-      stan::math::validate_non_negative_index("kappa_n", "M", M);
-      current_statement__ = 172;
-      stan::math::validate_non_negative_index("kappa_n", "L", L);
       current_statement__ = 173;
-      stan::math::validate_non_negative_index("nu_n", "M", M);
+      stan::math::validate_non_negative_index("s_0_param", "K", K);
       current_statement__ = 174;
-      stan::math::validate_non_negative_index("nu_n", "L", L);
+      stan::math::validate_non_negative_index("m_0", "M", M);
       current_statement__ = 175;
-      stan::math::validate_non_negative_index("m_n", "M", M);
+      stan::math::validate_non_negative_index("m_0", "K", K);
       current_statement__ = 176;
-      stan::math::validate_non_negative_index("m_n", "L", L);
+      stan::math::validate_non_negative_index("s_0", "M", M);
       current_statement__ = 177;
-      stan::math::validate_non_negative_index("m_n", "K", K);
+      stan::math::validate_non_negative_index("s_0", "K", K);
       current_statement__ = 178;
-      stan::math::validate_non_negative_index("s_n", "M", M);
+      stan::math::validate_non_negative_index("lapsing_probs", "M", M);
       current_statement__ = 179;
-      stan::math::validate_non_negative_index("s_n", "L", L);
+      stan::math::validate_non_negative_index("kappa_n", "M", M);
       current_statement__ = 180;
-      stan::math::validate_non_negative_index("s_n", "K", K);
+      stan::math::validate_non_negative_index("kappa_n", "L", L);
       current_statement__ = 181;
-      stan::math::validate_non_negative_index("t_scale", "M", M);
+      stan::math::validate_non_negative_index("nu_n", "M", M);
       current_statement__ = 182;
-      stan::math::validate_non_negative_index("t_scale", "L", L);
+      stan::math::validate_non_negative_index("nu_n", "L", L);
       current_statement__ = 183;
-      stan::math::validate_non_negative_index("t_scale", "K", K);
+      stan::math::validate_non_negative_index("m_n", "M", M);
       current_statement__ = 184;
-      stan::math::validate_non_negative_index("cue_weights", "L", L);
+      stan::math::validate_non_negative_index("m_n", "L", L);
       current_statement__ = 185;
-      stan::math::validate_non_negative_index("cue_weights", "K", K);
+      stan::math::validate_non_negative_index("m_n", "K", K);
       current_statement__ = 186;
-      stan::math::validate_non_negative_index("p_test_conj", "N_test", N_test);
+      stan::math::validate_non_negative_index("s_n", "M", M);
       current_statement__ = 187;
-      stan::math::validate_non_negative_index("p_test_conj", "M", M);
+      stan::math::validate_non_negative_index("s_n", "L", L);
       current_statement__ = 188;
+      stan::math::validate_non_negative_index("s_n", "K", K);
+      current_statement__ = 189;
+      stan::math::validate_non_negative_index("t_scale", "M", M);
+      current_statement__ = 190;
+      stan::math::validate_non_negative_index("t_scale", "L", L);
+      current_statement__ = 191;
+      stan::math::validate_non_negative_index("t_scale", "K", K);
+      current_statement__ = 192;
+      stan::math::validate_non_negative_index("cue_weights", "L", L);
+      current_statement__ = 193;
+      stan::math::validate_non_negative_index("cue_weights", "K", K);
+      current_statement__ = 194;
+      stan::math::validate_non_negative_index("p_test_conj", "N_test", N_test);
+      current_statement__ = 195;
+      stan::math::validate_non_negative_index("p_test_conj", "M", M);
+      current_statement__ = 196;
       stan::math::validate_non_negative_index("log_p_test_conj", "N_test",
         N_test);
-      current_statement__ = 189;
+      current_statement__ = 197;
       stan::math::validate_non_negative_index("log_p_test_conj", "M", M);
-      current_statement__ = 190;
+      current_statement__ = 198;
       stan::math::validate_non_negative_index("log_lik", "N_test", N_test);
-      current_statement__ = 191;
+      current_statement__ = 199;
       log_lik_split_1dim__ = std::numeric_limits<int>::min();
-      current_statement__ = 191;
+      current_statement__ = 199;
       log_lik_split_1dim__ = (split_loglik_per_observation ? stan::math::sum(
                                                                stan::math::to_array_1d(
                                                                  z_test_counts)) : 0);
-      current_statement__ = 191;
+      current_statement__ = 199;
       stan::math::validate_non_negative_index("log_lik_split",
         "split_loglik_per_observation ? sum(to_array_1d(z_test_counts)) : 0",
         log_lik_split_1dim__);
-      current_statement__ = 192;
-      stan::math::validate_non_negative_index("m_0_original", "M", M);
-      current_statement__ = 193;
-      stan::math::validate_non_negative_index("m_0_original", "K", K);
-      current_statement__ = 194;
-      stan::math::validate_non_negative_index("S_0_original", "M", M);
-      current_statement__ = 195;
-      stan::math::validate_non_negative_index("S_0_original", "K", K);
-      current_statement__ = 196;
-      stan::math::validate_non_negative_index("m_n_original", "M", M);
-      current_statement__ = 197;
-      stan::math::validate_non_negative_index("m_n_original", "L", L);
-      current_statement__ = 198;
-      stan::math::validate_non_negative_index("m_n_original", "K", K);
-      current_statement__ = 199;
-      stan::math::validate_non_negative_index("S_n_original", "M", M);
       current_statement__ = 200;
-      stan::math::validate_non_negative_index("S_n_original", "L", L);
+      stan::math::validate_non_negative_index("m_0_original", "M", M);
       current_statement__ = 201;
+      stan::math::validate_non_negative_index("m_0_original", "K", K);
+      current_statement__ = 202;
+      stan::math::validate_non_negative_index("S_0_original", "M", M);
+      current_statement__ = 203;
+      stan::math::validate_non_negative_index("S_0_original", "K", K);
+      current_statement__ = 204;
+      stan::math::validate_non_negative_index("m_n_original", "M", M);
+      current_statement__ = 205;
+      stan::math::validate_non_negative_index("m_n_original", "L", L);
+      current_statement__ = 206;
+      stan::math::validate_non_negative_index("m_n_original", "K", K);
+      current_statement__ = 207;
+      stan::math::validate_non_negative_index("S_n_original", "M", M);
+      current_statement__ = 208;
+      stan::math::validate_non_negative_index("S_n_original", "L", L);
+      current_statement__ = 209;
       stan::math::validate_non_negative_index("S_n_original", "K", K);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
@@ -970,8 +1013,8 @@ public:
         stan::model::assign(s_0,
           (Sigma_0_known ? stan::math::eval(
                              stan::math::multiply(
-                               stan::model::rvalue(Sigma_0_data,
-                                 "Sigma_0_data", stan::model::index_uni(cat)),
+                               stan::model::rvalue(tau_0_data, "tau_0_data",
+                                 stan::model::index_uni(cat)),
                                stan::math::sqrt(((nu_0 - 2) / nu_0)))) : 
           stan::math::eval(
             stan::model::rvalue(s_0_param, "s_0_param",
@@ -1338,8 +1381,8 @@ public:
         stan::model::assign(s_0,
           (Sigma_0_known ? stan::math::eval(
                              stan::math::multiply(
-                               stan::model::rvalue(Sigma_0_data,
-                                 "Sigma_0_data", stan::model::index_uni(cat)),
+                               stan::model::rvalue(tau_0_data, "tau_0_data",
+                                 stan::model::index_uni(cat)),
                                stan::math::sqrt(((nu_0 - 2) / nu_0)))) : 
           stan::math::eval(
             stan::model::rvalue(s_0_param, "s_0_param",
@@ -1746,8 +1789,8 @@ public:
         stan::model::assign(s_0,
           (Sigma_0_known ? stan::math::eval(
                              stan::math::multiply(
-                               stan::model::rvalue(Sigma_0_data,
-                                 "Sigma_0_data", stan::model::index_uni(cat)),
+                               stan::model::rvalue(tau_0_data, "tau_0_data",
+                                 stan::model::index_uni(cat)),
                                stan::math::sqrt(((nu_0 - 2) / nu_0)))) : 
           stan::math::eval(
             stan::model::rvalue(s_0_param, "s_0_param",

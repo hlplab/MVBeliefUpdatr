@@ -3,14 +3,14 @@
 \name{contains_draws}
 \alias{contains_draws}
 \alias{contains_draws.stanfit}
-\alias{contains_samples.ideal_adaptor_stanfit}
+\alias{contains_draws.ideal_adaptor_stanfit}
 \title{Check whether a stanfit object contains samples}
 \usage{
 contains_draws(x, ...)
 
 \method{contains_draws}{stanfit}(x)
 
-contains_samples.ideal_adaptor_stanfit(x)
+\method{contains_draws}{ideal_adaptor_stanfit}(x)
 }
 \arguments{
 \item{x}{A \code{\link[rstan]{stanfit}} object.}

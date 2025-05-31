@@ -119,7 +119,7 @@ make_data_for_1Dstanfit_with_exposure <- function() {
 }
 
 
-make_data_for_2Dstanfit_with_exposure <- function() {
+make_data_for_2Dstanfit_with_exposure <- function(plot = F) {
   .cues <- c("VOT", "f0_semitones")
 
   # Make 5 ideal observers to sample EXPOSURE from
@@ -165,31 +165,33 @@ make_data_for_2Dstanfit_with_exposure <- function() {
 
   .data <- get_test_responses_after_updating_based_on_exposure(.io, .exposure, .test, .cues)
 
-  p <-
-    .data %>%
-    filter(Phase == "exposure") %>%
-    ggplot(aes(x = !! sym(.cues[1]), y = !! sym(.cues[2]))) +
-    stat_ellipse(
-      aes(fill = category),
-      level = 0.95, geom = "polygon", alpha = 0.3) +
-    geom_point(aes(color = category)) +
-    facet_wrap(~ Condition, nrow = 1) +
-    theme_bw() +
-    title("Exposure data")
-  plot(p)
+  if (plot) {
+    p <-
+      .data %>%
+      filter(Phase == "exposure") %>%
+      ggplot(aes(x = !! sym(.cues[1]), y = !! sym(.cues[2]))) +
+      stat_ellipse(
+        aes(fill = category),
+        level = 0.95, geom = "polygon", alpha = 0.3) +
+      geom_point(aes(color = category)) +
+      facet_wrap(~ Condition, nrow = 1) +
+      theme_bw() +
+      ggtitle("Exposure data")
+    plot(p)
 
-  p <-
-    .data %>%
-    filter(Phase == "test") %>%
-    group_by(Condition, !!! syms(.cues)) %>%
-    summarise(meanResponse = mean(ifelse(Response == levels(.env$.data$Response)[2], 1, 0))) %>%
-    ggplot(aes(x = !! sym(.cues[1]), y = !! sym(.cues[2]))) +
-    geom_point(aes(color = meanResponse)) +
-    scale_color_gradient(name = as.character(paste("Proportion of", levels(.data$Response)[2], "responses")), aesthetics = c("color", "fill"), low = "pink", high = "cyan") +
-    facet_wrap(~ Condition, nrow = 1) +
-    theme_bw() + theme(legend.position = "bottom") +
-    title("Test data")
-  plot(p)
+    p <-
+      .data %>%
+      filter(Phase == "test") %>%
+      group_by(Condition, !!! syms(.cues)) %>%
+      summarise(meanResponse = mean(ifelse(Response == levels(.env$.data$Response)[2], 1, 0))) %>%
+      ggplot(aes(x = !! sym(.cues[1]), y = !! sym(.cues[2]))) +
+      geom_point(aes(color = meanResponse)) +
+      scale_color_gradient(name = as.character(paste("Proportion of", levels(.data$Response)[2], "responses")), aesthetics = c("color", "fill"), low = "pink", high = "cyan") +
+      facet_wrap(~ Condition, nrow = 1) +
+      theme_bw() + theme(legend.position = "bottom") +
+      ggtitle("Test data")
+    plot(p)
+  }
 
   return(.data)
 }
@@ -266,6 +268,7 @@ get_example_staninput <- function(
     example = 1,
     stanmodel = "NIW_ideal_adaptor",
     transform_type = "PCA whiten",
+    lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
     seed = 42
 ) {
   .data <- make_data_for_stanfit(example, seed = seed)
@@ -285,78 +288,74 @@ get_example_staninput <- function(
       group = "Subject",
       group.unique = "Condition",
       stanmodel = stanmodel,
-      transform_type = transform_type)
+      transform_type = transform_type,
+      lapse_rate = lapse_rate, mu_0 = mu_0, Sigma_0 = Sigma_0)
 
-  if (example %in% c(2, 5)) {
-    require(ellipse)
-    df <- tibble()
-
-    # Get mean and cov
-    L <- .staninput$staninput$transformed$L
-    M <- .staninput$staninput$transformed$M
-    for (m in 1:M) {
-      for (l in 1:L) {
-        df %<>%
-          bind_rows(
-            tibble(
-              group = l,
-              category = m,
-              N = .staninput$staninput$transformed$N_exposure[m, l],
-              center = list(.staninput$staninput$transformed$x_mean_exposure[m, l,]),
-              uss_matrix = list(.staninput$staninput$transformed$x_ss_exposure[m, l, , ]),
-              css_matrix = pmap(list(uss_matrix, N, center), ~ uss2css(..1, n = ..2, mean = ..3)),
-              cov_matrix = map2(css_matrix, N, ~ css2cov(.x, .y))) %>%
-              mutate(ellipse = map2(cov_matrix, center, ~ ellipse(x = .x, centre = .y))) %>%
-              # # This step is necessary since unnest() can't yet unnest lists of matrices
-              # # (bug was reported and added as milestone, 11/2019)
-              # mutate(ellipse = map(ellipse, ~ as_tibble(.x, .name_repair = "unique"))) %>%
-              # select(-c(kappa, nu, m, S, Sigma, lapse_rate)) %>%
-              unnest(ellipse)
-              )
-      }
-    }
-
-
-    eigen_decomp <- eigen(cov_matrix)
-    eigenvalues <- eigen_decomp$values
-    eigenvectors <- eigen_decomp$vectors
-
-    # 4. Scale ellipse axes by square root of eigenvalues
-    scale <- sqrt(eigenvalues)
-
-    # 5. Define rotation angle
-    angle <- atan2(eigenvectors[2, 1], eigenvectors[1, 1])
-
-    # 6. Create data for plotting the ellipse
-    angles <- seq(0, 2*pi, length.out = 100)
-    unit_circle <- cbind(cos(angles), sin(angles))
-    rotated_unit_circle <-
-      cbind(cos(angle) * unit_circle[, 1] - sin(angle) * unit_circle[, 2],
-            sin(angle) * unit_circle[, 1] + cos(angle) * unit_circle[, 2])
-    ellipse_df <- data.frame(
-      x = center[1] + scale[1] * rotated_unit_circle[, 1],
-      y = center[2] + scale[2] * rotated_unit_circle[, 2]
-    )
-
-    # 7. Plot the data and the ellipse
-    ggplot(df, aes(x = x, y = y)) +
-      geom_point() +
-      geom_path(data = ellipse_df, aes(x = x, y = y), color = "red")
-
-    p <-
-      .staninput$staninput$transformed %>%
-      filter(Phase == "exposure") %>%
-      ggplot(aes(x = !! sym(.cues[1]), y = !! sym(.cues[2]))) +
-      stat_ellipse(
-        aes(fill = category),
-        level = 0.95, geom = "polygon", alpha = 0.3) +
-      geom_point(aes(color = category)) +
-      facet_wrap(~ Condition, nrow = 1) +
-      theme_bw() +
-      title("Exposure statistics in staninput")
-    plot(p)
-
-  }
+  # # For debugging:
+  # if (example %in% c(2, 5)) {
+  #   require(ellipse)
+  #   df.transformed <- df.untransformed <- tibble()
+  #
+  #   # Get mean and cov
+  #   L <- .staninput$staninput$transformed$L
+  #   M <- .staninput$staninput$transformed$M
+  #   for (m in 1:M) {
+  #     for (l in 1:L) {
+  #       df.transformed %<>%
+  #         bind_rows(
+  #           tibble(
+  #             Condition = l,
+  #             category = m,
+  #             N = .staninput$staninput$transformed$N_exposure[m, l],
+  #             center = list(.staninput$staninput$transformed$x_mean_exposure[m, l,]),
+  #             uss_matrix = list(.staninput$staninput$transformed$x_ss_exposure[m, l, , ]),
+  #             css_matrix = pmap(list(uss_matrix, N, center), ~ uss2css(..1, n = ..2, mean = ..3)),
+  #             cov_matrix = map2(css_matrix, N, ~ css2cov(.x, .y))) %>%
+  #             mutate(ellipse = map2(cov_matrix, center, ~ ellipse(x = .x, centre = .y))) %>%
+  #             # # This step is necessary since unnest() can't yet unnest lists of matrices
+  #             # # (bug was reported and added as milestone, 11/2019)
+  #             mutate(ellipse = map(ellipse, ~ as_tibble(.x, .name_repair = "unique"))) %>%
+  #             unnest(ellipse))
+  #
+  #       df.untransformed %<>%
+  #         bind_rows(
+  #           tibble(
+  #             Condition = l,
+  #             category = m,
+  #             N = .staninput$staninput$untransformed$N_exposure[m, l],
+  #             center = list(.staninput$staninput$untransformed$x_mean_exposure[m, l,]),
+  #             uss_matrix = list(.staninput$staninput$untransformed$x_ss_exposure[m, l, , ]),
+  #             css_matrix = pmap(list(uss_matrix, N, center), ~ uss2css(..1, n = ..2, mean = ..3)),
+  #             cov_matrix = map2(css_matrix, N, ~ css2cov(.x, .y))) %>%
+  #             mutate(ellipse = map2(cov_matrix, center, ~ ellipse(x = .x, centre = .y))) %>%
+  #             # # This step is necessary since unnest() can't yet unnest lists of matrices
+  #             # # (bug was reported and added as milestone, 11/2019)
+  #             mutate(ellipse = map(ellipse, ~ as_tibble(.x, .name_repair = "unique"))) %>%
+  #             unnest(ellipse))
+  #     }
+  #   }
+  #
+  #   # Plot the data and the ellipse
+  #   p <-
+  #     df.transformed %>%
+  #     mutate(across(c(Condition, category), factor)) %>%
+  #     ggplot(aes(x = x, y = y)) +
+  #     geom_path(aes(x = x, y = y, color = category)) +
+  #     facet_wrap(~ Condition) +
+  #     theme_bw() +
+  #     ggtitle("Exposure statistics in staninput (transformed)")
+  #   plot(p)
+  #
+  #   p <-
+  #     df.untransformed %<>%
+  #     mutate(across(c(Condition, category), factor)) %>%
+  #     ggplot(aes(x = x, y = y)) +
+  #     geom_path(aes(x = x, y = y, color = category)) +
+  #     facet_wrap(~ Condition) +
+  #     theme_bw() +
+  #     ggtitle("Exposure statistics in staninput (untransformed)")
+  #   plot(p)
+  # }
 
   return(.staninput)
 }
@@ -367,6 +366,8 @@ get_example_stanfit <- function(
     file_refit = "on_change",
     stanmodel = "NIW_ideal_adaptor",
     transform_type = "PCA whiten",
+    lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
+    filename = NULL,
     ...
 ) {
   .staninput <-
@@ -374,9 +375,11 @@ get_example_stanfit <- function(
       example = example,
       stanmodel = stanmodel,
       transform_type = transform_type,
+      lapse_rate = lapse_rate, mu_0 = mu_0, Sigma_0 = Sigma_0,
       seed = seed)
 
-  filename <-
+  if (is.null(filename))
+    filename <-
     paste0(
       "../example-stanfit-",
       paste(

@@ -244,7 +244,7 @@ contains_draws.stanfit <- function(x) {
 
 #' @rdname contains_draws
 #' @export
-contains_samples.ideal_adaptor_stanfit <- function(x) {
+contains_draws.ideal_adaptor_stanfit <- function(x) {
   stanfit <- get_stanfit(x)
   return(contains_draws(stanfit))
 }

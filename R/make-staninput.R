@@ -367,7 +367,7 @@ to_array <- function(x, inner_dims = if (is.null(x)) 1 else NULL, outer_dims = N
 #' @keywords TBD
 #'
 #' @importFrom purrr map_lgl map_int
-#' @importFrom reshape2 acast
+#' @importFrom rstan nlist
 #' @rdname make_staninput
 #' @export
 make_staninput <- function(
@@ -375,7 +375,7 @@ make_staninput <- function(
     cues, category = "category", response = "response",
     group = "group", group.unique = NULL,
     lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
-    tau_scale = rep(5, length(cues)),
+    tau_scale = rep(5, length(cues)), L_omega_eta = 1, split_loglik_per_observation = 0,
     # THIS IS KEPT HERE JUST FOR NOW UNTIL I HAVE DETERMINED WHICH TRANSFORM IS BEST SUITED FOR FITTING.
     # (also remove the documentation for this once it's no longer needed AND remove transform_information
     # from the returned information AND change the documentation for the returned object above.)
@@ -448,6 +448,10 @@ make_staninput <- function(
       verbose = verbose) %>%
     select(c(!! group, !!! cues, !! response))
 
+
+  # -----------------------------------------------------------------
+  # Check whether exposure and test data are aligned in terms of factor levels
+  # -----------------------------------------------------------------
   assert_that(all(levels(exposure[[category]]) == levels(test[[response]])),
               msg = paste("category variable", category, "in exposure data and response variable", response, "in test data must be factors with the same levels in the same order. Either the levels do not match, or they are not in the same order."))
   assert_that(all(levels(exposure[[group]]) %in% levels(test[[group]])),
@@ -455,7 +459,7 @@ make_staninput <- function(
   if (verbose && !all(levels(test[[group]]) %in% levels(exposure[[group]])))
     message(paste("Not all levels of the grouping variable", group, "that are present in test were found in exposure.
     This is expected if and only if the data contained a test prior to (or without any) exposure.
-    Creating 0 exposure data for these groups."))
+    Creating 0 exposure data for these groups and aligning factor levels for group across exposure and test data."))
   exposure %<>%
     mutate(across(all_of(group), ~ factor(.x, levels = levels(test[[!! group]]))))
 
@@ -494,13 +498,27 @@ make_staninput <- function(
                   paste(paste(map(Sigma_0, ~ dim(.x) %>% paste(collapse = " x "))) %>% unique(), collapse = ", ")))
   }
 
+  # -----------------------------------------------------------------
   # Transform data and category representations (if provided)
-  transform <- get_affine_transform(exposure, cues, transform_type)
-  exposure_transformed <- transform[["transform.function"]](exposure)
-  test_transformed <- transform[["transform.function"]](test)
-  if (!is.null(mu_0)) mu_0_transformed <- map(mu_0, ~ transform_category_mean(m = .x, transform)) else mu_0_transformed <- mu_0
-  if (!is.null(Sigma_0)) Sigma_0_transformed <- map(Sigma_0, ~ transform_category_cov(S = .x, transform)) else Sigma_0_transformed <- Sigma_0
+  # (for now, store original untransformed data and parameters so that they can also be attached to the stanfit object)
+  # -----------------------------------------------------------------
+  exposure_untransformed <- exposure
+  test_untransformed <- test
+  mu_0_untransformed <- mu_0
+  Sigma_0_untransformed <- Sigma_0
+  test_counts_untransformed <-
+    get_test_counts(
+      test = test,
+      cues = cues,
+      response = response,
+      group = group,
+      verbose = verbose)
 
+  transform <- get_affine_transform(exposure, cues, transform_type)
+  exposure <- transform[["transform.function"]](exposure)
+  test <- transform[["transform.function"]](test)
+  if (!is.null(mu_0)) mu_0 %<>% map(~ transform_category_mean(m = .x, transform)) else mu_0_transformed <- mu_0
+  if (!is.null(Sigma_0)) Sigma_0 %<>% map(~ transform_category_cov(S = .x, transform)) else Sigma_0_transformed <- Sigma_0
   test_counts <-
     get_test_counts(
       test = test,
@@ -509,56 +527,94 @@ make_staninput <- function(
       group = group,
       verbose = verbose)
 
-  test_counts_transformed <-
-    get_test_counts(
-      test = test_transformed,
-      cues = cues,
-      response = response,
-      group = group,
-      verbose = verbose)
+  # -----------------------------------------------------------------
+  # Prepare nlist for Stan input
+  # -----------------------------------------------------------------
+  # Only for the NIX model: simplify some parameters to scalars
+  K <- length(cues)
+  M <- nlevels(exposure[[category]])
+  L <- nlevels(exposure[[group]])
 
+  staninput <-
+    nlist(
+      K, M, L,
+
+      tau_scale = tau_scale %>% to_array(inner_dims = K),
+      L_omega_eta,
+      split_loglik_per_observation,
+
+      lapse_rate_known = if (is.null(lapse_rate)) 0 else 1,
+      lapse_rate_data = lapse_rate %>% to_array(),
+
+      p_cat = rep(1/M, M), # Currently only used by MNIX
+
+      mu_0_known = if (is.null(mu_0_transformed)) 0 else 1,
+      Sigma_0_known = if (is.null(Sigma_0_transformed)) 0 else 1,
+      mu_0_data = mu_0 %>% to_array(inner_dims = K, outer_dims = M, simplify = if (stanmodel == "NIX_ideal_adaptor") T else F),
+      Sigma_0_data = Sigma_0 %>% to_array(inner_dims = c(K, K), outer_dims = M, simplify = if (stanmodel == "NIX_ideal_adaptor") T else F),
+
+      shift = transform$transform.parameters[["shift"]] %>% to_array(inner_dims = K, simplify = if (stanmodel == "NIX_ideal_adaptor") T else F),
+      INV_SCALE = transform$transform.parameters[["INV_SCALE"]] %>% to_array(inner_dims = c(K, K), simplify = if (stanmodel == "NIX_ideal_adaptor") T else F)
+    )
+
+  staninput_untransformed <- staninput
+  staninput_untransformed[["mu_0_data"]] <- mu_0_untransformed %>% to_array(inner_dims = K, outer_dims = M, simplify = if (stanmodel == "NIX_ideal_adaptor") T else F)
+  staninput_untransformed[["Sigma_0_data"]] <- Sigma_0_untransformed %>% to_array(inner_dims = K, outer_dims = M, simplify = if (stanmodel == "NIX_ideal_adaptor") T else F)
+
+  # -----------------------------------------------------------------
+  # Add the more model-specific parts of the staninput
+  # (could be further consolidated later)
+  # -----------------------------------------------------------------
   if (stanmodel == "NIX_ideal_adaptor") {
-    staninput <-
-      make_staninput_for_NIX_ideal_adaptor(
-        exposure = exposure, test = test, test_counts = test_counts,
-        exposure_transformed = exposure_transformed, test_counts_transformed = test_counts_transformed,
-        cues = cues, category = category, response = response, group = group,
-        transform = transform,
-        lapse_rate = lapse_rate,
-        mu_0 = mu_0, Sigma_0 = Sigma_0,
-        mu_0_transformed = mu_0_transformed, Sigma_0_transformed = Sigma_0_transformed,
-        tau_scale = tau_scale,
-        verbose = verbose,
-        ...)
+    staninput %<>%
+      append(
+        make_staninput_for_NIX_ideal_adaptor(
+          exposure = exposure, test_counts = test_counts,
+          cues = cues, category = category, group = group,
+          verbose = verbose))
+
+    staninput_untransformed %<>%
+      append(
+        make_staninput_for_NIX_ideal_adaptor(
+          exposure = exposure_untransformed, test_counts = test_counts_untransformed,
+          cues = cues, category = category, group = group,
+          verbose = verbose))
   } else if (stanmodel == "NIW_ideal_adaptor") {
-    staninput <-
-      make_staninput_for_NIW_ideal_adaptor(
-        exposure = exposure, test = test, test_counts = test_counts,
-        exposure_transformed = exposure_transformed, test_counts_transformed = test_counts_transformed,
-        cues = cues, category = category, response = response, group = group,
-        transform = transform,
-        lapse_rate = lapse_rate,
-        mu_0 = mu_0, Sigma_0 = Sigma_0,
-        mu_0_transformed = mu_0_transformed, Sigma_0_transformed = Sigma_0_transformed,
-        tau_scale = tau_scale,
-        verbose = verbose,
-        ...)
+    staninput %<>%
+      append(
+        make_staninput_for_NIW_ideal_adaptor(
+          exposure = exposure, test_counts = test_counts,
+          cues = cues, category = category, group = group,
+          verbose = verbose))
+
+    staninput_untransformed %<>%
+      append(
+        make_staninput_for_NIW_ideal_adaptor(
+          exposure = exposure_untransformed, test_counts = test_counts_untransformed,
+          cues = cues, category = category, group = group,
+          verbose = verbose))
   } else if (stanmodel == "MNIX_ideal_adaptor") {
-    staninput <-
-      make_staninput_for_MNIX_ideal_adaptor(
-        exposure = exposure, test = test, test_counts = test_counts,
-        exposure_transformed = exposure_transformed, test_counts_transformed = test_counts_transformed,
-        cues = cues, category = category, response = response, group = group,
-        transform = transform,
-        lapse_rate = lapse_rate,
-        mu_0 = mu_0, Sigma_0 = Sigma_0,
-        mu_0_transformed = mu_0_transformed, Sigma_0_transformed = Sigma_0_transformed,
-        tau_scale = tau_scale,
-        verbose = verbose,
-        ...)
+    staninput %<>%
+      append(
+        make_staninput_for_MNIX_ideal_adaptor(
+          exposure = exposure, test_counts = test_counts,
+          cues = cues, category = category, group = group,
+          verbose = verbose))
+
+    staninput_untransformed %<>%
+      append(
+        make_staninput_for_MNIX_ideal_adaptor(
+          exposure = exposure_untransformed, test_counts = test_counts_untransformed,
+          cues = cues, category = category, group = group,
+          verbose = verbose))
   } else {
     stop2("Model type ", stanmodel, " not recognized.")
   }
+  # (For now): combine transformed and untransformed versions of staninput
+  staninput <-
+    list(
+      transformed = staninput,
+      untransformed = staninput_untransformed)
 
   # Bind exposure and test data as processed, as long with factor level information used above.
   data <-
@@ -584,43 +640,17 @@ make_staninput <- function(
 }
 
 make_staninput_for_NIX_ideal_adaptor <- function(
-    exposure, test, test_counts,
-    exposure_transformed, test_counts_transformed,
-    cues, category, response, group,
-    transform,
-    lapse_rate,
-    mu_0, Sigma_0,
-    mu_0_transformed, Sigma_0_transformed,
-    tau_scale,
+    exposure, test_counts,
+    cues, category, group,
     verbose = F
 ) {
-  n.cats <- nlevels(exposure[[category]])
-  n.cues <- length(cues)
-
-  lapse_rate_known <- if (is.null(lapse_rate)) 0 else 1
-  mu_0_known <- if (is.null(mu_0_transformed)) 0 else 1
-  Sigma_0_known <- if (is.null(Sigma_0_transformed)) 0 else 1
-
-  lapse_rate %<>% to_array()
-  tau_scale %<>% to_array(inner_dims = n.cues)
-
-  mu_0 %<>% to_array(inner_dims = n.cues, outer_dims = n.cats)
-  mu_0_transformed %<>% to_array(inner_dims = n.cues, outer_dims = n.cats)
-  Sigma_0 %<>% to_array(inner_dims = c(n.cues, n.cues), outer_dims = n.cats)
-  Sigma_0_transformed %<>% to_array(inner_dims = c(n.cues, n.cues), outer_dims = n.cats)
-
-  shift <- transform$transform.parameters[["shift"]] %>% to_array(inner_dims = n.cues)
-  INV_SCALE <- transform$transform.parameters[["INV_SCALE"]] %>% to_array(inner_dims = c(n.cues, n.cues))
-
   staninput <-
     exposure %>%
     get_category_statistics_as_list_of_arrays(
       cues = cues, category = category, group = group,
+      simplify = list(T, T, T),
       N_exposure = length, x_mean_exposure = mean, x_sd_exposure = sd) %>%
     within({
-      M <- dim(x_mean_exposure)[1]
-      L <- dim(x_mean_exposure)[2]
-
       # x_test is different from definition in make_staninput_for_NIW_ideal_adaptor (since vector, rather than matrix, is expected)
       # could be changed if stan program instead is changed to accept matrix and then turn it into vector.
       x_test <-
@@ -629,70 +659,28 @@ make_staninput_for_NIX_ideal_adaptor <- function(
       y_test <-
         test_counts[[group]] %>%
         as.numeric() %T>%
-        { attr(., which = "levels") <- levels(test[[group]]) }
+        # This should work since we check above that exposure and test have the same levels for group
+        { attr(., which = "levels") <- levels(exposure[[group]]) }
       z_test_counts <-
         test_counts %>%
-        select(.dots = levels(test[[response]])) %>%
+        # This should work since we check above that exposure categories and test responses have the same levels
+        select(.dots = levels(exposure[[category]])) %>%
         as.matrix()
       N_test <- length(x_test)
-
-      # NOT YET USED
-      lapse_rate_known <- lapse_rate_known
-      lapse_rate_data <- lapse_rate
-      mu_0_known <- mu_0_known
-      mu_0_data <- mu_0_transformed
-      Sigma_0_known <- Sigma_0_known
-      Sigma_0_data <- Sigma_0_transformed
-
-      tau_scale <- tau_scale
     })
 
-  staninput_transformed <- staninput
-  return(
-    list(
-      transformed = staninput_transformed,
-      untransformed = staninput))
+  return(staninput)
 }
 
 make_staninput_for_NIW_ideal_adaptor <- function(
-    exposure, test, test_counts,
-    exposure_transformed, test_counts_transformed,
-    cues, category, response, group,
-    transform,
-    lapse_rate,
-    mu_0, Sigma_0,
-    mu_0_transformed, Sigma_0_transformed,
-    tau_scale,
-    # arguments beyond make_staninput_for_NIX_ideal_adaptor (except for verbose):
-    L_omega_eta = 1,
-    split_loglik_per_observation = 0,
+    exposure, test_counts,
+    cues, category, group,
     verbose = F
 ) {
   # It might be possible to collapse the different make_staninput functions even further since they seem to only differ in
-  # a) the agregate functions, b) that the multivariate models need simplify = F in a few places where to_array() is used.
-  ## BELOW: SAME AS FOR make_staninput_for_NIX()
-  n.cats <- nlevels(exposure[[category]])
-  n.cues <- length(cues)
-
-  lapse_rate_known <- if (is.null(lapse_rate)) 0 else 1
-  mu_0_known <- if (is.null(mu_0_transformed)) 0 else 1
-  Sigma_0_known <- if (is.null(Sigma_0_transformed)) 0 else 1
-
-  lapse_rate %<>% to_array()
-  tau_scale %<>% to_array(inner_dims = n.cues)
-  ## ABOVE: SAME AS FOR make_staninput_for_NIX()
-
-  # Next six lines are different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix)
-  mu_0 %<>% to_array(inner_dims = n.cues, outer_dims = n.cats, simplify = F)
-  mu_0_transformed %<>% to_array(inner_dims = n.cues, outer_dims = n.cats, simplify = F)
-  Sigma_0 %<>% to_array(inner_dims = c(n.cues, n.cues), outer_dims = n.cats, simplify = F)
-  Sigma_0_transformed %<>% to_array(inner_dims = c(n.cues, n.cues), outer_dims = n.cats, simplify = F)
-
-  shift <- transform$transform.parameters[["shift"]] %>% to_array(inner_dims = n.cues, simplify = F)
-  INV_SCALE <- transform$transform.parameters[["INV_SCALE"]] %>% to_array(inner_dims = c(n.cues, n.cues), simplify = F)
-
-  # First get untransform input (to be stored in fit since it's helpful for plotting), and then get
-  # transformed input below.
+  # a) the agregate functions, b) that the multivariate models need simplify = F in a few places where to_array() is used,
+  # and c) some specifics of how the test data is entered (again the multivariate and univariate models differ in the
+  # dimensionality of the input they expect)
   staninput <-
     exposure %>%
     get_category_statistics_as_list_of_arrays(
@@ -700,7 +688,7 @@ make_staninput_for_NIW_ideal_adaptor <- function(
       # Different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix):
       simplify = list(T, F, F),
       verbose = verbose,
-      N_exposure = length, x_mean_exposure = colMeans, x_ss_exposure = get_sum_of_uncentered_squares_from_df) %>%
+      N_exposure = nrow, x_mean_exposure = colMeans, x_ss_exposure = get_sum_of_uncentered_squares_from_df) %>%
     within({
       x_test <-
         test_counts %>%
@@ -709,109 +697,24 @@ make_staninput_for_NIW_ideal_adaptor <- function(
       y_test <-
         test_counts[[group]] %>%
         as.numeric() %T>%
-        { attr(., which = "levels") <- levels(test[[group]]) }
+        { attr(., which = "levels") <- levels(exposure[[group]]) }
       z_test_counts <-
         test_counts %>%
         mutate(rownames = paste0("group=", !! sym(group), "; ", paste(cues, collapse = "-"), "=", paste(!!! syms(cues), sep = ","))) %>%
         column_to_rownames("rownames") %>%
-        select(levels(test[[response]])) %>%
+        select(levels(exposure[[category]])) %>%
         as.matrix()
       N_test <- nrow(x_test)
-
-      lapse_rate_known <- lapse_rate_known
-      lapse_rate_data <- lapse_rate
-      mu_0_known <- mu_0_known
-      mu_0_data <- mu_0
-      Sigma_0_known <- Sigma_0_known
-      Sigma_0_data <- Sigma_0
     })
 
-  staninput_transformed <-
-    exposure_transformed %>%
-    get_category_statistics_as_list_of_arrays(
-      cues = cues, category = category, group = group,
-      # Different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix):
-      simplify = list(T, F, F),
-      verbose = verbose,
-      N_exposure = length, x_mean_exposure = colMeans, x_ss_exposure = get_sum_of_uncentered_squares_from_df) %>%
-    within({
-      M <- dim(x_mean_exposure)[1]
-      L <- dim(x_mean_exposure)[2]
-      K <- length(cues)
-
-      x_test <-
-        test_counts_transformed %>%
-        select(all_of(cues)) %>%
-        as.matrix()
-      y_test <-
-        test_counts_transformed[[group]] %>%
-        as.numeric() %T>%
-        { attr(., which = "levels") <- levels(test[[group]]) }
-      z_test_counts <-
-        test_counts_transformed %>%
-        mutate(rownames = paste0("group=", !! sym(group), "; ", paste(cues, collapse = "-"), "=", paste(!!! syms(cues), sep = ","))) %>%
-        column_to_rownames("rownames") %>%
-        select(levels(test[[response]])) %>%
-        as.matrix()
-      N_test <- nrow(x_test)
-
-      lapse_rate_known <- lapse_rate_known
-      lapse_rate_data <- lapse_rate
-      mu_0_known <- mu_0_known
-      mu_0_data <- mu_0_transformed
-      Sigma_0_known <- Sigma_0_known
-      Sigma_0_data <- Sigma_0_transformed
-
-      tau_scale <- tau_scale
-      L_omega_eta <- L_omega_eta
-
-      shift <- shift
-      INV_SCALE <- INV_SCALE
-
-      split_loglik_per_observation <- split_loglik_per_observation
-    })
-
-  return(
-    list(
-        transformed = staninput_transformed,
-        untransformed = staninput))
+  return(staninput)
 }
 
 make_staninput_for_MNIX_ideal_adaptor <- function(
-    exposure, test, test_counts,
-    exposure_transformed, test_counts_transformed,
-    cues, category, response, group,
-    transform,
-    lapse_rate,
-    mu_0, Sigma_0,
-    mu_0_transformed, Sigma_0_transformed,
-    tau_scale,
-    split_loglik_per_observation = 0,
+    exposure, test_counts,
+    cues, category, group,
     verbose = F
 ) {
-  # It might be possible to collapse the different make_staninput functions even further since they seem to only differ in
-  # a) the agregate functions, b) that the multivariate models need simplify = F in a few places where to_array() is used.
-  ## BELOW: SAME AS FOR make_staninput_for_NIX()
-  n.cats <- nlevels(exposure[[category]])
-  n.cues <- length(cues)
-
-  lapse_rate_known <- if (is.null(lapse_rate)) 0 else 1
-  mu_0_known <- if (is.null(mu_0_transformed)) 0 else 1
-  Sigma_0_known <- if (is.null(Sigma_0_transformed)) 0 else 1
-
-  lapse_rate %<>% to_array()
-  tau_scale %<>% to_array(inner_dims = n.cues)
-  ## ABOVE: SAME AS FOR make_staninput_for_NIX()
-
-  # Next six lines are different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix)
-  mu_0 %<>% to_array(inner_dims = n.cues, outer_dims = n.cats, simplify = F)
-  mu_0_transformed %<>% to_array(inner_dims = n.cues, outer_dims = n.cats, simplify = F)
-  Sigma_0 %<>% to_array(inner_dims = c(n.cues, n.cues), outer_dims = n.cats, simplify = F)
-  Sigma_0_transformed %<>% to_array(inner_dims = c(n.cues, n.cues), outer_dims = n.cats, simplify = F)
-
-  shift <- transform$transform.parameters[["shift"]] %>% to_array(inner_dims = n.cues, simplify = F)
-  INV_SCALE <- transform$transform.parameters[["INV_SCALE"]] %>% to_array(inner_dims = c(n.cues, n.cues), simplify = F)
-
   staninput <-
     get_category_statistics_as_list_of_arrays(
       data = exposure,
@@ -819,12 +722,8 @@ make_staninput_for_MNIX_ideal_adaptor <- function(
       # Different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix):
       simplify = list(T, F, F),
       verbose = verbose,
-      N_exposure = length, x_mean_exposure = colMeans, x_cov_exposure = cov) %>%
+      N_exposure = nrow, x_mean_exposure = colMeans, x_cov_exposure = cov) %>%
     within({
-      M <- dim(x_mean_exposure)[1]
-      L <- dim(x_mean_exposure)[2]
-      K <- length(cues)
-
       x_test <-
         test_counts %>%
         select(all_of(cues)) %>%
@@ -832,38 +731,17 @@ make_staninput_for_MNIX_ideal_adaptor <- function(
       y_test <-
         test_counts[[group]] %>%
         as.numeric() %T>%
-        { attr(., which = "levels") <- levels(test[[group]]) }
+        { attr(., which = "levels") <- levels(exposure[[group]]) }
       z_test_counts <-
         test_counts %>%
         mutate(rownames = paste0("group=", !! sym(group), "; ", paste(cues, collapse = "-"), "=", paste(!!! syms(cues), sep = ","))) %>%
         column_to_rownames("rownames") %>%
-        select(levels(test[[response]])) %>%
+        select(levels(exposure[[category]])) %>%
         as.matrix()
       N_test <- nrow(x_test)
-
-      lapse_rate_known <- lapse_rate_known
-      lapse_rate_data <- lapse_rate
-      mu_0_known <- mu_0_known
-      mu_0_data <- mu_0
-      Sigma_0_known <- Sigma_0_known
-      Sigma_0_data <- Sigma_0
-
-      # Different from all other functions so far (but that might change if the priors are added to those function, too)
-      p_cat <- rep(1/n.cats, n.cats)
-
-      tau_scale <- tau_scale
-
-      shift <- shift
-      INV_SCALE <- INV_SCALE
-
-      split_loglik_per_observation <- split_loglik_per_observation
     })
 
-  staninput_transformed <- staninput
-  return(
-    list(
-      transformed = staninput_transformed,
-      untransformed = staninput))
+  return(staninput)
 }
 
 

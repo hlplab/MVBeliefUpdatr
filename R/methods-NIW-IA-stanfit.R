@@ -49,7 +49,7 @@ loo.ideal_adaptor_stanfit <- function(
 #' @export
 summary.ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE, include_transformed_pars = F, ...) {
   stanfit <- get_stanfit(x)
-  assert_contains_draws(x)
+  assert_contains_draws(stanfit)
   if (is.null(pars)) {
     pars <- names(stanfit)
     pars <- grep("^((kappa|nu|m|S)_|lapse_rate)", pars, value = T)

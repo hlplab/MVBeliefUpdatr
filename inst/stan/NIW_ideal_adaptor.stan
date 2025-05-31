@@ -128,7 +128,7 @@ transformed parameters {
       t_scale[cat,group] =
         S_n[cat,group] * (kappa_n[cat,group] + 1) /
         (kappa_n[cat,group] * (nu_n[cat,group] - K + 1));
-      print(t_scale);
+      // print(t_scale);
     }
   }
 
@@ -233,7 +233,12 @@ generated quantities {
   array[M,L] vector[K] m_n_original;
   array[M,L] cov_matrix[K] S_n_original;
   for (cat in 1:M) {
+    /* The validity of back-transforming a NIW by back-transforming its m and S parameters (kappa and nu
+       remain unchanged) was confirmed via ChatGPT (https://chatgpt.com/c/683b3ed6-4924-800c-8f22-e61680f3360f)
+    */
+    // Since we define the affine transform as f(x) = SCALE(x + shift), rather than f(x) = SCALE * x + shift:
     m_0_original[cat] = INV_SCALE * m_0[cat] - shift;
+    // Since the inverse-Wishart distribution is affine-invariant under congruence transformations:
     S_0_original[cat] = INV_SCALE * S_0[cat] * INV_SCALE';
     for (group in 1:L) {
       m_n_original[cat,group] = INV_SCALE * m_n[cat,group] - shift;
