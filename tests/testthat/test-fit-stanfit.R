@@ -1,9 +1,10 @@
 source("../functions-to-make-or-load-models.R")
 
-.silent = 0
-.verbose = F
-.warmup = 200
-.iter = 400
+.silent <- 0
+.verbose <- F
+.warmup <- 200
+.iter <- 400
+.file_refit <- "always"
 
 context("to_array")
 
@@ -313,57 +314,77 @@ context("fit_ideal_adaptor (unknown parameters)")
 
 test_that("NIX - test fitting (one cue)", {
   expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "identity",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
   expect_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "center",
-                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose))
+                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                          file_refit = .file_refit))
   expect_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "standardize",
-                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose))
+                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                          file_refit = .file_refit))
   expect_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "PCA whiten",
-                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose))
+                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                          file_refit = .file_refit))
   expect_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "ZCA whiten",
-                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose))
+                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                          file_refit = .file_refit))
 })
 
 test_that("NIW - test fitting (one cue)", {
   expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "identity",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
   expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "center",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
   expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
   expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "PCA whiten",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
   expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "ZCA whiten",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
 })
 
 test_that("NIX - test fitting (two+ cues)", {
   expect_error(fit <- get_example_stanfit(2, stanmodel = "NIX_ideal_adaptor", transform_type = "identity",
-                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose))
+                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                          file_refit = .file_refit))
   expect_error(fit <- get_example_stanfit(3, stanmodel = "NIX_ideal_adaptor", transform_type = "identity",
-                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose))
+                                          warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                          file_refit = .file_refit))
 })
 
 test_that("NIW - test fitting (two+ cues)", {
   expect_warning(expect_no_error(fit <- get_example_stanfit(2, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
   expect_warning(expect_no_error(fit <- get_example_stanfit(2, stanmodel = "NIW_ideal_adaptor", transform_type = "PCA whiten",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
   expect_warning(expect_no_error(fit <- get_example_stanfit(3, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
   expect_warning(expect_no_error(fit <- get_example_stanfit(3, stanmodel = "NIW_ideal_adaptor", transform_type = "PCA whiten",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
 })
 
 test_that("MNIX - test fitting (two+ cues)", {
   expect_warning(expect_no_error(fit <- get_example_stanfit(2, stanmodel = "MNIX_ideal_adaptor", transform_type = "standardize",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
   expect_warning(expect_no_error(fit <- get_example_stanfit(2, stanmodel = "MNIX_ideal_adaptor", transform_type = "PCA whiten",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
   expect_warning(expect_no_error(fit <- get_example_stanfit(3, stanmodel = "MNIX_ideal_adaptor", transform_type = "standardize",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
   expect_warning(expect_no_error(fit <- get_example_stanfit(3, stanmodel = "MNIX_ideal_adaptor", transform_type = "PCA whiten",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
 })
 
 
@@ -377,26 +398,30 @@ test_that("NIX - test fitting (one cue)", {
   expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIX_ideal_adaptor", transform_type = "identity",
                                                             lapse_rate = unique(m_prior$lapse_rate),
                                                             file_refit = "always", filename = "temp",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
 })
 
 test_that("NIW - test fitting (one cue)", {
   expect_warning(expect_no_error(fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize",
                                                             lapse_rate = unique(m_prior$lapse_rate),
                                                             file_refit = "always", filename = "temp",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
 })
 
 test_that("NIW - test fitting (two cues)", {
   expect_warning(expect_no_error(fit <- get_example_stanfit(2, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize",
                                                             lapse_rate = unique(m_prior$lapse_rate),
                                                             file_refit = "always", filename = "temp",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
 })
 
 test_that("MNIX - test fitting  (two cues)", {
   expect_warning(expect_no_error(fit <- get_example_stanfit(2, stanmodel = "MNIX_ideal_adaptor", transform_type = "standardize",
                                                             lapse_rate = unique(m_prior$lapse_rate),
                                                             file_refit = "always", filename = "temp",
-                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose)))
+                                                            warmup = .warmup, iter = .iter, silent = .silent, verbose = .verbose,
+                                                            file_refit = .file_refit)))
 })

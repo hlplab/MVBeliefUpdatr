@@ -302,16 +302,16 @@ stanfit_needs_refit <- function(
     if (!silent) {
       message("The model ", deparse1(substitute(x)), " was fit with an old version of MVBeliefUpdater (< 0.0.1.0015).")
     }
-    refit <- TRUE
+    return(TRUE)
   }
-  if (!all.equal(x$version, current_version)) {
+  if (!isTRUE(all.equal(x$version, current_version))) {
     if (!silent) {
-      message("Version of MVBeliefUpdatr or rstan has changed (current version is", paste(current_version, collapse = ", "), ").")
+      message("Version of MVBeliefUpdatr or rstan has changed (current version is", paste(map_chr(current_version, ~ paste(.x, collapse = ", ")), collapse = "; "), ").")
       if (verbose) {
         print(x$version)
       }
     }
-    refit <- TRUE
+    return(TRUE)
   }
 
 
@@ -385,7 +385,7 @@ stanfit_needs_refit <- function(
   }
 
   if (!silent && refit) message("Model needs to be refit.")
-  refit
+  return(refit)
 }
 
 # modified from brms

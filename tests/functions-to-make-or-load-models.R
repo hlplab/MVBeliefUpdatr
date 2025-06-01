@@ -3,7 +3,7 @@ n_subject <- 30
 n_exposure_trial <- 50
 n_test_trial <- 15
 
-make_data_for_stanfit <- function(example = 1, seed = NULL) {
+make_data_for_stanfit <- function(example = 1, seed = NULL, verbose = F) {
   require(tidyverse)
   require(magrittr)
   require(MVBeliefUpdatr)
@@ -11,17 +11,17 @@ make_data_for_stanfit <- function(example = 1, seed = NULL) {
   if (!is.null(seed)) set.seed(seed)
 
   if (example == 1) {
-    return(make_data_for_1Dstanfit_with_exposure())
+    return(make_data_for_1Dstanfit_with_exposure(verbose = verbose))
   } else if (example == 2) {
-    return(make_data_for_2Dstanfit_with_exposure())
+    return(make_data_for_2Dstanfit_with_exposure(verbose = verbose))
   } else if (example == 3) {
-    return(make_data_for_3Dstanfit_with_exposure())
+    return(make_data_for_3Dstanfit_with_exposure(verbose = verbose))
   } else if (example == 4) {
-    return(make_data_for_1Dstanfit_without_exposure())
+    return(make_data_for_1Dstanfit_without_exposure(verbose = verbose))
   } else if (example == 5) {
-    return(make_data_for_2Dstanfit_without_exposure())
+    return(make_data_for_2Dstanfit_without_exposure(verbose = verbose))
   } else if (example == 6) {
-    return(make_data_for_3Dstanfit_without_exposure())
+    return(make_data_for_3Dstanfit_without_exposure(verbose = verbose))
   }
 }
 
@@ -71,12 +71,12 @@ get_test_responses_after_updating_based_on_exposure <- function(.io, .exposure, 
   return(.data)
 }
 
-make_data_for_1Dstanfit_with_exposure <- function() {
+make_data_for_1Dstanfit_with_exposure <- function(verbose = F) {
   .cues <- c("VOT")
 
   # Make 5 ideal observers to sample EXPOSURE from
   .io <-
-    example_MVG_ideal_observer(1) %>%
+    example_MVG_ideal_observer(1, verbose = verbose) %>%
     mutate(Sigma = map(Sigma, ~ .x))
   .exposure <-
     .io %>%
@@ -119,7 +119,7 @@ make_data_for_1Dstanfit_with_exposure <- function() {
 }
 
 
-make_data_for_2Dstanfit_with_exposure <- function(plot = F) {
+make_data_for_2Dstanfit_with_exposure <- function(verbose = F, plot = F) {
   .cues <- c("VOT", "f0_semitones")
 
   # Make 5 ideal observers to sample EXPOSURE from
@@ -196,7 +196,7 @@ make_data_for_2Dstanfit_with_exposure <- function(plot = F) {
   return(.data)
 }
 
-make_data_for_3Dstanfit_with_exposure <- function() {
+make_data_for_3Dstanfit_with_exposure <- function(verbose = F) {
   .cues <- c("VOT", "f0_semitones", "vowel_duration")
 
   # Make 5 ideal observers to sample EXPOSURE from
@@ -245,19 +245,19 @@ make_data_for_3Dstanfit_with_exposure <- function() {
   return(.data)
 }
 
-make_data_for_1Dstanfit_without_exposure <- function() {
+make_data_for_1Dstanfit_without_exposure <- function(verbose = F) {
   make_data_for_1Dstanfit_with_exposure() %>%
     ungroup() %>%
     filter(Condition != "baseline" | Phase == "test")
 }
 
-make_data_for_2Dstanfit_without_exposure <- function() {
+make_data_for_2Dstanfit_without_exposure <- function(verbose = F) {
   make_data_for_2Dstanfit_with_exposure() %>%
     ungroup() %>%
     filter(Condition != "baseline" | Phase == "test")
 }
 
-make_data_for_3Dstanfit_without_exposure <- function() {
+make_data_for_3Dstanfit_without_exposure <- function(verbose = F) {
   make_data_for_3Dstanfit_with_exposure() %>%
     ungroup() %>%
     filter(Condition != "baseline" | Phase == "test")
@@ -269,9 +269,9 @@ get_example_staninput <- function(
     stanmodel = "NIW_ideal_adaptor",
     transform_type = "PCA whiten",
     lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
-    seed = 42
+    seed = 42, verbose = F
 ) {
-  .data <- make_data_for_stanfit(example, seed = seed)
+  .data <- make_data_for_stanfit(example, seed = seed, verbose = verbose)
   .staninput <-
     make_staninput(
       exposure = .data %>% filter(Phase == "exposure"),
@@ -289,7 +289,8 @@ get_example_staninput <- function(
       group.unique = "Condition",
       stanmodel = stanmodel,
       transform_type = transform_type,
-      lapse_rate = lapse_rate, mu_0 = mu_0, Sigma_0 = Sigma_0)
+      lapse_rate = lapse_rate, mu_0 = mu_0, Sigma_0 = Sigma_0,
+      verbose = verbose)
 
   # # For debugging:
   # if (example %in% c(2, 5)) {
@@ -362,7 +363,7 @@ get_example_staninput <- function(
 
 get_example_stanfit <- function(
     example = 1,
-    silent = 2, refresh = 0, seed = 42,
+    silent = 2, refresh = 0, seed = 42, verbose = F,
     file_refit = "on_change",
     stanmodel = "NIW_ideal_adaptor",
     transform_type = "PCA whiten",
@@ -376,7 +377,7 @@ get_example_stanfit <- function(
       stanmodel = stanmodel,
       transform_type = transform_type,
       lapse_rate = lapse_rate, mu_0 = mu_0, Sigma_0 = Sigma_0,
-      seed = seed)
+      seed = seed, verbose = verbose)
 
   if (is.null(filename))
     filename <-
@@ -397,7 +398,7 @@ get_example_stanfit <- function(
       stanmodel = stanmodel,
       file = filename, file_refit = file_refit,
       refresh = refresh,
-      silent = silent,
+      silent = silent, verbose = verbose,
       cores = 4,
       ...)
 
