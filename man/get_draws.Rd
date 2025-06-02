@@ -4,7 +4,7 @@
 \alias{get_draws}
 \alias{add_draws}
 \alias{get_draws.ideal_adaptor_stanfit}
-\title{Add MCMC draws from an NIW IBBU stanfit to a tibble.}
+\title{Get MCMC draws from an ideal adaptor stanfit}
 \usage{
 get_draws(fit, ...)
 
@@ -60,7 +60,7 @@ is \code{S / (nu - D - 1)}, where \code{D} is the dimension of the multivariate 
 \insertCite{@see @murphy2012 p. 134;textual}{MVBeliefUpdatr}.
 }
 \description{
-Add MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) to a tibble. Both wide
+Get MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) as a tibble. Both wide
 (`wide=TRUE`) or long format (`wide=FALSE`) can be chosen as output. By default all post-warmup draws are
 returned, but if `summarize=TRUE` then just the mean of each parameter is returned instead.
 }

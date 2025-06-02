@@ -52,10 +52,10 @@ summary.ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE, in
   assert_contains_draws(stanfit)
   if (is.null(pars)) {
     pars <- names(stanfit)
-    pars <- grep("^((kappa|nu|m|S)_|lapse_rate)", pars, value = T)
+    pars <- grep("^((kappa|nu|m|S)_|lapse_rate|p_category)", pars, value = T)
     pars <- grep("^m_0_(tau|L_omega|cov)", pars, value = T, invert = T)
     pars <- grep("^((m|S)_0|lapse_rate)_param", pars, value = T, invert = T)
-    if (!include_transformed_pars) pars <- grep("^_transformed", pars, value = T, invert = T)
+    if (!include_transformed_pars) pars <- grep("_transformed", pars, value = T, invert = T)
   }
 
   # Sort and filter output
@@ -64,7 +64,7 @@ summary.ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE, in
     as.data.frame() %>%
     rownames_to_column("Parameter") %>%
     mutate(
-      name = factor(gsub("^(.*)_(0|n).*$", "\\1", Parameter), levels = c("kappa", "nu", "m", "S", "lapse_rate")),
+      name = factor(gsub("^(.*)_(0|n).*$", "\\1", Parameter), levels = c("kappa", "nu", "m", "S", "lapse_rate", "p_category")),
       distribution = gsub("^(.*)_(0|n).*$", "\\2", Parameter),
       distribution = factor(ifelse(distribution == Parameter, "0", distribution), levels = c("0", "n")),
       index = gsub("^.*_(0|n)\\[(.*)\\]$", "\\2", Parameter),

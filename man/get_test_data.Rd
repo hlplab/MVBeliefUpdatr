@@ -3,7 +3,7 @@
 \name{get_test_data}
 \alias{get_test_data}
 \alias{get_test_data.ideal_adaptor_stanfit}
-\title{Get the test data from an NIW ideal adaptor stanfit.}
+\title{Get the test data from an ideal adaptor stanfit.}
 \usage{
 get_test_data(fit, ...)
 

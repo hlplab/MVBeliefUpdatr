@@ -110,12 +110,12 @@ parameters {
   array[mu_0_known ? 0 : M] vector[K] m_0_param;                // prior expected means
   vector<lower=0>[mu_0_known ? 0 : K] m_0_tau;                  // prior SD of m_0
 
-  array[Sigma_0_known ? 0 : M] vector<lower=0>[K] s_0_param;    // square root of prior scale of Inverse Chisquare, s_0
+  array[Sigma_0_known ? 0 : M] vector<lower=0>[K] tau_0_param;    // square root of prior scale of Inverse Chisquare, tau_0
 }
 
 transformed parameters {
   array[M] vector[K] m_0 = mu_0_known ? mu_0_data : m_0_param;                     // prior expected means
-  array[M] vector<lower=0>[K] s_0;                                                 // square root of prior scale of Inverse Chisquare, s_0
+  array[M] vector<lower=0>[K] tau_0;                                               // square root of prior scale of Inverse Chisquare
   // simplex[use_ideal_weights ? 0 : K] cue_weights = weights_known ? cue_weights_data : cue_weights_param;
   real lapse_rate = lapse_rate_known ? lapse_rate_data[1] : lapse_rate_param[1];   // lapse rate
 
@@ -128,7 +128,7 @@ transformed parameters {
   array[M,L] real<lower=K> kappa_n;          // updated mean pseudocount
   array[M,L] real<lower=K> nu_n;             // updated sd pseudocount
   array[M,L] vector[K] m_n;                  // updated m_0
-  array[M,L] vector[K] s_n;                  // square root of updated scale of Inverse Chisquare, s_0
+  array[M,L] vector[K] tau_n;                // square root of updated scale of Inverse Chisquare
   array[M,L] vector[K] t_scale;              // scale matrix of predictive t distribution
 
   array[L] simplex[K] cue_weights;           // separate cue weights for each group (since the informativity of cues could differ between groups)
@@ -140,9 +140,9 @@ transformed parameters {
      Murphy (2007, p. 136)
   */
   for (cat in 1:M) {
-    // Get s_0 from expected Sigma given nu_0
-    // E[sigma_c^2] = nu  / (nu - 2) * s_0^2 <==> s_0^2 = E[sigma_c^2] * ((nu_0 - 2) / nu_0) <==> s_0 = E[sigma_c] * sqrt((nu_0 - 2)) / nu_0)
-    s_0[cat] = Sigma_0_known ? tau_0_data[cat] * sqrt((nu_0 - 2) / nu_0): s_0_param[cat];
+    // Get tau_0 from expected Sigma given nu_0
+    // E[sigma_c^2] = nu  / (nu - 2) * tau_0^2 <==> tau_0^2 = E[sigma_c^2] * ((nu_0 - 2) / nu_0) <==> tau_0 = E[sigma_c] * sqrt((nu_0 - 2)) / nu_0)
+    tau_0[cat] = Sigma_0_known ? tau_0_data[cat] * sqrt((nu_0 - 2) / nu_0): tau_0_param[cat];
 
     for (group in 1:L) {
       if (N_exposure[cat,group] > 0 ) {
@@ -151,9 +151,9 @@ transformed parameters {
         m_n[cat,group] =
           (kappa_0 * m_0[cat] + N_exposure[cat,group] * x_mean_exposure[cat,group]) /
           kappa_n[cat,group];
-        s_n[cat,group] =
+        tau_n[cat,group] =
           sqrt(
-             (nu_0 * s_0[cat]^2 +
+             (nu_0 * tau_0[cat]^2 +
               x_ss_exposure[cat,group] +
               (N_exposure[cat,group] * kappa_0) / (kappa_n[cat,group]) * (m_0[cat] - x_mean_exposure[cat,group])^2
           ) / nu_n[cat,group]
@@ -162,11 +162,11 @@ transformed parameters {
         kappa_n[cat,group] = kappa_0;
         nu_n[cat,group] = nu_0;
         m_n[cat,group] = m_0[cat];
-        s_n[cat,group] = s_0[cat];
+        tau_n[cat,group] = tau_0[cat];
       }
 
       t_scale[cat,group] =
-        s_n[cat,group] * sqrt((kappa_n[cat,group] + 1) / kappa_n[cat,group]);
+        tau_n[cat,group] * sqrt((kappa_n[cat,group] + 1) / kappa_n[cat,group]);
     }
   }
 
@@ -177,7 +177,7 @@ transformed parameters {
       for (cat2 in 1:M) {
         // NEEDS REVIEW: ARE IDEAL WEIGHTS REALLY A FUNCTION OF SIGMA_N (RATHER THAN, E.G., THE EXPECTED CATEGORY SD)?
         // Using element-wise operations ./ and .* so that this can all be done without looping over K
-        raw_weights += p_cat[cat1] * p_cat[cat2] * ((m_n[cat1,group] - m_n[cat2,group])^2 ./ (s_n[cat1,group] .* s_n[cat2,group]));
+        raw_weights += p_cat[cat1] * p_cat[cat2] * ((m_n[cat1,group] - m_n[cat2,group])^2 ./ (tau_n[cat1,group] .* tau_n[cat2,group]));
       }
     }
     raw_weights ./= rep_vector(2.0, K);
@@ -223,10 +223,10 @@ model {
       }
   }
 
-  // Specifying prior for components of S_0:
+  // Specifying prior for components of tau_0:
   if (!Sigma_0_known) {
     for (cat in 1:M) {
-      s_0_param[cat] ~ cauchy(0, tau_scale);
+      tau_0_param[cat] ~ cauchy(0, tau_scale);
     }
   }
 
@@ -237,21 +237,7 @@ model {
 }
 
 generated quantities {
-  /* Compute and store pointwise log-likelihood, in order to allow computation of LOOIC.
-     Doing so in generated quantities block, following help(rstan::loo). Note that currently,
-     each unique combination of test location and exposure group is treated as an observation
-     (rather than each individual response).
-  */
-  real log_lik_sum = 0;
-  vector[N_test] log_lik;
-
-  for (n in 1:N_test) {
-    log_lik[n] = multinomial_lpmf(z_test_counts[n] | p_test_conj[n] * (1-lapse_rate) + lapsing_probs);
-    log_lik_sum += log_lik[n];
-  }
-
-  /* If requested by user:
-     Compute and store pointwise log-likelihood, in order to allow computation of LOOIC. This is
+  /* Compute and store pointwise log-likelihood, in order to allow computation of LOOIC. This is
      done in the generated quantities block, following help(rstan::loo). Note that each unqiue
      combination of test location and exposure group is treated as an observation in z_test_counts.
      So calculating pointwise log-likelihoods based on the vectorized z_test_counts, which would be
@@ -267,12 +253,19 @@ generated quantities {
          one compares models over different transformation of the cues, which can result in different
          numbers of unique test locations.
 
-     Here, log-likelihoods are thus calculated for each individual response. This requires reformatting
-     the information z_test_counts.
-
-     The downside of this revised approach is that it makes the object very large to store, and slow to
-     work with.
+     Optionally, users can thus also request log-likelihoods to be calculated for each individual response.
+     This requires reformatting the information z_test_counts. The downside of this revised approach is that
+     it makes the object very large to store, and slow to work with.
   */
+  real log_lik_sum = 0;
+  vector[N_test] log_lik;
+
+  for (n in 1:N_test) {
+    log_lik[n] = multinomial_lpmf(z_test_counts[n] | p_test_conj[n] * (1-lapse_rate) + lapsing_probs);
+    log_lik_sum += log_lik[n];
+  }
+
+  // If requested by user:
   vector[split_loglik_per_observation ? sum(to_array_1d(z_test_counts)) : 0] log_lik_split;
   if (split_loglik_per_observation == 1) {
     int idx = 1;
@@ -295,11 +288,11 @@ generated quantities {
   for (cat in 1:M) {
     m_0_original[cat] = INV_SCALE * m_0[cat] - shift;
     // NEEDS REVISITING: IS THIS REALLY THE CORRECT WAY TO BACKTRANSFORM A VECTOR OF (ESSENTIALLY) STANDARD DEVIATIONS?
-    S_0_original[cat] = diagonal(INV_SCALE * diag_matrix(s_0[cat]^2) * INV_SCALE');               // store variance, not standard deviation (for the sake of parallelism to the NIW models)
+    S_0_original[cat] = diagonal(INV_SCALE * diag_matrix(tau_0[cat]^2) * INV_SCALE');               // store variance, not standard deviation (for the sake of parallelism to the NIW models)
     for (group in 1:L) {
       m_n_original[cat,group] = INV_SCALE * m_n[cat,group] - shift;
       // NEEDS REVISITING: IS THIS REALLY THE CORRECT WAY TO BACKTRANSFORM A VECTOR OF (ESSENTIALLY) STANDARD DEVIATIONS?
-      S_n_original[cat,group] = diagonal(INV_SCALE * diag_matrix(s_n[cat,group]^2) * INV_SCALE'); // store variance, not standard deviation (for the sake of parallelism to the NIW models)
+      S_n_original[cat,group] = diagonal(INV_SCALE * diag_matrix(tau_n[cat,group]^2) * INV_SCALE'); // store variance, not standard deviation (for the sake of parallelism to the NIW models)
     }
   }
 }

@@ -3,7 +3,7 @@
 \name{set_stanfit}
 \alias{set_stanfit}
 \alias{set_stanfit.ideal_adaptor_stanfit}
-\title{Set the stanfit of an NIW ideal adaptor stanfit}
+\title{Set the stanfit of an ideal adaptor stanfit}
 \usage{
 set_stanfit(x, ...)
 

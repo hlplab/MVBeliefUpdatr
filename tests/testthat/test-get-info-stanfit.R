@@ -1,8 +1,9 @@
-context("get information from stanfit")
 
 source("../functions-to-make-or-load-models.R")
 
-fit <- get_example_stanfit(1)
+context("get information from stanfit NIW (one cue)")
+
+fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize", file_refit = "never")
 test_that("Test is.ideal_adaptor_stanfit", {
   expect_false(is.ideal_adaptor_stanfit(NULL))
   expect_false(is.ideal_adaptor_stanfit(NA))
@@ -37,7 +38,9 @@ test_that("add draws - output check (1 cue)", {
 })
 
 
-fit <- get_example_stanfit(2)
+context("get information from stanfit NIW (two cues)")
+
+fit <- get_example_stanfit(2, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize", file_refit = "never")
 test_that("add draws - input check (2 cues)", {
   expect_true(is_tibble(get_draws(fit, groups = "prior")))
   expect_true(is_tibble(get_draws(fit, groups = "plus20.20")))
@@ -140,7 +143,9 @@ test_that("get expected category statistic", {
   expect_true(is_tibble(get_expected_category_statistic(fit, c("/b/", "/p/"), c("prior", "plus20.20"), c("mu", "Sigma"))))
 })
 
-fit <- get_example_stanfit(3)
+
+context("get information from stanfit NIW (three cues)")
+fit <- get_example_stanfit(3, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize", file_refit = "never")
 test_that("add ibbu draws - input check (3 cues)", {
   expect_true(is_tibble(get_draws(fit, groups = "prior")))
   expect_true(is_tibble(get_draws(fit, groups = "plus20.20.20")))

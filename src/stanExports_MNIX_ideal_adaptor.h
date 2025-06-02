@@ -34,31 +34,31 @@ static constexpr std::array<const char*, 210> locations_array__ =
   " (in 'MNIX_ideal_adaptor', line 92, column 2 to column 74)",
   " (in 'MNIX_ideal_adaptor', line 93, column 2 to column 48)",
   " (in 'MNIX_ideal_adaptor', line 94, column 2 to column 46)",
-  " (in 'MNIX_ideal_adaptor', line 95, column 2 to column 60)",
+  " (in 'MNIX_ideal_adaptor', line 95, column 2 to column 62)",
   " (in 'MNIX_ideal_adaptor', line 98, column 2 to column 62)",
-  " (in 'MNIX_ideal_adaptor', line 99, column 2 to column 34)",
+  " (in 'MNIX_ideal_adaptor', line 99, column 2 to column 36)",
   " (in 'MNIX_ideal_adaptor', line 101, column 2 to column 80)",
   " (in 'MNIX_ideal_adaptor', line 105, column 2 to column 58)",
   " (in 'MNIX_ideal_adaptor', line 107, column 2 to column 35)",
   " (in 'MNIX_ideal_adaptor', line 108, column 2 to column 32)",
   " (in 'MNIX_ideal_adaptor', line 109, column 2 to column 27)",
-  " (in 'MNIX_ideal_adaptor', line 110, column 2 to column 27)",
+  " (in 'MNIX_ideal_adaptor', line 110, column 2 to column 29)",
   " (in 'MNIX_ideal_adaptor', line 111, column 2 to column 31)",
   " (in 'MNIX_ideal_adaptor', line 112, column 2 to column 34)",
   " (in 'MNIX_ideal_adaptor', line 113, column 2 to column 39)",
   " (in 'MNIX_ideal_adaptor', line 114, column 2 to column 42)",
-  " (in 'MNIX_ideal_adaptor', line 207, column 2 to column 23)",
-  " (in 'MNIX_ideal_adaptor', line 208, column 2 to column 25)",
-  " (in 'MNIX_ideal_adaptor', line 232, column 2 to column 91)",
-  " (in 'MNIX_ideal_adaptor', line 245, column 2 to column 34)",
-  " (in 'MNIX_ideal_adaptor', line 246, column 2 to column 34)",
-  " (in 'MNIX_ideal_adaptor', line 247, column 2 to column 36)",
-  " (in 'MNIX_ideal_adaptor', line 248, column 2 to column 36)",
-  " (in 'MNIX_ideal_adaptor', line 121, column 4 to column 89)",
+  " (in 'MNIX_ideal_adaptor', line 219, column 2 to column 23)",
+  " (in 'MNIX_ideal_adaptor', line 220, column 2 to column 25)",
+  " (in 'MNIX_ideal_adaptor', line 226, column 2 to column 91)",
+  " (in 'MNIX_ideal_adaptor', line 239, column 2 to column 34)",
+  " (in 'MNIX_ideal_adaptor', line 240, column 2 to column 34)",
+  " (in 'MNIX_ideal_adaptor', line 241, column 2 to column 36)",
+  " (in 'MNIX_ideal_adaptor', line 242, column 2 to column 36)",
+  " (in 'MNIX_ideal_adaptor', line 121, column 4 to column 93)",
   " (in 'MNIX_ideal_adaptor', line 137, column 8 to column 37)",
   " (in 'MNIX_ideal_adaptor', line 138, column 8 to column 31)",
   " (in 'MNIX_ideal_adaptor', line 139, column 8 to column 34)",
-  " (in 'MNIX_ideal_adaptor', line 140, column 8 to column 34)",
+  " (in 'MNIX_ideal_adaptor', line 140, column 8 to column 38)",
   " (in 'MNIX_ideal_adaptor', line 136, column 13 to line 141, column 7)",
   " (in 'MNIX_ideal_adaptor', line 124, column 8 to column 61)",
   " (in 'MNIX_ideal_adaptor', line 125, column 8 to column 55)",
@@ -66,14 +66,14 @@ static constexpr std::array<const char*, 210> locations_array__ =
   " (in 'MNIX_ideal_adaptor', line 129, column 8 to line 135, column 10)",
   " (in 'MNIX_ideal_adaptor', line 123, column 38 to line 136, column 7)",
   " (in 'MNIX_ideal_adaptor', line 123, column 6 to line 141, column 7)",
-  " (in 'MNIX_ideal_adaptor', line 142, column 6 to line 143, column 77)",
+  " (in 'MNIX_ideal_adaptor', line 142, column 6 to line 143, column 79)",
   " (in 'MNIX_ideal_adaptor', line 122, column 23 to line 144, column 5)",
   " (in 'MNIX_ideal_adaptor', line 122, column 4 to line 144, column 5)",
   " (in 'MNIX_ideal_adaptor', line 118, column 19 to line 145, column 3)",
   " (in 'MNIX_ideal_adaptor', line 118, column 2 to line 145, column 3)",
   " (in 'MNIX_ideal_adaptor', line 148, column 11 to column 12)",
   " (in 'MNIX_ideal_adaptor', line 148, column 4 to column 45)",
-  " (in 'MNIX_ideal_adaptor', line 153, column 8 to column 131)",
+  " (in 'MNIX_ideal_adaptor', line 153, column 8 to column 135)",
   " (in 'MNIX_ideal_adaptor', line 150, column 24 to line 154, column 7)",
   " (in 'MNIX_ideal_adaptor', line 150, column 6 to line 154, column 7)",
   " (in 'MNIX_ideal_adaptor', line 149, column 22 to line 155, column 5)",
@@ -91,29 +91,29 @@ static constexpr std::array<const char*, 210> locations_array__ =
   " (in 'MNIX_ideal_adaptor', line 179, column 4 to column 79)",
   " (in 'MNIX_ideal_adaptor', line 160, column 22 to line 180, column 3)",
   " (in 'MNIX_ideal_adaptor', line 160, column 2 to line 180, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 210, column 4 to column 102)",
-  " (in 'MNIX_ideal_adaptor', line 211, column 4 to column 30)",
-  " (in 'MNIX_ideal_adaptor', line 209, column 22 to line 212, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 209, column 2 to line 212, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 234, column 4 to column 16)",
-  " (in 'MNIX_ideal_adaptor', line 238, column 10 to column 92)",
-  " (in 'MNIX_ideal_adaptor', line 239, column 10 to column 19)",
-  " (in 'MNIX_ideal_adaptor', line 237, column 41 to line 240, column 9)",
-  " (in 'MNIX_ideal_adaptor', line 237, column 8 to line 240, column 9)",
-  " (in 'MNIX_ideal_adaptor', line 236, column 21 to line 241, column 7)",
-  " (in 'MNIX_ideal_adaptor', line 236, column 6 to line 241, column 7)",
-  " (in 'MNIX_ideal_adaptor', line 235, column 24 to line 242, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 235, column 4 to line 242, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 233, column 41 to line 243, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 233, column 2 to line 243, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 250, column 4 to column 53)",
-  " (in 'MNIX_ideal_adaptor', line 252, column 4 to column 83)",
-  " (in 'MNIX_ideal_adaptor', line 254, column 6 to column 67)",
-  " (in 'MNIX_ideal_adaptor', line 256, column 6 to column 97)",
-  " (in 'MNIX_ideal_adaptor', line 253, column 23 to line 257, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 253, column 4 to line 257, column 5)",
-  " (in 'MNIX_ideal_adaptor', line 249, column 19 to line 258, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 249, column 2 to line 258, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 222, column 4 to column 102)",
+  " (in 'MNIX_ideal_adaptor', line 223, column 4 to column 30)",
+  " (in 'MNIX_ideal_adaptor', line 221, column 22 to line 224, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 221, column 2 to line 224, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 228, column 4 to column 16)",
+  " (in 'MNIX_ideal_adaptor', line 232, column 10 to column 92)",
+  " (in 'MNIX_ideal_adaptor', line 233, column 10 to column 19)",
+  " (in 'MNIX_ideal_adaptor', line 231, column 41 to line 234, column 9)",
+  " (in 'MNIX_ideal_adaptor', line 231, column 8 to line 234, column 9)",
+  " (in 'MNIX_ideal_adaptor', line 230, column 21 to line 235, column 7)",
+  " (in 'MNIX_ideal_adaptor', line 230, column 6 to line 235, column 7)",
+  " (in 'MNIX_ideal_adaptor', line 229, column 24 to line 236, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 229, column 4 to line 236, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 227, column 41 to line 237, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 227, column 2 to line 237, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 244, column 4 to column 53)",
+  " (in 'MNIX_ideal_adaptor', line 246, column 4 to column 85)",
+  " (in 'MNIX_ideal_adaptor', line 248, column 6 to column 67)",
+  " (in 'MNIX_ideal_adaptor', line 250, column 6 to column 99)",
+  " (in 'MNIX_ideal_adaptor', line 247, column 23 to line 251, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 247, column 4 to line 251, column 5)",
+  " (in 'MNIX_ideal_adaptor', line 243, column 19 to line 252, column 3)",
+  " (in 'MNIX_ideal_adaptor', line 243, column 2 to line 252, column 3)",
   " (in 'MNIX_ideal_adaptor', line 183, column 2 to column 37)",
   " (in 'MNIX_ideal_adaptor', line 184, column 2 to column 34)",
   " (in 'MNIX_ideal_adaptor', line 186, column 6 to column 37)",
@@ -122,7 +122,7 @@ static constexpr std::array<const char*, 210> locations_array__ =
   " (in 'MNIX_ideal_adaptor', line 187, column 6 to line 189, column 7)",
   " (in 'MNIX_ideal_adaptor', line 185, column 19 to line 190, column 3)",
   " (in 'MNIX_ideal_adaptor', line 185, column 2 to line 190, column 3)",
-  " (in 'MNIX_ideal_adaptor', line 194, column 6 to column 44)",
+  " (in 'MNIX_ideal_adaptor', line 194, column 6 to column 46)",
   " (in 'MNIX_ideal_adaptor', line 193, column 21 to line 195, column 5)",
   " (in 'MNIX_ideal_adaptor', line 193, column 4 to line 195, column 5)",
   " (in 'MNIX_ideal_adaptor', line 192, column 22 to line 196, column 3)",
@@ -226,18 +226,18 @@ static constexpr std::array<const char*, 210> locations_array__ =
   " (in 'MNIX_ideal_adaptor', line 113, column 24 to column 25)",
   " (in 'MNIX_ideal_adaptor', line 114, column 8 to column 14)",
   " (in 'MNIX_ideal_adaptor', line 114, column 23 to column 24)",
-  " (in 'MNIX_ideal_adaptor', line 208, column 9 to column 15)",
-  " (in 'MNIX_ideal_adaptor', line 232, column 9 to column 75)",
-  " (in 'MNIX_ideal_adaptor', line 245, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 245, column 18 to column 19)",
-  " (in 'MNIX_ideal_adaptor', line 246, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 246, column 18 to column 19)",
-  " (in 'MNIX_ideal_adaptor', line 247, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 247, column 10 to column 11)",
-  " (in 'MNIX_ideal_adaptor', line 247, column 20 to column 21)",
-  " (in 'MNIX_ideal_adaptor', line 248, column 8 to column 9)",
-  " (in 'MNIX_ideal_adaptor', line 248, column 10 to column 11)",
-  " (in 'MNIX_ideal_adaptor', line 248, column 20 to column 21)"};
+  " (in 'MNIX_ideal_adaptor', line 220, column 9 to column 15)",
+  " (in 'MNIX_ideal_adaptor', line 226, column 9 to column 75)",
+  " (in 'MNIX_ideal_adaptor', line 239, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 239, column 18 to column 19)",
+  " (in 'MNIX_ideal_adaptor', line 240, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 240, column 18 to column 19)",
+  " (in 'MNIX_ideal_adaptor', line 241, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 241, column 10 to column 11)",
+  " (in 'MNIX_ideal_adaptor', line 241, column 20 to column 21)",
+  " (in 'MNIX_ideal_adaptor', line 242, column 8 to column 9)",
+  " (in 'MNIX_ideal_adaptor', line 242, column 10 to column 11)",
+  " (in 'MNIX_ideal_adaptor', line 242, column 20 to column 21)"};
 #include <stan_meta_header.hpp>
 class model_MNIX_ideal_adaptor final : public model_base_crtp<model_MNIX_ideal_adaptor> {
 private:
@@ -269,7 +269,7 @@ private:
   int lapse_rate_param_1dim__;
   int m_0_param_1dim__;
   int m_0_tau_1dim__;
-  int s_0_param_1dim__;
+  int tau_0_param_1dim__;
   int log_lik_split_1dim__;
   Eigen::Map<Eigen::Matrix<double,-1,1>> p_cat{nullptr, 0};
   Eigen::Map<Eigen::Matrix<double,-1,1>> tau_scale{nullptr, 0};
@@ -804,22 +804,22 @@ public:
       stan::math::validate_non_negative_index("m_0_tau",
         "mu_0_known ? 0 : K", m_0_tau_1dim__);
       current_statement__ = 172;
-      s_0_param_1dim__ = std::numeric_limits<int>::min();
+      tau_0_param_1dim__ = std::numeric_limits<int>::min();
       current_statement__ = 172;
-      s_0_param_1dim__ = (Sigma_0_known ? 0 : M);
+      tau_0_param_1dim__ = (Sigma_0_known ? 0 : M);
       current_statement__ = 172;
-      stan::math::validate_non_negative_index("s_0_param",
-        "Sigma_0_known ? 0 : M", s_0_param_1dim__);
+      stan::math::validate_non_negative_index("tau_0_param",
+        "Sigma_0_known ? 0 : M", tau_0_param_1dim__);
       current_statement__ = 173;
-      stan::math::validate_non_negative_index("s_0_param", "K", K);
+      stan::math::validate_non_negative_index("tau_0_param", "K", K);
       current_statement__ = 174;
       stan::math::validate_non_negative_index("m_0", "M", M);
       current_statement__ = 175;
       stan::math::validate_non_negative_index("m_0", "K", K);
       current_statement__ = 176;
-      stan::math::validate_non_negative_index("s_0", "M", M);
+      stan::math::validate_non_negative_index("tau_0", "M", M);
       current_statement__ = 177;
-      stan::math::validate_non_negative_index("s_0", "K", K);
+      stan::math::validate_non_negative_index("tau_0", "K", K);
       current_statement__ = 178;
       stan::math::validate_non_negative_index("lapsing_probs", "M", M);
       current_statement__ = 179;
@@ -837,11 +837,11 @@ public:
       current_statement__ = 185;
       stan::math::validate_non_negative_index("m_n", "K", K);
       current_statement__ = 186;
-      stan::math::validate_non_negative_index("s_n", "M", M);
+      stan::math::validate_non_negative_index("tau_n", "M", M);
       current_statement__ = 187;
-      stan::math::validate_non_negative_index("s_n", "L", L);
+      stan::math::validate_non_negative_index("tau_n", "L", L);
       current_statement__ = 188;
-      stan::math::validate_non_negative_index("s_n", "K", K);
+      stan::math::validate_non_negative_index("tau_n", "K", K);
       current_statement__ = 189;
       stan::math::validate_non_negative_index("t_scale", "M", M);
       current_statement__ = 190;
@@ -897,7 +897,7 @@ public:
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
     }
     num_params_r__ = 1 + 1 + lapse_rate_param_1dim__ + (m_0_param_1dim__ * K)
-      + m_0_tau_1dim__ + (s_0_param_1dim__ * K);
+      + m_0_tau_1dim__ + (tau_0_param_1dim__ * K);
   }
   inline std::string model_name() const final {
     return "model_MNIX_ideal_adaptor";
@@ -952,10 +952,10 @@ public:
         in__.template read_constrain_lb<Eigen::Matrix<local_scalar_t__,-1,1>,
           jacobian__>(0, lp__, m_0_tau_1dim__);
       current_statement__ = 6;
-      auto s_0_param =
+      auto tau_0_param =
         in__.template read_constrain_lb<
           std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>, jacobian__>(0,
-          lp__, s_0_param_1dim__, K);
+          lp__, tau_0_param_1dim__, K);
       std::vector<Eigen::Matrix<local_scalar_t__,-1,1>> m_0 =
         std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>(M,
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(K, DUMMY_VAR__));
@@ -963,7 +963,7 @@ public:
       stan::model::assign(m_0,
         (mu_0_known ? stan::math::promote_scalar<local_scalar_t__>(mu_0_data) : m_0_param),
         "assigning variable m_0");
-      std::vector<Eigen::Matrix<local_scalar_t__,-1,1>> s_0 =
+      std::vector<Eigen::Matrix<local_scalar_t__,-1,1>> tau_0 =
         std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>(M,
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(K, DUMMY_VAR__));
       local_scalar_t__ lapse_rate = DUMMY_VAR__;
@@ -989,7 +989,7 @@ public:
         std::vector<std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>>(M,
           std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>(L,
             Eigen::Matrix<local_scalar_t__,-1,1>::Constant(K, DUMMY_VAR__)));
-      std::vector<std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>> s_n =
+      std::vector<std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>> tau_n =
         std::vector<std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>>(M,
           std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>(L,
             Eigen::Matrix<local_scalar_t__,-1,1>::Constant(K, DUMMY_VAR__)));
@@ -1010,15 +1010,15 @@ public:
       current_statement__ = 42;
       for (int cat = 1; cat <= M; ++cat) {
         current_statement__ = 26;
-        stan::model::assign(s_0,
+        stan::model::assign(tau_0,
           (Sigma_0_known ? stan::math::eval(
                              stan::math::multiply(
                                stan::model::rvalue(tau_0_data, "tau_0_data",
                                  stan::model::index_uni(cat)),
                                stan::math::sqrt(((nu_0 - 2) / nu_0)))) : 
           stan::math::eval(
-            stan::model::rvalue(s_0_param, "s_0_param",
-              stan::model::index_uni(cat)))), "assigning variable s_0",
+            stan::model::rvalue(tau_0_param, "tau_0_param",
+              stan::model::index_uni(cat)))), "assigning variable tau_0",
           stan::model::index_uni(cat));
         current_statement__ = 40;
         for (int group = 1; group <= L; ++group) {
@@ -1058,14 +1058,14 @@ public:
               "assigning variable m_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
             current_statement__ = 35;
-            stan::model::assign(s_n,
+            stan::model::assign(tau_n,
               stan::math::sqrt(
                 stan::math::divide(
                   stan::math::add(
                     stan::math::add(
                       stan::math::multiply(nu_0,
                         stan::math::pow(
-                          stan::model::rvalue(s_0, "s_0",
+                          stan::model::rvalue(tau_0, "tau_0",
                             stan::model::index_uni(cat)), 2)),
                       stan::model::rvalue(x_ss_exposure, "x_ss_exposure",
                         stan::model::index_uni(cat),
@@ -1087,7 +1087,7 @@ public:
                   stan::model::rvalue(nu_n, "nu_n",
                     stan::model::index_uni(cat),
                     stan::model::index_uni(group)))),
-              "assigning variable s_n", stan::model::index_uni(cat),
+              "assigning variable tau_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
           } else {
             current_statement__ = 27;
@@ -1103,16 +1103,16 @@ public:
               "assigning variable m_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
             current_statement__ = 30;
-            stan::model::assign(s_n,
-              stan::model::rvalue(s_0, "s_0", stan::model::index_uni(cat)),
-              "assigning variable s_n", stan::model::index_uni(cat),
+            stan::model::assign(tau_n,
+              stan::model::rvalue(tau_0, "tau_0", stan::model::index_uni(cat)),
+              "assigning variable tau_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
           }
           current_statement__ = 38;
           stan::model::assign(t_scale,
             stan::math::multiply(
-              stan::model::rvalue(s_n, "s_n", stan::model::index_uni(cat),
-                stan::model::index_uni(group)),
+              stan::model::rvalue(tau_n, "tau_n",
+                stan::model::index_uni(cat), stan::model::index_uni(group)),
               stan::math::sqrt(
                 ((stan::model::rvalue(kappa_n, "kappa_n",
                     stan::model::index_uni(cat),
@@ -1154,10 +1154,10 @@ public:
                           stan::model::index_uni(cat2),
                           stan::model::index_uni(group))), 2),
                     stan::math::elt_multiply(
-                      stan::model::rvalue(s_n, "s_n",
+                      stan::model::rvalue(tau_n, "tau_n",
                         stan::model::index_uni(cat1),
                         stan::model::index_uni(group)),
-                      stan::model::rvalue(s_n, "s_n",
+                      stan::model::rvalue(tau_n, "tau_n",
                         stan::model::index_uni(cat2),
                         stan::model::index_uni(group)))))),
               "assigning variable raw_weights");
@@ -1214,7 +1214,7 @@ public:
           "assigning variable p_test_conj", stan::model::index_uni(j));
       }
       current_statement__ = 8;
-      stan::math::check_greater_or_equal(function__, "s_0", s_0, 0);
+      stan::math::check_greater_or_equal(function__, "tau_0", tau_0, 0);
       current_statement__ = 11;
       stan::math::check_greater_or_equal(function__, "kappa_n", kappa_n, K);
       current_statement__ = 12;
@@ -1251,7 +1251,7 @@ public:
           for (int cat = 1; cat <= M; ++cat) {
             current_statement__ = 94;
             lp_accum__.add(stan::math::cauchy_lpdf<propto__>(
-                             stan::model::rvalue(s_0_param, "s_0_param",
+                             stan::model::rvalue(tau_0_param, "tau_0_param",
                                stan::model::index_uni(cat)), 0, tau_scale));
           }
         }
@@ -1320,10 +1320,10 @@ public:
         in__.template read_constrain_lb<Eigen::Matrix<local_scalar_t__,-1,1>,
           jacobian__>(0, lp__, m_0_tau_1dim__);
       current_statement__ = 6;
-      auto s_0_param =
+      auto tau_0_param =
         in__.template read_constrain_lb<
           std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>, jacobian__>(0,
-          lp__, s_0_param_1dim__, K);
+          lp__, tau_0_param_1dim__, K);
       std::vector<Eigen::Matrix<local_scalar_t__,-1,1>> m_0 =
         std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>(M,
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(K, DUMMY_VAR__));
@@ -1331,7 +1331,7 @@ public:
       stan::model::assign(m_0,
         (mu_0_known ? stan::math::promote_scalar<local_scalar_t__>(mu_0_data) : m_0_param),
         "assigning variable m_0");
-      std::vector<Eigen::Matrix<local_scalar_t__,-1,1>> s_0 =
+      std::vector<Eigen::Matrix<local_scalar_t__,-1,1>> tau_0 =
         std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>(M,
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(K, DUMMY_VAR__));
       local_scalar_t__ lapse_rate = DUMMY_VAR__;
@@ -1357,7 +1357,7 @@ public:
         std::vector<std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>>(M,
           std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>(L,
             Eigen::Matrix<local_scalar_t__,-1,1>::Constant(K, DUMMY_VAR__)));
-      std::vector<std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>> s_n =
+      std::vector<std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>> tau_n =
         std::vector<std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>>(M,
           std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>(L,
             Eigen::Matrix<local_scalar_t__,-1,1>::Constant(K, DUMMY_VAR__)));
@@ -1378,15 +1378,15 @@ public:
       current_statement__ = 42;
       for (int cat = 1; cat <= M; ++cat) {
         current_statement__ = 26;
-        stan::model::assign(s_0,
+        stan::model::assign(tau_0,
           (Sigma_0_known ? stan::math::eval(
                              stan::math::multiply(
                                stan::model::rvalue(tau_0_data, "tau_0_data",
                                  stan::model::index_uni(cat)),
                                stan::math::sqrt(((nu_0 - 2) / nu_0)))) : 
           stan::math::eval(
-            stan::model::rvalue(s_0_param, "s_0_param",
-              stan::model::index_uni(cat)))), "assigning variable s_0",
+            stan::model::rvalue(tau_0_param, "tau_0_param",
+              stan::model::index_uni(cat)))), "assigning variable tau_0",
           stan::model::index_uni(cat));
         current_statement__ = 40;
         for (int group = 1; group <= L; ++group) {
@@ -1426,14 +1426,14 @@ public:
               "assigning variable m_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
             current_statement__ = 35;
-            stan::model::assign(s_n,
+            stan::model::assign(tau_n,
               stan::math::sqrt(
                 stan::math::divide(
                   stan::math::add(
                     stan::math::add(
                       stan::math::multiply(nu_0,
                         stan::math::pow(
-                          stan::model::rvalue(s_0, "s_0",
+                          stan::model::rvalue(tau_0, "tau_0",
                             stan::model::index_uni(cat)), 2)),
                       stan::model::rvalue(x_ss_exposure, "x_ss_exposure",
                         stan::model::index_uni(cat),
@@ -1455,7 +1455,7 @@ public:
                   stan::model::rvalue(nu_n, "nu_n",
                     stan::model::index_uni(cat),
                     stan::model::index_uni(group)))),
-              "assigning variable s_n", stan::model::index_uni(cat),
+              "assigning variable tau_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
           } else {
             current_statement__ = 27;
@@ -1471,16 +1471,16 @@ public:
               "assigning variable m_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
             current_statement__ = 30;
-            stan::model::assign(s_n,
-              stan::model::rvalue(s_0, "s_0", stan::model::index_uni(cat)),
-              "assigning variable s_n", stan::model::index_uni(cat),
+            stan::model::assign(tau_n,
+              stan::model::rvalue(tau_0, "tau_0", stan::model::index_uni(cat)),
+              "assigning variable tau_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
           }
           current_statement__ = 38;
           stan::model::assign(t_scale,
             stan::math::multiply(
-              stan::model::rvalue(s_n, "s_n", stan::model::index_uni(cat),
-                stan::model::index_uni(group)),
+              stan::model::rvalue(tau_n, "tau_n",
+                stan::model::index_uni(cat), stan::model::index_uni(group)),
               stan::math::sqrt(
                 ((stan::model::rvalue(kappa_n, "kappa_n",
                     stan::model::index_uni(cat),
@@ -1522,10 +1522,10 @@ public:
                           stan::model::index_uni(cat2),
                           stan::model::index_uni(group))), 2),
                     stan::math::elt_multiply(
-                      stan::model::rvalue(s_n, "s_n",
+                      stan::model::rvalue(tau_n, "tau_n",
                         stan::model::index_uni(cat1),
                         stan::model::index_uni(group)),
-                      stan::model::rvalue(s_n, "s_n",
+                      stan::model::rvalue(tau_n, "tau_n",
                         stan::model::index_uni(cat2),
                         stan::model::index_uni(group)))))),
               "assigning variable raw_weights");
@@ -1582,7 +1582,7 @@ public:
           "assigning variable p_test_conj", stan::model::index_uni(j));
       }
       current_statement__ = 8;
-      stan::math::check_greater_or_equal(function__, "s_0", s_0, 0);
+      stan::math::check_greater_or_equal(function__, "tau_0", tau_0, 0);
       current_statement__ = 11;
       stan::math::check_greater_or_equal(function__, "kappa_n", kappa_n, K);
       current_statement__ = 12;
@@ -1619,7 +1619,7 @@ public:
           for (int cat = 1; cat <= M; ++cat) {
             current_statement__ = 94;
             lp_accum__.add(stan::math::cauchy_lpdf<propto__>(
-                             stan::model::rvalue(s_0_param, "s_0_param",
+                             stan::model::rvalue(tau_0_param, "tau_0_param",
                                stan::model::index_uni(cat)), 0, tau_scale));
           }
         }
@@ -1699,15 +1699,15 @@ public:
         in__.template read_constrain_lb<Eigen::Matrix<local_scalar_t__,-1,1>,
           jacobian__>(0, lp__, m_0_tau_1dim__);
       current_statement__ = 6;
-      auto s_0_param =
+      auto tau_0_param =
         in__.template read_constrain_lb<
           std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>, jacobian__>(0,
-          lp__, s_0_param_1dim__, K);
+          lp__, tau_0_param_1dim__, K);
       std::vector<Eigen::Matrix<double,-1,1>> m_0 =
         std::vector<Eigen::Matrix<double,-1,1>>(M,
           Eigen::Matrix<double,-1,1>::Constant(K,
             std::numeric_limits<double>::quiet_NaN()));
-      std::vector<Eigen::Matrix<double,-1,1>> s_0 =
+      std::vector<Eigen::Matrix<double,-1,1>> tau_0 =
         std::vector<Eigen::Matrix<double,-1,1>>(M,
           Eigen::Matrix<double,-1,1>::Constant(K,
             std::numeric_limits<double>::quiet_NaN()));
@@ -1726,7 +1726,7 @@ public:
           std::vector<Eigen::Matrix<double,-1,1>>(L,
             Eigen::Matrix<double,-1,1>::Constant(K,
               std::numeric_limits<double>::quiet_NaN())));
-      std::vector<std::vector<Eigen::Matrix<double,-1,1>>> s_n =
+      std::vector<std::vector<Eigen::Matrix<double,-1,1>>> tau_n =
         std::vector<std::vector<Eigen::Matrix<double,-1,1>>>(M,
           std::vector<Eigen::Matrix<double,-1,1>>(L,
             Eigen::Matrix<double,-1,1>::Constant(K,
@@ -1760,8 +1760,8 @@ public:
       out__.write(m_0_tau);
       current_statement__ = 6;
       for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
-        for (int sym2__ = 1; sym2__ <= s_0_param_1dim__; ++sym2__) {
-          out__.write(s_0_param[(sym2__ - 1)][(sym1__ - 1)]);
+        for (int sym2__ = 1; sym2__ <= tau_0_param_1dim__; ++sym2__) {
+          out__.write(tau_0_param[(sym2__ - 1)][(sym1__ - 1)]);
         }
       }
       if (stan::math::logical_negation(
@@ -1786,15 +1786,15 @@ public:
       current_statement__ = 42;
       for (int cat = 1; cat <= M; ++cat) {
         current_statement__ = 26;
-        stan::model::assign(s_0,
+        stan::model::assign(tau_0,
           (Sigma_0_known ? stan::math::eval(
                              stan::math::multiply(
                                stan::model::rvalue(tau_0_data, "tau_0_data",
                                  stan::model::index_uni(cat)),
                                stan::math::sqrt(((nu_0 - 2) / nu_0)))) : 
           stan::math::eval(
-            stan::model::rvalue(s_0_param, "s_0_param",
-              stan::model::index_uni(cat)))), "assigning variable s_0",
+            stan::model::rvalue(tau_0_param, "tau_0_param",
+              stan::model::index_uni(cat)))), "assigning variable tau_0",
           stan::model::index_uni(cat));
         current_statement__ = 40;
         for (int group = 1; group <= L; ++group) {
@@ -1834,14 +1834,14 @@ public:
               "assigning variable m_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
             current_statement__ = 35;
-            stan::model::assign(s_n,
+            stan::model::assign(tau_n,
               stan::math::sqrt(
                 stan::math::divide(
                   stan::math::add(
                     stan::math::add(
                       stan::math::multiply(nu_0,
                         stan::math::pow(
-                          stan::model::rvalue(s_0, "s_0",
+                          stan::model::rvalue(tau_0, "tau_0",
                             stan::model::index_uni(cat)), 2)),
                       stan::model::rvalue(x_ss_exposure, "x_ss_exposure",
                         stan::model::index_uni(cat),
@@ -1863,7 +1863,7 @@ public:
                   stan::model::rvalue(nu_n, "nu_n",
                     stan::model::index_uni(cat),
                     stan::model::index_uni(group)))),
-              "assigning variable s_n", stan::model::index_uni(cat),
+              "assigning variable tau_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
           } else {
             current_statement__ = 27;
@@ -1879,16 +1879,16 @@ public:
               "assigning variable m_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
             current_statement__ = 30;
-            stan::model::assign(s_n,
-              stan::model::rvalue(s_0, "s_0", stan::model::index_uni(cat)),
-              "assigning variable s_n", stan::model::index_uni(cat),
+            stan::model::assign(tau_n,
+              stan::model::rvalue(tau_0, "tau_0", stan::model::index_uni(cat)),
+              "assigning variable tau_n", stan::model::index_uni(cat),
               stan::model::index_uni(group));
           }
           current_statement__ = 38;
           stan::model::assign(t_scale,
             stan::math::multiply(
-              stan::model::rvalue(s_n, "s_n", stan::model::index_uni(cat),
-                stan::model::index_uni(group)),
+              stan::model::rvalue(tau_n, "tau_n",
+                stan::model::index_uni(cat), stan::model::index_uni(group)),
               stan::math::sqrt(
                 ((stan::model::rvalue(kappa_n, "kappa_n",
                     stan::model::index_uni(cat),
@@ -1931,10 +1931,10 @@ public:
                           stan::model::index_uni(cat2),
                           stan::model::index_uni(group))), 2),
                     stan::math::elt_multiply(
-                      stan::model::rvalue(s_n, "s_n",
+                      stan::model::rvalue(tau_n, "tau_n",
                         stan::model::index_uni(cat1),
                         stan::model::index_uni(group)),
-                      stan::model::rvalue(s_n, "s_n",
+                      stan::model::rvalue(tau_n, "tau_n",
                         stan::model::index_uni(cat2),
                         stan::model::index_uni(group)))))),
               "assigning variable raw_weights");
@@ -1991,7 +1991,7 @@ public:
           "assigning variable p_test_conj", stan::model::index_uni(j));
       }
       current_statement__ = 8;
-      stan::math::check_greater_or_equal(function__, "s_0", s_0, 0);
+      stan::math::check_greater_or_equal(function__, "tau_0", tau_0, 0);
       current_statement__ = 11;
       stan::math::check_greater_or_equal(function__, "kappa_n", kappa_n, K);
       current_statement__ = 12;
@@ -2010,7 +2010,7 @@ public:
         current_statement__ = 8;
         for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
           for (int sym2__ = 1; sym2__ <= M; ++sym2__) {
-            out__.write(s_0[(sym2__ - 1)][(sym1__ - 1)]);
+            out__.write(tau_0[(sym2__ - 1)][(sym1__ - 1)]);
           }
         }
         out__.write(lapse_rate);
@@ -2039,7 +2039,7 @@ public:
         for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
           for (int sym2__ = 1; sym2__ <= L; ++sym2__) {
             for (int sym3__ = 1; sym3__ <= M; ++sym3__) {
-              out__.write(s_n[(sym3__ - 1)][(sym2__ - 1)][(sym1__ - 1)]);
+              out__.write(tau_n[(sym3__ - 1)][(sym2__ - 1)][(sym1__ - 1)]);
             }
           }
         }
@@ -2162,7 +2162,7 @@ public:
               stan::math::multiply(INV_SCALE,
                 stan::math::diag_matrix(
                   stan::math::pow(
-                    stan::model::rvalue(s_0, "s_0",
+                    stan::model::rvalue(tau_0, "tau_0",
                       stan::model::index_uni(cat)), 2))),
               stan::math::transpose(INV_SCALE))),
           "assigning variable S_0_original", stan::model::index_uni(cat));
@@ -2183,7 +2183,7 @@ public:
                 stan::math::multiply(INV_SCALE,
                   stan::math::diag_matrix(
                     stan::math::pow(
-                      stan::model::rvalue(s_n, "s_n",
+                      stan::model::rvalue(tau_n, "tau_n",
                         stan::model::index_uni(cat),
                         stan::model::index_uni(group)), 2))),
                 stan::math::transpose(INV_SCALE))),
@@ -2280,19 +2280,19 @@ public:
         in__.read<Eigen::Matrix<local_scalar_t__,-1,1>>(m_0_tau_1dim__),
         "assigning variable m_0_tau");
       out__.write_free_lb(0, m_0_tau);
-      std::vector<Eigen::Matrix<local_scalar_t__,-1,1>> s_0_param =
-        std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>(s_0_param_1dim__,
+      std::vector<Eigen::Matrix<local_scalar_t__,-1,1>> tau_0_param =
+        std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>(tau_0_param_1dim__,
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(K, DUMMY_VAR__));
       current_statement__ = 6;
       for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
-        for (int sym2__ = 1; sym2__ <= s_0_param_1dim__; ++sym2__) {
+        for (int sym2__ = 1; sym2__ <= tau_0_param_1dim__; ++sym2__) {
           current_statement__ = 6;
-          stan::model::assign(s_0_param, in__.read<local_scalar_t__>(),
-            "assigning variable s_0_param", stan::model::index_uni(sym2__),
+          stan::model::assign(tau_0_param, in__.read<local_scalar_t__>(),
+            "assigning variable tau_0_param", stan::model::index_uni(sym2__),
             stan::model::index_uni(sym1__));
         }
       }
-      out__.write_free_lb(0, s_0_param);
+      out__.write_free_lb(0, tau_0_param);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
     }
@@ -2329,9 +2329,9 @@ public:
       context__.validate_dims("parameter initialization", "m_0_tau",
         "double", std::vector<size_t>{static_cast<size_t>(m_0_tau_1dim__)});
       current_statement__ = 6;
-      context__.validate_dims("parameter initialization", "s_0_param",
+      context__.validate_dims("parameter initialization", "tau_0_param",
         "double",
-        std::vector<size_t>{static_cast<size_t>(s_0_param_1dim__),
+        std::vector<size_t>{static_cast<size_t>(tau_0_param_1dim__),
           static_cast<size_t>(K)});
       int pos__ = std::numeric_limits<int>::min();
       pos__ = 1;
@@ -2381,24 +2381,24 @@ public:
         }
       }
       out__.write_free_lb(0, m_0_tau);
-      std::vector<Eigen::Matrix<local_scalar_t__,-1,1>> s_0_param =
-        std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>(s_0_param_1dim__,
+      std::vector<Eigen::Matrix<local_scalar_t__,-1,1>> tau_0_param =
+        std::vector<Eigen::Matrix<local_scalar_t__,-1,1>>(tau_0_param_1dim__,
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(K, DUMMY_VAR__));
       {
-        std::vector<local_scalar_t__> s_0_param_flat__;
+        std::vector<local_scalar_t__> tau_0_param_flat__;
         current_statement__ = 6;
-        s_0_param_flat__ = context__.vals_r("s_0_param");
+        tau_0_param_flat__ = context__.vals_r("tau_0_param");
         pos__ = 1;
         for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
-          for (int sym2__ = 1; sym2__ <= s_0_param_1dim__; ++sym2__) {
-            stan::model::assign(s_0_param, s_0_param_flat__[(pos__ - 1)],
-              "assigning variable s_0_param", stan::model::index_uni(sym2__),
-              stan::model::index_uni(sym1__));
+          for (int sym2__ = 1; sym2__ <= tau_0_param_1dim__; ++sym2__) {
+            stan::model::assign(tau_0_param, tau_0_param_flat__[(pos__ - 1)],
+              "assigning variable tau_0_param",
+              stan::model::index_uni(sym2__), stan::model::index_uni(sym1__));
             pos__ = (pos__ + 1);
           }
         }
       }
-      out__.write_free_lb(0, s_0_param);
+      out__.write_free_lb(0, tau_0_param);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
     }
@@ -2408,11 +2408,11 @@ public:
                   emit_transformed_parameters__ = true, const bool
                   emit_generated_quantities__ = true) const {
     names__ = std::vector<std::string>{"kappa_0", "nu_0", "lapse_rate_param",
-                "m_0_param", "m_0_tau", "s_0_param"};
+                "m_0_param", "m_0_tau", "tau_0_param"};
     if (emit_transformed_parameters__) {
       std::vector<std::string>
-        temp{"m_0", "s_0", "lapse_rate", "lapsing_probs", "kappa_n", "nu_n",
-             "m_n", "s_n", "t_scale", "cue_weights", "p_test_conj",
+        temp{"m_0", "tau_0", "lapse_rate", "lapsing_probs", "kappa_n",
+             "nu_n", "m_n", "tau_n", "t_scale", "cue_weights", "p_test_conj",
              "log_p_test_conj"};
       names__.reserve(names__.size() + temp.size());
       names__.insert(names__.end(), temp.begin(), temp.end());
@@ -2436,7 +2436,7 @@ public:
                 std::vector<size_t>{static_cast<size_t>(m_0_param_1dim__),
                   static_cast<size_t>(K)},
                 std::vector<size_t>{static_cast<size_t>(m_0_tau_1dim__)},
-                std::vector<size_t>{static_cast<size_t>(s_0_param_1dim__),
+                std::vector<size_t>{static_cast<size_t>(tau_0_param_1dim__),
                   static_cast<size_t>(K)}};
     if (emit_transformed_parameters__) {
       std::vector<std::vector<size_t>>
@@ -2502,8 +2502,8 @@ public:
         std::to_string(sym1__));
     }
     for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
-      for (int sym2__ = 1; sym2__ <= s_0_param_1dim__; ++sym2__) {
-        param_names__.emplace_back(std::string() + "s_0_param" + '.' +
+      for (int sym2__ = 1; sym2__ <= tau_0_param_1dim__; ++sym2__) {
+        param_names__.emplace_back(std::string() + "tau_0_param" + '.' +
           std::to_string(sym2__) + '.' + std::to_string(sym1__));
       }
     }
@@ -2516,7 +2516,7 @@ public:
       }
       for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
         for (int sym2__ = 1; sym2__ <= M; ++sym2__) {
-          param_names__.emplace_back(std::string() + "s_0" + '.' +
+          param_names__.emplace_back(std::string() + "tau_0" + '.' +
             std::to_string(sym2__) + '.' + std::to_string(sym1__));
         }
       }
@@ -2549,7 +2549,7 @@ public:
       for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
         for (int sym2__ = 1; sym2__ <= L; ++sym2__) {
           for (int sym3__ = 1; sym3__ <= M; ++sym3__) {
-            param_names__.emplace_back(std::string() + "s_n" + '.' +
+            param_names__.emplace_back(std::string() + "tau_n" + '.' +
               std::to_string(sym3__) + '.' + std::to_string(sym2__) + '.' +
               std::to_string(sym1__));
           }
@@ -2646,8 +2646,8 @@ public:
         std::to_string(sym1__));
     }
     for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
-      for (int sym2__ = 1; sym2__ <= s_0_param_1dim__; ++sym2__) {
-        param_names__.emplace_back(std::string() + "s_0_param" + '.' +
+      for (int sym2__ = 1; sym2__ <= tau_0_param_1dim__; ++sym2__) {
+        param_names__.emplace_back(std::string() + "tau_0_param" + '.' +
           std::to_string(sym2__) + '.' + std::to_string(sym1__));
       }
     }
@@ -2660,7 +2660,7 @@ public:
       }
       for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
         for (int sym2__ = 1; sym2__ <= M; ++sym2__) {
-          param_names__.emplace_back(std::string() + "s_0" + '.' +
+          param_names__.emplace_back(std::string() + "tau_0" + '.' +
             std::to_string(sym2__) + '.' + std::to_string(sym1__));
         }
       }
@@ -2693,7 +2693,7 @@ public:
       for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
         for (int sym2__ = 1; sym2__ <= L; ++sym2__) {
           for (int sym3__ = 1; sym3__ <= M; ++sym3__) {
-            param_names__.emplace_back(std::string() + "s_n" + '.' +
+            param_names__.emplace_back(std::string() + "tau_n" + '.' +
               std::to_string(sym3__) + '.' + std::to_string(sym2__) + '.' +
               std::to_string(sym1__));
           }
@@ -2770,10 +2770,10 @@ public:
     }
   }
   inline std::string get_constrained_sizedtypes() const {
-    return std::string("[{\"name\":\"kappa_0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"nu_0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"lapse_rate_param\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(lapse_rate_param_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"m_0_param\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(m_0_param_1dim__) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"parameters\"},{\"name\":\"m_0_tau\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(m_0_tau_1dim__) + "},\"block\":\"parameters\"},{\"name\":\"s_0_param\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(s_0_param_1dim__) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"parameters\"},{\"name\":\"m_0\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"s_0\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"lapse_rate\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"lapsing_probs\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(M) + "},\"block\":\"transformed_parameters\"},{\"name\":\"kappa_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"real\"}}},\"block\":\"transformed_parameters\"},{\"name\":\"nu_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"real\"}}},\"block\":\"transformed_parameters\"},{\"name\":\"m_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"transformed_parameters\"},{\"name\":\"s_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"transformed_parameters\"},{\"name\":\"t_scale\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"transformed_parameters\"},{\"name\":\"cue_weights\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"p_test_conj\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N_test) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(M) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"log_p_test_conj\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N_test) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(M) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"log_lik_sum\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"},{\"name\":\"log_lik\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_test) + "},\"block\":\"generated_quantities\"},{\"name\":\"log_lik_split\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(log_lik_split_1dim__) + "},\"block\":\"generated_quantities\"},{\"name\":\"m_0_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"generated_quantities\"},{\"name\":\"S_0_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"generated_quantities\"},{\"name\":\"m_n_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"generated_quantities\"},{\"name\":\"S_n_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"generated_quantities\"}]");
+    return std::string("[{\"name\":\"kappa_0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"nu_0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"lapse_rate_param\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(lapse_rate_param_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"m_0_param\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(m_0_param_1dim__) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"parameters\"},{\"name\":\"m_0_tau\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(m_0_tau_1dim__) + "},\"block\":\"parameters\"},{\"name\":\"tau_0_param\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(tau_0_param_1dim__) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"parameters\"},{\"name\":\"m_0\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"tau_0\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"lapse_rate\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"lapsing_probs\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(M) + "},\"block\":\"transformed_parameters\"},{\"name\":\"kappa_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"real\"}}},\"block\":\"transformed_parameters\"},{\"name\":\"nu_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"real\"}}},\"block\":\"transformed_parameters\"},{\"name\":\"m_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"transformed_parameters\"},{\"name\":\"tau_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"transformed_parameters\"},{\"name\":\"t_scale\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"transformed_parameters\"},{\"name\":\"cue_weights\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"p_test_conj\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N_test) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(M) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"log_p_test_conj\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N_test) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(M) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"log_lik_sum\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"},{\"name\":\"log_lik\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_test) + "},\"block\":\"generated_quantities\"},{\"name\":\"log_lik_split\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(log_lik_split_1dim__) + "},\"block\":\"generated_quantities\"},{\"name\":\"m_0_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"generated_quantities\"},{\"name\":\"S_0_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"generated_quantities\"},{\"name\":\"m_n_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"generated_quantities\"},{\"name\":\"S_n_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"generated_quantities\"}]");
   }
   inline std::string get_unconstrained_sizedtypes() const {
-    return std::string("[{\"name\":\"kappa_0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"nu_0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"lapse_rate_param\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(lapse_rate_param_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"m_0_param\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(m_0_param_1dim__) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"parameters\"},{\"name\":\"m_0_tau\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(m_0_tau_1dim__) + "},\"block\":\"parameters\"},{\"name\":\"s_0_param\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(s_0_param_1dim__) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"parameters\"},{\"name\":\"m_0\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"s_0\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"lapse_rate\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"lapsing_probs\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(M) + "},\"block\":\"transformed_parameters\"},{\"name\":\"kappa_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"real\"}}},\"block\":\"transformed_parameters\"},{\"name\":\"nu_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"real\"}}},\"block\":\"transformed_parameters\"},{\"name\":\"m_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"transformed_parameters\"},{\"name\":\"s_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"transformed_parameters\"},{\"name\":\"t_scale\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"transformed_parameters\"},{\"name\":\"cue_weights\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string((K -1)) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"p_test_conj\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N_test) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string((M -1)) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"log_p_test_conj\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N_test) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(M) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"log_lik_sum\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"},{\"name\":\"log_lik\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_test) + "},\"block\":\"generated_quantities\"},{\"name\":\"log_lik_split\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(log_lik_split_1dim__) + "},\"block\":\"generated_quantities\"},{\"name\":\"m_0_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"generated_quantities\"},{\"name\":\"S_0_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"generated_quantities\"},{\"name\":\"m_n_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"generated_quantities\"},{\"name\":\"S_n_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"generated_quantities\"}]");
+    return std::string("[{\"name\":\"kappa_0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"nu_0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"lapse_rate_param\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(lapse_rate_param_1dim__) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"parameters\"},{\"name\":\"m_0_param\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(m_0_param_1dim__) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"parameters\"},{\"name\":\"m_0_tau\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(m_0_tau_1dim__) + "},\"block\":\"parameters\"},{\"name\":\"tau_0_param\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(tau_0_param_1dim__) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"parameters\"},{\"name\":\"m_0\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"tau_0\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"lapse_rate\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"lapsing_probs\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(M) + "},\"block\":\"transformed_parameters\"},{\"name\":\"kappa_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"real\"}}},\"block\":\"transformed_parameters\"},{\"name\":\"nu_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"real\"}}},\"block\":\"transformed_parameters\"},{\"name\":\"m_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"transformed_parameters\"},{\"name\":\"tau_n\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"transformed_parameters\"},{\"name\":\"t_scale\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"transformed_parameters\"},{\"name\":\"cue_weights\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string((K -1)) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"p_test_conj\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N_test) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string((M -1)) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"log_p_test_conj\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N_test) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(M) + "}},\"block\":\"transformed_parameters\"},{\"name\":\"log_lik_sum\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"},{\"name\":\"log_lik\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_test) + "},\"block\":\"generated_quantities\"},{\"name\":\"log_lik_split\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(log_lik_split_1dim__) + "},\"block\":\"generated_quantities\"},{\"name\":\"m_0_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"generated_quantities\"},{\"name\":\"S_0_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}},\"block\":\"generated_quantities\"},{\"name\":\"m_n_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"generated_quantities\"},{\"name\":\"S_n_original\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(M) + ",\"element_type\":{\"name\":\"array\",\"length\":" + std::to_string(L) + ",\"element_type\":{\"name\":\"vector\",\"length\":" + std::to_string(K) + "}}},\"block\":\"generated_quantities\"}]");
   }
   // Begin method overload boilerplate
   template <typename RNG> inline void
@@ -2783,7 +2783,7 @@ public:
               emit_generated_quantities = true, std::ostream*
               pstream = nullptr) const {
     const size_t num_params__ = (((((1 + 1) + lapse_rate_param_1dim__) +
-      (m_0_param_1dim__ * K)) + m_0_tau_1dim__) + (s_0_param_1dim__ * K));
+      (m_0_param_1dim__ * K)) + m_0_tau_1dim__) + (tau_0_param_1dim__ * K));
     const size_t num_transformed = emit_transformed_parameters *
       (((((((((((((M * K) + (M * K)) + 1) + M) + (M * L)) + (M * L)) + (M *
       (L * K))) + (M * (L * K))) + (M * (L * K))) + (L * K)) + (N_test * M))
@@ -2806,7 +2806,7 @@ public:
               emit_generated_quantities = true, std::ostream*
               pstream = nullptr) const {
     const size_t num_params__ = (((((1 + 1) + lapse_rate_param_1dim__) +
-      (m_0_param_1dim__ * K)) + m_0_tau_1dim__) + (s_0_param_1dim__ * K));
+      (m_0_param_1dim__ * K)) + m_0_tau_1dim__) + (tau_0_param_1dim__ * K));
     const size_t num_transformed = emit_transformed_parameters *
       (((((((((((((M * K) + (M * K)) + 1) + M) + (M * L)) + (M * L)) + (M *
       (L * K))) + (M * (L * K))) + (M * (L * K))) + (L * K)) + (N_test * M))

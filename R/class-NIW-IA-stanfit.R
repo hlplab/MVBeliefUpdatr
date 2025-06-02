@@ -103,7 +103,7 @@ recover_types.ideal_adaptor_stanfit <- function(fit, staninput = NULL) {
       crossing(
         category = factor(colnames(staninput$z_test_counts), levels = colnames(staninput$z_test_counts)),
         group = factor(attr(staninput$y_test, "levels"), levels = attr(staninput$y_test, "levels")),
-        cue = factor(dimnames(staninput$x_test)[[2]], levels = dimnames(staninput$x_test)[[2]]),
+        cue = factor(dimnames(staninput$x_test)[[2]], levels = attr(staninput$x_test, "cues")),
         cue2 = cue))
 
   fit <- set_stanfit(fit, stanfit)
@@ -132,19 +132,27 @@ make_parnames <- function(prefix, ...) {
 
 # modified from brms
 # https://github.com/paul-buerkner/brms/blob/315c7874d6e1b58eb9082e5e07521682f0dc2ca9/R/rename_pars.R
-rename_pars <- function(x) {
+rename_pars <- function(x, include_original_pars = F) {
   stopifnot(is.ideal_adaptor_stanfit(x))
+  stanfit <- get_stanfit(x)
 
-  chains <- length(x$stanfit@sim$samples)
+  chains <- length(stanfit@sim$samples)
 
-  x$stanfit@sim$fnames_oi <- gsub("(m|S)(_(0|n))\\[", "\\1\\2_transformed\\[", x$stanfit@sim$fnames_oi)
-  x$stanfit@sim$fnames_oi <- gsub("(m|S)(_(0|n))_original\\[", "\\1\\2\\[", x$stanfit@sim$fnames_oi)
+  .rename <- function(parname) {
+    parname <- gsub("(t_scale)\\[", "\\1_transformed\\[", parname)
+    parname <- gsub("(m|S|tau)(_(0|n))\\[", "\\1\\2_transformed\\[", parname)
+    parname <- gsub("(m|S|tau)(_(0|n))_original\\[", "\\1\\2\\[", parname)
+    parname <- gsub("p_cat\\[", "p_category\\[", parname)
 
-  for (i in seq_len(chains)) {
-    names(x$stanfit@sim$samples[[i]]) <- gsub("(m|S)(_(0|n))\\[", "\\1\\2_transformed\\[", names(x$stanfit@sim$samples[[i]]))
-    names(x$stanfit@sim$samples[[i]]) <- gsub("(m|S)(_(0|n))_original\\[", "\\1\\2\\[", names(x$stanfit@sim$samples[[i]]))
+    parname
   }
+  # Leaving original model parameters untouched by default
+  if (include_original_pars) stanfit@model_pars %<>% .rename()
+  stanfit@sim$fnames_oi %<>% .rename()
 
+  for (i in seq_len(chains)) names(stanfit@sim$samples[[i]])  %<>% .rename()
+
+  x %<>% set_stanfit(stanfit)
   return(x)
 }
 

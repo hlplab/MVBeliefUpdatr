@@ -11,7 +11,7 @@
 \alias{get_exposure_category_css.ideal_adaptor_stanfit}
 \alias{get_exposure_category_uss.ideal_adaptor_stanfit}
 \alias{get_exposure_category_cov.ideal_adaptor_stanfit}
-\title{Get category sample mean or covariance matrix of exposure data from NIW ideal adaptor stanfit}
+\title{Get exposure category statistic from ideal adaptor stanfit}
 \usage{
 get_exposure_category_statistic(x, ...)
 

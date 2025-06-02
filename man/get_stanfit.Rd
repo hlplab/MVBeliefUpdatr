@@ -3,7 +3,7 @@
 \name{get_stanfit}
 \alias{get_stanfit}
 \alias{get_stanfit.ideal_adaptor_stanfit}
-\title{Get the stanfit from an NIW ideal adaptor stanfit}
+\title{Get the stanfit from an ideal adaptor stanfit}
 \usage{
 get_stanfit(x, ...)
 

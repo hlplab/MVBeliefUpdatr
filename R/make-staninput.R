@@ -199,7 +199,19 @@ get_category_statistics_as_list_of_arrays <- function(
       verbose = verbose,
       ...)
 
-  result %<>% map2(.y = simplify, .f = ~ to_array(.x, outer_dims = c(nlevels(data[[category]]), nlevels(data[[group]])), simplify = .y))
+  # (for now, only) name outer dimensions of array
+  dimnames <- list(levels(data[[category]]), levels(data[[group]]))
+  result %<>%
+    map2(
+      .y = simplify,
+      .f =
+        function(.x, .y) {
+          to_array(
+          .x,
+          outer_dims = c(nlevels(data[[category]]), nlevels(data[[group]])),
+          dimnames = dimnames,
+          simplify = .y)
+      })
 
   return(result)
 }
@@ -215,6 +227,10 @@ get_category_statistics_as_list_of_arrays <- function(
 #'   outer dimension. If `x` is list, the outer dimensions will each index one element of `x`.
 #'   The total length of `x` must match the product of outer dimensions. The first dimension will be iterated
 #'   over first (and thus alternating fastest), the second dimension will be iterated over second, etc. See details.
+#' @param dimnames A list of character vectors with names for each dimension of the array. If not `NULL`, the length
+#'   of this list must match the total number of dimensions, and each character vector must match the length of the
+#'   corresponding dimension. Dimensions are named from the outside-in (i.e. first outer than inner dimensions).
+#'   (default: `NULL`)
 #' @param simplify Should the array be simplified by removing inner dimensions whenever the inner element(s) are just scalars?
 #'   (e.g., if the inner elements are a one-element vector or a 1x1 matrix). This is currently checked only when `x` is `NULL`
 #'   or when `x` is a list. (default: `TRUE`)
@@ -235,18 +251,23 @@ get_category_statistics_as_list_of_arrays <- function(
 #'
 #' @keywords TBD
 #' @export
-to_array <- function(x, inner_dims = if (is.null(x)) 1 else NULL, outer_dims = NULL, simplify = T) {
+to_array <- function(
+    x,
+    inner_dims = if (is.null(x)) 1 else NULL,
+    outer_dims = NULL,
+    dimnames = NULL,
+    simplify = T
+) {
   if (is.null(x)) {
     if (is.null(inner_dims)) stop2("If x is NULL, inner_dims must be an integer >= 1.")
 
     # optionally simplify by removing inner_dims if there only is one such dimension of length 1 (i.e., if all elements are scalars)
     if (simplify) { inner_dims <- if (all(inner_dims == 1)) 0 else inner_dims }
 
-    return(array(numeric(), dim = rep(0, max(1, length(inner_dims) + length(outer_dims)))))
-  }
-
-  # Handle scalar, vector, and matrix input
-  if (is.atomic(x)) {
+    arr <- array(numeric(), dim = rep(0, max(1, length(inner_dims) + length(outer_dims))))
+  } else
+    # Handle atomic input
+    if (is.atomic(x)) {
     # NOTE: no simplification is currently being applied for atomic elements.
     found_inner_dims <- dim2(x)
 
@@ -276,12 +297,9 @@ to_array <- function(x, inner_dims = if (is.null(x)) 1 else NULL, outer_dims = N
     total_dims <- dim2(arr)
     perm <- c(if (length(total_dims) <= length(inner_dims)) NULL else seq(length(inner_dims) + 1, length(total_dims)), 1:length(inner_dims))
     arr <- aperm(a = arr, perm = perm)
-
-    return(arr)
-  }
-
-  # Handle list input
-  if (is.list(x)) {
+  } else
+    # Handle list input
+    if (is.list(x)) {
     # Use first list element to infer detected dimensions
     found_inner_dims <- dim2(x[[1]])
 
@@ -306,10 +324,15 @@ to_array <- function(x, inner_dims = if (is.null(x)) 1 else NULL, outer_dims = N
     if (simplify) { inner_dims <- if (all(inner_dims == 1)) NULL else inner_dims }
     # split first dimension into all outer dimensions
     arr <- array(arr, dim = c(outer_dims, inner_dims))
-    return(arr)
-  }
+  } else
+    stop2("Unsupported input type.")
 
-  stop2("Unsupported input type.")
+  # Name dimensions of array
+  # (no special handling and checking necessary since dimnames already does that: it exhaustively names from the outer to
+  # inner dimensions until it hits a mismatch)
+  dimnames(arr) <- dimnames
+
+  return(arr)
 }
 
 #' Prepare data to fit ideal_adaptor_stanfit via rstan
@@ -653,9 +676,12 @@ make_staninput_for_NIX_ideal_adaptor <- function(
     within({
       # x_test is different from definition in make_staninput_for_NIW_ideal_adaptor (since vector, rather than matrix, is expected)
       # could be changed if stan program instead is changed to accept matrix and then turn it into vector.
+
+      # It might be possible to simplify these steps through use of get_category_statistics_as_list_of_arrays
       x_test <-
         test_counts[[cues]] %>%
-        as.numeric()
+        as.numeric() %T>%
+        { attr(., which = "cues") <- cues }
       y_test <-
         test_counts[[group]] %>%
         as.numeric() %T>%
@@ -663,8 +689,10 @@ make_staninput_for_NIX_ideal_adaptor <- function(
         { attr(., which = "levels") <- levels(exposure[[group]]) }
       z_test_counts <-
         test_counts %>%
+        mutate(rownames = paste0("group=", !! sym(group), "; ", paste(cues, collapse = "-"), "=", paste(!!! syms(cues), sep = ","))) %>%
+        column_to_rownames("rownames") %>%
         # This should work since we check above that exposure categories and test responses have the same levels
-        select(.dots = levels(exposure[[category]])) %>%
+        select(levels(exposure[[category]])) %>%
         as.matrix()
       N_test <- length(x_test)
     })
@@ -690,10 +718,12 @@ make_staninput_for_NIW_ideal_adaptor <- function(
       verbose = verbose,
       N_exposure = nrow, x_mean_exposure = colMeans, x_ss_exposure = get_sum_of_uncentered_squares_from_df) %>%
     within({
+      # It might be possible to simplify these steps through use of get_category_statistics_as_list_of_arrays
       x_test <-
         test_counts %>%
         select(all_of(cues)) %>%
-        as.matrix()
+        as.matrix() %T>%
+        { attr(., which = "cues") <- cues }
       y_test <-
         test_counts[[group]] %>%
         as.numeric() %T>%
@@ -724,10 +754,12 @@ make_staninput_for_MNIX_ideal_adaptor <- function(
       verbose = verbose,
       N_exposure = nrow, x_mean_exposure = colMeans, x_cov_exposure = cov) %>%
     within({
+      # It might be possible to simplify these steps through use of get_category_statistics_as_list_of_arrays
       x_test <-
         test_counts %>%
         select(all_of(cues)) %>%
-        as.matrix()
+        as.matrix() %T>%
+        { attr(., which = "cues") <- cues }
       y_test <-
         test_counts[[group]] %>%
         as.numeric() %T>%

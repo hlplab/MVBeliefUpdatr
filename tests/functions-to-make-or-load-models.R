@@ -1,7 +1,7 @@
 n_subject <- 30
 # number of trials in exposure per category per subject
 n_exposure_trial <- 50
-n_test_trial <- 15
+n_test_trial <- 125
 
 make_data_for_stanfit <- function(example = 1, seed = NULL, verbose = F) {
   require(tidyverse)
@@ -124,7 +124,7 @@ make_data_for_2Dstanfit_with_exposure <- function(verbose = F, plot = F) {
 
   # Make 5 ideal observers to sample EXPOSURE from
   .io <-
-    example_MVG_ideal_observer(2) %>%
+    example_MVG_ideal_observer(2, verbose = verbose) %>%
     mutate(Sigma = map(Sigma, ~ .x))
   .exposure <-
     .io %>%
@@ -155,8 +155,8 @@ make_data_for_2Dstanfit_with_exposure <- function(verbose = F, plot = F) {
   # Define a test grid
   .test <-
     crossing(
-      !! sym(.cues[1]) := seq(min(.exposure[[.cues[1]]]), max(.exposure[[.cues[1]]]), length.out = n_test_trial),
-      !! sym(.cues[2]) := seq(min(.exposure[[.cues[2]]]), max(.exposure[[.cues[2]]]), length.out = n_test_trial),
+      !! sym(.cues[1]) := seq(min(.exposure[[.cues[1]]]), max(.exposure[[.cues[1]]]), length.out = ceiling(n_test_trial^(1/2))),
+      !! sym(.cues[2]) := seq(min(.exposure[[.cues[2]]]), max(.exposure[[.cues[2]]]), length.out = ceiling(n_test_trial^(1/2))),
       response = NA) %>%
     make_vector_column(cols = .cues, vector_col = "cue") %>%
     crossing(
@@ -201,7 +201,7 @@ make_data_for_3Dstanfit_with_exposure <- function(verbose = F) {
 
   # Make 5 ideal observers to sample EXPOSURE from
   .io <-
-    example_MVG_ideal_observer(3) %>%
+    example_MVG_ideal_observer(3, verbose = verbose) %>%
     mutate(Sigma = map(Sigma, ~ .x))
   .exposure <-
     .io %>%
@@ -232,9 +232,9 @@ make_data_for_3Dstanfit_with_exposure <- function(verbose = F) {
   # Define a test grid
   .test <-
     crossing(
-      !! sym(.cues[1]) := seq(min(.exposure[[.cues[1]]]), max(.exposure[[.cues[1]]]), length.out = n_test_trial),
-      !! sym(.cues[2]) := seq(min(.exposure[[.cues[2]]]), max(.exposure[[.cues[2]]]), length.out = n_test_trial),
-      !! sym(.cues[3]) := seq(min(.exposure[[.cues[3]]]), max(.exposure[[.cues[3]]]), length.out = n_test_trial),
+      !! sym(.cues[1]) := seq(min(.exposure[[.cues[1]]]), max(.exposure[[.cues[1]]]), length.out = ceiling(n_test_trial^(1/3))),
+      !! sym(.cues[2]) := seq(min(.exposure[[.cues[2]]]), max(.exposure[[.cues[2]]]), length.out = ceiling(n_test_trial^(1/3))),
+      !! sym(.cues[3]) := seq(min(.exposure[[.cues[3]]]), max(.exposure[[.cues[3]]]), length.out = ceiling(n_test_trial^(1/3))),
       response = NA) %>%
     make_vector_column(cols = .cues, vector_col = "cue") %>%
     crossing(
@@ -371,6 +371,23 @@ get_example_stanfit <- function(
     filename = NULL,
     ...
 ) {
+  if (is.null(filename))
+    filename <-
+      paste0(
+        "../example-stanfit-",
+        paste(
+          c(
+            if (!is.null(stanmodel)) stanmodel else "",
+            example,
+            if (!is.null(transform_type)) transform_type else "",
+            seed),
+          collapse = "-"),
+        ".rds")
+  if (file.exists(filename) && file_refit == "never") {
+    if (verbose) message("File already exists and file_refit is set to 'never'. Loading existing model from file.")
+    return(MVBeliefUpdatr:::read_ideal_adaptor_stanfit(filename))
+  }
+
   .staninput <-
     get_example_staninput(
       example = example,
@@ -379,19 +396,6 @@ get_example_stanfit <- function(
       lapse_rate = lapse_rate, mu_0 = mu_0, Sigma_0 = Sigma_0,
       seed = seed, verbose = verbose)
 
-  if (is.null(filename))
-    filename <-
-    paste0(
-      "../example-stanfit-",
-      paste(
-        c(
-          if (!is.null(stanmodel)) stanmodel else "",
-          example,
-          if (!is.null(transform_type)) transform_type else "",
-          seed),
-        collapse = "-"),
-      ".rds")
-
   fit <-
     fit_ideal_adaptor(
       staninput = .staninput,
@@ -399,7 +403,6 @@ get_example_stanfit <- function(
       file = filename, file_refit = file_refit,
       refresh = refresh,
       silent = silent, verbose = verbose,
-      cores = 4,
       ...)
 
   return(fit)

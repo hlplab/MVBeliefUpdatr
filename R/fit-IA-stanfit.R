@@ -144,7 +144,9 @@ fit_ideal_adaptor <- function(
 
   stanfit <- NULL
   if (chains > 0 & iter > 0) {
-    # Parameters *not* to store
+    # Parameters *not* to store (used with include = F below)
+    # Future file reduction could be achieved via the shredder package for stanfit
+    # post-processing (https://github.com/yonicd/shredder)
     exclude_pars <-
       c("lapse_rate_param",
         "m_0_param", "m_0_tau", "m_0_tau_param", "m_0_L_omega", "m_0_L_omega_param",

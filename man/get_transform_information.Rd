@@ -5,7 +5,7 @@
 \alias{get_transform_information.ideal_adaptor_stanfit}
 \alias{get_transform_function.ideal_adaptor_stanfit}
 \alias{get_untransform_function.ideal_adaptor_stanfit}
-\title{Get the transform/untransform information from an NIW ideal adaptor stanfit}
+\title{Get the transform/untransform information from an ideal adaptor stanfit}
 \usage{
 get_transform_information(x, ...)
 

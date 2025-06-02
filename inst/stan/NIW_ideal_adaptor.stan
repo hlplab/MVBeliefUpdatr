@@ -177,21 +177,7 @@ model {
 }
 
 generated quantities {
-  /* Compute and store pointwise log-likelihood, in order to allow computation of LOOIC.
-     Doing so in generated quantities block, following help(rstan::loo). Note that currently,
-     each unique combination of test location and exposure group is treated as an observation
-     (rather than each individual response).
-  */
-  real log_lik_sum = 0;
-  vector[N_test] log_lik;
-
-  for (n in 1:N_test) {
-    log_lik[n] = multinomial_lpmf(z_test_counts[n] | p_test_conj[n] * (1-lapse_rate) + lapsing_probs);
-    log_lik_sum += log_lik[n];
-  }
-
-  /* If requested by user:
-     Compute and store pointwise log-likelihood, in order to allow computation of LOOIC. This is
+  /* Compute and store pointwise log-likelihood, in order to allow computation of LOOIC. This is
      done in the generated quantities block, following help(rstan::loo). Note that each unqiue
      combination of test location and exposure group is treated as an observation in z_test_counts.
      So calculating pointwise log-likelihoods based on the vectorized z_test_counts, which would be
@@ -207,12 +193,19 @@ generated quantities {
          one compares models over different transformation of the cues, which can result in different
          numbers of unique test locations.
 
-     Here, log-likelihoods are thus calculated for each individual response. This requires reformatting
-     the information z_test_counts.
-
-     The downside of this revised approach is that it makes the object very large to store, and slow to
-     work with.
+     Optionally, users can thus also request log-likelihoods to be calculated for each individual response.
+     This requires reformatting the information z_test_counts. The downside of this revised approach is that
+     it makes the object very large to store, and slow to work with.
   */
+  real log_lik_sum = 0;
+  vector[N_test] log_lik;
+
+  for (n in 1:N_test) {
+    log_lik[n] = multinomial_lpmf(z_test_counts[n] | p_test_conj[n] * (1-lapse_rate) + lapsing_probs);
+    log_lik_sum += log_lik[n];
+  }
+
+  // If requested by user:
   vector[split_loglik_per_observation ? sum(to_array_1d(z_test_counts)) : 0] log_lik_split;
   if (split_loglik_per_observation == 1) {
     int idx = 1;
@@ -246,9 +239,10 @@ generated quantities {
     }
   }
 
-  matrix[mu_0_known ? 0 : K,mu_0_known ? 0 : K] m_0_cov_original;
-  if (!mu_0_known) {
-    matrix[K,K] m_0_cor = multiply_lower_tri_self_transpose(m_0_L_omega);
-    m_0_cov_original = INV_SCALE * quad_form_diag(m_0_cor, m_0_tau) * INV_SCALE';
-  }
+  // For debugging:
+  // matrix[mu_0_known ? 0 : K,mu_0_known ? 0 : K] m_0_cov_original;
+  // if (!mu_0_known) {
+  //   matrix[K,K] m_0_cor = multiply_lower_tri_self_transpose(m_0_L_omega);
+  //   m_0_cov_original = INV_SCALE * quad_form_diag(m_0_cor, m_0_tau) * INV_SCALE';
+  // }
 }

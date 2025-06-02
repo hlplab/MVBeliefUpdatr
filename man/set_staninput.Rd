@@ -3,7 +3,7 @@
 \name{set_staninput}
 \alias{set_staninput}
 \alias{set_staninput.ideal_adaptor_stanfit}
-\title{Set the input data from an NIW ideal adaptor stanfit}
+\title{Set the input data from an ideal adaptor stanfit}
 \usage{
 set_staninput(x, ...)
 

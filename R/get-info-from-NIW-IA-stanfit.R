@@ -10,10 +10,15 @@ NULL
 #' Get the names for all parameters in `fit`.
 #'
 #' @param fit A \code{\link{stanfit}} object.
+#' @param original_pars Should the original parameter names used in the Stan code be returned?
+#'   This includes parameters for which no samples were stored. Alternatively, only the
+#'   (renamed) parameters for which samples were stored are returned. (default: `FALSE`)
 #' @export
-get_params = function(fit) {
+get_params <- function(fit, original_pars = F) {
   stanfit <- get_stanfit(fit)
-  return(stanfit@model_pars)
+
+  names <- if (original_pars) stanfit@model_pars else names(stanfit)
+  return(names)
 }
 
 #' Get number of post-warmup MCMC samples from stanfit
@@ -22,7 +27,7 @@ get_params = function(fit) {
 #'
 #' @param fit A \code{\link{stanfit}} object.
 #' @export
-get_number_of_draws = function(fit) {
+get_number_of_draws <- function(fit) {
   stanfit <- get_stanfit(fit)
   return(length(stanfit@sim$samples[[1]][[1]]))
 }
@@ -50,7 +55,39 @@ get_random_draw_indices <- function(fit, ndraws)
 
 # Functions general to NIW ideal adaptor stanfit objects ----------------------------------------
 
-#' Get the stanfit from an NIW ideal adaptor stanfit
+# Method exported for compatibility with rstan
+#' @rdname get_stanfitmodelname
+#' @export
+get_stanmodel.ideal_adaptor_stanfit <- function(x) {
+  stanfit <- get_stanfit(x)
+
+  return(get_stanmodel(stanfit))
+}
+
+#' Get the name of the stanmodel from an ideal adaptor stanfit
+#'
+#' Returns the name of the stanfit model.
+#'
+#' @param x \code{\link{ideal_adaptor_stanfit}} object.
+#'
+#' @return A character string.
+#'
+#' @seealso TBD
+#' @keywords TBD
+#' @export
+get_stanmodelname <- function(x, ...) {
+  UseMethod("get_stanmodelname")
+}
+
+#' @rdname get_stanfitmodelname
+#' @export
+get_stanmodelname.ideal_adaptor_stanfit <- function(x) {
+  stanfit <- get_stanfit(x)
+
+  return(stanfit@model_name)
+}
+
+#' Get the stanfit from an ideal adaptor stanfit
 #'
 #' Returns the stanfit created by \code{stan} during the creation of the \code{\link{ideal_adaptor_stanfit}}
 #' object.
@@ -77,7 +114,7 @@ get_stanfit.ideal_adaptor_stanfit <- function(x) {
   }
 }
 
-#' Set the stanfit of an NIW ideal adaptor stanfit
+#' Set the stanfit of an ideal adaptor stanfit
 #'
 #' Sets the stanfit of an the \code{\link{ideal_adaptor_stanfit}} object.
 #'
@@ -114,7 +151,7 @@ set_stanfit.ideal_adaptor_stanfit <- function(x, stanfit = NULL) {
   }
 }
 
-#' Get the transform/untransform information from an NIW ideal adaptor stanfit
+#' Get the transform/untransform information from an ideal adaptor stanfit
 #'
 #' Returns the transform/untransform information handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
 #' object.
@@ -158,7 +195,7 @@ get_untransform_function.ideal_adaptor_stanfit <- function(x) {
   return(get_transform_information(x)$untransform.function)
 }
 
-#' Get the input data from an NIW ideal adaptor stanfit
+#' Get the input data from an ideal adaptor stanfit
 #'
 #' Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{\link{ideal_adaptor_stanfit}}
 #' object.
@@ -189,7 +226,7 @@ get_staninput.ideal_adaptor_stanfit <- function(x, which = c("untransformed", "t
   }
 }
 
-#' Set the input data from an NIW ideal adaptor stanfit
+#' Set the input data from an ideal adaptor stanfit
 #'
 #' Sets the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{\link{ideal_adaptor_stanfit}}
 #' object.
@@ -225,7 +262,7 @@ set_staninput.ideal_adaptor_stanfit <- function(x, staninput, which = c("untrans
   return(x)
 }
 
-#' Get category sample mean or covariance matrix of exposure data from NIW ideal adaptor stanfit
+#' Get exposure category statistic from ideal adaptor stanfit
 #'
 #' Returns the category means mu and/or category covariance matrix Sigma for the exposure data for an
 #' \code{\link{ideal_adaptor_stanfit}}.
@@ -297,17 +334,25 @@ get_exposure_category_statistic.ideal_adaptor_stanfit <- function(
   assert_that(all(groups %in% get_group_levels(x)),
               msg = paste("Some groups not found in the exposure data:",
                           paste(setdiff(groups, get_group_levels(x, include_prior = FALSE)), collapse = ", ")))
-  x <- get_staninput(x, ...)
+  staninput <- get_staninput(x, ...)
 
+  # Get names for requested dimensions from model object
+  category_names <- get_category_levels(x)
+  group_names <- get_group_levels(x)
+  cue_names<- get_cue_levels(x)
+
+  stanmodelname <- get_stanmodelname(x)
   df <- NULL
   # (If untransform_cues is TRUE, all statistics first need to be calculated because of the approach
   # taken below to untransform the statistics.)
 
   # Get counts n
   if (any(untransform_cues, c("n", "css", "cov") %in% statistic)) {
-    n <- x$N_exposure
+    n <- staninput$N_exposure
     d <- dim(n)
-    dn <- dimnames(n)
+    if (!length(category_names)) category_names <- paste0("category_", seq_len(d[1]))
+    if (!length(group_names)) group_names <- paste0("group_", seq_len(d[2]))
+    dn <- list(category = category_names, group = group_names)
 
     df.n <- tibble()
     for (c in 1:d[1]) { # category
@@ -326,21 +371,38 @@ get_exposure_category_statistic.ideal_adaptor_stanfit <- function(
 
   # Get central tendencies m
   if (any(untransform_cues, c("mean", "css", "cov") %in% statistic)) {
-    m <- x$x_mean_exposure
+    m <- staninput$x_mean_exposure
     d <- dim(m)
-    dn <- dimnames(m)
+    if (!length(category_names)) category_names <- paste0("category_", seq_len(d[1]))
+    if (!length(group_names)) group_names <- paste0("group_", seq_len(d[2]))
+    if (stanmodelname == "NIX_ideal_adaptor") {
+      dn <- list(category = category_names, group = group_names)
+    } else {
+      if (!length(cue_names)) cue_names <- paste0("cues", seq_len(d[3]))
+      dn <- list(category = category_names, group = group_names, cue = cue_names)
+    }
 
     df.m <- tibble()
+    # Get dimnames (skips if they are all null)
     for (c in 1:d[1]) { # category
       for (g in 1:d[2]) { # group/condition
-        for (f in 1:d[3]) { # cue
+        if (stanmodelname == "NIX_ideal_adaptor") {
           df.m %<>%
             bind_rows(
               tibble(
                 group = dn[[2]][g],
                 category = dn[[1]][c],
-                cue = dn[[3]][f],
-                value = m[c, g, f]))
+                value = m[c, g]))
+        } else {
+          for (f in 1:d[3]) { # cue
+            df.m %<>%
+              bind_rows(
+                tibble(
+                  group = dn[[2]][g],
+                  category = dn[[1]][c],
+                  cue = dn[[3]][f],
+                  value = m[c, g, f]))
+          }
         }
       }
     }
@@ -356,24 +418,56 @@ get_exposure_category_statistic.ideal_adaptor_stanfit <- function(
 
   # Get scatter or covariance matrices s
   if (any(untransform_cues, c("uss", "css", "cov") %in% statistic)) {
-    s <- x$x_ss_exposure
+    if (stanmodelname == "NIX_ideal_adaptor") {
+      s <- staninput$x_sd_exposure
+      # For now: stopping here, but note that some conditionals have already been added below
+      # (within this block for uss, css, and cov) to extract the currently adequate quantity
+      # form the model. But it's probably easier to standardize the models and store e.g., the cov
+      # for all types of models (or all stats), rather than storing different stats for each model.
+      # The stancode could then transform the input data to the correct quantities. This would make
+      # the handling here a lot easier.
+      stop2("Extraction of uss, css, or cov not yet implemented for NIX ideal adaptor stanfit.")
+    } else if (stanmodelname == "NIW_ideal_adaptor") {
+      s <- staninput$x_ss_exposure
+    } else if (stanmodelname == "MNIX_ideal_adaptor") {
+      s <- staninput$x_cov_exposure
+      stop2("Extraction of uss, css, or cov not yet implemented for MNIX ideal adaptor stanfit.")
+    } else {
+      stop2("Unrecognized stanmodel. No method available to extract category variance.")
+    }
+
     d <- dim(s)
-    dn <- dimnames(s)
+    if (!length(category_names)) category_names <- paste0("category_", seq_len(d[1]))
+    if (!length(group_names)) group_names <- paste0("group_", seq_len(d[2]))
+    if (stanmodelname == "NIX_ideal_adaptor") {
+      dn <- list(category = category_names, group = group_names)
+    } else {
+      if (!length(cue_names)) cue_names <- paste0("cues", seq_len(d[3]))
+      dn <- list(category = category_names, group = group_names, cue = cue_names, cue2 = cue_names)
+    }
 
     df.s <- tibble()
     for (c in 1:d[1]) { # category
       for (g in 1:d[2]) { # group/condition
-        for (f1 in 1:d[3]) { # cue1
-          for (f2 in 1:d[4]) { # cue2
-            df.s <-
-            rbind(
-              df.s,
+        if (stanmodelname == "NIX_ideal_adaptor") {
+          df.s %<>%
+            bind_rows(
               tibble(
                 group = dn[[2]][g],
                 category = dn[[1]][c],
-                cue = dn[[3]][f1],
-                cue2 = dn[[4]][f2],
                 value = s[c, g, f1, f2]))
+        } else {
+          for (f1 in 1:d[3]) { # cue1
+            for (f2 in 1:d[4]) { # cue2
+              df.s %<>%
+                bind_rows(
+                  tibble(
+                    group = dn[[2]][g],
+                    category = dn[[1]][c],
+                    cue = dn[[3]][f1],
+                    cue2 = dn[[4]][f2],
+                    value = s[c, g, f1, f2]))
+            }
           }
         }
       }
@@ -441,7 +535,7 @@ get_exposure_category_cov.ideal_adaptor_stanfit <- function(...) {
 }
 
 
-#' Get the test data from an NIW ideal adaptor stanfit.
+#' Get the test data from an ideal adaptor stanfit.
 #'
 #' Returns the test data used during the creation of the \code{\link[rstan]{stanfit}}.
 #' object.
@@ -482,7 +576,7 @@ get_test_data.ideal_adaptor_stanfit <- function(
 }
 
 
-#' Get or restore the original group or category levels from an NIW ideal adaptor stanfit.
+#' Get or restore the original group or category levels from an ideal adaptor stanfit.
 #'
 #' Checks if information is available about the original values and order of the factor levels
 #' for the category variable (for which beliefs about means and covariances are inferred) or
@@ -557,7 +651,7 @@ get_cue_levels.ideal_adaptor_stanfit <- function(x, indices = NULL) {
 }
 
 
-#' Get tidybayes constructor from an NIW ideal adaptor stanfit.
+#' Get tidybayes constructor from an ideal adaptor stanfit.
 #'
 #' Gets the tidybayes constructor function from the stanfit object. `get_category_constructor()` and
 #' `get_group_constructor()` are convenience functions, calling `get_constructor()`. See \code{
@@ -733,9 +827,9 @@ get_categorization_function_from_grouped_ibbu_stanfit_draws <- function(fit, ...
 }
 
 
-#' Add MCMC draws from an NIW IBBU stanfit to a tibble.
+#' Get MCMC draws from an ideal adaptor stanfit
 #'
-#' Add MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) to a tibble. Both wide
+#' Get MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) as a tibble. Both wide
 #' (`wide=TRUE`) or long format (`wide=FALSE`) can be chosen as output. By default all post-warmup draws are
 #' returned, but if `summarize=TRUE` then just the mean of each parameter is returned instead.
 #'

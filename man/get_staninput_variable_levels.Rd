@@ -9,7 +9,7 @@
 \alias{get_category_levels.ideal_adaptor_stanfit}
 \alias{get_group_levels.ideal_adaptor_stanfit}
 \alias{get_cue_levels.ideal_adaptor_stanfit}
-\title{Get or restore the original group or category levels from an NIW ideal adaptor stanfit.}
+\title{Get or restore the original group or category levels from an ideal adaptor stanfit.}
 \usage{
 get_staninput_variable_levels(x, ...)
 

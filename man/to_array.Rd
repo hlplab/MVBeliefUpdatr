@@ -8,6 +8,7 @@ to_array(
   x,
   inner_dims = if (is.null(x)) 1 else NULL,
   outer_dims = NULL,
+  dimnames = NULL,
   simplify = T
 )
 }
@@ -21,6 +22,11 @@ to_array(
 outer dimension. If `x` is list, the outer dimensions will each index one element of `x`.
 The total length of `x` must match the product of outer dimensions. The first dimension will be iterated
 over first (and thus alternating fastest), the second dimension will be iterated over second, etc. See details.}
+
+\item{dimnames}{A list of character vectors with names for each dimension of the array. If not `NULL`, the length
+of this list must match the total number of dimensions, and each character vector must match the length of the
+corresponding dimension. Dimensions are named from the outside-in (i.e. first outer than inner dimensions).
+(default: `NULL`)}
 
 \item{simplify}{Should the array be simplified by removing inner dimensions whenever the inner element(s) are just scalars?
 (e.g., if the inner elements are a one-element vector or a 1x1 matrix). This is currently checked only when `x` is `NULL`
