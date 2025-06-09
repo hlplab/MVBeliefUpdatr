@@ -2,9 +2,12 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{get_stanmodelname}
 \alias{get_stanmodelname}
+\alias{get_stanmodelname.ideal_adaptor_stanfit}
 \title{Get the name of the stanmodel from an ideal adaptor stanfit}
 \usage{
 get_stanmodelname(x, ...)
+
+\method{get_stanmodelname}{ideal_adaptor_stanfit}(x)
 }
 \arguments{
 \item{x}{\code{\link{ideal_adaptor_stanfit}} object.}

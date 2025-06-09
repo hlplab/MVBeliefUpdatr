@@ -182,20 +182,20 @@ example_data <- function(
 #'
 #' @param data The tibble or data.frame from which to construct the exemplar model.
 #' @param group Optionally, a vector of one or more grouping variables. If group is not NULL, one MVG or
-#' ideal observers will be derived for each level of \code{group}. (default: NULL)
+#'   ideal observers will be derived for each level of \code{group}. (default: NULL)
 #' @param category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param cues Name(s) of variables in \code{data} that contain the cue information.
 #' @param sim_function Similarity function that is used to calculate exemplar-to-exemplar similarity. If NULL,
-#' defaults to \code{sim_function = function(x, y, weights = w, distance_metric = 2, distance_decay_factor = 1) {
-#' distance <- sum(weights * abs(x - y)^distance_metric)^(1/distance_metric); similarity <- exp(-distance^distance_decay_factor) }},
-#' where each cue's weight \code{w} is the inverse of the cues SD^distance_metric. Except for the setting of the weights, this general formula follows
-#' \insertCite{afpelbaum-mcmurray2015}, who cite \insertCite{nosofsky1986}.
+#'   defaults to \code{sim_function = function(x, y, weights = w, distance_metric = 2, distance_decay_factor = 1) {
+#'   distance <- sum(weights * abs(x - y)^distance_metric)^(1/distance_metric); similarity <- exp(-distance^distance_decay_factor) }},
+#'   where each cue's weight \code{w} is the inverse of the cues SD^distance_metric. Except for the setting of the
+#'   weights, this general formula follows \insertCite{afpelbaum-mcmurray2015}, who cite \insertCite{nosofsky1986}.
 #' @param prior Optionally specify a prior probability for each category (in each group). (default: a uniform
-#' prior over all categories).
+#'   prior over all categories).
 #' @param lapse_rate Optionally specify a lapse rate. (default: \code{NA})
 #' @param lapse_bias Optionally specify a lapse bias. (default: \code{NA})
 #' @param Sigma_noise Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This
-#' argument will be ignored if NULL. (default: NULL)
+#'   argument will be ignored if NULL. (default: NULL)
 #' @param verbose If true provides more information. (default: FALSE)
 #'
 #' @return A tibble that is an MVG or MVG ideal observer object.

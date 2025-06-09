@@ -56,7 +56,6 @@ get_random_draw_indices <- function(fit, ndraws)
 # Functions general to NIW ideal adaptor stanfit objects ----------------------------------------
 
 # Method exported for compatibility with rstan
-#' @rdname get_stanfitmodelname
 #' @export
 get_stanmodel.ideal_adaptor_stanfit <- function(x) {
   stanfit <- get_stanfit(x)
@@ -79,7 +78,7 @@ get_stanmodelname <- function(x, ...) {
   UseMethod("get_stanmodelname")
 }
 
-#' @rdname get_stanfitmodelname
+#' @rdname get_stanmodelname
 #' @export
 get_stanmodelname.ideal_adaptor_stanfit <- function(x) {
   stanfit <- get_stanfit(x)
