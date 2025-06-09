@@ -1,11 +1,5 @@
 NULL
 
-# dim that returns length of vector for vector
-dim2 <- function(x) {
-  if (is.null(dim(x))) return(length(x))
-  return(dim(x))
-}
-
 #' Get sum-of-squares matrix
 #'
 #' Get sum-of-square matrix.

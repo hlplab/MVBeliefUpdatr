@@ -141,6 +141,13 @@ as_one_variable <- function(x, allow_na = TRUE) {
   x
 }
 
+# dim that returns length of vector for vector (not from brms)
+dim2 <- function(x) {
+  if (is.null(dim(x))) return(length(x))
+  return(dim(x))
+}
+
+
 warning2 <- function(...) {
   warning(..., call. = FALSE)
 }

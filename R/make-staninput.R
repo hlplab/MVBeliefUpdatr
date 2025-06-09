@@ -216,14 +216,11 @@ get_category_statistics_as_list_of_arrays <- function(
   return(result)
 }
 
-#' Turn (lists of) numerics into arrays (for Stan input)
-#'
-#' Takes `NULL`, numeric atomics (single scalars, vectors, matrices) or lists of numeric elements as inputs and turns them into numeric arrays.
-#'
 #' @param x The input to be turned into an array.
-#' @param inner_dims Intended dimensions of x. Will be used for checks and to enforce the correct dimensions of `x`. If `NULL`,
-#'   `inner_dims` will be inferred from the input. (default: `1` if `x` is `NULL`, else `NULL`)
-#' @param outer_dims A vector of outer dimensions for the array. If `x` is not a list, an array of `x` will be repeated for each
+#' @param inner_dims Integer vector of intended dimensions of x.
+#'   If `NULL`, `inner_dims` will be inferred from the input.
+#'   If not `NULL`, this will be used for checks and to enforce the correct dimensions of `x`. (default: `NULL`)
+#' @param outer_dims An integer vector of outer dimensions for the array. If `x` is not a list, an array of `x` will be repeated for each
 #'   outer dimension. If `x` is list, the outer dimensions will each index one element of `x`.
 #'   The total length of `x` must match the product of outer dimensions. The first dimension will be iterated
 #'   over first (and thus alternating fastest), the second dimension will be iterated over second, etc. See details.
@@ -253,11 +250,14 @@ get_category_statistics_as_list_of_arrays <- function(
 #' @export
 to_array <- function(
     x,
-    inner_dims = if (is.null(x)) 1 else NULL,
+    inner_dims = NULL,
     outer_dims = NULL,
     dimnames = NULL,
     simplify = T
 ) {
+  stopifnot(is.null(inner_dims) || inner_dims == round(inner_dims))
+  stopifnot(is.null(outer_dims) || outer_dims == round(outer_dims))
+
   if (is.null(x)) {
     if (is.null(inner_dims)) stop2("If x is NULL, inner_dims must be an integer >= 1.")
 
