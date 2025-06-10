@@ -413,7 +413,7 @@ read_ideal_adaptor_stanfit <- function(file) {
   x <- suppressWarnings(try(readRDS(file), silent = TRUE))
   if (!is_try_error(x)) {
     if (!is.ideal_adaptor_stanfit(x)) {
-      stop2("Object loaded via 'file' is not of class 'ideal_adaptor_stanfit'.")
+      stop2("Object loaded from 'file' is not recognized as class 'ideal_adaptor_stanfit'. This usually indicates that you need to refit the model.")
     }
     x$file <- file
   } else {
