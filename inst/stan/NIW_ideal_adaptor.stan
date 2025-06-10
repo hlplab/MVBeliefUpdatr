@@ -59,7 +59,7 @@ transformed data {
 }
 
 parameters {
-    /* The strength of the prior beliefs is currently assumed to be shared across groups, categories, and cues.
+  /* The strength of the prior beliefs is currently assumed to be shared across groups, categories, and cues.
      Any of these assumptions could be revisited in the future. For example, different groups could differ in
      the strength of their prior beliefs because of differences in prior experience. Different categories could
      be associated with weaker or stronger prior beliefs because of differences in the amount of exposure

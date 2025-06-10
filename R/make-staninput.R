@@ -229,8 +229,9 @@ get_category_statistics_as_list_of_arrays <- function(
 #'   corresponding dimension. Dimensions are named from the outside-in (i.e. first outer than inner dimensions).
 #'   (default: `NULL`)
 #' @param simplify Should the array be simplified by removing inner dimensions whenever the inner element(s) are just scalars?
-#'   (e.g., if the inner elements are a one-element vector or a 1x1 matrix). This is currently checked only when `x` is `NULL`
-#'   or when `x` is a list. (default: `TRUE`)
+#'   (e.g., if the inner elements are a one-element vector or a 1x1 matrix). Note that atomic values that can be simplified
+#'   will be returned as scalars (and thus without dimnames) if there are no outer dimensions, since the returned object cannot
+#'   be an array in that case. (default: `TRUE`)
 #'
 #' @return An array.
 #'
@@ -255,16 +256,15 @@ to_array <- function(
     dimnames = NULL,
     simplify = T
 ) {
-  stopifnot(is.null(inner_dims) || inner_dims == round(inner_dims))
-  stopifnot(is.null(outer_dims) || outer_dims == round(outer_dims))
+  stopifnot(is.null(inner_dims) || all(inner_dims == round(inner_dims)))
+  stopifnot(is.null(outer_dims) || all(outer_dims == round(outer_dims)))
 
   if (is.null(x)) {
-    if (is.null(inner_dims)) stop2("If x is NULL, inner_dims must be an integer >= 1.")
+    # optionally simplify by removing inner_dims if all inner dimension have length 1 (i.e., if all elements are intended to be scalars)
+    if (simplify) { inner_dims <- if (all(inner_dims == 1)) NULL else inner_dims }
 
-    # optionally simplify by removing inner_dims if there only is one such dimension of length 1 (i.e., if all elements are scalars)
-    if (simplify) { inner_dims <- if (all(inner_dims == 1)) 0 else inner_dims }
-
-    arr <- array(numeric(), dim = rep(0, max(1, length(inner_dims) + length(outer_dims))))
+    total_dim_length <- length(inner_dims) + length(outer_dims)
+    arr <- array(numeric(), dim = if (total_dim_length == 0) 0 else rep(0, total_dim_length))
   } else
     # Handle atomic input
     if (is.atomic(x)) {
@@ -290,12 +290,16 @@ to_array <- function(
       }
     }
 
+    # optionally simplify by removing inner_dims if all inner dimension have length 1 (i.e., if all elements are essentially scalars)
+    # Since array with no dimensions are not allowed, special handling is required when there are no outer dimensions and we still
+    # want to simplify. In that case, x as a scalar without dimnames.
+    if (simplify) { inner_dims <- if (all(inner_dims == 1)) { if (!is.null(outer_dims)) NULL else return(as.numeric(x)) } else inner_dims }
 
     # First cast an array with outer_dims on the outside (necessary to get correct handling of matrices when outer_dims are requested)
-    arr <- rep(x, prod(outer_dims)) %>% array(dim = c(inner_dims, outer_dims))
+    total_dim_length <- length(inner_dims) + length(outer_dims)
+    arr <- rep(x, prod(outer_dims)) %>% array(dim = if (total_dim_length == 0) 0 else c(inner_dims, outer_dims))
     # Move outer dimensions to the front
-    total_dims <- dim2(arr)
-    perm <- c(if (length(total_dims) <= length(inner_dims)) NULL else seq(length(inner_dims) + 1, length(total_dims)), 1:length(inner_dims))
+    perm <- c(if (is.null(outer_dims)) NULL else seq(length(inner_dims) + 1, total_dim_length), if (is.null(inner_dims)) NULL else 1:length(inner_dims))
     arr <- aperm(a = arr, perm = perm)
   } else
     # Handle list input
@@ -320,7 +324,7 @@ to_array <- function(
     perm <- c(length(total_dims), 1:(length(total_dims) - 1))
     arr <- aperm(a = arr, perm = perm)
 
-    # optionally simplify by removing inner_dims if there only is one such dimension of length 1 (i.e., if all elements are scalars)
+    # optionally simplify by removing inner_dims if all inner dimension have length 1 (i.e., if all elements are essentially scalars)
     if (simplify) { inner_dims <- if (all(inner_dims == 1)) NULL else inner_dims }
     # split first dimension into all outer dimensions
     arr <- array(arr, dim = c(outer_dims, inner_dims))
@@ -420,7 +424,6 @@ make_staninput <- function(
   n.cues <- length(cues)
   if (stanmodel == "NIX_ideal_adaptor") {
     assert_that(n.cues == 1, msg = paste0("NIX_ideal_adaptor requires univariate data (!= ", n.cues, " cues found)."))
-    assert_that(transform_type == "identity", msg = 'NIX_ideal_adaptor is only implemented for transform_type = "identity".')
   } else if (stanmodel == "MNIX_ideal_adaptor") {
     assert_that(n.cues >= 2, msg = paste0("MNIX_ideal_adaptor requires multivariate data (!= ", n.cues, " cue found)."))
   }
@@ -540,8 +543,8 @@ make_staninput <- function(
   transform <- get_affine_transform(exposure, cues, transform_type)
   exposure <- transform[["transform.function"]](exposure)
   test <- transform[["transform.function"]](test)
-  if (!is.null(mu_0)) mu_0 %<>% map(~ transform_category_mean(m = .x, transform)) else mu_0_transformed <- mu_0
-  if (!is.null(Sigma_0)) Sigma_0 %<>% map(~ transform_category_cov(S = .x, transform)) else Sigma_0_transformed <- Sigma_0
+  if (!is.null(mu_0)) mu_0 %<>% map(~ transform_category_mean(m = .x, transform))
+  if (!is.null(Sigma_0)) Sigma_0 %<>% map(~ transform_category_cov(S = .x, transform))
   test_counts <-
     get_test_counts(
       test = test,
@@ -562,17 +565,17 @@ make_staninput <- function(
     nlist(
       K, M, L,
 
-      tau_scale = tau_scale %>% to_array(inner_dims = K),
+      tau_scale = tau_scale %>% to_array(inner_dims = K, simplify = if (stanmodel == "NIX_ideal_adaptor") T else F),
       L_omega_eta,
       split_loglik_per_observation,
 
       lapse_rate_known = if (is.null(lapse_rate)) 0 else 1,
-      lapse_rate_data = lapse_rate %>% to_array(),
+      lapse_rate_data = lapse_rate %>% to_array(outer_dims = if (is.null(lapse_rate)) NULL else 1),
 
-      p_cat = rep(1/M, M), # Currently only used by MNIX
+      p_cat = rep(1/M, M) %>% to_array(), # Currently only used by MNIX
 
-      mu_0_known = if (is.null(mu_0_transformed)) 0 else 1,
-      Sigma_0_known = if (is.null(Sigma_0_transformed)) 0 else 1,
+      mu_0_known = if (is.null(mu_0)) 0 else 1,
+      Sigma_0_known = if (is.null(Sigma_0)) 0 else 1,
       mu_0_data = mu_0 %>% to_array(inner_dims = K, outer_dims = M, simplify = if (stanmodel == "NIX_ideal_adaptor") T else F),
       Sigma_0_data = Sigma_0 %>% to_array(inner_dims = c(K, K), outer_dims = M, simplify = if (stanmodel == "NIX_ideal_adaptor") T else F),
 
@@ -582,7 +585,7 @@ make_staninput <- function(
 
   staninput_untransformed <- staninput
   staninput_untransformed[["mu_0_data"]] <- mu_0_untransformed %>% to_array(inner_dims = K, outer_dims = M, simplify = if (stanmodel == "NIX_ideal_adaptor") T else F)
-  staninput_untransformed[["Sigma_0_data"]] <- Sigma_0_untransformed %>% to_array(inner_dims = K, outer_dims = M, simplify = if (stanmodel == "NIX_ideal_adaptor") T else F)
+  staninput_untransformed[["Sigma_0_data"]] <- Sigma_0_untransformed %>% to_array(inner_dims = c(K, K), outer_dims = M, simplify = if (stanmodel == "NIX_ideal_adaptor") T else F)
 
   # -----------------------------------------------------------------
   # Add the more model-specific parts of the staninput
