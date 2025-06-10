@@ -216,6 +216,10 @@ get_category_statistics_as_list_of_arrays <- function(
   return(result)
 }
 
+#' Turn (lists of) numerics into arrays (for Stan input)
+#'
+#' Takes `NULL`, numeric atomics (single scalars, vectors, matrices) or lists of numeric elements as inputs and turns them into numeric arrays.
+#'
 #' @param x The input to be turned into an array.
 #' @param inner_dims Integer vector of intended dimensions of x.
 #'   If `NULL`, `inner_dims` will be inferred from the input.
@@ -500,11 +504,12 @@ make_staninput <- function(
     assert_that(all(map_lgl(mu_0, is.numeric), map_lgl(mu_0, ~ is.null(dim(.x)) | length(dim(.x)) == 1)),
                 msg = "If mu_0 is a list, each element must be a vector.")
     assert_that(all((map_int(mu_0, length)) == n.cues),
-                msg = paste(
-                  "At least one element of mu_0 does not have the correct dimensionality. Observations have",
+                msg = paste0(
+                  "At least one element of mu_0 does not have the correct dimensionality. Observations have ",
                   n.cues,
-                  "dimensions. Dimensionality of mu_0 ranges from",
-                  paste(map_int(mu_0, length) %>% range(), collapse = " to ")))
+                  " dimensions. Dimensionality of mu_0 ranges from ",
+                  paste(map_int(mu_0, length) %>% range(), collapse = " to "),
+                  "."))
   }
   if (!is.null(Sigma_0)) {
     if (nlevels(exposure[[category]]) == 1) {
@@ -517,11 +522,12 @@ make_staninput <- function(
     assert_that(all(map_lgl(Sigma_0, is.numeric), map_lgl(Sigma_0, ~ length(dim(.x)) == 2)),
                 msg = "If Sigma_0 is a list, each element must be a k x k matrix.")
     assert_that(all(map_lgl(Sigma_0, ~ all(dim(.x) == n.cues))),
-                msg = paste(
-                  "At least one element of Sigma_0 does not have the correct dimensionality. Observations have",
+                msg = paste0(
+                  "At least one element of Sigma_0 does not have the correct dimensionality. Observations have ",
                   n.cues,
-                  "dimensions. Sigma_0 includes matrices of dimension",
-                  paste(paste(map(Sigma_0, ~ dim(.x) %>% paste(collapse = " x "))) %>% unique(), collapse = ", ")))
+                  " dimensions. Sigma_0 includes matrices of dimension ",
+                  paste(paste(map(Sigma_0, ~ dim(.x) %>% paste(collapse = " x "))) %>% unique(), collapse = ", "),
+                  "."))
   }
 
   # -----------------------------------------------------------------

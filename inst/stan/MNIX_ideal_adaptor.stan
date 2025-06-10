@@ -60,7 +60,7 @@ data {
   array[Sigma_0_known ? M : 0] cov_matrix[Sigma_0_known ? K : 0] Sigma_0_data;  // optional: user provided expected Sigma_0 (prior category covariance matrices) in space of affine transformation defined by INV_SCALE^-1 and shift
   // simplex[use_ideal_weights || !weights_known ? 0 : K] cue_weights_data;   // optional: user-provided cue weights (used only if use_ideal_weights == 0 and weights are known)
 
-  vector<lower=0>[mu_0_known ? 0 : K] tau_scale;           // separate taus for each of the K features to capture that features can be on separate scales
+  vector<lower=0>[K] tau_scale;                            // separate taus for each of the K features to capture that features can be on separate scales
 
   /* The data above are assumed to have been transformed by a sensible affine transformation f(x) = A(x - center)
      (e.g., by scaling or whitening the data) in order to improve numerical stability. A_inv and center are used

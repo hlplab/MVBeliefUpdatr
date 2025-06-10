@@ -329,19 +329,15 @@ make_staninput_deprecated <- function(
   if (length(cues) > 1 || !use_univariate_updating) {
     staninput <-
       exposure %>%
-      get_sufficient_statistics_as_list_of_arrays(
-        cues = cues,
-        category = category,
-        group = group,
-        use_univariate_updating = F,
+      get_category_statistics_as_list_of_arrays(
+        cues = cues, category = category, group = group,
+        # Different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix):
+        simplify = list(T, F, F),
         verbose = verbose,
-        # The part below currently is ignored by get_sufficient_statistics_as_list_of_arrays. If the same syntax as for univariate input could
-        # also work for multivariate input to get_sufficient_statistics_as_list_of_arrays that would be more
-        # elegant.
-        x_mean = colMeans, N = length, x_ss = get_sum_of_uncentered_squares_from_df) %>%
+        N_exposure = nrow, x_mean_exposure = colMeans, x_ss_exposure = get_sum_of_uncentered_squares_from_df) %>%
       within({
-        M <- dim(x_mean)[1]
-        L <- dim(x_mean)[2]
+        M <- dim(x_mean_exposure)[1]
+        L <- dim(x_mean_exposure)[2]
         K <- length(cues)
 
         x_test <-
@@ -372,27 +368,18 @@ make_staninput_deprecated <- function(
 
         split_loglik_per_observation <- split_loglik_per_observation
       })
-
-    # Clean-up x_mean and x_ss for groups without exposure data. For reasons laid out in
-    # get_sufficient_statistics_as_list_of_arrays, we had to set these means and sums of
-    # squares to arbitrary values (since Stan doesn't accept typed NAs). But this can
-    # create confusion when users try to retrieve the exposure statistics for those groups.
-    # Here we're thus setting them to NAs.
-    staninput$x_mean[staninput$N == 0] <- NA
-    staninput$x_ss[staninput$N == 0] <- NA
   } else if (use_univariate_updating) {
     if (length(cues) > 1) stop2("Univariate updating is only implemented for univariate data.")
 
     staninput <-
       exposure %>%
-      get_sufficient_statistics_as_list_of_arrays(
+      get_category_statistics_as_list_of_arrays(
         cues = cues, category = category, group = group,
-        use_univariate_updating = T,
-        verbose = verbose,
-        xbar = mean, n = length, xsd = sd) %>%
+        simplify = list(T, T, T),
+        N_exposure = length, x_mean_exposure = mean, x_sd_exposure = sd) %>%
       within({
-        m <- dim(xbar)[1]
-        l <- dim(xbar)[2]
+        m <- dim(x_mean_exposure)[1]
+        l <- dim(x_mean_exposure)[2]
 
         x_test <-
           test_counts %>%

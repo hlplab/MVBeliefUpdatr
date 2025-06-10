@@ -40,7 +40,7 @@ data {
      on the input data (e.g., by placing the mean of the Normal prior in the center of the
      exposure data).
   */
-  vector<lower=0>[mu_0_known ? 0 : K] tau_scale;           // separate taus for each of the K features to capture that features can be on separate scales
+  vector<lower=0>[K] tau_scale;                            // separate taus for each of the K features to capture that features can be on separate scales
   real<lower=0> L_omega_eta;                               // scale of LKJ prior for correlation of variance of m_0
 
   /* The data above are assumed to have been transformed by a sensible affine transformation f(x) = A(x - center)

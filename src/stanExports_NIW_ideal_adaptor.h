@@ -152,8 +152,8 @@ static constexpr std::array<const char*, 179> locations_array__ =
   " (in 'NIW_ideal_adaptor', line 32, column 8 to column 29)",
   " (in 'NIW_ideal_adaptor', line 32, column 42 to column 63)",
   " (in 'NIW_ideal_adaptor', line 32, column 2 to column 78)",
-  " (in 'NIW_ideal_adaptor', line 38, column 18 to column 36)",
-  " (in 'NIW_ideal_adaptor', line 38, column 2 to column 48)",
+  " (in 'NIW_ideal_adaptor', line 38, column 18 to column 19)",
+  " (in 'NIW_ideal_adaptor', line 38, column 2 to column 31)",
   " (in 'NIW_ideal_adaptor', line 39, column 2 to column 28)",
   " (in 'NIW_ideal_adaptor', line 44, column 9 to column 10)",
   " (in 'NIW_ideal_adaptor', line 44, column 12 to column 13)",
@@ -569,22 +569,20 @@ public:
       current_statement__ = 123;
       stan::math::check_cov_matrix(function__, "Sigma_0_data", Sigma_0_data);
       current_statement__ = 124;
-      stan::math::validate_non_negative_index("tau_scale",
-        "mu_0_known ? 0 : K", (mu_0_known ? 0 : K));
+      stan::math::validate_non_negative_index("tau_scale", "K", K);
       current_statement__ = 125;
       context__.validate_dims("data initialization", "tau_scale", "double",
-        std::vector<size_t>{static_cast<size_t>((mu_0_known ? 0 : K))});
-      tau_scale_data__ = Eigen::Matrix<double,-1,1>::Constant((mu_0_known ? 0 : K),
+        std::vector<size_t>{static_cast<size_t>(K)});
+      tau_scale_data__ = Eigen::Matrix<double,-1,1>::Constant(K,
                            std::numeric_limits<double>::quiet_NaN());
       new (&tau_scale)
-        Eigen::Map<Eigen::Matrix<double,-1,1>>(tau_scale_data__.data(),
-        (mu_0_known ? 0 : K));
+        Eigen::Map<Eigen::Matrix<double,-1,1>>(tau_scale_data__.data(), K);
       {
         std::vector<local_scalar_t__> tau_scale_flat__;
         current_statement__ = 125;
         tau_scale_flat__ = context__.vals_r("tau_scale");
         pos__ = 1;
-        for (int sym1__ = 1; sym1__ <= (mu_0_known ? 0 : K); ++sym1__) {
+        for (int sym1__ = 1; sym1__ <= K; ++sym1__) {
           stan::model::assign(tau_scale, tau_scale_flat__[(pos__ - 1)],
             "assigning variable tau_scale", stan::model::index_uni(sym1__));
           pos__ = (pos__ + 1);

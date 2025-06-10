@@ -179,8 +179,8 @@ fit_ideal_adaptor <- function(
 
     }
 
-    if (is.null(stanfit)) {
-      stop("Sampling failed.")
+    if (!contains_draws(stanfit)) {
+      stop2("Sampling failed.")
     } else {
       fit %<>% set_stanfit(stanfit)
       fit %<>% recover_types.ideal_adaptor_stanfit()
