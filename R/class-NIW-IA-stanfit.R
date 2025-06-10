@@ -209,20 +209,47 @@ is.NIW_ideal_adaptor_MCMC <- function(x, is.nested = T, is.long = T, with.prior 
 #' @seealso TBD
 #' @keywords TBD
 #' @export
-is.ideal_adaptor_staninput <- function(x) {
-  if (!is.list(x)) return(FALSE)
-  if (!all(c("staninput", "data", "transform_information") %in% names(x))) return(FALSE)
-  if (!is.list(x$staninput)) return(FALSE)
-  if (!is.data.frame(x$data)) return(FALSE)
-  if (!is.list(x$transform_information)) return(FALSE)
+is.ideal_adaptor_staninput <- function(x, verbose = FALSE) {
+  if (!is.list(x)) {
+    if (verbose) message("Object x is not a list.")
+    return(FALSE)
+  }
+  if (!all(c("staninput", "data", "transform_information") %in% names(x))) {
+    if (verbose) message("Object x is missing one of the required components: staninput, data, transform_information.")
+    return(FALSE)
+  }
+  if (!is.list(x$staninput)) {
+    if (verbose) message("Component staninput in object x is not a list.")
+    return(FALSE)
+  }
+  if (!is.data.frame(x$data)) {
+    if (verbose) message("Component data in object x is not a data.frame.")
+    return(FALSE)
+  }
+  if (!is.list(x$transform_information)) {
+    if (verbose) message("Component transform_information in object x is not a list.")
+    return(FALSE)
+  }
 
   # Checking presence of critical components
-  if(!all(c("transformed", "untransformed") %in% names(x$staninput))) return(FALSE)
-  if(!all(c("transform.function", "untransform.function") %in% names(x$transform_information))) return(FALSE)
+  if(!all(c("transformed", "untransformed") %in% names(x$staninput))) {
+    if (verbose) message("Component staninput in object x is missing one of the required components: transformed, untransformed.")
+    return(FALSE)
+  }
+  if(!all(c("transform.function", "untransform.function") %in% names(x$transform_information))) {
+    if (verbose) message("Component transform_information in object x is missing one of the required components: transform.function, untransform.function.")
+    return(FALSE)
+  }
 
   # Checking types of critical components
-  if(!all(map_lgl(x$staninput, is.list))) return(FALSE)
-  if(!all(map_lgl(list(x$transform_information$transform.function), is.function))) return(FALSE)
+  if(!all(map_lgl(x$staninput, is.list))) {
+    if (verbose) message("Component staninput in object x is not a list of lists.")
+    return(FALSE)
+  }
+  if(!all(map_lgl(list(x$transform_information$transform.function), is.function))) {
+    if (verbose) message("Component transform.function in component transform_information in object x is not a function.")
+    return(FALSE)
+  }
 
   return(TRUE)
 }

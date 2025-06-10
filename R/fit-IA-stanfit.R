@@ -100,7 +100,7 @@ fit_ideal_adaptor <- function(
   }
 
   # extract information from staninput
-  assert_that(is.ideal_adaptor_staninput(staninput))
+  assert_that(is.ideal_adaptor_staninput(staninput, verbose = verbose))
   data <- staninput$data
   transform_information <- staninput$transform_information
   staninput <- staninput$staninput
