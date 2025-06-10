@@ -3,7 +3,7 @@ source("../functions-to-make-or-load-models.R")
 
 context("get information from stanfit NIW (one cue)")
 
-fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize", file_refit = "never")
+fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", file_refit = "never")
 test_that("Test is.ideal_adaptor_stanfit", {
   expect_false(is.ideal_adaptor_stanfit(NULL))
   expect_false(is.ideal_adaptor_stanfit(NA))

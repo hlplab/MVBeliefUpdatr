@@ -343,6 +343,24 @@ to_array <- function(
   return(arr)
 }
 
+
+#' @export
+control_staninput <- function(
+    tau_scale = 5,
+    L_omega_eta = 1,
+    split_loglik_per_observation = 0,
+    # THIS IS KEPT HERE JUST FOR NOW UNTIL I HAVE DETERMINED WHICH TRANSFORM IS BEST SUITED FOR FITTING.
+    # (also remove the documentation for this once it's no longer needed AND remove transform_information
+    # from the returned information AND change the documentation for the returned object above.)
+    transform_type = c("identity", "center", "standardize", "PCA whiten", "ZCA whiten")[3]
+) {
+  list(
+    tau_scale = tau_scale,
+    L_omega_eta = L_omega_eta,
+    split_loglik_per_observation = split_loglik_per_observation,
+    transform_type = transform_type)
+}
+
 #' Prepare data to fit ideal_adaptor_stanfit via rstan
 #'
 #' Take exposure and test data as input, and prepare the data for input into an MVBeliefUpdatr Stan program.
@@ -368,8 +386,6 @@ to_array <- function(
 #' @param group.unique Name of column that uniquely identifies each group with identical exposure. This could be a
 #'   variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
 #'   substantially more efficient if many groups share the same exposure. To ignore, set to \code{NULL}. (default: \code{NULL})
-#' @param transform_type An affine transformation that can be applied to the data. See `type` in \code{\link{get_affine_transform}}
-#'    for details. (default: "PCA whiten")
 #' @param lapse_rate,mu_0,Sigma_0 Optionally, lapse rate, prior expected category means (\code{mu_0}) and/or prior expected
 #'   category covariance matrices (\code{Sigma_0}) for all categories. Lapse rate should be a number between 0 and 1. For \code{mu_0}
 #'   and \code{Sigma_0}, each should be a list, with each element being the expected mean/covariance matrix for a specific
@@ -381,18 +397,26 @@ to_array <- function(
 #'   Importantly, \strong{Sigma_0 should be convolved with perceptual noise (i.e., add perceptual noise covariance matrix to
 #'   the category variability covariance matrices when you specify \code{Sigma_0})} since the stancode for the inference of the
 #'   NIW ideal adaptor does \emph{not} infer category and noise variability separately.
-#' @param tau_scale A vector of scales for the Cauchy priors for each cue's standard deviations. Used in
-#'   both the prior for m_0 and the prior for S_0. (default: vector of 5s if scale.observations = TRUE, SD of each cue otherwise).
-#' @param L_omega_eta A vector of etas of the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. Only used for
-#' models with multivariate categories (e.g., NIW_ideal_adaptor). (default: 1,
-#'   which corresponds to a uniform prior of correlation matrices)
-#' @param split_loglik_per_observation Optionally, split the log likelihood per observation. This can be helpful of leave-one-out
-#'   estimation in order to avoid high Pareto k, but it also makes the stored stanfit object much larger. (default: 0)
+#' @param control A list of control parameters that only experienced users should change since it can change the fitting and
+#'   interpretation of the model:
+#' \itemize{
+#' \item {`tau_scale`: A vector of scales for the Cauchy priors for each cue's standard deviations. Used in
+#'   both the prior for m_0 and the prior for S_0. (default: vector of `5`s, assuming that the data are standardized).}
+#' \item {`L_omega_eta`: A vector of etas of the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. Only used for
+#'   models with multivariate categories (e.g., NIW_ideal_adaptor). (default: `1`,
+#'   which corresponds to a uniform prior of correlation matrices)}
+#' \item{`split_loglik_per_observation`: Optionally, split the log likelihood per observation. This can be helpful of leave-one-out
+#'   estimation in order to avoid high Pareto k, but it also makes the stored stanfit object much larger. (default: `0`)}
+#' \item{`transform_type`: An affine transformation that can be applied to the data. See `type` in \code{\link{get_affine_transform}}
+#'    for details. (default: "standardize", which standardizes each cue separately)}
+#' }
 #'
 #' @return A list consisting of:
-#'   * `data`: A data.frame with the exposure and test data after exclusion of NAs and other checks.
-#'   * `staninput`: A named list of variables and values to be handed to Stan.
-#'   * `transform_information`: A list with information about the transformation that was applied to the data.
+#' \itemize{
+#'   \item{`data`: A data.frame with the exposure and test data after exclusion of NAs and other checks.}
+#'   \item{`staninput`: A named list of variables and values to be handed to Stan.}
+#'   \item{`transform_information`: A list with information about the transformation that was applied to the data.}
+#'}
 #'
 #' @seealso \code{\link{is.ideal_adaptor_staninput}}
 #' @keywords TBD
@@ -406,15 +430,19 @@ make_staninput <- function(
     cues, category = "category", response = "response",
     group = "group", group.unique = NULL,
     lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
-    tau_scale = rep(5, length(cues)), L_omega_eta = 1, split_loglik_per_observation = 0,
-    # THIS IS KEPT HERE JUST FOR NOW UNTIL I HAVE DETERMINED WHICH TRANSFORM IS BEST SUITED FOR FITTING.
-    # (also remove the documentation for this once it's no longer needed AND remove transform_information
-    # from the returned information AND change the documentation for the returned object above.)
-    transform_type = c("identity", "center", "standardize", "PCA whiten", "ZCA whiten")[4],
+    control = control_staninput(),
     ...,
     stanmodel = "NIW_ideal_adaptor",
     verbose = F
 ) {
+  stopifnot(is.list(control))
+  stopifnot(all(c("tau_scale", "L_omega_eta", "split_loglik_per_observation", "transform_type") %in% names(control)))
+  tau_scale <- control$tau_scale
+  if (length(tau_scale) == 1) tau_scale <- rep(tau_scale, length(cues))
+  L_omega_eta <- control$L_omega_eta
+  split_loglik_per_observation <- control$split_loglik_per_observation
+  transform_type <- control$transform_type
+
   if (!is.null(lapse_rate)) {
     assert_that(is.number(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
     assert_that(between(lapse_rate, 0, 1), msg = "If not NULL, lapse rate must be a number between 0 and 1.")

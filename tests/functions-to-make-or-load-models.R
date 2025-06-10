@@ -267,8 +267,8 @@ make_data_for_3Dstanfit_without_exposure <- function(verbose = F) {
 get_example_staninput <- function(
     example = 1,
     stanmodel = "NIW_ideal_adaptor",
-    transform_type = "PCA whiten",
     lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
+    control = control_staninput(),
     seed = 42, verbose = F
 ) {
   .data <- make_data_for_stanfit(example, seed = seed, verbose = verbose)
@@ -287,9 +287,9 @@ get_example_staninput <- function(
       response = "Response",
       group = "Subject",
       group.unique = "Condition",
-      stanmodel = stanmodel,
-      transform_type = transform_type,
       lapse_rate = lapse_rate, mu_0 = mu_0, Sigma_0 = Sigma_0,
+      control = control,
+      stanmodel = stanmodel,
       verbose = verbose)
 
   # # For debugging:
@@ -366,11 +366,13 @@ get_example_stanfit <- function(
     silent = 2, refresh = 0, seed = 42, verbose = F,
     file_refit = "on_change",
     stanmodel = "NIW_ideal_adaptor",
-    transform_type = "PCA whiten",
     lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
+    control = control_staninput(),
     filename = NULL,
     ...
 ) {
+  transform_type <- control$transform_type
+
   if (is.null(filename))
     filename <-
       paste0(
@@ -392,7 +394,7 @@ get_example_stanfit <- function(
     get_example_staninput(
       example = example,
       stanmodel = stanmodel,
-      transform_type = transform_type,
+      control = control,
       lapse_rate = lapse_rate, mu_0 = mu_0, Sigma_0 = Sigma_0,
       seed = seed, verbose = verbose)
 

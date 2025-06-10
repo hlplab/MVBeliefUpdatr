@@ -4,13 +4,18 @@
 \alias{is.ideal_adaptor_staninput}
 \title{Is this a list of NIW ideal adaptor stanfit inputs?}
 \usage{
-is.ideal_adaptor_staninput(x)
+is.ideal_adaptor_staninput(x, verbose = FALSE)
+}
+\arguments{
+\item{x}{The input to be checked.}
+
+\item{verbose}{Should verbose output be provided? (default: `FALSE`)}
 }
 \value{
 A logical.
 }
 \description{
-Check whether \code{x} is of class \code{\link{ideal_adaptor_stanfit}}.
+Check whether \code{x} is a \code{ideal_adaptor_staninput}.
 }
 \seealso{
 TBD

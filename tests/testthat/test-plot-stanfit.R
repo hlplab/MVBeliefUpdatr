@@ -3,11 +3,11 @@ context("plot information from stanfit")
 source("../functions-to-make-or-load-models.R")
 
 # 1D stanfit with all conditions having exposure
-fit1 <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize", file_refit = "never")
+fit1 <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", file_refit = "never")
 # 2D stanfit with a condition without exposure
-fit2 <- get_example_stanfit(2, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize", file_refit = "never")
+fit2 <- get_example_stanfit(2, stanmodel = "NIW_ideal_adaptor", file_refit = "never")
 # 3D stanfit with a condition without exposure
-fit3 <- get_example_stanfit(3, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize", file_refit = "never")
+fit3 <- get_example_stanfit(3, stanmodel = "NIW_ideal_adaptor", file_refit = "never")
 
 test_that("plot_parameters.ideal_adaptor_stanfit", {
   expect_no_error(plot_parameters(fit1))

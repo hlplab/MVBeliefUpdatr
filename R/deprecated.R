@@ -94,13 +94,14 @@ infer_prior_beliefs <- function(
         response = response,
         group = group,
         group.unique = group.unique,
-        transform_type = transform_type,
         lapse_rate = lapse_rate,
         mu_0 = mu_0,
         Sigma_0 = Sigma_0,
-        tau_scale = if (is.null(tau_scale)) rep(5, length(cues)) else tau_scale,
-        L_omega_eta = L_omega_eta,
-        split_loglik_per_observation = split_loglik_per_observation,
+        control = list(
+          tau_scale = if (is.null(tau_scale)) rep(5, length(cues)) else tau_scale,
+          L_omega_eta = L_omega_eta,
+          split_loglik_per_observation = split_loglik_per_observation,
+          transform_type = transform_type),
         verbose = verbose,
         model_type = "NIW_ideal_adaptor")
   } else {

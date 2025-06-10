@@ -3,7 +3,7 @@ context("get information from stanfit")
 source("../functions-to-make-or-load-models.R")
 
 # 1D stanfit with all conditions having exposure
-fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", transform_type = "standardize", file_refit = "never")
+fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", file_refit = "never")
 
 test_that("Test for single cue", {
   expect_no_error(suppressWarnings(summary(fit)))

@@ -50,9 +50,6 @@ a variable identifying subjects/participants. Must exist in both exposure and te
 variable indicating the different conditions in an experiment. Using group.unique is optional, but can be
 substantially more efficient if many groups share the same exposure. To ignore, set to \code{NULL}. (default: \code{NULL})}
 
-\item{transform_type}{An affine transformation that can be applied to the data. See `type` in \code{\link{get_affine_transform}}
-for details. (default: "PCA whiten")}
-
 \item{lapse_rate, mu_0, Sigma_0}{Optionally, lapse rate, prior expected category means (\code{mu_0}) and/or prior expected
 category covariance matrices (\code{Sigma_0}) for all categories. Lapse rate should be a number between 0 and 1. For \code{mu_0}
 and \code{Sigma_0}, each should be a list, with each element being the expected mean/covariance matrix for a specific
@@ -64,16 +61,6 @@ distribution of means is mu_0) and S_0 is set so that the expected value of the 
 Importantly, \strong{Sigma_0 should be convolved with perceptual noise (i.e., add perceptual noise covariance matrix to
 the category variability covariance matrices when you specify \code{Sigma_0})} since the stancode for the inference of the
 NIW ideal adaptor does \emph{not} infer category and noise variability separately.}
-
-\item{tau_scale}{A vector of scales for the Cauchy priors for each cue's standard deviations. Used in
-both the prior for m_0 and the prior for S_0. (default: vector of 5s if scale.observations = TRUE, SD of each cue otherwise).}
-
-\item{L_omega_eta}{A vector of etas of the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. Only used for
-models with multivariate categories (e.g., NIW_ideal_adaptor). (default: 1,
-  which corresponds to a uniform prior of correlation matrices)}
-
-\item{split_loglik_per_observation}{Optionally, split the log likelihood per observation. This can be helpful of leave-one-out
-estimation in order to avoid high Pareto k, but it also makes the stored stanfit object much larger. (default: 0)}
 
 \item{stanmodel}{Name of stanmodel that should be used. Overrides any default selection.}
 

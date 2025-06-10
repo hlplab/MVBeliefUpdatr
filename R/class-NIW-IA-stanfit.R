@@ -202,7 +202,10 @@ is.NIW_ideal_adaptor_MCMC <- function(x, is.nested = T, is.long = T, with.prior 
 
 #' Is this a list of NIW ideal adaptor stanfit inputs?
 #'
-#' Check whether \code{x} is of class \code{\link{ideal_adaptor_stanfit}}.
+#' Check whether \code{x} is a \code{ideal_adaptor_staninput}.
+#'
+#' @param x The input to be checked.
+#' @param verbose Should verbose output be provided? (default: `FALSE`)
 #'
 #' @return A logical.
 #'
