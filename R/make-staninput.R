@@ -216,6 +216,7 @@ get_category_statistics_as_list_of_arrays <- function(
   return(result)
 }
 
+
 #' Turn (lists of) numerics into arrays (for Stan input)
 #'
 #' Takes `NULL`, numeric atomics (single scalars, vectors, matrices) or lists of numeric elements as inputs and turns them into numeric arrays.
@@ -732,6 +733,11 @@ make_staninput_for_NIX_ideal_adaptor <- function(
       N_test <- length(x_test)
     })
 
+  # Deal with empty exposure condition (pre-exposure tests)
+  staninput$N_exposure %<>% replace_na_in_array(fill = 0)
+  staninput$x_mean_exposure %<>% replace_na_in_array(fill = 0)
+  staninput$x_sd_exposure %<>% replace_na_in_array(fill = 0)
+
   return(staninput)
 }
 
@@ -772,6 +778,11 @@ make_staninput_for_NIW_ideal_adaptor <- function(
       N_test <- nrow(x_test)
     })
 
+  # Deal with empty exposure condition (pre-exposure tests)
+  staninput$N_exposure %<>% replace_na_in_array(fill = 0)
+  staninput$x_mean_exposure %<>% replace_na_in_array(fill = 0)
+  staninput$x_ss_exposure %<>% replace_na_in_array(fill = 0)
+
   return(staninput)
 }
 
@@ -807,6 +818,11 @@ make_staninput_for_MNIX_ideal_adaptor <- function(
         as.matrix()
       N_test <- nrow(x_test)
     })
+
+  # Deal with empty exposure condition (pre-exposure tests)
+  staninput$N_exposure %<>% replace_na_in_array(fill = 0)
+  staninput$x_mean_exposure %<>% replace_na_in_array(fill = 0)
+  staninput$x_cov_exposure %<>% replace_na_in_array(fill = 0)
 
   return(staninput)
 }

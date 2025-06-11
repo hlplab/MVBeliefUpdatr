@@ -51,6 +51,14 @@ isNA <- function(x) {
   length(x) == 1L && is.na(x)
 }
 
+replace_na_in_array <- function(x, fill = 0) {
+  stopifnot(is.array(x))
+  stopifnot(is.scalar(fill))
+
+  x[is.na(x)] <- fill
+  return(x)
+}
+
 is_equal <- function(x, y, check.attributes = FALSE, ...) {
   isTRUE(all.equal(x, y, check.attributes = check.attributes, ...))
 }

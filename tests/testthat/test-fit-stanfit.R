@@ -192,7 +192,7 @@ test_that("matrix inputs with simplify = FALSE", {
 
 # ADD LIST INPUT TEST
 
-context("make_staninput_for_ideal_adaptor")
+context("make_staninput_for_ideal_adaptor (with exposure)")
 
 # Test whether input formatting works before testing fitting
 test_that("test make_staninput_for_NIX_ideal_adaptor (one cue)", {
@@ -249,17 +249,54 @@ test_that("test make_staninput_for_MNIX_ideal_adaptor (two cues)", {
   expect_error(get_example_staninput(2, stanmodel = "MNIX_ideal_adaptor", control = control_staninput(transform_type = "other")))
 })
 
-# Test whether conditions with empty exposure information also work
+context("make_staninput_for_ideal_adaptor (without exposure)")
+
 test_that("test make_staninput_for_NIX_ideal_adaptor (two cues)", {
   expect_no_error(get_example_staninput(4, stanmodel = "NIX_ideal_adaptor"))
+  expect_true({
+    x <- get_example_staninput(4, stanmodel = "NIX_ideal_adaptor");
+    all(!is.na(x$staninput$transformed$N_exposure))
+  })
+  expect_true({
+    x <- get_example_staninput(4, stanmodel = "NIX_ideal_adaptor");
+    all(!is.na(x$staninput$transformed$x_mean_exposure))
+  })
+  expect_true({
+    x <- get_example_staninput(4, stanmodel = "NIX_ideal_adaptor");
+    all(!is.na(x$staninput$transformed$x_sd_exposure))
+  })
 })
 
 test_that("test make_staninput_for_NIW_ideal_adaptor (two cues)", {
   expect_no_error(get_example_staninput(5, stanmodel = "NIW_ideal_adaptor"))
+  expect_true({
+    x <- get_example_staninput(5, stanmodel = "NIW_ideal_adaptor");
+    all(!is.na(x$staninput$transformed$N_exposure))
+  })
+  expect_true({
+    x <- get_example_staninput(5, stanmodel = "NIW_ideal_adaptor");
+    all(!is.na(x$staninput$transformed$x_mean_exposure))
+  })
+  expect_true({
+    x <- get_example_staninput(5, stanmodel = "NIW_ideal_adaptor");
+    all(!is.na(x$staninput$transformed$x_ss_exposure))
+  })
 })
 
 test_that("test make_staninput_for_MNIX_ideal_adaptor (two cues)", {
   expect_no_error(get_example_staninput(5, stanmodel = "MNIX_ideal_adaptor"))
+  expect_true({
+    x <- get_example_staninput(5, stanmodel = "MNIX_ideal_adaptor");
+    all(!is.na(x$staninput$transformed$N_exposure))
+  })
+  expect_true({
+    x <- get_example_staninput(5, stanmodel = "MNIX_ideal_adaptor");
+    all(!is.na(x$staninput$transformed$x_mean_exposure))
+  })
+  expect_true({
+    x <- get_example_staninput(5, stanmodel = "MNIX_ideal_adaptor");
+    all(!is.na(x$staninput$transformed$x_cov_exposure))
+  })
 })
 
 
