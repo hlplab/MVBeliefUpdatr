@@ -431,7 +431,6 @@ make_staninput <- function(
     group = "group", group.unique = NULL,
     lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
     control = control_staninput(),
-    ...,
     stanmodel = "NIW_ideal_adaptor",
     verbose = F
 ) {
@@ -505,7 +504,6 @@ make_staninput <- function(
       which.data = "test",
       verbose = verbose) %>%
     select(c(!! group, !!! cues, !! response))
-
 
   # -----------------------------------------------------------------
   # Check whether exposure and test data are aligned in terms of factor levels
