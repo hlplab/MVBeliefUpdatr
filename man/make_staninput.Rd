@@ -15,10 +15,7 @@ make_staninput(
   lapse_rate = NULL,
   mu_0 = NULL,
   Sigma_0 = NULL,
-  control = list(tau_scale = rep(5, length(cues)), L_omega_eta = 1,
-    split_loglik_per_observation = 0, transform_type = c("identity", "center",
-    "standardize", "PCA whiten", "ZCA whiten")[3]),
-  ...,
+  control = control_staninput(),
   stanmodel = "NIW_ideal_adaptor",
   verbose = F
 )
@@ -56,7 +53,7 @@ Importantly, \strong{Sigma_0 should be convolved with perceptual noise (i.e., ad
 the category variability covariance matrices when you specify \code{Sigma_0})} since the stancode for the inference of the
 NIW ideal adaptor does \emph{not} infer category and noise variability separately.}
 
-\item{control}{a list of control parameters that only experienced users should change since it can change the fitting and
+\item{control}{A list of control parameters that only experienced users should change since it can change the fitting and
   interpretation of the model:
 \itemize{
 \item {`tau_scale`: A vector of scales for the Cauchy priors for each cue's standard deviations. Used in

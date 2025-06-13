@@ -59,10 +59,11 @@ get_test_counts <- function(test, cues, response, group, verbose = F) {
 
 
 
-#' Get category statistics (functions) from data as list of lists or list of arrays
+#' Get category statistics from data as list of arrays
 #'
-#' Get category statistics (aggregate functions) over `cues` in a data frame. Each function is calculated for each unique combination
-#' of values in the columns `category` and (optionally) `group`.
+#' Convenience function that obtains category statistics (aggregate functions) over `cues` in a data frame, and prepares them to be
+#' used as input to a MVBeliefUpdatr Stan program. Each function is calculated for each unique combination of values in the columns
+#' `category` and (optionally) `group`. Missing values will be automatically filled since Stan can't handle `NA` inputs.
 #'
 #' @param data `tibble` or `data.frame` with the data. Each row should be an observation of a category,
 #'   and contain information about the category label, the cue values of the observation, and optionally grouping variables.
@@ -71,277 +72,38 @@ get_test_counts <- function(test, cues, response, group, verbose = F) {
 #'   Can be `NULL` for unsupervised updating (not yet implemented). (default: "category")
 #' @param group Name of column that contains information about which observations form a group. This column must be
 #'   a factor.
+#' @param fill A value to fill in for missing combinations of `group` and `category` for which there is no data. (default: `0`)
 #' @param simplify A list of logicals of the same length as `...` indicating whether the array resulting from each function
 #'   should be simplified? See \code{\link{to_array}} for more detail. (default: `TRUE` for all functions)
 #' @param ... A named list of functions (statistics) of `cues` to calculate for each unique combination of `group` and
-#'   `category`. Functions must return `NA` for any combination `category` and `group` for which `data` does not contain
-#'   any observations.
+#'   `category`.
 #'
 #' @return A named list of length `...` (names are the names of the functions that have been computed). The list will be
 #'   sorted first by `group` and then by `category`, in ascending order of the levels of those variables. The elements of
-#'   the list will either be lists (for `get_category_statistics_as_list_of_lists`) or arrays (for `get_category_statistics_as_list_of_arrays`).
+#'   the list will be arrays.
 #'   Missing values---resulting from combinations of `group` and `category` for which there is no data---will be filled
-#'   with `NA`s coerced into the same structure as all other outputs for that function (e.g., if the function f results
+#'   with `fill` values coerced into the same structure as all other outputs for that function (e.g., if the function f results
 #'   in a 2-element vector for all combinations of `group` and `category` for which there is data, then unobserved data
-#'   results in a 2-element vector of `NA`s).
+#'   results in a 2-element vector of `fill` values).
 #'
 #' @keywords TBD
-#' @rdname get_category_statistics_as_list
-#' @export
-get_category_statistics_as_list_of_lists <- function(
-    data,
-    group,
-    category,
-    cues,
-    verbose = F,
-    ...
-) {
-  # Capture the named functions
-  fn_list <- list(...)
-
-  if (!is.factor(data[[group]])) {
-    stop2("Group variable must be a factor.")
-  }
-
-  if (!is.factor(data[[category]])) {
-    stop2("Category variable must be a factor.")
-  }
-
-  data %<>%
-    select(all_of(group), all_of(category), all_of(cues)) %>%
-    # Remove "." from group or category names to prevent it from leading to issues below
-    # (since split uses "." as a separator)
-    mutate(
-      across(
-        all_of(c(group, category)),
-        ~ factor(
-          gsub("\\.", "_", .x),
-          levels = gsub("\\.", "_", levels(.x)))))
-
-  # Get sorted levels
-  group_levels <- levels(data[[group]])
-  category_levels <- levels(data[[category]])
-
-  # Split the data by group and category
-  split_data <- split(data, list(data[[group]], data[[category]]), drop = FALSE)
-
-    # Sort the split list by factor levels of group (first) and category (second)
-  split_keys <- names(split_data)
-  split_order <- order(
-    match(sapply(strsplit(split_keys, "\\."), `[`, 1), group_levels),
-    match(sapply(strsplit(split_keys, "\\."), `[`, 2), category_levels))
-  split_data <- split_data[split_order]
-
-  # Initialize result list
-  result <- lapply(fn_list, function(f) vector("list", length(split_data)))
-  names(result) <- names(fn_list)
-
-  # Apply functions
-  for (i in seq_along(split_data)) {
-    x <- do.call(rbind, lapply(seq_len(nrow(split_data[[i]])), function(j) {
-      as.numeric(split_data[[i]][j, cues, drop = FALSE])
-    }))
-    for (fname in names(fn_list)) {
-      # Call function and make sure that NA is returned instead if x is empty data frame
-      result[[fname]][[i]] <- if (is.null(x)) NA else fn_list[[fname]](x)
-    }
-  }
-
-  # For each function, get the highest dimensionality of any of its outputs, and then coerce
-  # NA outputs into that same dimensionality.
-  dim_target <- result %>% map(~ reduce((map(.x, dim2)), pmax))
-  result %<>%
-    map2(
-      .y = dim_target,
-      ~ map(
-        .x,
-        function(x) {
-          if (any(is.na(x))) {
-            x <-
-              if (length(.y) == 1) {
-                # Coerce NA into vector
-                rep(NA, .y)
-              } else if (length(.y) == 2) {
-                # Coerce NA into matrix
-                matrix(rep(NA, prod(.y)), nrow = .y[1], ncol = .y[2])
-              } else if (length(.y) > 2) {
-                # Coerce NA into array
-                array(rep(NA, prod(.y)), dim = .y)
-              } else NA
-
-            return(x)
-          } else return(x)
-        }))
-
-  return(result)
-}
-
-#' @rdname get_category_statistics_as_list
+#' @rdname get_category_statistics_as_list_of_arrays
 #' @export
 get_category_statistics_as_list_of_arrays <- function(
     data,
-    group,
-    category,
+    group = "group",
+    category = "category",
     cues,
+    fill = 0,
     simplify = as.list(rep(T, length(list(...)))),
     verbose = F,
     ...
 ) {
-  if (!is.list(simplify) || !all(map_lgl(simplify, is.logical))) stop2("Argument simplify must be a list of logicals.")
-  if (length(simplify) != length(list(...))) stop2("Simplify must be a list of equal length as the number of functions provided in `...`.")
-
-  result <-
-    get_category_statistics_as_list_of_lists(
-      data = data,
-      group = group,
-      category = category,
-      cues = cues,
-      verbose = verbose,
-      ...)
-
-  # (for now, only) name outer dimensions of array
-  dimnames <- list(levels(data[[category]]), levels(data[[group]]))
-  result %<>%
-    map2(
-      .y = simplify,
-      .f =
-        function(.x, .y) {
-          to_array(
-          .x,
-          outer_dims = c(nlevels(data[[category]]), nlevels(data[[group]])),
-          dimnames = dimnames,
-          simplify = .y)
-      })
+  # The order of category and group is important since the Stan programs all expect category to be the outer-most array dimension,
+  # followed by group
+  result <- get_aggregates_from_grouped_data_as_list_of_arrays(data, groups = c(group, category), cols = cues, fill = fill, simplify = simplify, verbose = verbose, ...)
 
   return(result)
-}
-
-
-#' Turn (lists of) numerics into arrays (for Stan input)
-#'
-#' Takes `NULL`, numeric atomics (single scalars, vectors, matrices) or lists of numeric elements as inputs and turns them into numeric arrays.
-#'
-#' @param x The input to be turned into an array.
-#' @param inner_dims Integer vector of intended dimensions of x.
-#'   If `NULL`, `inner_dims` will be inferred from the input.
-#'   If not `NULL`, this will be used for checks and to enforce the correct dimensions of `x`. (default: `NULL`)
-#' @param outer_dims An integer vector of outer dimensions for the array. If `x` is not a list, an array of `x` will be repeated for each
-#'   outer dimension. If `x` is list, the outer dimensions will each index one element of `x`.
-#'   The total length of `x` must match the product of outer dimensions. The first dimension will be iterated
-#'   over first (and thus alternating fastest), the second dimension will be iterated over second, etc. See details.
-#' @param dimnames A list of character vectors with names for each dimension of the array. If not `NULL`, the length
-#'   of this list must match the total number of dimensions, and each character vector must match the length of the
-#'   corresponding dimension. Dimensions are named from the outside-in (i.e. first outer than inner dimensions).
-#'   (default: `NULL`)
-#' @param simplify Should the array be simplified by removing inner dimensions whenever the inner element(s) are just scalars?
-#'   (e.g., if the inner elements are a one-element vector or a 1x1 matrix). Note that atomic values that can be simplified
-#'   will be returned as scalars (and thus without dimnames) if there are no outer dimensions, since the returned object cannot
-#'   be an array in that case. (default: `TRUE`)
-#'
-#' @return An array.
-#'
-#' @details
-#' \itemize{
-#'   \item{`NULL` will be turned in a `array(numeric(0), dim = c(.outer_dims, .inner_dims))`. This is sometimes required for
-#'   optional Stan inputs.}
-#'   \item{Atomics (scalars, vectors, and matrices) will be turned into arrays of appropriate dimensions.}
-#'   \item{Lists will be turned into arrays of appropriate dimensions.}
-#' }
-#'
-#' E.g., if the input is a list of six 2x2 covariance matrices, and `...` is `3, 2`, then output will
-#' be an array of dimensionality `c(3, 2, 2, 2)`.
-#'
-#'
-#' @keywords TBD
-#' @export
-to_array <- function(
-    x,
-    inner_dims = NULL,
-    outer_dims = NULL,
-    dimnames = NULL,
-    simplify = T
-) {
-  stopifnot(is.null(inner_dims) || all(inner_dims == round(inner_dims)))
-  stopifnot(is.null(outer_dims) || all(outer_dims == round(outer_dims)))
-
-  if (is.null(x)) {
-    # optionally simplify by removing inner_dims if all inner dimension have length 1 (i.e., if all elements are intended to be scalars)
-    if (simplify) { inner_dims <- if (all(inner_dims == 1)) NULL else inner_dims }
-
-    total_dim_length <- length(inner_dims) + length(outer_dims)
-    arr <- array(numeric(), dim = if (total_dim_length == 0) 0 else rep(0, total_dim_length))
-  } else
-    # Handle atomic input
-    if (is.atomic(x)) {
-    # NOTE: no simplification is currently being applied for atomic elements.
-    found_inner_dims <- dim2(x)
-
-    if (is.null(inner_dims)) inner_dims <- found_inner_dims
-    if (any(found_inner_dims != inner_dims))
-      stop2(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ", "), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
-
-    # If desired inner_dims don't match found inner_dims, see whether the input can be coerced into the desired inner_dims format
-    if (length(found_inner_dims) != length(inner_dims)) {
-      if (prod(inner_dims) == prod(found_inner_dims)) {
-        if (length(inner_dims) == 1) {
-          # Coerce into scalar or vector format
-          x <- as.vector(x)
-        } else if (length(inner_dims) > 1) {
-          # Coerce into matrix format
-          x <- matrix(x, nrow = inner_dims[1], ncol = inner_dims[2])
-        }
-      } else {
-        stop2(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ", "), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
-      }
-    }
-
-    # optionally simplify by removing inner_dims if all inner dimension have length 1 (i.e., if all elements are essentially scalars)
-    # Since array with no dimensions are not allowed, special handling is required when there are no outer dimensions and we still
-    # want to simplify. In that case, x as a scalar without dimnames.
-    if (simplify) { inner_dims <- if (all(inner_dims == 1)) { if (!is.null(outer_dims)) NULL else return(as.numeric(x)) } else inner_dims }
-
-    # First cast an array with outer_dims on the outside (necessary to get correct handling of matrices when outer_dims are requested)
-    total_dim_length <- length(inner_dims) + length(outer_dims)
-    arr <- rep(x, prod(outer_dims)) %>% array(dim = if (total_dim_length == 0) 0 else c(inner_dims, outer_dims))
-    # Move outer dimensions to the front
-    perm <- c(if (is.null(outer_dims)) NULL else seq(length(inner_dims) + 1, total_dim_length), if (is.null(inner_dims)) NULL else 1:length(inner_dims))
-    arr <- aperm(a = arr, perm = perm)
-  } else
-    # Handle list input
-    if (is.list(x)) {
-    # Use first list element to infer detected dimensions
-    found_inner_dims <- dim2(x[[1]])
-
-    if (is.null(inner_dims)) inner_dims <- found_inner_dims
-    if (any(found_inner_dims != inner_dims)) stop2(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ","), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
-
-    # Check that x has the right number of elements
-    expected_len <- if (length(outer_dims) == 0) 1 else prod(outer_dims)
-    if (length(x) != expected_len) {
-      stop2(paste0("Length of list (", length(x), ") input does not match product of provided outer dimensions (", expected_len, ")."))
-    }
-
-    # Combine list elements into a matrix
-    arr <- simplify2array(x, except = NULL)
-
-    # Move last dimensions to the front
-    total_dims <- dim(arr)
-    perm <- c(length(total_dims), 1:(length(total_dims) - 1))
-    arr <- aperm(a = arr, perm = perm)
-
-    # optionally simplify by removing inner_dims if all inner dimension have length 1 (i.e., if all elements are essentially scalars)
-    if (simplify) { inner_dims <- if (all(inner_dims == 1)) NULL else inner_dims }
-    # split first dimension into all outer dimensions
-    arr <- array(arr, dim = c(outer_dims, inner_dims))
-  } else
-    stop2("Unsupported input type.")
-
-  # Name dimensions of array
-  # (no special handling and checking necessary since dimnames already does that: it exhaustively names from the outer to
-  # inner dimensions until it hits a mismatch)
-  dimnames(arr) <- dimnames
-
-  return(arr)
 }
 
 
@@ -733,11 +495,6 @@ make_staninput_for_NIX_ideal_adaptor <- function(
       N_test <- length(x_test)
     })
 
-  # Deal with empty exposure condition (pre-exposure tests)
-  staninput$N_exposure %<>% replace_na_in_array(fill = 0)
-  staninput$x_mean_exposure %<>% replace_na_in_array(fill = 0)
-  staninput$x_sd_exposure %<>% replace_na_in_array(fill = 0)
-
   return(staninput)
 }
 
@@ -778,11 +535,6 @@ make_staninput_for_NIW_ideal_adaptor <- function(
       N_test <- nrow(x_test)
     })
 
-  # Deal with empty exposure condition (pre-exposure tests)
-  staninput$N_exposure %<>% replace_na_in_array(fill = 0)
-  staninput$x_mean_exposure %<>% replace_na_in_array(fill = 0)
-  staninput$x_ss_exposure %<>% replace_na_in_array(fill = 0)
-
   return(staninput)
 }
 
@@ -818,11 +570,6 @@ make_staninput_for_MNIX_ideal_adaptor <- function(
         as.matrix()
       N_test <- nrow(x_test)
     })
-
-  # Deal with empty exposure condition (pre-exposure tests)
-  staninput$N_exposure %<>% replace_na_in_array(fill = 0)
-  staninput$x_mean_exposure %<>% replace_na_in_array(fill = 0)
-  staninput$x_cov_exposure %<>% replace_na_in_array(fill = 0)
 
   return(staninput)
 }

@@ -38,7 +38,7 @@ ideal observers will be derived for each level of \code{group}. (default: `NULL`
 defaults to \code{function(x, y, weights = w, distance_metric = 2, distance_decay_factor = 1)
 distance <- sum(weights * abs(x - y)^distance_metric)^(1/distance_metric); similarity <- exp(-distance^distance_decay_factor)},
 where each cue's weight \code{w} is the inverse of the cues SD^distance_metric. Except for the setting of the
-weights, this general formula follows \insertCite{afpelbaum-mcmurray2015}{MVBeliefUpdatr}, who cite \insertCite{nosofsky1986}{MVBeliefUpdatr}.}
+weights, this general formula follows \insertCite{apfelbaum-mcmurray2015}{MVBeliefUpdatr}, who cite \insertCite{nosofsky1986}{MVBeliefUpdatr}.}
 
 \item{verbose}{If true provides more information. (default: `FALSE`)}
 
