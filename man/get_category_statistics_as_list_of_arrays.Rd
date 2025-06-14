@@ -6,8 +6,8 @@
 \usage{
 get_category_statistics_as_list_of_arrays(
   data,
-  group,
-  category,
+  group = "group",
+  category = "category",
   cues,
   fill = 0,
   simplify = as.list(rep(T, length(list(...)))),
