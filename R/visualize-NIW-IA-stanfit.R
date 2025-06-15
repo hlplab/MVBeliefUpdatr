@@ -315,30 +315,30 @@ plot_parameter_correlations.ideal_adaptor_stanfit <- function(
 #'
 #' @param model \code{\link{ideal_adaptor_stanfit}} object.
 #' @param data.test Optionally, a \code{tibble} or \code{data.frame} with test data.
-#' If `NULL` the input will be extracted from fit. (default: `NULL`).
+#'   If `NULL` the input will be extracted from fit. (default: `NULL`).
 #' @param groups Character vector of groups to be plotted. Typically, the levels of these factors
-#' are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
-#' \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
-#' (default: all categories/groups will be plotted)
+#'   are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
+#'   \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+#'   (default: all categories/groups will be plotted)
 #' @param summarize Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
-#' unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)
+#'   unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
-#' (default: `NULL`)
+#'   (default: `NULL`)
 #' @param confidence.intervals The two confidence intervals that should be plotted (using `geom_ribbon`) around the mean.
-#' (default: `c(.66, .95)`)
+#'   (default: `c(.66, .95)`)
 #' @param target_category The index of the category for which categorization should be shown. (default: `1`)
 #' @param panel.group Should the groups be plotted in separate panels? (default: `FALSE`)
 #' @param group.colors,group.shapes,group.linetypes Vector of colors, shapes, and linetypes of same length as `groups` or `NULL` to use defaults.
 #' @param category.colors Vector of colors and linetypes of same length as `categories` or `NULL` to use defaults. Only
-#' relevant when `plot_in_cue_space = TRUE`.
+#'   relevant when `plot_in_cue_space = TRUE`.
 #' @param all_test_locations Should predictions be shown for all combinations of test locations and group, or should only
-#' combinations be shown that actually occurred in the data? (default: `FALSE`)
+#'   combinations be shown that actually occurred in the data? (default: `FALSE`)
 #' @param plot_in_cue_space Currently only available if the model has one or two cues. Should predictions be plotted in the cue space?
-#' If not, test tokens are treated as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)
+#'   If not, test tokens are treated as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)
 #' @param untransform_cues DEPRECATED. Should the cues be untransformed before plotting? This should only have visual consequences
-#' if `plot_in_cue_space = T`. (default: `FALSE`)
+#'   if `plot_in_cue_space = T`. (default: `FALSE`)
 #' @param sort_by Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
-#' from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired. (default: `"prior"`)
+#'   from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired. (default: `"prior"`)
 #'
 #' @return ggplot object.
 #'
@@ -357,11 +357,15 @@ plot_expected_categorization <- function(model, ...) {
 plot_expected_categorization.ideal_adaptor_stanfit <- function(
   model,
   data.test = NULL,
-  groups = get_group_levels(model, include_prior = TRUE),
-  summarize = T,
+  # handed to get_categorization_function:
+  groups = get_group_levels(model, include_prior = T),
+  lapse_treatment = c("no_lapses", "sample", "marginalize")[3],
   ndraws = NULL,
-  confidence.intervals = c(.66, .95),
+  # used by function returned by get_categorization_function:
   target_category = 1,
+  logit = F,
+  confidence.intervals = c(.66, .95),
+  summarize = T,
   panel.group = if (plot_in_cue_space) TRUE else FALSE,
   group.colors = get_default_colors("group", groups),
   group.shapes = get_default_shapes("group", groups),
@@ -390,26 +394,12 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
   confidence.intervals = sort(confidence.intervals)
 
   # Get prior and posterior parameters
-  d.pars <-
-    get_draws(
-      model,
-      groups = groups,
-      summarize = F,
-      wide = F,
-      ndraws = ndraws,
-      untransform_cues = untransform_cues)
-
-  # ndraws <- if (is.null(ndraws)) get_number_of_draws(model) else ndraws
-  # if (ndraws > 500)
-  #   message(paste("Marginalizing over", ndraws, "MCMC samples. This might take some time.\n"))
+  d.pars <- get_categorization_function(model, groups = groups, lapse_treatment = lapse_treatment, ndraws = ndraws)
 
   if (!is.null(sort_by))
     assert_that(sort_by %in% groups,
                 msg = paste("sort_by must be NULL or one of the groups:",
                       paste(groups, collapse = ", ")))
-
-  d.pars %<>%
-    filter(group %in% .env$groups)
 
   # Prepare test_data
   cue.labels <- get_cue_levels(model)
@@ -435,10 +425,8 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
   # !!! takes precedence over the definition of the function in the map statement
   # (see https://stackoverflow.com/questions/64356232/using-mutate-with-map2-and-exec-instead-of-invoke-map)
   # This works around that issue
-  .fun <- function(fn, args) exec(fn, !!!args, target_category = target_category, logit = T)
+  .fun <- function(fn, args) exec(fn, !!!args, target_category = target_category, logit = logit)
   d.pars %<>%
-    group_by(group, .draw) %>%
-    do(f = get_categorization_function_from_grouped_ibbu_stanfit_draws(.)) %>%
     right_join(test_data, by = "group") %>%
     group_by(group, .draw) %>%
     mutate(p_cat = map2(f, cues_joint, .fun)) %>%
@@ -528,7 +516,7 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
       #   labels = paste0(levels(d.pars$token), "\n",
       #                   levels(d.pars$token.cues))) +
       scale_y_continuous(
-        paste0("Predicted proportion of ", target_category_label, "-responses"),
+        paste0("Predicted ", if (logit) "log-odds" else "proportion", " of ", target_category_label, "-responses"),
         limits = c(0,1)) +
       scale_color_manual(
         "Group",

@@ -8,7 +8,8 @@
 get_posterior_from_MVG_ideal_observer(
   x,
   model,
-  noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+  noise_treatment = if (decision_rule == "sampling") "sample" else
+    infer_default_noise_treatment(model$Sigma_noise),
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize"
 )
 

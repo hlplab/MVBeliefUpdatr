@@ -739,7 +739,7 @@ get_cue2_constructor <- function(x) {
 #' (default: all groups)
 #' @param statistic Which category statistic should be returned? `mu` for category mean or `Sigma` for category
 #' covariance matrix, or `c("mu", "Sigma")` for both. (default: both)
-#' @param untransform_cues DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)
+#' @param ... additional arguments to \code{\link{get_draws}}.
 #'
 #' @return If just one group and category was requested, a vector (for the mean) or matrix (for the covariance
 #' matrix). If more than one group or category was requested, a tibble with one row for each unique combination
@@ -767,7 +767,7 @@ get_expected_category_statistic.ideal_adaptor_stanfit <- function(
   categories = get_category_levels(x),
   groups = get_group_levels(x, include_prior = TRUE),
   statistic = c("mu", "Sigma"),
-  untransform_cues = FALSE
+  ...
 ) {
   assert_that(all(statistic %in% c("mu", "Sigma")))
   assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
@@ -780,8 +780,7 @@ get_expected_category_statistic.ideal_adaptor_stanfit <- function(
                           paste(setdiff(groups, get_group_levels(x, include_prior = T)), collapse = ", ")))
 
   x <-
-    get_draws(x, which = "both", wide = F, nest = T, untransform_cues = untransform_cues) %>%
-    filter(group %in% .env[["groups"]], category %in% .env[["categories"]]) %>%
+    get_draws(x, categories = categories, groups = groups, wide = F, nest = T, summarize = FALSE, ...) %>%
     mutate(Sigma = get_expected_Sigma_from_S(S, nu)) %>%
     group_by(group, category) %>%
     summarise(
@@ -812,15 +811,51 @@ get_expected_sigma.ideal_adaptor_stanfit <- function(x, ...) {
 }
 
 
-#' @rdname get_NIW_categorization_function
+#' @rdname get_categorization_function
 #' @export
-get_categorization_function_from_grouped_ibbu_stanfit_draws <- function(fit, ...) {
+get_categorization_function <- function(x, ...) {
+  UseMethod("get_categorization_function")
+}
+
+#' @rdname get_categorization_function
+#' @export
+get_categorization_function.ideal_adaptor_stanfit <- function(
+    x,
+    lapse_treatment = c("no_lapses", "sample", "marginalize")[3],
+    groups = get_group_levels(x, include_prior = TRUE),
+    ...
+) {
+  d.pars <-
+    get_draws(
+      x,
+      groups = groups,
+      summarize = F,
+      wide = F,
+      ...)
+
+  d.pars %<>%
+    group_by(group, .draw) %>%
+    do(f =
+         get_categorization_function_from_stanfit_draws(
+           .,
+           # Set noise treatment to no noise for now since ideal adaptor stanfits
+           # include the noise in the inferred category variability
+           noise_treatment = "no_noise",
+           lapse_treatment = lapse_treatment,
+         ))
+
+  return(d.pars)
+}
+
+#' @rdname get_categorization_function_from_stanfit
+#' @export
+get_categorization_function_from_stanfit_draws <- function(x, ...) {
   get_NIW_categorization_function(
-    ms = fit$m,
-    Ss = fit$S,
-    kappas = fit$kappa,
-    nus = fit$nu,
-    lapse_rate = unlist(fit$lapse_rate)[1],
+    ms = x$m,
+    Ss = x$S,
+    kappas = x$kappa,
+    nus = x$nu,
+    lapse_rate = unlist(x$lapse_rate)[1],
     ...
   )
 }

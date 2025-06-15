@@ -13,13 +13,18 @@
 #' @param lapse_biases A lapse bias for the categorization responses. (default: uniform bias over categories)
 #' @param Sigma_noise A noise matrix. (default: a 0-matrix)
 #' @param noise_treatment How should the noise specified in \code{Sigma_noise} be considered in the categorization function?
-#' For details, see \code{\link{get_NIW_posterior_predictive}}.
+#'   For details, see \code{\link{get_NIW_posterior_predictive}}. Note though that "sample" would likely result in rather
+#'   counter-intuitive behavior of the categorization function and is thus not recommended.
+#' @param lapse_treatment Should the consequences of attentional lapses be included in the categorization function
+#'   ("marginalize") or not ("no_lapses")? (default: "marginalize")
 #'
 #' @return A function that takes as input cue values and returns posterior probabilities of the first category,
-#' based on the posterior predictive of the cues given the (IBBU-derived parameters for the) categories' m, S,
-#' kappa, nu, and prior, as well as the lapse rate. The function will accept the following arguments.
-#' @param target_category The index of the category for which categorization should be shown. (default: `1`)
-#' @param logit Should the function return log-odds (TRUE) or probabilities (FALSE)? (default: FALSE)
+#'   based on the posterior predictive of the cues given the (IBBU-derived parameters for the) categories' m, S,
+#'   kappa, nu, and prior, as well as the lapse rate. The function will accept the following arguments:
+#'   \itemize{
+#'     \item{`target_category`:}{The index of the category for which categorization should be shown. (default: `1`)}
+#'     \item{`logit`:}{Should the function return log-odds (TRUE) or probabilities (FALSE)? (default: FALSE)}
+#'   }
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -35,8 +40,8 @@ get_NIW_categorization_function <- function(
     lapse_rate = 0,
     lapse_biases = rep(1 / length(ms), length(ms)),
     Sigma_noise = NULL,
-    noise_treatment = if (any(is.null(Sigma_noise), all(is.null(Sigma_noise)), all(map_lgl(Sigma_noise, is.null)))) "no_noise" else "marginalize",
-    logit = FALSE
+    noise_treatment = infer_default_noise_treatment(Sigma_noise),
+    lapse_treatment = if (lapse_rate > 0) "marginalize" else "no_lapses"
 ) {
   tolerance = 1e-5
   assert_that(are_equal(length(ms), length(Ss)),
@@ -60,6 +65,11 @@ get_NIW_categorization_function <- function(
                 msg = "lapse biases must sum to 1.")
   }
 
+  if (lapse_treatment == "no_lapses") {
+    lapse_rate = 0
+    lapse_biases = rep(1 / length(ms), length(ms))
+  }
+
   # Get dimensions of multivariate category
   D = get_D(ms)
   assert_that(
@@ -78,7 +88,7 @@ get_NIW_categorization_function <- function(
     }
 
     p_target <-
-      (1 - lapse_rate[target_category]) *
+      (1 - lapse_rate) *
       exp(log_p[,target_category] + log(priors[target_category]) -
             log(rowSums(
               # multiply each row of the exponentiated log_p matrix (= the log densities of each category for each observation)
@@ -149,7 +159,7 @@ get_categorization_from_NIW_ideal_adaptor <- function(
   x,
   model,
   decision_rule,
-  noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+  noise_treatment = if (decision_rule == "sampling") "sample" else infer_default_noise_treatment(model$Sigma_noise),
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F,
   verbose = F

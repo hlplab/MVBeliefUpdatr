@@ -7,13 +7,7 @@
 get_likelihood_from_exemplars(
   x,
   model,
-  noise_treatment = if (is.exemplar_model(model)) {
-     if
-    (!is.null(first(model$Sigma_noise))) 
-         "marginalize"
-     else "no_noise"
- }
-    else "no_noise",
+  noise_treatment = infer_default_noise_treatment(model$Sigma_noise),
   log = T,
   category = "category",
   category.label = NULL

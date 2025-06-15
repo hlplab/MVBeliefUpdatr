@@ -10,20 +10,14 @@ get_MVG_likelihood(
   mu,
   Sigma,
   Sigma_noise = NULL,
-  noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
+  noise_treatment = infer_default_noise_treatment(Sigma_noise),
   log = T
 )
 
 get_likelihood_from_MVG(
   x,
   model,
-  noise_treatment = if (is.MVG_ideal_observer(model)) {
-     if
-    (!is.null(first(model$Sigma_noise))) 
-         "marginalize"
-     else "no_noise"
- }
-    else "no_noise",
+  noise_treatment = infer_default_noise_treatment(model$Sigma_noise),
   log = T,
   category = "category",
   category.label = NULL,

@@ -8,6 +8,8 @@ plot_expected_categorization_function_2D(
   x,
   data.exposure = NULL,
   data.test = NULL,
+  noise_treatment = infer_default_noise_treatment(x$Sigma_noise),
+  lapse_treatment = c("no_lapses", "marginalize")[2],
   target_category = 1,
   logit = F,
   xlim,
@@ -30,6 +32,12 @@ plot_expected_categorization_function_2D(
 \item{data.exposure}{Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)}
 
 \item{data.test}{Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)}
+
+\item{noise_treatment}{Should the consequences of perceptual noise be included in the categorization function
+("marginalize") or not ("no_noise")? (default: "marginalize")}
+
+\item{lapse_treatment}{Should the consequences of attentional lapses be included in the categorization function
+("marginalize") or not ("no_lapses")? (default: "marginalize")}
 
 \item{target_category}{The index of the category for which categorization should be shown. (default: `1`)}
 

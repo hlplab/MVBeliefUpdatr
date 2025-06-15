@@ -38,7 +38,7 @@ get_test_responses_after_updating_based_on_exposure <- function(.io, .exposure, 
     # Create one update model for condition, assuming that all subjects update the same way
     mutate(
       model = map2(model, Condition, ~ update_NIW_ideal_adaptor_batch(
-        prior = .x,
+        prior_model = .x,
         exposure = .exposure %>% filter(Condition == .y),
         noise_treatment = "no_noise"))) %>%
     left_join(.test, by = "Condition") %>%

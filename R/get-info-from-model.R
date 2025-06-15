@@ -16,7 +16,17 @@ check_compatibility_between_input_and_model <- function(x, model) {
 }
 
 
-# Just for internal use
+infer_default_noise_treatment <- function(Sigma_noise) {
+  noise_treatment <-
+    if (
+    any(
+      is.null(Sigma_noise),
+      any(is.null(Sigma_noise)),
+      any(map_lgl(Sigma_noise, is.null)))) "no_noise" else "marginalize"
+
+  return(noise_treatment)
+}
+
 get_cue_representation_from_model <- function(x) {
   if (is.MVG(x)) {
     x <- x$mu

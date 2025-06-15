@@ -103,7 +103,7 @@ infer_prior_beliefs <- function(
           split_loglik_per_observation = split_loglik_per_observation,
           transform_type = transform_type),
         verbose = verbose,
-        model_type = "NIW_ideal_adaptor")
+        stanmodel = "NIW_ideal_adaptor")
   } else {
     stop2("Either transform or center.observations, scale.observations, or pca.observations must be specified.")
   }

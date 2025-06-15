@@ -6,41 +6,35 @@
 \title{Update NIW prior beliefs about multivariate Gaussian category based on sufficient statistics of observations.}
 \usage{
 update_NIW_belief_by_sufficient_statistics_of_one_category(
-  prior,
+  prior_model,
   x_category,
   x_mean,
   x_SS,
   x_N,
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) {
-     if
-    (!is.null(first(prior$Sigma_noise))) 
-         "marginalize"
-     else "no_noise"
- }
-    else "no_noise",
-  lapse_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_lapses",
+  noise_treatment = infer_default_noise_treatment(prior_model$Sigma_noise),
+  lapse_treatment = if (is.NIW_ideal_adaptor(prior_model)) "sample" else "no_lapses",
   method = "label-certain",
   verbose = FALSE
 )
 
 update_NIW_belief_by_one_observation(
-  prior,
+  prior_model,
   x_category,
   x,
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) {
+  noise_treatment = if (is.NIW_ideal_adaptor(prior_model)) {
      if
-    (!is.null(first(prior$Sigma_noise))) 
+    (!is.null(first(prior_model$Sigma_noise))) 
          "marginalize"
-     else "no_noise"
- }
-    else "no_noise",
-  lapse_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_lapses",
+     else
+    "no_noise"
+ } else "no_noise",
+  lapse_treatment = if (is.NIW_ideal_adaptor(prior_model)) "sample" else "no_lapses",
   method = "label-certain",
   verbose = FALSE
 )
 }
 \arguments{
-\item{prior}{An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.}
+\item{prior_model}{An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.}
 
 \item{x_category}{The category label(s) of one or more observations.}
 

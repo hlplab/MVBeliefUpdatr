@@ -14,7 +14,7 @@ get_expected_category_statistic(x, ...)
   categories = get_category_levels(x),
   groups = get_group_levels(x, include_prior = TRUE),
   statistic = c("mu", "Sigma"),
-  untransform_cues = FALSE
+  ...
 )
 
 \method{get_expected_mu}{ideal_adaptor_stanfit}(x, ...)
@@ -24,6 +24,8 @@ get_expected_category_statistic(x, ...)
 \arguments{
 \item{x}{An \code{\link[=is.ideal_adaptor_stanfit]{mv_ibbu_stanfit}} object.}
 
+\item{...}{additional arguments to \code{\link{get_draws}}.}
+
 \item{categories}{Character vector with categories for which category statistics are to be
 returned. (default: all categories)}
 
@@ -32,8 +34,6 @@ returned. (default: all categories)}
 
 \item{statistic}{Which category statistic should be returned? `mu` for category mean or `Sigma` for category
 covariance matrix, or `c("mu", "Sigma")` for both. (default: both)}
-
-\item{untransform_cues}{DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)}
 }
 \value{
 If just one group and category was requested, a vector (for the mean) or matrix (for the covariance

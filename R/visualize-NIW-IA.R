@@ -4,10 +4,14 @@
 #'
 #' Plot categorization function for univariate Gaussian categories expected given NIW parameters.
 #'
+#' @param noise_treatment Should the consequences of perceptual noise be included in the categorization function
+#'   ("marginalize") or not ("no_noise")? (default: "marginalize")
+#' @param lapse_treatment Should the consequences of attentional lapses be included in the categorization function
+#'   ("marginalize") or not ("no_lapses")? (default: "marginalize")
 #' @param target_category The index of the category for which categorization should be shown. (default: `1`)
 #' @param xlim,ylim Limits for the x- and y-axis.
 #' @param logit Should the categorization function be plotted in logit (`TRUE`) or probabilities (`FALSE`)?
-#' (default: `FALSE`)
+#'   (default: `FALSE`)
 #' @inheritParams plot_expected_categories_density1D
 #'
 #' @return ggplot object.
@@ -21,6 +25,8 @@ plot_expected_categorization_function_1D <- function(
   x,
   data.exposure = NULL,
   data.test = NULL,
+  noise_treatment = infer_default_noise_treatment(x$Sigma_noise),
+  lapse_treatment = c("no_lapses", "marginalize")[2],
   target_category = 1,
   logit = F,
   xlim, ylim = NULL, x.expand = c(0, 0),
@@ -28,8 +34,6 @@ plot_expected_categorization_function_1D <- function(
   category.ids = NULL, category.labels = NULL, category.colors = NULL, category.linetypes = NULL,
   ...
 ) {
-  message("TO DO: implement noise and lapse rate handling. (already implemented in underling functions. just not integrated into plotting).")
-
   facet_rows_by <- enquo(facet_rows_by)
   facet_cols_by <- enquo(facet_cols_by)
   facet_wrap_by <- enquo(facet_wrap_by)
@@ -65,11 +69,13 @@ plot_expected_categorization_function_1D <- function(
     group_map(
       .keep = T,
       .f = function(.x, .y) {
-        cat_function <- get_categorization_function_from_NIW_ideal_adaptor(.x)
+        cat_function <- get_categorization_function_from_NIW_ideal_adaptor(.x, noise_treatment = noise_treatment, lapse_treatment = lapse_treatment)
         stat_function(
           data = .x,
           fun = cat_function,
-          args = list(target_category = target_category, logit = logit), ...) })
+          args = list(
+            target_category = target_category,
+            logit = logit), ...) })
 
   p <-
     ggplot() +
@@ -93,12 +99,16 @@ plot_expected_categorization_function_1D <- function(
 #'
 #' Plot categorization function for bivariate Gaussian categories expected given NIW parameters.
 #'
+#' @param noise_treatment Should the consequences of perceptual noise be included in the categorization function
+#'   ("marginalize") or not ("no_noise")? (default: "marginalize")
+#' @param lapse_treatment Should the consequences of attentional lapses be included in the categorization function
+#'   ("marginalize") or not ("no_lapses")? (default: "marginalize")
 #' @param target_category The index of the category for which categorization should be shown. (default: `1`)
 #' @param xlim,ylim Limits for the x- and y-axis.
 #' @param resolution How many steps along x and y should be calculated? Note that computational
-#' complexity increases quadratically with resolution. (default: 25)
+#'   complexity increases quadratically with resolution. (default: 25)
 #' @param logit Should the categorization function be plotted in logit (`TRUE`) or probabilities (`FALSE`)?
-#' (default: `FALSE`)
+#'   (default: `FALSE`)
 #' @inheritParams plot_expected_categories_contour2D
 #'
 #' @return ggplot object.
@@ -112,6 +122,8 @@ plot_expected_categorization_function_2D <- function(
   x,
   data.exposure = NULL,
   data.test = NULL,
+  noise_treatment = infer_default_noise_treatment(x$Sigma_noise),
+  lapse_treatment = c("no_lapses", "marginalize")[2],
   target_category = 1,
   logit = F,
   xlim, ylim, resolution = 25,
@@ -119,7 +131,6 @@ plot_expected_categorization_function_2D <- function(
   category.ids = NULL, category.labels = NULL, category.colors = NULL,
   ...
 ) {
-  message("TO DO: implement noise and lapse rate handling. (already implemented in underling functions. just not integrated into plotting).")
   facet_rows_by <- enquo(facet_rows_by)
   facet_cols_by <- enquo(facet_cols_by)
   facet_wrap_by <- enquo(facet_wrap_by)
@@ -163,7 +174,13 @@ plot_expected_categorization_function_2D <- function(
 
   x %<>%
     nest() %>%
-    mutate(f = map(data, get_categorization_function_from_NIW_ideal_adaptor)) %>%
+    mutate(f =
+             map(
+               data,
+               ~ get_categorization_function_from_NIW_ideal_adaptor(
+                 .x,
+                 noise_treatment = noise_treatment,
+                 lapse_treatment = lapse_treatment))) %>%
     # Join in vectored cues
     cross_join(
       d %>%

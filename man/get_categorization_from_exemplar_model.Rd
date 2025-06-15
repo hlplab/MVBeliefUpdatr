@@ -8,7 +8,8 @@ get_categorization_from_exemplar_model(
   x,
   model,
   decision_rule,
-  noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+  noise_treatment = if (decision_rule == "sampling") "sample" else
+    infer_default_noise_treatment(model$Sigma_noise),
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F
 )

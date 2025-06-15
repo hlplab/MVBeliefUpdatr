@@ -4,22 +4,22 @@
 \alias{update_NIW_ideal_adaptor_incrementally}
 \alias{update_NIW_ideal_adaptor_batch}
 \alias{update_NIW_beliefs_incrementally}
-\title{Update NIW prior beliefs about multivariate Gaussian category based on exposure data.}
+\title{Update NIW prior_model beliefs about multivariate Gaussian category based on exposure data.}
 \usage{
 update_NIW_ideal_adaptor_incrementally(
-  prior,
+  prior_model,
   exposure,
   exposure.category = "category",
-  exposure.cues = get_cue_labels_from_model(prior),
+  exposure.cues = get_cue_labels_from_model(prior_model),
   exposure.order = NULL,
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) {
+  noise_treatment = if (is.NIW_ideal_adaptor(prior_model)) {
      if
-    (!is.null(first(prior$Sigma_noise))) 
+    (!is.null(first(prior_model$Sigma_noise))) 
          "marginalize"
-     else "no_noise"
- }
-    else "no_noise",
-  lapse_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_lapses",
+     else
+    "no_noise"
+ } else "no_noise",
+  lapse_treatment = if (is.NIW_ideal_adaptor(prior_model)) "sample" else "no_lapses",
   method = "label-certain",
   keep.update_history = TRUE,
   keep.exposure_data = FALSE,
@@ -27,31 +27,31 @@ update_NIW_ideal_adaptor_incrementally(
 )
 
 update_NIW_ideal_adaptor_batch(
-  prior,
+  prior_model,
   exposure,
   exposure.category = "category",
-  exposure.cues = get_cue_labels_from_model(prior),
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) {
+  exposure.cues = get_cue_labels_from_model(prior_model),
+  noise_treatment = if (is.NIW_ideal_adaptor(prior_model)) {
      if
-    (!is.null(first(prior$Sigma_noise))) 
+    (!is.null(first(prior_model$Sigma_noise))) 
          "marginalize"
-     else "no_noise"
- }
-    else "no_noise",
+     else
+    "no_noise"
+ } else "no_noise",
   verbose = FALSE
 )
 
 update_NIW_beliefs_incrementally(...)
 }
 \arguments{
-\item{prior}{An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.}
+\item{prior_model}{An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.}
 
 \item{exposure}{\code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.}
 
 \item{exposure.category}{Name of variable in \code{data} that contains the category information. (default: "category")}
 
 \item{exposure.cues}{Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
-extracted from the prior object.}
+extracted from the `prior_model` object.}
 
 \item{exposure.order}{Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 exposure data is assumed to be in the order in which it should be presented.}

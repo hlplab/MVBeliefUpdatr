@@ -4,8 +4,8 @@
 \alias{compose_data_to_infer_NIW_ideal_adaptor}
 \title{Compose data to fit ideal_adaptor_stanfit via rstan}
 \usage{
-compose_data_to_infer_NIW_ideal_adaptor(model_type = "NIW_ideal_adaptor", ...)
+compose_data_to_infer_NIW_ideal_adaptor(stanmodel = "NIW_ideal_adaptor", ...)
 }
 \description{
-DEPRECATED: Use \code{make_staninput(model_type = "NIW_ideal_adaptor")} instead.
+DEPRECATED: Use \code{make_staninput(stanmodel = "NIW_ideal_adaptor")} instead.
 }

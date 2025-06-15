@@ -87,7 +87,7 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) { S_0 + x_S
 #' }
 #' Please feel free to suggest additional features.
 #'
-#' @param prior An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
+#' @param prior_model An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
 #' @param x The cues of single observation.
 #' @param x_category The category label(s) of one or more observations.
 #' @param x_mean The cue mean of observations.
@@ -123,9 +123,9 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) { S_0 + x_S
 #' @rdname update_NIW_belief
 #' @export
 update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
-  prior, x_category, x_mean, x_SS, x_N,
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) { if (!is.null(first(prior$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
-  lapse_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_lapses",
+  prior_model, x_category, x_mean, x_SS, x_N,
+  noise_treatment = infer_default_noise_treatment(prior_model$Sigma_noise),
+  lapse_treatment = if (is.NIW_ideal_adaptor(prior_model)) "sample" else "no_lapses",
   method = "label-certain",
   verbose = FALSE
 ) {
@@ -136,7 +136,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
   assert_that(all(is_scalar_character(noise_treatment)), is_scalar_character(lapse_treatment))
   if (any(noise_treatment != "no_noise", lapse_treatment != "no_lapses"))
-    assert_NIW_ideal_adaptor(prior, verbose = verbose) else assert_NIW_belief(prior, verbose = verbose)
+    assert_NIW_ideal_adaptor(prior_model, verbose = verbose) else assert_NIW_belief(prior_model, verbose = verbose)
 
   assert_that(all(is.scalar(x_N), is.numeric(x_N)), msg = "x_N must be a scalar numeric.")
   assert_that(x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
@@ -145,16 +145,16 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
   assert_that(lapse_treatment %in% c("no_lapses", "sample", "marginalize"),
               msg = paste(lapse_treatment, "is not an acceptable lapse_treatment. See details section of help page."))
   if (lapse_treatment == "sample") {
-    x_N <- rbinom(1, x_N, 1 - get_lapse_rate_from_model(prior))
+    x_N <- rbinom(1, x_N, 1 - get_lapse_rate_from_model(prior_model))
   } else if (lapse_treatment == "marginalize") {
     warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.", call. = FALSE)
-    x_N <- (1 - get_lapse_rate_from_model(prior)) * x_N
+    x_N <- (1 - get_lapse_rate_from_model(prior_model)) * x_N
   }
 
-  # If there's nothing to update (x_N == 0), return prior.
+  # If there's nothing to update (x_N == 0), return prior_model.
   if (any(is.na(x_mean), x_N == 0)) {
-    if (verbose) message("No observations to update on (x_N == 0 or x_mean is NA). This can happen, for example, if observations are missing or because model was lapsing during all observations. Returning prior as posterior.")
-    return(prior)
+    if (verbose) message("No observations to update on (x_N == 0 or x_mean is NA). This can happen, for example, if observations are missing or because model was lapsing during all observations. Returning prior_model as posterior.")
+    return(prior_model)
   }
   assert_that(method %in% c("no-updating",
                             "label-certain",
@@ -165,15 +165,15 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
     assert_that(x_N <= 1,
                 msg = "For this updating method, only incremental updating (one observations at a time) is implemented.")
 
-  x_Ns <- as.list(rep(0, length(prior$category)))
+  x_Ns <- as.list(rep(0, length(prior_model$category)))
   # Determine how observations should be distributed across categories
-  if (method == "no-updating") return(prior) else
-    if (method == "label-certain") x_Ns[[which(prior$category == x_category)]] <- x_N else
-      if (method == "nolabel-uniform") x_Ns <- as.list(1 / length(prior$category) * x_N) else
+  if (method == "no-updating") return(prior_model) else
+    if (method == "label-certain") x_Ns[[which(prior_model$category == x_category)]] <- x_N else
+      if (method == "nolabel-uniform") x_Ns <- as.list(1 / length(prior_model$category) * x_N) else
         if (method %in% c("nolabel-criterion", "nolabel-proportional")) {
           x_Ns <-
             get_categorization_from_NIW_ideal_adaptor(
-              x = x_mean, model = prior,
+              x = x_mean, model = prior_model,
               noise_treatment = noise_treatment,
               lapse_treatment = lapse_treatment,
               decision_rule = gsub("nolabel-", "", method),
@@ -183,7 +183,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
         } else if (method %in% c("nolabel-sampling")) {
           x_Ns <-
             get_categorization_from_NIW_ideal_adaptor(
-              x = x_mean, model = prior,
+              x = x_mean, model = prior_model,
               noise_treatment = noise_treatment,
               lapse_treatment = lapse_treatment,
               decision_rule = "proportional", # perhaps decision_rule = "sampling" could be used here with simplify = T, pre-empting the remaining rows?
@@ -195,7 +195,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
 
   # Handle noise
   assert_that(noise_treatment %in% c("no_noise", "sample", "marginalize"))
-  Sigma_noise <- get_perceptual_noise_from_model(prior)
+  Sigma_noise <- get_perceptual_noise_from_model(prior_model)
   if (noise_treatment == "sample") {
     assert_that(all(is_scalar_integerish(x_N), is_weakly_greater_than(x_N, 1)),
                 msg = "If noise_treatment is 'sample', x_N must be a positive integer.")
@@ -218,7 +218,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
 
   x_mean <- list(x_mean)
   x_SS <- list(x_SS)
-  prior %<>%
+  prior_model %<>%
     mutate(
       # Order of application matters here since all of these update functions assume inputs (kappa, nu, m, S) that are not yet updated.
       S = pmap(.l = list(.data$kappa, .data$m, .data$S, x_Ns, x_mean, x_SS), update_NIW_belief_S),
@@ -233,7 +233,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
     #   ((kappa * x_N) / (kappa + x_N)) * Sigma_noise / x_N =
     #   ((kappa * x_N) / (kappa + x_N)) * Sigma_noise / x_N =
     #   ((kappa) / (kappa + x_N)) * Sigma_noise
-    prior %<>%
+    prior_model %<>%
       mutate(
         # Since kappa has already been updated  ((kappa) / (kappa + x_N)) --> (kappa - x_N) / kappa
         S = pmap(.l = list(.data$kappa, x_Ns, .data$S), ~ ..3 - (..1 - ..2) / (..1) * .env$Sigma_noise),
@@ -242,26 +242,26 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
       )
   }
 
-  return(prior)
+  return(prior_model)
 }
 
 
 #' @rdname update_NIW_belief
 #' @export
 update_NIW_belief_by_one_observation = function(
-  prior, x_category, x,
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) { if (!is.null(first(prior$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
-  lapse_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_lapses",
+  prior_model, x_category, x,
+  noise_treatment = if (is.NIW_ideal_adaptor(prior_model)) { if (!is.null(first(prior_model$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
+  lapse_treatment = if (is.NIW_ideal_adaptor(prior_model)) "sample" else "no_lapses",
   method = "label-certain",
   verbose = FALSE
 ) {
   update_NIW_belief_by_sufficient_statistics_of_one_category(
-    prior, x_category = x_category, x_mean = x, x_SS = 0L, x_N = 1,
+    prior_model, x_category = x_category, x_mean = x, x_SS = 0L, x_N = 1,
     noise_treatment = noise_treatment, lapse_treatment = lapse_treatment, method = method, verbose = verbose)
 }
 
 
-#' Update NIW prior beliefs about multivariate Gaussian category based on exposure data.
+#' Update NIW prior_model beliefs about multivariate Gaussian category based on exposure data.
 #'
 #' Returns updated/posterior beliefs about the Gaussian categories based on conjugate NIW prior.
 #'
@@ -272,11 +272,11 @@ update_NIW_belief_by_one_observation = function(
 #' nu}), as well as the prior mean of means (\code{m}, same as \code{m_0} in Murphy, 2012) and the prior scatter
 #' matrix (\code{S}, same as \code{S_0} in Murphy, 2012).
 #'
-#' @param prior An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
+#' @param prior_model An \code{\link[=is.NIW_belief]{NIW_belief}} object, specifying the prior beliefs.
 #' @param exposure \code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.
 #' @param exposure.category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param exposure.cues Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
-#' extracted from the prior object.
+#' extracted from the `prior_model` object.
 #' @param exposure.order Name of variable in \code{data} that contains the order of the exposure data. If `NULL` the
 #' exposure data is assumed to be in the order in which it should be presented.
 #' @param noise_treatment Determines whether and how multivariate Gaussian noise is considered during categorization.
@@ -301,13 +301,13 @@ update_NIW_belief_by_one_observation = function(
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #' @export
 update_NIW_ideal_adaptor_incrementally <- function(
-  prior,
+  prior_model,
   exposure,
   exposure.category = "category",
-  exposure.cues = get_cue_labels_from_model(prior),
+  exposure.cues = get_cue_labels_from_model(prior_model),
   exposure.order = NULL,
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) { if (!is.null(first(prior$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
-  lapse_treatment = if (is.NIW_ideal_adaptor(prior)) "sample" else "no_lapses",
+  noise_treatment = if (is.NIW_ideal_adaptor(prior_model)) { if (!is.null(first(prior_model$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
+  lapse_treatment = if (is.NIW_ideal_adaptor(prior_model)) "sample" else "no_lapses",
   method = "label-certain",
   keep.update_history = TRUE,
   keep.exposure_data = FALSE,
@@ -335,15 +335,15 @@ update_NIW_ideal_adaptor_incrementally <- function(
     make_vector_column(exposure.cues, "cues")
 
   if (keep.update_history)
-    prior %<>%
+    prior_model %<>%
     mutate(observation.n = 0)
 
   for (i in 1:nrow(exposure)) {
-    posterior <- if (keep.update_history) prior %>% filter(.data$observation.n == i - 1) else prior
+    posterior <- if (keep.update_history) prior_model %>% filter(.data$observation.n == i - 1) else prior_model
     posterior <-
       suppressWarnings(
         update_NIW_belief_by_one_observation(
-          prior = posterior,
+          prior_model = posterior,
           x = unlist(exposure[i, "cues"]),
           x_category = exposure[i,][[exposure.category]],
           noise_treatment = noise_treatment,
@@ -354,8 +354,8 @@ update_NIW_ideal_adaptor_incrementally <- function(
     if (keep.update_history) {
       posterior %<>%
         mutate(observation.n = i)
-      prior <- rbind(prior, posterior)
-    } else prior <- posterior
+      prior_model <- rbind(prior_model, posterior)
+    } else prior_model <- posterior
   }
 
   if (keep.exposure_data) {
@@ -365,25 +365,25 @@ update_NIW_ideal_adaptor_incrementally <- function(
           mutate(., observation.n = 1:nrow(exposure)) } %>%
       rename_with(~ paste0("observation.", .x), !starts_with("observation.n"))
 
-    prior %<>%
+    prior_model %<>%
       left_join(exposure, by = "observation.n")
   }
 
-  return(prior)
+  return(prior_model)
 }
 
 
 #' @rdname update_NIW_ideal_adaptor_incrementally
 #' @export
 update_NIW_ideal_adaptor_batch <- function(
-  prior,
+  prior_model,
   exposure,
   exposure.category = "category",
-  exposure.cues = get_cue_labels_from_model(prior),
+  exposure.cues = get_cue_labels_from_model(prior_model),
   # Could add lapse treatment here, though it would only make sense to interpret it in the limit
   # as the fraction of trials that will be missed, changing only N, without affecting the other
   # sufficient statistics.
-  noise_treatment = if (is.NIW_ideal_adaptor(prior)) { if (!is.null(first(prior$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
+  noise_treatment = if (is.NIW_ideal_adaptor(prior_model)) { if (!is.null(first(prior_model$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
   verbose = FALSE
 ){
   if (verbose) message("Assuming that category variable in NIW belief/ideal adaptor is called category.")
@@ -407,7 +407,7 @@ update_NIW_ideal_adaptor_batch <- function(
     posterior <-
       suppressWarnings(
         update_NIW_belief_by_sufficient_statistics_of_one_category(
-          prior = prior,
+          prior_model = prior_model,
           x_category = c,
           x_mean = exposure[exposure$category == c,]$x_mean[[1]],
           x_SS = exposure[exposure$category == c,]$x_SS[[1]],
@@ -417,10 +417,10 @@ update_NIW_ideal_adaptor_batch <- function(
           method = "label-certain",
           verbose = verbose))
 
-    prior <- posterior
+    prior_model <- posterior
   }
 
-  return(prior)
+  return(prior_model)
 }
 
 
