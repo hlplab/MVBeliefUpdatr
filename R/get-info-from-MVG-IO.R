@@ -228,7 +228,7 @@ get_posterior_from_MVG_ideal_observer <- function(
 get_categorization_from_MVG_ideal_observer <- function(
   x,
   model,
-  decision_rule,
+  decision_rule = "sampling",
   noise_treatment = if (decision_rule == "sampling") "sample" else infer_default_noise_treatment(model$Sigma_noise),
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F

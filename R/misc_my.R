@@ -64,19 +64,18 @@ get_aggregates_from_grouped_data_as_list_of_lists <- function(
     data,
     groups,
     cols,
-    fill = NA,
+    fill = as.list(rep(NA, length(list(...)))),
     verbose = F,
     ...
 ) {
-  # Capture the named functions
-  fn_list <- list(...)
-
   stopifnot(all(groups %in% names(data)))
   stopifnot(all(cols %in% names(data)))
-
   if (!all(map_lgl(groups, ~ is.factor(data[[.x]])))) {
     stop2("Group variables must be factors.")
   }
+  if (length(fill) != length(list(...))) stop2("fill must be a list of equal length as the number of functions provided in `...`.")
+
+  fn_list <- list(...)
 
   data %<>%
     select(all_of(groups), all_of(cols)) %>%
@@ -129,32 +128,41 @@ get_aggregates_from_grouped_data_as_list_of_lists <- function(
   # For each function, get the highest dimensionality of any of its outputs, and then coerce
   # NA outputs into that same dimensionality.
   dim_target <- result %>% map(~ reduce((map(.x, dim2)), pmax))
-  result %<>%
-    map2(
-      .y = dim_target,
-      ~ map(
-        .x,
-        function(x) {
-          if (any(is.na(x))) {
-            if (verbose)
-              message("Empty data found for a combination of grouping variables. Coercing NA values
-                      into the same dimensionality as the other outputs for this aggregation function (",
-                      paste(.y, collapse = ", "), ").")
-            x <-
-              if (length(.y) == 1) {
-                # Coerce NA into vector
-                rep(fill, .y)
-              } else if (length(.y) == 2) {
-                # Coerce NA into matrix
-                matrix(rep(fill), nrow = .y[1], ncol = .y[2])
-              } else if (length(.y) > 2) {
-                # Coerce NA into array
-                array(rep(fill, prod(.y)), dim = .y)
-              } else fill
+  result <-
+    pmap(
+      .l = list(result, dim_target, fill),
+      .f =
+        ~ map(
+          ..1,
+          function(x) {
+            if (any(is.na(x))) {
+              if (verbose)
+                message("Empty data found for a combination of grouping variables. Filling NA values with fill value (",
+                        paste(..3, collapse = ", "),
+                        "). If necessary and possible, an attempt will be made to coerce the fill value into the same ",
+                        " dimensionality as the other outputs for this aggregation function (",
+                        paste(..2, collapse = ", "), ").")
+              if (all(dim2(..3) == ..2)) {
+                return(..3)
+              } else if (!is_scalar_double(..3)) {
+                stop2("Attempt to coerce fill value into the same dimensionality as the other outputs for this aggregation function failed: fill value must either be a scalar or a vector/matrix/array with the same dimensionality as the other outputs for this aggregation function.")
+              }
 
-            return(x)
-          } else return(x)
-        }))
+              x <-
+                if (length(..2) == 1) {
+                  # Coerce fill into vector
+                  rep(..3, ..2)
+                } else if (length(..2) == 2) {
+                  # Coerce fill into matrix
+                  matrix(..3, nrow = ..2[1], ncol = ..2[2])
+                } else if (length(..2) > 2) {
+                  # Coerce fill into array
+                  array(rep(..3, prod(..2)), dim = ..2)
+                } else ..3
+
+              return(x)
+            } else return(x)
+          }))
   # Check that all elements have the same dimensionality as the dim_target
   if (!all(map_lgl(1:length(dim_target), ~ map_lgl(result[[.x]], function(x) all(dim2(x) == dim_target[[.x]])) %>% reduce(all))))
     stop2(
@@ -171,7 +179,7 @@ get_aggregates_from_grouped_data_as_list_of_arrays <- function(
     data,
     groups,
     cols,
-    fill = NA,
+    fill = as.list(rep(NA, length(list(...)))),
     simplify = as.list(rep(T, length(list(...)))),
     verbose = F,
     ...

@@ -323,30 +323,30 @@ get_posterior_from_model <- function(model, ...) {
 #'
 #' @param x A vector of observations.
 #' @param model A model object.
-#' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
+#' @param decision_rule Must be one of "criterion", "proportional", or "sampling". (default: "sampling")
 #' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input.
-#' See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
-#' "sample"; "marginalize" otherwise).
+#'   See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
+#'   "sample"; "marginalize" otherwise).
 #' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
-#' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
-#' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
-#' will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
-#' perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
+#'   If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
+#'   a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
+#'   will be adjusted based on the lapse formula lapse_rate \emph{lapse_bias + (1 - lapse_rate)} posterior probability from
+#'   perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
 #' @param simplify Should the output be simplified, and just the label of the selected category be returned? This
-#' option is only available for the criterion and sampling decision rules. (default: `FALSE`)
+#'   option is only available for the criterion and sampling decision rules. (default: `FALSE`)
 #'
 #' @return Either a tibble of observations with posterior probabilities for each category (in long format), or a
-#' character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
+#'   character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
 #'
 #' @seealso TBD
 #' @keywords TBD
 #' @rdname get_categorization_from_model
 #' @export
-get_categorization_from_model <- function(model, ...) {
+get_categorization_from_model <- function(model, decision_rule = "sampling", ...) {
   if (is.MVG_ideal_observer(model)) {
-    c <- get_categorization_from_MVG_ideal_observer(model = model, ...)
+    c <- get_categorization_from_MVG_ideal_observer(model = model, decision_rule = decision_rule, ...)
   } else if (is.NIW_ideal_adaptor(model)) {
-    c <- get_categorization_from_NIW_ideal_adaptor(model = model, ...)
+    c <- get_categorization_from_NIW_ideal_adaptor(model = model, decision_rule = decision_rule, ...)
   } else {
     stop(
       paste(
@@ -366,19 +366,23 @@ get_categorization_from_model <- function(model, ...) {
 #' @param model A model object.
 #' @param x A vector of inputs (cue values).
 #' @param response_category A vector of category responses corresponding to each input. The model is evaluated against
-#' this ground truth. Must be of the same length as the list of inputs, and each element of the `response_category` must
-#' be one of the `category` levels of `model`.
+#'   this ground truth. Must be of the same length as the list of inputs, and each element of the `response_category` must
+#'   be one of the `category` levels of `model`.
 #' @param method Method for evaluating the model. Can be "accuracy", "likelihood", or "likelihood-up-to-constant". The
-#' latter two return the log-likelihood or the log-likelihood up to a constant that only depends on the data (rather than
-#' the model). This option calculates only sum_i sum_j n_ij log p_ij, where i = 1 ... M and M is the number of unique
-#' inputs x, and j = 1 ... K and K is the number of distinct categories, n_ij is the number of observed responses for
-#' category j at unique input x_i, and p_ij is the predicted posterior probability of response j at unique input x_i.
-#' Calculation of the "likelihood-up-to-constant" is thus particularly fast. Since this quantity is sufficient to compare
-#' models against each other on the same data, it makes the "likelihood-up-to-constant" method particularly useful for
-#' model fitting. It can, however, be important to keep in mind that this log-likelihood will be much smaller than the true
-#' data log-likelihood of the model under the assumption that the order of responses in the data should not be considered
-#' for the evaluation of the model.
+#'   latter two return the log-likelihood or the log-likelihood up to a constant that only depends on the data (rather than
+#'   the model). This option calculates only sum_i sum_j n_ij log p_ij, where i = 1 ... M and M is the number of unique
+#'   inputs x, and j = 1 ... K and K is the number of distinct categories, n_ij is the number of observed responses for
+#'   category j at unique input x_i, and p_ij is the predicted posterior probability of response j at unique input x_i.
+#'   Calculation of the "likelihood-up-to-constant" is thus particularly fast. Since this quantity is sufficient to compare
+#'   models against each other on the same data, it makes the "likelihood-up-to-constant" method particularly useful for
+#'   model fitting. It can, however, be important to keep in mind that this log-likelihood will be much smaller than the true
+#'   data log-likelihood of the model under the assumption that the order of responses in the data should not be considered
+#'   for the evaluation of the model.
 #' @inheritParams get_categorization_from_model
+#' @param decision_rule For details, see \code{\link{get_categorization_from_model}}. However, `evaluate_model` uses
+#'   sensible defaults depending on the value of `method`. If `method` is (only) "accuracy", then defaults to "criterion".
+#'   If `method` is "likelihood" or "likelihood-up-to-constant", then defaults to "proportional". Otherwise defaults to
+#'   `NULL`, which will result in an error (so users must manually specify the decision rule).
 #' @param return_by_x Should results be returned separately for each unique `x`? (default: `FALSE`)
 #'
 #' @return If `return_by_x`, the accuracy and/or log-likelihood of each unique input `x`. Otherwise, the overall accuracy
@@ -389,7 +393,15 @@ get_categorization_from_model <- function(model, ...) {
 #' @keywords TBD
 #' @rdname evaluate_model
 #' @export
-evaluate_model <- function(model, x, response_category, method = "likelihood-up-to-constant", ..., return_by_x = F) {
+evaluate_model <- function(
+    model,
+    x,
+    response_category,
+    method = "likelihood-up-to-constant",
+    decision_rule = if (all("accuracy" == method)) "criterion" else if (any(c("likelihood", "likelihood-up-to-constant") %in% method)) "proportional" else NULL,
+    ...,
+    return_by_x = F
+) {
   assert_that(all(method %in% c("likelihood", "likelihood-up-to-constant", "accuracy")))
   # When the input isn't a list, that's ambiguous between the input being a single input or a set of
   # 1D inputs. Use the model's cue dimensionality to disambiguate between the two cases.
@@ -414,7 +426,7 @@ evaluate_model <- function(model, x, response_category, method = "likelihood-up-
   posterior <-
     d.unique.observations %>%
     distinct(x) %>%
-    summarise(categorization = list(get_categorization_from_model(x = .data$x, model = .env$model, ...))) %>%
+    summarise(categorization = list(get_categorization_from_model(x = .data$x, model = .env$model, decision_rule = decision_rule, ...))) %>%
     unnest(categorization) %>%
     rename(posterior = response)
 

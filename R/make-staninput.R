@@ -94,7 +94,7 @@ get_category_statistics_as_list_of_arrays <- function(
     group = "group",
     category = "category",
     cues,
-    fill = 0,
+    fill = as.list(rep(0, length(list(...)))),
     simplify = as.list(rep(T, length(list(...)))),
     verbose = F,
     ...
@@ -249,13 +249,15 @@ make_staninput <- function(
       group_by(!! sym(group.unique), !! sym(category), !!! syms(cues)) %>%
       filter(!! sym(group) == unique(!! sym(group))[1])
 
+    # Keep information about original group around so that it can be stored in the data object below
+    group.original <- group
     group <- group.unique
   }
 
-  # Make sure data is ungrouped so that transform_cues works correctly, and keep only the necessary columns
-  exposure %<>%
-    ungroup() %>%
-    select(all_of(c(group, cues, category)))
+  # Keep only necessary columns but store original exposure data to attach it below
+  exposure %<>% ungroup()
+  exposure_original <- exposure %>% select(all_of(c(group.unique, group.original, category, cues)))
+  exposure %<>% select(all_of(c(group, category, cues)))
 
   test <-
     check_exposure_test_data(
@@ -265,8 +267,13 @@ make_staninput <- function(
       response = response,
       group = group,
       which.data = "test",
-      verbose = verbose) %>%
-    select(c(!! group, !!! cues, !! response))
+      verbose = verbose)
+
+  # Store original test data
+  test_original <- test %>% select(all_of(c(group.unique, group.original, cues, response)))
+  test %<>% select(all_of(c(group, cues, response)))
+  exposure_original %<>% mutate(across(all_of(group.unique), ~ factor(.x, levels = levels(test_original[[group.unique]]))))
+  exposure_original %<>% mutate(across(all_of(group), ~ factor(.x, levels = levels(test_original[[group]]))))
 
   # -----------------------------------------------------------------
   # Check whether exposure and test data are aligned in terms of factor levels
@@ -279,8 +286,7 @@ make_staninput <- function(
     message(paste("Not all levels of the grouping variable", group, "that are present in test were found in exposure.
     This is expected if and only if the data contained a test prior to (or without any) exposure.
     Creating 0 exposure data for these groups and aligning factor levels for group across exposure and test data."))
-  exposure %<>%
-    mutate(across(all_of(group), ~ factor(.x, levels = levels(test[[!! group]]))))
+  exposure %<>% mutate(across(all_of(group), ~ factor(.x, levels = levels(test[[group]]))))
 
   if (!is.null(mu_0)) {
     if (nlevels(exposure[[category]]) == 1) {
@@ -438,20 +444,28 @@ make_staninput <- function(
       untransformed = staninput_untransformed)
 
   # Bind exposure and test data as processed, as long with factor level information used above.
+  # Also attach information about variable name mapping as attribute to data.frame
   data <-
     bind_rows(
-      exposure[, c(group.unique, if (group == group.unique) NULL else group, category, cues)] %>%
+      exposure_original[, c(group.unique, group.original, category, cues)] %>%
         drop_na() %>%
         mutate(Phase = "exposure"),
-      test[, c(group.unique, if (group == group.unique) NULL else group, response, cues)] %>%
+      test_original[, c(group.unique, group.original, response, cues)] %>%
         drop_na() %>%
         mutate(Phase = "test")) %>%
     mutate(
-      !! sym(group.unique) := factor(!! sym(group.unique), levels = levels(exposure[[.env$group.unique]])),
-      !! sym(group) := factor(!! sym(group), levels = levels(exposure[[.env$group]])),
-      !! sym(category) := factor(!! sym(category), levels = levels(exposure[[.env$category]])),
-      !! sym(response) := factor(!! sym(response), levels = levels(test[[.env$response]]))) %>%
+      Phase = factor(Phase, levels = c("exposure", "test")),
+      !! sym(group.unique) := factor(!! sym(group.unique), levels = levels(exposure_original[[.env$group.unique]])),
+      !! sym(group.original) := factor(!! sym(group.original), levels = levels(exposure_original[[.env$group.original]])),
+      !! sym(category) := factor(!! sym(category), levels = levels(exposure_original[[.env$category]])),
+      !! sym(response) := factor(!! sym(response), levels = levels(exposure_original[[.env$response]]))) %>%
     relocate(Phase, all_of(c(group.unique, group, category, cues, response)))
+
+  attr(data, "group.unique") <- group.unique
+  attr(data, "group") <- group.original
+  attr(data, "category") <- category
+  attr(data, "cues") <- cues
+  attr(data, "response") <- response
 
   return(
     list(
@@ -512,6 +526,7 @@ make_staninput_for_NIW_ideal_adaptor <- function(
     get_category_statistics_as_list_of_arrays(
       cues = cues, category = category, group = group,
       # Different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix):
+      fill = list(0, rep(0, length(cues)), diag(length(cues))),
       simplify = list(T, F, F),
       verbose = verbose,
       N_exposure = nrow, x_mean_exposure = colMeans, x_ss_exposure = get_sum_of_uncentered_squares_from_df) %>%
@@ -547,6 +562,7 @@ make_staninput_for_MNIX_ideal_adaptor <- function(
     get_category_statistics_as_list_of_arrays(
       data = exposure,
       cues = cues, category = category, group = group,
+      fill = list(0, rep(0, length(cues)), diag(length(cues))),
       # Different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix):
       simplify = list(T, F, F),
       verbose = verbose,

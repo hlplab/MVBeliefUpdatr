@@ -11,11 +11,13 @@ plot_expected_categorization(model, ...)
 \method{plot_expected_categorization}{ideal_adaptor_stanfit}(
   model,
   data.test = NULL,
-  groups = get_group_levels(model, include_prior = TRUE),
-  summarize = T,
+  groups = get_group_levels(model, include_prior = T),
+  lapse_treatment = c("no_lapses", "sample", "marginalize")[3],
   ndraws = NULL,
-  confidence.intervals = c(0.66, 0.95),
   target_category = 1,
+  logit = F,
+  confidence.intervals = c(0.66, 0.95),
+  summarize = T,
   panel.group = if (plot_in_cue_space) TRUE else FALSE,
   group.colors = get_default_colors("group", groups),
   group.shapes = get_default_shapes("group", groups),
@@ -23,8 +25,9 @@ plot_expected_categorization(model, ...)
   category.colors = get_default_colors("category", get_category_levels(model)),
   all_test_locations = TRUE,
   plot_in_cue_space = FALSE,
-  untransform_cues = FALSE,
-  sort_by = if (plot_in_cue_space) NULL else "prior"
+  plot_test_data = TRUE,
+  sort_by = if (plot_in_cue_space) NULL else "prior",
+  untransform_cues = FALSE
 )
 }
 \arguments{
@@ -38,16 +41,16 @@ are automatically added to the fit during the creation of the fit. If necessary,
 \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
 (default: all categories/groups will be plotted)}
 
-\item{summarize}{Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
-unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)}
-
 \item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
 (default: `NULL`)}
+
+\item{target_category}{The index of the category for which categorization should be shown. (default: `1`)}
 
 \item{confidence.intervals}{The two confidence intervals that should be plotted (using `geom_ribbon`) around the mean.
 (default: `c(.66, .95)`)}
 
-\item{target_category}{The index of the category for which categorization should be shown. (default: `1`)}
+\item{summarize}{Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
+unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)}
 
 \item{panel.group}{Should the groups be plotted in separate panels? (default: `FALSE`)}
 
@@ -62,11 +65,14 @@ combinations be shown that actually occurred in the data? (default: `FALSE`)}
 \item{plot_in_cue_space}{Currently only available if the model has one or two cues. Should predictions be plotted in the cue space?
 If not, test tokens are treated as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)}
 
-\item{untransform_cues}{DEPRECATED. Should the cues be untransformed before plotting? This should only have visual consequences
-if `plot_in_cue_space = T`. (default: `FALSE`)}
+\item{plot_test_data}{Should the test data be plotted? If `plot_in_cue_space = TRUE`, then test data will be shown as points
+on top of the raster. If not, then pointranges will be shown. (default: `TRUE`)}
 
 \item{sort_by}{Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
 from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired. (default: `"prior"`)}
+
+\item{untransform_cues}{DEPRECATED. Should the cues be untransformed before plotting? This should only have visual consequences
+if `plot_in_cue_space = T`. (default: `FALSE`)}
 }
 \value{
 ggplot object.

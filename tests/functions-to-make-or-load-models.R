@@ -60,13 +60,13 @@ get_test_responses_after_updating_based_on_exposure <- function(.io, .exposure, 
   .data <-
     bind_rows(
       .exposure %>%
-        crossing(Subject = 1:n_subject) %>%
+        crossing(Subject = factor(1:n_subject)) %>%
         select(Phase, Condition, Subject, !!! syms(.cues), cue, category),
       .ia %>%
         unnest(test) %>%
         mutate(Phase = "test") %>%
-        select(Phase, Condition, all_of(.cues), cue, Response)) %>%
-    mutate(across(c(Phase, Condition, category, Response), factor))
+        select(Phase, Condition, Subject, all_of(.cues), cue, Response)) %>%
+    mutate(across(c(Phase, Condition, Subject, category, Response), factor))
 
   return(.data)
 }
@@ -112,7 +112,7 @@ make_data_for_1Dstanfit_with_exposure <- function(verbose = F) {
     make_vector_column(cols = .cues, vector_col = "cue") %>%
     crossing(
       Condition = unique(.exposure$Condition),
-      Subject = 1:n_subject)
+      Subject = factor(1:n_subject))
 
   .data <- get_test_responses_after_updating_based_on_exposure(.io, .exposure, .test, .cues)
   return(.data)
@@ -161,7 +161,7 @@ make_data_for_2Dstanfit_with_exposure <- function(verbose = F, plot = F) {
     make_vector_column(cols = .cues, vector_col = "cue") %>%
     crossing(
       Condition = unique(.exposure$Condition),
-      Subject = 1:n_subject)
+      Subject = factor(1:n_subject))
 
   .data <- get_test_responses_after_updating_based_on_exposure(.io, .exposure, .test, .cues)
 
@@ -239,7 +239,7 @@ make_data_for_3Dstanfit_with_exposure <- function(verbose = F) {
     make_vector_column(cols = .cues, vector_col = "cue") %>%
     crossing(
       Condition = unique(.exposure$Condition),
-      Subject = 1:n_subject)
+      Subject = factor(1:n_subject))
 
   .data <- get_test_responses_after_updating_based_on_exposure(.io, .exposure, .test, .cues)
   return(.data)

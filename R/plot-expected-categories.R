@@ -387,7 +387,7 @@ plot_expected_categories_contour2D.ideal_adaptor_stanfit <- function(
     # Optionally plot test data
     { if (plot.test)
       add_test_data_to_2D_plot(
-        get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
+        get_test_data(model, groups = setdiff(groups_found, "prior"), .from_staninput = TRUE) %>%
           { if (untransform_cues) get_untransform_function(model)(.) else . } %>%
           ungroup() %>%
           distinct(group, !!! syms(cues)),
@@ -554,7 +554,7 @@ plot_expected_categories_density1D.ideal_adaptor_stanfit <- function(
   # By default get plot dimensions that are centered around the test data
   xlim <-
     if (is.null(xlim)) {
-      get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
+      get_test_data(model, groups = setdiff(groups_found, "prior"), .from_staninput = TRUE) %>%
         pull(cues[1]) %>%
         { (range(.) - mean(.) * 1.5) + mean(.) }
     } else xlim
@@ -607,7 +607,7 @@ plot_expected_categories_density1D.ideal_adaptor_stanfit <- function(
     # Optionally plot test data
     { if (plot.test)
       add_test_data_to_1D_plot(
-        get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
+        get_test_data(model, groups = setdiff(groups_found, "prior"), .from_staninput = TRUE) %>%
           { if (untransform_cues) get_untransform_function(model)(.) else . } %>%
           ungroup() %>%
           distinct(group, !!! syms(cues)),
@@ -664,13 +664,13 @@ plot_expected_categories_density2D.ideal_adaptor_stanfit <- function(
   # By default get plot dimensions that are centered around the test data
   xlim <-
     if (is.null(xlim)) {
-      get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
+      get_test_data(model, groups = setdiff(groups_found, "prior"), .from_staninput = TRUE) %>%
         pull(cues[1]) %>%
         { (range(.) - mean(.) * 1.5) + mean(.) }
     } else xlim
   ylim <-
     if (is.null(ylim)) {
-      get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
+      get_test_data(model, groups = setdiff(groups_found, "prior"), .from_staninput = TRUE) %>%
         pull(cues[2]) %>%
         { (range(.) - mean(.) * 1.5) + mean(.) }
     } else ylim
@@ -738,7 +738,7 @@ plot_expected_categories_density2D.ideal_adaptor_stanfit <- function(
     # Optionally plot test data
     { if (plot.test)
       add_test_data_to_2D_plot(
-        get_test_data(model, groups = setdiff(groups_found, "prior")) %>%
+        get_test_data(model, groups = setdiff(groups_found, "prior"), .from_staninput = TRUE) %>%
           { if (untransform_cues) get_untransform_function(model)(.) else . } %>%
           ungroup() %>%
           distinct(group, !!! syms(cues)),

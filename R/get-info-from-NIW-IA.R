@@ -158,7 +158,7 @@ get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
 get_categorization_from_NIW_ideal_adaptor <- function(
   x,
   model,
-  decision_rule,
+  decision_rule = "sampling",
   noise_treatment = if (decision_rule == "sampling") "sample" else infer_default_noise_treatment(model$Sigma_noise),
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F,

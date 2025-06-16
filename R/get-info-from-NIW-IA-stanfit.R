@@ -534,9 +534,9 @@ get_exposure_category_cov.ideal_adaptor_stanfit <- function(...) {
 }
 
 
-#' Get the test data from an ideal adaptor stanfit.
+#' Get the exposure and/or test data from an ideal adaptor stanfit.
 #'
-#' Returns the test data used during the creation of the \code{\link[rstan]{stanfit}}.
+#' Returns the exposure and/or test data used during the creation of the \code{\link[rstan]{stanfit}}.
 #' object.
 #'
 #' @param x \code{\link{ideal_adaptor_stanfit}} object.
@@ -551,27 +551,96 @@ get_exposure_category_cov.ideal_adaptor_stanfit <- function(...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
+#' @rdname get_exposure_test_data
 #' @export
-get_test_data <- function(fit, ...) {
+get_data <- function(x, ...) {
+  UseMethod("get_data")
+}
+
+#' @rdname get_exposure_test_data
+#' @export
+get_data.ideal_adaptor_stanfit <- function(
+    x,
+    groups = get_group_levels(x, include_prior = FALSE),
+    .rename_to_MVB_default = FALSE,
+    ...
+) {
+  data <- x$data
+
+  group.unique <- attr(data, "group.unique")
+  if (.rename_to_MVB_default) {
+    group <- attr(data, "group")
+    category <- attr(data, "category")
+    cues <- attr(data, "cues")
+    response <- attr(data, "response")
+
+    data <-
+      data %>%
+      rename(
+        group.unique = !! sym(group.unique),
+        group = !! sym(group),
+        category = !! sym(category),
+        response = !! sym(response))
+
+    for (c in 1:length(cues)) {
+      data <- data %>% rename(!! sym(paste0("cue", c)) := !! sym(cues[c]))
+    }
+
+    group.unique <- "group.unique"
+  }
+
+  data %>% filter(!! sym(group.unique) %in% groups)
+}
+
+#' @rdname get_exposure_test_data
+#' @export
+get_exposure_data <- function(x, ...) {
+  UseMethod("get_exposure_data")
+}
+
+#' @rdname get_exposure_test_data
+#' @export
+get_exposure_data.ideal_adaptor_stanfit <- function(
+    x,
+    groups = get_group_levels(x, include_prior = FALSE),
+    ...
+) {
+  get_data(x, ...) %>%
+    filter(Phase == "exposure")
+}
+
+#' @rdname get_exposure_test_data
+#' @export
+get_test_data <- function(x, ...) {
   UseMethod("get_test_data")
 }
 
-#' @rdname get_test_data
+#' @rdname get_exposure_test_data
 #' @export
 get_test_data.ideal_adaptor_stanfit <- function(
-  fit,
-  groups = get_group_levels(fit, include_prior = FALSE),
+  x,
+  groups = get_group_levels(x, include_prior = FALSE),
+  .from_staninput = FALSE, # for now included so as to allow the previous way of extracting test data from the staninput
   ...
 ) {
-  data <- get_staninput(fit, ...)
-  data[["x_test"]] %>%
-    cbind(data[["z_test_counts"]]) %>%
-    as_tibble(.name_repair = "minimal") %>%
-    mutate(
-      group.id = data[["y_test"]],
-      group = factor(attr(data[["y_test"]], "levels")[group.id],
-                     levels = attr(data[["y_test"]], "levels"))) %>%
-    filter(group %in% groups)
+  if (.from_staninput) {
+    data <- get_staninput(x, ...)
+    data <-
+      data[["x_test"]] %>%
+      cbind(data[["z_test_counts"]]) %>%
+      as_tibble(.name_repair = "minimal") %>%
+      mutate(
+        group.id = data[["y_test"]],
+        group = factor(attr(data[["y_test"]], "levels")[group.id],
+                       levels = attr(data[["y_test"]], "levels"))) %>%
+      filter(group %in% groups)
+  } else {
+    data <-
+      get_data(x, ...) %>%
+      filter(Phase == "test")
+  }
+
+  return(data)
 }
 
 

@@ -335,10 +335,12 @@ plot_parameter_correlations.ideal_adaptor_stanfit <- function(
 #'   combinations be shown that actually occurred in the data? (default: `FALSE`)
 #' @param plot_in_cue_space Currently only available if the model has one or two cues. Should predictions be plotted in the cue space?
 #'   If not, test tokens are treated as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)
-#' @param untransform_cues DEPRECATED. Should the cues be untransformed before plotting? This should only have visual consequences
-#'   if `plot_in_cue_space = T`. (default: `FALSE`)
+#' @param plot_test_data Should the test data be plotted? If `plot_in_cue_space = TRUE`, then test data will be shown as points
+#'   on top of the raster. If not, then pointranges will be shown. (default: `TRUE`)
 #' @param sort_by Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
 #'   from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired. (default: `"prior"`)
+#' @param untransform_cues DEPRECATED. Should the cues be untransformed before plotting? This should only have visual consequences
+#'   if `plot_in_cue_space = T`. (default: `FALSE`)
 #'
 #' @return ggplot object.
 #'
@@ -373,8 +375,10 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
   category.colors = get_default_colors("category", get_category_levels(model)),
   all_test_locations = TRUE,
   plot_in_cue_space = FALSE,
-  untransform_cues = FALSE,
-  sort_by = if (plot_in_cue_space) NULL else "prior"
+  plot_test_data = TRUE,
+  sort_by = if (plot_in_cue_space) NULL else "prior",
+  # deprecated
+  untransform_cues = FALSE
 ) {
   if (is.null(data.test)) data.test <- get_test_data(model)
   assert_that(is.flag(summarize))
@@ -424,8 +428,11 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
   # There are some issues with using exec instead of invoke_map in a mutate context since
   # !!! takes precedence over the definition of the function in the map statement
   # (see https://stackoverflow.com/questions/64356232/using-mutate-with-map2-and-exec-instead-of-invoke-map)
-  # This works around that issue
-  .fun <- function(fn, args) exec(fn, !!!args, target_category = target_category, logit = logit)
+  # This works around that issue.
+  #
+  # Independently, note that we're first obtaining estimates in logits so that summarization
+  # (if requested) is done over logits before we transform into probabilities.
+  .fun <- function(fn, args) exec(fn, !!!args, target_category = target_category, logit = T)
   d.pars %<>%
     right_join(test_data, by = "group") %>%
     group_by(group, .draw) %>%
@@ -433,21 +440,23 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
     select(-f) %>%
     unnest(c(cues_joint, cues_separate, p_cat))
 
-
   if (summarize) {
+    f <- if (logit) I else plogis
     d.pars %<>%
       # For each unique group and test token obtain the CIs and the mean.
       group_by(group, x, !!! syms(cue.labels)) %>%
-      summarise_at(
-        "p_cat",
-        .funs = list(
-          # na.rm = T excludes cases that might result from estimated probabilities of 0 and 1 (infinities in log-odds)
-          y.outer.min = function(x) plogis(quantile(x, confidence.intervals[1], na.rm = T)),
-          y.outer.max = function(x) plogis(quantile(x, confidence.intervals[4], na.rm = T)),
-          y.inner.min = function(x) plogis(quantile(x, confidence.intervals[2], na.rm = T)),
-          y.inner.max = function(x) plogis(quantile(x, confidence.intervals[3], na.rm = T)),
-          p_cat = function(x) plogis(mean(x, na.rm = T))))
-  } else {
+      summarise(
+        across(
+          p_cat,
+          list(
+            # na.rm = T excludes cases that might result from estimated probabilities of 0 and 1 (infinities in log-odds)
+            y.outer.min = function(x) f(quantile(x, confidence.intervals[1], na.rm = T)),
+            y.outer.max = function(x) f(quantile(x, confidence.intervals[4], na.rm = T)),
+            y.inner.min = function(x) f(quantile(x, confidence.intervals[2], na.rm = T)),
+            y.inner.max = function(x) f(quantile(x, confidence.intervals[3], na.rm = T)),
+            p_cat = function(x) f(mean(x, na.rm = T))),
+          .names = "{.fn}"))
+  } else if (!logit) {
     d.pars %<>%
       mutate(p_cat = plogis(p_cat))
   }
@@ -477,6 +486,8 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
         low = if (length(category.colors[which(get_category_levels(model) != target_category_label)]) > 1) "gray" else category.colors[which(get_category_levels(model) != target_category_label)],
         limits = c(0,1)) +
       coord_cartesian(expand = F)
+
+    if (plot_test_data) p <- p + geom_point(data = test_data, color = "black")
   } else {
     # Get cues as rounded character strings (for the x-axis)
     d.pars %<>% mutate(token.cues = map(x, ~ paste(signif(.x), collapse = ",\n"))) %>% select(-c(x))
@@ -548,6 +559,21 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
           breaks = groups,
           values = group.colors)
 
+      if (plot_test_data) {
+        message("plot_test_data not yet implemented when plot_in_cue_space = FALSE. Not plotting test data.")
+
+        # Need access to participant information for adequate CIs.
+        # p <-
+        #   p +
+        #   stat_summary(
+        #     data =
+        #       test_data %>%
+        #       group_by(token.cues, group, ParticipantID) %>%
+        #       summarise(p_cat = mean(Response == "SH")),
+        #     fun.data = mean_cl_boot,
+        #     geom = "pointrange", position = position_dodge(.25))
+      }
+
       # Place information about confidence intervals on plot.
       p <- p +
         ggtitle(paste0((confidence.intervals[4]-confidence.intervals[1]) * 100,
@@ -556,7 +582,8 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
                        "% CIs\nbased on ", ndraws, " posterior samples."))
     }
 
-    p <- p +
+    p <-
+      p +
       geom_point(alpha = .9) +
       geom_line(size = 1, alpha = .9, aes(x = as.numeric(.data$token)))
   }
