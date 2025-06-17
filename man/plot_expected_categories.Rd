@@ -17,9 +17,11 @@
 \alias{plot_expected_categories_density.ideal_adaptor_stanfit}
 \alias{plot_expected_ibbu_stanfit_categories_density}
 \alias{plot_expected_categories_contour2D.NIW_ideal_adaptor}
+\alias{plot_expected_categories_contour2D.tbl_df}
 \alias{plot_expected_categories_contour2D.ideal_adaptor_stanfit}
 \alias{plot_expected_ibbu_stanfit_categories_contour2D}
 \alias{plot_expected_categories_density1D.NIW_ideal_adaptor}
+\alias{plot_expected_categories_density1D.tbl_df}
 \alias{plot_expected_categories_density1D.ideal_adaptor_stanfit}
 \alias{plot_expected_ibbu_stanfit_categories_density1D}
 \alias{plot_expected_categories_density2D.ideal_adaptor_stanfit}
@@ -60,6 +62,8 @@ plot_expected_categories_density2D(model, ...)
   ...
 )
 
+\method{plot_expected_categories_contour2D}{tbl_df}(...)
+
 \method{plot_expected_categories_contour2D}{ideal_adaptor_stanfit}(
   model,
   categories = get_category_levels(model),
@@ -91,6 +95,8 @@ plot_expected_categories_density2D(model, ...)
   category.linetypes = NULL,
   ...
 )
+
+\method{plot_expected_categories_density1D}{tbl_df}(...)
 
 \method{plot_expected_categories_density1D}{ideal_adaptor_stanfit}(
   model,

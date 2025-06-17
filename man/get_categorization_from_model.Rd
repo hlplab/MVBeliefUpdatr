@@ -8,21 +8,21 @@
 get_categorization_from_MVG_ideal_observer(
   x,
   model,
-  decision_rule,
+  decision_rule = "sampling",
   noise_treatment = if (decision_rule == "sampling") "sample" else
     infer_default_noise_treatment(model$Sigma_noise),
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F
 )
 
-get_categorization_from_model(model, ...)
+get_categorization_from_model(model, decision_rule = "sampling", ...)
 }
 \arguments{
 \item{x}{A vector of observations.}
 
 \item{model}{A model object.}
 
-\item{decision_rule}{Must be one of "criterion", "proportional", or "sampling".}
+\item{decision_rule}{Must be one of "criterion", "proportional", or "sampling". (default: "sampling")}
 
 \item{noise_treatment}{Determines whether and how multivariate Gaussian noise is added to the input.
 See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
@@ -31,7 +31,7 @@ See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if
 \item{lapse_treatment}{Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
 If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
 a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
-will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
+will be adjusted based on the lapse formula lapse_rate \emph{lapse_bias + (1 - lapse_rate)} posterior probability from
 perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).}
 
 \item{simplify}{Should the output be simplified, and just the label of the selected category be returned? This
@@ -39,7 +39,7 @@ option is only available for the criterion and sampling decision rules. (default
 }
 \value{
 Either a tibble of observations with posterior probabilities for each category (in long format), or a
-character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
+  character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
 }
 \description{
 Categorize a single observation based a model. The decision rule can be specified to be either the

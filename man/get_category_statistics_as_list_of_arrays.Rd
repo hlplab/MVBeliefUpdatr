@@ -9,7 +9,7 @@ get_category_statistics_as_list_of_arrays(
   group = "group",
   category = "category",
   cues,
-  fill = 0,
+  fill = as.list(rep(0, length(list(...)))),
   simplify = as.list(rep(T, length(list(...)))),
   verbose = F,
   ...

@@ -79,6 +79,7 @@ ideal_adaptor_stanfit <- function(
       file,
       version)
 
+  # For S4 class in the future
   # setClass(
   #   "ideal_adaptor_stanfit",
   #   slots = c(input_data = "list", transform_information = "list", labels = "list"),

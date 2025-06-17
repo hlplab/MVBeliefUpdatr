@@ -266,7 +266,7 @@ plot_expected_categories_contour2D.NIW_ideal_adaptor <- function(
       group_by(!!! syms(group_vars(x)))
   )
 
-  p = ggplot(x,
+  p <- ggplot(x,
              aes(
                x = .data[[cue.labels[1]]],
                y = .data[[cue.labels[2]]],
@@ -295,6 +295,14 @@ plot_expected_categories_contour2D.NIW_ideal_adaptor <- function(
 
   p = facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
   return(p)
+}
+
+
+# this is a temporary hack to deal with the fact that grouped ideal adaptors are just tibbles atm
+#' @rdname plot_expected_categories
+#' @export
+plot_expected_categories_contour2D.tbl_df <- function(...) {
+  plot_expected_categories_contour2D.NIW_ideal_adaptor(...)
 }
 
 
@@ -519,6 +527,14 @@ plot_expected_categories_density1D.NIW_ideal_adaptor <- function(
   p <- facet_or_animate(p, !!facet_rows_by, !!facet_cols_by, !! facet_wrap_by, !!animate_by, animation_follow)
   return(p)
 }
+
+# this is a temporary hack to deal with the fact that grouped ideal adaptors are just tibbles atm
+#' @rdname plot_expected_categories
+#' @export
+plot_expected_categories_density1D.tbl_df <- function(...) {
+  plot_expected_categories_density1D.NIW_ideal_adaptor(...)
+}
+
 
 #' @aliases plot_expected_ibbu_stanfit_categories_density1D
 #' @rdname plot_expected_categories

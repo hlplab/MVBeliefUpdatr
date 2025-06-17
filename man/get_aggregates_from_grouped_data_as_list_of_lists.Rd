@@ -9,7 +9,7 @@ get_aggregates_from_grouped_data_as_list_of_lists(
   data,
   groups,
   cols,
-  fill = NA,
+  fill = as.list(rep(NA, length(list(...)))),
   verbose = F,
   ...
 )
@@ -18,7 +18,7 @@ get_aggregates_from_grouped_data_as_list_of_arrays(
   data,
   groups,
   cols,
-  fill = NA,
+  fill = as.list(rep(NA, length(list(...)))),
   simplify = as.list(rep(T, length(list(...)))),
   verbose = F,
   ...

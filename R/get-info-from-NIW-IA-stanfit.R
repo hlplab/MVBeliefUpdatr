@@ -880,6 +880,23 @@ get_expected_sigma.ideal_adaptor_stanfit <- function(x, ...) {
 }
 
 
+#' Get categorization function from a model object
+#'
+#' Returns a categorization function that can be used to categorize a set of cues into categories.
+#'
+#' @param x A model object. Currently, only \code{\link{ideal_adaptor_stanfit}} objects are supported.
+#' @param lapse_treatment Should the consequences of attentional lapses be included in the categorization function
+#'   ("marginalize") or not ("no_lapses")? (default: "marginalize")
+#' @param ... Optionally, additional arguments handed to \code{\link{get_draws}}.
+#'
+#' @return A function that takes as input cue values and returns posterior probabilities of the first category,
+#'   based on the posterior predictive of the cues given the ideal adaptor categories' parameters. The function
+#'   will accept the following arguments:
+#'   \itemize{
+#'     \item{`target_category`:}{The index of the category for which categorization should be shown. (default: `1`)}
+#'     \item{`logit`:}{Should the function return log-odds (TRUE) or probabilities (FALSE)? (default: FALSE)}
+#'   }
+#'
 #' @rdname get_categorization_function
 #' @export
 get_categorization_function <- function(x, ...) {
@@ -916,8 +933,6 @@ get_categorization_function.ideal_adaptor_stanfit <- function(
   return(d.pars)
 }
 
-#' @rdname get_categorization_function_from_stanfit
-#' @export
 get_categorization_function_from_stanfit_draws <- function(x, ...) {
   get_NIW_categorization_function(
     ms = x$m,
