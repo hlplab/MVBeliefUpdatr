@@ -146,7 +146,7 @@ get_S_from_expected_Sigma <- function(Sigma, nu) {
 #' @export
 get_NIW_posterior_predictive <- function(
     x, m, S, kappa, nu, Sigma_noise = NULL,
-    noise_treatment = if (any(is.null(Sigma_noise), all(is.null(Sigma_noise)), all(map_lgl(Sigma_noise, is.null)))) "no_noise" else "marginalize",
+    noise_treatment = infer_default_noise_treatment(Sigma_noise),
     log = T
 ) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
@@ -167,7 +167,7 @@ get_NIW_posterior_predictive <- function(
   if (noise_treatment != "no_noise") {
     assert_that(is.Sigma(Sigma_noise))
     assert_that(all(dim(S) == dim(Sigma_noise)),
-                msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the scatter matrices S.')
+                msg = 'Unless noise_treatment is "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the scatter matrices S.')
   }
 
   D <- get_D(S)
@@ -221,7 +221,7 @@ get_NIW_posterior_predictive.pmap = function(x, m, S, kappa, nu, ...) {
 get_posterior_predictive_from_NIW_belief = function(
   x,
   model,
-  noise_treatment = if (is.NIW_ideal_adaptor(model)) { if (!is.null(first(model$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
+  noise_treatment = infer_default_noise_treatment(model$Sigma_noise),
   log = T,
   category = "category",
   category.label = NULL,
@@ -275,7 +275,7 @@ get_posterior_predictive_from_NIW_belief = function(
 get_posterior_predictives_from_NIW_beliefs = function(
   x,
   model,
-  noise_treatment = if (is.NIW_ideal_adaptor(model)) { if (!is.null(first(model$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
+  noise_treatment = infer_default_noise_treatment(model$Sigma_noise),
   log = T,
   category = "category",
   category.label = NULL,

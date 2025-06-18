@@ -25,7 +25,7 @@
 get_likelihood_from_exemplars <- function(
   x,
   model,
-  noise_treatment = if (is.exemplar_model(model)) { if (!is.null(first(model$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
+  noise_treatment = infer_default_noise_treatment(model$Sigma_noise),
   log = T,
   category = "category",
   category.label = NULL
@@ -63,7 +63,7 @@ get_categorization_from_exemplar_model <- function(
   x,
   model,
   decision_rule,
-  noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+  noise_treatment = if (decision_rule == "sampling") "sample" else infer_default_noise_treatment(model$Sigma_noise),
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F
 ) {

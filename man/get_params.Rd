@@ -2,9 +2,16 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{get_params}
 \alias{get_params}
-\title{Get parameter names}
+\title{Get parameter names of stanfit}
 \usage{
-get_params(fit)
+get_params(fit, original_pars = F)
+}
+\arguments{
+\item{fit}{A \code{\link{stanfit}} object.}
+
+\item{original_pars}{Should the original parameter names used in the Stan code be returned?
+This includes parameters for which no samples were stored. Alternatively, only the
+(renamed) parameters for which samples were stored are returned. (default: `FALSE`)}
 }
 \description{
 Get the names for all parameters in `fit`.

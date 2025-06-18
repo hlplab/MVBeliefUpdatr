@@ -23,7 +23,7 @@ test_that("Test is.MVG_ideal_observer", {
   expect_false(is.MVG_ideal_observer(example_exemplar_model(1)))
   expect_true(is.MVG_ideal_observer(example_MVG_ideal_observer(1)))
   expect_false(is.MVG_ideal_observer(example_NIW_ideal_adaptor(1)))
-#  expect_false(is.MVG_ideal_observer(example_NIW_ideal_adaptor_stanfit(1)))
+#  expect_false(is.MVG_ideal_observer(example_ideal_adaptor_stanfit(1)))
 })
 
 test_that("Get MVG likelihood - input check x (single element, non-list)", {

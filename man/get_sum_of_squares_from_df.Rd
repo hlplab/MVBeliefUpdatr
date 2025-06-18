@@ -15,7 +15,7 @@ get_sum_of_centered_squares_from_df(data, variables = NULL, verbose = F)
 \arguments{
 \item{data}{A `tibble`, `data.frame`, or `matrix`. If data is a `tibble` or `data.frame`, the columns for
 specified variables are extracted and (together) converted into a matrix with as many colums as there are
-variables.}
+variables. If `NULL`, `NA` is returned.}
 
 \item{variables}{Only required if data is not already a `matrix`.}
 }

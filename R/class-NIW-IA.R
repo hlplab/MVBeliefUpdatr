@@ -1,3 +1,21 @@
+#' An S4 class for NIW ideal adaptor objects.
+#'
+#' @name NIW_ideal_adaptor-class
+#' @aliases NIW_ideal_adaptor
+#'
+#' @details
+#' See \code{methods(class = "NIW_ideal_adaptor")} for an overview of available methods.
+#'
+#' @export
+NIW_ideal_adaptor <-
+  setClass(
+    "NIW_ideal_adaptor",
+    contains = "tbl_df",
+    package = "MVBeliefUpdatr")
+
+# Call class constructor function
+NIW_ideal_adaptor
+
 get_expected_columns_for_NIW_ideal_adaptor <- function()
   c(get_expected_columns_for_NIW_belief(), get_expected_columns_for_model())
 
@@ -25,7 +43,7 @@ get_expected_columns_for_NIW_ideal_adaptor <- function()
 #' @seealso TBD
 #' @keywords TBD
 #' @export
-is.NIW_ideal_adaptor = function(x, group = NULL, category = "category", is.long = T, with.prior = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = 1e-5) {
+is.NIW_ideal_adaptor <- function(x, group = NULL, category = "category", is.long = T, with.prior = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = 1e-5) {
   name_of_x <- deparse(substitute(x))
   assert_that(all(is.flag(with.lapse), is.flag(with.lapse_bias)))
 

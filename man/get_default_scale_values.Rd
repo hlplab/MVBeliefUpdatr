@@ -2,10 +2,13 @@
 % Please edit documentation in R/visualize-basics.R
 \name{get_default_colors}
 \alias{get_default_colors}
+\alias{get_default_shapes}
 \alias{get_default_linetypes}
 \title{Get default colors, linetype, etc.}
 \usage{
 get_default_colors(var, levels)
+
+get_default_shapes(var, levels)
 
 get_default_linetypes(var, levels)
 }

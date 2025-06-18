@@ -1,649 +1,411 @@
-make_data_for_stanfit <- function(example = 1) {
+n_subject <- 30
+# number of trials in exposure per category per subject
+n_exposure_trial <- 50
+n_test_trial <- 125
+
+make_data_for_stanfit <- function(example = 1, seed = NULL, verbose = F) {
   require(tidyverse)
   require(magrittr)
   require(MVBeliefUpdatr)
 
+  if (!is.null(seed)) set.seed(seed)
+
   if (example == 1) {
-    return(make_data_for_1Dstanfit_with_exposure())
+    return(make_data_for_1Dstanfit_with_exposure(verbose = verbose))
   } else if (example == 2) {
-    return(make_data_for_2Dstanfit_with_exposure())
+    return(make_data_for_2Dstanfit_with_exposure(verbose = verbose))
   } else if (example == 3) {
-    return(make_data_for_3Dstanfit_with_exposure())
+    return(make_data_for_3Dstanfit_with_exposure(verbose = verbose))
   } else if (example == 4) {
-    return(make_data_for_1Dstanfit_without_exposure())
+    return(make_data_for_1Dstanfit_without_exposure(verbose = verbose))
   } else if (example == 5) {
-    return(make_data_for_2Dstanfit_without_exposure())
+    return(make_data_for_2Dstanfit_without_exposure(verbose = verbose))
   } else if (example == 6) {
-    return(make_data_for_3Dstanfit_without_exposure())
+    return(make_data_for_3Dstanfit_without_exposure(verbose = verbose))
   }
 }
 
-make_data_for_1Dstanfit_with_exposure <- function() {
-  n_subject <- 30
-  # number of trials in exposure per category per subject
-  # (and there will be 2 * n_trials trials in test per subject)
-  n_trial <- 50
+get_test_responses_after_updating_based_on_exposure <- function(.io, .exposure, .test, .cues) {
+  .kappa <- 5
+  .nu <- 100
+
+  # Define NIW and update it based on exposures, and then sample responses over test grid
+  .ia <-
+    .io %>%
+    lift_MVG_ideal_observer_to_NIW_ideal_adaptor(kappa = .kappa, nu = .nu) %>%
+    crossing(Condition = unique(.exposure$Condition)) %>%
+    nest(model = -Condition) %>%
+    # Create one update model for condition, assuming that all subjects update the same way
+    mutate(
+      model = map2(model, Condition, ~ update_NIW_ideal_adaptor_batch(
+        prior_model = .x,
+        exposure = .exposure %>% filter(Condition == .y),
+        noise_treatment = "no_noise"))) %>%
+    left_join(.test, by = "Condition") %>%
+    # Nest subject, too, since that makes the sampling more efficient (and currently all subjects
+    # in a condition have the same updated model)
+    nest(test = c(Subject, all_of(.cues), cue, response)) %>%
+    mutate(
+      test = map2(test, model, ~
+                    .x %>%
+                    mutate(
+                      Response = get_categorization_from_NIW_ideal_adaptor(
+                        x = .x$cue,
+                        model = .y,
+                        decision_rule = "sampling",
+                        simplify = T,
+                        noise_treatment = "no_noise",
+                        lapse_treatment = "marginalize"))))
+
+  .data <-
+    bind_rows(
+      .exposure %>%
+        crossing(Subject = factor(1:n_subject)) %>%
+        select(Phase, Condition, Subject, !!! syms(.cues), cue, category),
+      .ia %>%
+        unnest(test) %>%
+        mutate(Phase = "test") %>%
+        select(Phase, Condition, Subject, all_of(.cues), cue, Response)) %>%
+    mutate(across(c(Phase, Condition, Subject, category, Response), factor))
+
+  return(.data)
+}
+
+make_data_for_1Dstanfit_with_exposure <- function(verbose = F) {
   .cues <- c("VOT")
 
-  # Make 5 ideal observers
+  # Make 5 ideal observers to sample EXPOSURE from
   .io <-
-    example_MVG_ideal_observer(1) %>%
-    mutate(Sigma = map(Sigma, ~ .x * 5))
-  .io.p20 <-
+    example_MVG_ideal_observer(1, verbose = verbose) %>%
+    mutate(Sigma = map(Sigma, ~ .x))
+  .exposure <-
     .io %>%
-    mutate(mu = map(mu, ~ .x + c(20)))
-  .io.p40 <-
-    .io %>%
-    mutate(mu = map(mu, ~ .x + c(40)))
-  .io.m20 <-
-    .io %>%
-    mutate(mu = map(mu, ~ .x + c(-20)))
-  .io.m40 <-
-    .io %>%
-    mutate(mu = map(mu, ~ .x + c(-40)))
-
-  # Sample responses for subjects that have converged against those five states
-  .data <-
+    mutate(Condition = "baseline") %>%
     bind_rows(
-      sample_MVG_data_from_model(
-        model = .io,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = c("VOT"), vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "baseline",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
-        model = .io.p20,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = c("VOT"), vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "plus20",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io.p20,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
-        model = .io.p40,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = c("VOT"), vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "plus40",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io.p40,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
-        model = .io.m20,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = c("VOT"), vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "minus20",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io.m20,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
-        model = .io.m40,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = c("VOT"), vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "minus40",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io.m40,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")))
+      .io %>%
+        mutate(
+          mu = map(mu, ~ .x + c(20)),
+          Condition = "plus20"),
+      .io %>%
+        mutate(
+          mu = map(mu, ~ .x + c(40)),
+          Condition = "plus40"),
+      .io %>%
+        mutate(
+          mu = map(mu, ~ .x + c(-20)),
+          Condition = "minus20"),
+      .io %>%
+        mutate(
+          mu = map(mu, ~ .x + c(-40)),
+          Condition = "minus40")) %>%
+    nest(model = -Condition) %>%
+    mutate(data = map(model, ~ sample_data_from_model(.x, Ns = n_exposure_trial, randomize.order = T))) %>%
+    unnest(data) %>%
+    make_vector_column(cols = .cues, vector_col = "cue") %>%
+    mutate(Phase = "exposure")
 
-  return(.data %>%
-           crossing(Phase = c("exposure", "test")))
+  # Define a test grid
+  .test <-
+    crossing(
+      !! sym(.cues[1]) := seq(min(.exposure[[.cues[1]]]), max(.exposure[[.cues[1]]]), length.out = n_test_trial),
+      response = NA) %>%
+    make_vector_column(cols = .cues, vector_col = "cue") %>%
+    crossing(
+      Condition = unique(.exposure$Condition),
+      Subject = factor(1:n_subject))
+
+  .data <- get_test_responses_after_updating_based_on_exposure(.io, .exposure, .test, .cues)
+  return(.data)
 }
 
 
-make_data_for_2Dstanfit_with_exposure <- function() {
-  n_subject <- 30
-  # number of trials in exposure per category per subject
-  # (and there will be 2 * n_trials trials in test per subject)
-  n_trial <- 50
+make_data_for_2Dstanfit_with_exposure <- function(verbose = F, plot = F) {
   .cues <- c("VOT", "f0_semitones")
 
-  # Make 5 ideal observers
+  # Make 5 ideal observers to sample EXPOSURE from
   .io <-
-    example_MVG_ideal_observer(2) %>%
-    mutate(Sigma = map(Sigma, ~ .x * 5))
-  .io.20.20 <-
+    example_MVG_ideal_observer(2, verbose = verbose) %>%
+    mutate(Sigma = map(Sigma, ~ .x))
+  .exposure <-
     .io %>%
-    mutate(mu = map(mu, ~ .x + c(20, 20)))
-  .io.40.40 <-
-    .io %>%
-    mutate(mu = map(mu, ~ .x + c(40, 40)))
-  .io.20.40 <-
-    .io %>%
-    mutate(mu = map(mu, ~ .x + c(20, 40)))
-  .io.40.20 <-
-    .io %>%
-    mutate(mu = map(mu, ~ .x + c(40, 20)))
-
-  # Sample responses for subjects that have converged against those five states
-  .data <-
+    mutate(Condition = "baseline") %>%
     bind_rows(
-      sample_MVG_data_from_model(
-        model = .io,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = .cues, vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "baseline",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
-        model = .io.20.20,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = .cues, vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "plus20.20",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io.20.20,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
-        model = .io.40.40,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = .cues, vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "plus40.40",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io.40.40,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
-        model = .io.20.40,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = .cues, vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "plus20.40",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io.20.40,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
-        model = .io.40.20,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = .cues, vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "plus40.20",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io.40.20,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")))
+      .io %>%
+        mutate(
+          mu = map(mu, ~ .x + c(20, 20)),
+          Condition = "plus20.20"),
+      .io %>%
+        mutate(
+          mu = map(mu, ~ .x + c(40, 40)),
+          Condition = "plus40.40"),
+      .io %>%
+        mutate(
+          mu = map(mu, ~ .x + c(20, 40)),
+          Condition = "plus20.40"),
+      .io %>%
+        mutate(
+          mu = map(mu, ~ .x + c(40, 20)),
+          Condition = "plus40.20")) %>%
+    nest(model = -Condition) %>%
+    mutate(data = map(model, ~ sample_data_from_model(.x, Ns = n_exposure_trial, randomize.order = T))) %>%
+    unnest(data) %>%
+    make_vector_column(cols = .cues, vector_col = "cue") %>%
+    mutate(Phase = "exposure")
 
-  return(.data %>%
-           crossing(Phase = c("exposure", "test")))
+  # Define a test grid
+  .test <-
+    crossing(
+      !! sym(.cues[1]) := seq(min(.exposure[[.cues[1]]]), max(.exposure[[.cues[1]]]), length.out = ceiling(n_test_trial^(1/2))),
+      !! sym(.cues[2]) := seq(min(.exposure[[.cues[2]]]), max(.exposure[[.cues[2]]]), length.out = ceiling(n_test_trial^(1/2))),
+      response = NA) %>%
+    make_vector_column(cols = .cues, vector_col = "cue") %>%
+    crossing(
+      Condition = unique(.exposure$Condition),
+      Subject = factor(1:n_subject))
+
+  .data <- get_test_responses_after_updating_based_on_exposure(.io, .exposure, .test, .cues)
+
+  if (plot) {
+    p <-
+      .data %>%
+      filter(Phase == "exposure") %>%
+      ggplot(aes(x = !! sym(.cues[1]), y = !! sym(.cues[2]))) +
+      stat_ellipse(
+        aes(fill = category),
+        level = 0.95, geom = "polygon", alpha = 0.3) +
+      geom_point(aes(color = category)) +
+      facet_wrap(~ Condition, nrow = 1) +
+      theme_bw() +
+      ggtitle("Exposure data")
+    plot(p)
+
+    p <-
+      .data %>%
+      filter(Phase == "test") %>%
+      group_by(Condition, !!! syms(.cues)) %>%
+      summarise(meanResponse = mean(ifelse(Response == levels(.env$.data$Response)[2], 1, 0))) %>%
+      ggplot(aes(x = !! sym(.cues[1]), y = !! sym(.cues[2]))) +
+      geom_point(aes(color = meanResponse)) +
+      scale_color_gradient(name = as.character(paste("Proportion of", levels(.data$Response)[2], "responses")), aesthetics = c("color", "fill"), low = "pink", high = "cyan") +
+      facet_wrap(~ Condition, nrow = 1) +
+      theme_bw() + theme(legend.position = "bottom") +
+      ggtitle("Test data")
+    plot(p)
+  }
+
+  return(.data)
 }
 
-make_data_for_3Dstanfit_with_exposure <- function() {
-  n_subject <- 30
-  # number of trials in exposure per category per subject
-  # (and there will be 2 * n_trials trials in test per subject)
-  n_trial <- 50
+make_data_for_3Dstanfit_with_exposure <- function(verbose = F) {
   .cues <- c("VOT", "f0_semitones", "vowel_duration")
 
-  # Make 5 ideal observers
+  # Make 5 ideal observers to sample EXPOSURE from
   .io <-
-    example_MVG_ideal_observer(3) %>%
-    mutate(Sigma = map(Sigma, ~ .x * 5))
-  .io.20.20.20 <-
+    example_MVG_ideal_observer(3, verbose = verbose) %>%
+    mutate(Sigma = map(Sigma, ~ .x))
+  .exposure <-
     .io %>%
-    mutate(mu = map(mu, ~ .x + c(20, 20, 20)))
-  .io.40.40.40 <-
-    .io %>%
-    mutate(mu = map(mu, ~ .x + c(40, 40, 40)))
-  .io.20.40.60 <-
-    .io %>%
-    mutate(mu = map(mu, ~ .x + c(20, 40, 60)))
-  .io.40.20.0 <-
-    .io %>%
-    mutate(mu = map(mu, ~ .x + c(40, 20, 0)))
-
-  # Sample responses for subjects that have converged against those five states
-  .data <-
+    mutate(Condition = "baseline") %>%
     bind_rows(
-      sample_MVG_data_from_model(
-        model = .io,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = .cues, vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "baseline",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
-        model = .io.20.20.20,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = .cues, vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "plus20.20.20",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io.20.20.20,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
-        model = .io.40.40.40,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = .cues, vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "plus40.40.40",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io.40.40.40,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
-        model = .io.20.40.60,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = .cues, vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "plus20.40.60",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io.20.40.60,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")),
-      sample_MVG_data_from_model(
-        model = .io.40.20.0,
-        Ns = n_trial,
-        keep.input_parameters = F) %>%
-        make_vector_column(cols = .cues, vector_col = "cue") %>%
-        crossing(Subject = 1:n_subject) %>%
-        mutate(Condition = "plus40.20.0",
-               Response = get_categorization_from_MVG_ideal_observer(
-                 x = cue,
-                 model = .io.40.20.0,
-                 decision_rule = "sampling",
-                 simplify = T,
-                 noise_treatment = "no_noise",
-                 lapse_treatment = "no_lapses")))
-
-  return(.data %>%
-           crossing(Phase = c("exposure", "test")))
-}
-
-
-make_data_for_2Dstanfit_without_exposure <- function() {
-  n_subject <- 60
-  # number of trials in exposure per category per subject
-  # (and there will be 2 * n_trials trials in test per subject)
-  n_trial.exposure <- 90
-  .cues <- c("cue1", "cue2")
-
-  # Make ideal adaptor for prior
-  .ia_0 <-
-    example_MVG_ideal_observer(5) %>%
-    lift_MVG_ideal_observer_to_NIW_ideal_adaptor(kappa = 10, nu = 100)
-  # Update that ideal adaptor with shifted exposure
-  # Shift 1
-  .exposure_1 <-
-    sample_MVG_data_from_model(
-      model =
-        example_MVG_ideal_observer(5) %>%
+      .io %>%
         mutate(
-          mu = map(mu, ~ .x + c(-1, 3)),
-          Sigma = ifelse(category == "B", map(Sigma, ~ .x * 2), Sigma)),
-      Ns = n_trial.exposure,
-      keep.input_parameters = F) %>%
-    make_vector_column(cols = .cues, vector_col = "cue")
-  .ia_1 <-
-    .ia_0 %>%
-    update_NIW_ideal_adaptor_batch(
-      prior = .,
-      exposure = .exposure_1,
-      noise_treatment = "no_noise")
-  # Shift 2
-  .exposure_2 <-
-    sample_MVG_data_from_model(
-      model =
-        example_MVG_ideal_observer(5) %>%
-        mutate(mu = map(mu, ~ .x + c(4, -1))),
-      Ns = n_trial.exposure,
-      keep.input_parameters = F) %>%
-    make_vector_column(cols = .cues, vector_col = "cue")
-  .ia_2 <-
-    .ia_0 %>%
-    update_NIW_ideal_adaptor_batch(
-      prior = .,
-      exposure = .exposure_2,
-      noise_treatment = "no_noise")
-  # Shift 3
-  .exposure_3 <-
-    sample_MVG_data_from_model(
-      model =
-        example_MVG_ideal_observer(5) %>%
+          mu = map(mu, ~ .x + c(20, 20, 20)),
+          Condition = "plus20.20.20"),
+      .io %>%
         mutate(
-          mu = map(mu, ~ .x + c(-4, -2)),
-          Sigma = ifelse(category == "B", map(Sigma, ~ .x * 2), Sigma)),
-      Ns = n_trial.exposure,
-      keep.input_parameters = F) %>%
-    make_vector_column(cols = .cues, vector_col = "cue")
-  .ia_3 <-
-    .ia_0 %>%
-    update_NIW_ideal_adaptor_batch(
-      prior = .,
-      exposure = .exposure_3,
-      noise_treatment = "no_noise")
-
-  # store exposure data
-  df.exposure <-
-    bind_rows(
-      .exposure_1 %>% mutate(Condition = "shift_1"),
-      .exposure_2 %>% mutate(Condition = "shift_2"),
-      .exposure_3 %>% mutate(Condition = "shift_3")) %>%
+          mu = map(mu, ~ .x + c(40, 40, 40)),
+          Condition = "plus40.40.40"),
+      .io %>%
+        mutate(
+          mu = map(mu, ~ .x + c(20, 40, 60)),
+          Condition = "plus20.40.60"),
+      .io %>%
+        mutate(
+          mu = map(mu, ~ .x + c(40, 20, 0)),
+          Condition = "plus40.20.0")) %>%
+    nest(model = -Condition) %>%
+    mutate(data = map(model, ~ sample_data_from_model(.x, Ns = n_exposure_trial, randomize.order = T))) %>%
+    unnest(data) %>%
+    make_vector_column(cols = .cues, vector_col = "cue") %>%
     mutate(Phase = "exposure")
 
-  # define a test grid
-  df.test <-
+  # Define a test grid
+  .test <-
     crossing(
-      cue1 = seq(-5, 5, length.out = 10),
-      cue2 = seq(-5, 5, length.out = 10),
-      category = NA) %>%
-    make_vector_column(cols = c("cue1", "cue2"), vector_col = "cue") %>%
-    mutate(Phase = "test")
+      !! sym(.cues[1]) := seq(min(.exposure[[.cues[1]]]), max(.exposure[[.cues[1]]]), length.out = ceiling(n_test_trial^(1/3))),
+      !! sym(.cues[2]) := seq(min(.exposure[[.cues[2]]]), max(.exposure[[.cues[2]]]), length.out = ceiling(n_test_trial^(1/3))),
+      !! sym(.cues[3]) := seq(min(.exposure[[.cues[3]]]), max(.exposure[[.cues[3]]]), length.out = ceiling(n_test_trial^(1/3))),
+      response = NA) %>%
+    make_vector_column(cols = .cues, vector_col = "cue") %>%
+    crossing(
+      Condition = unique(.exposure$Condition),
+      Subject = factor(1:n_subject))
 
-  plot_expected_categories_contour2D(.ia_0) +
-    geom_point(
-      data = df.exposure,
-      aes(x = cue1, y = cue2, shape = category, color = Condition)) +
-    geom_point(
-      data = df.test,
-      aes(x = cue1, y = cue2), shape = 3, color = "black") +
-    scale_color_manual(values = c("red", "blue", "green")) +
-    theme_bw()
-
-  # Sample tests responses for subjects after the four exposure conditions
-  # (one of which is no_exposure)
-  df.exposure %<>% crossing(Subject = 1:n_subject)
-  df.test %<>% crossing(Subject = 1:n_subject)
-  .data <-
-    df.exposure %>%
-    bind_rows(
-      df.test %>%
-        mutate(
-          Condition = "no_exposure",
-          Response =
-            get_categorization_from_NIW_ideal_adaptor(
-              x = cue,
-              model = .ia_0,
-              decision_rule = "sampling",
-              simplify = T,
-              noise_treatment = "no_noise",
-              lapse_treatment = "no_lapses")),
-      df.test %>%
-        mutate(
-          Condition = "shift_1",
-          Response =
-            get_categorization_from_NIW_ideal_adaptor(
-              x = cue,
-              model = .ia_1,
-              decision_rule = "sampling",
-              simplify = T,
-              noise_treatment = "no_noise",
-              lapse_treatment = "no_lapses")),
-      df.test %>%
-        mutate(
-          Condition = "shift_2",
-          Response =
-            get_categorization_from_NIW_ideal_adaptor(
-              x = cue,
-              model = .ia_2,
-              decision_rule = "sampling",
-              simplify = T,
-              noise_treatment = "no_noise",
-              lapse_treatment = "no_lapses")),
-      df.test %>%
-        mutate(
-          Condition = "shift_3",
-          Response =
-            get_categorization_from_NIW_ideal_adaptor(
-              x = cue,
-              model = .ia_3,
-              decision_rule = "sampling",
-              simplify = T,
-              noise_treatment = "no_noise",
-              lapse_treatment = "no_lapses")))
-
-  .data %<>%
-    arrange(Condition, Subject, Phase)
-
+  .data <- get_test_responses_after_updating_based_on_exposure(.io, .exposure, .test, .cues)
   return(.data)
 }
 
-make_data_for_3Dstanfit_without_exposure <- function() {
-  n_subject <- 60
-  # number of trials in exposure per category per subject
-  # (and there will be 2 * n_trials trials in test per subject)
-  n_trial.exposure <- 90
-  .cues <- c("cue1", "cue2", "cue3")
-
-  # Make ideal adaptor for prior
-  .ia_0 <-
-    example_MVG_ideal_observer(3) %>%
-    lift_MVG_ideal_observer_to_NIW_ideal_adaptor(kappa = 10, nu = 100)
-  # Update that ideal adaptor with shifted exposure
-  # Shift 1
-  .exposure_1 <-
-    sample_MVG_data_from_model(
-      model =
-        example_MVG_ideal_observer(3) %>%
-        mutate(
-          mu = map(mu, ~ .x + c(-1, 3, 2)),
-          Sigma = ifelse(category == "B", map(Sigma, ~ .x * 2), Sigma)),
-      Ns = n_trial.exposure,
-      keep.input_parameters = F) %>%
-    make_vector_column(cols = .cues, vector_col = "cue")
-  .ia_1 <-
-    .ia_0 %>%
-    update_NIW_ideal_adaptor_batch(
-      prior = .,
-      exposure = .exposure_1,
-      noise_treatment = "no_noise")
-  # Shift 2
-  .exposure_2 <-
-    sample_MVG_data_from_model(
-      model =
-        example_MVG_ideal_observer(3) %>%
-        mutate(mu = map(mu, ~ .x + c(4, -1))),
-      Ns = n_trial.exposure,
-      keep.input_parameters = F) %>%
-    make_vector_column(cols = .cues, vector_col = "cue")
-  .ia_2 <-
-    .ia_0 %>%
-    update_NIW_ideal_adaptor_batch(
-      prior = .,
-      exposure = .exposure_2,
-      noise_treatment = "no_noise")
-  # Shift 3
-  .exposure_3 <-
-    sample_MVG_data_from_model(
-      model =
-        example_MVG_ideal_observer(3) %>%
-        mutate(
-          mu = map(mu, ~ .x + c(-4, -2)),
-          Sigma = ifelse(category == "B", map(Sigma, ~ .x * 2), Sigma)),
-      Ns = n_trial.exposure,
-      keep.input_parameters = F) %>%
-    make_vector_column(cols = .cues, vector_col = "cue")
-  .ia_3 <-
-    .ia_0 %>%
-    update_NIW_ideal_adaptor_batch(
-      prior = .,
-      exposure = .exposure_3,
-      noise_treatment = "no_noise")
-
-  # store exposure data
-  df.exposure <-
-    bind_rows(
-      .exposure_1 %>% mutate(Condition = "shift_1"),
-      .exposure_2 %>% mutate(Condition = "shift_2"),
-      .exposure_3 %>% mutate(Condition = "shift_3")) %>%
-    mutate(Phase = "exposure")
-
-  # define a test grid
-  df.test <-
-    crossing(
-      cue1 = seq(-5, 5, length.out = 10),
-      cue2 = seq(-5, 5, length.out = 10),
-      category = NA) %>%
-    make_vector_column(cols = c("cue1", "cue2"), vector_col = "cue") %>%
-    mutate(Phase = "test")
-
-  plot_expected_categories_contour2D(.ia_0) +
-    geom_point(
-      data = df.exposure,
-      aes(x = cue1, y = cue2, shape = category, color = Condition)) +
-    geom_point(
-      data = df.test,
-      aes(x = cue1, y = cue2), shape = 3, color = "black") +
-    scale_color_manual(values = c("red", "blue", "green")) +
-    theme_bw()
-
-  # Sample tests responses for subjects after the four exposure conditions
-  # (one of which is no_exposure)
-  df.exposure %<>% crossing(Subject = 1:n_subject)
-  df.test %<>% crossing(Subject = 1:n_subject)
-  .data <-
-    df.exposure %>%
-    bind_rows(
-      df.test %>%
-        mutate(
-          Condition = "no_exposure",
-          Response =
-            get_categorization_from_NIW_ideal_adaptor(
-              x = cue,
-              model = .ia_0,
-              decision_rule = "sampling",
-              simplify = T,
-              noise_treatment = "no_noise",
-              lapse_treatment = "no_lapses")),
-      df.test %>%
-        mutate(
-          Condition = "shift_1",
-          Response =
-            get_categorization_from_NIW_ideal_adaptor(
-              x = cue,
-              model = .ia_1,
-              decision_rule = "sampling",
-              simplify = T,
-              noise_treatment = "no_noise",
-              lapse_treatment = "no_lapses")),
-      df.test %>%
-        mutate(
-          Condition = "shift_2",
-          Response =
-            get_categorization_from_NIW_ideal_adaptor(
-              x = cue,
-              model = .ia_2,
-              decision_rule = "sampling",
-              simplify = T,
-              noise_treatment = "no_noise",
-              lapse_treatment = "no_lapses")),
-      df.test %>%
-        mutate(
-          Condition = "shift_3",
-          Response =
-            get_categorization_from_NIW_ideal_adaptor(
-              x = cue,
-              model = .ia_3,
-              decision_rule = "sampling",
-              simplify = T,
-              noise_treatment = "no_noise",
-              lapse_treatment = "no_lapses")))
-
-  .data %<>%
-    arrange(Condition, Subject, Phase)
-
-  return(.data)
+make_data_for_1Dstanfit_without_exposure <- function(verbose = F) {
+  make_data_for_1Dstanfit_with_exposure() %>%
+    ungroup() %>%
+    filter(Condition != "baseline" | Phase == "test")
 }
 
-get_example_stanfit <- function(example = 1) {
-  filename <- paste0("../example-stanfit", example, ".rds")
-  if (file.exists(filename)) {
-    fit <- readRDS(filename)
-  } else {
-    .data <- make_data_for_stanfit(example)
-    fit <-
-      infer_prior_beliefs(
-        exposure = .data %>% filter(Phase == "exposure"),
-        test = .data %>% filter(Phase == "test"),
-        cues =
-          if (example %in% 1:3)
-          {
-            c("VOT", "f0_semitones", "vowel_duration")[1:(example)]
-          } else if (example %in% 4:6) {
-            c("cue1", "cue2", "cue3")[1:(example %% 4 + 1)]
-          },
-        category = "category",
-        response = "Response",
-        group = "Subject",
-        group.unique = "Condition",
-        file = filename,
-        cores = 4)
+make_data_for_2Dstanfit_without_exposure <- function(verbose = F) {
+  make_data_for_2Dstanfit_with_exposure() %>%
+    ungroup() %>%
+    filter(Condition != "baseline" | Phase == "test")
+}
+
+make_data_for_3Dstanfit_without_exposure <- function(verbose = F) {
+  make_data_for_3Dstanfit_with_exposure() %>%
+    ungroup() %>%
+    filter(Condition != "baseline" | Phase == "test")
+}
+
+
+get_example_staninput <- function(
+    example = 1,
+    stanmodel = "NIW_ideal_adaptor",
+    lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
+    control = control_staninput(),
+    seed = 42, verbose = F
+) {
+  .data <- make_data_for_stanfit(example, seed = seed, verbose = verbose)
+  .staninput <-
+    make_staninput(
+      exposure = .data %>% filter(Phase == "exposure"),
+      test = .data %>% filter(Phase == "test"),
+      cues =
+        if (example %in% 1:3)
+        {
+          c("VOT", "f0_semitones", "vowel_duration")[1:(example)]
+        } else if (example %in% 4:6) {
+          c("VOT", "f0_semitones", "vowel_duration")[1:(example - 3)]
+        },
+      category = "category",
+      response = "Response",
+      group = "Subject",
+      group.unique = "Condition",
+      lapse_rate = lapse_rate, mu_0 = mu_0, Sigma_0 = Sigma_0,
+      control = control,
+      stanmodel = stanmodel,
+      verbose = verbose)
+
+  # # For debugging:
+  # if (example %in% c(2, 5)) {
+  #   require(ellipse)
+  #   df.transformed <- df.untransformed <- tibble()
+  #
+  #   # Get mean and cov
+  #   L <- .staninput$staninput$transformed$L
+  #   M <- .staninput$staninput$transformed$M
+  #   for (m in 1:M) {
+  #     for (l in 1:L) {
+  #       df.transformed %<>%
+  #         bind_rows(
+  #           tibble(
+  #             Condition = l,
+  #             category = m,
+  #             N = .staninput$staninput$transformed$N_exposure[m, l],
+  #             center = list(.staninput$staninput$transformed$x_mean_exposure[m, l,]),
+  #             uss_matrix = list(.staninput$staninput$transformed$x_ss_exposure[m, l, , ]),
+  #             css_matrix = pmap(list(uss_matrix, N, center), ~ uss2css(..1, n = ..2, mean = ..3)),
+  #             cov_matrix = map2(css_matrix, N, ~ css2cov(.x, .y))) %>%
+  #             mutate(ellipse = map2(cov_matrix, center, ~ ellipse(x = .x, centre = .y))) %>%
+  #             # # This step is necessary since unnest() can't yet unnest lists of matrices
+  #             # # (bug was reported and added as milestone, 11/2019)
+  #             mutate(ellipse = map(ellipse, ~ as_tibble(.x, .name_repair = "unique"))) %>%
+  #             unnest(ellipse))
+  #
+  #       df.untransformed %<>%
+  #         bind_rows(
+  #           tibble(
+  #             Condition = l,
+  #             category = m,
+  #             N = .staninput$staninput$untransformed$N_exposure[m, l],
+  #             center = list(.staninput$staninput$untransformed$x_mean_exposure[m, l,]),
+  #             uss_matrix = list(.staninput$staninput$untransformed$x_ss_exposure[m, l, , ]),
+  #             css_matrix = pmap(list(uss_matrix, N, center), ~ uss2css(..1, n = ..2, mean = ..3)),
+  #             cov_matrix = map2(css_matrix, N, ~ css2cov(.x, .y))) %>%
+  #             mutate(ellipse = map2(cov_matrix, center, ~ ellipse(x = .x, centre = .y))) %>%
+  #             # # This step is necessary since unnest() can't yet unnest lists of matrices
+  #             # # (bug was reported and added as milestone, 11/2019)
+  #             mutate(ellipse = map(ellipse, ~ as_tibble(.x, .name_repair = "unique"))) %>%
+  #             unnest(ellipse))
+  #     }
+  #   }
+  #
+  #   # Plot the data and the ellipse
+  #   p <-
+  #     df.transformed %>%
+  #     mutate(across(c(Condition, category), factor)) %>%
+  #     ggplot(aes(x = x, y = y)) +
+  #     geom_path(aes(x = x, y = y, color = category)) +
+  #     facet_wrap(~ Condition) +
+  #     theme_bw() +
+  #     ggtitle("Exposure statistics in staninput (transformed)")
+  #   plot(p)
+  #
+  #   p <-
+  #     df.untransformed %<>%
+  #     mutate(across(c(Condition, category), factor)) %>%
+  #     ggplot(aes(x = x, y = y)) +
+  #     geom_path(aes(x = x, y = y, color = category)) +
+  #     facet_wrap(~ Condition) +
+  #     theme_bw() +
+  #     ggtitle("Exposure statistics in staninput (untransformed)")
+  #   plot(p)
+  # }
+
+  return(.staninput)
+}
+
+get_example_stanfit <- function(
+    example = 1,
+    silent = 2, refresh = 0, seed = 42, verbose = F,
+    file_refit = "on_change",
+    stanmodel = "NIW_ideal_adaptor",
+    lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
+    control = control_staninput(),
+    filename = NULL,
+    ...
+) {
+  transform_type <- control$transform_type
+
+  if (is.null(filename))
+    filename <-
+      paste0(
+        "../example-stanfit-",
+        paste(
+          c(
+            if (!is.null(stanmodel)) stanmodel else "",
+            example,
+            if (!is.null(transform_type)) transform_type else "",
+            seed),
+          collapse = "-"),
+        ".rds")
+  if (file.exists(filename) && file_refit == "never") {
+    if (verbose) message("File already exists and file_refit is set to 'never'. Loading existing model from file.")
+    return(MVBeliefUpdatr:::read_ideal_adaptor_stanfit(filename))
   }
+
+  .staninput <-
+    get_example_staninput(
+      example = example,
+      stanmodel = stanmodel,
+      control = control,
+      lapse_rate = lapse_rate, mu_0 = mu_0, Sigma_0 = Sigma_0,
+      seed = seed, verbose = verbose)
+
+  fit <-
+    fit_ideal_adaptor(
+      staninput = .staninput,
+      stanmodel = stanmodel,
+      file = filename, file_refit = file_refit,
+      refresh = refresh,
+      silent = silent, verbose = verbose,
+      ...)
 
   return(fit)
 }

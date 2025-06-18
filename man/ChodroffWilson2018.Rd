@@ -4,11 +4,8 @@
 \name{ChodroffWilson2018}
 \alias{ChodroffWilson2018}
 \title{Chodroff & Wilson (2018) data on word-initial stop-voicing in native US English}
-\format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 65800 rows and 12 columns.
-}
 \usage{
-ChodroffWilson2018
+data(ChodroffWilson2018)
 }
 \description{
 A subset of the data collected and annotated by Chodroff & Wilson (2018) of word-initial stop-voicing in native US English.
@@ -24,4 +21,4 @@ like pitch doubling or halving. The full data are available on Eleanor Chodroff'
 \references{
 \insertRef{chodroff-wilson2018}{MVBeliefUpdatr}
 }
-\keyword{datasets}
+\keyword{data}

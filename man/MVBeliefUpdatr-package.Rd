@@ -50,8 +50,8 @@ The package defines a number of new classes that are essentially tibbles with ce
   other words, this object describes uncertainty about the parameters of the NIW ideal adaptor (specifically, in the
   current implementation about the NIW beliefs and the lapse rate and lapse bias, but not yet about the category priors). This is
   used, for example, to represent the researchers uncertainty about the prior or posterior beliefs of an ideal adaptor.}
-  \item{\code{NIW_ideal_adaptor_stanfit}: }{The stanfit resulting from inferring an \code{NIW_ideal_adaptor} from a collection
-  of exposure and test data. This object contains an \code{NIW_ideal_adaptor_MCMC} object.}
+  \item{\code{ideal_adaptor_stanfit}: }{The stanfit resulting from inferring an \code{ideal_adaptor} from a collection
+  of exposure and test data. This object contains an \code{ideal_adaptor_MCMC} object.}
 }
 }
 

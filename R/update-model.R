@@ -1,6 +1,12 @@
 #' @importFrom dplyr arrange first rename_with
 
 # Functions for incremental bias change model
+
+emp_logit <- function(p, n)  {
+  stopifnot(p >= 0, p <= 1, n >= 0)
+  log(p + .5 / n) - log((1 - p) + .5 / n)
+}
+
 probability2logit <- function(p, refcat = 1)
   if (length(p) == 2)
     qlogis(p) else

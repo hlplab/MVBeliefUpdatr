@@ -6,6 +6,8 @@ VERY IMPORTANT
 
 
 IMPORTANT
+++++ Change use of "fit" argument to "model" argument in all the get-info-from-NIW-IA-stanfit.R functions
+
 + could introduce class definitions for MVBU_representations and MVBU_models
 
 #' An S4 class for MVBeliefUpdatr representation objects

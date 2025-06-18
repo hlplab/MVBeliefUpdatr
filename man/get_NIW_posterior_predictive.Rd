@@ -13,8 +13,7 @@ get_NIW_posterior_predictive(
   kappa,
   nu,
   Sigma_noise = NULL,
-  noise_treatment = if (any(is.null(Sigma_noise), all(is.null(Sigma_noise)),
-    all(map_lgl(Sigma_noise, is.null)))) "no_noise" else "marginalize",
+  noise_treatment = infer_default_noise_treatment(Sigma_noise),
   log = T
 )
 
@@ -23,13 +22,7 @@ get_NIW_posterior_predictive.pmap(x, m, S, kappa, nu, ...)
 get_posterior_predictive_from_NIW_belief(
   x,
   model,
-  noise_treatment = if (is.NIW_ideal_adaptor(model)) {
-     if
-    (!is.null(first(model$Sigma_noise))) 
-         "marginalize"
-     else "no_noise"
- }
-    else "no_noise",
+  noise_treatment = infer_default_noise_treatment(model$Sigma_noise),
   log = T,
   category = "category",
   category.label = NULL,

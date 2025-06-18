@@ -29,7 +29,7 @@
 #' @export
 get_MVG_likelihood <- function(
     x, mu, Sigma, Sigma_noise = NULL,
-    noise_treatment = if (is.null(Sigma_noise)) "no_noise" else "marginalize",
+    noise_treatment = infer_default_noise_treatment(Sigma_noise),
     log = T
 ) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
@@ -89,7 +89,7 @@ get_MVG_likelihood <- function(
 get_likelihood_from_MVG <- function(
   x,
   model,
-  noise_treatment = if (is.MVG_ideal_observer(model)) { if (!is.null(first(model$Sigma_noise))) "marginalize" else "no_noise" } else "no_noise",
+  noise_treatment = infer_default_noise_treatment(model$Sigma_noise),
   log = T,
   category = "category",
   category.label = NULL,
@@ -145,7 +145,7 @@ get_likelihood_from_MVG <- function(
 get_posterior_from_MVG_ideal_observer <- function(
     x,
     model,
-    noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+    noise_treatment = if (decision_rule == "sampling") "sample" else infer_default_noise_treatment(model$Sigma_noise),
     lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize"
 ) {
   # TO DO: check dimensionality of x with regard to belief.
@@ -228,8 +228,8 @@ get_posterior_from_MVG_ideal_observer <- function(
 get_categorization_from_MVG_ideal_observer <- function(
   x,
   model,
-  decision_rule,
-  noise_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
+  decision_rule = "sampling",
+  noise_treatment = if (decision_rule == "sampling") "sample" else infer_default_noise_treatment(model$Sigma_noise),
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F
 ) {

@@ -9,6 +9,8 @@ evaluate_model(
   x,
   response_category,
   method = "likelihood-up-to-constant",
+  decision_rule = if (all("accuracy" == method)) "criterion" else if (any(c("likelihood",
+    "likelihood-up-to-constant") \%in\% method)) "proportional" else NULL,
   ...,
   return_by_x = F
 )
@@ -32,6 +34,11 @@ models against each other on the same data, it makes the "likelihood-up-to-const
 model fitting. It can, however, be important to keep in mind that this log-likelihood will be much smaller than the true
 data log-likelihood of the model under the assumption that the order of responses in the data should not be considered
 for the evaluation of the model.}
+
+\item{decision_rule}{For details, see \code{\link{get_categorization_from_model}}. However, `evaluate_model` uses
+sensible defaults depending on the value of `method`. If `method` is (only) "accuracy", then defaults to "criterion".
+If `method` is "likelihood" or "likelihood-up-to-constant", then defaults to "proportional". Otherwise defaults to
+`NULL`, which will result in an error (so users must manually specify the decision rule).}
 
 \item{return_by_x}{Should results be returned separately for each unique `x`? (default: `FALSE`)}
 }

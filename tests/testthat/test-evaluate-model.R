@@ -1,4 +1,4 @@
-context("get information from model - INITIAL TEST ONLY")
+context("evaluate model")
 
 my_model <- example_MVG_ideal_observer(5)
 my_data <-

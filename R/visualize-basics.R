@@ -23,15 +23,15 @@ NULL
 #' @references Webber (2012). Measurement Science and Technology .
 #' @rdname symlog
 #' @export
-symlog = function(x, C = 0) sign(x) * log10(1 + abs(x) / 10^C)
+symlog <- function(x, C = 0) sign(x) * log10(1 + abs(x) / 10^C)
 
 #' @rdname symlog
 #' @export
-inv_symlog = function(x, C = 0) sign(x) * (10^abs(x) * 10^C - 10^C)
+inv_symlog <- function(x, C = 0) sign(x) * (10^abs(x) * 10^C - 10^C)
 
 #' @rdname symlog
 #' @export
-symlog_trans = function(){
+symlog_trans <- function(){
   scales::trans_new("symlog",
                     transform = function(x) sign(x) * log10(1 + abs(x)),
                     inverse = function(x) sign(x) * (10^abs(x) - 1))
@@ -48,7 +48,7 @@ symlog_trans = function(){
 #'
 #' @rdname get_default_scale_values
 #' @export
-get_default_colors = function(var, levels) {
+get_default_colors <- function(var, levels) {
   assert_that(all(var %in% c("category", "group")))
   assert_that(is.character(levels))
   n <- length(levels)
@@ -68,7 +68,19 @@ get_default_colors = function(var, levels) {
 
 #' @rdname get_default_scale_values
 #' @export
-get_default_linetypes = function(var, levels) {
+get_default_shapes <- function(var, levels) {
+  assert_that(all(var %in% c("category", "group")))
+  assert_that(is.character(levels))
+
+  l <- 1:length(levels)
+
+  return(l)
+}
+
+
+#' @rdname get_default_scale_values
+#' @export
+get_default_linetypes <- function(var, levels) {
   assert_that(all(var %in% c("category", "group")))
   assert_that(is.character(levels))
 
@@ -91,7 +103,7 @@ get_default_linetypes = function(var, levels) {
 #' @keywords TBD
 #'
 #' @export
-get_plot_limits = function(plot) {
+get_plot_limits <- function(plot) {
   list(x = ggplot_build(plot)$layout$panel_scales_x[[1]]$range$range,
        y = ggplot_build(obj)$layout$panel_scales_y[[1]]$range$range)
 }
@@ -127,7 +139,7 @@ get_limits = function(data, measure, by = NULL, hdi.prob = .99, min = NULL, max 
 }
 
 #' @export
-ellipse.pmap = function(x, centre, level, ...)
+ellipse.pmap <- function(x, centre, level, ...)
   ellipse(x = x, centre = centre, level = level, ...)
 
 #' Add exposure/test data to a plot as points or ellipse
