@@ -9,7 +9,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "fjaeger@ur.rochester.edu",
            comment = c(ORCID = "0000-0002-1158-7308"))
-Description: A package to model and visualize incremental Bayesian categorization and belief-updating for multivariate Gaussian categories.
+Description: Model and visualize incremental Bayesian categorization and belief-updating over uni- or multivariate Gaussian categories. 
 License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true

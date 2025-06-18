@@ -6,7 +6,7 @@
 \alias{MVBeliefUpdatr-package}
 \title{MVBeliefUpdatr: Fitting, Summarizing, and Visualizing of Gaussian Ideal Observers and Adaptors}
 \description{
-A package to model and visualize incremental Bayesian categorization and belief-updating for multivariate Gaussian categories.
+Model and visualize incremental Bayesian categorization and belief-updating over uni- or multivariate Gaussian categories.
 }
 \section{Overview}{
 
