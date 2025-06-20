@@ -1,4 +1,3 @@
-#' @export
 check_exposure_test_data <- function(data, cues, category, response, group, which.data = "the", verbose = F) {
   assert_that(is_tibble(data) | is.data.frame(data))
   assert_cols_in_data(data, cues, which.data, scalar = F)
@@ -33,7 +32,6 @@ check_exposure_test_data <- function(data, cues, category, response, group, whic
 }
 
 
-#' @export
 get_test_counts <- function(test, cues, response, group, verbose = F) {
   test_counts <-
     test %>%
@@ -107,6 +105,99 @@ get_category_statistics_as_list_of_arrays <- function(
 }
 
 
+#' Prepare long data from incremental exposure-test design for input to Stan
+#'
+#' Takes \code{data.frame} or \code{tibble} that contains the exposure and test data from an incremental
+#' exposure-test design in long format, and prepares it for input to the \code{\link{ideal_adaptor_stanfit}}
+#' Stan programs. This is done by pretending that each incremental test block (and its preceding exposure)
+#' constitute a separate between-participant condition. Note that this does not capture the dependency
+#' between test responses of participants in the same between-participant conditions, but such dependencies
+#' are not modeled by current `MVBeliefUpdatr` Stan programs anyway (which do not include random effects by
+#' participants).
+#'
+#' @param data Data frame or tibble to be sliced. Each row should be a single exposure or test observation.
+#' @param group Character string indicating the name of the column that contains the information about
+#'   the between-participant condition. (default: "Group")
+#' @param phase Character string indicating the name of the column that contains the information about
+#'   whether an observation is part of "exposure" or "test". This column must contain the values "exposure"
+#'   and "test". Observation with other values will be ignored. (default: "Phase")
+#' @param block Character string indicating the name of the column that contains the information about the
+#'   incremental exposure and test blocks. Must be a factor with the levels indicating the order of the blocks.
+#'   (default: "Block")
+#' @param verbose Should verbose output be provided? (default: `FALSE`)
+#'
+#' @return A data frame or tibble in long format with a new column "ExposureGroup" that contains a unique
+#'   label for each unique combination of `group.unique` and `block`.
+#'
+#' @export
+slice_incremental_design_into_unique_exposure_test_combinations <- function(
+    data,
+    group = "Group",
+    phase = "Phase",
+    block = "Block",
+    verbose = F
+) {
+  stopifnot(all(c(phase, group, block) %in% names(data)))
+  stopifnot(all(c("exposure", "test") %in% unique(data[[phase]])))
+  stopifnot(is.factor(data[[block]]))
+  if (
+    any(
+      levels(data %>% filter(!! phase == "exposure") %>% pull(!! block)) %in%
+      levels(data %>% filter(!! phase == "test") %>% pull(!! block))))
+    stop2("The levels of the block variable in the exposure phase must not overlap with those in the test phase. Please check your data.")
+
+
+  if (verbose && length(setdiff(unique(data[[phase]]), c("exposure", "test"))) > 0) {
+    message(
+      paste("The following values in the", phase, "column are not recognized as exposure or test and thus removed:",
+            paste(setdiff(unique(data[[phase]]), c("exposure", "test")), collapse = ", ")))
+  }
+  data %<>%
+    filter(!! sym(phase) %in% c("exposure", "test")) %>%
+    mutate(..block_order = as.numeric(!! sym(block)))
+  block_levels <- levels(data[[block]])
+  testblock_order <-
+    data %>%
+    distinct(!! sym(phase), ..block_order) %>%
+    filter(!! sym(phase) == "test") %>%
+    .[["..block_order"]]
+
+  df.new <- tibble()
+  for (g in unique(data[[group]]))
+    for (b in testblock_order) {
+      df.new %<>%
+        rbind(
+          data %>%
+            # Include only exposure blocks from the current exposure condition and the current test block
+            # from the current exposure condition (but not earlier test blocks)
+            filter(
+              !! sym(group) == g, ..block_order <= b,
+              ..block_order == b | ! (!! sym(phase) == "test")) %>%
+            mutate(ExposureGroup = if (b == 1) "no exposure" else paste0("Group ", g, "_up to block ", block_levels[b])))
+    }
+
+  df.new  %>%
+    select(ExposureGroup, !! group, !!phase, !! block, everything())
+}
+
+
+#' Specify control parameters for make_staninput()
+#'
+#' This function is used to specify control parameters for the `make_staninput()` function, and to provide
+#' reasonable defaults for any of the unspecified parameters.
+#'
+#' @param tau_scale A vector of scales for the Cauchy priors for each cue's standard deviations. Used in
+#'   both the prior for m_0 and the prior for S_0. (default: vector of `5`s, assuming that the data are standardized).
+#' @param L_omega_eta A vector of etas of the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. Only used for
+#'   models with multivariate categories (e.g., NIW_ideal_adaptor). (default: `1`,
+#'   which corresponds to a uniform prior of correlation matrices)
+#' @param split_loglik_per_observation Optionally, split the log likelihood per observation. This can be helpful of leave-one-out
+#'   estimation in order to avoid high Pareto k, but it also makes the stored stanfit object much larger. (default: `0`)
+#' @param transform_type An affine transformation that can be applied to the data. See `type` in \code{\link{get_affine_transform}}
+#'    for details. (default: "standardize", which standardizes each cue separately)
+#'
+#' @return A list of control parameters that can be passed to \code{\link{make_staninput}}.
+#'
 #' @export
 control_staninput <- function(
     tau_scale = 5,
@@ -161,18 +252,7 @@ control_staninput <- function(
 #'   the category variability covariance matrices when you specify \code{Sigma_0})} since the stancode for the inference of the
 #'   NIW ideal adaptor does \emph{not} infer category and noise variability separately.
 #' @param control A list of control parameters that only experienced users should change since it can change the fitting and
-#'   interpretation of the model:
-#' \itemize{
-#' \item{`tau_scale`: }{A vector of scales for the Cauchy priors for each cue's standard deviations. Used in
-#'   both the prior for m_0 and the prior for S_0. (default: vector of `5`s, assuming that the data are standardized).}
-#' \item{`L_omega_eta`: }{A vector of etas of the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. Only used for
-#'   models with multivariate categories (e.g., NIW_ideal_adaptor). (default: `1`,
-#'   which corresponds to a uniform prior of correlation matrices)}
-#' \item{`split_loglik_per_observation`: }{Optionally, split the log likelihood per observation. This can be helpful of leave-one-out
-#'   estimation in order to avoid high Pareto k, but it also makes the stored stanfit object much larger. (default: `0`)}
-#' \item{`transform_type`: }{An affine transformation that can be applied to the data. See `type` in \code{\link{get_affine_transform}}
-#'    for details. (default: "standardize", which standardizes each cue separately)}
-#' }
+#'   interpretation of the model. See \code{\link{control_staninput}} for details.
 #'
 #' @return A list consisting of:
 #' \itemize{
