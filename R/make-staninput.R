@@ -139,8 +139,8 @@ reshape_incremental_design_into_unique_exposure_test_combinations <- function(
     group = "Group",
     phase = "Phase",
     block = "Block",
-    join_adjacent_test_blocks = F,
-    verbose = F
+    join_adjacent_test_blocks = FALSE,
+    verbose = FALSE
 ) {
   stopifnot(is_tibble(data) || is.data.frame(data))
   data %<>% ungroup()
