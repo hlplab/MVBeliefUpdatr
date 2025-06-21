@@ -131,7 +131,7 @@ get_category_statistics_as_list_of_arrays <- function(
 #' @param verbose Should verbose output be provided? (default: `FALSE`)
 #'
 #' @return A data frame or tibble in long format with a new column "ExposureGroup" that contains a unique
-#'   label for each unique combination of `group.unique` and `block`.
+#'   label for each unique combination of `group` and `block`.
 #'
 #' @export
 reshape_incremental_design_into_unique_exposure_test_combinations <- function(

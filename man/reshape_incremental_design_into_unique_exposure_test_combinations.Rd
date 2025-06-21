@@ -9,8 +9,8 @@ reshape_incremental_design_into_unique_exposure_test_combinations(
   group = "Group",
   phase = "Phase",
   block = "Block",
-  join_adjacent_test_blocks = F,
-  verbose = F
+  join_adjacent_test_blocks = FALSE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -36,7 +36,7 @@ won't be able to plot the results of the different test blocks separately. (defa
 }
 \value{
 A data frame or tibble in long format with a new column "ExposureGroup" that contains a unique
-  label for each unique combination of `group.unique` and `block`.
+  label for each unique combination of `group` and `block`.
 }
 \description{
 Takes \code{data.frame} or \code{tibble} that contains the exposure and test data from an incremental
