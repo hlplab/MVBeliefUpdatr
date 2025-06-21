@@ -26,7 +26,7 @@ plot_expected_categorization(model, ...)
   all_test_locations = TRUE,
   plot_in_cue_space = FALSE,
   plot_test_data = TRUE,
-  sort_by = if (plot_in_cue_space) NULL else "prior",
+  sort_by = if ("prior" \%in\% groups) "prior" else NULL,
   untransform_cues = FALSE
 )
 }

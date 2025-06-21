@@ -376,11 +376,11 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
   all_test_locations = TRUE,
   plot_in_cue_space = FALSE,
   plot_test_data = TRUE,
-  sort_by = if (plot_in_cue_space) NULL else "prior",
+  sort_by = if ("prior" %in% groups) "prior" else NULL,
   # deprecated
   untransform_cues = FALSE
 ) {
-  if (is.null(data.test)) data.test <- get_test_data(model)
+  if (is.null(data.test)) data.test <- get_test_data(model, .from_staninput = T)
   assert_that(is.flag(summarize))
   assert_that(is.null(confidence.intervals) |
                 all(is.numeric(confidence.intervals),
@@ -388,7 +388,6 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
                     all(between(confidence.intervals, 0, 1))),
               msg = "Confidence intervals must be NULL (if not CIs are desired) or a vector of two probabilities.")
   assert_that(is.null(sort_by) | length(sort_by) == 1)
-
 
   # Set confidence intervals
   if (!is.null(confidence.intervals)) {
@@ -465,17 +464,16 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
   target_category_label <- if (is.null(get_category_levels(model))) paste("category", target_category) else get_category_levels(model, target_category)
 
   if (plot_in_cue_space) {
-    if (length(get_cue_levels(model)) == 2) stop("plot_in_cue_space = T not yet implemented for more than two cues (and makes no sense for a single cue).")
+    if (length(get_cue_levels(model)) != 2) stop("plot_in_cue_space = T not yet implemented for more than two cues (and makes no sense for a single cue).")
 
     p <-
       d.pars %>%
       mutate(group = factor(group, levels = .env$groups)) %>%
       ggplot(
         aes(
-        x = !! sym(cue.labels[1]),
-        y = !! sym(cue.labels[2]),
-        fill = .data$p_cat)) +
-      geom_raster(interpolate = FALSE) +
+          x = map_dbl(.data$x, ~ .x[1]),
+          y = map_dbl(.data$x, ~ .x[2]))) +
+      geom_raster(aes(fill = .data$p_cat), interpolate = FALSE) +
       scale_x_continuous(cue.labels[1]) +
       scale_y_continuous(cue.labels[2]) +
       scale_fill_gradient2(
@@ -487,7 +485,7 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
         limits = c(0,1)) +
       coord_cartesian(expand = F)
 
-    if (plot_test_data) p <- p + geom_point(data = test_data, color = "black")
+    if (plot_test_data) p <- p + geom_point(data = test_data %>% unnest(cues_joint), color = "black")
   } else {
     # Get cues as rounded character strings (for the x-axis)
     d.pars %<>% mutate(token.cues = map(x, ~ paste(signif(.x), collapse = ",\n"))) %>% select(-c(x))
@@ -501,16 +499,15 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
         summarise(p_cat = mean(p_cat)) %>%
         arrange(p_cat) %>%
         pull(token.cues)
-
-      d.pars %<>%
-        # Get cues as rounded character strings (for the x-axis)
-        mutate(
-          token.cues =
-            factor(
-              token.cues,
-              levels = sort.levels),
-          token = factor(as.numeric(token.cues), levels = 1:length(levels(token.cues))))
+    } else {
+      sort.levels <- unique(d.pars$token.cues)
     }
+
+    # Get cues as rounded character strings (for the x-axis)
+    d.pars %<>%
+      mutate(
+        token.cues = factor(token.cues, levels = sort.levels),
+        token = factor(as.numeric(token.cues)))
 
     p <-
       d.pars %>%
