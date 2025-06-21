@@ -142,8 +142,8 @@ slice_incremental_design_into_unique_exposure_test_combinations <- function(
   stopifnot(is.factor(data[[block]]))
   if (
     any(
-      levels(data %>% filter(!! phase == "exposure") %>% pull(!! block)) %in%
-      levels(data %>% filter(!! phase == "test") %>% pull(!! block))))
+      unique(data %>% filter(!! phase == "exposure") %>% pull(!! block)) %in%
+      unique(data %>% filter(!! phase == "test") %>% pull(!! block))))
     stop2("The levels of the block variable in the exposure phase must not overlap with those in the test phase. Please check your data.")
 
 
