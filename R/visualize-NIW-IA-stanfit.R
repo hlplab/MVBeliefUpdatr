@@ -380,7 +380,7 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
   # deprecated
   untransform_cues = FALSE
 ) {
-  if (is.null(data.test)) data.test <- get_test_data(model)
+  if (is.null(data.test)) data.test <- get_test_data(model, .from_staninput = T)
   assert_that(is.flag(summarize))
   assert_that(is.null(confidence.intervals) |
                 all(is.numeric(confidence.intervals),

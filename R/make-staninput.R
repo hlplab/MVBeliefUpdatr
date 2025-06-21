@@ -124,19 +124,26 @@ get_category_statistics_as_list_of_arrays <- function(
 #' @param block Character string indicating the name of the column that contains the information about the
 #'   incremental exposure and test blocks. Must be a factor with the levels indicating the order of the blocks.
 #'   (default: "Block")
+#' @param join_adjacent_test_blocks Logical indicating whether adjacent test blocks without intervening
+#'   exposure blocks should be joined into a single test block. This will speed up \code{\link{fit_ideal_adapor}}
+#'   since there will be fewer conditions to iterate over but also means that the default plotting functions
+#'   won't be able to plot the results of the different test blocks separately. (default: `FALSE`)
 #' @param verbose Should verbose output be provided? (default: `FALSE`)
 #'
 #' @return A data frame or tibble in long format with a new column "ExposureGroup" that contains a unique
 #'   label for each unique combination of `group.unique` and `block`.
 #'
 #' @export
-slice_incremental_design_into_unique_exposure_test_combinations <- function(
+reshape_incremental_design_into_unique_exposure_test_combinations <- function(
     data,
     group = "Group",
     phase = "Phase",
     block = "Block",
+    join_adjacent_test_blocks = F,
     verbose = F
 ) {
+  stopifnot(is_tibble(data) || is.data.frame(data))
+  data %<>% ungroup()
   stopifnot(all(c(phase, group, block) %in% names(data)))
   stopifnot(all(c("exposure", "test") %in% unique(data[[phase]])))
   stopifnot(is.factor(data[[block]]))
@@ -155,12 +162,30 @@ slice_incremental_design_into_unique_exposure_test_combinations <- function(
   data %<>%
     filter(!! sym(phase) %in% c("exposure", "test")) %>%
     mutate(..block_order = as.numeric(!! sym(block)))
+
   block_levels <- levels(data[[block]])
+  phase_levels <- data %>% distinct(!! sym(phase), !! sym(block), ..block_order) %>% arrange(..block_order) %>% pull(!! sym(phase))
+  if (join_adjacent_test_blocks)
+    for (b in 1:(length(block_levels) - 1)) {
+      if (all(phase_levels[b:(b+1)] == "test")) {
+        if (verbose) message("Joining adjacent test blocks ", block_levels[b], " and ", block_levels[b+1], " into a single test block.")
+
+        block_levels[b] <- paste(block_levels[b], block_levels[b+1], sep = "_")
+        block_levels <- block_levels[-(b+1)]
+        data %<>%
+          mutate(
+            ..block_order = ifelse(..block_order == b + 1, b, ..block_order),
+            !! sym(block) := factor(ifelse(..block_order %in% c(b, b + 1), block_levels[b], as.character(!! sym(block))), levels = block_levels))
+      }
+    }
+  if (verbose) message("Inferred block order: ", paste(block_levels, collapse = ", "))
+
   testblock_order <-
     data %>%
     distinct(!! sym(phase), ..block_order) %>%
     filter(!! sym(phase) == "test") %>%
     .[["..block_order"]]
+  if (verbose) message("Inferred test block order: ", paste(testblock_order, collapse = ", "))
 
   df.new <- tibble()
   for (g in unique(data[[group]]))
