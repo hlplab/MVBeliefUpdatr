@@ -541,13 +541,18 @@ get_exposure_category_cov.ideal_adaptor_stanfit <- function(...) {
 #'
 #' @param x \code{\link{ideal_adaptor_stanfit}} object.
 #' @param groups Character vector of groups for which test data is requested. Typically, the levels of these factors
-#' are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
-#' \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
-#' (default: all categories/groups will be selected)
+#'   are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
+#'   \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+#'   (default: all categories/groups will be selected)
+#' @param .rename_to_MVB_default Should the data columns be renamed to the default names used internally in
+#'   `MVBeliefUpdatr`? his option is included primarily for internal use. (default: `FALSE`)
+#' @param .from_staninput Should the data be extracted from the staninput (rather than data) object stored in the
+#'   stanfit object? This returns the data in a somewhat different format. This option is included primarily for
+#'   internal use. (default: `FALSE`)
 #' @param ... additional arguments to \code{\link{get_staninput}}.
 #'
 #' @return A \code{tibble} in which each row is a test token. Columns include the cues
-#' and the response counts (one column per category) for all test tokens and all groups.
+#'   and the response counts (one column per category) for all test tokens and all groups.
 #'
 #' @seealso TBD
 #' @keywords TBD
