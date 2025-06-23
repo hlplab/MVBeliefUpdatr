@@ -446,6 +446,10 @@ make_staninput <- function(
       group = group,
       verbose = verbose)
 
+  if (verbose)
+    message(
+      "Appling affine transformation (", transform_type, ") to exposure and test data ",
+      "(and any optional prior information that was provided).")
   transform <- get_affine_transform(exposure, cues, transform_type)
   exposure <- transform[["transform.function"]](exposure)
   test <- transform[["transform.function"]](test)
@@ -563,7 +567,7 @@ make_staninput <- function(
       !! sym(group.unique) := factor(!! sym(group.unique), levels = levels(exposure_original[[.env$group.unique]])),
       !! sym(group.original) := factor(!! sym(group.original), levels = levels(exposure_original[[.env$group.original]])),
       !! sym(category) := factor(!! sym(category), levels = levels(exposure_original[[.env$category]])),
-      !! sym(response) := factor(!! sym(response), levels = levels(exposure_original[[.env$response]]))) %>%
+      !! sym(response) := factor(!! sym(response), levels = levels(exposure_original[[.env$category]]))) %>%
     relocate(Phase, all_of(c(group.unique, group, category, cues, response)))
 
   attr(data, "group.unique") <- group.unique

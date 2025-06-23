@@ -1,6 +1,7 @@
 #' loo for NIW ideal adaptor stanfit
 #'
-#' \code{loo} method for \code{\link{ideal_adaptor_stanfit}} objects.
+#' \code{loo} method for \code{\link{ideal_adaptor_stanfit}} objects. For details,
+#' see \code{\link[loo:loo]{loo::loo}}.
 #'
 #' @param x An \code{\link{ideal_adaptor_stanfit}} object.
 #'
@@ -40,7 +41,7 @@ loo.ideal_adaptor_stanfit <- function(
 #' NIW_ideal_adaptor are summarized. (default: `NULL`)
 #' @param prior_only Should only the priors and other sufficient parameters be summarized? (default: `FALSE`)
 #' @param include_transformed_pars Should transformed parameters be included in the summary? (default: `FALSE`)
-#' @param ... Additional arguments passed to \code{\link[rstan]{summary}}.
+#' @param ... Additional arguments passed to \code{\link[rstan::summary]{rstan::summary}}.
 #'
 #' @method summary ideal_adaptor_stanfit
 #'
