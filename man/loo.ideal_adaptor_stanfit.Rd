@@ -19,5 +19,6 @@
 A \code{loo} object.
 }
 \description{
-\code{loo} method for \code{\link{ideal_adaptor_stanfit}} objects.
+\code{loo} method for \code{\link{ideal_adaptor_stanfit}} objects. For details,
+see \code{\link[loo:loo]{loo::loo}}.
 }
