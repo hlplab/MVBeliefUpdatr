@@ -131,7 +131,7 @@ transformed parameters {
   array[M,L] vector[K] tau_n;                // square root of updated scale of Inverse Chisquare
   array[M,L] vector[K] t_scale;              // scale matrix of predictive t distribution
 
-  array[L] simplex[K] cue_weights;           // separate cue weights for each group (since the informativity of cues could differ between groups)
+  array[L] simplex[K] cue_weight;           // separate cue weights for each group (since the informativity of cues could differ between groups)
 
   array[N_test] simplex[M] p_test_conj;
   array[N_test] vector[M] log_p_test_conj;
@@ -172,16 +172,16 @@ transformed parameters {
 
   // Compute cue weights for each group
   for (group in 1:L) {
-    vector[K] raw_weights = rep_vector(0, K);
+    vector[K] raw_weight = rep_vector(0, K);
     for (cat1 in 1:M) {
       for (cat2 in 1:M) {
         // NEEDS REVIEW: ARE IDEAL WEIGHTS REALLY A FUNCTION OF SIGMA_N (RATHER THAN, E.G., THE EXPECTED CATEGORY SD)?
         // Using element-wise operations ./ and .* so that this can all be done without looping over K
-        raw_weights += p_cat[cat1] * p_cat[cat2] * ((m_n[cat1,group] - m_n[cat2,group])^2 ./ (tau_n[cat1,group] .* tau_n[cat2,group]));
+        raw_weight += p_cat[cat1] * p_cat[cat2] * ((m_n[cat1,group] - m_n[cat2,group])^2 ./ (tau_n[cat1,group] .* tau_n[cat2,group]));
       }
     }
-    raw_weights ./= rep_vector(2.0, K);
-    cue_weights[group] = softmax(raw_weights); // Enforces simplex
+    raw_weight ./= rep_vector(2.0, K);
+    cue_weight[group] = softmax(raw_weight); // Enforces simplex
   }
 
 
@@ -204,7 +204,7 @@ transformed parameters {
                                               m_n[cat,group],
                                               t_scale[cat,group]);
       // NEEDS REVIEW: DOES THE CUE-WEIGHTING HAVE TO BE APPLIED BEFORE CALCULATING THE DENSITY?
-      log_p_test_conj[j,cat] = sum(log_p_test_conj[j,cat] * cue_weights[group]);
+      log_p_test_conj[j,cat] = sum(log_p_test_conj[j,cat] * cue_weight[group]);
     }
     // normalize to get actual posterior probs in simplex
     p_test_conj[j] = exp(log_p_test_conj[j] - log_sum_exp(log_p_test_conj[j]));
