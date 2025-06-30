@@ -131,7 +131,7 @@ transformed parameters {
   array[M,L] vector[K] tau_n;                // square root of updated scale of Inverse Chisquare
   array[M,L] vector[K] t_scale;              // scale matrix of predictive t distribution
 
-  array[L] simplex[K] cue_weight;           // separate cue weights for each group (since the informativity of cues could differ between groups)
+  array[L] simplex[K] cue_weight_n;          // separate cue weights for each group (since the informativity of cues could differ between groups)
 
   array[N_test] simplex[M] p_test_conj;
   array[N_test] vector[M] log_p_test_conj;
@@ -181,7 +181,7 @@ transformed parameters {
       }
     }
     raw_weight ./= rep_vector(2.0, K);
-    cue_weight[group] = softmax(raw_weight); // Enforces simplex
+    cue_weight_n[group] = softmax(raw_weight); // Enforces simplex
   }
 
 
@@ -204,7 +204,7 @@ transformed parameters {
                                               m_n[cat,group],
                                               t_scale[cat,group]);
       // NEEDS REVIEW: DOES THE CUE-WEIGHTING HAVE TO BE APPLIED BEFORE CALCULATING THE DENSITY?
-      log_p_test_conj[j,cat] = sum(log_p_test_conj[j,cat] * cue_weight[group]);
+      log_p_test_conj[j,cat] = sum(log_p_test_conj[j,cat] * cue_weight_n[group]);
     }
     // normalize to get actual posterior probs in simplex
     p_test_conj[j] = exp(log_p_test_conj[j] - log_sum_exp(log_p_test_conj[j]));

@@ -8,7 +8,7 @@
   x,
   pars = NULL,
   indices_as_names = TRUE,
-  prior_only = FALSE,
+  sufficient_only = FALSE,
   include_transformed_pars = F,
   ...
 )
@@ -23,7 +23,7 @@ NIW_ideal_adaptor are summarized. (default: `NULL`)}
 This output is substantially more readable, but might lend itself less for post-processing. The
 names will be shown in separate columns (distribution, group, category, cue, ...). (default: `TRUE`)}
 
-\item{prior_only}{Should only the priors and other sufficient parameters be summarized? (default: `FALSE`)}
+\item{sufficient_only}{Should only the sufficient parameters be summarized? (default: `FALSE`)}
 
 \item{include_transformed_pars}{Should transformed parameters be included in the summary? (default: `FALSE`)}
 
