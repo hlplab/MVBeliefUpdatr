@@ -11,7 +11,7 @@ is.MVG(x, group = NULL, category = "category", is.long = T, verbose = F)
 
 \item{group}{Name of one or more group variables, each unique combination of which describes an MVG. (default: NULL)}
 
-\item{category}{Name of the category variable. (default: "category")}
+\item{category}{DEPRECATED Name of the category variable. (default: "category")}
 
 \item{is.long}{Is this check assessing whether the ideal observer is in long format (`TRUE`) or wide format (`FALSE`)?
 (default: `TRUE`)}

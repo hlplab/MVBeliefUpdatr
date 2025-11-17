@@ -4,9 +4,9 @@
 \name{ideal_adaptor_stanfit-class}
 \alias{ideal_adaptor_stanfit-class}
 \alias{NIW_ideal_adaptor_stanfit}
-\title{An S4 class for ideal_adaptor stanfit objects that use one of the ideal_adaptor Stan programs.}
+\title{An S3 class for ideal_adaptor stanfit objects that use one of the ideal_adaptor Stan programs.}
 \description{
-An S4 class for ideal_adaptor stanfit objects that use one of the ideal_adaptor Stan programs.
+An S3 class for ideal_adaptor stanfit objects that use one of the ideal_adaptor Stan programs.
 }
 \details{
 See \code{methods(class = "ideal_adaptor_stanfit")} for an overview of available methods.

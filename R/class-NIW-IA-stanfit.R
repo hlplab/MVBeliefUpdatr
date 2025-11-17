@@ -1,4 +1,4 @@
-#' An S4 class for ideal_adaptor stanfit objects that use one of the ideal_adaptor Stan programs.
+#' An S3 class for ideal_adaptor stanfit objects that use one of the ideal_adaptor Stan programs.
 #'
 #' @name ideal_adaptor_stanfit-class
 #' @aliases NIW_ideal_adaptor_stanfit
