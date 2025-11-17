@@ -6,7 +6,7 @@ get_expected_columns_for_MVG <- function() c("category", "mu", "Sigma")
 #'
 #' @param x Object to be checked.
 #' @param group Name of one or more group variables, each unique combination of which describes an MVG. (default: NULL)
-#' @param category Name of the category variable. (default: "category")
+#' @param category DEPRECATED Name of the category variable. (default: "category")
 #' @param is.long Is this check assessing whether the ideal observer is in long format (`TRUE`) or wide format (`FALSE`)?
 #' (default: `TRUE`)
 #'
@@ -43,7 +43,7 @@ is.MVG <- function(x, group = NULL, category = "category", is.long = T, verbose 
   # }
 
   if (any(get_expected_columns_for_MVG() %nin% names(x))) {
-    if (verbose) message(paste("x is missing a required column: ", paste(get_expected_columns_for_exemplars, collapse = ",")))
+    if (verbose) message(paste("x is missing a required column: ", paste(get_expected_columns_for_MVG, collapse = ",")))
     return(FALSE)
   }
 

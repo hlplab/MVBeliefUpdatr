@@ -28,7 +28,7 @@ incremental exposure and test blocks. Must be a factor with the levels indicatin
 (default: "Block")}
 
 \item{join_adjacent_test_blocks}{Logical indicating whether adjacent test blocks without intervening
-exposure blocks should be joined into a single test block. This will speed up \code{\link{fit_ideal_adapor}}
+exposure blocks should be joined into a single test block. This will speed up \code{\link{fit_ideal_adaptor}}
 since there will be fewer conditions to iterate over but also means that the default plotting functions
 won't be able to plot the results of the different test blocks separately. (default: `FALSE`)}
 

@@ -1,3 +1,8 @@
+# from rlang
+`%||%` <- function(x, y) {
+  if (is.null(x)) y else x
+}
+
 # from brms
 # get pattern matches in text as vector
 # @param simplify return an atomic vector of matches?

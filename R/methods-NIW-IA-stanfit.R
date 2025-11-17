@@ -1,6 +1,7 @@
 #' loo for NIW ideal adaptor stanfit
 #'
-#' \code{loo} method for \code{\link{ideal_adaptor_stanfit}} objects.
+#' \code{loo} method for \code{\link{ideal_adaptor_stanfit}} objects. For details,
+#' see \code{\link[loo:loo]{loo::loo}}.
 #'
 #' @param x An \code{\link{ideal_adaptor_stanfit}} object.
 #'
@@ -37,22 +38,25 @@ loo.ideal_adaptor_stanfit <- function(
 #'
 #' @param x An \code{\link{ideal_adaptor_stanfit}} object.
 #' @param pars A character vector of parameter names to be summarized. If `NULL`, all parameters of the
-#' NIW_ideal_adaptor are summarized. (default: `NULL`)
-#' @param prior_only Should only the priors and other sufficient parameters be summarized? (default: `FALSE`)
+#'   NIW_ideal_adaptor are summarized. (default: `NULL`)
+#' @param indices_as_names Should the indices of the parameters be translated into level names in the summary?
+#'   This output is substantially more readable, but might lend itself less for post-processing. The
+#'   names will be shown in separate columns (distribution, group, category, cue, ...). (default: `TRUE`)
+#' @param sufficient_only Should only the sufficient parameters be summarized? (default: `FALSE`)
 #' @param include_transformed_pars Should transformed parameters be included in the summary? (default: `FALSE`)
-#' @param ... Additional arguments passed to \code{\link[rstan]{summary}}.
+#' @param ... Additional arguments passed to \code{\link[rstan::summary]{rstan::summary}}.
 #'
 #' @method summary ideal_adaptor_stanfit
 #'
 #' @importFrom rstan summary
 #' @importFrom tibble rownames_to_column
 #' @export
-summary.ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE, include_transformed_pars = F, ...) {
+summary.ideal_adaptor_stanfit <- function(x, pars = NULL, indices_as_names = TRUE, sufficient_only = FALSE, include_transformed_pars = F, ...) {
   stanfit <- get_stanfit(x)
   assert_contains_draws(stanfit)
   if (is.null(pars)) {
     pars <- names(stanfit)
-    pars <- grep("^((kappa|nu|m|S)_|lapse_rate|p_category)", pars, value = T)
+    pars <- grep("^((kappa|nu|m|S)_|lapse_rate|p_category|cue_weight_n)", pars, value = T)
     pars <- grep("^m_0_(tau|L_omega|cov)", pars, value = T, invert = T)
     pars <- grep("^((m|S)_0|lapse_rate)_param", pars, value = T, invert = T)
     if (!include_transformed_pars) pars <- grep("_transformed", pars, value = T, invert = T)
@@ -64,16 +68,50 @@ summary.ideal_adaptor_stanfit <- function(x, pars = NULL, prior_only = FALSE, in
     as.data.frame() %>%
     rownames_to_column("Parameter") %>%
     mutate(
-      name = factor(gsub("^(.*)_(0|n).*$", "\\1", Parameter), levels = c("kappa", "nu", "m", "S", "lapse_rate", "p_category")),
-      distribution = gsub("^(.*)_(0|n).*$", "\\2", Parameter),
-      distribution = factor(ifelse(distribution == Parameter, "0", distribution), levels = c("0", "n")),
+      name = factor(gsub("^(kappa|nu|m|S|lapse_rate|p_category|cue_weight).*$", "\\1", Parameter), levels = c("kappa", "nu", "m", "S", "cue_weight", "lapse_rate", "p_category")),
+      distribution = gsub("^.*_(0|n).*$", "\\1", Parameter),
       index = gsub("^.*_(0|n)\\[(.*)\\]$", "\\2", Parameter),
       index = ifelse(index == Parameter, 1, index)) %>%
-    { if (prior_only) filter(., distribution == "0") else . } %>%
+    { if (sufficient_only) filter(., distribution == "0" | name %in% c("cue_weight", "lapse_rate", "p_category")) else . } %>%
     separate(index, into = c("i1", "i2", "i3", "i4"), sep = ",", fill = "right") %>%
-    arrange(distribution, name, i1, i2, i3, i4) %>%
-    select(-c(name, distribution, i1, i2, i3, i4))
+    mutate(across(c(i1, i2, i3, i4), as.integer)) %>%
+    arrange(distribution, name, i1, i2, i3, i4)
 
+  category_levels <- get_category_levels(x)
+  group_levels <- get_group_levels(x)
+  cue_levels <- get_cue_levels(x)
+  if (indices_as_names) {
+    full_summary %<>%
+      mutate(
+        Parameter = name,
+        `Dist.` = case_when(
+          distribution == "0" ~ "prior",
+          distribution == "n" ~ "posterior",
+          TRUE ~ ""),
+        Group = case_when(
+          name %in% c("kappa", "nu", "m", "S") & `Dist.` == "posterior" ~ group_levels[i2],
+          name == "cue_weight" ~ group_levels[i1],
+          TRUE ~ ""),
+        Category = case_when(
+          name %in% c("m", "S") & `Dist.` == "prior" ~ category_levels[i1],
+          name %in% c("kappa", "nu", "m", "S") & `Dist.` == "posterior" ~ category_levels[i1],
+          TRUE ~ ""),
+        Cue1 = case_when(
+          name %in% c("m", "S") & `Dist.` == "prior" ~ cue_levels[i2],
+          name %in% c("m", "S") & `Dist.` == "posterior" ~ cue_levels[i3],
+          name == "cue_weight" ~ cue_levels[i2],
+          TRUE ~ ""),
+        Cue2 = case_when(
+          name %in% c("S") & `Dist.` == "prior" ~ cue_levels[i3],
+          name %in% c("S") & `Dist.` == "posterior" ~ cue_levels[i4],
+          TRUE ~ "")) %>%
+      relocate(Parameter, `Dist.`, Group, Category, Cue1, Cue2, mean, se_mean, sd, contains("%"), Rhat, n_eff, everything())
+  } else {
+    full_summary %<>% relocate(Parameter, mean, se_mean, sd, contains("%"), Rhat, n_eff, everything())
+  }
+
+  full_summary %<>%
+    select(-c(name, distribution, i1, i2, i3, i4))
 
   Rhats <- full_summary[, "Rhat"]
   if (any(Rhats > 1.05, na.rm = TRUE)) {
