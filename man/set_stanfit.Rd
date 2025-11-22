@@ -2,12 +2,12 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{set_stanfit}
 \alias{set_stanfit}
-\alias{set_stanfit.ideal_adaptor_stanfit}
+\alias{set_stanfit,ideal_adaptor_stanfit-method}
 \title{Set the stanfit of an ideal adaptor stanfit}
 \usage{
 set_stanfit(x, ...)
 
-\method{set_stanfit}{ideal_adaptor_stanfit}(x, stanfit = NULL)
+\S4method{set_stanfit}{ideal_adaptor_stanfit}(x, stanfit = NULL)
 }
 \arguments{
 \item{x}{\code{\link{ideal_adaptor_stanfit}} object.}

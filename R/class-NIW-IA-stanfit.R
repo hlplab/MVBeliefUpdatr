@@ -1,4 +1,4 @@
-#' An S3 class for ideal_adaptor stanfit objects that use one of the ideal_adaptor Stan programs.
+#' An S4 class for ideal_adaptor stanfit objects that use one of the ideal_adaptor Stan programs.
 #'
 #' @name ideal_adaptor_stanfit-class
 #' @aliases NIW_ideal_adaptor_stanfit
@@ -27,12 +27,25 @@
 #' @slot version The versions of \pkg{MVBeliefUpdatr} and \pkg{rstan} with
 #'   which the model was fitted.
 #' @slot labels list
-#'
-#' @importFrom rstan nlist
-#' @importFrom utils packageVersion
-NULL
+setClass(
+  "ideal_adaptor_stanfit",
+  slots = list(
+    data = "data.frame",
+    staninput = "list",
+    stanvars = "ANY",
+    backend = "character",
+    save_pars = "ANY",
+    stan_args = "list",
+    stanfit = "ANY",
+    basis = "ANY",
+    transform_information = "ANY",
+    criteria = "list",
+    file = "character",
+    version = "ANY"
+  )
+)
 
-# ideal_adaptor_stanfit class
+# ideal_adaptor_stanfit class constructor
 ideal_adaptor_stanfit <- function(
     data = data.frame(),
     staninput = list(),
@@ -64,52 +77,46 @@ ideal_adaptor_stanfit <- function(
 
   version <- get_current_versions()
 
-  x <-
-    nlist(
-      data,
-      staninput,
-      stanvars,
-      save_pars,
-      backend,
-      stan_args,
-      stanfit,
-      basis,
-      transform_information,
-      criteria,
-      file,
-      version)
-
-  # For S4 class in the future
-  # setClass(
-  #   "ideal_adaptor_stanfit",
-  #   slots = c(input_data = "list", transform_information = "list", labels = "list"),
-  #   contains = "stanfit",
-  #   package = "MVBeliefUpdatr")
-  class(x) <- "ideal_adaptor_stanfit"
-
-  x
+  new(
+    "ideal_adaptor_stanfit",
+    data = data,
+    staninput = staninput,
+    stanvars = stanvars,
+    backend = backend,
+    save_pars = save_pars,
+    stan_args = stan_args,
+    stanfit = stanfit,
+    basis = basis,
+    transform_information = transform_information,
+    criteria = criteria,
+    file = file,
+    version = version
+  )
 }
 
-# Ultimately, this could be turned into a method, but care would have to be taken to still make tidybayes::recover_types()
-# work since that applies to objects of class "stanfit" (but is not defined as a method, I think)
-#' @export
-recover_types.ideal_adaptor_stanfit <- function(fit, staninput = NULL) {
-  stanfit <- get_stanfit(fit)
-  if (is.null(staninput)) staninput <- get_staninput(fit)
+# methods(class = "ideal_adaptor_stanfit")
 
-  # the levels information recovered below should probably should be stored in a more systematic way, either as attributes
-  # to the model or as some part of a list
-  stanfit %<>%
-    recover_types(
-      crossing(
-        category = factor(colnames(staninput$z_test_counts), levels = colnames(staninput$z_test_counts)),
-        group = factor(attr(staninput$y_test, "levels"), levels = attr(staninput$y_test, "levels")),
-        cue = factor(dimnames(staninput$x_test)[[2]], levels = attr(staninput$x_test, "cues")),
-        cue2 = cue))
+setMethod(
+  "recover_types", signature(model = "ideal_adaptor_stanfit"),
+  function(model, staninput = NULL) {
+    stanfit <- get_stanfit(model)
+    if (is.null(staninput)) staninput <- get_staninput(model)
 
-  fit <- set_stanfit(fit, stanfit)
-  return(fit)
-}
+    # the levels information recovered below should probably should be stored in a more systematic way, either as attributes
+    # to the model or as some part of a list
+    stanfit %<>%
+      recover_types(
+        crossing(
+          category = factor(colnames(staninput$z_test_counts), levels = colnames(staninput$z_test_counts)),
+          group = factor(attr(staninput$y_test, "levels"), levels = attr(staninput$y_test, "levels")),
+          cue = factor(dimnames(staninput$x_test)[[2]], levels = attr(staninput$x_test, "cues")),
+          cue2 = cue))
+
+    model <- set_stanfit(model, stanfit)
+    return(model)
+  }
+)
+
 
 # Example usage
 # make_parnames("lapse_rate_param", 1),
@@ -337,7 +344,7 @@ stanfit_needs_refit <- function(
   verbose <- as_one_logical(verbose)
 
   # Check if the stanfit is older than version 0.0.1.0015 when we introduced the version slot
-  if (!hasSlot(x, "version")) {
+  if (!.hasSlot(x, "version")) {
     if (!silent) {
       message("The model ", deparse1(substitute(x)), " was fit with an old version of MVBeliefUpdater (< 0.0.1.0015).")
     }
@@ -446,7 +453,7 @@ read_ideal_adaptor_stanfit <- function(file) {
     if (!is.ideal_adaptor_stanfit(x)) {
       stop2("Object loaded from 'file' is not recognized as class 'ideal_adaptor_stanfit'. This usually indicates that you need to refit the model.")
     }
-    x$file <- file
+    x@file <- file
   } else {
     x <- NULL
   }
@@ -462,7 +469,7 @@ read_ideal_adaptor_stanfit <- function(file) {
 write_ideal_adaptor_stanfit <- function(x, file, compress = TRUE) {
   stopifnot(is.ideal_adaptor_stanfit(x))
   file <- check_stanfit_file(file)
-  x$file <- file
+  x@file <- file
   saveRDS(x, file = file, compress = compress)
   invisible(x)
 }
