@@ -80,7 +80,7 @@ neff_ratio.ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
 #' @param x An \R object
 #' @param pars Optional names of the control parameters to be returned.
 #'  If \code{NULL} (the default) all control parameters are returned.
-#'  See \code{\link[rstan:stan]{stan}} for more details.
+#'  See \code{\link[rstan]{stan}} for more details.
 #' @param ... Currently ignored.
 #'
 #' @return A named \code{list} with control parameter values.

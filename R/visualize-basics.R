@@ -309,8 +309,8 @@ facet_or_animate = function(p, facet_rows_by, facet_cols_by, facet_wrap_by, anim
 
 #' Plot pairwise cue correlation matrix
 #'
-#' Plots a n x n correlation matrix, using ggforce::facet_matrix, with univariate densities for each category on
-#' the diagonal, scatter plots in the lower triangle and 95% bivariate Gaussian ellipsoids on the upper diagonal.
+#' Plots a n x n correlation matrix, using \code{\link{ggforce::facet_matrix}}, with univariate densities for each category on
+#' the diagonal, scatter plots in the lower triangle and 95\% bivariate Gaussian ellipsoids on the upper diagonal.
 #'
 #' @param data A `tibble` or `data.frame` that contains the `cues` and `category`.
 #' @param cues Variables in `data` -containing the cue values that are to be plotted.
