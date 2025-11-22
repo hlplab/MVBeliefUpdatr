@@ -572,7 +572,7 @@ plot_expected_categories_density1D.ideal_adaptor_stanfit <- function(
     if (is.null(xlim)) {
       get_test_data(model, groups = setdiff(groups_found, "prior"), .from_staninput = TRUE) %>%
         pull(cues[1]) %>%
-        { (range(.) - mean(.) * 1.5) + mean(.) }
+        { (range(.) - mean(.)) * 1.5 + mean(.) }
     } else xlim
 
   d.pars %<>%
@@ -682,13 +682,13 @@ plot_expected_categories_density2D.ideal_adaptor_stanfit <- function(
     if (is.null(xlim)) {
       get_test_data(model, groups = setdiff(groups_found, "prior"), .from_staninput = TRUE) %>%
         pull(cues[1]) %>%
-        { (range(.) - mean(.) * 1.5) + mean(.) }
+        { (range(.) - mean(.)) * 1.5 + mean(.) }
     } else xlim
   ylim <-
     if (is.null(ylim)) {
       get_test_data(model, groups = setdiff(groups_found, "prior"), .from_staninput = TRUE) %>%
         pull(cues[2]) %>%
-        { (range(.) - mean(.) * 1.5) + mean(.) }
+        { (range(.) - mean(.)) * 1.5 + mean(.) }
     } else ylim
 
   d.pars %<>%
