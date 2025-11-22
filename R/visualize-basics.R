@@ -53,14 +53,19 @@ get_default_colors <- function(var, levels) {
   assert_that(is.character(levels))
   n <- length(levels)
 
-  if (var == "category")
-    color <- scales::hue_pal()(n)
-  else {
+  if (var == "category") {
+    assert_that(n <= 12, msg = "Cannot provide default colors for more than 12 levels.")
+    color <- palette.colors(n, "Set 3")
+  } else {
     if ("prior" %in% levels) {
+      assert_that(n - 1 <= 36, msg = "Cannot provide default colors for more than 36 levels.")
       color <- c()
-      color[which(levels != "prior")] <- scales::brewer_pal(palette = "Set1")(n - 1)
+      color[which(levels != "prior")] <- palette.colors(n-1, "Polychrome 36")
       color[which(levels == "prior")] <- "darkgray"
-    } else color <- scales::brewer_pal(palette = "Set1")(n)
+    } else {
+      assert_that(n <= 36, msg = "Cannot provide default colors for more than 36 levels.")
+      color <- palette.colors(n, "Polychrome 36")
+    }
   }
 
   return(color)
