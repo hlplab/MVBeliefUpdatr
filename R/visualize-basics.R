@@ -8,15 +8,15 @@ NULL
 #' Symmetric log transform and function.
 #'
 #' Makes it possible to use log-stepped scales or coordinate systems even when negative values
-#' are included in the data. E.g., in `coord_trans(x = "symlog")`. `symlog`` applies a modified
-#' logarithm scale to the specified or current axes that handles negative values while maintaining
+#' are included in the data. E.g., in [ggplot2::coord_transform], argument `x = symlog` applies a modified
+#' logarithm scale to the x-axis that handles negative values while maintaining
 #' continuity across zero:
 #'
-#' y = sign(x) * log10(1 + abs(x) / 10^C )
+#' x' = sign(x) * log10(1 + abs(x) / 10^C )
 #'
 #' where the scaling constant C determines the resolution of the data around zero. The smallest
 #' order of magnitude shown on either side of zero will be 10^ceil(C). If applies as a transform
-#' for a ggplot2 coordinate system, C is taken to be 0.
+#' for a `ggplot2` coordinate system, C is taken to be 0.
 #'
 #' Taken from https://www.mathworks.com/matlabcentral/fileexchange/57902-symlog.
 #'

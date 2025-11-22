@@ -502,7 +502,7 @@ plot_expected_categories_density1D.NIW_ideal_adaptor <- function(
     group_by(category, .add = T) %>%
     group_map(
       .keep = T,
-      .f = function(.x, .y)
+      .f = function(.x)
         stat_function(
           data = .x,
           mapping = aes(color = category),
