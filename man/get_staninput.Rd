@@ -2,12 +2,12 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{get_staninput}
 \alias{get_staninput}
-\alias{get_staninput.ideal_adaptor_stanfit}
+\alias{get_staninput,ideal_adaptor_stanfit-method}
 \title{Get the input data from an ideal adaptor stanfit}
 \usage{
-get_staninput(x, ...)
+get_staninput(x, which = c("untransformed", "transformed", "both")[1])
 
-\method{get_staninput}{ideal_adaptor_stanfit}(x, which = c("untransformed", "transformed", "both")[1])
+\S4method{get_staninput}{ideal_adaptor_stanfit}(x, which = c("untransformed", "transformed", "both")[1])
 }
 \arguments{
 \item{x}{\code{\link{ideal_adaptor_stanfit}} object.}

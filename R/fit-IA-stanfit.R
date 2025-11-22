@@ -183,7 +183,7 @@ fit_ideal_adaptor <- function(
       stop2("Sampling failed.")
     } else {
       fit %<>% set_stanfit(stanfit)
-      fit %<>% recover_types.ideal_adaptor_stanfit()
+      fit %<>% recover_types()
 
       if (rename) fit %<>% rename_pars()
     }
