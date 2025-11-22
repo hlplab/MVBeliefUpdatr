@@ -117,7 +117,7 @@ cov2css <- function(cov, n) {
 #'
 #' @return A square matrix.
 #'
-#' @seealso \code{\link[stats]{cov2cor}}, \code{\link{cov2tau}}
+#' @seealso [stats::cov2cor], \code{\link{cov2tau}}
 #' @references \url{https://stats.stackexchange.com/questions/62850/obtaining-covariance-matrix-from-correlation-matrix}
 #' @keywords TBD
 #'
@@ -141,7 +141,7 @@ cor2cov = function(omega, tau) {
 #'
 #' @return A numeric vector.
 #'
-#' @seealso \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}
+#' @seealso [stats::cov2cor], \code{\link{cor2cov}}
 #' @keywords TBD
 #'
 #' @export
@@ -171,7 +171,7 @@ make_named_square_matrix = function(x, names) {
 #' @param data `tibble` or `data.frame`.
 #' @param cols Vector of characters with names of variables to combine.
 #' @param vector_col Name of new column of vectors.
-#' @param .keep See \code{\link{dplyr::mutate}}.
+#' @param .keep See [dplyr::mutate].
 #'
 #' @return Same as \code{data}.
 #'

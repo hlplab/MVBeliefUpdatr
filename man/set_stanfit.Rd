@@ -12,7 +12,7 @@ set_stanfit(x, ...)
 \arguments{
 \item{x}{\code{\link{ideal_adaptor_stanfit}} object.}
 
-\item{stanfit}{An \code{\link[rstan]{stanfit}} object of adequate structure.}
+\item{stanfit}{An \link[rstan:stanfit-class]{rstan::stanfit} object of adequate structure.}
 }
 \value{
 An \code{\link{ideal_adaptor_stanfit}} object with the updated stanfit.

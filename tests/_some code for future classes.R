@@ -14,7 +14,7 @@
 #' @slot backend The name of the backend used to fit the model.
 #' @slot stan_args Named list of additional control arguments that were passed
 #'   to the Stan backend directly. NOT YET USED
-#' @slot stanfit An object of class \code{\link[rstan]{stanfit}}
+#' @slot stanfit An object of class [rstan::stanfit]
 #'   among others containing the posterior draws.
 #' @slot basis An object that contains a small subset of the Stan data
 #'   created at fitting time, which is needed to process new data correctly. NOT YET USED

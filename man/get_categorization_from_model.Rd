@@ -35,11 +35,11 @@ will be adjusted based on the lapse formula lapse_rate \emph{lapse_bias + (1 - l
 perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).}
 
 \item{simplify}{Should the output be simplified, and just the label of the selected category be returned? This
-option is only available for the criterion and sampling decision rules. (default: `FALSE`)}
+option is only available for the criterion and sampling decision rules. (default: \code{FALSE})}
 }
 \value{
 Either a tibble of observations with posterior probabilities for each category (in long format), or a
-  character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
+character vector indicating the chosen category in the same order as the observations in x (if simplify = \code{TRUE}).
 }
 \description{
 Categorize a single observation based a model. The decision rule can be specified to be either the

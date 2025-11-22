@@ -9,7 +9,7 @@ is.ideal_adaptor_staninput(x, verbose = FALSE)
 \arguments{
 \item{x}{The input to be checked.}
 
-\item{verbose}{Should verbose output be provided? (default: `FALSE`)}
+\item{verbose}{Should verbose output be provided? (default: \code{FALSE})}
 }
 \value{
 A logical.

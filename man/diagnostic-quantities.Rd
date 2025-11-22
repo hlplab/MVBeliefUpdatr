@@ -40,5 +40,5 @@ These diagnostic functions are all copied and modified from \pkg{brms}.
 }
 \details{
 For more details see
-  \code{\link[bayesplot:bayesplot-extractors]{bayesplot-extractors}}.
+\link[bayesplot:bayesplot-extractors]{bayesplot::bayesplot-extractors}.
 }

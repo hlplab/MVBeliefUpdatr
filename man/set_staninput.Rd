@@ -18,7 +18,7 @@ set_staninput(x, ...)
 
 \item{staninput}{A list with element names and structures determined by the type of stanfit model.}
 
-\item{which}{Should "transformed" or "untransformed" staninput be set or "both"? (default: `"both"`)}
+\item{which}{Should "transformed" or "untransformed" staninput be set or "both"? (default: \code{"both"})}
 }
 \value{
 A list with element names and structures determined by the type of stanfit model.

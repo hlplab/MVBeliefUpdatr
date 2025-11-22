@@ -13,8 +13,8 @@ is.MVG(x, group = NULL, category = "category", is.long = T, verbose = F)
 
 \item{category}{DEPRECATED Name of the category variable. (default: "category")}
 
-\item{is.long}{Is this check assessing whether the ideal observer is in long format (`TRUE`) or wide format (`FALSE`)?
-(default: `TRUE`)}
+\item{is.long}{Is this check assessing whether the ideal observer is in long format (\code{TRUE}) or wide format (\code{FALSE})?
+(default: \code{TRUE})}
 }
 \value{
 A logical.

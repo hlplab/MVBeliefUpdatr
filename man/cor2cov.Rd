@@ -22,6 +22,6 @@ by Ben Bolder for efficiency.
 \url{https://stats.stackexchange.com/questions/62850/obtaining-covariance-matrix-from-correlation-matrix}
 }
 \seealso{
-\code{\link[stats]{cov2cor}}, \code{\link{cov2tau}}
+\link[stats:cor]{stats::cov2cor}, \code{\link{cov2tau}}
 }
 \keyword{TBD}

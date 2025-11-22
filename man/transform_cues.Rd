@@ -32,42 +32,42 @@ untransform_cues(
 )
 }
 \arguments{
-\item{data}{`tibble` or `data.frame`.}
+\item{data}{\code{tibble} or \code{data.frame}.}
 
 \item{cues}{Vector of characters with names of cue variables.}
 
-\item{center, uncenter}{Should the data be (un)centered? (default: `TRUE` unless `pca = TRUE`)}
+\item{center, uncenter}{Should the data be (un)centered? (default: \code{TRUE} unless \code{pca = TRUE})}
 
-\item{scale, unscale}{Should the data be (un)standardized? (default: `TRUE` unless `pca = TRUE`)}
+\item{scale, unscale}{Should the data be (un)standardized? (default: \code{TRUE} unless \code{pca = TRUE})}
 
-\item{pca, unpca}{Should the data be transformed into/back from orthogonal principal components? If `TRUE`
-then \code{center} and \code{scale} are default to `FALSE`. If PCA is applied, it is applied after
-centering and/or scaling. (default: `FALSE`)}
+\item{pca, unpca}{Should the data be transformed into/back from orthogonal principal components? If \code{TRUE}
+then \code{center} and \code{scale} are default to \code{FALSE}. If PCA is applied, it is applied after
+centering and/or scaling. (default: \code{FALSE})}
 
 \item{attach}{Should the transformed cues be attached to \code{data} or should just the transformed cues be
-returned? (default: `TRUE`)}
+returned? (default: \code{TRUE})}
 
-\item{transform.parameters}{List of transforms (default: `NULL`)}
+\item{transform.parameters}{List of transforms (default: \code{NULL})}
 
-\item{return.transformed.data, return.transformed.data}{Should the (un)transformed data be returned? (default: `TRUE`)}
+\item{return.transformed.data, return.transformed.data}{Should the (un)transformed data be returned? (default: \code{TRUE})}
 
-\item{return.transform.parameters}{Should the list of transforms be returned? (default: `FALSE`)}
+\item{return.transform.parameters}{Should the list of transforms be returned? (default: \code{FALSE})}
 
 \item{return.transform.function, return.untransform.function}{Should a function that applies the (un)transform be
-returned? (default: `FALSE`)}
+returned? (default: \code{FALSE})}
 }
 \value{
-By default a \code{data.frame}. If `return.transform.parameters = TRUE`, a list of parameters. If
-`return.transform.function = TRUE` or `return.untransform.function = TRUE` a function. If more than one of
-these flags is `TRUE` then a list in which
+By default a \code{data.frame}. If \code{return.transform.parameters = TRUE}, a list of parameters. If
+\code{return.transform.function = TRUE} or \code{return.untransform.function = TRUE} a function. If more than one of
+these flags is \code{TRUE} then a list in which
 the data element has name "data", the transform parameters have name "transform.parameters" and the (un)transform
 function(s) have the name "(un)transform.function".
 }
 \description{
-If the `transform.parameters` argument
+If the \code{transform.parameters} argument
 is specified, the transforms in that object will be applied. This can be useful when the goal is to transform one
 data set (e.g., test data) based on the statistics of the another data set (e.g., exposure data). If no
-`transform.parameters` are specified, then the transformations specified by the `center`, `scale`, and `pca`
+\code{transform.parameters} are specified, then the transformations specified by the \code{center}, \code{scale}, and \code{pca}
 flags will be applied. The transform and untransform functions can also return \emph{functions} that perform their
 actions for the specific cues. This can be helpful if one wants to store those functions. For example, the
 transform function can return both the transform and untransform functions necessary to perform the specified

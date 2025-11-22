@@ -21,19 +21,18 @@ get_cue2_constructor(x)
 \arguments{
 \item{x}{\code{\link{ideal_adaptor_stanfit}} object.}
 
-\item{variable}{Either "category" or "group". If set to `NULL` then a list of all constructors is
-returned. That list is `NULL` if not tidybayes constructors are found in fit. (default: c("category", "group"))}
+\item{variable}{Either "category" or "group". If set to \code{NULL} then a list of all constructors is
+returned. That list is \code{NULL} if not tidybayes constructors are found in fit. (default: c("category", "group"))}
 }
 \value{
-A constructor function, a list of constructor functions, or `NULL`. If a specific constructor
+A constructor function, a list of constructor functions, or \code{NULL}. If a specific constructor
 function is requested but not found, a warning is shown.
 }
 \description{
-Gets the tidybayes constructor function from the stanfit object. `get_category_constructor()` and
-`get_group_constructor()` are convenience functions, calling `get_constructor()`. See \code{
-\link[tidybayes]{recover_types}}. If variable is
+Gets the tidybayes constructor function from the stanfit object. \code{get_category_constructor()} and
+\code{get_group_constructor()} are convenience functions, calling \code{get_constructor()}. See \link[tidybayes:recover_types]{tidybayes::recover_types}.
 }
 \seealso{
-\code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_staninput_variable_levels}}
+\link[tidybayes:recover_types]{tidybayes::recover_types}, \code{\link{get_staninput_variable_levels}}
 }
 \keyword{TBD}

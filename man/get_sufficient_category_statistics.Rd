@@ -15,24 +15,24 @@ get_sufficient_category_statistics(
 )
 }
 \arguments{
-\item{data}{`tibble` or `data.frame` with the data. Each row should be an observation of a category,
+\item{data}{\code{tibble} or \code{data.frame} with the data. Each row should be an observation of a category,
 and contain information about the category label, the cue values of the observation, and optionally grouping variables.}
 
 \item{cues}{Names of columns with cue values.}
 
-\item{category}{Name of column that contains the category label for the exposure data. Can be `NULL` for unsupervised updating
+\item{category}{Name of column that contains the category label for the exposure data. Can be \code{NULL} for unsupervised updating
 (not yet implemented). (default: "category")}
 
 \item{group}{Name of column(s) that contains information about which observations form a group. This could be individual
 subjects or conditions in an experiment. The latter is more efficient, but should only be used if exposure is
 identical for every individual within the group. Test does not have to be identical for every individual within
 the same group. For example, one can group multiple groups of subjects that have received the same exposure
-but were tested on different test tokens. If `NULL` no grouping variable will be considered. (default: `NULL`)}
+but were tested on different test tokens. If \code{NULL} no grouping variable will be considered. (default: \code{NULL})}
 
-\item{categories, groups}{Character vector of categories/groups to be summarize. If `NULL`, all categories/groups will be
-included. (default: `NULL`)}
+\item{categories, groups}{Character vector of categories/groups to be summarize. If \code{NULL}, all categories/groups will be
+included. (default: \code{NULL})}
 
-\item{test}{`tibble` or `data.frame` with the test data. Each row should be an observation, and contain information
+\item{test}{\code{tibble} or \code{data.frame} with the test data. Each row should be an observation, and contain information
 about the cue values of the test stimulus and the participant's response.}
 }
 \value{

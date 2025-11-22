@@ -44,7 +44,7 @@ Scaling will not affect the inferred correlation matrix,
 but it will affect the inferred covariance matrix because it affects the inferred standard deviations. It will also
 affect the absolute position of the inferred means. The relative position of the inferred means remains unaffected.
 If \code{TRUE} and \code{mu_0} and \code{Sigma_0} are specified, \code{mu_0} and \code{Sigma_0} will also be scaled.
-(default: `FALSE`)}
+(default: \code{FALSE})}
 
 \item{pca.observations}{Should the data be transformed into orthogonal principal components? (default: \code{FALSE})}
 

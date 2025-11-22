@@ -25,18 +25,18 @@ plot_parameter_correlations(model, ...)
 \item{categories, groups, cues, pars}{Character vector of categories, groups, cues, and/or parameters to be plotted. To
 subset to specific parameters, note the following naming conventions:
 
-(1) all `m` parameters are named `m_{cue_name}`
-(2) the `S` parameter is decomposed into a vector of standard deviations `tau` and a correlation matrix `rho`.
-(3) all `tau` parameters are named `tau_{cue_name}`
-(4) all `rho` parameters are named `rho_{cue_name1}__x__{cue_name2}`
+(1) all \code{m} parameters are named \verb{m_\{cue_name\}}
+(2) the \code{S} parameter is decomposed into a vector of standard deviations \code{tau} and a correlation matrix \code{rho}.
+(3) all \code{tau} parameters are named \verb{tau_\{cue_name\}}
+(4) all \code{rho} parameters are named \verb{rho_\{cue_name1\}__x__\{cue_name2\}}
 
-(default: all categories, cues, and parameters in the model; `"prior"` for group since those are the only free parameters).}
+(default: all categories, cues, and parameters in the model; \code{"prior"} for group since those are the only free parameters).}
 
-\item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
+\item{ndraws}{Number of draws to plot (or use to calculate the CIs), or \code{NULL} if all draws are to be returned. (default: \code{NULL})}
 
-\item{untransform_cues}{DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)}
+\item{untransform_cues}{DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: \code{FALSE})}
 
-\item{category.colors}{Vector of fill colors of same length as category or `NULL` to use defaults. (default: `NULL`)}
+\item{category.colors}{Vector of fill colors of same length as category or \code{NULL} to use defaults. (default: \code{NULL})}
 }
 \value{
 ggplot object.
@@ -46,7 +46,7 @@ Plot correlations between posterior MCMC samples for all parameters representing
 }
 \details{
 Typically, the categories, groups, and cues are automatically added to the fit during the creation of the fit. If necessary,
-however, it is possible to use \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+however, it is possible to use \link[tidybayes:recover_types]{tidybayes::recover_types} on the stanfit object to add or change these levels later.
 }
 \seealso{
 TBD

@@ -7,7 +7,7 @@
 get_plot_limits(plot)
 }
 \arguments{
-\item{plot}{A `ggplot` object.}
+\item{plot}{A \code{ggplot} object.}
 }
 \value{
 List with elements x and y, each of which is a vector of two values..

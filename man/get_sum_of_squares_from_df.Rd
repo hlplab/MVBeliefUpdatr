@@ -13,11 +13,11 @@ get_sum_of_uncentered_squares_from_df(data, variables = NULL, verbose = F)
 get_sum_of_centered_squares_from_df(data, variables = NULL, verbose = F)
 }
 \arguments{
-\item{data}{A `tibble`, `data.frame`, or `matrix`. If data is a `tibble` or `data.frame`, the columns for
+\item{data}{A \code{tibble}, \code{data.frame}, or \code{matrix}. If data is a \code{tibble} or \code{data.frame}, the columns for
 specified variables are extracted and (together) converted into a matrix with as many colums as there are
-variables. If `NULL`, `NA` is returned.}
+variables. If \code{NULL}, \code{NA} is returned.}
 
-\item{variables}{Only required if data is not already a `matrix`.}
+\item{variables}{Only required if data is not already a \code{matrix}.}
 }
 \value{
 A matrix.

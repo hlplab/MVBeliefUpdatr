@@ -14,7 +14,7 @@ symlog_trans()
 }
 \description{
 Makes it possible to use log-stepped scales or coordinate systems even when negative values
-are included in the data. E.g., in `coord_trans(x = "symlog")`. `symlog`` applies a modified
+are included in the data. E.g., in \code{coord_trans(x = "symlog")}. `symlog`` applies a modified
 logarithm scale to the specified or current axes that handles negative values while maintaining
 continuity across zero:
 }

@@ -49,13 +49,13 @@ get_exposure_category_cov(x, ...)
 returned. (default: all categories)}
 
 \item{groups}{Character vector with groups for which category statistics are to be
-returned. (default: all groups except `"prior"`)}
+returned. (default: all groups except \code{"prior"})}
 
-\item{statistic}{Which exposure statistic should be returned? `n` for number of observations, `mean` for
-category mean, `css` or `uss` for centered or uncentered category sum-of-square matrix, `cov` for the
+\item{statistic}{Which exposure statistic should be returned? \code{n} for number of observations, \code{mean} for
+category mean, \code{css} or \code{uss} for centered or uncentered category sum-of-square matrix, \code{cov} for the
 category covariance matrix, or a character vector with any combination thereof. (default: all)}
 
-\item{untransform_cues}{DEPRECATED. Should statistics be transformed back into the original cue space? (default: `FALSE`)}
+\item{untransform_cues}{DEPRECATED. Should statistics be transformed back into the original cue space? (default: \code{FALSE})}
 }
 \value{
 If just one group and category was requested, a vector (for the mean) or matrix (for the covariance

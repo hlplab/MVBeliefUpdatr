@@ -101,7 +101,7 @@ check_compatibility_between_NIW_belief_and_data <- function(
 #' @details
 #' Typically, the categories, groups, and cues
 #' are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
-#' \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+#' [tidybayes::recover_types] on the stanfit object to add or change these levels later.
 #'
 #'
 #' @seealso TBD

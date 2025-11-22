@@ -7,12 +7,12 @@
 get_limits(data, measure, by = NULL, hdi.prob = 0.99, min = NULL, max = NULL)
 }
 \arguments{
-\item{data}{A `tibble` or `data.frame` that contains a `measure`.}
+\item{data}{A \code{tibble} or \code{data.frame} that contains a \code{measure}.}
 
-\item{measure}{Name of variable in `data` for which limits are sought.}
+\item{measure}{Name of variable in \code{data} for which limits are sought.}
 
 \item{by}{Optionally, a grouping variable. If not NULL, limits will be returned for each level of this
-variable. (default: `NULL`)}
+variable. (default: \code{NULL})}
 
 \item{hdi.prob}{Proportion of MCMC samples that are within the limits. (default: .99)}
 

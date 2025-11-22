@@ -1,7 +1,7 @@
 #' loo for NIW ideal adaptor stanfit
 #'
 #' \code{loo} method for \code{\link{ideal_adaptor_stanfit}} objects. For details,
-#' see \code{\link[loo]{loo::loo}}.
+#' see [loo::loo].
 #'
 #' @param x An \code{\link{ideal_adaptor_stanfit}} object.
 #'
@@ -44,7 +44,7 @@ loo.ideal_adaptor_stanfit <- function(
 #'   names will be shown in separate columns (distribution, group, category, cue, ...). (default: `TRUE`)
 #' @param sufficient_only Should only the sufficient parameters be summarized? (default: `FALSE`)
 #' @param include_transformed_pars Should transformed parameters be included in the summary? (default: `FALSE`)
-#' @param ... Additional arguments passed to \code{\link[rstan]{rstan::summary}}.
+#' @param ... Additional arguments passed to \link[rstan:`summary,stanfit-method`]{rstan::`summary,stanfit-method`}.
 #'
 #' @method summary ideal_adaptor_stanfit
 #'
@@ -137,7 +137,7 @@ summary.ideal_adaptor_stanfit <- function(x, pars = NULL, indices_as_names = TRU
 #' #' loo moment matching for NIW ideal adaptor stanfit
 #' #'
 #' #' \code{loo_moment_match} method for \code{\link{ideal_adaptor_stanfit}} objects. For detaisl,
-#' #' see \code{\link[loo]{loo::loo_moment_match}}.
+#' #' see [loo::loo_moment_match].
 #' #'
 #' #' @param x An \code{\link{ideal_adaptor_stanfit}} object.
 #' #' @param loo A `loo` object.

@@ -46,12 +46,12 @@ counter-intuitive behavior of the categorization function and is thus not recomm
 }
 \value{
 A function that takes as input cue values and returns posterior probabilities of the first category,
-  based on the posterior predictive of the cues given the (IBBU-derived parameters for the) categories' m, S,
-  kappa, nu, and prior, as well as the lapse rate. The function will accept the following arguments:
-  \itemize{
-    \item{`target_category`:}{The index of the category for which categorization should be shown. (default: `1`)}
-    \item{`logit`:}{Should the function return log-odds (TRUE) or probabilities (FALSE)? (default: FALSE)}
-  }
+based on the posterior predictive of the cues given the (IBBU-derived parameters for the) categories' m, S,
+kappa, nu, and prior, as well as the lapse rate. The function will accept the following arguments:
+\itemize{
+\item{\code{target_category}:}{The index of the category for which categorization should be shown. (default: \code{1})}
+\item{\code{logit}:}{Should the function return log-odds (TRUE) or probabilities (FALSE)? (default: FALSE)}
+}
 }
 \description{
 Returns a categorization function for the first category, based on a set of parameters for the Normal-Inverse-Wishart (NIW)

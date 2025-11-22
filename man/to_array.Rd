@@ -16,43 +16,43 @@ to_array(
 \item{x}{The input to be turned into an array.}
 
 \item{inner_dims}{Integer vector of intended dimensions of x.
-If `NULL`, `inner_dims` will be inferred from the input.
-If not `NULL`, `inner_dims` will be used for checks and to enforce the correct dimensions of `x`. (default: `NULL`)}
+If \code{NULL}, \code{inner_dims} will be inferred from the input.
+If not \code{NULL}, \code{inner_dims} will be used for checks and to enforce the correct dimensions of \code{x}. (default: \code{NULL})}
 
-\item{outer_dims}{An integer vector of outer dimensions for the array. If `x` is not a list, an array of `x` will be repeated for each
-outer dimension. If `x` is list, combinations of the outer dimensions will each index one element of `x`.
-The total length of `x` must match the product of outer dimensions. The first dimension will be iterated
+\item{outer_dims}{An integer vector of outer dimensions for the array. If \code{x} is not a list, an array of \code{x} will be repeated for each
+outer dimension. If \code{x} is list, combinations of the outer dimensions will each index one element of \code{x}.
+The total length of \code{x} must match the product of outer dimensions. The first dimension will be iterated
 over first (and thus alternating fastest), the second dimension will be iterated over second, etc. See details.}
 
-\item{dimnames}{A list of character vectors with names for each dimension of the array. If not `NULL`, the length
+\item{dimnames}{A list of character vectors with names for each dimension of the array. If not \code{NULL}, the length
 of this list must match the total number of dimensions, and each character vector must match the length of the
 corresponding dimension. Dimensions are named from the outside-in (i.e. first outer than inner dimensions).
-(default: `NULL`)}
+(default: \code{NULL})}
 
 \item{simplify}{Should the array be simplified by removing inner dimensions whenever the inner element(s) are just scalars?
 (e.g., if the inner elements are a one-element vector or a 1x1 matrix). Note that atomic values that can be simplified
 will be returned as scalars (and thus without dimnames) if there are no outer dimensions, since the returned object cannot
-be an array in that case. (default: `TRUE`)}
+be an array in that case. (default: \code{TRUE})}
 }
 \value{
 An array.
 }
 \description{
-Takes `NULL`, numeric atomics (single scalars, vectors, matrices) or lists of numeric elements as inputs and turns them into
+Takes \code{NULL}, numeric atomics (single scalars, vectors, matrices) or lists of numeric elements as inputs and turns them into
 numeric arrays. For lists, the \emph{outer} dimension of the array iterate over the list elements (for details, see argument
-`outer_dims`).
+\code{outer_dims}).
 }
 \details{
 \itemize{
-  \item{`NULL` will be turned in an `array(numeric(0), dim = c(outer_dims, inner_dims))`. This is sometimes required for
-  optional Stan inputs.}
-  \item{Atomics (scalars, vectors, and matrices) will be turned into an `array(x, dim = c(outer_dims, inner_dims))`.
-  This essentially creates copies of `x` for each combination of `outer_dims`.}
-  \item{Lists will be turned into an `array(x, dim = c(outer_dims, inner_dims))`. `prod(outer_dims)` must match the length
-  of the list.}
+\item{\code{NULL} will be turned in an \code{array(numeric(0), dim = c(outer_dims, inner_dims))}. This is sometimes required for
+optional Stan inputs.}
+\item{Atomics (scalars, vectors, and matrices) will be turned into an \code{array(x, dim = c(outer_dims, inner_dims))}.
+This essentially creates copies of \code{x} for each combination of \code{outer_dims}.}
+\item{Lists will be turned into an \code{array(x, dim = c(outer_dims, inner_dims))}. \code{prod(outer_dims)} must match the length
+of the list.}
 }
 
-E.g., if the input is a list of six 2x2 covariance matrices, and `...` is `3, 2`, then output will
-be an array of dimensionality `c(3, 2, 2, 2)`.
+E.g., if the input is a list of six 2x2 covariance matrices, and \code{...} is \verb{3, 2}, then output will
+be an array of dimensionality \code{c(3, 2, 2, 2)}.
 }
 \keyword{TBD}

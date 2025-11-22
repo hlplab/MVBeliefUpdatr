@@ -66,15 +66,15 @@ as well. If using \code{backend = "rstan"} you can also set
 \code{open_progress = FALSE} to prevent opening additional progress bars.}
 
 \item{stan_model_args}{A \code{list} of further arguments passed to
-\code{\link[rstan:stan_model]{rstan::stan_model}} for \code{backend =
-"rstan"} or to \code{cmdstanr::cmdstan_model} for \code{backend =
-"cmdstanr"}, which allows to change how models are compiled.}
+\link[rstan:stan_model]{rstan::stan_model} for \code{backend =
+  "rstan"} or to \code{cmdstanr::cmdstan_model} for \code{backend =
+  "cmdstanr"}, which allows to change how models are compiled.}
 
 \item{stanmodel}{Name of stanmodel that should be used. Overrides any default selection.}
 
 \item{rename}{For internal use only.}
 
-\item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}.}
+\item{...}{Additional parameters are passed to \link[rstan:stanmodel-method-sampling]{rstan::sampling}.}
 }
 \value{
 An object of class \code{ideal_adaptor_stanfit} with the fitted stan model.
@@ -86,26 +86,25 @@ Gaussian categories:
 }
 \details{
 \itemize{
- \item{\code{NIW_ideal_adaptor}:} A Normal-Inverse-Wishart (NIW) prior over the ideal adaptor. This is the
-   default model with multivariate Gaussian categories. Accepts univariate and multivariate input, though
-   the NIX model should be faster for univariate input.
- \item{\code{NIX_ideal_adaptor}:} A Normal-Inverse-Chisquare (NIX) prior over the ideal adaptor with with
-   univariate Gaussian categories. Accepts only univariate input.
- \item{\code{MNIX_ideal_adaptor}:} Separate NIXs for each of multiple cues that are integrated over during
-   categorization(cue integration) assuming ideal cue weights based on the relative informativity of each cue.
-   Accepts univariate and multivariate input, though the NIX model should be faster for univariate input.
+\item{\code{NIW_ideal_adaptor}:} A Normal-Inverse-Wishart (NIW) prior over the ideal adaptor. This is the
+default model with multivariate Gaussian categories. Accepts univariate and multivariate input, though
+the NIX model should be faster for univariate input.
+\item{\code{NIX_ideal_adaptor}:} A Normal-Inverse-Chisquare (NIX) prior over the ideal adaptor with with
+univariate Gaussian categories. Accepts only univariate input.
+\item{\code{MNIX_ideal_adaptor}:} Separate NIXs for each of multiple cues that are integrated over during
+categorization(cue integration) assuming ideal cue weights based on the relative informativity of each cue.
+Accepts univariate and multivariate input, though the NIX model should be faster for univariate input.
 }
 
+In interpreting the inferred parameters, it should be kept in mind that the \emph{inferred} scatter matrix
+(e.g., S_0) for the NIW model) includes
+variability from internal perceptual and/or external environmental noise, \emph{in addition} to the motor
+noise that is reflected in production data. This also implies that, \strong{if \code{Sigma_0} is provided
+by the user it should be arguably convolved with an estimate of perceptual noise}. This is particularly
+important if the data you're fitting contains test phases without exposure (e.g., pre-exposure tests).
 
-  In interpreting the inferred parameters, it should be kept in mind that the \emph{inferred} scatter matrix
-  (e.g., S_0) for the NIW model) includes
-  variability from internal perceptual and/or external environmental noise, \emph{in addition} to the motor
-  noise that is reflected in production data. This also implies that, \strong{if \code{Sigma_0} is provided
-  by the user it should be arguably convolved with an estimate of perceptual noise}. This is particularly
-  important if the data you're fitting contains test phases without exposure (e.g., pre-exposure tests).
-
-  Make sure to read the notes about the \code{Sigma_0} argument in the help page on \code{\link{make_staninput}}.
-  Use \code{methods(class = "ideal_adaptor_stanfit")} for an overview on available methods.
+Make sure to read the notes about the \code{Sigma_0} argument in the help page on \code{\link{make_staninput}}.
+Use \code{methods(class = "ideal_adaptor_stanfit")} for an overview on available methods.
 }
 \seealso{
 \code{\link{is.ideal_adaptor_stanfit}} for information about ideal_adaptor_stanfit objects,

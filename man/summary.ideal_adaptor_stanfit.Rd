@@ -16,18 +16,18 @@
 \arguments{
 \item{x}{An \code{\link{ideal_adaptor_stanfit}} object.}
 
-\item{pars}{A character vector of parameter names to be summarized. If `NULL`, all parameters of the
-NIW_ideal_adaptor are summarized. (default: `NULL`)}
+\item{pars}{A character vector of parameter names to be summarized. If \code{NULL}, all parameters of the
+NIW_ideal_adaptor are summarized. (default: \code{NULL})}
 
 \item{indices_as_names}{Should the indices of the parameters be translated into level names in the summary?
 This output is substantially more readable, but might lend itself less for post-processing. The
-names will be shown in separate columns (distribution, group, category, cue, ...). (default: `TRUE`)}
+names will be shown in separate columns (distribution, group, category, cue, ...). (default: \code{TRUE})}
 
-\item{sufficient_only}{Should only the sufficient parameters be summarized? (default: `FALSE`)}
+\item{sufficient_only}{Should only the sufficient parameters be summarized? (default: \code{FALSE})}
 
-\item{include_transformed_pars}{Should transformed parameters be included in the summary? (default: `FALSE`)}
+\item{include_transformed_pars}{Should transformed parameters be included in the summary? (default: \code{FALSE})}
 
-\item{...}{Additional arguments passed to \code{\link[rstan::summary]{rstan::summary}}.}
+\item{...}{Additional arguments passed to \link[rstan:\verb{summary,stanfit-method}]{rstan::\verb{summary,stanfit-method}}.}
 }
 \description{
 \code{summary} method for \code{\link{ideal_adaptor_stanfit}} objects. Specifies reasonable defaults

@@ -21,8 +21,8 @@ evaluate_model(
 \item{x}{A vector of inputs (cue values).}
 
 \item{response_category}{A vector of category responses corresponding to each input. The model is evaluated against
-this ground truth. Must be of the same length as the list of inputs, and each element of the `response_category` must
-be one of the `category` levels of `model`.}
+this ground truth. Must be of the same length as the list of inputs, and each element of the \code{response_category} must
+be one of the \code{category} levels of \code{model}.}
 
 \item{method}{Method for evaluating the model. Can be "accuracy", "likelihood", or "likelihood-up-to-constant". The
 latter two return the log-likelihood or the log-likelihood up to a constant that only depends on the data (rather than
@@ -35,17 +35,17 @@ model fitting. It can, however, be important to keep in mind that this log-likel
 data log-likelihood of the model under the assumption that the order of responses in the data should not be considered
 for the evaluation of the model.}
 
-\item{decision_rule}{For details, see \code{\link{get_categorization_from_model}}. However, `evaluate_model` uses
-sensible defaults depending on the value of `method`. If `method` is (only) "accuracy", then defaults to "criterion".
-If `method` is "likelihood" or "likelihood-up-to-constant", then defaults to "proportional". Otherwise defaults to
-`NULL`, which will result in an error (so users must manually specify the decision rule).}
+\item{decision_rule}{For details, see \code{\link{get_categorization_from_model}}. However, \code{evaluate_model} uses
+sensible defaults depending on the value of \code{method}. If \code{method} is (only) "accuracy", then defaults to "criterion".
+If \code{method} is "likelihood" or "likelihood-up-to-constant", then defaults to "proportional". Otherwise defaults to
+\code{NULL}, which will result in an error (so users must manually specify the decision rule).}
 
-\item{return_by_x}{Should results be returned separately for each unique `x`? (default: `FALSE`)}
+\item{return_by_x}{Should results be returned separately for each unique \code{x}? (default: \code{FALSE})}
 }
 \value{
-If `return_by_x`, the accuracy and/or log-likelihood of each unique input `x`. Otherwise, the overall accuracy
-and/or log-likelihood of the all observations. Note that the overall log-likelihood is *not* simply the sum of the
-log-likelihoods of all unique inputs `x`.
+If \code{return_by_x}, the accuracy and/or log-likelihood of each unique input \code{x}. Otherwise, the overall accuracy
+and/or log-likelihood of the all observations. Note that the overall log-likelihood is \emph{not} simply the sum of the
+log-likelihoods of all unique inputs \code{x}.
 }
 \description{
 Evaluate the fit of a categorization model against a ground truth (e.g., human responses or the category intended

@@ -93,7 +93,7 @@ get_stanmodelname.ideal_adaptor_stanfit <- function(x) {
 #'
 #' @param x \code{\link{ideal_adaptor_stanfit}} object.
 #'
-#' @return An \code{\link{rstan::stanfit}} object.
+#' @return An [rstan::stanfit] object.
 #'
 #' @seealso TBD
 #' @keywords TBD
@@ -118,7 +118,7 @@ get_stanfit.ideal_adaptor_stanfit <- function(x) {
 #' Sets the stanfit of an the \code{\link{ideal_adaptor_stanfit}} object.
 #'
 #' @param x \code{\link{ideal_adaptor_stanfit}} object.
-#' @param stanfit An \code{\link[rstan]{stanfit}} object of adequate structure.
+#' @param stanfit An [rstan::stanfit] object of adequate structure.
 #'
 #' @return An \code{\link{ideal_adaptor_stanfit}} object with the updated stanfit.
 #'
@@ -536,13 +536,13 @@ get_exposure_category_cov.ideal_adaptor_stanfit <- function(...) {
 
 #' Get the exposure and/or test data from an ideal adaptor stanfit.
 #'
-#' Returns the exposure and/or test data used during the creation of the \code{\link[rstan]{stanfit}}.
+#' Returns the exposure and/or test data used during the creation of the [rstan::stanfit].
 #' object.
 #'
 #' @param x \code{\link{ideal_adaptor_stanfit}} object.
 #' @param groups Character vector of groups for which test data is requested. Typically, the levels of these factors
 #'   are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
-#'   \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+#'   [tidybayes::recover_types] on the stanfit object to add or change these levels later.
 #'   (default: all categories/groups will be selected)
 #' @param .rename_to_MVB_default Should the data columns be renamed to the default names used internally in
 #'   `MVBeliefUpdatr`? his option is included primarily for internal use. (default: `FALSE`)
@@ -666,7 +666,7 @@ get_test_data.ideal_adaptor_stanfit <- function(
 #' @return If no category or group indices are provided, the levels of the category/group are returned (in the
 #' original order). Otherwise a vector of the same length as \code{indices}
 #'
-#' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_constructor}}
+#' @seealso [tidybayes::recover_types], \code{\link{get_constructor}}
 #' @keywords TBD
 #' @export
 get_staninput_variable_levels <- function(x, ...) {
@@ -727,8 +727,7 @@ get_cue_levels.ideal_adaptor_stanfit <- function(x, indices = NULL) {
 #' Get tidybayes constructor from an ideal adaptor stanfit.
 #'
 #' Gets the tidybayes constructor function from the stanfit object. `get_category_constructor()` and
-#' `get_group_constructor()` are convenience functions, calling `get_constructor()`. See \code{
-#' \link[tidybayes]{recover_types}}. If variable is
+#' `get_group_constructor()` are convenience functions, calling `get_constructor()`. See [tidybayes::recover_types].
 #'
 #' @param x \code{\link{ideal_adaptor_stanfit}} object.
 #' @param variable Either "category" or "group". If set to `NULL` then a list of all constructors is
@@ -737,7 +736,7 @@ get_cue_levels.ideal_adaptor_stanfit <- function(x, indices = NULL) {
 #' @return A constructor function, a list of constructor functions, or `NULL`. If a specific constructor
 #' function is requested but not found, a warning is shown.
 #'
-#' @seealso \code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_staninput_variable_levels}}
+#' @seealso [tidybayes::recover_types], \code{\link{get_staninput_variable_levels}}
 #' @keywords TBD
 #' @rdname get_constructor
 #' @export

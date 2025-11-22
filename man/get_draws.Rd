@@ -33,18 +33,18 @@ get_draws(fit, ...)
 
 \item{groups}{Character vector of groups for which draws are to be returned. (default: all groups)}
 
-\item{which}{DEPRECATED. Use `groups` instead. Should parameters for the prior, posterior, or both be added? (default: `"posterior"`)}
+\item{which}{DEPRECATED. Use \code{groups} instead. Should parameters for the prior, posterior, or both be added? (default: \code{"posterior"})}
 
-\item{ndraws}{Number of random draws or `NULL` if all draws are to be returned. Only `draws` or `ndraws` should be non-zero. (default: `NULL`)}
+\item{ndraws}{Number of random draws or \code{NULL} if all draws are to be returned. Only \code{draws} or \code{ndraws} should be non-zero. (default: \code{NULL})}
 
-\item{untransform_cues}{DEPRECATED Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)}
+\item{untransform_cues}{DEPRECATED Should m_0 and S_0 be transformed back into the original cue space? (default: \code{FALSE})}
 
-\item{summarize}{Should the mean of the draws be returned instead of all of the draws? (default: `FALSE`)}
+\item{summarize}{Should the mean of the draws be returned instead of all of the draws? (default: \code{FALSE})}
 
-\item{wide}{Should all parameters be returned in one row? (default: `FALSE`)}
+\item{wide}{Should all parameters be returned in one row? (default: \code{FALSE})}
 
 \item{nest}{Should the category mean vectors and scatter matrices be nested into one cell each, or should each element
-be stored in a separate cell? (default: `TRUE`)}
+be stored in a separate cell? (default: \code{TRUE})}
 
 \item{seed}{A seed to use when subsampling draws (i.e. when ndraws is not NULL).}
 }
@@ -61,12 +61,12 @@ is \code{S / (nu - D - 1)}, where \code{D} is the dimension of the multivariate 
 }
 \description{
 Get MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) as a tibble. Both wide
-(`wide=TRUE`) or long format (`wide=FALSE`) can be chosen as output. By default all post-warmup draws are
-returned, but if `summarize=TRUE` then just the mean of each parameter is returned instead.
+(\code{wide=TRUE}) or long format (\code{wide=FALSE}) can be chosen as output. By default all post-warmup draws are
+returned, but if \code{summarize=TRUE} then just the mean of each parameter is returned instead.
 }
 \details{
 By default, the category means and scatter matrices are nested, rather than each of their elements being
-stored separately (`nest=TRUE`).
+stored separately (\code{nest=TRUE}).
 }
 \references{
 \insertRef{murphy2012}{MVBeliefUpdatr}

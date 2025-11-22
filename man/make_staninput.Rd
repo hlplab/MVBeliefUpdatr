@@ -21,10 +21,10 @@ make_staninput(
 )
 }
 \arguments{
-\item{exposure}{`tibble` or `data.frame` with the exposure data. Each row should be an observation of a category,
+\item{exposure}{\code{tibble} or \code{data.frame} with the exposure data. Each row should be an observation of a category,
 and contain information about the category label, the cue values of the observation, and optionally grouping variables.}
 
-\item{test}{`tibble` or `data.frame` with the test data. Each row should be an observation, and contain information
+\item{test}{\code{tibble} or \code{data.frame} with the test data. Each row should be an observation, and contain information
 about the cue values of the test stimulus and the participant's response.}
 
 \item{cues}{Names of columns with cue values. Must exist in both exposure and test data.}
@@ -59,9 +59,9 @@ interpretation of the model. See \code{\link{control_staninput}} for details.}
 \value{
 A list consisting of:
 \itemize{
-  \item{`data`: }{A data.frame with the exposure and test data after exclusion of NAs and other checks.}
-  \item{`staninput`: }{A named list of variables and values to be handed to Stan.}
-  \item{`transform_information`: }{A list with information about the transformation that was applied to the data.}
+\item{\code{data}: }{A data.frame with the exposure and test data after exclusion of NAs and other checks.}
+\item{\code{staninput}: }{A named list of variables and values to be handed to Stan.}
+\item{\code{transform_information}: }{A list with information about the transformation that was applied to the data.}
 }
 }
 \description{

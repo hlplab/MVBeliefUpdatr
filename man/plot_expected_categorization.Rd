@@ -34,45 +34,45 @@ plot_expected_categorization(model, ...)
 \item{model}{\code{\link{ideal_adaptor_stanfit}} object.}
 
 \item{data.test}{Optionally, a \code{tibble} or \code{data.frame} with test data.
-If `NULL` the input will be extracted from fit. (default: `NULL`).}
+If \code{NULL} the input will be extracted from fit. (default: \code{NULL}).}
 
 \item{groups}{Character vector of groups to be plotted. Typically, the levels of these factors
 are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
-\code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+\link[tidybayes:recover_types]{tidybayes::recover_types} on the stanfit object to add or change these levels later.
 (default: all categories/groups will be plotted)}
 
-\item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned.
-(default: `NULL`)}
+\item{ndraws}{Number of draws to plot (or use to calculate the CIs), or \code{NULL} if all draws are to be returned.
+(default: \code{NULL})}
 
-\item{target_category}{The index of the category for which categorization should be shown. (default: `1`)}
+\item{target_category}{The index of the category for which categorization should be shown. (default: \code{1})}
 
-\item{confidence.intervals}{The two confidence intervals that should be plotted (using `geom_ribbon`) around the mean.
-(default: `c(.66, .95)`)}
+\item{confidence.intervals}{The two confidence intervals that should be plotted (using \code{geom_ribbon}) around the mean.
+(default: \code{c(.66, .95)})}
 
-\item{summarize}{Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
-unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)}
+\item{summarize}{Should one categorization function (optionally with CIs) be plotted (\code{TRUE}) or should separate
+unique categorization function be plotted for each MCMC draw (\code{FALSE})? (default: \code{TRUE})}
 
-\item{panel.group}{Should the groups be plotted in separate panels? (default: `FALSE`)}
+\item{panel.group}{Should the groups be plotted in separate panels? (default: \code{FALSE})}
 
-\item{group.colors, group.shapes, group.linetypes}{Vector of colors, shapes, and linetypes of same length as `groups` or `NULL` to use defaults.}
+\item{group.colors, group.shapes, group.linetypes}{Vector of colors, shapes, and linetypes of same length as \code{groups} or \code{NULL} to use defaults.}
 
-\item{category.colors}{Vector of colors and linetypes of same length as `categories` or `NULL` to use defaults. Only
-relevant when `plot_in_cue_space = TRUE`.}
+\item{category.colors}{Vector of colors and linetypes of same length as \code{categories} or \code{NULL} to use defaults. Only
+relevant when \code{plot_in_cue_space = TRUE}.}
 
 \item{all_test_locations}{Should predictions be shown for all combinations of test locations and group, or should only
-combinations be shown that actually occurred in the data? (default: `FALSE`)}
+combinations be shown that actually occurred in the data? (default: \code{FALSE})}
 
 \item{plot_in_cue_space}{Currently only available if the model has one or two cues. Should predictions be plotted in the cue space?
-If not, test tokens are treated as factors and sorted along the x-axis based on `sort_by`. (default: `TRUE`)}
+If not, test tokens are treated as factors and sorted along the x-axis based on \code{sort_by}. (default: \code{TRUE})}
 
-\item{plot_test_data}{Should the test data be plotted? If `plot_in_cue_space = TRUE`, then test data will be shown as points
-on top of the raster. If not, then pointranges will be shown. (default: `TRUE`)}
+\item{plot_test_data}{Should the test data be plotted? If \code{plot_in_cue_space = TRUE}, then test data will be shown as points
+on top of the raster. If not, then pointranges will be shown. (default: \code{TRUE})}
 
 \item{sort_by}{Which group, if any, should the x-axis be sorted by (in increasing order of posterior probability
-from left to right). Set to 0 for sorting by prior (default). Set to `NULL` if no sorting is desired. (default: `"prior"`)}
+from left to right). Set to 0 for sorting by prior (default). Set to \code{NULL} if no sorting is desired. (default: \code{"prior"})}
 
 \item{untransform_cues}{DEPRECATED. Should the cues be untransformed before plotting? This should only have visual consequences
-if `plot_in_cue_space = T`. (default: `FALSE`)}
+if \code{plot_in_cue_space = T}. (default: \code{FALSE})}
 }
 \value{
 ggplot object.
@@ -87,9 +87,9 @@ phonetic tuning studies.
 Tokens are sorted based on the increasing probability of a \code{target_category} response for the condition
 (\code{group}, e.g., prior or a specific exposure group) specified in \code{sort_by}. By default both the mean
 categorization and confidence intervals are plotted.
-If `summarize=TRUE`, the function marginalizes over all posterior samples. The number of samples
+If \code{summarize=TRUE}, the function marginalizes over all posterior samples. The number of samples
 is determined by ndraws. If ndraws is NULL, all samples are used. Otherwise ndraws random
-samples will be used. If `summarize=FALSE`, separate categorization plots for all ndraws
+samples will be used. If \code{summarize=FALSE}, separate categorization plots for all ndraws
 individual samples will be plotted in separate panels.
 }
 \seealso{

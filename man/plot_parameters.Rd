@@ -24,19 +24,19 @@ plot_parameters(fit, ...)
 
 \item{categories, groups, cues}{Character vector of categories/groups/cues to be plotted. Typically, the levels of these factors
 are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
-\code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+\link[tidybayes:recover_types]{tidybayes::recover_types} on the stanfit object to add or change these levels later.
 (default: all categories/groups/cues will be plotted)}
 
-\item{ndraws}{Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)}
+\item{ndraws}{Number of draws to plot (or use to calculate the CIs), or \code{NULL} if all draws are to be returned. (default: \code{NULL})}
 
-\item{untransform_cues}{DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)}
+\item{untransform_cues}{DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: \code{FALSE})}
 
 \item{panel_scaling}{Should the relative scaling be calculated separately for each panel? If not the scaling is calculated
-globally. (default: `FALSE`)}
+globally. (default: \code{FALSE})}
 
-\item{group.colors}{Vector of fill colors of same length as group.ids or `NULL` to use defaults. (default: `NULL`)}
+\item{group.colors}{Vector of fill colors of same length as group.ids or \code{NULL} to use defaults. (default: \code{NULL})}
 
-\item{which}{Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)}
+\item{which}{Should parameters for the prior, posterior, or both be plotted? (default: \code{"both"})}
 }
 \value{
 ggplot object.

@@ -12,7 +12,7 @@ get_staninput(x, ...)
 \arguments{
 \item{x}{\code{\link{ideal_adaptor_stanfit}} object.}
 
-\item{which}{Should "transformed" or "untransformed" staninput be returned or "both"? (default: `"untransformed"`)}
+\item{which}{Should "transformed" or "untransformed" staninput be returned or "both"? (default: \code{"untransformed"})}
 }
 \value{
 A list with element names and structures determined by the type of stanfit model.

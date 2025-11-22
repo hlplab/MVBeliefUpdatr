@@ -9,7 +9,7 @@ ss(x, center = TRUE)
 \arguments{
 \item{x}{A matrix of observations, with each row being a vector observation.}
 
-\item{centered}{Should the centered sum-of-squares be returned (`TRUE`) or the uncentered (`FALSE`)? (default: `TRUE`)}
+\item{centered}{Should the centered sum-of-squares be returned (\code{TRUE}) or the uncentered (\code{FALSE})? (default: \code{TRUE})}
 }
 \value{
 A square matrix.

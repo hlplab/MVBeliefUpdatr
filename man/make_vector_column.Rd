@@ -7,13 +7,13 @@
 make_vector_column(data, cols, vector_col, .keep = "all")
 }
 \arguments{
-\item{data}{`tibble` or `data.frame`.}
+\item{data}{\code{tibble} or \code{data.frame}.}
 
 \item{cols}{Vector of characters with names of variables to combine.}
 
 \item{vector_col}{Name of new column of vectors.}
 
-\item{.keep}{See \code{\link{dplyr::mutate}}.}
+\item{.keep}{See \link[dplyr:mutate]{dplyr::mutate}.}
 }
 \value{
 Same as \code{data}.

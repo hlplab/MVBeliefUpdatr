@@ -40,24 +40,24 @@ update_NIW_belief_by_one_observation(
 
 \item{x_mean}{The cue mean of observations.}
 
-\item{x_SS}{*Centered* The sum of squares matrix of observations.}
+\item{x_SS}{\emph{Centered} The sum of squares matrix of observations.}
 
 \item{x_N}{Number of observations that went into the mean and sum of squares matrix.}
 
 \item{noise_treatment}{Determines whether perceptual noise is considered during categorization, and how.
 Can be "no_noise", "sample", or "marginalize". If "no_noise", no noise will be applied to the input,
 and no noise will be assumed during categorization. If "marginalize", average noise (i.e., no noise)
-will be added to the stimulus, and `Sigma_noise` is added to Sigma when calculating the likelihood.
-This simulates the expected consequences for perceptual noise on categorization *in the limit*, i.e,
+will be added to the stimulus, and \code{Sigma_noise} is added to Sigma when calculating the likelihood.
+This simulates the expected consequences for perceptual noise on categorization \emph{in the limit}, i.e,
 if the input was categorized infinitely many times. If "sample", then noise is sampled and applied to
-the input, and `Sigma_noise` is added to Sigma when calculating the likelihood. This simulates the
-consequence of perceptual noise *on a particular observation*. If "sample" or "marginalize" are chosen,
-`Sigma_noise` must be a covariance matrix of appropriate dimensions. (default: "no_noise" if Sigma_noise
+the input, and \code{Sigma_noise} is added to Sigma when calculating the likelihood. This simulates the
+consequence of perceptual noise \emph{on a particular observation}. If "sample" or "marginalize" are chosen,
+\code{Sigma_noise} must be a covariance matrix of appropriate dimensions. (default: "no_noise" if Sigma_noise
 is NULL, "marginalize" otherwise).}
 
 \item{lapse_treatment}{Determines whether attentional lapses can occur during which no updating occurs.
 Can be "no_lapses", "sample", or "marginalize". If "no_lapses", no lapses occur (even if the ideal adaptor specifies
-a non-zero `lapse_rate`), and all observations lead to updating. If "sample" or "marginalize", the lapse rate from '
+a non-zero \code{lapse_rate}), and all observations lead to updating. If "sample" or "marginalize", the lapse rate from '
 the ideal adaptor will be used. For "sample", sampling determines for each observation whether it was a lapse or not.
 If an observation was a lapse no updating occurs. For "marginalize", 1 - lapse_rate is the proportion of observations
 that are assumed to be lapsing trials (default: "no_lapses" for NIW_beliefs; "sample" for NIW_ideal_adaptors)}
@@ -85,46 +85,46 @@ A number of different updating schemes are supported, including supervised updat
 unsupervised updating based on unlabeled data. Except for "nolabel-sampling", the unsupervised updating rules
 were originally presented in \insertCite{yan:jaeger2018;textual}{MVBeliefUpdatr}.
 \itemize{
-  \item "no-updating" doesn't update the prior. Combined with keep_history = T, this allows the creation of baseline
-  against which to compare the updated beliefs. This option is likely most useful when used as part of a call to
-  \code{\link{update_NIW_beliefs_incrementally}}.
-  \item "label-certain" assumes that the label is provided and known to the observer with 100% certainty, resulting
-  in fully Bayesian supervised belief-updating. This update method is \emph{not order sensitive}. Under this update
-  method, the order of a batch of observations does not affect the final posterior belief after all observations
-  have been made (it does, of course, effect the beliefs held in the interim). This reflects the "exchangeability"
-  assumption of Bayesian belief-updating under the assumption that the observations are drawn from a stationary
-  random process.
-  \item "nolabel-criterion" implements a winner-takes-all update based on the prior beliefs. The
-  posterior probability of all categories under the prior is calculated, and only the category with the
-  highest posterior probability is updated (see decision_rule = "criterion" in \code{\link{get_categorization_from_NIW_ideal_adaptor}}).
-  The update for this category proceed the same ways as under the "label-certain" method. method "nolabel-criterion" is
-  thus \emph{order sensitive}, but deterministic (i.e., it yields the same result on each repeated run), provided
-  there is no noise (specifically, no noise = "sample").
-  \item "nolabel-sampling" implements another winner-takes-all update based on the prior beliefs. The
-  posterior probability of all categories under the prior is calculated. Then a single category is \emph{sampled}
-  based on this posterior (see decision_rule = "sampling" in \code{\link{get_categorization_from_NIW_ideal_adaptor}}), and only this
-  sampled category is  updated with the observation.
-  Like "nolabel-criterion", this updating method is \emph{order sensitive}. Unlike "nolabel-criterion", this method had a
-  random element and thus does \emph{not replicate the same result on each run}.
-  \item "nolabel-proportional" captures the uncertainty about the category label (and is this sense fully Bayesian). The
-  posterior probability of all categories under the prior is calculated (see decision_rule = "proportional" in
-  \code{\link{get_categorization_from_NIW_ideal_adaptor}}). The input is then distributed across all categories
-  based on their posterior probability under the prior beliefs. That is, \emph{all categories are updated}, but to different
-  degrees. Like "nolabel-criterion" and "nolabel-sampling", this updating method is \emph{order sensitive}. Like "nolabel-criterion",
-  it is \emph{deterministic}.
-  \item "nolabel-uniform" implements unsupervised updating under maximal \emph{uninformed} uncertainty. The input is attributed
-  to equal parts to all categories. Like all the "nolabel-*" methods, this updating method is \emph{order sensitive}. Like
-  "nolabel-criterion" and "nolabel-proportional, it is \emph{deterministic}. Unlike any of these methods, it completely ignores
-  the knowledge listeners have (i.e., the prior).
+\item "no-updating" doesn't update the prior. Combined with keep_history = T, this allows the creation of baseline
+against which to compare the updated beliefs. This option is likely most useful when used as part of a call to
+\code{\link{update_NIW_beliefs_incrementally}}.
+\item "label-certain" assumes that the label is provided and known to the observer with 100\% certainty, resulting
+in fully Bayesian supervised belief-updating. This update method is \emph{not order sensitive}. Under this update
+method, the order of a batch of observations does not affect the final posterior belief after all observations
+have been made (it does, of course, effect the beliefs held in the interim). This reflects the "exchangeability"
+assumption of Bayesian belief-updating under the assumption that the observations are drawn from a stationary
+random process.
+\item "nolabel-criterion" implements a winner-takes-all update based on the prior beliefs. The
+posterior probability of all categories under the prior is calculated, and only the category with the
+highest posterior probability is updated (see decision_rule = "criterion" in \code{\link{get_categorization_from_NIW_ideal_adaptor}}).
+The update for this category proceed the same ways as under the "label-certain" method. method "nolabel-criterion" is
+thus \emph{order sensitive}, but deterministic (i.e., it yields the same result on each repeated run), provided
+there is no noise (specifically, no noise = "sample").
+\item "nolabel-sampling" implements another winner-takes-all update based on the prior beliefs. The
+posterior probability of all categories under the prior is calculated. Then a single category is \emph{sampled}
+based on this posterior (see decision_rule = "sampling" in \code{\link{get_categorization_from_NIW_ideal_adaptor}}), and only this
+sampled category is  updated with the observation.
+Like "nolabel-criterion", this updating method is \emph{order sensitive}. Unlike "nolabel-criterion", this method had a
+random element and thus does \emph{not replicate the same result on each run}.
+\item "nolabel-proportional" captures the uncertainty about the category label (and is this sense fully Bayesian). The
+posterior probability of all categories under the prior is calculated (see decision_rule = "proportional" in
+\code{\link{get_categorization_from_NIW_ideal_adaptor}}). The input is then distributed across all categories
+based on their posterior probability under the prior beliefs. That is, \emph{all categories are updated}, but to different
+degrees. Like "nolabel-criterion" and "nolabel-sampling", this updating method is \emph{order sensitive}. Like "nolabel-criterion",
+it is \emph{deterministic}.
+\item "nolabel-uniform" implements unsupervised updating under maximal \emph{uninformed} uncertainty. The input is attributed
+to equal parts to all categories. Like all the "nolabel-*" methods, this updating method is \emph{order sensitive}. Like
+"nolabel-criterion" and "nolabel-proportional, it is \emph{deterministic}. Unlike any of these methods, it completely ignores
+the knowledge listeners have (i.e., the prior).
 }
 \strong{Please consider the following important limitations of these functions:}
 \itemize{
-  \item the category priors---p(category)---are currently assumed to be uniform. This affects the categorization of the input
+\item the category priors---p(category)---are currently assumed to be uniform. This affects the categorization of the input
 based on the NIW prior and thus the way that the input observations are distributed across the categories during
 unsupervised updating.
-  \item the updating models introduced here treat the cue distributions of the different categories as \emph{independent} of
-  each other. That is, the updating does not consider knowledge about, for example, the covariance of the category means, although
-  there is evidence that listeners have knowledge of this covariance and draw on it during categorization and adaptation.
+\item the updating models introduced here treat the cue distributions of the different categories as \emph{independent} of
+each other. That is, the updating does not consider knowledge about, for example, the covariance of the category means, although
+there is evidence that listeners have knowledge of this covariance and draw on it during categorization and adaptation.
 }
 Please feel free to suggest additional features.
 }

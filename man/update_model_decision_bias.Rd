@@ -27,17 +27,17 @@ update_model_decision_bias_by_one_observation(
 \item{noise_treatment}{Determines whether perceptual noise is considered during categorization, and how.
 Can be "no_noise", "sample", or "marginalize". If "no_noise", no noise will be applied to the input,
 and no noise will be assumed during categorization. If "marginalize", average noise (i.e., no noise)
-will be added to the stimulus, and `Sigma_noise` is added to Sigma when calculating the likelihood.
-This simulates the expected consequences for perceptual noise on categorization *in the limit*, i.e,
+will be added to the stimulus, and \code{Sigma_noise} is added to Sigma when calculating the likelihood.
+This simulates the expected consequences for perceptual noise on categorization \emph{in the limit}, i.e,
 if the input was categorized infinitely many times. If "sample", then noise is sampled and applied to
-the input, and `Sigma_noise` is added to Sigma when calculating the likelihood. This simulates the
-consequence of perceptual noise *on a particular observation*. If "sample" or "marginalize" are chosen,
-`Sigma_noise` must be a covariance matrix of appropriate dimensions. (default: "no_noise" if Sigma_noise
+the input, and \code{Sigma_noise} is added to Sigma when calculating the likelihood. This simulates the
+consequence of perceptual noise \emph{on a particular observation}. If "sample" or "marginalize" are chosen,
+\code{Sigma_noise} must be a covariance matrix of appropriate dimensions. (default: "no_noise" if Sigma_noise
 is NULL, "marginalize" otherwise).}
 
 \item{lapse_treatment}{Determines whether attentional lapses can occur during which no updating occurs.
 Can be "no_lapses", "sample", or "marginalize". If "no_lapses", no lapses occur (even if the model specifies
-a non-zero `lapse_rate`), and all observations lead to updating. If "sample" or "marginalize", the lapse rate from '
+a non-zero \code{lapse_rate}), and all observations lead to updating. If "sample" or "marginalize", the lapse rate from '
 the model will be used. For "sample", sampling determines for each observation whether it was a lapse or not.
 If an observation was a lapse no updating occurs. For "marginalize", 1 - lapse_rate is the proportion of observations
 that are assumed to be lapsing trials (default: "no_lapses")}

@@ -35,20 +35,20 @@ matrix, or vector of length k.}
 \item{Sigma}{The category covariance matrix Sigma. Should be a square k x k matrix.}
 
 \item{Sigma_noise}{Optionally, a covariance matrix describing the perceptual noise to be applied while
-calculating the posterior predictive. (default: `NULL`)}
+calculating the posterior predictive. (default: \code{NULL})}
 
 \item{noise_treatment}{Determines whether perceptual noise is considered during categorization, and how.
 Can be "no_noise", "sample", or "marginalize". If "no_noise", no noise will be applied to the input,
 and no noise will be assumed during categorization. If "marginalize", average noise (i.e., no noise)
-will be added to the stimulus, and `Sigma_noise` is added to Sigma when calculating the likelihood.
-This simulates the expected consequences for perceptual noise on categorization *in the limit*, i.e,
+will be added to the stimulus, and \code{Sigma_noise} is added to Sigma when calculating the likelihood.
+This simulates the expected consequences for perceptual noise on categorization \emph{in the limit}, i.e,
 if the input was categorized infinitely many times. If "sample", then noise is sampled and applied to
-the input, and `Sigma_noise` is added to Sigma when calculating the likelihood. This simulates the
-consequence of perceptual noise *on a particular observation*. If "sample" or "marginalize" are chosen,
-`Sigma_noise` must be a covariance matrix of appropriate dimensions. (default: "no_noise" if Sigma_noise
+the input, and \code{Sigma_noise} is added to Sigma when calculating the likelihood. This simulates the
+consequence of perceptual noise \emph{on a particular observation}. If "sample" or "marginalize" are chosen,
+\code{Sigma_noise} must be a covariance matrix of appropriate dimensions. (default: "no_noise" if Sigma_noise
 is NULL, "marginalize" otherwise).}
 
-\item{log}{Should the log-transformed density be returned (`TRUE`)? (default: `TRUE`)}
+\item{log}{Should the log-transformed density be returned (\code{TRUE})? (default: \code{TRUE})}
 }
 \description{
 Get likelihood of observation(s) x given the MVG parameters mu and Sigma. This is the density of
