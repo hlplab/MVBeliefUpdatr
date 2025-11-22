@@ -4,17 +4,6 @@ get_current_versions <- function()
     rstan = utils::packageVersion("rstan"),
     stanHeaders = utils::packageVersion("StanHeaders"))
 
-# Placeholder functions since we're not using S4 classes
-hasSlot <- function(object, slot) {
-  slot_names <- slotNames(class(object))
-
-  if (length(slot_names) == 0) {
-    slot_names <- names(object)
-  }
-
-  slot %in% slot_names
-}
-
 
 # dim that returns length of vector for vector (not from brms)
 dim2 <- function(x) {

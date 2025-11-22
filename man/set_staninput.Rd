@@ -2,12 +2,16 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{set_staninput}
 \alias{set_staninput}
-\alias{set_staninput.ideal_adaptor_stanfit}
+\alias{set_staninput,ideal_adaptor_stanfit-method}
 \title{Set the input data from an ideal adaptor stanfit}
 \usage{
-set_staninput(x, ...)
+set_staninput(
+  x,
+  staninput,
+  which = c("untransformed", "transformed", "both")[3]
+)
 
-\method{set_staninput}{ideal_adaptor_stanfit}(
+\S4method{set_staninput}{ideal_adaptor_stanfit}(
   x,
   staninput,
   which = c("untransformed", "transformed", "both")[3]

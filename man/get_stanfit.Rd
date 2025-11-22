@@ -2,12 +2,12 @@
 % Please edit documentation in R/get-info-from-NIW-IA-stanfit.R
 \name{get_stanfit}
 \alias{get_stanfit}
-\alias{get_stanfit.ideal_adaptor_stanfit}
+\alias{get_stanfit,ideal_adaptor_stanfit-method}
 \title{Get the stanfit from an ideal adaptor stanfit}
 \usage{
 get_stanfit(x, ...)
 
-\method{get_stanfit}{ideal_adaptor_stanfit}(x)
+\S4method{get_stanfit}{ideal_adaptor_stanfit}(x)
 }
 \arguments{
 \item{x}{\code{\link{ideal_adaptor_stanfit}} object.}
