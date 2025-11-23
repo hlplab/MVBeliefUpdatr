@@ -8,7 +8,7 @@ NULL
 #' Symmetric log transform and function.
 #'
 #' Makes it possible to use log-stepped scales or coordinate systems even when negative values
-#' are included in the data. E.g., in [ggplot2::coord_transform], argument `x = symlog` applies a modified
+#' are included in the data. E.g., in [ggplot2::coord_trans], argument `x = symlog` applies a modified
 #' logarithm scale to the x-axis that handles negative values while maintaining
 #' continuity across zero:
 #'

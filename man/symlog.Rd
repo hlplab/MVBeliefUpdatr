@@ -14,7 +14,7 @@ symlog_trans()
 }
 \description{
 Makes it possible to use log-stepped scales or coordinate systems even when negative values
-are included in the data. E.g., in \link[ggplot2:coord_transform]{ggplot2::coord_transform}, argument \code{x = symlog} applies a modified
+are included in the data. E.g., in \link[ggplot2:coord_trans]{ggplot2::coord_trans}, argument \code{x = symlog} applies a modified
 logarithm scale to the x-axis that handles negative values while maintaining
 continuity across zero:
 }

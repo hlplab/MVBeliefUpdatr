@@ -109,7 +109,7 @@ plot_parameters.ideal_adaptor_stanfit <- function(
           seq(
             ceiling(symlog(min(x.limits))),
             floor(symlog(max(x.limits)))))) +
-      coord_transform(x = "symlog") +
+      coord_trans(x = "symlog") +
       facet_grid(.data$cue2 ~ .data$cue, scales = "free_x")) +
     theme(panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -129,7 +129,7 @@ plot_parameters.ideal_adaptor_stanfit <- function(
               ceiling(log10(min(x.limits))),
               floor(log10(max(x.limits)))))) +
         scale_y_discrete("", expand = expansion(mult = c(0 , 0.1))) +
-        coord_transform(x = "log10", xlim = x.limits) +  # lim = x.limits for now put back in since plots was empty without it.
+        coord_trans(x = "log10", xlim = x.limits) +  # lim = x.limits for now put back in since plots was empty without it.
         facet_grid(~ .data$key, scales = "free_x"))) +
     theme(panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
 
