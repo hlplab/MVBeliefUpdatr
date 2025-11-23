@@ -10,7 +10,7 @@ get_cue_labels_from_model(x, indices = NULL)
 \item{x}{A likelihood or model object.}
 
 \item{indeces}{A vector of indices that should be turned into the original cue labels corresponding to those
-indices, or `NULL` if all cue labels should be returned. (default: `NULL`)}
+indices, or \code{NULL} if all cue labels should be returned. (default: \code{NULL})}
 }
 \value{
 A character vector.

@@ -28,7 +28,7 @@ make_exemplar_model_from_data(
 \item{data}{The tibble or data.frame from which to construct the exemplar model.}
 
 \item{group}{Optionally, a vector of one or more grouping variables. If group is not NULL, one MVG or
-ideal observers will be derived for each level of \code{group}. (default: `NULL`)}
+ideal observers will be derived for each level of \code{group}. (default: \code{NULL})}
 
 \item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
 
@@ -36,21 +36,21 @@ ideal observers will be derived for each level of \code{group}. (default: `NULL`
 
 \item{sim_function}{Similarity function that is used to calculate exemplar-to-exemplar similarity. If NULL,
 defaults to \code{function(x, y, weights = w, distance_metric = 2, distance_decay_factor = 1)
-distance <- sum(weights * abs(x - y)^distance_metric)^(1/distance_metric); similarity <- exp(-distance^distance_decay_factor)},
+  distance <- sum(weights * abs(x - y)^distance_metric)^(1/distance_metric); similarity <- exp(-distance^distance_decay_factor)},
 where each cue's weight \code{w} is the inverse of the cues SD^distance_metric. Except for the setting of the
 weights, this general formula follows \insertCite{apfelbaum-mcmurray2015}{MVBeliefUpdatr}, who cite \insertCite{nosofsky1986}{MVBeliefUpdatr}.}
 
-\item{verbose}{If true provides more information. (default: `FALSE`)}
+\item{verbose}{If true provides more information. (default: \code{FALSE})}
 
 \item{prior}{Optionally specify a prior probability for each category (in each group). (default: a uniform
 prior over all categories).}
 
-\item{lapse_rate}{Optionally specify a lapse rate. (default: `NA`)}
+\item{lapse_rate}{Optionally specify a lapse rate. (default: \code{NA})}
 
-\item{lapse_bias}{Optionally specify a lapse bias. (default: `NA`)}
+\item{lapse_bias}{Optionally specify a lapse bias. (default: \code{NA})}
 
 \item{Sigma_noise}{Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This
-argument will be ignored if NULL. (default: `NULL`)}
+argument will be ignored if NULL. (default: \code{NULL})}
 }
 \value{
 A tibble that is an MVG or MVG ideal observer object.

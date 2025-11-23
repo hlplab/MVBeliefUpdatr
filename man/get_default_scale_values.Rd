@@ -13,13 +13,13 @@ get_default_shapes(var, levels)
 get_default_linetypes(var, levels)
 }
 \arguments{
-\item{var}{Variable for which default color/linetype is requested. Can be either `"category"` or
-`"group"`.}
+\item{var}{Variable for which default color/linetype is requested. Can be either \code{"category"} or
+\code{"group"}.}
 
 \item{levels}{Character vector of levels of the variable.}
 }
 \value{
-Character vector of color/linetype values in the order specified by `levels`.
+Character vector of color/linetype values in the order specified by \code{levels}.
 }
 \description{
 Get default colors, linetype, etc.

@@ -16,7 +16,7 @@ control_params(x, ...)
 
 \item{pars}{Optional names of the control parameters to be returned.
 If \code{NULL} (the default) all control parameters are returned.
-See \code{\link[rstan:stan]{stan}} for more details.}
+See \link[rstan:stan]{rstan::stan} for more details.}
 }
 \value{
 A named \code{list} with control parameter values.

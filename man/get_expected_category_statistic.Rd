@@ -32,8 +32,8 @@ returned. (default: all categories)}
 \item{groups}{Character vector with groups for which category statistics are to be returned.
 (default: all groups)}
 
-\item{statistic}{Which category statistic should be returned? `mu` for category mean or `Sigma` for category
-covariance matrix, or `c("mu", "Sigma")` for both. (default: both)}
+\item{statistic}{Which category statistic should be returned? \code{mu} for category mean or \code{Sigma} for category
+covariance matrix, or \code{c("mu", "Sigma")} for both. (default: both)}
 }
 \value{
 If just one group and category was requested, a vector (for the mean) or matrix (for the covariance

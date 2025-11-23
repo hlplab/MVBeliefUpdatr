@@ -22,14 +22,14 @@ is.MVG_ideal_observer(
 
 \item{category}{Name of the category variable. (default: "category")}
 
-\item{is.long}{Is this check assessing whether the ideal observer is in long format (`TRUE`) or wide format (`FALSE`)?
-(default: `TRUE`)}
+\item{is.long}{Is this check assessing whether the ideal observer is in long format (\code{TRUE}) or wide format (\code{FALSE})?
+(default: \code{TRUE})}
 
-\item{with.lapse}{Does this ideal observer have a lapse rate? (default: `FALSE`)}
+\item{with.lapse}{Does this ideal observer have a lapse rate? (default: \code{FALSE})}
 
-\item{with.lapse_bias}{Does this ideal observer have a lapse bias? (default: `FALSE`)}
+\item{with.lapse_bias}{Does this ideal observer have a lapse bias? (default: \code{FALSE})}
 
-\item{verbose}{Should verbose output be provided? (default: `TRUE`)}
+\item{verbose}{Should verbose output be provided? (default: \code{TRUE})}
 }
 \value{
 A logical.

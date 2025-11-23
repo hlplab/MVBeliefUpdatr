@@ -37,8 +37,8 @@ get_cue_levels(x, ...)
 \item{variable}{Either "category" or "group".}
 
 \item{indeces}{A vector of category or group indices that should be turned into the original
-category levels, or `NULL` if only the unique levels in their original order (as vector of characters)
-should be returned. (default: `NULL`)}
+category levels, or \code{NULL} if only the unique levels in their original order (as vector of characters)
+should be returned. (default: \code{NULL})}
 }
 \value{
 If no category or group indices are provided, the levels of the category/group are returned (in the
@@ -48,10 +48,10 @@ original order). Otherwise a vector of the same length as \code{indices}
 Checks if information is available about the original values and order of the factor levels
 for the category variable (for which beliefs about means and covariances are inferred) or
 group variable (e.g., subject or exposure group), respectively. If available,
-that information is returned. `get_category_levels()` and `get_group_levels()` are
-convenience functions, calling `get_staninput_variable_levels()`.
+that information is returned. \code{get_category_levels()} and \code{get_group_levels()} are
+convenience functions, calling \code{get_staninput_variable_levels()}.
 }
 \seealso{
-\code{\link[tidybayes]{recover_types}} from tidybayes, \code{\link{get_constructor}}
+\link[tidybayes:recover_types]{tidybayes::recover_types}, \code{\link{get_constructor}}
 }
 \keyword{TBD}

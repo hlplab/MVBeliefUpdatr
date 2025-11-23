@@ -25,7 +25,7 @@ get_aggregates_from_grouped_data_as_list_of_arrays(
 )
 }
 \arguments{
-\item{data}{`tibble` or `data.frame` with the data.}
+\item{data}{\code{tibble} or \code{data.frame} with the data.}
 
 \item{groups}{Character vector of column names that contain information about which observations form a group.
 These columns must factors.}
@@ -34,26 +34,26 @@ These columns must factors.}
 one column, but only one aggregate will be returned \emph{across} columns, i.e., the aggregate will be calculated for
 each unique group in the data.}
 
-\item{fill}{What value should be substituted for `groups` for which there is no data (see `...`)? (default: `NA`)}
+\item{fill}{What value should be substituted for \code{groups} for which there is no data (see \code{...})? (default: \code{NA})}
 
-\item{...}{A named list of aggregating functions of `cols` to calculate for each unique combination of grouping
-variables `groups` in `data`.}
+\item{...}{A named list of aggregating functions of \code{cols} to calculate for each unique combination of grouping
+variables \code{groups} in \code{data}.}
 }
 \value{
-A named list of length `...` (names are the names of the functions that have been computed). The list will
-  be sorted by the `group` variables (in the order they are presented), in ascending order of the levels of those
-  variables. The elements of the list will be lists.
-  Missing values---resulting from combinations of grouping variables for which there is no data---will be filled
-  with the value provided in `fill` and coerced into the same structure as all other outputs for that function
-  (e.g., if the function f results in a 2-element vector for all combinations of `groups` variables for which
-  there is data, then unobserved data results in a 2-element vector of `fill` values).
+A named list of length \code{...} (names are the names of the functions that have been computed). The list will
+be sorted by the \code{group} variables (in the order they are presented), in ascending order of the levels of those
+variables. The elements of the list will be lists.
+Missing values---resulting from combinations of grouping variables for which there is no data---will be filled
+with the value provided in \code{fill} and coerced into the same structure as all other outputs for that function
+(e.g., if the function f results in a 2-element vector for all combinations of \code{groups} variables for which
+there is data, then unobserved data results in a 2-element vector of \code{fill} values).
 }
 \description{
-Get aggregates from grouped data for any number aggregation functions specified in `...`. The columns specified in
-`cols` jointly (essentially as a matrix) form the input to the aggregation functions. Aggregates are obtained
-separately for each unique combinations values for the variables specified in the grouping variables `groups`
+Get aggregates from grouped data for any number aggregation functions specified in \code{...}. The columns specified in
+\code{cols} jointly (essentially as a matrix) form the input to the aggregation functions. Aggregates are obtained
+separately for each unique combinations values for the variables specified in the grouping variables \code{groups}
 (which must be factors). For combinations of the grouping variables for which there is no data, the value in
-`fill` will be substituted, repeated up to the necessary dimensionality (inferred from the other outputs of
+\code{fill} will be substituted, repeated up to the necessary dimensionality (inferred from the other outputs of
 the aggregation function).
 }
 \keyword{TBD}

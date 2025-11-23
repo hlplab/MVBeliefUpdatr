@@ -34,10 +34,10 @@ add_exposure_summary_to_1D_plot(data)
 add_exposure_summary_to_2D_plot(data, level = 0.95)
 }
 \arguments{
-\item{data}{A `tibble` or `data.frame`. For plotting points, this table must contain columns
-named in `cue.labels`. For ellipsis plots, the table must contain the columns `mean` and `cov`.}
+\item{data}{A \code{tibble} or \code{data.frame}. For plotting points, this table must contain columns
+named in \code{cue.labels}. For ellipsis plots, the table must contain the columns \code{mean} and \code{cov}.}
 
-\item{cue.labels}{Name of the columns in `data` that contain the cue values of the data to be
+\item{cue.labels}{Name of the columns in \code{data} that contain the cue values of the data to be
 plotted.}
 
 \item{level}{Level of probability mass for which ellipsis should be plotted (default: .95)}

@@ -30,10 +30,10 @@ infer_prior_beliefs(
 )
 }
 \arguments{
-\item{exposure}{`tibble` or `data.frame` with the exposure data. Each row should be an observation of a category,
+\item{exposure}{\code{tibble} or \code{data.frame} with the exposure data. Each row should be an observation of a category,
 and contain information about the category label, the cue values of the observation, and optionally grouping variables.}
 
-\item{test}{`tibble` or `data.frame` with the test data. Each row should be an observation, and contain information
+\item{test}{\code{tibble} or \code{data.frame} with the test data. Each row should be an observation, and contain information
 about the cue values of the test stimulus and the participant's response.}
 
 \item{cues}{Names of columns with cue values. Must exist in both exposure and test data.}
@@ -72,7 +72,7 @@ sampling progress is still printed. Set \code{refresh = 0} to turn this off
 as well. If using \code{backend = "rstan"} you can also set
 \code{open_progress = FALSE} to prevent opening additional progress bars.}
 
-\item{...}{Additional parameters are passed to \code{\link[rstan]{sampling}}.}
+\item{...}{Additional parameters are passed to \link[rstan:stanmodel-method-sampling]{rstan::sampling}.}
 }
 \description{
 Use \code{\link{infer_NIW_ideal_adaptor()}} instead, together with \code{\link{make_staninput_for_NIW_ideal_adaptor()}}.

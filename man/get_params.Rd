@@ -11,8 +11,8 @@ get_params(fit, original_pars = F)
 
 \item{original_pars}{Should the original parameter names used in the Stan code be returned?
 This includes parameters for which no samples were stored. Alternatively, only the
-(renamed) parameters for which samples were stored are returned. (default: `FALSE`)}
+(renamed) parameters for which samples were stored are returned. (default: \code{FALSE})}
 }
 \description{
-Get the names for all parameters in `fit`.
+Get the names for all parameters in \code{fit}.
 }

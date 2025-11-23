@@ -48,12 +48,12 @@
 #'   as well. If using \code{backend = "rstan"} you can also set
 #'   \code{open_progress = FALSE} to prevent opening additional progress bars.
 #' @param stan_model_args A \code{list} of further arguments passed to
-#'   \code{\link[rstan:stan_model]{rstan::stan_model}} for \code{backend =
+#'   [rstan::stan_model] for \code{backend =
 #'   "rstan"} or to \code{cmdstanr::cmdstan_model} for \code{backend =
 #'   "cmdstanr"}, which allows to change how models are compiled.
 #' @param stanmodel Name of stanmodel that should be used. Overrides any default selection.
 #' @param rename For internal use only.
-#' @param ... Additional parameters are passed to \code{\link[rstan]{sampling}}.
+#' @param ... Additional parameters are passed to [rstan::sampling].
 #'
 #' @return An object of class \code{ideal_adaptor_stanfit} with the fitted stan model.
 #'

@@ -14,7 +14,7 @@
 #' @slot backend The name of the backend used to fit the model.
 #' @slot stan_args Named list of additional control arguments that were passed
 #'   to the Stan backend directly. NOT YET USED
-#' @slot stanfit An object of class \code{\link[rstan:stanfit-class]{stanfit}}
+#' @slot stanfit An object of class [rstan::stanfit]
 #'   among others containing the posterior draws.
 #' @slot basis An object that contains a small subset of the Stan data
 #'   created at fitting time, which is needed to process new data correctly. NOT YET USED
@@ -260,7 +260,7 @@ is.ideal_adaptor_staninput <- function(x, verbose = FALSE) {
 
 #' Check whether a stanfit object contains samples
 #'
-#' @param x A \code{\link[rstan]{stanfit}} object.
+#' @param x A [rstan::stanfit] object.
 #'
 #' @return A logical.
 #'
@@ -315,7 +315,7 @@ file_refit_options <- function() {
 #' @param current_version Current version of relevant packages. (default: will be automatically
 #'  obtained from current packages).
 #' @param data New data to check consistency of factor level names. (default: \code{NULL}))
-#' @param staninput New Stan data (result of a call to \code{\link[standata.default]{standata}}).
+#' @param staninput New Stan data (result of a call to \code{\link{make_staninput}}).
 #'   Pass \code{NULL} to avoid this data check. (default: \code{NULL}))
 #' @param silent Logical. If \code{TRUE}, no messages will be given. (default: \code{FALSE}))
 #' @param verbose Logical. If \code{TRUE} detailed report of the differences

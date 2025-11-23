@@ -26,7 +26,7 @@ See \code{methods(class = "ideal_adaptor_stanfit")} for an overview of available
 \item{\code{stan_args}}{Named list of additional control arguments that were passed
 to the Stan backend directly. NOT YET USED}
 
-\item{\code{stanfit}}{An object of class \code{\link[rstan:stanfit-class]{stanfit}}
+\item{\code{stanfit}}{An object of class \link[rstan:stanfit-class]{rstan::stanfit}
 among others containing the posterior draws.}
 
 \item{\code{basis}}{An object that contains a small subset of the Stan data

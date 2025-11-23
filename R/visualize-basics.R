@@ -8,15 +8,15 @@ NULL
 #' Symmetric log transform and function.
 #'
 #' Makes it possible to use log-stepped scales or coordinate systems even when negative values
-#' are included in the data. E.g., in `coord_trans(x = "symlog")`. `symlog`` applies a modified
-#' logarithm scale to the specified or current axes that handles negative values while maintaining
+#' are included in the data. E.g., in [ggplot2::coord_transform], argument `x = symlog` applies a modified
+#' logarithm scale to the x-axis that handles negative values while maintaining
 #' continuity across zero:
 #'
-#' y = sign(x) * log10(1 + abs(x) / 10^C )
+#' x' = sign(x) * log10(1 + abs(x) / 10^C )
 #'
 #' where the scaling constant C determines the resolution of the data around zero. The smallest
 #' order of magnitude shown on either side of zero will be 10^ceil(C). If applies as a transform
-#' for a ggplot2 coordinate system, C is taken to be 0.
+#' for a `ggplot2` coordinate system, C is taken to be 0.
 #'
 #' Taken from https://www.mathworks.com/matlabcentral/fileexchange/57902-symlog.
 #'
@@ -53,14 +53,19 @@ get_default_colors <- function(var, levels) {
   assert_that(is.character(levels))
   n <- length(levels)
 
-  if (var == "category")
-    color <- scales::hue_pal()(n)
-  else {
+  if (var == "category") {
+    assert_that(n <= 12, msg = "Cannot provide default colors for more than 12 levels.")
+    color <- palette.colors(n, "Set 3")
+  } else {
     if ("prior" %in% levels) {
+      assert_that(n - 1 <= 36, msg = "Cannot provide default colors for more than 36 levels.")
       color <- c()
-      color[which(levels != "prior")] <- scales::brewer_pal(palette = "Set1")(n - 1)
+      color[which(levels != "prior")] <- palette.colors(n-1, "Polychrome 36")
       color[which(levels == "prior")] <- "darkgray"
-    } else color <- scales::brewer_pal(palette = "Set1")(n)
+    } else {
+      assert_that(n <= 36, msg = "Cannot provide default colors for more than 36 levels.")
+      color <- palette.colors(n, "Polychrome 36")
+    }
   }
 
   return(color)
@@ -309,8 +314,8 @@ facet_or_animate = function(p, facet_rows_by, facet_cols_by, facet_wrap_by, anim
 
 #' Plot pairwise cue correlation matrix
 #'
-#' Plots a n x n correlation matrix, using ggforce::facet_matrix, with univariate densities for each category on
-#' the diagonal, scatter plots in the lower triangle and 95% bivariate Gaussian ellipsoids on the upper diagonal.
+#' Plots a n x n correlation matrix, using [ggforce::facet_matrix], with univariate densities for each category on
+#' the diagonal, scatter plots in the lower triangle and 95\% bivariate Gaussian ellipsoids on the upper diagonal.
 #'
 #' @param data A `tibble` or `data.frame` that contains the `cues` and `category`.
 #' @param cues Variables in `data` -containing the cue values that are to be plotted.

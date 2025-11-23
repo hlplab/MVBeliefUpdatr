@@ -21,7 +21,7 @@ obtained from current packages).}
 
 \item{data}{New data to check consistency of factor level names. (default: \code{NULL}))}
 
-\item{staninput}{New Stan data (result of a call to \code{\link[standata.default]{standata}}).
+\item{staninput}{New Stan data (result of a call to \code{\link{make_staninput}}).
 Pass \code{NULL} to avoid this data check. (default: \code{NULL}))}
 
 \item{silent}{Logical. If \code{TRUE}, no messages will be given. (default: \code{FALSE}))}

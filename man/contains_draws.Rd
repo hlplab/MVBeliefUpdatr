@@ -13,7 +13,7 @@ contains_draws(x, ...)
 \method{contains_draws}{ideal_adaptor_stanfit}(x)
 }
 \arguments{
-\item{x}{A \code{\link[rstan]{stanfit}} object.}
+\item{x}{A \link[rstan:stanfit-class]{rstan::stanfit} object.}
 }
 \value{
 A logical.

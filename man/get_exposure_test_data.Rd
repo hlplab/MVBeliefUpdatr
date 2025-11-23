@@ -38,22 +38,22 @@ get_test_data(x, ...)
 
 \item{groups}{Character vector of groups for which test data is requested. Typically, the levels of these factors
 are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
-\code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+\link[tidybayes:recover_types]{tidybayes::recover_types} on the stanfit object to add or change these levels later.
 (default: all categories/groups will be selected)}
 
 \item{.rename_to_MVB_default}{Should the data columns be renamed to the default names used internally in
-`MVBeliefUpdatr`? his option is included primarily for internal use. (default: `FALSE`)}
+\code{MVBeliefUpdatr}? his option is included primarily for internal use. (default: \code{FALSE})}
 
 \item{.from_staninput}{Should the data be extracted from the staninput (rather than data) object stored in the
 stanfit object? This returns the data in a somewhat different format. This option is included primarily for
-internal use. (default: `FALSE`)}
+internal use. (default: \code{FALSE})}
 }
 \value{
 A \code{tibble} in which each row is a test token. Columns include the cues
-  and the response counts (one column per category) for all test tokens and all groups.
+and the response counts (one column per category) for all test tokens and all groups.
 }
 \description{
-Returns the exposure and/or test data used during the creation of the \code{\link[rstan]{stanfit}}.
+Returns the exposure and/or test data used during the creation of the \link[rstan:stanfit-class]{rstan::stanfit}.
 object.
 }
 \seealso{

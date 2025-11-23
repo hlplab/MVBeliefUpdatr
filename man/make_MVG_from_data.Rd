@@ -54,14 +54,14 @@ and covariance matrix of the cues for each category and group from the data. No 
 overfitting are implemented, though it is recommended that such methods are applied.
 }
 \details{
-Alternative approaches include the use of `brms::brm()` to fit a multivariate Normal model to the data. While this approach
+Alternative approaches include the use of \code{brms::brm()} to fit a multivariate Normal model to the data. While this approach
 allows fitting of both the means and variances of each category (including for hierarchically organized grouped data), it
 currently does not provide a way to model category-specific correlations (or covariances) between cues. Instead, the
-approach implemented in `brms` only models correlation at the population-level (residual correlations).
+approach implemented in \code{brms} only models correlation at the population-level (residual correlations).
 
-Yet another alternative would be to write a separate `Stan` program specifically for this purpose. However, while this is
+Yet another alternative would be to write a separate \code{Stan} program specifically for this purpose. However, while this is
 relatively straightforward for data from a single talker, a hierarchical model for grouped data essentially requires an
-extension of the multivariate model approach implemented in `brms` and described in the preceding paragraph.
+extension of the multivariate model approach implemented in \code{brms} and described in the preceding paragraph.
 }
 \seealso{
 TBD

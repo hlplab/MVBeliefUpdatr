@@ -11,7 +11,7 @@ is.exemplar_model(x, group = NULL, verbose = F, tolerance = 1e-05)
 
 \item{group}{Name of one or more group variables, each unique combination of which describes an exemplar model. (default: NULL)}
 
-\item{verbose}{Should verbose output be provided? (default: `TRUE`)}
+\item{verbose}{Should verbose output be provided? (default: \code{TRUE})}
 
 \item{category}{Name of the category variable. (default: "category")}
 }

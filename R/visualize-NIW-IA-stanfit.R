@@ -21,7 +21,7 @@ NULL
 #' @param model An ideal adaptor stanfit object.
 #' @param categories,groups,cues Character vector of categories/groups/cues to be plotted. Typically, the levels of these factors
 #' are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
-#' \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+#' [tidybayes::recover_types] on the stanfit object to add or change these levels later.
 #' (default: all categories/groups/cues will be plotted)
 #' @param which Should parameters for the prior, posterior, or both be plotted? (default: `"both"`)
 #' @param ndraws Number of draws to plot (or use to calculate the CIs), or `NULL` if all draws are to be returned. (default: `NULL`)
@@ -109,7 +109,7 @@ plot_parameters.ideal_adaptor_stanfit <- function(
           seq(
             ceiling(symlog(min(x.limits))),
             floor(symlog(max(x.limits)))))) +
-      coord_trans(x = "symlog") +
+      coord_transform(x = "symlog") +
       facet_grid(.data$cue2 ~ .data$cue, scales = "free_x")) +
     theme(panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -129,7 +129,7 @@ plot_parameters.ideal_adaptor_stanfit <- function(
               ceiling(log10(min(x.limits))),
               floor(log10(max(x.limits)))))) +
         scale_y_discrete("", expand = expansion(mult = c(0 , 0.1))) +
-        coord_trans(x = "log10", xlim = x.limits) +  # lim = x.limits for now put back in since plots was empty without it.
+        coord_transform(x = "log10", xlim = x.limits) +  # lim = x.limits for now put back in since plots was empty without it.
         facet_grid(~ .data$key, scales = "free_x"))) +
     theme(panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -192,7 +192,7 @@ plot_parameters.ideal_adaptor_stanfit <- function(
 #'
 #' @details
 #' Typically, the categories, groups, and cues are automatically added to the fit during the creation of the fit. If necessary,
-#' however, it is possible to use \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+#' however, it is possible to use [tidybayes::recover_types] on the stanfit object to add or change these levels later.
 #'
 #'
 #' @seealso TBD
@@ -318,7 +318,7 @@ plot_parameter_correlations.ideal_adaptor_stanfit <- function(
 #'   If `NULL` the input will be extracted from fit. (default: `NULL`).
 #' @param groups Character vector of groups to be plotted. Typically, the levels of these factors
 #'   are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
-#'   \code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+#'   [tidybayes::recover_types] on the stanfit object to add or change these levels later.
 #'   (default: all categories/groups will be plotted)
 #' @param summarize Should one categorization function (optionally with CIs) be plotted (`TRUE`) or should separate
 #'   unique categorization function be plotted for each MCMC draw (`FALSE`)? (default: `TRUE`)

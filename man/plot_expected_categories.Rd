@@ -134,60 +134,60 @@ plot_expected_categories_density2D(model, ...)
 
 \item{...}{additional arguments to geom_line.}
 
-\item{type}{Either `"contour"` or `"density"`, specifying the type of plot. Note that the contour plot is *much*
+\item{type}{Either \code{"contour"} or \code{"density"}, specifying the type of plot. Note that the contour plot is \emph{much}
 faster. It simply gets the expected values of \code{mu} (based on the NIW parameter \code{m}) and \code{Sigma}
 (based on the NIW parameters \code{S} and \code{nu}) at each MCMC draw, and then averages over
 all MCMC draws. The plotted categories represent those means of the expected \code{mu} and \code{Sigma}. The
 density plot instead calculates the posterior predictive for each MCMC draw (i.e, the multivariate Student-T
 density based on the NIW parameters \code{m, S, kappa, nu}), and then averages those densities. Since this is
-done for *all* points defined by the data.grid this can be rather computationally expensive and slow.}
+done for \emph{all} points defined by the data.grid this can be rather computationally expensive and slow.}
 
 \item{x}{An \code{\link{NIW_belief}} or \code{\link{NIW_beliefs}} object.}
 
 \item{levels}{Levels of the confidence ellipses. (default: .5, .66, .8, .9., and .95)}
 
-\item{data.exposure}{Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)}
+\item{data.exposure}{Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: \code{NULL})}
 
-\item{data.test}{Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)}
+\item{data.test}{Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: \code{NULL})}
 
 \item{facet_rows_by, facet_cols_by, facet_wrap_by, animate_by}{Which group variables, if any, should be used for faceting and/or
-animation? (defaults: `NULL`)}
+animation? (defaults: \code{NULL})}
 
-\item{animation_follow}{Should the animation follow the data (zoom in and out)? (default: `FALSE`)}
+\item{animation_follow}{Should the animation follow the data (zoom in and out)? (default: \code{FALSE})}
 
-\item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)}
+\item{category.ids}{Vector of category IDs to be plotted or leave \code{NULL} to plot all groups. (default: \code{NULL})}
 
-\item{category.labels}{Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)}
+\item{category.labels}{Vector of group labels of same length as \code{category.ids} or \code{NULL} to use defaults. (default: \code{NULL})}
 
-\item{category.colors}{Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)}
+\item{category.colors}{Vector of colors of same length as category.ids or \code{NULL} to use defaults. (default: \code{NULL})}
 
 \item{categories, groups, cues}{Character vector of categories, groups, and cues to be plotted.
 (default: all categories, groups, and cues in the model will be plotted)}
 
-\item{plot.test, plot.exposure}{Should the test and/or exposure stimuli be plotted? (default: `TRUE` for `plot.test`,
-`FALSE` for `plot.exposure`) The test items are plotted as black points. The exposure mean is plotted as point,
+\item{plot.test, plot.exposure}{Should the test and/or exposure stimuli be plotted? (default: \code{TRUE} for \code{plot.test},
+\code{FALSE} for \code{plot.exposure}) The test items are plotted as black points. The exposure mean is plotted as point,
 and the .95 interval of cue distributions during exposure are plotted as dashed ellipse in the same color as the
 expected categories.}
 
 \item{annotate_inferred_category_means}{Character vector indicating whether the location and value of the mean be
-indicated through data rugs (`"rug"`) and/or text labels (`"text"`)? Set to NULL to ignore. (default: `c("rug", "text")`)}
+indicated through data rugs (\code{"rug"}) and/or text labels (\code{"text"})? Set to NULL to ignore. (default: \code{c("rug", "text")})}
 
-\item{untransform_cues}{DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: `FALSE`)}
+\item{untransform_cues}{DEPRECATED. Should m_0 and S_0 be transformed back into the original cue space? (default: \code{FALSE})}
 
 \item{xlim, ylim}{Limits for the x- and y-axis.}
 
-\item{category.linetypes}{Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
+\item{category.linetypes}{Vector of linetypes of same length as category.ids or \code{NULL} to use defaults. (default: \code{NULL})
 Currently being ignored.}
 
-\item{ndraws}{Number of draws from posterior to use for plot, or `NULL` if all draws are to be returned. (default: `NULL`)}
+\item{ndraws}{Number of draws from posterior to use for plot, or \code{NULL} if all draws are to be returned. (default: \code{NULL})}
 
 \item{resolution}{For density plots. How many steps along x and y should be calculated? Note that computational
 complexity increases quadratically with resolution. (default: 25)}
 
-\item{data.grid.xlim, data.grid.ylim, data.grid.resolution}{Used only if `type` is `"density"`. Limits for x- and y-axis as
+\item{data.grid.xlim, data.grid.ylim, data.grid.resolution}{Used only if \code{type} is \code{"density"}. Limits for x- and y-axis as
 well as resolution of the data.grid, defining the range over which the posterior predictive (multivariate Student-T density)
-is calculated. Note that the number of densities to calculate is a *quadratic* function of `data.grid.resolution`. The default
-for `data.grid.resolution` is 10, corresponding to 100 densities to be calculated for each MCMC draw.}
+is calculated. Note that the number of densities to calculate is a \emph{quadratic} function of \code{data.grid.resolution}. The default
+for \code{data.grid.resolution} is 10, corresponding to 100 densities to be calculated for each MCMC draw.}
 }
 \value{
 ggplot object.
@@ -199,7 +199,7 @@ ggplot object.
 \description{
 Plot bivariate Gaussian categories expected given the parameters inferred by incremental Bayesian belief-
 updating (IBBU) for an ideal adaptor. Specifically, the categories are derived by marginalizing over the uncertainty represented
-by the posterior MCMC samples. Two methods are available (specified by `type`), which differ in their
+by the posterior MCMC samples. Two methods are available (specified by \code{type}), which differ in their
 computational demands and speed.
 
 Plot bivariate Gaussian categories expected given NIW belief(s). One NIW belief describes the uncertainty about the
@@ -214,7 +214,7 @@ scalars \insertCite{@see @murphy2012 p. 136}{MVBeliefUpdatr}.
 \details{
 Typically, the categories, groups, and cues
 are automatically added to the fit during the creation of the fit. If necessary, however, it is possible to use
-\code{\link[tidybayes]{recover_types}} on the stanfit object to add or change these levels later.
+\link[tidybayes:recover_types]{tidybayes::recover_types} on the stanfit object to add or change these levels later.
 
 It is possible to hand more than one NIW belief to this function, and to facet or animate by variables that uniquely
 identify the different beliefs. For example, one can plot

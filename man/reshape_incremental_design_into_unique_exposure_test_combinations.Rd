@@ -30,13 +30,13 @@ incremental exposure and test blocks. Must be a factor with the levels indicatin
 \item{join_adjacent_test_blocks}{Logical indicating whether adjacent test blocks without intervening
 exposure blocks should be joined into a single test block. This will speed up \code{\link{fit_ideal_adaptor}}
 since there will be fewer conditions to iterate over but also means that the default plotting functions
-won't be able to plot the results of the different test blocks separately. (default: `FALSE`)}
+won't be able to plot the results of the different test blocks separately. (default: \code{FALSE})}
 
-\item{verbose}{Should verbose output be provided? (default: `FALSE`)}
+\item{verbose}{Should verbose output be provided? (default: \code{FALSE})}
 }
 \value{
 A data frame or tibble in long format with a new column "ExposureGroup" that contains a unique
-  label for each unique combination of `group` and `block`.
+label for each unique combination of \code{group} and \code{block}.
 }
 \description{
 Takes \code{data.frame} or \code{tibble} that contains the exposure and test data from an incremental
@@ -44,6 +44,6 @@ exposure-test design in long format, and prepares it for input to the \code{\lin
 Stan programs. This is done by pretending that each incremental test block (and its preceding exposure)
 constitute a separate between-participant condition. Note that this does not capture the dependency
 between test responses of participants in the same between-participant conditions, but such dependencies
-are not modeled by current `MVBeliefUpdatr` Stan programs anyway (which do not include random effects by
+are not modeled by current \code{MVBeliefUpdatr} Stan programs anyway (which do not include random effects by
 participants).
 }

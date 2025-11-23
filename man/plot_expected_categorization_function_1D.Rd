@@ -30,9 +30,9 @@ plot_expected_categorization_function_1D(
 \arguments{
 \item{x}{An \code{\link{NIW_belief}} or \code{\link{NIW_beliefs}} object.}
 
-\item{data.exposure}{Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: `NULL`)}
+\item{data.exposure}{Optional \code{tibble} or \code{data.frame} that contains exposure data to be plotted. (default: \code{NULL})}
 
-\item{data.test}{Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: `NULL`)}
+\item{data.test}{Optional \code{tibble} or \code{data.frame} that contains test data to be plotted. (default: \code{NULL})}
 
 \item{noise_treatment}{Should the consequences of perceptual noise be included in the categorization function
 ("marginalize") or not ("no_noise")? (default: "marginalize")}
@@ -40,25 +40,25 @@ plot_expected_categorization_function_1D(
 \item{lapse_treatment}{Should the consequences of attentional lapses be included in the categorization function
 ("marginalize") or not ("no_lapses")? (default: "marginalize")}
 
-\item{target_category}{The index of the category for which categorization should be shown. (default: `1`)}
+\item{target_category}{The index of the category for which categorization should be shown. (default: \code{1})}
 
-\item{logit}{Should the categorization function be plotted in logit (`TRUE`) or probabilities (`FALSE`)?
-(default: `FALSE`)}
+\item{logit}{Should the categorization function be plotted in logit (\code{TRUE}) or probabilities (\code{FALSE})?
+(default: \code{FALSE})}
 
 \item{xlim, ylim}{Limits for the x- and y-axis.}
 
 \item{facet_rows_by, facet_cols_by, facet_wrap_by, animate_by}{Which group variables, if any, should be used for faceting and/or
-animation? (defaults: `NULL`)}
+animation? (defaults: \code{NULL})}
 
-\item{animation_follow}{Should the animation follow the data (zoom in and out)? (default: `FALSE`)}
+\item{animation_follow}{Should the animation follow the data (zoom in and out)? (default: \code{FALSE})}
 
-\item{category.ids}{Vector of category IDs to be plotted or leave `NULL` to plot all groups. (default: `NULL`)}
+\item{category.ids}{Vector of category IDs to be plotted or leave \code{NULL} to plot all groups. (default: \code{NULL})}
 
-\item{category.labels}{Vector of group labels of same length as `category.ids` or `NULL` to use defaults. (default: `NULL`)}
+\item{category.labels}{Vector of group labels of same length as \code{category.ids} or \code{NULL} to use defaults. (default: \code{NULL})}
 
-\item{category.colors}{Vector of colors of same length as category.ids or `NULL` to use defaults. (default: `NULL`)}
+\item{category.colors}{Vector of colors of same length as category.ids or \code{NULL} to use defaults. (default: \code{NULL})}
 
-\item{category.linetypes}{Vector of linetypes of same length as category.ids or `NULL` to use defaults. (default: `NULL`)
+\item{category.linetypes}{Vector of linetypes of same length as category.ids or \code{NULL} to use defaults. (default: \code{NULL})
 Currently being ignored.}
 
 \item{...}{additional arguments to geom_line.}

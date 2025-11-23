@@ -24,12 +24,12 @@ get_categorization_function(x, ...)
 }
 \value{
 A function that takes as input cue values and returns posterior probabilities of the first category,
-  based on the posterior predictive of the cues given the ideal adaptor categories' parameters. The function
-  will accept the following arguments:
-  \itemize{
-    \item{`target_category`:}{The index of the category for which categorization should be shown. (default: `1`)}
-    \item{`logit`:}{Should the function return log-odds (TRUE) or probabilities (FALSE)? (default: FALSE)}
-  }
+based on the posterior predictive of the cues given the ideal adaptor categories' parameters. The function
+will accept the following arguments:
+\itemize{
+\item{\code{target_category}:}{The index of the category for which categorization should be shown. (default: \code{1})}
+\item{\code{logit}:}{Should the function return log-odds (TRUE) or probabilities (FALSE)? (default: FALSE)}
+}
 }
 \description{
 Returns a categorization function that can be used to categorize a set of cues into categories.

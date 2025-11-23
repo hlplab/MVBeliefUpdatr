@@ -10,12 +10,12 @@ get_random_draw_indices(fit, ndraws)
 \item{fit}{A \code{\link{stanfit}} object.}
 
 \item{ndraws}{Number of indices to be returned. Can't be larger than total number of
-post-warmup samples across all MCMC chains in `fit`.}
+post-warmup samples across all MCMC chains in \code{fit}.}
 }
 \value{
 A numeric vector.
 }
 \description{
-Returns `ndraws` indices for random post-warmup MCMC draws (without replacement) from
-`fit`.
+Returns \code{ndraws} indices for random post-warmup MCMC draws (without replacement) from
+\code{fit}.
 }

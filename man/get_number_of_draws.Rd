@@ -10,5 +10,5 @@ get_number_of_draws(fit)
 \item{fit}{A \code{\link{stanfit}} object.}
 }
 \description{
-Get the total number of post-warmup MCMC samples in `fit`.
+Get the total number of post-warmup MCMC samples in \code{fit}.
 }

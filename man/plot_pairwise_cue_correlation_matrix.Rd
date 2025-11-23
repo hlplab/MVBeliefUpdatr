@@ -12,11 +12,11 @@ plot_pairwise_cue_correlation_matrix(
 )
 }
 \arguments{
-\item{data}{A `tibble` or `data.frame` that contains the `cues` and `category`.}
+\item{data}{A \code{tibble} or \code{data.frame} that contains the \code{cues} and \code{category}.}
 
-\item{cues}{Variables in `data` -containing the cue values that are to be plotted.}
+\item{cues}{Variables in \code{data} -containing the cue values that are to be plotted.}
 
-\item{category}{Variable in `data` that contains the category information. (currently required)}
+\item{category}{Variable in \code{data} that contains the category information. (currently required)}
 
 \item{category.colors}{The colors to be mapped onto the category values.}
 }
@@ -24,8 +24,8 @@ plot_pairwise_cue_correlation_matrix(
 A ggplot2 plot.
 }
 \description{
-Plots a n x n correlation matrix, using ggforce::facet_matrix, with univariate densities for each category on
-the diagonal, scatter plots in the lower triangle and 95% bivariate Gaussian ellipsoids on the upper diagonal.
+Plots a n x n correlation matrix, using \link[ggforce:facet_matrix]{ggforce::facet_matrix}, with univariate densities for each category on
+the diagonal, scatter plots in the lower triangle and 95\\% bivariate Gaussian ellipsoids on the upper diagonal.
 }
 \seealso{
 TBD
