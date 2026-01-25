@@ -286,14 +286,15 @@ control_staninput <- function(
 #'   \item{`transform_information`: }{A list with information about the transformation that was applied to the data.}
 #'}
 #'
-#' @seealso \code{\link{is.ideal_adaptor_staninput}}
+#' @seealso \code{\link{is.ideal_adaptor_stanfit_input}}
 #' @keywords TBD
 #'
 #' @importFrom purrr map_lgl map_int
 #' @importFrom rstan nlist
-#' @rdname make_staninput
+#' @rdname make_ideal_adaptor_stanfit_input
+#' @aliases make_staninput
 #' @export
-make_staninput <- function(
+make_ideal_adaptor_stanfit_input <- function(
     exposure, test,
     cues, category = "category", response = "response",
     group = "group", group.unique = NULL,
