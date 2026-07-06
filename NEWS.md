@@ -8,5 +8,5 @@
 
 ## Bug Fixes
 
- * None yet.
+ * 26/07/06, NW, Fixed operator-precedence bug that broke nolabel-criterion and nolabel-proportional updating.
 

@@ -177,9 +177,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
               noise_treatment = noise_treatment,
               lapse_treatment = lapse_treatment,
               decision_rule = gsub("nolabel-", "", method),
-              simplify = F) %>%
-            pull(response) * x_N %>%
-            as.list()
+              simplify = F) %>% pull(response) %>% { . * x_N } %>% as.list()
         } else if (method %in% c("nolabel-sampling")) {
           x_Ns <-
             get_categorization_from_NIW_ideal_adaptor(
