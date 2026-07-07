@@ -1,3 +1,5 @@
+context("update NIW models")
+
 test_that("incremental updating runs for all methods (1 cue)", {
   model <- example_NIW_ideal_adaptor(example = 1, verbose = FALSE)  # 1 cue: VOT
   cats  <- get_category_labels_from_model(model)
