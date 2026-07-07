@@ -109,7 +109,7 @@ update_NIW_belief_S = function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) { S_0 + x_S
 #' the ideal adaptor will be used. For "sample", sampling determines for each observation whether it was a lapse or not.
 #' If an observation was a lapse no updating occurs. For "marginalize", 1 - lapse_rate is the proportion of observations
 #' that are assumed to be lapsing trials (default: "no_lapses" for NIW_beliefs; "sample" for NIW_ideal_adaptors)
-#' @param method Which updating method should be used? See details. (default: "supervised-certain")
+#' @param method Which updating method should be used? See details. (default: "label-certain")
 #' @param verbose Should more informative output be provided?
 #'
 #' @return An NIW_belief object.
@@ -281,9 +281,11 @@ update_NIW_belief_by_one_observation = function(
 #' See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
 #' @param lapse_treatment Determines whether attentional lapses can occur during which no updating occurs.
 #' See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
-#' @param method Which updating method should be used? See \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
+#' @param method Which updating method should be used to update the prior? Both supervised and unsupervised updating
+#' methods are available to allow updating based on labeled and unlabeled observations. See details in \code{\link{update_NIW_belief_by_sufficient_statistics_of_one_category}}.
 #' The length of this argument should either be 1 (in which case it is recycled for each observation) or the same as
-#' the number of rows in \code{expsure}. (default: "label-certain").
+#' the number of rows in \code{exposure} (in which case, the k-th observation is updated with the k-th method).
+#' (default: "label-certain", which describes updating with perfect certainty based on the provided label).
 #' @param keep.update_history Should the history of the belief-updating be stored and returned? If so, the output is
 #' tibble with the one set of NIW beliefs for each exposure observation. This is useful, for example, if one wants to
 #' visualize the changes in the category parameters, posterior predictive, categorization function, or alike across time.

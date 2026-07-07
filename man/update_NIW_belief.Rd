@@ -62,7 +62,7 @@ the ideal adaptor will be used. For "sample", sampling determines for each obser
 If an observation was a lapse no updating occurs. For "marginalize", 1 - lapse_rate is the proportion of observations
 that are assumed to be lapsing trials (default: "no_lapses" for NIW_beliefs; "sample" for NIW_ideal_adaptors)}
 
-\item{method}{Which updating method should be used? See details. (default: "supervised-certain")}
+\item{method}{Which updating method should be used? See details. (default: "label-certain")}
 
 \item{verbose}{Should more informative output be provided?}
 
