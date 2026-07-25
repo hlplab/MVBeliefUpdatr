@@ -13,7 +13,7 @@ get_stanfit(x, ...)
 \item{x}{\code{\link{ideal_adaptor_stanfit}} object.}
 }
 \value{
-An \link[rstan:stanfit-class]{rstan::stanfit} object.
+An \link[rstan:stanfit]{rstan::stanfit} object.
 }
 \description{
 Returns the stanfit created by \code{stan} during the creation of the \code{\link{ideal_adaptor_stanfit}}

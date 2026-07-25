@@ -80,5 +80,10 @@ Useful links:
 \author{
 \strong{Maintainer}: T. Florian Jaeger \email{fjaeger@ur.rochester.edu} (\href{https://orcid.org/0000-0002-1158-7308}{ORCID})
 
+Authors:
+\itemize{
+  \item T. Florian Jaeger \email{fjaeger@ur.rochester.edu} (\href{https://orcid.org/0000-0002-1158-7308}{ORCID})
+}
+
 }
 \keyword{internal}

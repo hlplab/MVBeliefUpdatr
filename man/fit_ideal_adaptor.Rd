@@ -67,14 +67,14 @@ as well. If using \code{backend = "rstan"} you can also set
 
 \item{stan_model_args}{A \code{list} of further arguments passed to
 \link[rstan:stan_model]{rstan::stan_model} for \code{backend =
-  "rstan"} or to \code{cmdstanr::cmdstan_model} for \code{backend =
-  "cmdstanr"}, which allows to change how models are compiled.}
+"rstan"} or to \code{cmdstanr::cmdstan_model} for \code{backend =
+"cmdstanr"}, which allows to change how models are compiled.}
 
 \item{stanmodel}{Name of stanmodel that should be used. Overrides any default selection.}
 
 \item{rename}{For internal use only.}
 
-\item{...}{Additional parameters are passed to \link[rstan:stanmodel-method-sampling]{rstan::sampling}.}
+\item{...}{Additional parameters are passed to \link[rstan:sampling]{rstan::sampling}.}
 }
 \value{
 An object of class \code{ideal_adaptor_stanfit} with the fitted stan model.

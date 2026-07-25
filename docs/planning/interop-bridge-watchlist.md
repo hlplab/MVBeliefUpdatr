@@ -1,6 +1,6 @@
 # Interop Bridge Watchlist
 
-Purpose: track which rstan/tidybayes-facing methods should be bridged for inferred-model classes, and why.
+Purpose: track which rstan/tidybayes-facing methods should be bridged for ModelDistribution classes, and why.
 
 Policy:
 - Prioritize methods used in real package workflows.

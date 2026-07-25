@@ -4,7 +4,7 @@
 \alias{is.MVBU_model}
 \title{Is this an MVBeliefUpdatr model?}
 \usage{
-is.MVBU_model(x, group = NULL, verbose = F, tolerance = 1e-05)
+is.MVBU_model(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL)
 }
 \arguments{
 \item{x}{Object to be checked.}

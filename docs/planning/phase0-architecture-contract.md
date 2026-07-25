@@ -1,13 +1,13 @@
 # Phase 0 Architecture Contract: MVBeliefUpdatr v1.0
 
 ## Status
-Near-final draft pending final sign-off on 3 decision blocks.
-This contract becomes binding for Phases 1+ once the three blocks in Section 14 are resolved.
+Approved for Phase 1 kickoff.
+This contract is binding for Phases 1+.
 
 ## 1) Architectural Principles
 - All core user-facing entities are model objects.
 - Model objects explicitly contain representation objects.
-- Inferred-model objects are first-class package objects, not raw stanfit objects.
+- ModelDistribution objects are first-class package objects, not raw stanfit objects.
 - Interop with rstan/tidybayes is preserved through explicit bridges and selected method forwarding.
 - API consistency is prioritized over backward shape compatibility.
 - Old API compatibility for the v1 migration lives in deprecated-2026.R.
@@ -17,36 +17,57 @@ This contract becomes binding for Phases 1+ once the three blocks in Section 14 
 
 ### Abstract base classes
 - MVBU_Object
-- MVBU_Representation (extends MVBU_Object)
+- MVBU_CategoryRepresentation (extends MVBU_Object)
+- MVBU_CategoryRepresentationTemplate (extends MVBU_Object)
 - MVBU_CognitiveModel (extends MVBU_Object)
-- MVBU_InferredModel (extends MVBU_Object)
+- MVBU_ModelDistribution (extends MVBU_Object)
 
 ### Representation families
-- NIW_Representation (extends MVBU_Representation)
-- MVG_Representation (extends MVBU_Representation)
-- Exemplar_Representation
+- UVG_CategoryRepresentation (extends MVBU_CategoryRepresentation)
+- NIX_CategoryRepresentation (extends MVBU_CategoryRepresentation)
+- MUVG_CategoryRepresentation (extends MVBU_CategoryRepresentation)
+- MNIX_CategoryRepresentation (extends MVBU_CategoryRepresentation)
+- MVG_CategoryRepresentation (extends MVBU_CategoryRepresentation)
+- NIW_CategoryRepresentation (extends MVBU_CategoryRepresentation)
+- Exemplar_CategoryRepresentation (extends MVBU_CategoryRepresentation)
 
 ### Cognitive model families
-- NIW_IdealAdaptorModel (extends MVBU_CognitiveModel)
-- MVG_IdealObserverModel (extends MVBU_CognitiveModel)
-- ExemplarModel 
+- UVG_IdealObserver (extends MVBU_CognitiveModel)
+- NIX_IdealAdaptor (extends MVBU_CognitiveModel)
+- MUVG_IdealObserver (extends MVBU_CognitiveModel)
+- MNIX_IdealAdaptor (extends MVBU_CognitiveModel)
+- MVG_IdealObserver (extends MVBU_CognitiveModel)
+- NIW_IdealAdaptor (extends MVBU_CognitiveModel)
+- Exemplar_Model (extends MVBU_CognitiveModel)
 
-### Inferred model families
-- NIW_IdealAdaptorFit (extends MVBU_InferredModel)
-- Future families should generally follow <Family>_IdealObserverModel, <Family>_IdealAdaptorModel, and <Family>_IdealAdaptorFit when those concepts apply; family-specific exceptions are allowed for clearer non-ideal comparator models.
+### ModelDistribution families
+- UVG_IdealObserverDistribution (extends MVBU_ModelDistribution)
+- NIX_IdealAdaptorDistribution (extends MVBU_ModelDistribution)
+- MUVG_IdealObserverDistribution (extends MVBU_ModelDistribution)
+- MNIX_IdealAdaptorDistribution (extends MVBU_ModelDistribution)
+- MVG_IdealObserverDistribution (extends MVBU_ModelDistribution)
+- NIW_IdealAdaptorDistribution (extends MVBU_ModelDistribution)
+- Exemplar_ModelDistribution (extends MVBU_ModelDistribution)
+- Future families should generally follow <Family>_IdealObserverModel, <Family>_IdealAdaptorModel, and <Family>_IdealAdaptorModelDistribution when those concepts apply; family-specific exceptions are allowed for clearer non-ideal comparator models.
+
+### Observer/Adaptor relationship map (locked semantics)
+- UVG <-> NIX: NIX expresses uncertainty over UVG parameters.
+- MUVG <-> MNIX: MNIX expresses uncertainty over MUVG-like category-level parameterization.
+- MVG <-> NIW: NIW expresses uncertainty over MVG parameters.
+- Exemplar: standalone (currently not treated as an observer/adaptor conjugate pair).
 
 ## 3) Composition Contract
 
 Each MVBU_CognitiveModel must contain:
-- multiple representations, one for each category: an MVBU_Representation subclass instance
+- category_likelihood: an MVBU_CategoryRepresentationTemplate containing one representation per category
 - decision_rule: scalar character
 - lapse_rate: scalar [0,1]
 - lapse_bias: structured numeric value (vector/matrix as needed). one bias per category, each in [0,1], summing to 1
 - perceptual_noise: structured numeric value (covariance/scalar as needed)
-- priors: optional prior bundle object, one prior per category, each in [0,1], summing to 1
+- category_prior: optional prior bundle object, one prior per category, each in [0,1], summing to 1
 - metadata: optional list for provenance and labels (cue labels, category labels, etc. for ease of access through other functions)
 
-Each MVBU_InferredModel must contain:
+Each MVBU_ModelDistribution must contain:
 - model_family: identifier
 - stanfit_ref: raw stanfit object
 - staninput_ref: typed staninput object (or validated list)
@@ -55,7 +76,7 @@ Each MVBU_InferredModel must contain:
 - cache: optional cache container (nullable)
 - metadata: provenance/version/schema tags
 
-## 4) Interop Contract for Inferred Models
+## 4) Interop Contract for ModelDistribution Objects
 
 Default strategy: Wrapper + forwarding (approved direction).
 
@@ -136,7 +157,7 @@ For all cognitive model families (NIW/MVG/Exemplar), Phase 3 minimum parity:
 - summary/print
 - high-level category plotting
 
-For inferred model families, minimum parity:
+For ModelDistribution families, minimum parity:
 - bridge to stanfit
 - draws extraction
 - posterior summaries
@@ -172,6 +193,9 @@ Each phase must include:
 - testthat updates for all touched interfaces
 - method parity tests for impacted families
 - documentation updates for all changed public behavior
+- roxygen documentation for all newly added code in phase scope
+- roxygen documentation for all existing code that becomes integrated into the S7 scaffold in phase scope
+- documentation QA checks for phase-touched docs (roxygen generation, unresolved-link checks, malformed Rd/macros checks)
 - migration notes for renamed/removed interfaces
 
 ## 11) Cleanup Contract (Per Phase)
@@ -183,6 +207,7 @@ When removing obsolete code:
 - remove dead functions
 - remove dead files
 - remove stale references from docs and tests
+- include phase-end documentation cleanup for touched files (roxygen consistency and navigable links)
 - keep deprecated surface minimal and explicit
 
 ## 12) Release Hygiene Contract
@@ -222,7 +247,7 @@ Sign-off choice:
 - [x] A1 Family-specific only
 - [ ] A2 Family-specific + unified router
 
-### Decision Block B: Interop Forwarded Surface (NIW_IdealAdaptorFit)
+### Decision Block B: Interop Forwarded Surface (NIW_IdealAdaptorModelDistribution)
 Scope:
 - Finalize exactly which rstan/tidybayes-facing methods are forwarded or bridged in Phase 1-3.
 
@@ -249,7 +274,8 @@ Operationalization note:
 
 ### Decision Block C: Cache Profile Defaults
 Scope:
-- Confirm default cache profile and mutability policy for inferred-model workflows.
+- Confirm default cache profile and mutability policy for ModelDistribution workflows.
+ 
 
 Already agreed:
 - Pure-by-default behavior
@@ -267,6 +293,9 @@ Optional policy detail:
 
 ### Near-Final Freeze Note
 All other naming and architectural decisions in this contract are considered frozen for Phase 0 unless a blocker is discovered.
+
+### Phase 0 Closure Note
+Interop bridge surface details beyond the agreed baseline are intentionally finalized during Phases 1-3 using the interop bridge watchlist, with dependency discipline and workflow-driven tests.
 
 ## 15) Non-goals (for early phases)
 - Stan model expansion

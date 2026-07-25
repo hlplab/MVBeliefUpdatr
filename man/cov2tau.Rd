@@ -16,6 +16,6 @@ A numeric vector.
 Get vector of standard deviations from covariance matrix.
 }
 \seealso{
-\link[stats:cor]{stats::cov2cor}, \code{\link{cor2cov}}
+\link[stats:cov2cor]{stats::cov2cor}, \code{\link{cor2cov}}
 }
 \keyword{TBD}

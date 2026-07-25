@@ -6,14 +6,14 @@
 - New migration aliases isolated in deprecated-2026.R for 2-3 minor releases (legacy deprecated-2025.R remains historical/out-of-scope)
 - Explicit S7 composition: model contains representation
 - Stan expansion/debugging deferred until architecture stabilizes
-- Extensible family architecture: support multiple ideal observer/adaptor families (including MNIX and non-Gaussian representations)
+- Extensible family architecture: support multiple ideal observer/adaptor families (including MUVG, MNIX, and other non-Gaussian representations)
 
 ### Phase Status
 | Phase | Status | Gate | Notes |
 | --- | --- | --- | --- |
-| 0 Architecture Contract and Freeze | In Progress | Open | Decision sheet, architecture draft, and naming map are in place; remaining blockers are constructor strategy, interop surface, and cache profile finalization. |
-| 1 S7 Hierarchy Foundation | Not Started | Open | Awaits Phase 0 approvals. |
-| 2 Concrete Class Migration | Not Started | Open | Blocked by Phase 1. |
+| 0 Architecture Contract and Freeze | Completed | Closed | Contract approved; interop bridge expansion continues in Phases 1-3 via watchlist (not a blocker). |
+| 1 S7 Hierarchy Foundation | Completed | Closed | Base classes, validators, core generic aliases, extension hooks, and baseline dispatch tests are in place. |
+| 2 Concrete Class Migration | In Progress | Open | Started with non-breaking legacy->S7 adapters for NIW/MVG/Exemplar families. |
 | 3 API Unification and Method Coverage | Not Started | Open | Blocked by Phase 2. |
 | 4 Compatibility Shell | Not Started | Open | Can start late in Phase 3. |
 | 5 Data Model and Print Strategy | Not Started | Open | Starts after class migration baseline. |
@@ -30,12 +30,26 @@
 - [x] Backward wrappers: keep for 2-3 minor releases
 - [x] Core composition: explicit model -> representation
 - [x] Stan timeline: after class/API stabilization
-- [ ] Finalize inferred-model interop strategy (A/B/C below)
+- [ ] Finalize ModelDistribution interop strategy (A/B/C below)
 - [ ] Finalize cache profile defaults (minimal/standard/eager)
+- [x] Documentation policy: all new code and all code integrated into the new S7 scaffold must be roxygen documented
+- [x] Documentation QA policy: each phase-end cleanup includes checks for broken links and roxygen/Rd issues
+
+### Model Relationship Map (Locked Semantics)
+- Family pairings encode observer/adaptor uncertainty relationships:
+  - UVG (Univariate Gaussian, observer) <-> NIX (Normal-Inverse-chi^2, adaptor over UVG parameters)
+  - MUVG (Multi-cue Univariate Gaussian integration, observer) <-> MNIX (Mixture of Normal-Inverse-chi^2, adaptor)
+  - MVG (Multivariate Gaussian, observer) <-> NIW (Normal-Inverse-Wishart, adaptor over MVG parameters)
+- Exemplar is intentionally treated as a standalone family (not an observer/adaptor conjugate pair in current scaffold).
+- Core class composition semantics:
+  - CategoryRepresentation: one category-level parametric/nonparametric representation object
+  - CategoryRepresentationTemplate: a validated set of per-category representations
+  - CognitiveModel: decision/lapse/prior machinery composed with a CategoryRepresentationTemplate
+  - ModelDistribution: inferred posterior/distribution-level package object associated with a model family
 
 ### Decision Blocks
 
-#### Decision: Inferred-Model Interop
+#### Decision: ModelDistribution Interop
 - Option A: strict wrapper with get_stanfit()/as_stanfit()
 - Option B: wrapper + S3 forwarding for key rstan/tidybayes generics
 - Option C: on-demand adapter object for external tooling
@@ -46,7 +60,7 @@
 
 #### Decision: Cache Semantics
 - Global default: pure-by-default methods
-- Persistent cache candidates (inside inferred-model objects):
+- Persistent cache candidates (inside ModelDistribution objects):
   - extracted posterior draws
   - reused posterior summaries
   - bounded-size item-level posterior predictions
@@ -64,33 +78,33 @@
 **Goal:** lock contract before coding
 
 Checklist:
-- [ ] Finalize class family contract: Representation, CognitiveModel, InferredModel
-- [ ] Confirm that all user-facing core entities are model objects that compose representations
-- [ ] Finalize family-extension naming pattern for future model families (e.g., <Family>_Representation, <Family>_IdealObserverModel, <Family>_IdealAdaptorModel, <Family>_IdealAdaptorFit)
-- [ ] Lock naming conventions and migration vocabulary
-- [ ] Lock wrapper/deprecation policy text and timeline
-- [ ] Define phase gate criteria and rollback criteria
+- [x] Finalize class family contract: Representation, CognitiveModel, ModelDistribution
+- [x] Confirm that all user-facing core entities are model objects that compose representations
+- [x] Finalize family-extension naming pattern for future model families (e.g., <Family>_Representation, <Family>_IdealObserverModel, <Family>_IdealAdaptorModel, <Family>_IdealAdaptorFit)
+- [x] Lock naming conventions and migration vocabulary
+- [x] Lock wrapper/deprecation policy text and timeline
+- [x] Define phase gate criteria and rollback criteria
 
 Phase gate (exit criteria):
-- [ ] Written architecture contract approved
-- [ ] Written naming/deprecation policy approved
-- [ ] Phase gate checklist approved
+- [x] Written architecture contract approved
+- [x] Written naming/deprecation policy approved
+- [x] Phase gate checklist approved
 
 ### Phase 1: S7 Hierarchy Foundation
 **Goal:** establish base class and generic system
 
 Checklist:
-- [ ] Implement abstract S7 base classes (Representation, CognitiveModel, InferredModel)
-- [ ] Add schema and semantic validators
-- [ ] Add composition structure (CognitiveModel includes representation slot)
-- [ ] Create core S7 generics: construct, validate, summarize, print, categorize/predict, posterior, plot-prep
-- [ ] Define extension hooks for future Stan families
-- [ ] Add explicit extension hooks for non-Gaussian representation families
-- [ ] Initialize interop bridge watchlist with baseline forwarded methods and dependency rationale
+- [x] Implement abstract S7 base classes (Representation, CognitiveModel, ModelDistribution)
+- [x] Add schema and semantic validators
+- [x] Add composition structure (CognitiveModel includes representation slot)
+- [x] Create core S7 generics: construct, validate, summarize, print, categorize/predict, posterior, plot-prep
+- [x] Define extension hooks for future Stan families
+- [x] Add explicit extension hooks for non-Gaussian representation families
+- [x] Initialize interop bridge watchlist with baseline forwarded methods and dependency rationale
 
 Phase gate:
-- [ ] Class instantiation and validator tests pass
-- [ ] Core generic dispatch tests pass
+- [x] Class instantiation and validator tests pass
+- [x] Core generic dispatch tests pass
 
 ### Phase 2: Concrete Class Migration
 **Goal:** move NIW/MVG/exemplar families to S7 and unify inferred classes
@@ -98,9 +112,9 @@ Phase gate:
 Checklist:
 - [ ] Migrate representation classes (NIW belief, MVG representation, exemplar representation)
 - [ ] Migrate cognitive model classes (NIW adaptor, MVG observer, exemplar model)
-- [ ] Migrate inferred-model classes around stanfit outputs
+- [ ] Migrate ModelDistribution classes around stanfit outputs
 - [ ] Standardize constructors and defaults
-- [ ] Validate migration pattern can be reused by at least one future-family prototype (MNIX or another non-Gaussian family)
+- [ ] Validate migration pattern can be reused by at least one future-family prototype (MUVG, MNIX, or another non-Gaussian family)
 
 Phase gate:
 - [ ] Constructor normalization tests pass
@@ -155,7 +169,7 @@ Checklist:
 - [ ] Implement operation-aware caching
 - [ ] Add cache keys/invalidation (version, transform settings, draw filters, prediction options)
 - [ ] Keep large plot-grid computations in dedicated grid/result objects
-- [ ] Add optional eager postprocess profile for inferred models with size guards
+- [ ] Add optional eager postprocess profile for ModelDistribution objects with size guards
 
 Priority hotspots to benchmark:
 - [ ] density plotting recomputation loops
@@ -184,7 +198,7 @@ Phase gate:
 **Goal:** systematically clean and modernize tests folder structure and test code quality
 
 Checklist:
-- [ ] Reorganize tests into a clear, family-based structure (representations, models, inferred models, interoperability)
+- [ ] Reorganize tests into a clear, family-based structure (representations, models, ModelDistribution objects, interoperability)
 - [ ] Introduce a systematic tests/testthat/data/ layout for reusable fixtures and generated test inputs
 - [ ] Replace ad hoc or repetitive test setup with shared helpers/fixtures
 - [ ] Rewrite fragile or outdated existing tests to current API and naming conventions
@@ -200,10 +214,19 @@ Phase gate:
 **Goal:** explain architecture and workflows clearly
 
 Checklist:
+- [ ] Add class-level reference docs for all S7 class families (core classes, representation classes, cognitive model classes, and model distribution classes)
+- [ ] Include explicit observer/adaptor pairing map and standalone-family rationale (Exemplar) in architecture-facing docs
 - [ ] v1.0 architecture vignette
 - [ ] migration vignette with worked examples
 - [ ] workflow vignettes (fitting, prediction/categorization, plotting, interop)
 - [ ] contributor guide for adding model families
+
+### Phase-End Cleanup Standard (Applies to Every Phase)
+Checklist:
+- [ ] All newly added functions/classes in phase scope have roxygen documentation.
+- [ ] All legacy code integrated into the S7 scaffold in phase scope is brought up to roxygen documentation standards.
+- [ ] Roxygen generation runs for the phase branch without introducing new unresolved-link warnings for phase-touched files.
+- [ ] Generated Rd output for phase-touched topics is checked for malformed markup/macros.
 
 Phase gate:
 - [ ] Vignette examples run end-to-end
@@ -216,14 +239,14 @@ Checklist:
 - [ ] Define template for new Stan-backed inferred models
 - [ ] Reuse diagnostics/extraction interfaces across Stan families
 - [ ] Begin Stan debugging and model expansion work
-- [ ] Add at least one additional family plan item (e.g., MNIX ideal observer/adaptor) using the same extension template
+- [ ] Add at least one additional family plan item (e.g., MOG or MNIX ideal observer/adaptor) using the same extension template
 
 Phase gate:
 - [ ] First new Stan-family prototype passes interface contract tests
 
 ## Verification Matrix
 - [ ] Structural validation checks for all classes
-- [ ] API parity checks across NIW/MVG/exemplar/inferred families
+- [ ] API parity checks across NIW/MVG/exemplar/ModelDistribution families
 - [ ] Family-extension checks: adding a new family does not require changing core generics
 - [ ] Wrapper compatibility equivalence checks
 - [ ] rstan/tidybayes interoperability checks
@@ -251,3 +274,4 @@ Phase gate:
 - Keep phases independently shippable where possible
 - Attach explicit go/no-go criteria to each phase before coding starts
 - If phase gate fails, resolve blockers before entering next phase
+- Revisit grouped-model containers: group labels currently identify model instances in model combinations; formal grouped-model class/container design should be addressed in later phases.
