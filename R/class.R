@@ -45,7 +45,7 @@ get_expected_columns_for_model <- function() c("prior", "lapse_rate", "lapse_bia
 #'
 #' @importFrom dplyr group_map
 #' @export
-is.MVBU_representation <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
+is.MVBU_representation <- function(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL) {
   name_of_x <- deparse(substitute(x))
 
   if (!is.null(group)) {
@@ -75,7 +75,7 @@ is.MVBU_representation <- function(x, group = NULL, verbose = F, tolerance = 1e-
 #'
 #' @importFrom purrr map_lgl
 #' @export
-is.MVBU_model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
+is.MVBU_model <- function(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL) {
   name_of_x <- deparse(substitute(x))
 
   if (!is_tibble(x)) {

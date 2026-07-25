@@ -11,8 +11,8 @@ NULL
 ideal_adaptor_staninput <- S7::new_class(
   "ideal_adaptor_staninput",
   properties = list(
-    transformed = "list",
-    untransformed = "list"
+    transformed = S7::class_list,
+    untransformed = S7::class_list
   ),
   validator = function(self) {
     stopifnot(is.list(self@transformed))
@@ -21,15 +21,9 @@ ideal_adaptor_staninput <- S7::new_class(
   }
 )
 
-# Constructor helper for staninput
-#' @export
-ideal_adaptor_staninput <- function(transformed = list(), untransformed = list()) {
-  S7::new_object(
-    "ideal_adaptor_staninput",
-    transformed = transformed,
-    untransformed = untransformed
-  )
-}
+# NOTE: temporary migration shim
+# Legacy helper constructors that overwrite S7 class objects are disabled.
+# In S7, the class object itself is callable as a constructor.
 
 #' S7 class for transformation information for Stan models
 #'
@@ -43,9 +37,9 @@ ideal_adaptor_staninput <- function(transformed = list(), untransformed = list()
 transform_information <- S7::new_class(
   "transform_information",
   properties = list(
-    transform.parameters = "list",
-    transform.function = "function",
-    untransform.function = "function"
+    transform.parameters = S7::class_list,
+    transform.function = S7::class_function,
+    untransform.function = S7::class_function
   ),
   validator = function(self) {
     stopifnot(is.list(self@transform.parameters))
@@ -54,17 +48,6 @@ transform_information <- S7::new_class(
     TRUE
   }
 )
-
-# Constructor helper
-#' @export
-transform_information <- function(transform.parameters, transform.function, untransform.function) {
-  S7::new_object(
-    "transform_information",
-    transform.parameters = transform.parameters,
-    transform.function = transform.function,
-    untransform.function = untransform.function
-  )
-}
 
 
 #' An S7 class for ideal_adaptor stanfit objects that use one of the ideal_adaptor Stan programs.
@@ -105,19 +88,19 @@ transform_information <- function(transform.parameters, transform.function, untr
 ideal_adaptor_stanfit <- S7::new_class(
   "ideal_adaptor_stanfit",
   properties = list(
-    data = "data.frame",
-    staninput = "ideal_adaptor_staninput",
-    stanvars = "ANY",
-    backend = "character",
-    save_pars = "ANY",
-    stan_args = "list",
-    stanfit = "stanfit",
-    basis = "ANY",
-    transform_information = "transform_information",
-    criteria = "list",
-    file = "character",
-    version = "ANY",
-    labels = "list"
+    data = S7::new_S3_class("data.frame"),
+    staninput = ideal_adaptor_staninput,
+    stanvars = S7::class_any,
+    backend = S7::class_character,
+    save_pars = S7::class_any,
+    stan_args = S7::class_list,
+    stanfit = S7::class_any,
+    basis = S7::class_any,
+    transform_information = transform_information,
+    criteria = S7::class_list,
+    file = S7::class_character,
+    version = S7::class_any,
+    labels = S7::class_list
   ),
   validator = function(self) {
     stopifnot(is.data.frame(self@data))
@@ -285,20 +268,20 @@ is.ideal_adaptor_stanfit_input <- function(x, verbose = FALSE) {
   TRUE
 }
 
-# --- contains_draws generics and methods (S7) ---
-contains_draws <- S7::new_generic("contains_draws", function(x, ...) standardGeneric("contains_draws"))
+# --- contains_draws temporary dispatch shim ---
+# NOTE: legacy S7/S4 mixed generic syntax is temporarily replaced to keep
+# package loadable during S7 migration and roxygen generation.
+contains_draws <- function(x, ...) {
+  if (inherits(x, "stanfit")) {
+    return(length(x@sim) > 0)
+  }
 
-# Method for stanfit S4 objects (delegated to S4 internals)
-S7::method(contains_draws, "stanfit", function(x, ...) {
-  if (!(length(x@sim))) return(FALSE)
-  TRUE
-})
+  if (S7::is_object(x) && S7::class_name(x) == "ideal_adaptor_stanfit") {
+    return(contains_draws(x@stanfit))
+  }
 
-# Method for ideal_adaptor_stanfit
-S7::method(contains_draws, "ideal_adaptor_stanfit", function(x, ...) {
-  stanfit <- x@stanfit
-  contains_draws(stanfit)
-})
+  FALSE
+}
 
 # --- file helpers ---
 check_stanfit_file <- function(file) {

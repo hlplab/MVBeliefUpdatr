@@ -15,7 +15,7 @@ get_expected_columns_for_exemplar_model <- function() append(get_expected_column
 #' @seealso TBD
 #' @keywords TBD
 #' @export
-is.exemplar_model <- function(x, group = NULL, verbose = F, tolerance = 1e-5) {
+is.exemplar_model <- function(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL) {
   name_of_x <- deparse(substitute(x))
 
   if (!is.MVBU_model(x, group = group, verbose = verbose, tolerance = tolerance)) {

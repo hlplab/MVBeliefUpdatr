@@ -53,7 +53,7 @@ A \code{tibble} in which each row is a test token. Columns include the cues
 and the response counts (one column per category) for all test tokens and all groups.
 }
 \description{
-Returns the exposure and/or test data used during the creation of the \link[rstan:stanfit-class]{rstan::stanfit}.
+Returns the exposure and/or test data used during the creation of the \link[rstan:stanfit]{rstan::stanfit}.
 object.
 }
 \seealso{

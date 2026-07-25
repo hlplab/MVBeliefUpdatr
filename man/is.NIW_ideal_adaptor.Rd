@@ -13,7 +13,7 @@ is.NIW_ideal_adaptor(
   with.lapse = if (with.lapse_bias) T else F,
   with.lapse_bias = F,
   verbose = F,
-  tolerance = 1e-05
+  tolerance = MVBU_PROB_TOL
 )
 }
 \arguments{

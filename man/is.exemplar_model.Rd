@@ -4,7 +4,7 @@
 \alias{is.exemplar_model}
 \title{Is this an exemplar model?}
 \usage{
-is.exemplar_model(x, group = NULL, verbose = F, tolerance = 1e-05)
+is.exemplar_model(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL)
 }
 \arguments{
 \item{x}{Object to be checked.}

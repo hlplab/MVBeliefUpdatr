@@ -43,7 +43,7 @@ get_NIW_categorization_function <- function(
     noise_treatment = infer_default_noise_treatment(Sigma_noise),
     lapse_treatment = if (lapse_rate > 0) "marginalize" else "no_lapses"
 ) {
-  tolerance = 1e-5
+  tolerance = MVBU_PROB_TOL
   assert_that(are_equal(length(ms), length(Ss)),
               are_equal(length(ms), length(priors)),
               are_equal(length(ms), length(kappas)),

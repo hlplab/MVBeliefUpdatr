@@ -4,7 +4,7 @@
 \alias{is.ideal_adaptor_stanfit}
 \title{Is this an NIW ideal adaptor stanfit?}
 \usage{
-is.ideal_adaptor_stanfit(x, verbose = F)
+is.ideal_adaptor_stanfit(x, verbose = FALSE)
 }
 \arguments{
 \item{x}{Object to be checked.}
@@ -17,7 +17,3 @@ A logical.
 \description{
 Check whether \code{x} is of class \code{\link{ideal_adaptor_stanfit}}.
 }
-\seealso{
-TBD
-}
-\keyword{TBD}

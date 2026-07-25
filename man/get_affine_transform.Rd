@@ -22,8 +22,6 @@ by scaling along each principal axis to achieve unit variance. ZCA whitening als
 all dimensions, and---like PCA whitening---decorrelates the data but it aims to maintain the original orientation
 of the data as close as possible. If \code{cue} is a single cue, whitening reduces to standardization.
 (default : "identity")}
-
-\item{return}{}
 }
 \value{
 A list with the following elements:

@@ -45,12 +45,12 @@ Use a reusable template so new families can be added with minimal API churn:
 - <Family>_Representation
 - <Family>_IdealObserverModel
 - <Family>_IdealAdaptorModel
-- <Family>_IdealAdaptorFit
+- <Family>_IdealAdaptorModelDistribution
 
 Examples:
-- NIW_Representation, NIW_IdealAdaptorModel, NIW_IdealAdaptorFit
+- NIW_Representation, NIW_IdealAdaptorModel, NIW_IdealAdaptorModelDistribution
 - MVG_Representation, MVG_IdealObserverModel
-- MNIX_Representation, MNIX_IdealObserverModel, MNIX_IdealAdaptorModel, MNIX_IdealAdaptorFit
+- MNIX_Representation, MNIX_IdealObserverModel, MNIX_IdealAdaptorModel, MNIX_IdealAdaptorModelDistribution
 - Exemplar_Representation, ExemplarModel (or Exemplar_IdealObserverModel if observer/adaptor split is introduced)
 
 ## Class Name Map
@@ -63,8 +63,8 @@ Examples:
 | MVG_ideal_observer | MVG_IdealObserverModel | Cognitive model |
 | NIW_ideal_adaptor | NIW_IdealAdaptorModel | Cognitive model |
 | exemplar_model | ExemplarModel | Cognitive model |
-| ideal_adaptor_stanfit | NIW_IdealAdaptorFit | Inferred model |
-| ideal_adaptor_staninput | NIW_IdealAdaptorStanInput | Inferred-model support object |
+| ideal_adaptor_stanfit | NIW_IdealAdaptorModelDistribution | ModelDistribution object |
+| ideal_adaptor_staninput | NIW_IdealAdaptorStanInput | ModelDistribution support object |
 | transform_information | TransformInfo | Shared transform metadata object |
 
 ## Constructor Name Map
@@ -124,8 +124,8 @@ Examples:
 
 | Current | Proposed v1 | Notes |
 | --- | --- | --- |
-| summary.ideal_adaptor_stanfit | summary.NIW_IdealAdaptorFit | Same behavior under new class |
-| loo.ideal_adaptor_stanfit | loo.NIW_IdealAdaptorFit | Forward or bridge to stanfit |
+| summary.ideal_adaptor_stanfit | summary.NIW_IdealAdaptorModelDistribution | Same behavior under new class |
+| loo.ideal_adaptor_stanfit | loo.NIW_IdealAdaptorModelDistribution | Forward or bridge to stanfit |
 | add_ibbu_stanfit_draw | get_draws | Deprecated wrapper already forwards to get_draws; extraction semantics only |
 
 ## Forward Compatibility Requirements
@@ -134,7 +134,7 @@ Examples:
 - New families should only need:
 	- one representation class
 	- one or more cognitive model classes (observer/adaptor as appropriate)
-	- inferred fit class (if fitted via Stan)
+	- ModelDistribution class (if represented as a distribution over models, including Stan-based fits)
 	- family-specific methods on existing generics
 - Family-specific helper functions may exist, but public high-level workflows should remain generic-driven.
 
