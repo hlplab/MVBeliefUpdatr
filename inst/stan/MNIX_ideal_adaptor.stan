@@ -177,11 +177,29 @@ transformed parameters {
       for (cat2 in 1:M) {
         // NEEDS REVIEW: ARE IDEAL WEIGHTS REALLY A FUNCTION OF SIGMA_N (RATHER THAN, E.G., THE EXPECTED CATEGORY SD)?
         // Using element-wise operations ./ and .* so that this can all be done without looping over K
+        // Loop version (this or the one below is faster than avoiding the double-counting according to GPT-OSS 1024
         raw_weight += p_cat[cat1] * p_cat[cat2] * ((m_n[cat1,group] - m_n[cat2,group])^2 ./ (tau_n[cat1,group] .* tau_n[cat2,group]));
       }
     }
-    raw_weight ./= rep_vector(2.0, K);
+    raw_weight ./= rep_vector(2.0, K); // divide by 2 because each pair of categories is counted twice in the double loop above
     cue_weight_n[group] = softmax(raw_weight); // Enforces simplex
+
+    // faster according to GPT-OSS 1024, as it avoids recomputing the constant p_cat[i] * p_cat[j] for each cue k
+    // vector[K] raw_weight = rep_vector(0, K);
+    // matrix[M, M] P = outer_product(p_cat, p_cat);   // p_i * p_j, constant
+
+    // for (cat1 in 1:M) {
+    //     for (cat2 in 1:M) {
+    //       real pij = P[cat1, cat2];  // ≡ p_cat[cat1] * p_cat[cat2]
+    //       for (k in 1:K) {
+    //         real diff = m_n[cat1, group][k] - m_n[cat2, group][k];
+    //         real tau  = tau_n[cat1, group][k] * tau_n[cat2, group][k];
+    //         raw_weight[k] += pij * diff * diff / tau;
+    //       }
+    //    }
+    // }
+    // raw_weight *= 0.5;        // correct for double‑counting
+    // cue_weight_n[group] = softmax(raw_weight);
   }
 
 
