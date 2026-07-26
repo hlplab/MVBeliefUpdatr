@@ -3,6 +3,8 @@
 This file preserves the historical task list, converted from plain text into Markdown.
 
 ## Very Important
+- Correct MNIX formulation in stan code to match the ideal cue integration MNIX in the R code implemented as 
+  part of the new S7 implementation
 - Change handling of cue naming in mu, Sigma, Sigma_noise, m, S. Use attributes instead of naming each column.
 - Decide whether univariate vs multivariate differences should be handled by umbrella sampling/density functions; simplify model print methods rather than storing mu, Sigma, Sigma_noise, m, S differently by dimensionality.
 - Fix transform_cues when center = FALSE and return untransform function = TRUE.
