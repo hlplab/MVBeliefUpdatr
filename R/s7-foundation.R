@@ -39,6 +39,11 @@ NULL
 #' \insertAllCited{}
 NULL
 
+#' @collate
+#' s7-foundation.R
+#' zzz-s7-methods.R
+NULL
+
 #' @rdname MVBU-core-classes
 #' @section MVBU_Object:
 #' Root S7 base class for MVBeliefUpdatr scaffold objects.
@@ -1143,6 +1148,11 @@ new_cognitive_model <- function(
     stop("category_likelihood must contain at least one element.", call. = FALSE)
   }
 
+  repr_names <- names(category_likelihood@representations)
+  if (!is.null(repr_names) && (length(repr_names) != n_repr || any(repr_names == "") || anyDuplicated(repr_names) > 0)) {
+    stop("if category_likelihood representations are named, names must be non-empty and unique.", call. = FALSE)
+  }
+
   if (is.null(category_prior)) {
     category_prior <- rep(1 / n_repr, n_repr)
   }
@@ -1151,22 +1161,38 @@ new_cognitive_model <- function(
     lapse_bias <- category_prior
   }
 
-  # If category_likelihood is named, use those names for category_prior/lapse_bias unless
-  # already explicitly named.
-  repr_names <- names(category_likelihood@representations)
-  if (!is.null(repr_names) && length(repr_names) == n_repr && all(repr_names != "")) {
-    if (is.null(names(category_prior)) && length(category_prior) == n_repr) names(category_prior) <- repr_names
-    if (is.null(names(lapse_bias)) && length(lapse_bias) == n_repr) names(lapse_bias) <- repr_names
+  .mvbu_align_probability_vector <- function(values, target_names, arg_name) {
+    values <- as.numeric(values)
+    value_names <- names(values)
+
+    if (is.null(value_names)) {
+      return(values)
+    }
+
+    if (length(value_names) != length(values) || any(value_names == "") || anyDuplicated(value_names) > 0) {
+      stop(paste0(arg_name, " names must be non-empty and unique when provided."), call. = FALSE)
+    }
+
+    if (is.null(target_names) || length(target_names) != length(values) || any(target_names == "") || anyDuplicated(target_names) > 0) {
+      stop(paste0(arg_name, " names cannot be validated because category_likelihood names are missing or invalid."), call. = FALSE)
+    }
+
+    if (!setequal(value_names, target_names)) {
+      stop(paste0(arg_name, " names must match category_likelihood names."), call. = FALSE)
+    }
+
+    values[match(target_names, value_names)]
   }
 
-  prior_names <- names(category_prior)
-  lapse_names <- names(lapse_bias)
+  category_prior <- .mvbu_align_probability_vector(category_prior, repr_names, "category_prior")
+  lapse_bias <- .mvbu_align_probability_vector(lapse_bias, repr_names, "lapse_bias")
 
-  category_prior <- as.numeric(category_prior)
-  lapse_bias <- as.numeric(lapse_bias)
-
-  if (!is.null(prior_names)) names(category_prior) <- prior_names
-  if (!is.null(lapse_names)) names(lapse_bias) <- lapse_names
+  if (length(category_prior) != n_repr) {
+    stop("category_prior length must match the number of category representations.", call. = FALSE)
+  }
+  if (length(lapse_bias) != n_repr) {
+    stop("lapse_bias length must match the number of category representations.", call. = FALSE)
+  }
 
   MVBU_CognitiveModel(
     category_likelihood = category_likelihood,
@@ -1831,141 +1857,3 @@ plot_categories <- S7::new_generic("plot_categories", "x")
 plot_parameters <- S7::new_generic("plot_parameters", "x")
 plot_diagnostics <- S7::new_generic("plot_diagnostics", "x")
 
-# -------------------------
-# Minimal base methods
-# -------------------------
-
-S7::method(get_model_family, MVBU_Object) <- function(x) {
-  class(x)[1]
-}
-
-S7::method(construct_mvbu, MVBU_Object) <- function(x) {
-  x
-}
-
-S7::method(validate_mvbu, MVBU_Object) <- function(x) {
-  validate_object(x)
-}
-
-S7::method(summarize_mvbu, MVBU_Object) <- function(x) {
-  list(
-    class = class(x)[1],
-    model_family = get_model_family(x)
-  )
-}
-
-S7::method(print_mvbu, MVBU_Object) <- function(x) {
-  cat("<", class(x)[1], ">\n", sep = "")
-  invisible(x)
-}
-
-S7::method(categorize_mvbu, list(MVBU_CognitiveModel, S7::class_any)) <- function(x, new_data) {
-  get_categorization(x, new_data)
-}
-
-S7::method(predict_mvbu, list(MVBU_CognitiveModel, S7::class_any)) <- function(x, new_data) {
-  get_category_prediction(x, new_data)
-}
-
-S7::method(posterior_mvbu, MVBU_Object) <- function(x) {
-  get_posterior(x)
-}
-
-S7::method(plot_prep_mvbu, MVBU_Object) <- function(x) {
-  .mvbu_not_implemented("plot_prep_mvbu", class(x)[1])
-}
-
-S7::method(get_model_family, MVBU_ModelDistribution) <- function(x) {
-  x@model_family
-}
-
-S7::method(get_category_likelihood, MVBU_CognitiveModel) <- function(x) {
-  x@category_likelihood
-}
-
-S7::method(get_parameters, MVBU_Object) <- function(x) {
-  .mvbu_not_implemented("get_parameters", class(x)[1])
-}
-
-S7::method(get_parameters, UVG_CategoryRepresentation) <- function(x) {
-  list(
-    mu = x@mu,
-    sigma2 = x@sigma2
-  )
-}
-
-S7::method(get_parameters, NIX_CategoryRepresentation) <- function(x) {
-  list(
-    m = x@m,
-    kappa = x@kappa,
-    nu = x@nu,
-    sigma2 = x@sigma2
-  )
-}
-
-S7::method(get_parameters, MUVG_CategoryRepresentation) <- function(x) {
-  list(
-    component_mu = x@component_mu,
-    component_sigma2 = x@component_sigma2,
-    component_weights = x@component_weights
-  )
-}
-
-S7::method(get_parameters, MNIX_CategoryRepresentation) <- function(x) {
-  list(
-    component_m = x@component_m,
-    component_kappa = x@component_kappa,
-    component_nu = x@component_nu,
-    component_sigma2 = x@component_sigma2,
-    component_weights = x@component_weights
-  )
-}
-
-S7::method(get_parameters, MVG_CategoryRepresentation) <- function(x) {
-  list(
-    mu = x@mu,
-    Sigma = x@Sigma
-  )
-}
-
-S7::method(get_parameters, NIW_CategoryRepresentation) <- function(x) {
-  list(
-    m = x@m,
-    kappa = x@kappa,
-    nu = x@nu,
-    S = x@S
-  )
-}
-
-S7::method(get_parameters, Exemplar_CategoryRepresentation) <- function(x) {
-  list(
-    exemplars = x@exemplars,
-    exemplar_weights = x@exemplar_weights
-  )
-}
-
-S7::method(get_category_prior, MVBU_Object) <- function(x) {
-  .mvbu_not_implemented("get_category_prior", class(x)[1])
-}
-
-S7::method(get_category_prior, MVBU_CognitiveModel) <- function(x) {
-  x@category_prior
-}
-
-S7::method(get_cue_labels, MVBU_CategoryRepresentation) <- function(x) {
-  x@cue_labels
-}
-
-S7::method(get_category_labels, MVBU_CategoryRepresentation) <- function(x) {
-  x@category_labels
-}
-
-S7::method(get_group_labels, MVBU_Object) <- function(x) {
-  character(0)
-}
-
-# NOTE: group labels currently identify model instances in combinations of
-# models. Revisit later for richer grouped-model containers.
-S7::method(get_group_labels, MVBU_ModelDistribution) <- function(x) {
-  x@group_label
-}

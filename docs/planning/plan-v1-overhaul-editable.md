@@ -13,8 +13,8 @@
 | --- | --- | --- | --- |
 | 0 Architecture Contract and Freeze | Completed | Closed | Contract approved; interop bridge expansion continues in Phases 1-3 via watchlist (not a blocker). |
 | 1 S7 Hierarchy Foundation | Completed | Closed | Base classes, validators, core generic aliases, extension hooks, and baseline dispatch tests are in place. |
-| 2 Concrete Class Migration | In Progress | Open | Started with non-breaking legacy->S7 adapters for NIW/MVG/Exemplar families. |
-| 3 API Unification and Method Coverage | Not Started | Open | Blocked by Phase 2. |
+| 2 Concrete Class Migration | Completed | Closed | Legacy->S7 adapters implemented for NIW/MVG/Exemplar and prototype MUVG/MNIX families; constructor/default normalization and S7-only adapter-output gates are covered in migration tests. |
+| 3 API Unification and Method Coverage | In Progress | Open | Initial S7 unification landed for categorization/prediction/posterior-prediction with consistent single and list/batch handling. |
 | 4 Compatibility Shell | Not Started | Open | Can start late in Phase 3. |
 | 5 Data Model and Print Strategy | Not Started | Open | Starts after class migration baseline. |
 | 6 Performance and Caching Framework | Not Started | Open | Starts after API baseline stabilizes. |
@@ -110,23 +110,23 @@ Phase gate:
 **Goal:** move NIW/MVG/exemplar families to S7 and unify inferred classes
 
 Checklist:
-- [ ] Migrate representation classes (NIW belief, MVG representation, exemplar representation)
-- [ ] Migrate cognitive model classes (NIW adaptor, MVG observer, exemplar model)
-- [ ] Migrate ModelDistribution classes around stanfit outputs
-- [ ] Standardize constructors and defaults
-- [ ] Validate migration pattern can be reused by at least one future-family prototype (MUVG, MNIX, or another non-Gaussian family)
+- [x] Migrate representation classes (NIW belief, MVG representation, exemplar representation)
+- [x] Migrate cognitive model classes (NIW adaptor, MVG observer, exemplar model)
+- [x] Migrate ModelDistribution classes around stanfit outputs
+- [x] Standardize constructors and defaults
+- [x] Validate migration pattern can be reused by at least one future-family prototype (MUVG, MNIX, or another non-Gaussian family)
 
 Phase gate:
-- [ ] Constructor normalization tests pass
-- [ ] No mixed S4/S7 construction paths for migrated classes
+- [x] Constructor normalization tests pass
+- [x] No mixed S4/S7 construction paths for migrated classes
 
 ### Phase 3: API Unification and Method Coverage
 **Goal:** normalize user-facing behavior and signatures
 
 Checklist:
 - [ ] Replace mixed S3/S4/direct dispatch with unified S7 API surface
-- [ ] Normalize categorization/prediction signatures across model families
-- [ ] Support both single and list/batch forms consistently
+- [x] Normalize categorization/prediction signatures across model families
+- [x] Support both single and list/batch forms consistently
 - [ ] Unify high-level plotting entry points with internal dimension specialization
 - [ ] Fill method coverage gaps (summary/print/plot/getters/update parity)
 - [ ] Ensure generic signatures remain family-agnostic for Gaussian and non-Gaussian model families
