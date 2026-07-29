@@ -103,31 +103,6 @@ get_NIW_categorization_function <- function(
   return(f)
 }
 
-
-#' @rdname get_NIW_categorization_function
-#' @export
-get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
-  # Could be used later in a function that checks internal consistency of model
-  # if (nunique(model$lapse_rate) > 1) stop2("Model has more than one unique lapse_rate.")
-  #
-  # .is_identical_to_first <- function(x, first_matrix) {
-  #   identical(x, first_matrix)
-  # }
-  # if (nunique(model$lapse_rate) > 1) stop2("Model has more than one unique Sigma_noise.")
-
-  get_NIW_categorization_function(
-    ms = model$m,
-    Ss = model$S,
-    kappas = model$kappa,
-    nus = model$nu,
-    priors = model$prior,
-    lapse_rate = model$lapse_rate[[1]],
-    lapse_biases = model$lapse_bias,
-    Sigma_noise = model$Sigma_noise[[1]],
-    ...
-  )
-}
-
 #' Get categorization from an NIW ideal adaptor
 #'
 #' Categorize a single observation based on an NIW ideal adaptor The decision rule can be specified to be either the
@@ -153,8 +128,38 @@ get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
+
+# Deprecated after S7-migration
+
+#' @rdname get_NIW_categorization_function
 #' @export
-#'
+#' @deprecated Use get_category_posterior_function() instead.
+get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
+  warning("get_categorization_function_from_NIW_ideal_adaptor() is deprecated; use get_category_posterior_function() on an S7 cognitive model instead.", call. = FALSE)
+  # Could be used later in a function that checks internal consistency of model
+  # if (nunique(model$lapse_rate) > 1) stop2("Model has more than one unique lapse_rate.")
+  #
+  # .is_identical_to_first <- function(x, first_matrix) {
+  #   identical(x, first_matrix)
+  # }
+  # if (nunique(model$lapse_rate) > 1) stop2("Model has more than one unique Sigma_noise.")
+
+  get_NIW_categorization_function(
+    ms = model$m,
+    Ss = model$S,
+    kappas = model$kappa,
+    nus = model$nu,
+    priors = model$prior,
+    lapse_rate = model$lapse_rate[[1]],
+    lapse_biases = model$lapse_bias,
+    Sigma_noise = model$Sigma_noise[[1]],
+    ...
+  )
+}
+
+#' @rdname get_categorization_from_model
+#' @export
+#' @deprecated Use categorize() instead.
 get_categorization_from_NIW_ideal_adaptor <- function(
   x,
   model,
@@ -164,6 +169,7 @@ get_categorization_from_NIW_ideal_adaptor <- function(
   simplify = F,
   verbose = F
 ) {
+  warning("get_categorization_from_NIW_ideal_adaptor() is deprecated; use categorize() on an S7 cognitive model instead.", call. = FALSE)
   # TO DO: check dimensionality of x with regard to model.
   assert_NIW_ideal_adaptor(model, verbose = verbose)
   assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
@@ -175,15 +181,15 @@ get_categorization_from_NIW_ideal_adaptor <- function(
   # correctly treats it as length 1 (rather than the dimensionality of the one observation).
   if (!is.list(x)) x <- list(x)
 
-  n.distinct_categories <- length(get_category_labels_from_model(model))
+  n.distinct_categories <- length(get_category_labels(model))
   posterior_probabilities <-
     get_posterior_predictive_from_NIW_belief(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%
     mutate(
       observationID = rep(1:length(.env$x), .env$n.distinct_categories),
       x = rep(.env$x, .env$n.distinct_categories),
-      lapse_rate = get_lapse_rate_from_model(.env$model),
-      lapse_bias = get_lapse_biases_from_model(.env$model, categories = .data$category),
-      prior = get_priors_from_model(.env$model, categories = .data$category)) %>%
+      lapse_rate = get_lapse_rate(.env$model),
+      lapse_bias = get_lapse_bias(.env$model, categories = .data$category),
+      prior = get_category_prior(.env$model, categories = .data$category)) %>%
     group_by(observationID) %>%
     mutate(posterior_probability = (posterior_predictive * prior) / sum(posterior_predictive * prior))
 
@@ -194,7 +200,7 @@ get_categorization_from_NIW_ideal_adaptor <- function(
         posterior_probability = ifelse(
           rep(
             rbinom(1, 1, lapse_rate),
-            get_nlevels_of_category_labels_from_model(model)),
+            length(get_category_labels(model))),
           lapse_bias,                 # substitute lapse probabilities for posterior
           posterior_probability))     # ... or not
   } else if (lapse_treatment == "marginalize") {
@@ -210,9 +216,9 @@ get_categorization_from_NIW_ideal_adaptor <- function(
         posterior_probability = ifelse(
           rep(
             sum(posterior_probability == max(posterior_probability)) > 1,
-            get_nlevels_of_category_labels_from_model(model)),
+            length(get_category_labels(model))),
           posterior_probability + runif(
-            get_nlevels_of_category_labels_from_model(model),
+            length(get_category_labels(model)),
             min = 0,
             max = 0),
           posterior_probability),

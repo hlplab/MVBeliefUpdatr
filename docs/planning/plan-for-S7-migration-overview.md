@@ -124,7 +124,8 @@ Phase gate:
 **Goal:** normalize user-facing behavior and signatures
 
 Checklist:
-- [ ] Replace mixed S3/S4/direct dispatch with unified S7 API surface
+- [ ] Replace mixed S3/S4/direct dispatch with unified S7 API surface. 
+- [ ] Update handling of stanfit-related classes. For details, see [docs/planning/phase3-stanfit-migration.md](docs/planning/phase3-stanfit-migration.md).
 - [x] Normalize categorization/prediction signatures across model families
 - [x] Support both single and list/batch forms consistently
 - [ ] Unify high-level plotting entry points with internal dimension specialization
@@ -164,6 +165,8 @@ Phase gate:
 
 ### Phase 6: Performance and Caching Framework
 **Goal:** fix high-impact bottlenecks with controlled memory use
+
+Planning note: see [docs/planning/phase6-performance-caching-framework.md](docs/planning/phase6-performance-caching-framework.md) for the detailed design and implementation outline for the posterior-kernel caching strategy.
 
 Checklist:
 - [ ] Implement operation-aware caching
@@ -227,6 +230,7 @@ Checklist:
 - [ ] All legacy code integrated into the S7 scaffold in phase scope is brought up to roxygen documentation standards.
 - [ ] Roxygen generation runs for the phase branch without introducing new unresolved-link warnings for phase-touched files.
 - [ ] Generated Rd output for phase-touched topics is checked for malformed markup/macros.
+- [ ] Remove temporary S7 scaffold-only `package = NULL` overrides once the class registration strategy is finalized for the packaged build.
 
 Phase gate:
 - [ ] Vignette examples run end-to-end

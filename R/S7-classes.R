@@ -41,8 +41,8 @@ NULL
 
 #' @rdname MVBU-core-classes
 #' @section MVBU_Object:
-#' Root S7 base class for MVBeliefUpdatr scaffold objects.
-MVBU_Object <- S7::new_class("MVBU_Object")
+#' Root S7 base class for MVBeliefUpdatr objects.
+MVBU_Object <- S7::new_class("MVBU_Object", package = NULL)
 
 #' @rdname MVBU-core-classes
 #' @section MVBU_CategoryRepresentation:
@@ -51,23 +51,34 @@ MVBU_Object <- S7::new_class("MVBU_Object")
 #' Expected properties:
 #' - `category_labels`: one or more category labels associated with the object.
 #' - `cue_labels`: one or more cue-dimension labels.
-#' - `category_likelihood`: family-specific likelihood function placeholder.
+#' - `category_likelihood_function`: family-specific likelihood function placeholder.
 #' - `metadata`: optional auxiliary metadata list.
 MVBU_CategoryRepresentation <- S7::new_class(
   "MVBU_CategoryRepresentation",
+  package = NULL,
   parent = MVBU_Object,
   properties = list(
-    category_labels = S7::class_character,
-    cue_labels = S7::class_character,
-    category_likelihood = S7::class_function,
+    category_likelihood_function = S7::class_function,
     metadata = S7::class_list
   ),
   validator = function(self) {
-    if (length(self@category_labels) < 1) {
-      return("category_labels must contain at least one label.")
+    if (!is.list(self@metadata)) {
+      return("metadata must be a list.")
     }
-    if (length(self@cue_labels) < 1) {
-      return("cue_labels must contain at least one label.")
+
+    label_information <- .mvbu_label_information(self@metadata)
+    if (is.null(label_information$category)) {
+      label_information$category <- character(0)
+    }
+    if (is.null(label_information$cue)) {
+      label_information$cue <- character(0)
+    }
+
+    if (length(label_information$category) < 1) {
+      return("metadata$label_information$category must contain at least one label.")
+    }
+    if (length(label_information$cue) < 1) {
+      return("metadata$label_information$cue must contain at least one label.")
     }
     NULL
   }
@@ -86,6 +97,7 @@ MVBU_CategoryRepresentation <- S7::new_class(
 #' non-empty representation names.
 MVBU_CategoryRepresentationTemplate <- S7::new_class(
   "MVBU_CategoryRepresentationTemplate",
+  package = NULL,
   parent = MVBU_Object,
   properties = list(
     representations = S7::class_list,
@@ -117,32 +129,92 @@ MVBU_CategoryRepresentationTemplate <- S7::new_class(
 #' model-level decision and uncertainty parameters.
 #'
 #' Expected properties:
-#' - `category_likelihood`: `MVBU_CategoryRepresentationTemplate`.
+#' - `category_template`: `MVBU_CategoryRepresentationTemplate`.
+#' - `category_posterior_functions`: named list of treatment-specific posterior functions.
 #' - `decision_rule`: scalar character rule label.
 #' - `category_prior`: numeric probability vector over represented categories.
-#' - `lapse_rate`: scalar probability in `[0,1]`.
-#' - `lapse_bias`: numeric probability vector over represented categories.
+#' - `lapse_behavior`: list with `lapse_rate`, `lapse_bias`, and `lapse_treatment`.
+#' - `noise_behavior`: list with `Sigma_noise` and `noise_treatment`.
+#'   `Sigma_noise` is stored as a square matrix and may be supplied as a vector
+#'   (which is converted to a diagonal matrix) or as a matrix.
 #' - `metadata`: optional model metadata.
 MVBU_CognitiveModel <- S7::new_class(
   "MVBU_CognitiveModel",
+  package = NULL,
   parent = MVBU_Object,
   properties = list(
-    category_likelihood = MVBU_CategoryRepresentationTemplate,
+    category_template = MVBU_CategoryRepresentationTemplate,
+    category_posterior_functions = S7::class_list,
     decision_rule = S7::class_character,
     category_prior = S7::class_numeric,
-    lapse_rate = S7::class_numeric,
-    lapse_bias = S7::class_numeric,
+    lapse_behavior = S7::class_list,
+    noise_behavior = S7::class_list,
     metadata = S7::class_list
   ),
   validator = function(self) {
-    n_repr <- length(self@category_likelihood@representations)
+    n_repr <- length(self@category_template@representations)
 
     if (length(self@decision_rule) != 1) {
       return("decision_rule must be a scalar character value.")
     }
 
-    if (length(self@lapse_rate) != 1 || self@lapse_rate < 0 || self@lapse_rate > 1) {
+    lapse_behavior <- self@lapse_behavior
+    if (!is.list(lapse_behavior) || !all(c("lapse_rate", "lapse_bias", "lapse_treatment") %in% names(lapse_behavior))) {
+      return("lapse_behavior must be a list containing lapse_rate, lapse_bias, and lapse_treatment.")
+    }
+
+    lapse_rate <- as.numeric(lapse_behavior$lapse_rate)
+    lapse_bias <- as.numeric(lapse_behavior$lapse_bias)
+    lapse_treatment <- as.character(lapse_behavior$lapse_treatment)
+    if (length(lapse_rate) != 1 || lapse_rate < 0 || lapse_rate > 1) {
       return("lapse_rate must be a scalar numeric in [0, 1].")
+    }
+
+    if (length(lapse_bias) != n_repr) {
+      return("lapse_bias length must match the number of category representations.")
+    }
+
+    if (length(lapse_bias) > 0) {
+      if (any(lapse_bias < 0) || any(lapse_bias > 1)) {
+        return("lapse_bias entries must be in [0, 1].")
+      }
+      if (abs(sum(lapse_bias) - 1) > MVBU_PROB_TOL) {
+        return("lapse_bias entries must sum to 1.")
+      }
+    }
+
+    if (!lapse_treatment %in% c("no_lapses", "sample", "marginalize")) {
+      return("lapse_treatment must be one of 'no_lapses', 'sample', or 'marginalize'.")
+    }
+
+    noise_behavior <- self@noise_behavior
+    if (!is.list(noise_behavior) || !all(c("Sigma_noise", "noise_treatment") %in% names(noise_behavior))) {
+      return("noise_behavior must be a list containing Sigma_noise and noise_treatment.")
+    }
+
+    Sigma_noise <- noise_behavior$Sigma_noise
+    noise_treatment <- as.character(noise_behavior$noise_treatment)
+    if (!is.null(Sigma_noise)) {
+      if (!is.matrix(Sigma_noise)) {
+        return("Sigma_noise must be NULL or a matrix.")
+      }
+      if (!is.numeric(Sigma_noise)) {
+        return("Sigma_noise must be NULL or a numeric matrix.")
+      }
+      if (any(!is.finite(Sigma_noise))) {
+        return("Sigma_noise entries must be finite.")
+      }
+      if (any(Sigma_noise < 0)) {
+        return("Sigma_noise entries must be non-negative.")
+      }
+      cue_labels <- get_cue_labels(self@category_template)
+      if (nrow(Sigma_noise) != length(cue_labels) || ncol(Sigma_noise) != length(cue_labels)) {
+        return("Sigma_noise dimensions must match the number of cue labels.")
+      }
+    }
+
+    if (!noise_treatment %in% c("no_noise", "sample", "marginalize")) {
+      return("noise_treatment must be one of 'no_noise', 'sample', or 'marginalize'.")
     }
 
     if (length(self@category_prior) != n_repr) {
@@ -157,21 +229,8 @@ MVBU_CognitiveModel <- S7::new_class(
       return("category_prior entries must sum to 1.")
     }
 
-    if (length(self@lapse_bias) != n_repr) {
-      return("lapse_bias length must match the number of category representations.")
-    }
-
-    if (length(self@lapse_bias) > 0) {
-      if (any(self@lapse_bias < 0) || any(self@lapse_bias > 1)) {
-        return("lapse_bias entries must be in [0, 1].")
-      }
-      if (abs(sum(self@lapse_bias) - 1) > MVBU_PROB_TOL) {
-        return("lapse_bias entries must sum to 1.")
-      }
-    }
-
     # Category association can be by explicit names or by order.
-    repr_names <- names(self@category_likelihood@representations)
+    repr_names <- names(self@category_template@representations)
     if (!is.null(repr_names)) {
       if (length(repr_names) != n_repr || any(repr_names == "") || anyDuplicated(repr_names) > 0) {
         return("if representations are named, names must be non-empty and unique.")
@@ -183,17 +242,17 @@ MVBU_CognitiveModel <- S7::new_class(
           return("if category_prior is named, names must be non-empty and unique.")
         }
         if (!setequal(prior_names, repr_names)) {
-          return("if category_prior is named, names must match category_likelihood names.")
+          return("if category_prior is named, names must match category_template names.")
         }
       }
 
-      lapse_names <- names(self@lapse_bias)
+      lapse_names <- names(lapse_bias)
       if (!is.null(lapse_names)) {
         if (length(lapse_names) != n_repr || any(lapse_names == "") || anyDuplicated(lapse_names) > 0) {
           return("if lapse_bias is named, names must be non-empty and unique.")
         }
         if (!setequal(lapse_names, repr_names)) {
-          return("if lapse_bias is named, names must match category_likelihood names.")
+          return("if lapse_bias is named, names must match category_template names.")
         }
       }
     }
@@ -214,6 +273,7 @@ MVBU_CognitiveModel <- S7::new_class(
 #' - `group_label`: scalar grouping label for grouped workflows.
 MVBU_ModelDistribution <- S7::new_class(
   "MVBU_ModelDistribution",
+  package = NULL,
   parent = MVBU_Object,
   properties = list(
     model_family = S7::class_character,
@@ -394,7 +454,7 @@ register_stan_family_hooks(
 )
 
 # -------------------------
-# Family-typed subclasses
+# Family-specific representation classes
 # -------------------------
 
 #' UVG Category Representation
@@ -427,7 +487,8 @@ UVG_CategoryRepresentation <- S7::new_class(
     sigma2 = S7::class_numeric
   ),
   validator = function(self) {
-    if (length(self@cue_labels) != 1) {
+    label_information <- .mvbu_label_information(self@metadata)
+    if (length(label_information$cue) != 1) {
       return("UVG representation must describe a single cue dimension.")
     }
     if (length(self@mu) != 1) {
@@ -479,7 +540,8 @@ NIX_CategoryRepresentation <- S7::new_class(
     sigma2 = S7::class_numeric
   ),
   validator = function(self) {
-    if (length(self@cue_labels) != 1) {
+    label_information <- .mvbu_label_information(self@metadata)
+    if (length(label_information$cue) != 1) {
       return("NIX representation must describe a single cue dimension.")
     }
     if (length(self@m) != 1) {
@@ -546,7 +608,8 @@ MUVG_CategoryRepresentation <- S7::new_class(
     if (length(self@component_sigma2) != n_comp || length(self@component_weights) != n_comp) {
       return("MUVG component parameter vectors must all have equal length.")
     }
-    if (length(self@cue_labels) != n_comp) {
+    label_information <- .mvbu_label_information(self@metadata)
+    if (length(label_information$cue) != n_comp) {
       return("MUVG cue_labels length must match the number of cue components.")
     }
     if (any(is.na(self@component_mu))) {
@@ -621,7 +684,8 @@ MNIX_CategoryRepresentation <- S7::new_class(
         length(self@component_weights) != n_comp) {
       return("MNIX component parameter vectors must all have equal length.")
     }
-    if (length(self@cue_labels) != 1) {
+    label_information <- .mvbu_label_information(self@metadata)
+    if (length(label_information$cue) != 1) {
       return("MNIX representation must describe a single cue dimension.")
     }
     if (any(self@component_kappa <= 0)) {
@@ -676,7 +740,8 @@ MVG_CategoryRepresentation <- S7::new_class(
     Sigma = S7::class_any
   ),
   validator = function(self) {
-    d <- length(self@cue_labels)
+    label_information <- .mvbu_label_information(self@metadata)
+    d <- length(label_information$cue)
 
     if (length(self@mu) != d) {
       return("MVG mu must have length equal to cue dimensionality.")
@@ -733,7 +798,8 @@ NIW_CategoryRepresentation <- S7::new_class(
     S = S7::class_any
   ),
   validator = function(self) {
-    d <- length(self@cue_labels)
+    label_information <- .mvbu_label_information(self@metadata)
+    d <- length(label_information$cue)
 
     if (length(self@m) != d) {
       return("NIW m must have length equal to cue dimensionality.")
@@ -801,7 +867,8 @@ Exemplar_CategoryRepresentation <- S7::new_class(
     if (n_ex < 1) {
       return("Exemplar exemplars must contain at least one row.")
     }
-    if (d != length(self@cue_labels)) {
+    label_information <- .mvbu_label_information(self@metadata)
+    if (d != length(label_information$cue)) {
       return("Exemplar exemplar column count must match cue dimensionality.")
     }
     if (length(self@exemplar_weights) != n_ex) {
@@ -817,6 +884,10 @@ Exemplar_CategoryRepresentation <- S7::new_class(
     NULL
   }
 )
+
+# -------------------------
+# Family-specific cognitive model classes
+# -------------------------
 
 #' UVG Ideal Observer Model Class
 #'
@@ -895,6 +966,10 @@ NIW_IdealAdaptor <- S7::new_class("NIW_IdealAdaptor", parent = MVBU_CognitiveMod
 #' @name Exemplar-Model-class
 #' @keywords internal
 Exemplar_Model <- S7::new_class("Exemplar_Model", parent = MVBU_CognitiveModel)
+
+# -------------------------
+# Family-specific model distribution classes
+# -------------------------
 
 #' UVG Ideal Observer Distribution Class
 #'
@@ -1126,26 +1201,65 @@ new_exemplar_model_distribution <- function(cache = list(), metadata = list(), g
 #' By default, lapse_bias equals category_prior.
 #' Category association is by order unless explicit names are supplied.
 #' @keywords internal
+.mvbu_normalize_sigma_noise <- function(Sigma_noise, cue_labels) {
+  if (is.null(Sigma_noise)) {
+    return(NULL)
+  }
+
+  if (is.matrix(Sigma_noise)) {
+    Sigma_noise <- as.matrix(Sigma_noise)
+  } else if (is.numeric(Sigma_noise) && length(Sigma_noise) > 0 && is.null(dim(Sigma_noise))) {
+    if (length(Sigma_noise) != length(cue_labels)) {
+      stop("Sigma_noise length must match the number of cue labels.", call. = FALSE)
+    }
+    Sigma_noise <- diag(Sigma_noise, nrow = length(Sigma_noise), ncol = length(Sigma_noise))
+  } else {
+    stop("Sigma_noise must be NULL, a numeric vector, or a matrix.", call. = FALSE)
+  }
+
+  if (!is.numeric(Sigma_noise)) {
+    stop("Sigma_noise must be numeric.", call. = FALSE)
+  }
+  if (any(!is.finite(Sigma_noise))) {
+    stop("Sigma_noise entries must be finite.", call. = FALSE)
+  }
+  if (any(Sigma_noise < 0)) {
+    stop("Sigma_noise entries must be non-negative.", call. = FALSE)
+  }
+  if (nrow(Sigma_noise) != length(cue_labels) || ncol(Sigma_noise) != length(cue_labels)) {
+    stop("Sigma_noise dimensions must match the number of cue labels.", call. = FALSE)
+  }
+
+  Sigma_noise
+}
+
 new_cognitive_model <- function(
-    category_likelihood,
+    category_template = NULL,
     decision_rule = "sampling",
     category_prior = NULL,
     lapse_rate = 0,
     lapse_bias = NULL,
-  metadata = list()
+    Sigma_noise = NULL,
+    noise_treatment = "no_noise",
+    lapse_treatment = "no_lapses",
+    metadata = list()
 ) {
-  if (!S7::S7_inherits(category_likelihood, MVBU_CategoryRepresentationTemplate)) {
-    stop("category_likelihood must be an MVBU_CategoryRepresentationTemplate.", call. = FALSE)
+  if (is.null(category_template)) {
+    stop("category_template must be supplied.", call. = FALSE)
   }
 
-  n_repr <- length(category_likelihood@representations)
-  if (n_repr < 1) {
-    stop("category_likelihood must contain at least one element.", call. = FALSE)
+  if (!S7::S7_inherits(category_template, MVBU_CategoryRepresentationTemplate)) {
+    stop("category_template must be an MVBU_CategoryRepresentationTemplate.", call. = FALSE)
   }
 
-  repr_names <- names(category_likelihood@representations)
-  if (!is.null(repr_names) && (length(repr_names) != n_repr || any(repr_names == "") || anyDuplicated(repr_names) > 0)) {
-    stop("if category_likelihood representations are named, names must be non-empty and unique.", call. = FALSE)
+  n_repr <- length(category_template@representations)
+  repr_names <- names(category_template@representations)
+
+  if (!noise_treatment %in% c("no_noise", "sample", "marginalize")) {
+    stop("noise_treatment must be one of 'no_noise', 'sample', or 'marginalize'.", call. = FALSE)
+  }
+  if (!lapse_treatment %in% c("no_lapses", "sample", "marginalize")) {
+    stop("lapse_treatment must be one of 'no_lapses', 'sample', or 'marginalize'.", call. = FALSE)
   }
 
   if (is.null(category_prior)) {
@@ -1163,7 +1277,7 @@ new_cognitive_model <- function(
     if (is.null(value_names)) {
       if (!is.null(target_names) && length(target_names) == length(values)) {
         if (any(target_names == "") || anyDuplicated(target_names) > 0) {
-          stop(paste0(arg_name, " names cannot be validated because category_likelihood names are missing or invalid."), call. = FALSE)
+          stop(paste0(arg_name, " names cannot be validated because category_template names are missing or invalid."), call. = FALSE)
         }
         names(values) <- target_names
       }
@@ -1175,11 +1289,11 @@ new_cognitive_model <- function(
     }
 
     if (is.null(target_names) || length(target_names) != length(values) || any(target_names == "") || anyDuplicated(target_names) > 0) {
-      stop(paste0(arg_name, " names cannot be validated because category_likelihood names are missing or invalid."), call. = FALSE)
+      stop(paste0(arg_name, " names cannot be validated because category_template names are missing or invalid."), call. = FALSE)
     }
 
     if (!setequal(value_names, target_names)) {
-      stop(paste0(arg_name, " names must match category_likelihood names."), call. = FALSE)
+      stop(paste0(arg_name, " names must match category_template names."), call. = FALSE)
     }
 
     values <- values[match(target_names, value_names)]
@@ -1197,33 +1311,229 @@ new_cognitive_model <- function(
     stop("lapse_bias length must match the number of category representations.", call. = FALSE)
   }
 
-  MVBU_CognitiveModel(
-    category_likelihood = category_likelihood,
-    decision_rule = as.character(decision_rule),
+  cue_labels <- get_cue_labels(category_template)
+  Sigma_noise <- .mvbu_normalize_sigma_noise(Sigma_noise, cue_labels)
+  noise_behavior <- list(
+    Sigma_noise = Sigma_noise,
+    noise_treatment = as.character(noise_treatment)
+  )
+  lapse_behavior <- list(
     lapse_rate = as.numeric(lapse_rate),
-    category_prior = category_prior,
     lapse_bias = lapse_bias,
+    lapse_treatment = as.character(lapse_treatment)
+  )
+
+  model <- MVBU_CognitiveModel(
+    category_template = category_template,
+    category_posterior_functions = list(),
+    decision_rule = as.character(decision_rule),
+    category_prior = category_prior,
+    lapse_behavior = lapse_behavior,
+    noise_behavior = noise_behavior,
     metadata = metadata
   )
+
+  noise_treatments <- if (!is.null(model@noise_behavior$Sigma_noise)) c("no_noise", "sample", "marginalize") else "no_noise"
+  lapse_treatments <- c("no_lapses", "sample", "marginalize")
+  posterior_functions <- list()
+  for (noise_treatment_i in noise_treatments) {
+    for (lapse_treatment_i in lapse_treatments) {
+      key <- paste(noise_treatment_i, lapse_treatment_i, sep = "__")
+      posterior_functions[[key]] <- function(new_data, categories = NULL, .noise_treatment = noise_treatment_i, .lapse_treatment = lapse_treatment_i) {
+        .mvbu_posterior_matrix(model, new_data, categories = categories, noise_treatment = .noise_treatment, lapse_treatment = .lapse_treatment)
+      }
+    }
+  }
+  model@category_posterior_functions <- posterior_functions
+
+  model
 }
 
 #' Construct a category representation set
 #' @keywords internal
-new_category_representation_template <- function(representations, metadata = list()) {
+.mvbu_label_information <- function(metadata = list()) {
+  if (!is.list(metadata)) {
+    metadata <- as.list(metadata)
+  }
+
+  if (!is.null(metadata$label_information) && is.list(metadata$label_information)) {
+    label_information <- metadata$label_information
+  } else {
+    label_information <- list()
+  }
+
+  if (is.null(label_information$category) && !is.null(metadata$category)) {
+    label_information$category <- metadata$category
+  }
+  if (is.null(label_information$cue) && !is.null(metadata$cue)) {
+    label_information$cue <- metadata$cue
+  }
+
+  label_information
+}
+
+.mvbu_label_metadata <- function(category_labels = character(), cue_labels = character(), metadata = list()) {
+  if (!is.list(metadata)) {
+    metadata <- as.list(metadata)
+  }
+
+  label_information <- .mvbu_label_information(metadata)
+  label_information$category <- as.character(category_labels)
+  label_information$cue <- as.character(cue_labels)
+
+  metadata$label_information <- label_information
+  metadata$category <- NULL
+  metadata$cue <- NULL
+  metadata
+}
+
+.mvbu_extract_label_metadata <- function(x) {
+  if (is.null(x)) {
+    return(list(category = character(0), cue = character(0), group = character(0)))
+  }
+
+  if (S7::S7_inherits(x, MVBU_CategoryRepresentation)) {
+    metadata <- x@metadata
+  } else if (S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
+    metadata <- x@metadata
+  } else if (S7::S7_inherits(x, MVBU_CognitiveModel)) {
+    likelihood <- S7::method(get_category_likelihood, MVBU_CognitiveModel)(x)
+    return(.mvbu_extract_label_metadata(likelihood))
+  } else {
+    return(list(category = character(0), cue = character(0), group = character(0)))
+  }
+
+  if (!is.list(metadata)) {
+    metadata <- list()
+  }
+
+  label_information <- .mvbu_label_information(metadata)
+
+  list(
+    category = if (!is.null(label_information$category)) as.character(label_information$category) else character(0),
+    cue = if (!is.null(label_information$cue)) as.character(label_information$cue) else character(0),
+    group = if (!is.null(label_information$group)) as.character(label_information$group) else character(0)
+  )
+}
+
+.mvbu_validate_cue_consistency <- function(representations) {
+  if (length(representations) < 2) {
+    return(invisible(NULL))
+  }
+
+  reference_cues <- .mvbu_extract_label_metadata(representations[[1]])$cue
+  for (i in seq_along(representations)[-1]) {
+    rep_cues <- .mvbu_extract_label_metadata(representations[[i]])$cue
+    if (!identical(as.character(rep_cues), as.character(reference_cues))) {
+      stop("cue labels must be consistent across all representations in a template.", call. = FALSE)
+    }
+  }
+
+  invisible(NULL)
+}
+
+.mvbu_template_metadata <- function(representations, metadata = list()) {
+  if (!is.list(metadata)) {
+    metadata <- as.list(metadata)
+  }
+
+  category_labels <- unlist(lapply(representations, function(rep) .mvbu_extract_label_metadata(rep)$category), use.names = FALSE)
+  cue_labels <- .mvbu_extract_label_metadata(representations[[1]])$cue
+
+  metadata$label_information <- list(
+    category = category_labels,
+    cue = cue_labels
+  )
+  metadata$category <- NULL
+  metadata$cue <- NULL
+  metadata
+}
+
+add_category_representation <- function(template, representation, name = NULL) {
+  if (!S7::S7_inherits(template, MVBU_CategoryRepresentationTemplate)) {
+    stop("template must be an MVBU_CategoryRepresentationTemplate.", call. = FALSE)
+  }
+  if (!S7::S7_inherits(representation, MVBU_CategoryRepresentation)) {
+    stop("representation must be an MVBU_CategoryRepresentation.", call. = FALSE)
+  }
+  if (!is.null(name) && (length(name) != 1 || !nzchar(name))) {
+    stop("name must be a non-empty scalar character value.", call. = FALSE)
+  }
+
+  representations <- template@representations
+  representations[[length(representations) + 1]] <- representation
+
+  if (!is.null(name)) {
+    names(representations)[length(representations)] <- name
+  }
+
+  .mvbu_validate_cue_consistency(representations)
+
+  metadata <- as.list(template@metadata)
+  rep_labels <- .mvbu_extract_label_metadata(representation)
+  template_labels <- .mvbu_extract_label_metadata(template)
+  if (length(template_labels$cue) > 0 && length(rep_labels$cue) > 0 && !identical(as.character(template_labels$cue), as.character(rep_labels$cue))) {
+    stop("cue labels must be consistent across all representations in a template.", call. = FALSE)
+  }
+  if (length(template_labels$cue) == 0 && length(rep_labels$cue) > 0) {
+    metadata$label_information$cue <- rep_labels$cue
+  } else if (length(template_labels$cue) > 0) {
+    metadata$label_information$cue <- template_labels$cue
+  }
+
+  metadata$label_information$category <- c(template_labels$category, rep_labels$category)
+  metadata$category <- NULL
+  metadata$cue <- NULL
   MVBU_CategoryRepresentationTemplate(
     representations = representations,
     metadata = metadata
   )
 }
 
+new_category_representation_template <- function(representations, metadata = list()) {
+  if (!is.list(representations) || length(representations) < 1) {
+    stop("representations must contain at least one category representation object.", call. = FALSE)
+  }
+  if (!all(vapply(representations, function(r) S7::S7_inherits(r, MVBU_CategoryRepresentation), logical(1)))) {
+    stop("all representations entries must inherit from MVBU_CategoryRepresentation.", call. = FALSE)
+  }
+
+  rep_names <- names(representations)
+  if (!is.null(rep_names) && (length(rep_names) != length(representations) || any(rep_names == "") || anyDuplicated(rep_names) > 0)) {
+    stop("if representations are named, names must be non-empty and unique.", call. = FALSE)
+  }
+
+  template <- NULL
+  rep_names <- names(representations)
+  for (i in seq_along(representations)) {
+    rep_name <- if (!is.null(rep_names)) rep_names[i] else NULL
+    if (is.null(template)) {
+      template_representations <- list(representations[[i]])
+      if (!is.null(rep_name)) {
+        names(template_representations) <- rep_name
+      }
+      template <- MVBU_CategoryRepresentationTemplate(
+        representations = template_representations,
+        metadata = .mvbu_template_metadata(template_representations, metadata)
+      )
+    } else {
+      template <- add_category_representation(template, representations[[i]], name = rep_name)
+    }
+  }
+
+  template
+}
+
 #' Construct a base representation object
 #' @keywords internal
-new_category_representation <- function(category_labels, cue_labels, category_likelihood = function(...) stop("category_likelihood not implemented.", call. = FALSE), metadata = list()) {
+new_category_representation <- function(category_labels, cue_labels, category_likelihood_function = NULL, metadata = list()) {
+  if (is.null(category_likelihood_function)) {
+    category_likelihood_function <- function(...) stop("category_likelihood not implemented.", call. = FALSE)
+  }
+
   MVBU_CategoryRepresentation(
-    category_labels = as.character(category_labels),
-    cue_labels = as.character(cue_labels),
-    category_likelihood = category_likelihood,
-    metadata = metadata
+    category_likelihood_function = category_likelihood_function,
+    metadata = .mvbu_label_metadata(as.character(category_labels), as.character(cue_labels), metadata)
   )
 }
 
@@ -1302,17 +1612,19 @@ new_uvg_category_representation <- function(
     metadata = list()
 ) {
   UVG_CategoryRepresentation(
-    category_labels = as.character(category_labels),
-    cue_labels = as.character(cue_labels),
-    category_likelihood = {
+    category_likelihood_function = {
       mu0 <- as.numeric(mu)
       sigma20 <- as.numeric(sigma2)
-      function(x, log = FALSE) {
+      function(x, log = FALSE, noise_treatment = "no_noise", Sigma_noise = NULL) {
         x <- .as_observation_matrix(x, d = 1, arg_name = "x")
-        stats::dnorm(x[, 1], mean = mu0, sd = sqrt(sigma20), log = log)
+        if (identical(noise_treatment, "sample") && !is.null(Sigma_noise)) {
+          x <- x + mvtnorm::rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
+        }
+        noise_variance <- if (!is.null(Sigma_noise) && (identical(noise_treatment, "sample") || identical(noise_treatment, "marginalize"))) as.numeric(Sigma_noise[1, 1]) else 0
+        stats::dnorm(x[, 1], mean = mu0, sd = sqrt(sigma20 + noise_variance), log = log)
       }
     },
-    metadata = metadata,
+    metadata = .mvbu_label_metadata(as.character(category_labels), as.character(cue_labels), metadata),
     mu = as.numeric(mu),
     sigma2 = as.numeric(sigma2)
   )
@@ -1330,25 +1642,27 @@ new_nix_category_representation <- function(
     metadata = list()
 ) {
   NIX_CategoryRepresentation(
-    category_labels = as.character(category_labels),
-    cue_labels = as.character(cue_labels),
-    category_likelihood = {
+    category_likelihood_function = {
       m0 <- as.numeric(m)
       kappa0 <- as.numeric(kappa)
       nu0 <- as.numeric(nu)
       sigma20 <- as.numeric(sigma2)
-      scale0 <- sqrt(sigma20 * (kappa0 + 1) / kappa0)
-      function(x, log = FALSE) {
+      function(x, log = FALSE, noise_treatment = "no_noise", Sigma_noise = NULL) {
         x <- .as_observation_matrix(x, d = 1, arg_name = "x")
-        z <- (x[, 1] - m0) / scale0
+        if (identical(noise_treatment, "sample") && !is.null(Sigma_noise)) {
+          x <- x + mvtnorm::rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
+        }
+        noise_variance <- if (!is.null(Sigma_noise) && (identical(noise_treatment, "sample") || identical(noise_treatment, "marginalize"))) as.numeric(Sigma_noise[1, 1]) else 0
+        scale_eff <- sqrt((sigma20 * (kappa0 + 1) / kappa0) + noise_variance)
+        z <- (x[, 1] - m0) / scale_eff
         if (isTRUE(log)) {
-          stats::dt(z, df = nu0, log = TRUE) - log(scale0)
+          stats::dt(z, df = nu0, log = TRUE) - log(scale_eff)
         } else {
-          stats::dt(z, df = nu0) / scale0
+          stats::dt(z, df = nu0) / scale_eff
         }
       }
     },
-    metadata = metadata,
+    metadata = .mvbu_label_metadata(as.character(category_labels), as.character(cue_labels), metadata),
     m = as.numeric(m),
     kappa = as.numeric(kappa),
     nu = as.numeric(nu),
@@ -1382,21 +1696,23 @@ new_muvg_category_representation <- function(
   }
 
   MUVG_CategoryRepresentation(
-    category_labels = as.character(category_labels),
-    cue_labels = as.character(cue_labels),
-    category_likelihood = {
+    category_likelihood_function = {
       mu0 <- as.numeric(component_mu)
       sigma20 <- as.numeric(component_sigma2)
       w0 <- as.numeric(component_weights)
       z_mean <- sum(w0 * mu0)
       z_var <- sum((w0^2) * sigma20)
-      function(x, log = FALSE) {
+      function(x, log = FALSE, noise_treatment = "no_noise", Sigma_noise = NULL) {
         x <- .as_observation_matrix(x, d = length(w0), arg_name = "x")
+        if (identical(noise_treatment, "sample") && !is.null(Sigma_noise)) {
+          x <- x + mvtnorm::rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
+        }
+        noise_variance <- if (!is.null(Sigma_noise) && (identical(noise_treatment, "sample") || identical(noise_treatment, "marginalize"))) sum((w0^2) * diag(Sigma_noise)) else 0
         z <- as.numeric(x %*% w0)
-        stats::dnorm(z, mean = z_mean, sd = sqrt(z_var), log = log)
+        stats::dnorm(z, mean = z_mean, sd = sqrt(z_var + noise_variance), log = log)
       }
     },
-    metadata = metadata,
+    metadata = .mvbu_label_metadata(as.character(category_labels), as.character(cue_labels), metadata),
     component_mu = as.numeric(component_mu),
     component_sigma2 = as.numeric(component_sigma2),
     component_weights = as.numeric(component_weights)
@@ -1430,19 +1746,21 @@ new_mnix_category_representation <- function(
   }
 
   MNIX_CategoryRepresentation(
-    category_labels = as.character(category_labels),
-    cue_labels = as.character(cue_labels),
-    category_likelihood = {
+    category_likelihood_function = {
       m0 <- as.numeric(component_m)
       kappa0 <- as.numeric(component_kappa)
       sigma20 <- as.numeric(component_sigma2)
       nu0 <- as.numeric(component_nu)
       pred_var <- sigma20 * (kappa0 + 1) / kappa0
       w0 <- as.numeric(component_weights)
-      function(x, log = FALSE) {
+      function(x, log = FALSE, noise_treatment = "no_noise", Sigma_noise = NULL) {
         x <- .as_observation_matrix(x, d = 1, arg_name = "x")
+        if (identical(noise_treatment, "sample") && !is.null(Sigma_noise)) {
+          x <- x + mvtnorm::rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
+        }
+        noise_variance <- if (!is.null(Sigma_noise) && (identical(noise_treatment, "sample") || identical(noise_treatment, "marginalize"))) as.numeric(Sigma_noise[1, 1]) else 0
         component_logdens <- sapply(seq_along(w0), function(i) {
-          scale_i <- sqrt(pred_var[i])
+          scale_i <- sqrt(pred_var[i] + noise_variance)
           stats::dt((x[, 1] - m0[i]) / scale_i, df = nu0[i], log = TRUE) - log(scale_i)
         })
         if (is.vector(component_logdens)) {
@@ -1457,7 +1775,7 @@ new_mnix_category_representation <- function(
         }
       }
     },
-    metadata = metadata,
+    metadata = .mvbu_label_metadata(as.character(category_labels), as.character(cue_labels), metadata),
     component_m = as.numeric(component_m),
     component_kappa = as.numeric(component_kappa),
     component_nu = as.numeric(component_nu),
@@ -1476,16 +1794,22 @@ new_mvg_category_representation <- function(
     metadata = list()
 ) {
   MVG_CategoryRepresentation(
-    category_labels = as.character(category_labels),
-    cue_labels = as.character(cue_labels),
-    category_likelihood = {
+    category_likelihood_function = {
       mu0 <- as.numeric(mu)
       Sigma0 <- as.matrix(Sigma)
-      function(x, log = FALSE) {
-        .dmvnorm_density(x, mean = mu0, Sigma = Sigma0, log = log)
+      function(x, log = FALSE, noise_treatment = "no_noise", Sigma_noise = NULL) {
+        if (identical(noise_treatment, "sample") && !is.null(Sigma_noise)) {
+          x <- x + mvtnorm::rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
+        }
+        if (!is.null(Sigma_noise) && (identical(noise_treatment, "sample") || identical(noise_treatment, "marginalize"))) {
+          Sigma_eff <- Sigma0 + Sigma_noise
+        } else {
+          Sigma_eff <- Sigma0
+        }
+        .dmvnorm_density(x, mean = mu0, Sigma = Sigma_eff, log = log)
       }
     },
-    metadata = metadata,
+    metadata = .mvbu_label_metadata(as.character(category_labels), as.character(cue_labels), metadata),
     mu = as.numeric(mu),
     Sigma = as.matrix(Sigma)
   )
@@ -1503,9 +1827,7 @@ new_niw_category_representation <- function(
     metadata = list()
 ) {
   NIW_CategoryRepresentation(
-    category_labels = as.character(category_labels),
-    cue_labels = as.character(cue_labels),
-    category_likelihood = {
+    category_likelihood_function = {
       m0 <- as.numeric(m)
       kappa0 <- as.numeric(kappa)
       nu0 <- as.numeric(nu)
@@ -1513,11 +1835,19 @@ new_niw_category_representation <- function(
       d0 <- length(m0)
       df0 <- nu0 - d0 + 1
       Sigma0 <- ((kappa0 + 1) / (kappa0 * df0)) * S0
-      function(x, log = FALSE) {
-        .dmvt_density(x, mean = m0, Sigma = Sigma0, df = df0, log = log)
+      function(x, log = FALSE, noise_treatment = "no_noise", Sigma_noise = NULL) {
+        if (identical(noise_treatment, "sample") && !is.null(Sigma_noise)) {
+          x <- x + mvtnorm::rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
+        }
+        if (!is.null(Sigma_noise) && (identical(noise_treatment, "sample") || identical(noise_treatment, "marginalize"))) {
+          Sigma_eff <- Sigma0 + Sigma_noise
+        } else {
+          Sigma_eff <- Sigma0
+        }
+        .dmvt_density(x, mean = m0, Sigma = Sigma_eff, df = df0, log = log)
       }
     },
-    metadata = metadata,
+    metadata = .mvbu_label_metadata(as.character(category_labels), as.character(cue_labels), metadata),
     m = as.numeric(m),
     kappa = as.numeric(kappa),
     nu = as.numeric(nu),
@@ -1547,9 +1877,7 @@ new_exemplar_category_representation <- function(
   }
 
   Exemplar_CategoryRepresentation(
-    category_labels = as.character(category_labels),
-    cue_labels = as.character(cue_labels),
-    category_likelihood = {
+    category_likelihood_function = {
       ex0 <- exemplars
       w0 <- as.numeric(exemplar_weights)
       d0 <- ncol(ex0)
@@ -1564,10 +1892,18 @@ new_exemplar_category_representation <- function(
       }
       Sigma0 <- Sigma0 + diag(MVBU_PROB_TOL, d0)
 
-      function(x, log = FALSE) {
+      function(x, log = FALSE, noise_treatment = "no_noise", Sigma_noise = NULL) {
         x <- .as_observation_matrix(x, d = d0, arg_name = "x")
+        if (identical(noise_treatment, "sample") && !is.null(Sigma_noise)) {
+          x <- x + mvtnorm::rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
+        }
+        if (!is.null(Sigma_noise) && (identical(noise_treatment, "sample") || identical(noise_treatment, "marginalize"))) {
+          Sigma_eff <- Sigma0 + Sigma_noise
+        } else {
+          Sigma_eff <- Sigma0
+        }
         log_dens_by_exemplar <- sapply(seq_len(n0), function(i) {
-          .dmvnorm_density(x, mean = ex0[i, ], Sigma = Sigma0, log = TRUE)
+          .dmvnorm_density(x, mean = ex0[i, ], Sigma = Sigma_eff, log = TRUE)
         })
         if (is.vector(log_dens_by_exemplar)) {
           log_dens_by_exemplar <- matrix(log_dens_by_exemplar, ncol = n0)
@@ -1581,14 +1917,14 @@ new_exemplar_category_representation <- function(
         }
       }
     },
-    metadata = metadata,
+    metadata = .mvbu_label_metadata(as.character(category_labels), as.character(cue_labels), metadata),
     exemplars = exemplars,
     exemplar_weights = as.numeric(exemplar_weights)
   )
 }
 
 .new_family_cognitive_model <- function(
-    category_likelihood,
+    category_template = NULL,
     category_representation_class,
     model_class,
     family_label,
@@ -1596,52 +1932,69 @@ new_exemplar_category_representation <- function(
     category_prior = NULL,
     lapse_rate = 0,
     lapse_bias = NULL,
+    Sigma_noise = NULL,
+    noise_treatment = "no_noise",
+    lapse_treatment = "no_lapses",
     metadata = list()
 ) {
-  if (!S7::S7_inherits(category_likelihood, MVBU_CategoryRepresentationTemplate)) {
-    stop("category_likelihood must be an MVBU_CategoryRepresentationTemplate.", call. = FALSE)
+  if (is.null(category_template)) {
+    stop("category_template must be supplied.", call. = FALSE)
   }
 
-  family_representations <- category_likelihood@representations
+  if (!S7::S7_inherits(category_template, MVBU_CategoryRepresentationTemplate)) {
+    stop("category_template must be an MVBU_CategoryRepresentationTemplate.", call. = FALSE)
+  }
+
+  family_representations <- category_template@representations
 
   if (!all(vapply(family_representations, function(r) S7::S7_inherits(r, category_representation_class), logical(1)))) {
     stop(
-      paste0("All category_likelihood entries must inherit from ", family_label, " category representation class."),
+      paste0("All category_likelihood_template entries must inherit from ", family_label, " category representation class."),
       call. = FALSE
     )
   }
 
   base_model <- new_cognitive_model(
-    category_likelihood = category_likelihood,
+    category_template = category_template,
     decision_rule = decision_rule,
     category_prior = category_prior,
     lapse_rate = lapse_rate,
     lapse_bias = lapse_bias,
+    Sigma_noise = Sigma_noise,
+    noise_treatment = noise_treatment,
+    lapse_treatment = lapse_treatment,
     metadata = metadata
   )
 
-  model_class(
-    category_likelihood = base_model@category_likelihood,
+  model <- model_class(
+    category_template = base_model@category_template,
     decision_rule = base_model@decision_rule,
     category_prior = base_model@category_prior,
-    lapse_rate = base_model@lapse_rate,
-    lapse_bias = base_model@lapse_bias,
+    lapse_behavior = base_model@lapse_behavior,
+    noise_behavior = base_model@noise_behavior,
     metadata = base_model@metadata
   )
+
+  model@category_posterior_functions <- base_model@category_posterior_functions
+
+  model
 }
 
 #' Construct a UVG ideal observer object
 #' @keywords internal
 new_uvg_ideal_observer <- function(
-    category_likelihood,
+    category_template = NULL,
     decision_rule = "sampling",
     category_prior = NULL,
     lapse_rate = 0,
     lapse_bias = NULL,
+    Sigma_noise = NULL,
+    noise_treatment = "no_noise",
+    lapse_treatment = "no_lapses",
     metadata = list()
 ) {
   .new_family_cognitive_model(
-    category_likelihood = category_likelihood,
+    category_template = category_template,
     category_representation_class = UVG_CategoryRepresentation,
     model_class = UVG_IdealObserver,
     family_label = "UVG",
@@ -1649,6 +2002,7 @@ new_uvg_ideal_observer <- function(
     category_prior = category_prior,
     lapse_rate = lapse_rate,
     lapse_bias = lapse_bias,
+    Sigma_noise = Sigma_noise,
     metadata = metadata
   )
 }
@@ -1656,15 +2010,18 @@ new_uvg_ideal_observer <- function(
 #' Construct a NIX ideal adaptor object
 #' @keywords internal
 new_nix_ideal_adaptor <- function(
-    category_likelihood,
+    category_template = NULL,
     decision_rule = "sampling",
     category_prior = NULL,
     lapse_rate = 0,
     lapse_bias = NULL,
+    Sigma_noise = NULL,
+    noise_treatment = "no_noise",
+    lapse_treatment = "no_lapses",
     metadata = list()
 ) {
   .new_family_cognitive_model(
-    category_likelihood = category_likelihood,
+    category_template = category_template,
     category_representation_class = NIX_CategoryRepresentation,
     model_class = NIX_IdealAdaptor,
     family_label = "NIX",
@@ -1672,6 +2029,7 @@ new_nix_ideal_adaptor <- function(
     category_prior = category_prior,
     lapse_rate = lapse_rate,
     lapse_bias = lapse_bias,
+    Sigma_noise = Sigma_noise,
     metadata = metadata
   )
 }
@@ -1679,15 +2037,18 @@ new_nix_ideal_adaptor <- function(
 #' Construct a MUVG ideal observer object
 #' @keywords internal
 new_muvg_ideal_observer <- function(
-    category_likelihood,
+    category_template = NULL,
     decision_rule = "sampling",
     category_prior = NULL,
     lapse_rate = 0,
     lapse_bias = NULL,
+    Sigma_noise = NULL,
+    noise_treatment = "no_noise",
+    lapse_treatment = "no_lapses",
     metadata = list()
 ) {
   .new_family_cognitive_model(
-    category_likelihood = category_likelihood,
+    category_template = category_template,
     category_representation_class = MUVG_CategoryRepresentation,
     model_class = MUVG_IdealObserver,
     family_label = "MUVG",
@@ -1695,6 +2056,7 @@ new_muvg_ideal_observer <- function(
     category_prior = category_prior,
     lapse_rate = lapse_rate,
     lapse_bias = lapse_bias,
+    Sigma_noise = Sigma_noise,
     metadata = metadata
   )
 }
@@ -1702,15 +2064,18 @@ new_muvg_ideal_observer <- function(
 #' Construct a MNIX ideal adaptor object
 #' @keywords internal
 new_mnix_ideal_adaptor <- function(
-    category_likelihood,
+    category_template = NULL,
     decision_rule = "sampling",
     category_prior = NULL,
     lapse_rate = 0,
     lapse_bias = NULL,
+    Sigma_noise = NULL,
+    noise_treatment = "no_noise",
+    lapse_treatment = "no_lapses",
     metadata = list()
 ) {
   .new_family_cognitive_model(
-    category_likelihood = category_likelihood,
+    category_template = category_template,
     category_representation_class = MNIX_CategoryRepresentation,
     model_class = MNIX_IdealAdaptor,
     family_label = "MNIX",
@@ -1718,6 +2083,7 @@ new_mnix_ideal_adaptor <- function(
     category_prior = category_prior,
     lapse_rate = lapse_rate,
     lapse_bias = lapse_bias,
+    Sigma_noise = Sigma_noise,
     metadata = metadata
   )
 }
@@ -1725,15 +2091,18 @@ new_mnix_ideal_adaptor <- function(
 #' Construct a MVG ideal observer object
 #' @keywords internal
 new_mvg_ideal_observer <- function(
-    category_likelihood,
+    category_template = NULL,
     decision_rule = "sampling",
     category_prior = NULL,
     lapse_rate = 0,
     lapse_bias = NULL,
+    Sigma_noise = NULL,
+    noise_treatment = "no_noise",
+    lapse_treatment = "no_lapses",
     metadata = list()
 ) {
   .new_family_cognitive_model(
-    category_likelihood = category_likelihood,
+    category_template = category_template,
     category_representation_class = MVG_CategoryRepresentation,
     model_class = MVG_IdealObserver,
     family_label = "MVG",
@@ -1741,6 +2110,7 @@ new_mvg_ideal_observer <- function(
     category_prior = category_prior,
     lapse_rate = lapse_rate,
     lapse_bias = lapse_bias,
+    Sigma_noise = Sigma_noise,
     metadata = metadata
   )
 }
@@ -1748,15 +2118,18 @@ new_mvg_ideal_observer <- function(
 #' Construct a NIW ideal adaptor object
 #' @keywords internal
 new_niw_ideal_adaptor <- function(
-    category_likelihood,
+    category_template = NULL,
     decision_rule = "sampling",
     category_prior = NULL,
     lapse_rate = 0,
     lapse_bias = NULL,
+    Sigma_noise = NULL,
+    noise_treatment = "no_noise",
+    lapse_treatment = "no_lapses",
     metadata = list()
 ) {
   .new_family_cognitive_model(
-    category_likelihood = category_likelihood,
+    category_template = category_template,
     category_representation_class = NIW_CategoryRepresentation,
     model_class = NIW_IdealAdaptor,
     family_label = "NIW",
@@ -1764,6 +2137,7 @@ new_niw_ideal_adaptor <- function(
     category_prior = category_prior,
     lapse_rate = lapse_rate,
     lapse_bias = lapse_bias,
+    Sigma_noise = Sigma_noise,
     metadata = metadata
   )
 }
@@ -1771,15 +2145,18 @@ new_niw_ideal_adaptor <- function(
 #' Construct an Exemplar model object
 #' @keywords internal
 new_exemplar_model <- function(
-    category_likelihood,
+    category_template = NULL,
     decision_rule = "sampling",
     category_prior = NULL,
     lapse_rate = 0,
     lapse_bias = NULL,
+    Sigma_noise = NULL,
+    noise_treatment = "no_noise",
+    lapse_treatment = "no_lapses",
     metadata = list()
 ) {
   .new_family_cognitive_model(
-    category_likelihood = category_likelihood,
+    category_template = category_template,
     category_representation_class = Exemplar_CategoryRepresentation,
     model_class = Exemplar_Model,
     family_label = "EXEMPLAR",
@@ -1787,6 +2164,7 @@ new_exemplar_model <- function(
     category_prior = category_prior,
     lapse_rate = lapse_rate,
     lapse_bias = lapse_bias,
+    Sigma_noise = Sigma_noise,
     metadata = metadata
   )
 }

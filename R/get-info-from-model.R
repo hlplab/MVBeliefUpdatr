@@ -27,6 +27,7 @@ infer_default_noise_treatment <- function(Sigma_noise) {
   return(noise_treatment)
 }
 
+
 get_cue_representation_from_model <- function(x) {
   if (is.MVG(x)) {
     x <- x$mu
@@ -57,117 +58,6 @@ get_cue_dimensionality_from_model <- function(x, indices = NULL) {
   x <- get_cue_representation_from_model(x)
   d <- if (is.null(dim(x))) length(x) else dim(x)[2]
   return(d)
-}
-
-
-#' Get cue labels from likelihood or model
-#'
-#' Get the names for all cues from a likelihood (e.g., MVG or NIW_belief) or model (e.g., an MVG ideal observer
-#' or NIW ideal adaptor) object.
-#'
-#' @param x  A likelihood or model object.
-#' @param indeces A vector of indices that should be turned into the original cue labels corresponding to those
-#' indices, or `NULL` if all cue labels should be returned. (default: `NULL`)
-#'
-#' @return A character vector.
-#'
-#' @export
-get_cue_labels_from_model <- function(x, indices = NULL) {
-  x <- get_cue_representation_from_model(x)
-  if (is.null(x)) x <- "cue"
-  if (is.null(indices)) return(x) else return(x[indices])
-  return(x)
-}
-
-
-#' Get category labels from likelihood or model
-#'
-#' Get the unique labels for all categories from a likelihood (e.g., MVG or NIW_belief) or model (e.g., an MVG ideal observer
-#' or NIW ideal adaptor) object.
-#'
-#' @param x A likelihood or model object.
-#'
-#' @export
-get_category_labels_from_model <- function(x) {
-  if (is.MVBU_representation(x) | is.MVBU_model(x)) {
-    return(sort(unique(x$category)))
-  } else {
-    error("Object not recognized.")
-  }
-}
-
-
-#' Get number of categories from likelihood or model
-#'
-#' Get the number of unique category labels from a likelihood (e.g., MVG or NIW_belief) or model (e.g., an MVG ideal observer
-#' or NIW ideal adaptor) object.
-#'
-#' @param x A likelihood or model object.
-#'
-#' @export
-get_nlevels_of_category_labels_from_model <- function(x) {
-  if (is.MVBU_representation(x) | is.MVBU_model(x)) {
-    return(length(unique(x$category)))
-  } else {
-    error("Object not recognized.")
-  }
-}
-
-
-#' Get priors from model
-#'
-#' @param model A model object.
-#' @param categories A vector of category values.
-#'
-#' @return A vector of prior values of the same length as \code{categories}.
-#'
-#' @export
-get_priors_from_model <- function(model, categories = model$category) {
-  assert_that("prior" %in% names(model),
-              msg = "No prior found in model.")
-
-  prior <-
-    model %>%
-    left_join(tibble(category = categories), by = "category") %>%
-    pull(prior)
-
-  return(prior)
-}
-
-#' Get lapse rate from model
-#'
-#' @param model A model object.
-#'
-#' @export
-get_lapse_rate_from_model <- function(model) {
-  assert_that("lapse_rate" %in% names(model),
-              msg = "No lapse_rate found in model.")
-
-  lapse_rate <- unique(model$lapse_rate)
-
-  assert_that(length(lapse_rate) == 1,
-              msg = "More than one lapse_rate found in model.")
-  return(lapse_rate)
-}
-
-#' Get lapse bias from model
-#'
-#' @param model A model object.
-#' @param categories A vector of category values.
-#'
-#' @return A vector of lapse bias values of the same length as \code{categories}.
-#'
-#' @export
-get_lapse_biases_from_model <- function(model, categories = model$category) {
-  assert_that("lapse_bias" %in% names(model),
-              msg = "No lapse_bias found in model.")
-
-  lapse_bias <-
-    model %>%
-    left_join(tibble(category = categories), by = "category") %>%
-    pull(lapse_bias)
-
-  return(lapse_bias)
 }
 
 
@@ -296,25 +186,6 @@ format_input_for_likelihood_calculation <- function(x, dim = 1) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @rdname get_posterior_from_model
-#' @export
-get_posterior_from_model <- function(model, ...) {
-  if (is.MVG_ideal_observer(model)) {
-    c <- get_posterior_from_MVG_ideal_observer(model = model, ...)
-  } else if (is.NIW_ideal_adaptor(model)) {
-    c <- get_posterior_from_NIW_ideal_adaptor(model = model, ...)
-  } else {
-    stop(
-      paste(
-        "get_categorization_from_* function for model type",
-        class(model),
-        "does not yet exist."))
-  }
-
-  return(c)
-}
-
-
 #' Get categorization from model
 #'
 #' Categorize a single observation based a model. The decision rule can be specified to be either the
@@ -340,24 +211,6 @@ get_posterior_from_model <- function(model, ...) {
 #'
 #' @seealso TBD
 #' @keywords TBD
-#' @rdname get_categorization_from_model
-#' @export
-get_categorization_from_model <- function(model, decision_rule = "sampling", ...) {
-  if (is.MVG_ideal_observer(model)) {
-    c <- get_categorization_from_MVG_ideal_observer(model = model, decision_rule = decision_rule, ...)
-  } else if (is.NIW_ideal_adaptor(model)) {
-    c <- get_categorization_from_NIW_ideal_adaptor(model = model, decision_rule = decision_rule, ...)
-  } else {
-    stop(
-      paste(
-        "get_categorization_from_* function for model type",
-        class(model),
-        "does not yet exist."))
-  }
-
-  return(c)
-}
-
 #' Evaluate the fit of a model
 #'
 #' Evaluate the fit of a categorization model against a ground truth (e.g., human responses or the category intended
@@ -542,4 +395,204 @@ evaluate_model <- function(
     if (nrow(r) <= 1) r <- as.numeric(r)
   }
   return(r)
+}
+
+# Deprecated after S7-migration
+
+#' @rdname get_posterior_from_model
+#' @export
+#' @deprecated Use posterior() instead.
+get_posterior_from_model <- function(model, ...) {
+  warning("get_posterior_from_model() is deprecated; use posterior() on an S7 cognitive model instead.", call. = FALSE)
+  if (.mvbu_is_s7_class(model, "MVBU_CognitiveModel")) {
+    return(posterior(model, ...))
+  }
+  if (is.MVG_ideal_observer(model)) {
+    c <- get_posterior_from_MVG_ideal_observer(model = model, ...)
+  } else if (is.NIW_ideal_adaptor(model)) {
+    c <- get_posterior_from_NIW_ideal_adaptor(model = model, ...)
+  } else {
+    stop(
+      paste(
+        "get_categorization_from_* function for model type",
+        class(model),
+        "does not yet exist."))
+  }
+
+  return(c)
+}
+
+#' @rdname get_categorization_from_model
+#' @export
+#' @deprecated Use categorize() instead.
+get_categorization_from_model <- function(model, decision_rule = "sampling", ...) {
+  warning("get_categorization_from_model() is deprecated; use categorize() on an S7 cognitive model instead.", call. = FALSE)
+  if (.mvbu_is_s7_class(model, "MVBU_CognitiveModel")) {
+    return(categorize(model, decision_rule = decision_rule, ...))
+  }
+  if (is.MVG_ideal_observer(model)) {
+    c <- get_categorization_from_MVG_ideal_observer(model = model, decision_rule = decision_rule, ...)
+  } else if (is.NIW_ideal_adaptor(model)) {
+    c <- get_categorization_from_NIW_ideal_adaptor(model = model, decision_rule = decision_rule, ...)
+  } else {
+    stop(
+      paste(
+        "get_categorization_from_* function for model type",
+        class(model),
+        "does not yet exist."))
+  }
+
+  return(c)
+}
+
+#' Get cue labels from likelihood or model
+#'
+#' Get the names for all cues from a likelihood (e.g., MVG or NIW_belief) or model (e.g., an MVG ideal observer
+#' or NIW ideal adaptor) object.
+#'
+#' @param x  A likelihood or model object.
+#' @param indeces A vector of indices that should be turned into the original cue labels corresponding to those
+#' indices, or `NULL` if all cue labels should be returned. (default: `NULL`)
+#'
+#' @return A character vector.
+#'
+#' @export
+#' @deprecated Use get_cue_labels() instead.
+get_cue_labels_from_model <- function(x, indices = NULL) {
+  if (.mvbu_is_s7_class(x, "MVBU_CategoryRepresentation") ||
+      .mvbu_is_s7_class(x, "MVBU_CategoryRepresentationTemplate") ||
+      .mvbu_is_s7_class(x, "MVBU_CognitiveModel")) {
+    return(get_cue_labels(x, indices = indices))
+  }
+
+  x <- get_cue_representation_from_model(x)
+  if (is.null(x)) x <- "cue"
+  if (is.null(indices)) return(x) else return(x[indices])
+  return(x)
+}
+
+#' Get category labels from likelihood or model
+#'
+#' Get the unique labels for all categories from a likelihood (e.g., MVG or NIW_belief) or model (e.g., an MVG ideal observer
+#' or NIW ideal adaptor) object.
+#'
+#' @param x A likelihood or model object.
+#'
+#' @export
+#' @deprecated Use get_category_labels() instead.
+get_category_labels_from_model <- function(x, indices = NULL) {
+  if (.mvbu_is_s7_class(x, "MVBU_CategoryRepresentation") ||
+      .mvbu_is_s7_class(x, "MVBU_CategoryRepresentationTemplate") ||
+      .mvbu_is_s7_class(x, "MVBU_CognitiveModel")) {
+    return(get_category_labels(x, indices = indices))
+  }
+
+  if (is.MVBU_representation(x) | is.MVBU_model(x)) {
+    return(sort(unique(x$category)))
+  }
+
+  stop("Object not recognized.", call. = FALSE)
+}
+
+#' Get number of categories from likelihood or model
+#'
+#' Get the number of unique category labels from a likelihood (e.g., MVG or NIW_belief) or model (e.g., an MVG ideal observer
+#' or NIW ideal adaptor) object.
+#'
+#' @param x A likelihood or model object.
+#'
+#' @export
+#' @deprecated Use length(get_category_labels()) instead.
+get_nlevels_of_category_labels_from_model <- function(x) {
+  if (.mvbu_is_s7_class(x, "MVBU_CategoryRepresentation") ||
+      .mvbu_is_s7_class(x, "MVBU_CategoryRepresentationTemplate") ||
+      .mvbu_is_s7_class(x, "MVBU_CognitiveModel")) {
+    category_labels <- get_category_labels_from_model(x)
+    return(length(unique(category_labels)))
+  }
+
+  if (is.MVBU_representation(x) | is.MVBU_model(x)) {
+    return(length(unique(x$category)))
+  }
+
+  stop("Object not recognized.", call. = FALSE)
+}
+
+#' Get priors from model
+#'
+#' @param model A model object.
+#' @param categories A vector of category values.
+#'
+#' @return A vector of prior values of the same length as \code{categories}.
+#'
+#' @export
+#' @deprecated Use get_category_prior() instead.
+get_priors_from_model <- function(model, categories = model$category) {
+  if (.mvbu_is_s7_class(model, "MVBU_CognitiveModel")) {
+    prior <- get_category_prior(model)
+    if (!is.null(names(prior))) {
+      prior <- prior[match(as.character(categories), names(prior))]
+    }
+    return(as.numeric(prior))
+  }
+
+  assert_that("prior" %in% names(model),
+              msg = "No prior found in model.")
+
+  prior <-
+    model %>%
+    left_join(tibble(category = categories), by = "category") %>%
+    pull(prior)
+
+  return(prior)
+}
+
+#' Get lapse rate from model
+#'
+#' @param model A model object.
+#'
+#' @export
+#' @deprecated Use get_lapse_rate() instead.
+get_lapse_rate_from_model <- function(model) {
+  if (.mvbu_is_s7_class(model, "MVBU_CognitiveModel")) {
+    return(as.numeric(get_lapse_rate(model)))
+  }
+
+  assert_that("lapse_rate" %in% names(model),
+              msg = "No lapse_rate found in model.")
+
+  lapse_rate <- unique(model$lapse_rate)
+
+  assert_that(length(lapse_rate) == 1,
+              msg = "More than one lapse_rate found in model.")
+  return(lapse_rate)
+}
+
+#' Get lapse bias from model
+#'
+#' @param model A model object.
+#' @param categories A vector of category values.
+#'
+#' @return A vector of lapse bias values of the same length as \code{categories}.
+#'
+#' @export
+#' @deprecated Use get_lapse_bias() instead.
+get_lapse_biases_from_model <- function(model, categories = model$category) {
+  if (.mvbu_is_s7_class(model, "MVBU_CognitiveModel")) {
+    lapse_bias <- get_lapse_bias(model)
+    if (!is.null(names(lapse_bias))) {
+      lapse_bias <- lapse_bias[match(as.character(categories), names(lapse_bias))]
+    }
+    return(as.numeric(lapse_bias))
+  }
+
+  assert_that("lapse_bias" %in% names(model),
+              msg = "No lapse_bias found in model.")
+
+  lapse_bias <-
+    model %>%
+    left_join(tibble(category = categories), by = "category") %>%
+    pull(lapse_bias)
+
+  return(lapse_bias)
 }
