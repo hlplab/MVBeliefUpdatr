@@ -139,15 +139,19 @@ get_likelihood_from_MVG <- function(
   return(likelihood)
 }
 
+# Deprecated after S7-migration
 
 #' @rdname get_posterior_from_model
 #' @export
+#' @deprecated Use posterior() instead.
 get_posterior_from_MVG_ideal_observer <- function(
     x,
     model,
     noise_treatment = if (decision_rule == "sampling") "sample" else infer_default_noise_treatment(model$Sigma_noise),
     lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize"
 ) {
+  warning("get_posterior_from_MVG_ideal_observer() is deprecated; use posterior() on an S7 cognitive model instead.", call. = FALSE)
+
   # TO DO: check dimensionality of x with regard to belief.
   assert_MVG_ideal_observer(model)
   assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
@@ -159,15 +163,15 @@ get_posterior_from_MVG_ideal_observer <- function(
     x <- if (get_cue_dimensionality_from_model(model) == 1) as.list(x) else list(x)
   }
 
-  n.distinct_categories <- length(get_category_labels_from_model(model))
+  n.distinct_categories <- length(get_category_labels(model))
   posterior_probabilities <-
     get_likelihood_from_MVG(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%
     mutate(
       observationID = rep(1:length(.env$x), .env$n.distinct_categories),
       x = rep(.env$x, .env$n.distinct_categories),
-      lapse_rate = get_lapse_rate_from_model(.env$model),
-      lapse_bias = get_lapse_biases_from_model(.env$model, categories = .data$category),
-      prior = get_priors_from_model(.env$model, categories = .data$category)) %>%
+      lapse_rate = get_lapse_rate(.env$model),
+      lapse_bias = get_lapse_bias(.env$model, categories = .data$category),
+      prior = get_category_prior(.env$model, categories = .data$category)) %>%
     group_by(observationID) %>%
     mutate(posterior_probability = (.data$likelihood * .data$prior) / sum(.data$likelihood * .data$prior))
 
@@ -178,7 +182,7 @@ get_posterior_from_MVG_ideal_observer <- function(
         posterior_probability = ifelse(
           rep(
             rbinom(1, 1, .data$lapse_rate),
-            get_nlevels_of_category_labels_from_model(model)),
+            length(get_category_labels(model))),
           .data$lapse_bias,                 # substitute lapse probabilities for posterior
           .data$posterior_probability))     # ... or not
   } else if (lapse_treatment == "marginalize") {
@@ -222,9 +226,9 @@ get_posterior_from_MVG_ideal_observer <- function(
   return(posterior_probabilities)
 }
 
-
 #' @rdname get_categorization_from_model
 #' @export
+#' @deprecated Use categorize() instead.
 get_categorization_from_MVG_ideal_observer <- function(
   x,
   model,
@@ -233,6 +237,8 @@ get_categorization_from_MVG_ideal_observer <- function(
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F
 ) {
+  warning("get_categorization_from_MVG_ideal_observer() is deprecated; use categorize() on an S7 cognitive model instead.", call. = FALSE)
+
   posterior_probabilities <-
     get_posterior_from_MVG_ideal_observer(x = x, model = model, noise_treatment = noise_treatment, lapse_treatment = lapse_treatment)
 
@@ -245,9 +251,9 @@ get_categorization_from_MVG_ideal_observer <- function(
         posterior_probability = ifelse(
           rep(
             sum(.data$posterior_probability == max(.data$posterior_probability)) > 1,
-            get_nlevels_of_category_labels_from_model(model)),
+            length(get_category_labels(model))),
           posterior_probability + runif(
-            get_nlevels_of_category_labels_from_model(model),
+            length(get_category_labels(model)),
             min = 0,
             max = 1),
           .data$posterior_probability),

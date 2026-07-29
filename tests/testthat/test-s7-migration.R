@@ -190,3 +190,44 @@ test_that("Phase 2 migrated adapter outputs are S7-only (no S4 construction path
   expect_false(any(vapply(objs, isS4, logical(1))))
 })
 
+test_that("S7 accessors expose category priors and lapse biases directly", {
+  rep_a <- new_category_representation(category_labels = "A", cue_labels = c("F1", "F2"))
+  rep_b <- new_category_representation(category_labels = "B", cue_labels = c("F1", "F2"))
+  template <- new_category_representation_template(representations = list(A = rep_a, B = rep_b))
+  model <- new_cognitive_model(
+    category_template = template,
+    category_prior = c(A = 0.7, B = 0.3),
+    lapse_rate = 0.1,
+    lapse_bias = c(A = 0.8, B = 0.2)
+  )
+
+  expect_equal(get_category_prior(model, categories = c("A", "B")), c(0.7, 0.3))
+  expect_equal(get_lapse_rate(model), 0.1)
+  expect_equal(get_lapse_bias(model, categories = c("A", "B")), c(0.8, 0.2))
+  expect_equal(get_cue_labels(model), c("F1", "F2"))
+  expect_equal(get_category_labels(model), c("A", "B"))
+  expect_equal(length(get_category_labels(model)), 2L)
+  expect_equal(get_cue_labels(model, indices = 1), "F1")
+  expect_equal(get_category_labels(model, indices = 1), "A")
+})
+
+test_that("legacy info helpers work with S7 objects through the new accessors", {
+  rep_a <- new_category_representation(category_labels = "A", cue_labels = c("F1", "F2"))
+  rep_b <- new_category_representation(category_labels = "B", cue_labels = c("F1", "F2"))
+  template <- new_category_representation_template(representations = list(A = rep_a, B = rep_b))
+  model <- new_cognitive_model(
+    category_template = template,
+    category_prior = c(A = 0.7, B = 0.3),
+    lapse_rate = 0.1,
+    lapse_bias = c(A = 0.8, B = 0.2)
+  )
+
+  expect_equal(get_priors_from_model(model, categories = c("A", "B")), c(0.7, 0.3))
+  expect_equal(get_lapse_rate_from_model(model), 0.1)
+  expect_equal(get_lapse_biases_from_model(model, categories = c("A", "B")), c(0.8, 0.2))
+  expect_equal(get_cue_labels_from_model(model), c("F1", "F2"))
+  expect_equal(get_category_labels_from_model(model), c("A", "B"))
+  expect_equal(get_nlevels_of_category_labels_from_model(model), 2L)
+  expect_equal(get_cue_labels_from_model(model, indices = 1), "F1")
+  expect_equal(get_category_labels_from_model(model, indices = 1), "A")
+})

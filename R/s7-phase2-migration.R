@@ -257,7 +257,7 @@ as_s7_mvg_ideal_observer <- function(x, category = "category", decision_rule = "
   decision_rule <- .normalize_phase2_scalar_character(decision_rule, "decision_rule")
   template <- as_s7_category_representation_template(x, family = "MVG", category = category)
   new_mvg_ideal_observer(
-    category_likelihood = template,
+    category_template = template,
     decision_rule = decision_rule,
     category_prior = .legacy_model_priors(x, category = category),
     lapse_rate = .legacy_model_lapse_rate(x),
@@ -272,7 +272,7 @@ as_s7_niw_ideal_adaptor <- function(x, category = "category", decision_rule = "s
   decision_rule <- .normalize_phase2_scalar_character(decision_rule, "decision_rule")
   template <- as_s7_category_representation_template(x, family = "NIW", category = category)
   new_niw_ideal_adaptor(
-    category_likelihood = template,
+    category_template = template,
     decision_rule = decision_rule,
     category_prior = .legacy_model_priors(x, category = category),
     lapse_rate = .legacy_model_lapse_rate(x),
@@ -287,7 +287,7 @@ as_s7_exemplar_model <- function(x, category = "category", decision_rule = "samp
   decision_rule <- .normalize_phase2_scalar_character(decision_rule, "decision_rule")
   template <- as_s7_category_representation_template(x, family = "EXEMPLAR", category = category)
   new_exemplar_model(
-    category_likelihood = template,
+    category_template = template,
     decision_rule = decision_rule,
     category_prior = .legacy_model_priors(x, category = category),
     lapse_rate = .legacy_model_lapse_rate(x),
@@ -302,7 +302,7 @@ as_s7_muvg_ideal_observer <- function(x, category = "category", decision_rule = 
   decision_rule <- .normalize_phase2_scalar_character(decision_rule, "decision_rule")
   template <- as_s7_category_representation_template(x, family = "MUVG", category = category)
   new_muvg_ideal_observer(
-    category_likelihood = template,
+    category_template = template,
     decision_rule = decision_rule,
     category_prior = .legacy_model_priors(x, category = category),
     lapse_rate = .legacy_model_lapse_rate(x),
@@ -317,7 +317,7 @@ as_s7_mnix_ideal_adaptor <- function(x, category = "category", decision_rule = "
   decision_rule <- .normalize_phase2_scalar_character(decision_rule, "decision_rule")
   template <- as_s7_category_representation_template(x, family = "MNIX", category = category)
   new_mnix_ideal_adaptor(
-    category_likelihood = template,
+    category_template = template,
     decision_rule = decision_rule,
     category_prior = .legacy_model_priors(x, category = category),
     lapse_rate = .legacy_model_lapse_rate(x),
