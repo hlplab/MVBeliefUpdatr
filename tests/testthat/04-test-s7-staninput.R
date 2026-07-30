@@ -506,44 +506,53 @@ test_that("new_ideal_adaptor_staninput produces inputs compatible with the MNIX 
 test_that("legacy constructor wrappers remain compatible with the new path", {
   data <- make_minimal_staninput_data(cues = "cue1")
 
-  nix_input <- make_ideal_adaptor_stanfit_input(
-    exposure = data$exposure,
-    test = data$test,
-    cues = "cue1",
-    category = "category",
-    response = "response",
-    group = "group",
-    control = control_staninput(transform_type = "identity"),
-    stanmodel = "NIX_ideal_adaptor"
+  nix_input <- expect_warning(
+    make_ideal_adaptor_stanfit_input(
+      exposure = data$exposure,
+      test = data$test,
+      cues = "cue1",
+      category = "category",
+      response = "response",
+      group = "group",
+      control = control_staninput(transform_type = "identity"),
+      stanmodel = "NIX_ideal_adaptor"
+    ),
+    "new_ideal_adaptor_staninput"
   )
   expect_true(is.ideal_adaptor_stanfit_input(nix_input))
   expect_true(is.data.frame(nix_input$data))
   expect_true(is.list(nix_input$staninput$transformed))
   expect_true(is.list(nix_input$staninput$untransformed))
 
-  niw_input <- make_ideal_adaptor_stanfit_input(
-    exposure = data$exposure,
-    test = data$test,
-    cues = "cue1",
-    category = "category",
-    response = "response",
-    group = "group",
-    control = control_staninput(transform_type = "standardize"),
-    stanmodel = "NIW_ideal_adaptor"
+  niw_input <- expect_warning(
+    make_ideal_adaptor_stanfit_input(
+      exposure = data$exposure,
+      test = data$test,
+      cues = "cue1",
+      category = "category",
+      response = "response",
+      group = "group",
+      control = control_staninput(transform_type = "standardize"),
+      stanmodel = "NIW_ideal_adaptor"
+    ),
+    "new_ideal_adaptor_staninput"
   )
   expect_true(is.ideal_adaptor_stanfit_input(niw_input))
   expect_true("x_mean_exposure" %in% names(niw_input$staninput$untransformed))
 
   multi_cue_data <- make_minimal_staninput_data(cues = c("cue1", "cue2"))
-  mnix_input <- make_ideal_adaptor_stanfit_input(
-    exposure = multi_cue_data$exposure,
-    test = multi_cue_data$test,
-    cues = c("cue1", "cue2"),
-    category = "category",
-    response = "response",
-    group = "group",
-    control = control_staninput(transform_type = "identity"),
-    stanmodel = "MNIX_ideal_adaptor"
+  mnix_input <- expect_warning(
+    make_ideal_adaptor_stanfit_input(
+      exposure = multi_cue_data$exposure,
+      test = multi_cue_data$test,
+      cues = c("cue1", "cue2"),
+      category = "category",
+      response = "response",
+      group = "group",
+      control = control_staninput(transform_type = "identity"),
+      stanmodel = "MNIX_ideal_adaptor"
+    ),
+    "new_ideal_adaptor_staninput"
   )
   expect_true(is.ideal_adaptor_stanfit_input(mnix_input))
 })
@@ -551,68 +560,80 @@ test_that("legacy constructor wrappers remain compatible with the new path", {
 test_that("invalid transform types fail early in legacy wrappers", {
   data <- make_minimal_staninput_data(cues = "cue1")
 
-  expect_error(
-    make_ideal_adaptor_stanfit_input(
-      exposure = data$exposure,
-      test = data$test,
-      cues = "cue1",
-      category = "category",
-      response = "response",
-      group = "group",
-      control = control_staninput(transform_type = "other"),
-      stanmodel = "NIW_ideal_adaptor"
+  expect_warning(
+    expect_error(
+      make_ideal_adaptor_stanfit_input(
+        exposure = data$exposure,
+        test = data$test,
+        cues = "cue1",
+        category = "category",
+        response = "response",
+        group = "group",
+        control = control_staninput(transform_type = "other"),
+        stanmodel = "NIW_ideal_adaptor"
+      ),
+      "transform_type"
     ),
-    "transform_type"
+    "new_ideal_adaptor_staninput"
   )
 })
 
 test_that("model-specific cue requirements are enforced by legacy wrappers", {
   data <- make_minimal_staninput_data(cues = c("cue1", "cue2"))
 
-  expect_error(
-    make_ideal_adaptor_stanfit_input(
-      exposure = data$exposure,
-      test = data$test,
-      cues = c("cue1", "cue2"),
-      category = "category",
-      response = "response",
-      group = "group",
-      control = control_staninput(transform_type = "identity"),
-      stanmodel = "NIX_ideal_adaptor"
+  expect_warning(
+    expect_error(
+      make_ideal_adaptor_stanfit_input(
+        exposure = data$exposure,
+        test = data$test,
+        cues = c("cue1", "cue2"),
+        category = "category",
+        response = "response",
+        group = "group",
+        control = control_staninput(transform_type = "identity"),
+        stanmodel = "NIX_ideal_adaptor"
+      ),
+      "requires exactly one cue"
     ),
-    "requires exactly one cue"
+    "new_ideal_adaptor_staninput"
   )
 
-  expect_error(
-    make_ideal_adaptor_stanfit_input(
-      exposure = data$exposure,
-      test = data$test,
-      cues = "cue1",
-      category = "category",
-      response = "response",
-      group = "group",
-      control = control_staninput(transform_type = "identity"),
-      stanmodel = "MNIX_ideal_adaptor"
+  expect_warning(
+    expect_error(
+      make_ideal_adaptor_stanfit_input(
+        exposure = data$exposure,
+        test = data$test,
+        cues = "cue1",
+        category = "category",
+        response = "response",
+        group = "group",
+        control = control_staninput(transform_type = "identity"),
+        stanmodel = "MNIX_ideal_adaptor"
+      ),
+      "requires at least two cues"
     ),
-    "requires at least two cues"
+    "new_ideal_adaptor_staninput"
   )
 })
 
 test_that("invalid lapse rates are rejected by legacy wrappers", {
   data <- make_minimal_staninput_data(cues = "cue1")
 
-  expect_error(
-    make_ideal_adaptor_stanfit_input(
-      exposure = data$exposure,
-      test = data$test,
-      cues = "cue1",
-      category = "category",
-      response = "response",
-      group = "group",
-      lapse_rate = 1.5,
-      control = control_staninput(transform_type = "identity"),
-      stanmodel = "NIW_ideal_adaptor"
+  expect_warning(
+    expect_error(
+      make_ideal_adaptor_stanfit_input(
+        exposure = data$exposure,
+        test = data$test,
+        cues = "cue1",
+        category = "category",
+        response = "response",
+        group = "group",
+        lapse_rate = 1.5,
+        control = control_staninput(transform_type = "identity"),
+        stanmodel = "NIW_ideal_adaptor"
+      ),
+      "between 0 and 1"
     ),
-    "between 0 and 1"
+    "new_ideal_adaptor_staninput"
   )
 })

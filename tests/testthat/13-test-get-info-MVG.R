@@ -135,9 +135,17 @@ test_that("Get likelihood from MVG - input check x", {
 })
 
 test_that("Get categorization from MVG ideal observer - input check x", {
-  expect_no_error(get_categorization_from_MVG_ideal_observer(x = x.2, model = my_model,
-                                                             noise_treatment = "no_noise",
-                                                             lapse_treatment = "no_lapses",
-                                                             decision_rule = "sampling"))
+  expect_warning(
+    expect_no_error(
+      get_categorization_from_MVG_ideal_observer(
+        x = x.2,
+        model = my_model,
+        noise_treatment = "no_noise",
+        lapse_treatment = "no_lapses",
+        decision_rule = "sampling"
+      )
+    ),
+    "deprecated"
+  )
 })
 
