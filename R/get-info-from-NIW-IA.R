@@ -131,6 +131,9 @@ get_NIW_categorization_function <- function(
 
 # Deprecated after S7-migration
 
+#' Legacy wrapper for get_category_posterior_function.
+#'
+#' @description Deprecated. Use \code{\link{get_category_posterior_function}} instead.
 #' @rdname get_NIW_categorization_function
 #' @export
 #' @deprecated Use get_category_posterior_function() instead.
@@ -157,6 +160,9 @@ get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
   )
 }
 
+#' Legacy wrapper for categorize.
+#'
+#' @description Deprecated. Use \code{\link{categorize}} instead.
 #' @rdname get_categorization_from_model
 #' @export
 #' @deprecated Use categorize() instead.

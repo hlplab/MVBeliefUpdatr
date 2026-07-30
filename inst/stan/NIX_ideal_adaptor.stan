@@ -102,10 +102,10 @@ transformed parameters {
     S_0[cat] = Sigma_0_known ? Sigma_0_data[cat] * (nu_0 - 2) : S_0_param[cat];
     for (group in 1:L) {
       if (N_exposure[cat,group] > 0 ) {
-      kappa_n[cat,group] = kappa_0 + N_exposure[cat,group];
-      nu_n[cat,group] = nu_0 + N_exposure[cat,group];
-      m_n[cat,group] = (m_0[cat] * kappa_0 + x_mean_exposure[cat,group] * N_exposure[cat,group]) / kappa_n[cat,group];
-      S_n[cat,group] = sqrt((nu_0*S_0[cat]^2 +
+        kappa_n[cat,group] = kappa_0 + N_exposure[cat,group];
+        nu_n[cat,group] = nu_0 + N_exposure[cat,group];
+        m_n[cat,group] = (m_0[cat] * kappa_0 + x_mean_exposure[cat,group] * N_exposure[cat,group]) / kappa_n[cat,group];
+        S_n[cat,group] = sqrt((nu_0*S_0[cat]^2 +
                                  x_ss_exposure[cat,group] +
                                  (N_exposure[cat,group] * kappa_0) / (kappa_n[cat,group]) *
                                    (m_0[cat] - x_mean_exposure[cat,group])^2

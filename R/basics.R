@@ -617,7 +617,7 @@ get_affine_transform <- function(
   transform.parameters[["cue.labels"]] <- cues
 
   n.cues <- length(cues)
-  data <- as.matrix(data[, cues])
+  data <- as.matrix(data[, cues, drop = FALSE])
 
   if (type == "identity") {
     transform.parameters[["shift"]] <- rep(0, n.cues)
@@ -630,7 +630,7 @@ get_affine_transform <- function(
     if (type %in% c("identity", "center")) {
       transform.parameters[["SCALE"]] <- 1
     } else if (type %in% c("standardize", "PCA whiten", "ZCA whiten")) {
-      transform.parameters[["SCALE"]] <- 1 / sd(data[, cues])
+      transform.parameters[["SCALE"]] <- 1 / sd(data[, 1])
     } else {
       stop2("Unknown type.")
     }
@@ -638,7 +638,7 @@ get_affine_transform <- function(
     if (type %in% c("identity", "center")) {
       transform.parameters[["SCALE"]] <- diag(n.cues)
     } else if (type == "standardize") {
-      transform.parameters[["SCALE"]] <- diag(1 / apply(data[, cues], 2, sd))
+      transform.parameters[["SCALE"]] <- diag(1 / apply(data, 2, sd))
     } else if (type %in% c("PCA whiten", "ZCA whiten")) {
       eig <- eigen(cov(data))
       U <- eig$vectors

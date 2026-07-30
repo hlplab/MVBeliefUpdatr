@@ -399,6 +399,9 @@ evaluate_model <- function(
 
 # Deprecated after S7-migration
 
+#' Legacy wrapper for posterior.
+#'
+#' @description Deprecated. Use \code{\link{posterior}} instead.
 #' @rdname get_posterior_from_model
 #' @export
 #' @deprecated Use posterior() instead.
@@ -422,6 +425,9 @@ get_posterior_from_model <- function(model, ...) {
   return(c)
 }
 
+#' Legacy wrapper for categorize.
+#'
+#' @description Deprecated. Use \code{\link{categorize}} instead.
 #' @rdname get_categorization_from_model
 #' @export
 #' @deprecated Use categorize() instead.
@@ -456,6 +462,9 @@ get_categorization_from_model <- function(model, decision_rule = "sampling", ...
 #'
 #' @return A character vector.
 #'
+#' Legacy wrapper for get_cue_labels.
+#'
+#' @description Deprecated. Use \code{\link{get_cue_labels}} instead.
 #' @export
 #' @deprecated Use get_cue_labels() instead.
 get_cue_labels_from_model <- function(x, indices = NULL) {
@@ -478,6 +487,9 @@ get_cue_labels_from_model <- function(x, indices = NULL) {
 #'
 #' @param x A likelihood or model object.
 #'
+#' Legacy wrapper for get_category_labels.
+#'
+#' @description Deprecated. Use \code{\link{get_category_labels}} instead.
 #' @export
 #' @deprecated Use get_category_labels() instead.
 get_category_labels_from_model <- function(x, indices = NULL) {
@@ -501,6 +513,9 @@ get_category_labels_from_model <- function(x, indices = NULL) {
 #'
 #' @param x A likelihood or model object.
 #'
+#' Legacy wrapper for length(get_category_labels()).
+#'
+#' @description Deprecated. Use \code{\link{get_category_labels}} and take its length instead.
 #' @export
 #' @deprecated Use length(get_category_labels()) instead.
 get_nlevels_of_category_labels_from_model <- function(x) {
@@ -525,6 +540,9 @@ get_nlevels_of_category_labels_from_model <- function(x) {
 #'
 #' @return A vector of prior values of the same length as \code{categories}.
 #'
+#' Legacy wrapper for get_category_prior.
+#'
+#' @description Deprecated. Use \code{\link{get_category_prior}} instead.
 #' @export
 #' @deprecated Use get_category_prior() instead.
 get_priors_from_model <- function(model, categories = model$category) {
@@ -551,6 +569,9 @@ get_priors_from_model <- function(model, categories = model$category) {
 #'
 #' @param model A model object.
 #'
+#' Legacy wrapper for get_lapse_rate.
+#'
+#' @description Deprecated. Use \code{\link{get_lapse_rate}} instead.
 #' @export
 #' @deprecated Use get_lapse_rate() instead.
 get_lapse_rate_from_model <- function(model) {
@@ -575,6 +596,9 @@ get_lapse_rate_from_model <- function(model) {
 #'
 #' @return A vector of lapse bias values of the same length as \code{categories}.
 #'
+#' Legacy wrapper for get_lapse_bias.
+#'
+#' @description Deprecated. Use \code{\link{get_lapse_bias}} instead.
 #' @export
 #' @deprecated Use get_lapse_bias() instead.
 get_lapse_biases_from_model <- function(model, categories = model$category) {
