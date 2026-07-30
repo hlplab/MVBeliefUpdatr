@@ -17,9 +17,38 @@ get_category_likelihood_function <- S7::new_generic("get_category_likelihood_fun
 get_category_template <- S7::new_generic("get_category_template", "x")
 get_category_representations <- S7::new_generic("get_category_representations", "x")
 get_parameters <- S7::new_generic("get_parameters", "x")
+
+#' Get category-prior values from a cognitive model or legacy input.
+#'
+#' Compatibility methods accept older list/data-frame shapes such as scalars,
+#' named vectors, or table-like objects with a category column. These shims are
+#' transitional and will be removed once S7-only representations are the only
+#' supported interface.
+#' @param x A cognitive model or legacy input object.
+#' @param categories Optional category labels used to resolve values.
+#' @return A numeric vector of category-prior values.
+#' @export
 get_category_prior <- S7::new_generic("get_category_prior", c("x", "categories"))
+
+#' Get lapse-rate values from a cognitive model or legacy input.
+#'
+#' Compatibility methods handle older list/data-frame inputs while the S7 API
+#' becomes the standard interface.
+#' @param x A cognitive model or legacy input object.
+#' @return A numeric lapse-rate value.
+#' @export
 get_lapse_rate <- S7::new_generic("get_lapse_rate", "x")
+
+#' Get lapse-bias values from a cognitive model or legacy input.
+#'
+#' Compatibility methods handle older list/data-frame inputs while the S7 API
+#' becomes the standard interface.
+#' @param x A cognitive model or legacy input object.
+#' @param categories Optional category labels used to resolve values.
+#' @return A numeric vector of lapse-bias values.
+#' @export
 get_lapse_bias <- S7::new_generic("get_lapse_bias", c("x", "categories"))
+
 #' Get cue labels from a representation, template, model, or model distribution.
 #'
 #' @param x A representation, representation template, or cognitive model.
@@ -30,6 +59,8 @@ get_cue_labels <- S7::new_generic("get_cue_labels", c("x", "indices"))
 
 #' Get category labels from a representation, template, model, or model distribution.
 #'
+#' Compatibility methods also accept older list/data-frame inputs for
+#' transitional support while the S7 API becomes the canonical interface.
 #' @param x A representation, representation template, or cognitive model.
 #' @param indices An optional integer vector of indices to subset the returned labels.
 #' @return A character vector of category labels.

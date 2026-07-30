@@ -5,6 +5,42 @@ NULL
 
 # Functions general to stanfit objects ----------------------------------------
 
+.is_ideal_adaptor_stanfit_object <- function(x) {
+  if (!is_s7_object(x)) {
+    return(FALSE)
+  }
+
+  if (S7::S7_inherits(x, IdealAdaptorStanfit)) {
+    return(TRUE)
+  }
+
+  get_s7_class_name(x) %in% c("ideal_adaptor_stanfit", "IdealAdaptorStanfit")
+}
+
+.is_ideal_adaptor_staninput_object <- function(x) {
+  if (!is_s7_object(x)) {
+    return(FALSE)
+  }
+
+  if (S7::S7_inherits(x, IdealAdaptorStaninput)) {
+    return(TRUE)
+  }
+
+  get_s7_class_name(x) %in% c("ideal_adaptor_staninput", "IdealAdaptorStaninput")
+}
+
+.is_transform_information_object <- function(x) {
+  if (!is_s7_object(x)) {
+    return(FALSE)
+  }
+
+  if (S7::S7_inherits(x, MVBU_TransformInformation)) {
+    return(TRUE)
+  }
+
+  get_s7_class_name(x) %in% c("transform_information", "MVBU_TransformInformation")
+}
+
 #' Get parameter names of stanfit
 #'
 #' Get the names for all parameters in `fit`.
@@ -100,28 +136,21 @@ get_stanmodelname.ideal_adaptor_stanfit <- function(x) {
 #'
 #' @rdname get_stanfit
 #' @export
-setGeneric(
-  "get_stanfit",
-  function(x, ...) {
-    standardGeneric("get_stanfit")
+get_stanfit <- function(x, ...) {
+  if (.is_ideal_adaptor_stanfit_object(x)) {
+    return(x@stanfit)
   }
-)
 
-#' @rdname get_stanfit
-#' @export
-setMethod(
-  "get_stanfit",
-  signature(x = "ideal_adaptor_stanfit"),
-  function(x) {
-    if (!.hasSlot(x, "version")) {
-      stop2("It appears that the model was fit with an old version of MVBeliefUpdatr (< 0.0.1.0015). Please refit the model.")
-    } else if (x@version$MVBeliefUpdatr >= "0.0.2.0010") {
-      stop2("It appears that the model was fit with an old version of MVBeliefUpdatr (< 0.0.2.0010). Please refit the model.")
-    } else {
-      return(x@stanfit)
-    }
+  if (is.list(x) && !is.null(x[["stanfit"]])) {
+    return(x[["stanfit"]])
   }
-)
+
+  if (inherits(x, "stanfit")) {
+    return(x)
+  }
+
+  stop("x must be an ideal_adaptor_stanfit object or a list with a stanfit component.", call. = FALSE)
+}
 
 
 #' Set the stanfit of an ideal adaptor stanfit
@@ -138,38 +167,28 @@ setMethod(
 #'
 #' @rdname set_stanfit
 #' @export
-setGeneric(
-  "set_stanfit",
-  function(x, ...) {
-    standardGeneric("set_stanfit")
+set_stanfit <- function(x, stanfit = NULL) {
+  if (!is.null(stanfit)) {
+    assert_that(is.stanfit(stanfit))
+    assert_that(
+      stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels),
+      msg = paste0("stanfit object was not created by one of the accepted stancodes:\n\t",
+                   paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),
+                   "\n(you can get the name of your model from your_stanfit@model_name)."))
   }
-)
 
-#' @rdname set_stanfit
-#' @export
-setMethod(
-  "set_stanfit",
-  signature(x = "ideal_adaptor_stanfit"),
-  function(x, stanfit = NULL) {
-    if (!is.null(stanfit)) {
-      assert_that(is.stanfit(stanfit))
-      assert_that(
-        stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels),
-        msg = paste0("stanfit object was not created by one of the accepted stancodes:\n\t",
-                     paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),
-                     "\n(you can get the name of your model from your_stanfit@model_name)."))
-    }
-
-    if (!.hasSlot(x, "version")) {
-      stop2("It appears that the model was fit with an old version of MVBeliefUpdatr (< 0.0.1.0015). Please refit the model.")
-    } else if (x@version$MVBeliefUpdatr >= "0.0.2.0010") {
-      stop2("It appears that the model was fit with an old version of MVBeliefUpdatr (< 0.0.2.0010). Please refit the model.")
-    } else {
-      x@stanfit <- stanfit
-      return(x)
-    }
+  if (.is_ideal_adaptor_stanfit_object(x)) {
+    x@stanfit <- stanfit
+    return(x)
   }
-)
+
+  if (is.list(x)) {
+    x[["stanfit"]] <- stanfit
+    return(x)
+  }
+
+  stop("x must be an ideal_adaptor_stanfit object or a list with a stanfit component.", call. = FALSE)
+}
 
 #' Get the transform/untransform information from an ideal adaptor stanfit
 #'
@@ -184,35 +203,33 @@ setMethod(
 #' @keywords TBD
 #' @export
 get_transform_information <- function(x, ...) {
-  UseMethod("get_transform_information")
+  if (.is_ideal_adaptor_stanfit_object(x)) {
+    return(x@transform_information)
+  }
+
+  if (is.list(x) && !is.null(x[["transform_information"]])) {
+    return(x[["transform_information"]])
+  }
+
+  stop("x must be an ideal_adaptor_stanfit object or a list with a transform_information component.", call. = FALSE)
 }
 
 #' @export
 get_transform_function <- function(x, ...) {
-  UseMethod("get_transform_function")
+  info <- get_transform_information(x)
+  if (.is_transform_information_object(info)) {
+    return(info@`transform.function`)
+  }
+  return(info[["transform.function"]])
 }
 
 #' @export
 get_untransform_function <- function(x, ...) {
-  UseMethod("get_untransform_function")
-}
-
-#' @rdname get_transform_information
-#' @export
-get_transform_information.ideal_adaptor_stanfit <- function(x) {
-  return(x$transform_information)
-}
-
-#' @rdname get_transform_information
-#' @export
-get_transform_function.ideal_adaptor_stanfit <- function(x) {
-  return(get_transform_information(x)$transform.function)
-}
-
-#' @rdname get_transform_information
-#' @export
-get_untransform_function.ideal_adaptor_stanfit <- function(x) {
-  return(get_transform_information(x)$untransform.function)
+  info <- get_transform_information(x)
+  if (.is_transform_information_object(info)) {
+    return(info@`untransform.function`)
+  }
+  return(info[["untransform.function"]])
 }
 
 #' Get the input data from an ideal adaptor stanfit
@@ -229,34 +246,33 @@ get_untransform_function.ideal_adaptor_stanfit <- function(x) {
 #' @keywords TBD
 #' @rdname get_staninput
 #' @export
-setGeneric(
-  "get_staninput",
-  function(x, which = c("untransformed", "transformed", "both")[1]) {
-    standardGeneric("get_staninput")
-  }
-)
+get_staninput <- function(x, which = c("untransformed", "transformed", "both")[1]) {
+  which <- match.arg(which, c("untransformed", "transformed", "both"))
 
-
-#' @rdname get_staninput
-#' @export
-setMethod(
-  "get_staninput",
-  signature(x = "ideal_adaptor_stanfit"),
-  function(x, which = c("untransformed", "transformed", "both")[1]) {
-
-    which <- match.arg(which, c("untransformed", "transformed", "both"))
-
+  if (.is_ideal_adaptor_stanfit_object(x)) {
     staninput <- x@staninput
-
     if (which == "untransformed") {
-      return(staninput$untransformed)
-    } else if (which == "transformed") {
-      return(staninput$transformed)
-    } else {
-      return(staninput)
+      return(staninput@untransformed)
     }
+    if (which == "transformed") {
+      return(staninput@transformed)
+    }
+    return(staninput)
   }
-)
+
+  if (is.list(x) && !is.null(x[["staninput"]])) {
+    staninput <- x[["staninput"]]
+    if (which == "untransformed") {
+      return(staninput[["untransformed"]])
+    }
+    if (which == "transformed") {
+      return(staninput[["transformed"]])
+    }
+    return(staninput)
+  }
+
+  stop("x must be an ideal_adaptor_stanfit object or a list with a staninput component.", call. = FALSE)
+}
 
 #' Set the input data from an ideal adaptor stanfit
 #'
@@ -275,42 +291,37 @@ setMethod(
 #' @keywords TBD
 #' @rdname set_staninput
 #' @export
-setGeneric(
-  "set_staninput",
-  function(x, staninput, which = c("untransformed", "transformed", "both")[3]) {
-    standardGeneric("set_staninput")
-  }
-)
+set_staninput <- function(x, staninput, which = c("untransformed", "transformed", "both")[3]) {
+  which <- match.arg(which, c("untransformed", "transformed", "both"))
 
-#' @rdname set_staninput
-#' @export
-setMethod(
-  "set_staninput",
-  signature(x = "ideal_adaptor_stanfit"),
-  function(x, staninput, which = c("untransformed", "transformed", "both")[3]) {
-
-    # Validate "which"
-    which <- match.arg(which, c("untransformed", "transformed", "both"))
-
+  if (.is_ideal_adaptor_stanfit_object(x)) {
     current <- x@staninput
-
-    # Modify according to "which"
     if (which == "both") {
-      new_staninput <- staninput
+      if (is.list(staninput) && !is_s7_object(staninput)) {
+        x@staninput <- ideal_adaptor_staninput(
+          transformed = if (!is.null(staninput[["transformed"]])) staninput[["transformed"]] else list(),
+          untransformed = if (!is.null(staninput[["untransformed"]])) staninput[["untransformed"]] else list()
+        )
+      } else {
+        x@staninput <- staninput
+      }
     } else if (which == "transformed") {
-      current$transformed <- staninput
-      new_staninput <- current
-    } else if (which == "untransformed") {
-      current$untransformed <- staninput
-      new_staninput <- current
+      current@transformed <- staninput
+      x@staninput <- current
+    } else {
+      current@untransformed <- staninput
+      x@staninput <- current
     }
-
-    # Create updated S4 object (S4 requires replacement)
-    x@staninput <- new_staninput
-
-    x
+    return(x)
   }
-)
+
+  if (is.list(x)) {
+    x[["staninput"]] <- staninput
+    return(x)
+  }
+
+  stop("x must be an ideal_adaptor_stanfit object or a list with a staninput component.", call. = FALSE)
+}
 
 #' Get exposure category statistic from ideal adaptor stanfit
 #'
@@ -480,7 +491,7 @@ get_exposure_category_statistic.ideal_adaptor_stanfit <- function(
     } else if (stanmodelname == "NIW_ideal_adaptor") {
       s <- staninput$x_ss_exposure
     } else if (stanmodelname == "MNIX_ideal_adaptor") {
-      s <- staninput$x_cov_exposure
+      s <- staninput$x_ss_exposure
       stop2("Extraction of uss, css, or cov not yet implemented for MNIX ideal adaptor stanfit.")
     } else {
       stop2("Unrecognized stanmodel. No method available to extract category variance.")

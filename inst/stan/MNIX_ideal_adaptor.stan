@@ -32,7 +32,7 @@ data {
 
   array[M,L] int<lower=0> N_exposure;                      // number of observations per category (M) and exposure group (L)
   array[M,L] vector[K] x_mean_exposure;                    // means for each category (M) and exposure group (L)
-  array[M,L] cov_matrix[K] x_cov_exposure;                 // covariance matrix for each category (M) and group (L)
+  array[M,L] vector[K] x_ss_exposure;                      // sum of *centered* squares for each category (M) and group (L)
 
   int N_test;                                              // number of unique combinations of test locations & exposure groups
   array[N_test] vector[K] x_test;                          // locations (in cue space) of test trials
@@ -73,15 +73,6 @@ data {
 }
 
 transformed data {
-  array[M,L] vector[K] x_ss_exposure;                      // sum of *centered* squares matrix for each category (M) and group (L)
-  for (category in 1:M) {
-    for (group in 1:L) {
-      for (cue in 1:K) {
-        x_ss_exposure[category, group, cue] = x_cov_exposure[category, group, cue, cue] * (N_exposure[category, group] - 1);
-      }
-    }
-  }
-
   // Extract vector of expected SDs from user-provided expected cov_matrix of categories
   array[Sigma_0_known ? M : 0] vector[Sigma_0_known ? K : 0] tau_0_data;
   if (Sigma_0_known) {

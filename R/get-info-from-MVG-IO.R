@@ -141,6 +141,9 @@ get_likelihood_from_MVG <- function(
 
 # Deprecated after S7-migration
 
+#' Legacy wrapper for posterior.
+#'
+#' @description Deprecated. Use \code{\link{posterior}} instead.
 #' @rdname get_posterior_from_model
 #' @export
 #' @deprecated Use posterior() instead.
@@ -226,6 +229,9 @@ get_posterior_from_MVG_ideal_observer <- function(
   return(posterior_probabilities)
 }
 
+#' Legacy wrapper for categorize.
+#'
+#' @description Deprecated. Use \code{\link{categorize}} instead.
 #' @rdname get_categorization_from_model
 #' @export
 #' @deprecated Use categorize() instead.

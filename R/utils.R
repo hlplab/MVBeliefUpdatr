@@ -16,6 +16,14 @@
   is.numeric(x) && is.null(dim(x))
 }
 
+is_scalar_character <- function(x) {
+  is.character(x) && length(x) == 1L && !is.na(x[1])
+}
+
+is_character <- function(x) {
+  is.character(x)
+}
+
 #' @keywords internal
 .as_numeric_vector <- function(x) {
   if (!.is_numeric_vector(x)) {

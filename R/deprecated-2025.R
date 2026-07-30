@@ -1,17 +1,29 @@
-#' DEPRECATED: get_transform_information_from_stanfit
+#' Legacy wrapper for get_transform_information.ideal_adaptor_stanfit.
+#'
+#' @description Deprecated. Use \code{\link{get_transform_information.ideal_adaptor_stanfit}} instead.
 #' @export
+#' @deprecated Use get_transform_information.ideal_adaptor_stanfit() instead.
 get_transform_information_from_stanfit <- function(...) get_transform_information.ideal_adaptor_stanfit(...)
 
-#' DEPRECATED: get_transform_function_from_stanfit
+#' Legacy wrapper for get_transform_function.ideal_adaptor_stanfit.
+#'
+#' @description Deprecated. Use \code{\link{get_transform_function.ideal_adaptor_stanfit}} instead.
 #' @export
+#' @deprecated Use get_transform_function.ideal_adaptor_stanfit() instead.
 get_transform_function_from_stanfit <- function(...) get_transform_function.ideal_adaptor_stanfit(...)
 
-#' DEPRECATED: get_untransform_function_from_stanfit
+#' Legacy wrapper for get_untransform_function.ideal_adaptor_stanfit.
+#'
+#' @description Deprecated. Use \code{\link{get_untransform_function.ideal_adaptor_stanfit}} instead.
 #' @export
+#' @deprecated Use get_untransform_function.ideal_adaptor_stanfit() instead.
 get_untransform_function_from_stanfit <- function(...) get_untransform_function.ideal_adaptor_stanfit(...)
 
-#' DEPRECATED: get_staninput_from_stanfit
+#' Legacy wrapper for get_staninput.ideal_adaptor_stanfit.
+#'
+#' @description Deprecated. Use \code{\link{get_staninput.ideal_adaptor_stanfit}} instead.
 #' @export
+#' @deprecated Use get_staninput.ideal_adaptor_stanfit() instead.
 get_staninput_from_stanfit <- function(...) get_staninput.ideal_adaptor_stanfit(...)
 
 # get_exposure_category_statistic_from_stanfit <- get_exposure_category_statistic.ideal_adaptor_stanfit
@@ -20,8 +32,11 @@ get_staninput_from_stanfit <- function(...) get_staninput.ideal_adaptor_stanfit(
 # get_exposure_uss_from_stanfit <- get_exposure_category_uss.ideal_adaptor_stanfit
 # get_exposure_cov_from_stanfit <- get_exposure_category_cov.ideal_adaptor_stanfit
 
-#' DEPRECATED: get_test_data_from_stanfit
+#' Legacy wrapper for get_test_data.
+#'
+#' @description Deprecated. Use \code{\link{get_test_data}} instead.
 #' @export
+#' @deprecated Use get_test_data() instead.
 get_test_data_from_stanfit <- function(...) get_test_data(...)
 
 # get_original_variable_levels_from_stanfit <- get_staninput_variable_levels
@@ -33,16 +48,20 @@ get_test_data_from_stanfit <- function(...) get_test_data(...)
 # get_expected_mu_from_stanfit <- get_expected_mu
 # get_expected_sigma_from_stanfit <- get_expected_sigma
 
-#' DEPRECATED: add_ibbu_stanfit_draw
+#' Legacy wrapper for get_draws.
+#'
+#' @description Deprecated. Use \code{\link{get_draws}} instead.
 #' @export
+#' @deprecated Use get_draws() instead.
 add_ibbu_stanfit_draw <- function(...) get_draws(...)
 
-#' DEPRECATED: Infer prior beliefs
+#' Legacy wrapper for the old prior-belief inference workflow.
 #'
-#' Use \code{\link{infer_NIW_ideal_adaptor()}} instead, together with \code{\link{make_staninput_for_NIW_ideal_adaptor()}}.
+#' @description Deprecated. Use \code{\link{infer_NIW_ideal_adaptor}} together with \code{\link{make_staninput_for_NIW_ideal_adaptor}} instead.
 #' @inheritParams make_staninput
 #' @inheritParams fit_ideal_adaptor
 #' @export
+#' @deprecated Use infer_NIW_ideal_adaptor() instead.
 infer_prior_beliefs <- function(
   # arguments for make_staninput
   exposure, test,
@@ -111,8 +130,9 @@ infer_prior_beliefs <- function(
   fit_ideal_adaptor(staninput = staninput, stanmodel = stanmodel, silent = silent, verbose = verbose, ...)
 }
 
-#' DEPRECATED: make_staninput
+#' Legacy wrapper for the older make_staninput interface.
 #'
+#' @description Deprecated. Use \code{\link{fit_ideal_adaptor}} or \code{\link{new_ideal_adaptor_staninput}} instead.
 #' @param center.observations Should the data be centered based on cues' means during exposure? Note that the cues' means
 #' used for centering are calculated after aggregating the data to all unique combinations specified by \code{group.unique}.
 #' These means are only expected to be the same as the standard deviations over the entire exposure data if the exposure data

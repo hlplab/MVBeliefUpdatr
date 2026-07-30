@@ -107,7 +107,7 @@ transformed parameters {
     S_0[cat] = Sigma_0_known ? Sigma_0_data[cat] * (nu_0 - K - 1) : quad_form_diag(multiply_lower_tri_self_transpose(L_omega_0_param[cat]), tau_0_param[cat]);
 
     for (group in 1:L) {
-      if (N_exposure[cat,group] > 0 ) {
+      if (N_exposure[cat,group] > 1) {
         kappa_n[cat,group] = kappa_0 + N_exposure[cat,group];
         nu_n[cat,group] = nu_0 + N_exposure[cat,group];
         m_n[cat,group] =
@@ -116,6 +116,18 @@ transformed parameters {
         S_n[cat,group] =
           S_0[cat] +
           x_ss_exposure[cat,group] +
+          kappa_0 * m_0[cat] * m_0[cat]' -
+          kappa_n[cat,group] * m_n[cat,group] * m_n[cat,group]';
+      } else if (N_exposure[cat,group] > 0) {
+        // For a single observation, the scatter contribution is not well-defined as a covariance summary,
+        // so we update the posterior mean parameters but keep the scatter term at the prior level.
+        kappa_n[cat,group] = kappa_0 + N_exposure[cat,group];
+        nu_n[cat,group] = nu_0 + N_exposure[cat,group];
+        m_n[cat,group] =
+          (kappa_0 * m_0[cat] + N_exposure[cat,group] * x_mean_exposure[cat,group]) /
+          kappa_n[cat,group];
+        S_n[cat,group] =
+          S_0[cat] +
           kappa_0 * m_0[cat] * m_0[cat]' -
           kappa_n[cat,group] * m_n[cat,group] * m_n[cat,group]';
       } else {

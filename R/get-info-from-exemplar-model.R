@@ -148,6 +148,9 @@ get_categorization_from_exemplar_model <- function(
 
 # Deprecated after S7-migration
 
+#' Legacy wrapper for categorize.
+#'
+#' @description Deprecated. Use \code{\link{categorize}} instead.
 #' @rdname get_categorization_from_model
 #' @export
 #' @deprecated Use categorize() instead.

@@ -11,7 +11,9 @@ NULL
 #' MVBU Core S7 Class Architecture
 #'
 #' The MVBeliefUpdatr S7 organizes model objects around an explicit
-#' compositional structure:
+#' compositional structure. These classes define the canonical S7 API; any
+#' older list/data-frame-style inputs are supported only through transitional
+#' compatibility methods and should be phased out over time.
 #'
 #' - [MVBU_CategoryRepresentation] defines the structure for one category-level
 #'   representational object. This could be a uni- or multivariate Gaussian, 

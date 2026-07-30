@@ -130,6 +130,18 @@ S7::method(get_parameters, Exemplar_CategoryRepresentation) <- function(x) {
 # Model property accessors
 # -------------------------
 
+#' Normalize category-scoped values from legacy list/data-frame inputs.
+#'
+#' This helper resolves a single value, a vector of values, or a named vector
+#' into a value vector aligned to the requested category labels. It is used by
+#' the S7 compatibility methods for legacy objects so that category priors and
+#' lapse biases can be read from older list/data-frame shapes without duplicating
+#' the same coercion logic in each accessor.
+#'
+#' @keywords internal
+#' @deprecated This compatibility helper is only needed while legacy
+#'   list/data-frame inputs are still supported. It can be removed once the
+#'   S7 interface is the only supported representation.
 .mvbu_resolve_values_for_categories <- function(values, categories = NULL) {
   if (is.null(values)) {
     return(NULL)
@@ -171,6 +183,8 @@ S7::method(get_category_prior, list(MVBU_Object, S7::class_any)) <- function(x, 
   .mvbu_not_implemented("get_category_prior", class(x)[1])
 }
 
+#' @deprecated Legacy compatibility method for list/data-frame inputs; remove once
+#'   S7-only representations are required.
 S7::method(get_category_prior, list(S7::class_any, S7::class_any)) <- function(x, categories) {
   if (is.list(x) && !is.null(x[["prior"]])) {
     prior <- x[["prior"]]
@@ -215,12 +229,28 @@ S7::method(get_lapse_rate, MVBU_Object) <- function(x) {
   .mvbu_not_implemented("get_lapse_rate", class(x)[1])
 }
 
+#' @deprecated Legacy compatibility method for list/data-frame inputs; remove once
+#'   S7-only representations are required.
 S7::method(get_lapse_rate, S7::class_any) <- function(x) {
   if (is.list(x) && !is.null(x[["lapse_rate"]])) {
-    return(.mvbu_resolve_values_for_categories(x[["lapse_rate"]], categories = NULL))
+    lapse_rate <- x[["lapse_rate"]]
+    if (is.list(lapse_rate) && length(lapse_rate) > 0) {
+      lapse_rate <- lapse_rate[[1]]
+    }
+    if (is.null(lapse_rate)) {
+      return(NULL)
+    }
+    return(as.numeric(lapse_rate[1]))
   }
   if (is.data.frame(x) && "lapse_rate" %in% names(x)) {
-    return(.mvbu_resolve_values_for_categories(x[["lapse_rate"]], categories = NULL))
+    lapse_rate <- x[["lapse_rate"]]
+    if (is.list(lapse_rate) && length(lapse_rate) > 0) {
+      lapse_rate <- lapse_rate[[1]]
+    }
+    if (is.null(lapse_rate)) {
+      return(NULL)
+    }
+    return(as.numeric(lapse_rate[1]))
   }
   NULL
 }
@@ -233,6 +263,8 @@ S7::method(get_lapse_bias, list(MVBU_Object, S7::class_any)) <- function(x, cate
   .mvbu_not_implemented("get_lapse_bias", class(x)[1])
 }
 
+#' @deprecated Legacy compatibility method for list/data-frame inputs; remove once
+#'   S7-only representations are required.
 S7::method(get_lapse_bias, list(S7::class_any, S7::class_any)) <- function(x, categories) {
   if (is.list(x) && !is.null(x[["lapse_bias"]])) {
     lapse_bias <- x[["lapse_bias"]]
@@ -287,6 +319,8 @@ S7::method(get_cue_labels, list(MVBU_CognitiveModel, S7::class_any)) <- function
   S7::method(get_cue_labels, list(MVBU_CategoryRepresentationTemplate, S7::class_any))(template, indices)
 }
 
+#' @deprecated Legacy compatibility method for list/data-frame inputs; remove once
+#'   S7-only representations are required.
 S7::method(get_category_labels, list(S7::class_any, S7::class_any)) <- function(x, indices) {
   if (is.data.frame(x) && "category" %in% names(x)) {
     category_labels <- sort(unique(as.character(x[["category"]])))
