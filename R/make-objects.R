@@ -165,8 +165,8 @@ example_data <- function(
     ...,
     Ns = 20
 ) {
-  assert_that(is_scalar_character(model_type))
-  assert_that(model_type %in% c("exemplar_model", "MVG_ideal_observer", "NIX_ideal_adaptor", "MNIX_ideal_adaptor", "NIW_ideal_adaptor"),
+  .assert_that(is_scalar_character(model_type))
+  .assert_that(model_type %in% c("exemplar_model", "MVG_ideal_observer", "NIX_ideal_adaptor", "MNIX_ideal_adaptor", "NIW_ideal_adaptor"),
               msg = paste0("model_type must be one of: exemplar_model, MVG_ideal_observer, NIX_ideal_adaptor, MNIX_ideal_adaptor, NIW_ideal_adaptor."))
 
   model <- example_model(example = example, model_type = model_type, ...)
@@ -212,10 +212,10 @@ make_exemplars_from_data <- function(
     sim_function = NULL,
     verbose = F
 ) {
-  assert_that(is.data.frame(data) | is_tibble(data))
-  assert_that(all(is.null(group) | all(is.character(group) | is_symbol(group))))
-  assert_that(all(is.character(category) | is_symbol(category), length(category) == 1))
-  assert_that(all(is.character(cues) | is_symbol(cues), length(cues) > 0))
+  .assert_data_frame_like(data)
+  .assert_that(all(is.null(group) | all(is.character(group) | is_symbol(group))))
+  .assert_that(all(is.character(category) | is_symbol(category), length(category) == 1))
+  .assert_that(all(is.character(cues) | is_symbol(cues), length(cues) > 0))
 
   if (is.character(group)) group <- syms(group)
   if (is.character(category)) category <- sym(category)
@@ -224,9 +224,9 @@ make_exemplars_from_data <- function(
     cues <- syms(cues)
   }
 
-  assert_that(as_name(category) %in% names(data),
+  .assert_that(as_name(category) %in% names(data),
               msg = paste0("Category variable (", as_name(category), ") not found in data."))
-  assert_that(all(cue_names %in% names(data)),
+  .assert_that(all(cue_names %in% names(data)),
               msg = paste0("Some cues not found in data: ", paste(setdiff(cue_names, intersect(cue_names, names(data))), collapse = ", ")))
 
   if (verbose) if (!is.null(group))
@@ -353,10 +353,10 @@ make_MVG_from_data = function(
   cues,
   verbose = F
 ) {
-  assert_that(is.data.frame(data) | is_tibble(data))
-  assert_that(all(is.null(group) | all(is.character(group) | is_symbol(group))))
-  assert_that(all(is.character(category) | is_symbol(category), length(category) == 1))
-  assert_that(all(is.character(cues) | is_symbol(cues), length(cues) > 0))
+  .assert_data_frame_like(data)
+  .assert_that(all(is.null(group) | all(is.character(group) | is_symbol(group))))
+  .assert_that(all(is.character(category) | is_symbol(category), length(category) == 1))
+  .assert_that(all(is.character(cues) | is_symbol(cues), length(cues) > 0))
 
   if (is.character(group)) group <- syms(group)
   if (is.character(category)) category <- sym(category)
@@ -365,9 +365,9 @@ make_MVG_from_data = function(
     cues <- syms(cues)
   }
 
-  assert_that(as_name(category) %in% names(data),
+  .assert_that(as_name(category) %in% names(data),
               msg = paste0("Category variable (", as_name(category), ") not found in data."))
-  assert_that(all(cue_names %in% names(data)),
+  .assert_that(all(cue_names %in% names(data)),
               msg = paste0("Some cues not found in data: ", paste(setdiff(cue_names, intersect(cue_names, names(data))), collapse = ", ")))
 
   if (verbose) if (!is.null(group))
@@ -461,8 +461,8 @@ make_NIW_belief_from_data <- function(
   nu = length(cues) + 2,
   verbose = F
 ) {
-  assert_that(all(is.numeric(kappa), is.numeric(nu), !is.na(kappa), !is.na(nu)))
-  assert_that(nu > length(cues) + 1,
+  .assert_that(all(is.numeric(kappa), is.numeric(nu), !is.na(kappa), !is.na(nu)))
+  .assert_that(nu > length(cues) + 1,
               msg = paste0("nu must be larger than dimensionality of cues + 1 (>", length(cues) + 1, ")."))
 
   # if (is.character(group)) group = syms(group)
@@ -552,16 +552,16 @@ lift_likelihood_to_model <- function(
   verbose = F
 ) {
   if (is.character(group)) group = syms(group)
-  assert_that(all(is.numeric(lapse_rate), is.numeric(lapse_bias), is.numeric(prior)),
+  .assert_that(all(is.numeric(lapse_rate), is.numeric(lapse_bias), is.numeric(prior)),
               msg = "Category prior, lapse rate, and lapse bias must be numeric.")
 
   category_levels <- get_category_labels_from_model(x)
   n.cat <- get_nlevels_of_category_labels_from_model(x)
   if (!is.null(prior)) {
-    assert_that(length(prior) == n.cat,
+    .assert_that(length(prior) == n.cat,
               msg = paste("Category prior must have as many elements as there are categories. Has", length(prior), "instead of needed", n.cat))
     if (!is.null(names(prior))) {
-        assert_that(all(names(prior) == category_levels),
+        .assert_that(all(names(prior) == category_levels),
                     msg = paste("Names of category priors must match levels of category in x."))
     } else if (!all(prior == first(prior))) {
       # If priors are the same there's no need for this message. This also prevents that the message is
@@ -571,10 +571,10 @@ lift_likelihood_to_model <- function(
     names(prior) <- category_levels
   }
   if (!is.null(lapse_bias)) {
-    assert_that(length(lapse_bias) == n.cat,
+    .assert_that(length(lapse_bias) == n.cat,
                 msg = paste("Lapse_bias must have as many elements as there are categories. Has", length(lapse_bias), "instead of needed", n.cat))
     if (!is.null(names(lapse_bias))) {
-      assert_that(all(names(lapse_bias) == category_levels),
+      .assert_that(all(names(lapse_bias) == category_levels),
                   msg = paste("Names of lapse biases must match levels of category in x."))
     } else if (!all(lapse_bias == first(lapse_bias))) {
       # If biases are the same there's no need for this message. This also prevents that the message is
@@ -588,15 +588,15 @@ lift_likelihood_to_model <- function(
     lapse_rate <- 0
   }
 
-  assert_that(is.null(Sigma_noise) | is.matrix(Sigma_noise),
+  .assert_that(is.null(Sigma_noise) | is.matrix(Sigma_noise),
               msg = "Sigma_noise must be NULL or a matrix (noise is independent of, and thus constant across, categories).")
   if (!is.null(Sigma_noise)) {
-    assert_that(all(dim(Sigma_noise) == rep(get_cue_dimensionality_from_model(x), 2)),
+    .assert_that(all(dim(Sigma_noise) == rep(get_cue_dimensionality_from_model(x), 2)),
                 msg = paste("If not NULL, Sigma_noise must match the dimensionality of other parameters in the model (here: a",
                             get_cue_dimensionality_from_model(x), "x", get_cue_dimensionality_from_model(x), " matrix)."))
-    assert_that(!is.null(first(dimnames(Sigma_noise))),
+    .assert_that(!is.null(first(dimnames(Sigma_noise))),
                 msg = "If not NULL, Sigma_noise = must have non-NULL dimnames.")
-    assert_that(map(dimnames(Sigma_noise), ~ .x == get_cue_labels_from_model(x)) %>% reduce(all),
+    .assert_that(map(dimnames(Sigma_noise), ~ .x == get_cue_labels_from_model(x)) %>% reduce(all),
                 msg = "The dimnames of Sigma_noise must match those of the model to lift.")
   }
 
@@ -626,7 +626,7 @@ lift_exemplars_to_exemplar_model <- function(
     Sigma_noise = NULL,
     verbose = F
 ) {
-  assert_that(is.exemplars(x, group = group, verbose = verbose))
+  .assert_that(is.exemplars(x, group = group, verbose = verbose))
 
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
 
@@ -648,7 +648,7 @@ lift_MVG_to_MVG_ideal_observer = function(
   Sigma_noise = NULL,
   verbose = F
 ) {
-  assert_that(is.MVG(x, group = group, verbose = verbose))
+  .assert_that(is.MVG(x, group = group, verbose = verbose))
 
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
 
@@ -669,7 +669,7 @@ lift_NIW_belief_to_NIW_ideal_adaptor <- function(
   Sigma_noise = NULL,
   verbose = F
 ) {
-  assert_that(is.NIW_belief(x, group = group, verbose = verbose))
+  .assert_that(is.NIW_belief(x, group = group, verbose = verbose))
 
   x %<>% lift_likelihood_to_model(group = group, prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
 
@@ -688,8 +688,8 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor <- function(
   kappa, nu,
   verbose = F
 ) {
-  assert_that(is.MVG_ideal_observer(x, group = group, verbose = verbose))
-  assert_that(!is.null(kappa), !is.null(nu),
+  .assert_that(is.MVG_ideal_observer(x, group = group, verbose = verbose))
+  .assert_that(!is.null(kappa), !is.null(nu),
               msg = "kappa and nu must be provided.")
 
   x %<>%
@@ -727,9 +727,9 @@ aggregate_models_by_group_structure = function(
   x,
   group_structure = NULL
 ) {
-  assert_that(all(is.character(group_structure)),
+  .assert_that(all(is.character(group_structure)),
               msg = "Group structure must be a vector of characters.")
-  assert_that(all(group_structure %in% names(x)),
+  .assert_that(all(group_structure %in% names(x)),
               msg = "All variables in group_structure must be contained in the x.")
 
   x_names <- setdiff(names(x), group_structure)
@@ -823,10 +823,10 @@ sample_MVG_data <- function(
   # (since they are in non-standard evaluations)
   category <- n <- mu <- Sigma <- NULL
 
-  assert_that(!is.null(mus), !is.null(Sigmas))
-  assert_that(is.null(category.labels) | length(mus) == length(category.labels),
+  .assert_that(!is.null(mus), !is.null(Sigmas))
+  .assert_that(is.null(category.labels) | length(mus) == length(category.labels),
               msg = "Number of category labels mismatch number of mus.")
-  assert_that(is.null(cue.labels) | length(mus[[1]]) == length(cue.labels),
+  .assert_that(is.null(cue.labels) | length(mus[[1]]) == length(cue.labels),
               msg = "Number of cue labels mismatches dimensionality of mus.")
 
   if (is.null(category.labels)) category.labels = 1:length(mus)
@@ -857,10 +857,10 @@ sample_NIW_data <- function(
   # (since they are in non-standard evaluations)
   category <- n <- m <- S <- kappa <- nu <- NULL
 
-  assert_that(!is.null(ms), !is.null(Ss))
-  assert_that(is.null(category.labels) | length(ms) == length(category.labels),
+  .assert_that(!is.null(ms), !is.null(Ss))
+  .assert_that(is.null(category.labels) | length(ms) == length(category.labels),
               msg = "Number of category labels mismatch number of ms.")
-  assert_that(is.null(cue.labels) | length(ms[[1]]) == length(cue.labels),
+  .assert_that(is.null(cue.labels) | length(ms[[1]]) == length(cue.labels),
               msg = "Number of cue labels mismatches dimensionality of ms.")
 
   if (is.null(category.labels)) category.labels = 1:length(ms)

@@ -13,7 +13,9 @@ get_lapse_biases_from_model(model, categories = model$category)
 }
 \value{
 A vector of lapse bias values of the same length as \code{categories}.
+
+Legacy wrapper for get_lapse_bias.
 }
 \description{
-Get lapse bias from model
+Deprecated. Use \code{\link{get_lapse_bias}} instead.
 }

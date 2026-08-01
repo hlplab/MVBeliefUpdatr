@@ -134,15 +134,15 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
   response <- NULL
 
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
-  assert_that(all(is_scalar_character(noise_treatment)), is_scalar_character(lapse_treatment))
+  .assert_that(all(is_scalar_character(noise_treatment)), is_scalar_character(lapse_treatment))
   if (any(noise_treatment != "no_noise", lapse_treatment != "no_lapses"))
     assert_NIW_ideal_adaptor(prior_model, verbose = verbose) else assert_NIW_belief(prior_model, verbose = verbose)
 
-  assert_that(all(is.scalar(x_N), is.numeric(x_N)), msg = "x_N must be a scalar numeric.")
-  assert_that(x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
+  .assert_that(all(is.scalar(x_N), is.numeric(x_N)), msg = "x_N must be a scalar numeric.")
+  .assert_that(x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
 
   # Handle lapses
-  assert_that(lapse_treatment %in% c("no_lapses", "sample", "marginalize"),
+  .assert_that(lapse_treatment %in% c("no_lapses", "sample", "marginalize"),
               msg = paste(lapse_treatment, "is not an acceptable lapse_treatment. See details section of help page."))
   if (lapse_treatment == "sample") {
     x_N <- rbinom(1, x_N, 1 - get_lapse_rate_from_model(prior_model))
@@ -156,13 +156,13 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
     if (verbose) message("No observations to update on (x_N == 0 or x_mean is NA). This can happen, for example, if observations are missing or because model was lapsing during all observations. Returning prior_model as posterior.")
     return(prior_model)
   }
-  assert_that(method %in% c("no-updating",
+  .assert_that(method %in% c("no-updating",
                             "label-certain",
                             "nolabel-criterion", "nolabel-sampling", "nolabel-proportional",
                             "nolabel-uniform"),
               msg = paste(method, "is not an acceptable updating method. See details section of help page."))
   if (method %nin% c("no-updating", "label-certain"))
-    assert_that(x_N <= 1,
+    .assert_that(x_N <= 1,
                 msg = "For this updating method, only incremental updating (one observations at a time) is implemented.")
 
   x_Ns <- as.list(rep(0, length(prior_model$category)))
@@ -192,10 +192,10 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
         }
 
   # Handle noise
-  assert_that(noise_treatment %in% c("no_noise", "sample", "marginalize"))
+  .assert_that(noise_treatment %in% c("no_noise", "sample", "marginalize"))
   Sigma_noise <- get_perceptual_noise_from_model(prior_model)
   if (noise_treatment == "sample") {
-    assert_that(all(is_scalar_integerish(x_N), is_weakly_greater_than(x_N, 1)),
+    .assert_that(all(is_scalar_integerish(x_N), is_weakly_greater_than(x_N, 1)),
                 msg = "If noise_treatment is 'sample', x_N must be a positive integer.")
     if (verbose) message("Sampling perceptual noise and adding it to each observation")
     warning("Updating while including noise_treatment = sample has not yet been thoroughly tested. If noise is included in perception but not in the prior beliefs, it should be discounted during the updating. This implementation has not been tested. You might want to construct the model while adding the perceptual noise to the category beliefs and use categorization that does not add the noise again (noise_treatment = 'no_noise').")
@@ -317,15 +317,16 @@ update_NIW_ideal_adaptor_incrementally <- function(
   if (lapse_treatment == "marginalize")
     warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.", call. = FALSE)
 
-  assert_that(all(is.flag(keep.update_history), is.flag(keep.exposure_data)))
-  assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
-  assert_that(exposure.category %in% names(exposure),
+  .assert_flag(keep.update_history)
+  .assert_flag(keep.exposure_data)
+  .assert_data_frame_like(exposure)
+  .assert_that(exposure.category %in% names(exposure),
               msg = paste0("exposure.category variable not found: ", exposure.category, " must be a column in the exposure data."))
-  assert_that(any(is.null(exposure.order), exposure.order %in% names(exposure)),
+  .assert_that(any(is.null(exposure.order), exposure.order %in% names(exposure)),
               msg = paste0("exposure.order variable not found: ", exposure.order, " must be a column in the exposure data."))
-  assert_that(any(is.null(exposure.order), if (!is.null(exposure.order)) is.numeric(exposure[[exposure.order]]) else T),
+  .assert_that(any(is.null(exposure.order), if (!is.null(exposure.order)) is.numeric(exposure[[exposure.order]]) else T),
               msg = "exposure.order variable must be numeric.")
-  assert_that(length(method) == 1 | length(method) == nrow(exposure),
+  .assert_that(length(method) == 1 | length(method) == nrow(exposure),
               msg = paste0("Length of method argument must be either 1 or the number of rows in exposure (", nrow(exposure),")."))
   if (length(method) == 1) method <- rep(method, nrow(exposure))
 
@@ -388,10 +389,10 @@ update_NIW_ideal_adaptor_batch <- function(
 ){
   if (verbose) message("Assuming that category variable in NIW belief/ideal adaptor is called category.")
 
-  assert_that(any(is_tibble(exposure), is.data.frame(exposure)))
-  assert_that(exposure.category %in% names(exposure),
+  .assert_data_frame_like(exposure)
+  .assert_that(exposure.category %in% names(exposure),
               msg = paste0("exposure.category variable not found: ", exposure.category, " must be a column in the exposure data."))
-  assert_that(noise_treatment %in% c("no_noise", "marginalize"))
+  .assert_that(noise_treatment %in% c("no_noise", "marginalize"))
 
   # Prepare exposure data
   exposure %<>%
@@ -428,7 +429,7 @@ update_NIW_ideal_adaptor_batch <- function(
 #' @export
 update_NIW_beliefs_incrementally <- function(...){
   dots <- list(...)
-  assert_that(all(is.null(dots[["noise_treatment"]]), is.null(dots[["lapse_treatment"]])),
+  .assert_that(all(is.null(dots[["noise_treatment"]]), is.null(dots[["lapse_treatment"]])),
               msg = "NIW beliefs do not have noise or lapse rates. Perhaps you meant to use update_NIW_ideal_adaptor_incrementally()?")
 
   update_NIW_ideal_adaptor_incrementally(..., noise_treatment = "no_noise", lapse_treatment = "no_lapses")

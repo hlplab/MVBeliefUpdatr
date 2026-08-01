@@ -1,4 +1,4 @@
-#' @include S7-classes.R
+#' @include S7-core-classes.R
 NULL
 
 # -------------------------
@@ -17,6 +17,43 @@ get_category_likelihood_function <- S7::new_generic("get_category_likelihood_fun
 get_category_template <- S7::new_generic("get_category_template", "x")
 get_category_representations <- S7::new_generic("get_category_representations", "x")
 get_parameters <- S7::new_generic("get_parameters", "x")
+
+#' Get the stored Stan fit from an S7 fit object.
+#'
+#' @param x An S7 fit object.
+#' @return The stored [rstan::stanfit] object when present.
+#' @export
+get_stanfit <- S7::new_generic("get_stanfit", "x")
+
+#' Set the stored Stan fit on an S7 fit object.
+#'
+#' @param x An S7 fit object.
+#' @param stanfit An [rstan::stanfit] object.
+#' @return The updated S7 fit object.
+#' @export
+set_stanfit <- S7::new_generic("set_stanfit", c("x", "stanfit"))
+
+#' Get the stored Stan input from an S7 fit or fit-input object.
+#'
+#' @param x An S7 fit or fit-input object.
+#' @return The stored S7 Stan input object.
+#' @export
+get_staninput <- S7::new_generic("get_staninput", "x")
+
+#' Set the stored Stan input on an S7 fit or fit-input object.
+#'
+#' @param x An S7 fit or fit-input object.
+#' @param staninput An S7 Stan input object.
+#' @return The updated S7 object.
+#' @export
+set_staninput <- S7::new_generic("set_staninput", c("x", "staninput"))
+
+#' Get transform metadata from an S7 fit or fit-input object.
+#'
+#' @param x An S7 fit or fit-input object.
+#' @return A transform-information object.
+#' @export
+get_transform_information <- S7::new_generic("get_transform_information", "x")
 
 #' Get category-prior values from a cognitive model or legacy input.
 #'

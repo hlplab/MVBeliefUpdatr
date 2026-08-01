@@ -4,12 +4,17 @@
 \alias{get_category_labels_from_model}
 \title{Get category labels from likelihood or model}
 \usage{
-get_category_labels_from_model(x)
+get_category_labels_from_model(x, indices = NULL)
 }
 \arguments{
-\item{x}{A likelihood or model object.}
+\item{x}{A likelihood or model object.
+
+Legacy wrapper for get_category_labels.}
 }
 \description{
+Deprecated. Use \code{\link{get_category_labels}} instead.
+}
+\details{
 Get the unique labels for all categories from a likelihood (e.g., MVG or NIW_belief) or model (e.g., an MVG ideal observer
 or NIW ideal adaptor) object.
 }

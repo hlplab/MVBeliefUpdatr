@@ -15,13 +15,13 @@ make_staninput <- function(
     stanmodel = "NIW_ideal_adaptor",
     verbose = FALSE
 ) {
-  .Deprecated("new_ideal_adaptor_staninput")
-  fix_parameters <- list(
+  .Deprecated("new_ideal_adaptor_stanfit_input")
+  fixed_parameters <- list(
     lapse_rate = lapse_rate,
     mu_0 = mu_0,
     Sigma_0 = Sigma_0
   )
-  new_ideal_adaptor_staninput(
+  new_ideal_adaptor_stanfit_input(
     exposure = exposure,
     test = test,
     cues = cues,
@@ -29,7 +29,7 @@ make_staninput <- function(
     response = response,
     group = group,
     group.unique = group.unique,
-    fix_parameters = fix_parameters,
+    fixed_parameters = fixed_parameters,
     control = control,
     stanmodel = stanmodel,
     verbose = verbose
@@ -54,13 +54,13 @@ make_ideal_adaptor_stanfit_input <- function(
     stanmodel = "NIW_ideal_adaptor",
     verbose = FALSE
 ) {
-  .Deprecated("new_ideal_adaptor_staninput")
-  fix_parameters <- list(
+  .Deprecated("new_ideal_adaptor_stanfit_input")
+  fixed_parameters <- list(
     lapse_rate = lapse_rate,
     mu_0 = mu_0,
     Sigma_0 = Sigma_0
   )
-  new_ideal_adaptor_staninput(
+  new_ideal_adaptor_stanfit_input(
     exposure = exposure,
     test = test,
     cues = cues,
@@ -68,7 +68,7 @@ make_ideal_adaptor_stanfit_input <- function(
     response = response,
     group = group,
     group.unique = group.unique,
-    fix_parameters = fix_parameters,
+    fixed_parameters = fixed_parameters,
     control = control,
     stanmodel = stanmodel,
     verbose = verbose

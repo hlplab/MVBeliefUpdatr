@@ -3,6 +3,7 @@
 #' @description Deprecated. Use \code{\link{get_transform_information.ideal_adaptor_stanfit}} instead.
 #' @export
 #' @deprecated Use get_transform_information.ideal_adaptor_stanfit() instead.
+#' @keywords internal
 get_transform_information_from_stanfit <- function(...) get_transform_information.ideal_adaptor_stanfit(...)
 
 #' Legacy wrapper for get_transform_function.ideal_adaptor_stanfit.
@@ -10,6 +11,7 @@ get_transform_information_from_stanfit <- function(...) get_transform_informatio
 #' @description Deprecated. Use \code{\link{get_transform_function.ideal_adaptor_stanfit}} instead.
 #' @export
 #' @deprecated Use get_transform_function.ideal_adaptor_stanfit() instead.
+#' @keywords internal
 get_transform_function_from_stanfit <- function(...) get_transform_function.ideal_adaptor_stanfit(...)
 
 #' Legacy wrapper for get_untransform_function.ideal_adaptor_stanfit.
@@ -17,6 +19,7 @@ get_transform_function_from_stanfit <- function(...) get_transform_function.idea
 #' @description Deprecated. Use \code{\link{get_untransform_function.ideal_adaptor_stanfit}} instead.
 #' @export
 #' @deprecated Use get_untransform_function.ideal_adaptor_stanfit() instead.
+#' @keywords internal
 get_untransform_function_from_stanfit <- function(...) get_untransform_function.ideal_adaptor_stanfit(...)
 
 #' Legacy wrapper for get_staninput.ideal_adaptor_stanfit.
@@ -24,6 +27,7 @@ get_untransform_function_from_stanfit <- function(...) get_untransform_function.
 #' @description Deprecated. Use \code{\link{get_staninput.ideal_adaptor_stanfit}} instead.
 #' @export
 #' @deprecated Use get_staninput.ideal_adaptor_stanfit() instead.
+#' @keywords internal
 get_staninput_from_stanfit <- function(...) get_staninput.ideal_adaptor_stanfit(...)
 
 # get_exposure_category_statistic_from_stanfit <- get_exposure_category_statistic.ideal_adaptor_stanfit
@@ -37,6 +41,7 @@ get_staninput_from_stanfit <- function(...) get_staninput.ideal_adaptor_stanfit(
 #' @description Deprecated. Use \code{\link{get_test_data}} instead.
 #' @export
 #' @deprecated Use get_test_data() instead.
+#' @keywords internal
 get_test_data_from_stanfit <- function(...) get_test_data(...)
 
 # get_original_variable_levels_from_stanfit <- get_staninput_variable_levels
@@ -53,6 +58,7 @@ get_test_data_from_stanfit <- function(...) get_test_data(...)
 #' @description Deprecated. Use \code{\link{get_draws}} instead.
 #' @export
 #' @deprecated Use get_draws() instead.
+#' @keywords internal
 add_ibbu_stanfit_draw <- function(...) get_draws(...)
 
 #' Legacy wrapper for the old prior-belief inference workflow.
@@ -62,6 +68,7 @@ add_ibbu_stanfit_draw <- function(...) get_draws(...)
 #' @inheritParams fit_ideal_adaptor
 #' @export
 #' @deprecated Use infer_NIW_ideal_adaptor() instead.
+#' @keywords internal
 infer_prior_beliefs <- function(
   # arguments for make_staninput
   exposure, test,
@@ -172,10 +179,10 @@ make_staninput_deprecated <- function(
     message("You did not center observations. Note that the prior of category means is symmetric around 0.")
 
   if (pca.observations)
-    assert_that(between(pca.cutoff, 0, 1), msg = "pca.cutoff must be between 0 and 1.")
+    .assert_that(between(pca.cutoff, 0, 1), msg = "pca.cutoff must be between 0 and 1.")
   if (!is.null(lapse_rate)) {
-    assert_that(is.number(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
-    assert_that(between(lapse_rate, 0, 1), msg = "If not NULL, lapse rate must be a number between 0 and 1.")
+    .assert_that(is.number(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
+    .assert_that(between(lapse_rate, 0, 1), msg = "If not NULL, lapse rate must be a number between 0 and 1.")
   }
 
   cues <- unique(cues)
@@ -190,7 +197,7 @@ make_staninput_deprecated <- function(
       verbose = verbose)
 
   if (!is.null(group.unique)) {
-    assert_that(group.unique %in% names(exposure),
+    .assert_that(group.unique %in% names(exposure),
                 msg = paste("Column for group.unique ", group.unique, "not found in exposure data."))
     message(paste0("Collapsing *exposure* observations to unique values of group.unique (", group.unique, ") by
     discarding the data from all but the first group member. This means that each unique exposure condition will
@@ -220,9 +227,9 @@ make_staninput_deprecated <- function(
       verbose = verbose) %>%
     select(c(!! group, !!! cues, !! response))
 
-  assert_that(all(levels(exposure[[category]]) == levels(test[[response]])),
+  .assert_that(all(levels(exposure[[category]]) == levels(test[[response]])),
               msg = paste("category variable", category, "in exposure data and response variable", response, "in test data must be factors with the same levels in the same order. Either the levels do not match, or they are not in the same order."))
-  assert_that(all(levels(exposure[[group]]) %in% levels(test[[group]])),
+  .assert_that(all(levels(exposure[[group]]) %in% levels(test[[group]])),
               msg = paste("All levels of the grouping variable", group, "found in exposure must also be present in test."))
   if (!all(levels(test[[group]]) %in% levels(exposure[[group]])))
     message(paste("Not all levels of the grouping variable", group, "that are present in test were found in exposure.
@@ -233,15 +240,15 @@ make_staninput_deprecated <- function(
 
   if (!is.null(mu_0)) {
     if (nlevels(exposure[[category]]) == 1) {
-      assert_that(is.vector(mu_0),
+      .assert_that(is.vector(mu_0),
                   msg = "If mu_0 is not NULL and there is only one category, mu_0 must be a vector.")
     } else {
-      assert_that(is.list(mu_0) & length(mu_0) == nlevels(exposure[[category]]),
+      .assert_that(is.list(mu_0) & length(mu_0) == nlevels(exposure[[category]]),
                   msg = "If mu_0 is not NULL, mu_0 must be a list of vectors with as many elements as there are categories.")
     }
-    assert_that(all(map_lgl(mu_0, is.numeric), map_lgl(mu_0, ~ is.null(dim(.x)) | length(dim(.x)) == 1)),
+    .assert_that(all(map_lgl(mu_0, is.numeric), map_lgl(mu_0, ~ is.null(dim(.x)) | length(dim(.x)) == 1)),
                 msg = "If mu_0 is a list, each element must be a vector.")
-    assert_that(all((map_int(mu_0, length)) == length(cues)),
+    .assert_that(all((map_int(mu_0, length)) == length(cues)),
                 msg = paste(
                   "At least one element of mu_0 does not have the correct dimensionality. Observations have",
                   length(cues),
@@ -250,15 +257,15 @@ make_staninput_deprecated <- function(
   }
   if (!is.null(Sigma_0)) {
     if (nlevels(exposure[[category]]) == 1) {
-      assert_that(is.array(Sigma_0),
+      .assert_that(is.array(Sigma_0),
                   msg = "If Sigma_0 is not NULL and there is only one category, Sigma_0 must be a positive-definite  matrix.")
     } else {
-      assert_that(is.list(Sigma_0) & length(Sigma_0) == nlevels(exposure[[category]]),
+      .assert_that(is.list(Sigma_0) & length(Sigma_0) == nlevels(exposure[[category]]),
                   msg = "If Sigma_0 not NULL, Sigma_0 must be a list of positive-definite matrices with as many elements as there are categories.")
     }
-    assert_that(all(map_lgl(Sigma_0, is.numeric), map_lgl(Sigma_0, ~ length(dim(.x)) == 2)),
+    .assert_that(all(map_lgl(Sigma_0, is.numeric), map_lgl(Sigma_0, ~ length(dim(.x)) == 2)),
                 msg = "If Sigma_0 is a list, each element must be a k x k matrix.")
-    assert_that(all(map_lgl(Sigma_0, ~ all(dim(.x) == length(cues)))),
+    .assert_that(all(map_lgl(Sigma_0, ~ all(dim(.x) == length(cues)))),
                 msg = paste(
                   "At least one element of Sigma_0 does not have the correct dimensionality. Observations have",
                   length(cues),
@@ -280,11 +287,11 @@ make_staninput_deprecated <- function(
       return.untransform.function = T)
 
   if (pca.observations) {
-    assert_that(all(is.null(mu_0), is.null(Sigma_0)),
+    .assert_that(all(is.null(mu_0), is.null(Sigma_0)),
                 msg = "PCA is not yet implemented when mu_0 or Sigma_0 are specified.")
     s = summary(transform[["transform.parameters"]][["pca"]])$importance
     l = min(which(s["Cumulative Proportion",] >= pca.cutoff))
-    assert_that(l >= 1, msg = "Specified pca.cutoff does not yield to any PCA component being included. Increase the
+    .assert_that(l >= 1, msg = "Specified pca.cutoff does not yield to any PCA component being included. Increase the
                 pca.cutoff value.")
     if (length(cues) > l)
       message(paste("Given the specified pca.cutoff, only the first", l, "principal component(s) will be used as cues."))

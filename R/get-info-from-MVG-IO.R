@@ -34,40 +34,40 @@ get_MVG_likelihood <- function(
 ) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
-  assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
-  assert_that(is.vector(mu) | is.matrix(mu) | is_scalar_double(mu))
-  assert_that(is.Sigma(Sigma))
+  .assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
+  .assert_that(is.vector(mu) | is.matrix(mu) | is_scalar_double(mu))
+  .assert_that(is.Sigma(Sigma))
 
   # do not reorder these conditionals (go from more to less specific)
   if (is.matrix(mu)) mu <- as.vector(mu)
   x %<>% format_input_for_likelihood_calculation(dim = length(mu))
-  assert_that(dim(x)[2] == length(mu),
+  .assert_that(dim(x)[2] == length(mu),
               msg = "Input x and m are not of compatible dimensions.")
 
-  assert_that(is.flag(log))
-  assert_that(any(noise_treatment %in% c("no_noise", "marginalize", "sample")),
+  .assert_that(is.flag(log))
+  .assert_that(any(noise_treatment %in% c("no_noise", "marginalize", "sample")),
               msg = "noise_treatment must be one of 'no_noise', 'marginalize', or 'sample'.")
   if (noise_treatment != "no_noise") {
-    assert_that(is.Sigma(Sigma_noise),
+    .assert_that(is.Sigma(Sigma_noise),
                 msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the category covariance matrices Sigma.')
-    assert_that(all(dim(Sigma) == dim(Sigma_noise)),
+    .assert_that(all(dim(Sigma) == dim(Sigma_noise)),
                 msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the category covariance matrices Sigma.')
   }
 
   D <- get_D(Sigma)
   if (D == 1) {
-    assert_that(is_scalar_double(mu), msg = "Sigma and mu are not of compatible dimensions.")
+    .assert_that(is_scalar_double(mu), msg = "Sigma and mu are not of compatible dimensions.")
   } else {
-    assert_that(dim(Sigma)[2] == D,
+    .assert_that(dim(Sigma)[2] == D,
                 msg = "Sigma is not a square matrix, and thus not a covariance matrix")
-    assert_that(length(mu) == dim(x)[2],
+    .assert_that(length(mu) == dim(x)[2],
                 msg = paste("mu and input are not of compatible dimensions. mu is of length", length(mu), "but input has", dim(x)[2], "columns."))
-    assert_that(length(mu) == D,
+    .assert_that(length(mu) == D,
                 msg = "Sigma and mu are not of compatible dimensions.")
   }
 
   if (noise_treatment == "sample") {
-    assert_that(
+    .assert_that(
       is_weakly_greater_than(nrow(x), 1),
       msg = "For noise sampling, x must be of length 1 or longer.")
 
@@ -95,9 +95,9 @@ get_likelihood_from_MVG <- function(
   category.label = NULL,
   wide = FALSE
 ) {
-  assert_that(is.MVG(model))
-  assert_that(any(is.null(category.label) | is.character(category.label)))
-  assert_that(any(noise_treatment == "no_noise", is.MVG_ideal_observer(model)),
+  .assert_that(is.MVG(model))
+  .assert_that(any(is.null(category.label) | is.character(category.label)))
+  .assert_that(any(noise_treatment == "no_noise", is.MVG_ideal_observer(model)),
               msg = 'No noise matrix Sigma_noise found. If noise_treatment is not "no_noise", then model must be an MVG_ideal_observer.')
 
   if (is.null(category.label)) {
@@ -147,6 +147,7 @@ get_likelihood_from_MVG <- function(
 #' @rdname get_posterior_from_model
 #' @export
 #' @deprecated Use posterior() instead.
+#' @keywords internal
 get_posterior_from_MVG_ideal_observer <- function(
     x,
     model,
@@ -157,7 +158,7 @@ get_posterior_from_MVG_ideal_observer <- function(
 
   # TO DO: check dimensionality of x with regard to belief.
   assert_MVG_ideal_observer(model)
-  assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
+  .assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
               msg = "lapse_treatment must be one of 'no_lapses', 'sample' or 'marginalize'.")
 
   # When the input isn't a list, that's ambiguous between the input being a single input or a set of
@@ -235,6 +236,7 @@ get_posterior_from_MVG_ideal_observer <- function(
 #' @rdname get_categorization_from_model
 #' @export
 #' @deprecated Use categorize() instead.
+#' @keywords internal
 get_categorization_from_MVG_ideal_observer <- function(
   x,
   model,
@@ -280,7 +282,7 @@ get_categorization_from_MVG_ideal_observer <- function(
     select(observationID, x, category, response)
 
   if (simplify) {
-    assert_that(decision_rule  %in% c("criterion", "sampling"),
+    .assert_that(decision_rule  %in% c("criterion", "sampling"),
                 msg = "For simplify = T, decision rule must be either criterion or sampling.")
     return(posterior_probabilities %>%
              filter(response == 1) %>%

@@ -18,7 +18,7 @@ loo.ideal_adaptor_stanfit <- function(
     save_psis = FALSE,
     cores = getOption("mc.cores", 1)
 ) {
-  stopifnot(length(pars) == 1L)
+  .assert_true(length(pars) == 1L, msg = "pars must contain exactly one element.")
   stanfit <- get_stanfit(x)
   LLarray <- loo::extract_log_lik(stanfit = stanfit,
                                   parameter_name = pars,
@@ -53,7 +53,7 @@ loo.ideal_adaptor_stanfit <- function(
 #' @export
 summary.ideal_adaptor_stanfit <- function(x, pars = NULL, indices_as_names = TRUE, sufficient_only = FALSE, include_transformed_pars = F, ...) {
   stanfit <- get_stanfit(x)
-  assert_contains_draws(stanfit)
+  .assert_contains_draws(stanfit)
   if (is.null(pars)) {
     pars <- names(stanfit)
     pars <- grep("^((kappa|nu|m|S)_|lapse_rate|p_category|cue_weight_n)", pars, value = T)
@@ -270,8 +270,8 @@ summary.ideal_adaptor_stanfit <- function(x, pars = NULL, indices_as_names = TRU
 #'                                      k_threshold = NULL, split = TRUE,
 #'                                      cov = TRUE, cores = getOption("mc.cores", 1),
 #'                                      ...) {
-#'   assert_that(is.ideal_adaptor_stanfit(x))
-#'   assert_that(class(loo) == "loo")
+#'   .assert_that(is.ideal_adaptor_stanfit(x))
+#'   .assert_that(class(loo) == "loo")
 #'
 #'   # input checks
 #'   checkmate::assertClass(loo, classes = "loo")

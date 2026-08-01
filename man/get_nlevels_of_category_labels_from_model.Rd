@@ -7,9 +7,14 @@
 get_nlevels_of_category_labels_from_model(x)
 }
 \arguments{
-\item{x}{A likelihood or model object.}
+\item{x}{A likelihood or model object.
+
+Legacy wrapper for length(get_category_labels()).}
 }
 \description{
+Deprecated. Use \code{\link{get_category_labels}} and take its length instead.
+}
+\details{
 Get the number of unique category labels from a likelihood (e.g., MVG or NIW_belief) or model (e.g., an MVG ideal observer
 or NIW ideal adaptor) object.
 }

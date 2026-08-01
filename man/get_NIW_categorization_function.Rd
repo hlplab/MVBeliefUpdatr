@@ -37,12 +37,24 @@ get_categorization_function_from_NIW_ideal_adaptor(model, ...)
 
 \item{Sigma_noise}{A noise matrix. (default: a 0-matrix)}
 
-\item{noise_treatment}{How should the noise specified in \code{Sigma_noise} be considered in the categorization function?
-For details, see \code{\link{get_NIW_posterior_predictive}}. Note though that "sample" would likely result in rather
-counter-intuitive behavior of the categorization function and is thus not recommended.}
+\item{noise_treatment}{Determines whether and how multivariate Gaussian noise is considered during categorization.
+See \code{\link[=get_NIW_posterior_predictive]{get_NIW_posterior_predictive}}. (default: "sample" if decision_rule is
+"sample"; "marginalize" otherwise).}
 
-\item{lapse_treatment}{Should the consequences of attentional lapses be included in the categorization function
-("marginalize") or not ("no_lapses")? (default: "marginalize")}
+\item{lapse_treatment}{Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
+If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
+a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
+will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
+perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).}
+
+\item{model}{An \code{\link[=is.NIW_ideal_adaptor]{NIW_ideal_adaptor}} object.}
+
+\item{x}{A vector of observations.}
+
+\item{decision_rule}{Must be one of "criterion", "proportional", or "sampling".}
+
+\item{simplify}{Should the output be simplified, and just the label of the selected category be returned? This
+option is only available for the criterion and sampling decision rules. (default: \code{FALSE})}
 }
 \value{
 A function that takes as input cue values and returns posterior probabilities of the first category,
@@ -52,13 +64,27 @@ kappa, nu, and prior, as well as the lapse rate. The function will accept the fo
 \item{\code{target_category}:}{The index of the category for which categorization should be shown. (default: \code{1})}
 \item{\code{logit}:}{Should the function return log-odds (TRUE) or probabilities (FALSE)? (default: FALSE)}
 }
+
+Either a tibble of observations with posterior probabilities for each category (in long format), or a
+character vector indicating the chosen category in the same order as the observations in x (if simplify = \code{TRUE}).
 }
 \description{
 Returns a categorization function for the first category, based on a set of parameters for the Normal-Inverse-Wishart (NIW)
 distribution. ms, Ss, kappas, nus, and priors are assumed to be of the same length and sorted the same way, so that the first
 element of ms is corresponding to the same category as the first element of Ss, kappas, nus, and priors, etc.
+
+Deprecated. Use \code{\link{get_category_posterior_function}} instead.
+}
+\details{
+Categorize a single observation based on an NIW ideal adaptor The decision rule can be specified to be either the
+criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
+Luce's choice rule.
 }
 \seealso{
 TBD
 }
+\keyword{Legacy}
 \keyword{TBD}
+\keyword{for}
+\keyword{get_category_posterior_function.}
+\keyword{wrapper}

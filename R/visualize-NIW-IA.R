@@ -41,7 +41,7 @@ plot_expected_categorization_function_1D <- function(
   check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                   !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
   cue.labels <- get_cue_labels_from_model(x)
-  assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
+  .assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
 
   if (is_missing(xlim)) {
     if (!is.null(data.exposure) & !is.null(data.test))
@@ -51,7 +51,7 @@ plot_expected_categorization_function_1D <- function(
             if (!is.null(data.test))
               xlim <- range(data.test[[cue.labels[1]]])
   }
-  assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
+  .assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
 
   # Setting aes defaults
   if (is.null(category.ids)) category.ids <- levels(x$category)
@@ -138,7 +138,7 @@ plot_expected_categorization_function_2D <- function(
   check_compatibility_between_NIW_belief_and_data(x, data.exposure, data.test,
                                                   !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
   cue.labels <- get_cue_labels_from_model(x)
-  assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
+  .assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
   if (is_missing(xlim)) {
     if (!is.null(data.exposure) & !is.null(data.test))
       xlim <- range(range(data.exposure[[cue.labels[1]]]), range(data.test[[cue.labels[1]]])) else
@@ -155,8 +155,8 @@ plot_expected_categorization_function_2D <- function(
             if (!is.null(data.test))
               ylim <- range(data.test[[cue.labels[2]]])
   }
-  assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
-  assert_that(!is_missing(ylim), msg = "`ylim` must be specified")
+  .assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
+  .assert_that(!is_missing(ylim), msg = "`ylim` must be specified")
 
   # Setting aes defaults
   if (is.null(category.ids)) category.ids <- levels(x$category)

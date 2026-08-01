@@ -67,10 +67,10 @@ get_categorization_from_exemplar_model <- function(
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F
 ) {
-  assert_that(is.exemplar_model(model))
-  assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
+  .assert_that(is.exemplar_model(model))
+  .assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
               msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
-  assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
+  .assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
               msg = "lapse_treatment must be one of 'no_lapses', 'sample' or 'marginalize'.")
 
   # In case a single x is handed as argument, make sure it's made a list so that the length check below
@@ -134,7 +134,7 @@ get_categorization_from_exemplar_model <- function(
     select(observationID, x, category, response)
 
   if (simplify) {
-    assert_that(decision_rule  %in% c("criterion", "sampling"),
+    .assert_that(decision_rule  %in% c("criterion", "sampling"),
                 msg = "For simplify = T, decision rule must be either criterion or sampling.")
     return(posterior_probabilities %>%
              filter(response == 1) %>%
@@ -154,6 +154,7 @@ get_categorization_from_exemplar_model <- function(
 #' @rdname get_categorization_from_model
 #' @export
 #' @deprecated Use categorize() instead.
+#' @keywords internal
 get_categorization_from_exemplar_model <- function(
   x,
   model,
@@ -163,10 +164,10 @@ get_categorization_from_exemplar_model <- function(
   simplify = F
 ) {
   warning("get_categorization_from_exemplar_model() is deprecated; use categorize() on an S7 cognitive model instead.", call. = FALSE)
-  assert_that(is.exemplar_model(model))
-  assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
+  .assert_that(is.exemplar_model(model))
+  .assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
               msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
-  assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
+  .assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
               msg = "lapse_treatment must be one of 'no_lapses', 'sample' or 'marginalize'.")
 
   # In case a single x is handed as argument, make sure it's made a list so that the length check below
@@ -230,7 +231,7 @@ get_categorization_from_exemplar_model <- function(
     select(observationID, x, category, response)
 
   if (simplify) {
-    assert_that(decision_rule  %in% c("criterion", "sampling"),
+    .assert_that(decision_rule  %in% c("criterion", "sampling"),
                 msg = "For simplify = T, decision rule must be either criterion or sampling.")
     return(posterior_probabilities %>%
              filter(response == 1) %>%

@@ -7,8 +7,10 @@
 get_lapse_rate_from_model(model)
 }
 \arguments{
-\item{model}{A model object.}
+\item{model}{A model object.
+
+Legacy wrapper for get_lapse_rate.}
 }
 \description{
-Get lapse rate from model
+Deprecated. Use \code{\link{get_lapse_rate}} instead.
 }

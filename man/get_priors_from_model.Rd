@@ -13,7 +13,9 @@ get_priors_from_model(model, categories = model$category)
 }
 \value{
 A vector of prior values of the same length as \code{categories}.
+
+Legacy wrapper for get_category_prior.
 }
 \description{
-Get priors from model
+Deprecated. Use \code{\link{get_category_prior}} instead.
 }

@@ -79,4 +79,8 @@ utils::globalVariables(".")
 ## usethis namespace: end
 NULL
 
-# This should be at the end of this file:
+get_current_versions <- function()
+  list(
+    MVBeliefUpdatr = utils::packageVersion("MVBeliefUpdatr"),
+    rstan = utils::packageVersion("rstan"),
+    stanHeaders = utils::packageVersion("StanHeaders"))

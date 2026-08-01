@@ -49,21 +49,21 @@ symlog_trans <- function(){
 #' @rdname get_default_scale_values
 #' @export
 get_default_colors <- function(var, levels) {
-  assert_that(all(var %in% c("category", "group")))
-  assert_that(is.character(levels))
+  .assert_that(all(var %in% c("category", "group")))
+  .assert_that(is.character(levels))
   n <- length(levels)
 
   if (var == "category") {
-    assert_that(n <= 12, msg = "Cannot provide default colors for more than 12 levels.")
+    .assert_that(n <= 12, msg = "Cannot provide default colors for more than 12 levels.")
     color <- palette.colors(n, "Set 3")
   } else {
     if ("prior" %in% levels) {
-      assert_that(n - 1 <= 36, msg = "Cannot provide default colors for more than 36 levels.")
+      .assert_that(n - 1 <= 36, msg = "Cannot provide default colors for more than 36 levels.")
       color <- c()
       color[which(levels != "prior")] <- palette.colors(n-1, "Polychrome 36")
       color[which(levels == "prior")] <- "darkgray"
     } else {
-      assert_that(n <= 36, msg = "Cannot provide default colors for more than 36 levels.")
+      .assert_that(n <= 36, msg = "Cannot provide default colors for more than 36 levels.")
       color <- palette.colors(n, "Polychrome 36")
     }
   }
@@ -74,8 +74,8 @@ get_default_colors <- function(var, levels) {
 #' @rdname get_default_scale_values
 #' @export
 get_default_shapes <- function(var, levels) {
-  assert_that(all(var %in% c("category", "group")))
-  assert_that(is.character(levels))
+  .assert_that(all(var %in% c("category", "group")))
+  .assert_that(is.character(levels))
 
   l <- 1:length(levels)
 
@@ -86,8 +86,8 @@ get_default_shapes <- function(var, levels) {
 #' @rdname get_default_scale_values
 #' @export
 get_default_linetypes <- function(var, levels) {
-  assert_that(all(var %in% c("category", "group")))
-  assert_that(is.character(levels))
+  .assert_that(all(var %in% c("category", "group")))
+  .assert_that(is.character(levels))
 
   l <- 1:length(levels)
 

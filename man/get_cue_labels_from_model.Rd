@@ -14,8 +14,13 @@ indices, or \code{NULL} if all cue labels should be returned. (default: \code{NU
 }
 \value{
 A character vector.
+
+Legacy wrapper for get_cue_labels.
 }
 \description{
+Deprecated. Use \code{\link{get_cue_labels}} instead.
+}
+\details{
 Get the names for all cues from a likelihood (e.g., MVG or NIW_belief) or model (e.g., an MVG ideal observer
 or NIW ideal adaptor) object.
 }

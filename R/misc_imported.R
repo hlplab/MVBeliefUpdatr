@@ -3,6 +3,54 @@
   if (is.null(x)) y else x
 }
 
+# Compatibility fallbacks for helper functions that are normally provided by
+# imported packages such as rstan or rlang when the package is loaded via
+# `devtools::load_all()` or `pkgload`.
+#
+# These shims keep the source-based test harness functional even when the
+# package is not loaded through its namespace.
+nlist <- function(...) {
+  args <- list(...)
+  if (length(args) == 0L) {
+    return(list())
+  }
+
+  call <- substitute(list(...))
+  arg_exprs <- as.list(call)[-1L]
+  if (length(arg_exprs) < length(args)) {
+    arg_exprs <- c(arg_exprs, rep(list(NULL), length(args) - length(arg_exprs)))
+  }
+
+  arg_names <- vapply(arg_exprs, function(expr) {
+    if (is.null(expr)) {
+      ""
+    } else if (is.symbol(expr)) {
+      as.character(expr)
+    } else {
+      paste(deparse(expr, width.cutoff = 500L), collapse = "")
+    }
+  }, character(1))
+
+  names(args) <- arg_names[seq_len(length(args))]
+  args
+}
+
+SW <- function(x) {
+  suppressWarnings(x)
+}
+
+is_scalar_double <- function(x) {
+  is.numeric(x) && length(x) == 1L && !is.na(x)
+}
+
+is_scalar_integer <- function(x) {
+  is.integer(x) && length(x) == 1L && !is.na(x)
+}
+
+is_scalar_numeric <- function(x) {
+  is.numeric(x) && length(x) == 1L && !is.na(x)
+}
+
 # from brms
 # get pattern matches in text as vector
 # @param simplify return an atomic vector of matches?
