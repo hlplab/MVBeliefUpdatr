@@ -11,7 +11,7 @@
 #'
 #' @return Same as \code{data}.
 #'
-#' @importFrom assertthat assert_that
+#' @importFrom assertthat .assert_that
 #' @importFrom dplyr mutate
 #' @export
 add_noise = function(
@@ -19,18 +19,18 @@ add_noise = function(
   cues,
   method = c("sample", "marginalize"),
   Sigma
-) {
-  assert_that(is_tibble(data) | is.data.frame(data))
-  assert_that(nrow(data),
+) { 
+  .assert_data_frame_like(data)
+  .assert_that(nrow(data),
               msg = paste("There must be at least one observation in the data. Found", nrow(data), "observations."))
-  assert_cols_in_data(data, cues, scalar = F)
-  assert_that(method %in% c("sample", "marginalize"),
+  .assert_cols_in_data(data, cues, scalar = F)
+  .assert_that(method %in% c("sample", "marginalize"),
               msg = 'method must be one of "sample" or "marginalize"')
-  assert_that(!is.null(Sigma),
+  .assert_that(!is.null(Sigma),
               msg = "No Sigma provided.")
-  assert_that(is.matrix(Sigma),
+  .assert_that(is.matrix(Sigma),
               msg = "Sigma must be a matrix.")
-  assert_that(all(length(dim(Sigma)) == 2, dim(Sigma)[1] == dim(Sigma)[2], dim(Sigma)[1] == length(cues)),
+  .assert_that(all(length(dim(Sigma)) == 2, dim(Sigma)[1] == dim(Sigma)[2], dim(Sigma)[1] == length(cues)),
               msg = "Sigma must be a square matrix of the same dimensionality as the length of cues.")
 
   data %<>%

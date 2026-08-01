@@ -17,8 +17,14 @@ to_array <- function(
     dimnames = NULL,
     simplify = TRUE
 ) {
-  stopifnot(is.null(inner_dims) || all(inner_dims == round(inner_dims)))
-  stopifnot(is.null(outer_dims) || all(outer_dims == round(outer_dims)))
+  .assert_true(
+    is.null(inner_dims) || all(inner_dims == round(inner_dims)),
+    msg = "inner_dims must be NULL or contain whole numbers."
+  )
+  .assert_true(
+    is.null(outer_dims) || all(outer_dims == round(outer_dims)),
+    msg = "outer_dims must be NULL or contain whole numbers."
+  )
 
   if (is.null(x)) {
     if (simplify && !is.null(inner_dims) && all(inner_dims == 1)) {

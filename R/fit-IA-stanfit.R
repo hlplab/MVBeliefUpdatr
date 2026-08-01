@@ -15,7 +15,7 @@
 #'    Accepts univariate and multivariate input, though the NIX model should be faster for univariate input.
 #' }
 #'
-#' @param staninput A list of the type returned by \code{\link{make_staninput}}.
+#' @param stanfit_input An object of class \code{\link{IdealAdaptorStanfitInput}} containing the prepared Stan input, data, and transform metadata.
 #' @param backend Character string naming the package to use as the backend for
 #'   fitting the Stan model. Options are \code{"rstan"} (the default) or
 #'   \code{"cmdstanr"}. Details on the
@@ -74,7 +74,7 @@
 #' @importFrom rstan nlist
 #' @export
 fit_ideal_adaptor <- function(
-  staninput,
+  stanfit_input,
   file = NULL, file_refit = "never", file_compress = T,
   # included for later use
   stanvars = NULL, backend = "rstan", save_pars = NULL, basis = NULL,
@@ -90,32 +90,33 @@ fit_ideal_adaptor <- function(
   # optionally load ideal_adaptor_stanfit from file
   # Loading here only when we should directly load the file.
   # The "on_change" option needs more information
-  file_refit <- match.arg(file_refit, file_refit_options())
+  file_refit <- match.arg(file_refit, .file_refit_options())
   if (!is.null(file) && file_refit == "never") {
-    fit <- read_ideal_adaptor_stanfit(file)
+    fit <- .read_ideal_adaptor_stanfit(file)
     if (!is.null(fit)) {
       if (silent == 0) message("Loading existing model from file.")
       return(fit)
     }
   }
 
-  # extract information from staninput
-  assert_that(is.ideal_adaptor_stanfit_input(staninput, verbose = verbose))
-  data <- staninput$data
-  transform_information <- staninput$transform_information
-  staninput <- staninput$staninput
+  # extract information from the S7 fit-input object
+  assert_stanfit_input(stanfit_input)
+  assert_staninput(stanfit_input@staninput)
+  data <- stanfit_input@data
+  transform_information <- stanfit_input@transform_information
+  staninput <- stanfit_input@staninput
 
   if (!is.null(stanmodel)) {
-    assert_that(!is.null(stanmodels[[stanmodel]]),
+    .assert_that(!is.null(stanmodels[[stanmodel]]),
                 msg = paste("The specified stanmodel does not exist. Allowable models include:", paste(names(MVBeliefUpdatr:::stanmodels), collapse = ", ")))
   }
 
   # Check whether model actually needs to be refit
   if (!is.null(file) && file_refit == "on_change") {
-    x_from_file <- read_ideal_adaptor_stanfit(file)
+    x_from_file <- .read_ideal_adaptor_stanfit(file)
     if (!is.null(x_from_file)) {
       needs_refit <-
-        stanfit_needs_refit(
+        .stanfit_needs_refit(
           x_from_file,
           current_version = get_current_versions(),
           data = data, staninput = staninput,
@@ -140,7 +141,7 @@ fit_ideal_adaptor <- function(
       file = file)
 
   # Check that staninput has at least two categories (fitting with one category makes no sense)
-  if (get_staninput(fit, which = "transformed")$M < 2) stop("staninput must have at least two categories.")
+  if (get_staninput(fit)@values$M < 2) stop("staninput must have at least two categories.")
 
   stanfit <- NULL
   if (chains > 0 & iter > 0) {
@@ -158,7 +159,7 @@ fit_ideal_adaptor <- function(
       stanfit <-
         sampling(
           MVBeliefUpdatr:::stanmodels[[current_default_modelname]],
-          data = get_staninput(fit, which = "transformed"),
+          data = get_staninput(fit)@values,
           check_data = TRUE,
           pars = exclude_pars, include = FALSE,
           chains = chains, iter = iter, warmup = warmup,
@@ -169,7 +170,7 @@ fit_ideal_adaptor <- function(
         stanfit <-
           sampling(
             MVBeliefUpdatr:::stanmodels[[stanmodel]],
-            data = get_staninput(fit, which = "transformed"),
+            data = get_staninput(fit)@values,
             check_data = TRUE,
             pars = exclude_pars, include = FALSE,
             chains = chains, iter = iter, warmup = warmup,
@@ -179,18 +180,18 @@ fit_ideal_adaptor <- function(
 
     }
 
-    if (!contains_draws(stanfit)) {
+    if (!.contains_draws(stanfit)) {
       stop2("Sampling failed.")
     } else {
-      fit %<>% set_stanfit(stanfit)
-      fit %<>% recover_types()
+      fit <- set_stanfit(fit, stanfit)
+      fit <- recover_types(fit)
 
-      if (rename) fit %<>% rename_pars()
+      if (rename) fit <- .rename_pars(fit)
     }
   } else if (!silent) message("No sampling requested. Returning empty model object.")
 
   if (!is.null(fit) && !is.null(file)) {
-    fit <- write_ideal_adaptor_stanfit(x = fit, file = file, compress = file_compress)
+    fit <- .write_ideal_adaptor_stanfit(x = fit, file = file, compress = file_compress)
   }
 
   return(fit)

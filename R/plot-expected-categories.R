@@ -16,42 +16,42 @@ check_compatibility_between_NIW_belief_and_data <- function(
   facet_wrap_by = enquo(facet_wrap_by)
   animate_by = enquo(animate_by)
 
-  assert_that(is.NIW_belief(x))
+  .assert_that(is.NIW_belief(x))
 
   if (!quo_is_null(facet_rows_by)) {
-    assert_that(quo_is_null(facet_wrap_by), msg = "Can only specify either facet_wrap_by or facet_rows_by/facet_cols_by.")
-    assert_that(all(as_name(facet_rows_by) %in% names(x)),
+    .assert_that(quo_is_null(facet_wrap_by), msg = "Can only specify either facet_wrap_by or facet_rows_by/facet_cols_by.")
+    .assert_that(all(as_name(facet_rows_by) %in% names(x)),
                 msg = paste(as_name(facet_rows_by), "not found in NIW_belief (x)."))
-    assert_that(!all(!is.null(data.exposure), as_name(facet_rows_by) %nin% names(data.exposure)),
+    .assert_that(!all(!is.null(data.exposure), as_name(facet_rows_by) %nin% names(data.exposure)),
                 msg = "When facet_rows_by is specified, it must be present in the exposure data.")
   }
   if (!quo_is_null(facet_cols_by)) {
-    assert_that(all(as_name(facet_cols_by) %in% names(x)),
+    .assert_that(all(as_name(facet_cols_by) %in% names(x)),
                 msg = paste(as_name(facet_cols_by), "not found in NIW_belief (x)."))
-    assert_that(!all(!is.null(data.exposure), as_name(facet_cols_by) %nin% names(data.exposure)),
+    .assert_that(!all(!is.null(data.exposure), as_name(facet_cols_by) %nin% names(data.exposure)),
                 msg = "When facet_cols_by is specified, it must be present in the exposure data.")
   }
   if (!quo_is_null(facet_wrap_by)) {
-    assert_that(all(as_name(facet_wrap_by) %in% names(x)),
+    .assert_that(all(as_name(facet_wrap_by) %in% names(x)),
                 msg = paste(as_name(facet_wrap_by), "not found in NIW_belief (x)."))
-    assert_that(!all(!is.null(data.exposure), as_name(facet_wrap_by) %nin% names(data.exposure)),
+    .assert_that(!all(!is.null(data.exposure), as_name(facet_wrap_by) %nin% names(data.exposure)),
                 msg = "When facet_wrap_by is specified, it must be present in the exposure data.")
   }
   if (!quo_is_null(animate_by)) {
-    assert_that(all(as_name(animate_by) %in% names(x)),
+    .assert_that(all(as_name(animate_by) %in% names(x)),
                 msg = paste(as_name(animate_by), "not found in NIW_belief (x)."))
-    assert_that(!all(!is.null(data.exposure), as_name(animate_by) %nin% names(data.exposure)),
+    .assert_that(!all(!is.null(data.exposure), as_name(animate_by) %nin% names(data.exposure)),
                 msg = "When animate_by is specified, it must be present in the exposure data.")
   }
 
   cue.labels = get_cue_labels_from_model(x)
-  assert_that(!all(!is.null(data.exposure), cue.labels %nin% names(data.exposure)),
+  .assert_that(!all(!is.null(data.exposure), cue.labels %nin% names(data.exposure)),
               msg = "Can't plot exposure data: cue names in exposure data must match those in the NIW belief object.")
-  assert_that(!all(!is.null(data.exposure), "category" %nin% names(data.exposure)),
+  .assert_that(!all(!is.null(data.exposure), "category" %nin% names(data.exposure)),
               msg = "Can't plot exposure data: exposure data does not contain column category.")
-  assert_that(!all(!is.null(data.test), is.null(data.test)),
+  .assert_that(!all(!is.null(data.test), is.null(data.test)),
               msg = "Can't plot test data: No test data provided.")
-  assert_that(!all(!is.null(data.test), cue.labels %nin% names(data.test)),
+  .assert_that(!all(!is.null(data.test), cue.labels %nin% names(data.test)),
               msg = "Can't plot test data: cue names in test data must match those in the NIW belief object.")
 
   return(TRUE)
@@ -153,7 +153,7 @@ plot_expected_categories.ideal_adaptor_stanfit <- function(
     type,
     ...
 ) {
-  assert_that(all(type %in% c("contour", "density"), length(type) == 1))
+  .assert_that(all(type %in% c("contour", "density"), length(type) == 1))
   if (type == "contour")
     plot_expected_categories_contour(model = model, ...)
   else {
@@ -245,7 +245,7 @@ plot_expected_categories_contour2D.NIW_ideal_adaptor <- function(
                                                   !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
   # Remember groups
   cue.labels = get_cue_labels_from_model(x)
-  assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
+  .assert_that(length(cue.labels) == 2, msg = "Expecting exactly two cues for plotting.")
 
   # Setting aes defaults
   if (is.null(category.ids)) category.ids = levels(x$category)
@@ -321,9 +321,9 @@ plot_expected_categories_contour2D.ideal_adaptor_stanfit <- function(
     levels = plogis(seq(-15, qlogis(.95), length.out = 20)),
     category.colors = get_default_colors("category", categories)
 ) {
-  assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
+  .assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
   cues <- unique(cues)
-  assert_that(length(cues) == 2)
+  .assert_that(length(cues) == 2)
 
   d.pars <-
     get_expected_category_statistic(
@@ -471,7 +471,7 @@ plot_expected_categories_density1D.NIW_ideal_adaptor <- function(
                                                   !! facet_rows_by, !! facet_cols_by, !! facet_wrap_by, !! animate_by)
   # Remember groups
   cue.labels <- get_cue_labels_from_model(x)
-  assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
+  .assert_that(length(cue.labels) == 1, msg = "Expecting exactly one cue for plotting.")
 
   if (is_missing(xlim)) {
     if (!is.null(data.exposure) & !is.null(data.test))
@@ -481,7 +481,7 @@ plot_expected_categories_density1D.NIW_ideal_adaptor <- function(
             if (!is.null(data.test))
               xlim <- range(data.test[[cue.labels[1]]])
   }
-  assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
+  .assert_that(!is_missing(xlim), msg = "`xlim` must be specified")
 
   # Setting aes defaults
   if (is.null(category.ids)) category.ids <- levels(x$category)
@@ -552,9 +552,9 @@ plot_expected_categories_density1D.ideal_adaptor_stanfit <- function(
     category.colors = get_default_colors("category", categories),
     xlim = NULL, resolution = 101
 ) {
-  assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
+  .assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
   cues <- unique(cues)
-  assert_that(length(cues) == 1)
+  .assert_that(length(cues) == 1)
 
   d.pars <-
     get_draws(
@@ -662,9 +662,9 @@ plot_expected_categories_density2D.ideal_adaptor_stanfit <- function(
     category.colors = get_default_colors("category", categories),
     xlim = NULL, ylim = NULL, resolution = 25
 ) {
-  assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
+  .assert_that(all(annotate_inferred_category_means %in% c("rug", "text")))
   cues <- unique(cues)
-  assert_that(length(cues) == 2)
+  .assert_that(length(cues) == 2)
 
   d.pars <-
     get_draws(

@@ -32,7 +32,7 @@
 #' @rdname get_NIW_categorization_function
 #' @importFrom dplyr between
 #' @importFrom purrr map_lgl
-#' @importFrom assertthat assert_that
+#' @importFrom assertthat .assert_that
 #' @export
 get_NIW_categorization_function <- function(
     ms, Ss, kappas, nus,
@@ -44,24 +44,24 @@ get_NIW_categorization_function <- function(
     lapse_treatment = if (lapse_rate > 0) "marginalize" else "no_lapses"
 ) {
   tolerance = MVBU_PROB_TOL
-  assert_that(are_equal(length(ms), length(Ss)),
+  .assert_that(are_equal(length(ms), length(Ss)),
               are_equal(length(ms), length(priors)),
               are_equal(length(ms), length(kappas)),
               are_equal(length(ms), length(nus)),
               msg = "The number of ms, Ss, kappas, nus, and priors must be identical.")
   n.cat = length(ms)
 
-  assert_that(all(between(priors, 0, 1), between(sum(priors), 1 - tolerance, 1 + tolerance)),
+  .assert_that(all(between(priors, 0, 1), between(sum(priors), 1 - tolerance, 1 + tolerance)),
               msg = "priors must sum to 1.")
-  assert_that(is_scalar_double(lapse_rate),
+  .assert_that(is_scalar_double(lapse_rate),
               msg = "lapse_rate must be a scalar.")
-  assert_that(between(lapse_rate, 0, 1))
+  .assert_that(between(lapse_rate, 0, 1))
   if (any(is.null(lapse_biases),
           all(is.null(lapse_biases)),
           all(map_lgl(lapse_biases, is.null)))) {
     lapse_biases <- 1 / n.cat
   } else {
-    assert_that(all(between(lapse_biases, 0, 1), between(sum(lapse_biases), 1 - tolerance, 1 + tolerance)),
+    .assert_that(all(between(lapse_biases, 0, 1), between(sum(lapse_biases), 1 - tolerance, 1 + tolerance)),
                 msg = "lapse biases must sum to 1.")
   }
 
@@ -72,7 +72,7 @@ get_NIW_categorization_function <- function(
 
   # Get dimensions of multivariate category
   D = get_D(ms)
-  assert_that(
+  .assert_that(
     nus[[1]] >= D,
     msg = "Nu must be at least K (number of dimensions of the multivariate Gaussian category).")
 
@@ -137,6 +137,7 @@ get_NIW_categorization_function <- function(
 #' @rdname get_NIW_categorization_function
 #' @export
 #' @deprecated Use get_category_posterior_function() instead.
+#' @keywords internal
 get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
   warning("get_categorization_function_from_NIW_ideal_adaptor() is deprecated; use get_category_posterior_function() on an S7 cognitive model instead.", call. = FALSE)
   # Could be used later in a function that checks internal consistency of model
@@ -166,6 +167,7 @@ get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
 #' @rdname get_categorization_from_model
 #' @export
 #' @deprecated Use categorize() instead.
+#' @keywords internal
 get_categorization_from_NIW_ideal_adaptor <- function(
   x,
   model,
@@ -178,9 +180,9 @@ get_categorization_from_NIW_ideal_adaptor <- function(
   warning("get_categorization_from_NIW_ideal_adaptor() is deprecated; use categorize() on an S7 cognitive model instead.", call. = FALSE)
   # TO DO: check dimensionality of x with regard to model.
   assert_NIW_ideal_adaptor(model, verbose = verbose)
-  assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
+  .assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
               msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
-  assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
+  .assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
               msg = "lapse_treatment must be one of 'no_lapses', 'sample' or 'marginalize'.")
 
   # In case a single x is handed as argument, make sure it's made a list so that the length check below
@@ -244,7 +246,7 @@ get_categorization_from_NIW_ideal_adaptor <- function(
     select(observationID, x, category, response)
 
   if (simplify) {
-    assert_that(decision_rule  %in% c("criterion", "sampling"),
+    .assert_that(decision_rule  %in% c("criterion", "sampling"),
                 msg = "For simplify = T, decision rule must be either criterion or sampling.")
     return(posterior_probabilities %>%
              filter(response == 1) %>%

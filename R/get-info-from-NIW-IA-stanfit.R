@@ -5,42 +5,6 @@ NULL
 
 # Functions general to stanfit objects ----------------------------------------
 
-.is_ideal_adaptor_stanfit_object <- function(x) {
-  if (!is_s7_object(x)) {
-    return(FALSE)
-  }
-
-  if (S7::S7_inherits(x, IdealAdaptorStanfit)) {
-    return(TRUE)
-  }
-
-  get_s7_class_name(x) %in% c("ideal_adaptor_stanfit", "IdealAdaptorStanfit")
-}
-
-.is_ideal_adaptor_staninput_object <- function(x) {
-  if (!is_s7_object(x)) {
-    return(FALSE)
-  }
-
-  if (S7::S7_inherits(x, IdealAdaptorStaninput)) {
-    return(TRUE)
-  }
-
-  get_s7_class_name(x) %in% c("ideal_adaptor_staninput", "IdealAdaptorStaninput")
-}
-
-.is_transform_information_object <- function(x) {
-  if (!is_s7_object(x)) {
-    return(FALSE)
-  }
-
-  if (S7::S7_inherits(x, MVBU_TransformInformation)) {
-    return(TRUE)
-  }
-
-  get_s7_class_name(x) %in% c("transform_information", "MVBU_TransformInformation")
-}
-
 #' Get parameter names of stanfit
 #'
 #' Get the names for all parameters in `fit`.
@@ -81,7 +45,7 @@ get_number_of_draws <- function(fit) {
 get_random_draw_indices <- function(fit, ndraws)
 {
   n.all.draws <- get_number_of_draws(fit)
-  assert_that(ndraws <= n.all.draws,
+  .assert_that(ndraws <= n.all.draws,
               msg = paste0("Cannot return ", ndraws, " draws because there are only ", n.all.draws, " in the object."))
 
   draws <- sample(1:n.all.draws, size = ndraws)
@@ -122,74 +86,6 @@ get_stanmodelname.ideal_adaptor_stanfit <- function(x) {
   return(stanfit@model_name)
 }
 
-#' Get the stanfit from an ideal adaptor stanfit
-#'
-#' Returns the stanfit created by \code{stan} during the creation of the \code{\link{ideal_adaptor_stanfit}}
-#' object.
-#'
-#' @param x \code{\link{ideal_adaptor_stanfit}} object.
-#'
-#' @return An [rstan::stanfit] object.
-#'
-#' @seealso TBD
-#' @keywords TBD
-#'
-#' @rdname get_stanfit
-#' @export
-get_stanfit <- function(x, ...) {
-  if (.is_ideal_adaptor_stanfit_object(x)) {
-    return(x@stanfit)
-  }
-
-  if (is.list(x) && !is.null(x[["stanfit"]])) {
-    return(x[["stanfit"]])
-  }
-
-  if (inherits(x, "stanfit")) {
-    return(x)
-  }
-
-  stop("x must be an ideal_adaptor_stanfit object or a list with a stanfit component.", call. = FALSE)
-}
-
-
-#' Set the stanfit of an ideal adaptor stanfit
-#'
-#' Sets the stanfit of an the \code{\link{ideal_adaptor_stanfit}} object.
-#'
-#' @param x \code{\link{ideal_adaptor_stanfit}} object.
-#' @param stanfit An [rstan::stanfit] object of adequate structure.
-#'
-#' @return An \code{\link{ideal_adaptor_stanfit}} object with the updated stanfit.
-#'
-#' @seealso TBD
-#' @keywords TBD
-#'
-#' @rdname set_stanfit
-#' @export
-set_stanfit <- function(x, stanfit = NULL) {
-  if (!is.null(stanfit)) {
-    assert_that(is.stanfit(stanfit))
-    assert_that(
-      stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels),
-      msg = paste0("stanfit object was not created by one of the accepted stancodes:\n\t",
-                   paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),
-                   "\n(you can get the name of your model from your_stanfit@model_name)."))
-  }
-
-  if (.is_ideal_adaptor_stanfit_object(x)) {
-    x@stanfit <- stanfit
-    return(x)
-  }
-
-  if (is.list(x)) {
-    x[["stanfit"]] <- stanfit
-    return(x)
-  }
-
-  stop("x must be an ideal_adaptor_stanfit object or a list with a stanfit component.", call. = FALSE)
-}
-
 #' Get the transform/untransform information from an ideal adaptor stanfit
 #'
 #' Returns the transform/untransform information handed to \code{stan} or \code{sampling} during the creation of the \code{stanfit}
@@ -202,125 +98,15 @@ set_stanfit <- function(x, stanfit = NULL) {
 #' @seealso TBD
 #' @keywords TBD
 #' @export
-get_transform_information <- function(x, ...) {
-  if (.is_ideal_adaptor_stanfit_object(x)) {
-    return(x@transform_information)
-  }
-
-  if (is.list(x) && !is.null(x[["transform_information"]])) {
-    return(x[["transform_information"]])
-  }
-
-  stop("x must be an ideal_adaptor_stanfit object or a list with a transform_information component.", call. = FALSE)
-}
-
-#' @export
 get_transform_function <- function(x, ...) {
   info <- get_transform_information(x)
-  if (.is_transform_information_object(info)) {
-    return(info@`transform.function`)
-  }
-  return(info[["transform.function"]])
+  info@`transform.function`
 }
 
 #' @export
 get_untransform_function <- function(x, ...) {
   info <- get_transform_information(x)
-  if (.is_transform_information_object(info)) {
-    return(info@`untransform.function`)
-  }
-  return(info[["untransform.function"]])
-}
-
-#' Get the input data from an ideal adaptor stanfit
-#'
-#' Returns the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{\link{ideal_adaptor_stanfit}}
-#' object.
-#'
-#' @param x \code{\link{ideal_adaptor_stanfit}} object.
-#' @param which Should "transformed" or "untransformed" staninput be returned or "both"? (default: `"untransformed"`)
-#'
-#' @return A list with element names and structures determined by the type of stanfit model.
-#'
-#' @seealso TBD
-#' @keywords TBD
-#' @rdname get_staninput
-#' @export
-get_staninput <- function(x, which = c("untransformed", "transformed", "both")[1]) {
-  which <- match.arg(which, c("untransformed", "transformed", "both"))
-
-  if (.is_ideal_adaptor_stanfit_object(x)) {
-    staninput <- x@staninput
-    if (which == "untransformed") {
-      return(staninput@untransformed)
-    }
-    if (which == "transformed") {
-      return(staninput@transformed)
-    }
-    return(staninput)
-  }
-
-  if (is.list(x) && !is.null(x[["staninput"]])) {
-    staninput <- x[["staninput"]]
-    if (which == "untransformed") {
-      return(staninput[["untransformed"]])
-    }
-    if (which == "transformed") {
-      return(staninput[["transformed"]])
-    }
-    return(staninput)
-  }
-
-  stop("x must be an ideal_adaptor_stanfit object or a list with a staninput component.", call. = FALSE)
-}
-
-#' Set the input data from an ideal adaptor stanfit
-#'
-#' Sets the inputs handed to \code{stan} or \code{sampling} during the creation of the \code{\link{ideal_adaptor_stanfit}}
-#' object.
-#'
-#' @param x \code{\link{ideal_adaptor_stanfit}} object.
-#' @param staninput A list with element names and structures determined by the type of stanfit model.
-#' @param which Should "transformed" or "untransformed" staninput be set or "both"? (default: `"both"`)
-#'
-#' @return A list with element names and structures determined by the type of stanfit model.
-#'
-#' @return An \code{\link{ideal_adaptor_stanfit}} object with the updated staninput.
-#'
-#' @seealso TBD
-#' @keywords TBD
-#' @rdname set_staninput
-#' @export
-set_staninput <- function(x, staninput, which = c("untransformed", "transformed", "both")[3]) {
-  which <- match.arg(which, c("untransformed", "transformed", "both"))
-
-  if (.is_ideal_adaptor_stanfit_object(x)) {
-    current <- x@staninput
-    if (which == "both") {
-      if (is.list(staninput) && !is_s7_object(staninput)) {
-        x@staninput <- ideal_adaptor_staninput(
-          transformed = if (!is.null(staninput[["transformed"]])) staninput[["transformed"]] else list(),
-          untransformed = if (!is.null(staninput[["untransformed"]])) staninput[["untransformed"]] else list()
-        )
-      } else {
-        x@staninput <- staninput
-      }
-    } else if (which == "transformed") {
-      current@transformed <- staninput
-      x@staninput <- current
-    } else {
-      current@untransformed <- staninput
-      x@staninput <- current
-    }
-    return(x)
-  }
-
-  if (is.list(x)) {
-    x[["staninput"]] <- staninput
-    return(x)
-  }
-
-  stop("x must be an ideal_adaptor_stanfit object or a list with a staninput component.", call. = FALSE)
+  info@`untransform.function`
 }
 
 #' Get exposure category statistic from ideal adaptor stanfit
@@ -385,17 +171,17 @@ get_exposure_category_statistic.ideal_adaptor_stanfit <- function(
   untransform_cues = FALSE,
   ...
 ) {
-  assert_that(all(statistic %in% c("n", "mean", "css", "uss", "cov")),
+  .assert_that(all(statistic %in% c("n", "mean", "css", "uss", "cov")),
               msg = "statistic must be one of 'n', mean', 'css', 'uss', or 'cov'.")
-  assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
-  assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
-  assert_that(all(categories %in% get_category_levels(x)),
+  .assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
+  .assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
+  .assert_that(all(categories %in% get_category_levels(x)),
               msg = paste("Some categories not found in the exposure data:",
                           paste(setdiff(categories, get_category_levels(x)), collapse = ", ")))
-  assert_that(all(groups %in% get_group_levels(x)),
+  .assert_that(all(groups %in% get_group_levels(x)),
               msg = paste("Some groups not found in the exposure data:",
                           paste(setdiff(groups, get_group_levels(x, include_prior = FALSE)), collapse = ", ")))
-  staninput <- get_staninput(x, ...)
+  staninput <- get_staninput(x)@values
 
   # Get names for requested dimensions from model object
   category_names <- get_category_levels(x)
@@ -691,7 +477,7 @@ get_test_data.ideal_adaptor_stanfit <- function(
   ...
 ) {
   if (.from_staninput) {
-    data <- get_staninput(x, ...)
+    data <- get_staninput(x)@values
     data <-
       data[["x_test"]] %>%
       cbind(data[["z_test_counts"]]) %>%
@@ -756,7 +542,7 @@ get_cue_levels <- function(x, ...) {
 #' @rdname get_staninput_variable_levels
 #' @export
 get_staninput_variable_levels.ideal_adaptor_stanfit <- function(x, variable = c("category", "group", "cue"), indices = NULL) {
-  assert_that(is.null(indices) | all(indices > 0))
+  .assert_that(is.null(indices) | all(indices > 0))
   f <- get_constructor(x, variable)
 
   if (is.null(indices)) return(levels(f(c()))) else return(f(indices))
@@ -804,13 +590,13 @@ get_cue_levels.ideal_adaptor_stanfit <- function(x, indices = NULL) {
 #' @export
 #' @importFrom rlang sym
 get_constructor <- function(x, variable = NULL) {
-  assert_that(class(x) %in% c("stanfit", "ideal_adaptor_stanfit"))
+  .assert_that(class(x) %in% c("stanfit", "ideal_adaptor_stanfit"))
   if (class(x) == "ideal_adaptor_stanfit") stanfit <- get_stanfit(x) else stanfit <- x
 
   available_constructors <- c("category", "group", "cue", "cue2")
   if (is.null(variable)) return(attr(stanfit, "tidybayes_constructors"))
 
-  assert_that(variable %in% available_constructors,
+  .assert_that(variable %in% available_constructors,
               msg = paste0("Variable name must be one of ", paste(available_constructors, collapse = "or"), "."))
 
   if (is.null(attr(stanfit, "tidybayes_constructors")[[rlang::sym(variable)]])) {
@@ -904,13 +690,13 @@ get_expected_category_statistic.ideal_adaptor_stanfit <- function(
   statistic = c("mu", "Sigma"),
   ...
 ) {
-  assert_that(all(statistic %in% c("mu", "Sigma")))
-  assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
-  assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
-  assert_that(all(categories %in% get_category_levels(x)),
+  .assert_that(all(statistic %in% c("mu", "Sigma")))
+  .assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
+  .assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
+  .assert_that(all(categories %in% get_category_levels(x)),
               msg = paste("Some categories not found in model:",
                           paste(setdiff(categories, get_category_levels(x)), collapse = ", ")))
-  assert_that(all(groups %in% get_group_levels(x, include_prior = T)),
+  .assert_that(all(groups %in% get_group_levels(x, include_prior = T)),
               msg = paste("Some groups not found in model:",
                           paste(setdiff(groups, get_group_levels(x, include_prior = T)), collapse = ", ")))
 
@@ -1049,7 +835,7 @@ get_categorization_function_from_stanfit_draws <- function(x, ...) {
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #'
 #'
-#' @importFrom assertthat assert_that
+#' @importFrom assertthat .assert_that
 #' @importFrom tidyselect ends_with
 #' @export
 get_draws <- function(fit, ...) {
@@ -1080,28 +866,28 @@ get_draws.ideal_adaptor_stanfit <- function(
   # (since they are in non-standard evaluations)
   .chain <- .iteration <- .draw <- group <- category <- kappa <- nu <- m <- S <- lapse_rate <- NULL
 
-  assert_contains_draws(fit)
-  assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
-  assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
-  assert_that(all(categories %in% get_category_levels(fit)),
+  .assert_contains_draws(fit)
+  .assert_that(any(is.factor(categories), is.character(categories), is.numeric(categories)))
+  .assert_that(any(is.factor(groups), is.character(groups), is.numeric(groups)))
+  .assert_that(all(categories %in% get_category_levels(fit)),
               msg = paste("Some categories not found in model:",
                           paste(setdiff(categories, get_category_levels(fit)), collapse = ", ")))
-  assert_that(all(groups %in% get_group_levels(fit, include_prior = T)),
+  .assert_that(all(groups %in% get_group_levels(fit, include_prior = T)),
               msg = paste("Some groups not found in model:",
                           paste(setdiff(groups, get_group_levels(fit, include_prior = T)), collapse = ", ")))
 
   ##### SPECIAL HANDLING OF WHICH, WHICH IS NOW DEPRECATED.
-  assert_that(which %in% c("prior", "posterior", "both"),
+  .assert_that(which %in% c("prior", "posterior", "both"),
               msg = "which must be one of 'prior', 'posterior', or 'both'.")
   ##### END OF SPECIAL HANDLING
 
-  assert_that(any(is.null(ndraws), is.count(ndraws)),
+  .assert_that(any(is.null(ndraws), is.count(ndraws)),
               msg = "If not NULL, ndraw must be a count.")
-  assert_that(any(is.null(ndraws), !is.null(seed)),
+  .assert_that(any(is.null(ndraws), !is.null(seed)),
               msg = "If not ndraws is not NULL, seed must be specified.")
-  assert_that(is.flag(summarize))
-  assert_that(is.flag(wide))
-  assert_that(!all(wide, !nest),
+  .assert_that(is.flag(summarize))
+  .assert_that(is.flag(wide))
+  .assert_that(!all(wide, !nest),
               msg = "Wide format is currently not implemented without nesting.")
 
   if ("prior" %in% groups & length(groups) > 1) {

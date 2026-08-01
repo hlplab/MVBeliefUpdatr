@@ -57,7 +57,7 @@ uss2css <- function(uss, n, mean) {
   if (!is.numeric(uss)) stop2("uss must be a numeric matrix.")
   if (is.scalar(uss)) uss <- matrix(uss, nrow = 1, ncol = 1)
   if (!is.positive.semidefinite(uss)) stop2("uss must be positive definite.")
-  assert_that(length(mean) == dim(uss)[[1]],
+  .assert_that(length(mean) == dim(uss)[[1]],
               msg = "uss and mean are not of compatible dimensions.")
 
   css <- uss - n * mean %*% t(mean)
@@ -79,7 +79,7 @@ css2uss <- function(css, n, mean) {
   if (!is.numeric(css)) stop2("css must be a numeric matrix.")
   if (is.scalar(css)) css <- matrix(css, nrow = 1, ncol = 1)
   if (!is.positive.semidefinite(css)) stop2("css must be positive definite.")
-  assert_that(length(mean) == dim(css)[[1]],
+  .assert_that(length(mean) == dim(css)[[1]],
               msg = "uss and mean are not of compatible dimensions.")
 
   xm <- matrix(mean, nrow = n, ncol = length(mean), byrow = T)
@@ -123,11 +123,11 @@ cov2css <- function(cov, n) {
 #'
 #' @export
 cor2cov = function(omega, tau) {
-  assert_that(is.matrix(omega))
-  assert_that(is.numeric(tau))
-  assert_that(nrow(omega) == ncol(omega),
+  .assert_that(is.matrix(omega))
+  .assert_that(is.numeric(tau))
+  .assert_that(nrow(omega) == ncol(omega),
               msg = "omega must be a square matrix.")
-  assert_that(length(tau) == nrow(omega),
+  .assert_that(length(tau) == nrow(omega),
               msg = "tau must have as many elements as omega has rows (and columns).")
 
   outer(tau,tau) * omega
@@ -146,8 +146,8 @@ cor2cov = function(omega, tau) {
 #'
 #' @export
 cov2tau = function(v) {
-  assert_that(is.matrix(v))
-  assert_that(nrow(v) == ncol(v),
+  .assert_that(is.matrix(v))
+  .assert_that(nrow(v) == ncol(v),
               msg = "omega must be a square matrix.")
   sqrt(diag(v))
 }
@@ -212,9 +212,9 @@ make_vector_column = function(data, cols, vector_col, .keep = "all") {
 get_sum_of_squares_from_df <- function(data, variables = NULL, center = T, verbose = F) {
   if (is.null(data)) return(NA)
 
-  assert_that(is_tibble(data) | is.data.frame(data) | is.matrix(data))
+  .assert_that(is_tibble(data) | is.data.frame(data) | is.matrix(data))
   if (is_tibble(data) | is.data.frame(data))
-    assert_that(all(variables %in% names(data)),
+    .assert_that(all(variables %in% names(data)),
                 msg = paste("Variable column(s)", variables[which(variables %nin% names(data))], "not found in data."))
 
   data.matrix <- if (is_tibble(data) | is.data.frame(data)) {
@@ -356,14 +356,14 @@ transform_cues <- function(
     return.transformed.data = T, return.transform.parameters = F,
     return.transform.function = F, return.untransform.function = F
 ) {
-  assert_that(is.data.frame(data) | is_tibble(data))
-  assert_that(is.character(cues))
-  assert_that(all(cues %in% colnames(data)))
-  assert_that(all(is.logical(center), is.logical(scale), is.logical(pca), is.logical(attach),
+  .assert_data_frame_like(data)
+  .assert_that(is.character(cues))
+  .assert_that(all(cues %in% colnames(data)))
+  .assert_that(all(is.logical(center), is.logical(scale), is.logical(pca), is.logical(attach),
                   is.logical(return.transformed.data), is.logical(return.transform.parameters),
                   is.logical(return.transform.function), is.logical(return.untransform.function)))
   if (pca) center <- T
-  assert_that(is.null(transform.parameters) | is.list(transform.parameters))
+  .assert_that(is.null(transform.parameters) | is.list(transform.parameters))
   old_data <- data
   groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
 
@@ -482,8 +482,8 @@ untransform_cues <- function(
     transform.parameters = NULL,
     return.untransformed.data = T, return.untransform.function = F
 ) {
-  assert_that(is.data.frame(data) | is_tibble(data))
-  assert_that(!is.null(transform.parameters) & is.list(transform.parameters),
+  .assert_data_frame_like(data)
+  .assert_that(!is.null(transform.parameters) & is.list(transform.parameters),
               msg = "Must provide transform parameters.")
   old_data <- data
   groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
@@ -607,9 +607,9 @@ get_affine_transform <- function(
     cues,
     type = c("identity", "center", "scale", "PCA whiten", "ZCA whiten")[1]
 ) {
-  assert_that(is.data.frame(data) | is_tibble(data))
-  assert_that(is.character(cues))
-  assert_that(all(cues %in% colnames(data)), msg = "Some cues cannot be found in the data.")
+  .assert_data_frame_like(data)
+  .assert_that(is.character(cues))
+  .assert_that(all(cues %in% colnames(data)), msg = "Some cues cannot be found in the data.")
 
   # groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
 

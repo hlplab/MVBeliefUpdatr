@@ -27,7 +27,7 @@ fit_ideal_adaptor(
 )
 }
 \arguments{
-\item{staninput}{A list of the type returned by \code{\link{make_staninput}}.}
+\item{staninput}{An S7 object inheriting from \code{\link{MVBU_Staninput}} (for example \code{\link{IdealAdaptorStaninput}}) stored in an \code{\link{IdealAdaptorStanfitInput}} object.}
 
 \item{file}{Either NULL or a character string. In the latter case, the fitted model object is saved
 via saveRDS in a file named after the string supplied in file. The .rds extension is added automatically.

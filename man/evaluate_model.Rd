@@ -2,7 +2,7 @@
 % Please edit documentation in R/get-info-from-model.R
 \name{evaluate_model}
 \alias{evaluate_model}
-\title{Evaluate the fit of a model}
+\title{Get posterior from model}
 \usage{
 evaluate_model(
   model,
@@ -41,17 +41,80 @@ If \code{method} is "likelihood" or "likelihood-up-to-constant", then defaults t
 \code{NULL}, which will result in an error (so users must manually specify the decision rule).}
 
 \item{return_by_x}{Should results be returned separately for each unique \code{x}? (default: \code{FALSE})}
+
+\item{noise_treatment}{Determines whether and how multivariate Gaussian noise is added to the input.
+See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
+"sample"; "marginalize" otherwise).}
+
+\item{lapse_treatment}{Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
+If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
+a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
+will be adjusted based on the lapse formula lapse_rate \emph{lapse_bias + (1 - lapse_rate)} posterior probability from
+perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).}
+
+\item{simplify}{Should the output be simplified, and just the label of the selected category be returned? This
+option is only available for the criterion and sampling decision rules. (default: \code{FALSE})}
 }
 \value{
+A tibble of observations with posterior probabilities for each category (in long format).
+
+Either a tibble of observations with posterior probabilities for each category (in long format), or a
+character vector indicating the chosen category in the same order as the observations in x (if simplify = \code{TRUE}).
+
 If \code{return_by_x}, the accuracy and/or log-likelihood of each unique input \code{x}. Otherwise, the overall accuracy
 and/or log-likelihood of the all observations. Note that the overall log-likelihood is \emph{not} simply the sum of the
 log-likelihoods of all unique inputs \code{x}.
 }
 \description{
-Evaluate the fit of a categorization model against a ground truth (e.g., human responses or the category intended
-by a talker).
+Categorize a single observation based a model. The decision rule can be specified to be either the
+criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
+Luce's choice rule.
 }
 \seealso{
 TBD
 }
+\keyword{(Luce's}
+\keyword{(e.g.,}
+\keyword{Categorize}
+\keyword{Evaluate}
+\keyword{Get}
+\keyword{Luce's}
 \keyword{TBD}
+\keyword{The}
+\keyword{a}
+\keyword{against}
+\keyword{based}
+\keyword{be}
+\keyword{by}
+\keyword{can}
+\keyword{categorization}
+\keyword{category}
+\keyword{choice}
+\keyword{criterion}
+\keyword{decision}
+\keyword{either}
+\keyword{fit}
+\keyword{from}
+\keyword{ground}
+\keyword{human}
+\keyword{intended}
+\keyword{interpretation}
+\keyword{matching}
+\keyword{model}
+\keyword{model.}
+\keyword{observation}
+\keyword{of}
+\keyword{or}
+\keyword{proportional}
+\keyword{responses}
+\keyword{rule}
+\keyword{rule),}
+\keyword{rule,}
+\keyword{rule.}
+\keyword{sampling-based}
+\keyword{single}
+\keyword{specified}
+\keyword{talker).}
+\keyword{the}
+\keyword{to}
+\keyword{truth}

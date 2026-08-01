@@ -1,6 +1,6 @@
 # S7 registration hook for MVBeliefUpdatr.
 
 # This file should only register methods; the implementation of the methods
-# lives in R/S7-methods.R.
+# lives in R/S7-core-methods.R.
 
 S7::methods_register()

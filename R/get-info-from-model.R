@@ -5,7 +5,7 @@ check_compatibility_between_input_and_model <- function(x, model) {
 
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or
   # a matrix. In the latter case, each *row* of the matrix is an input.
-  assert_that(is.list(x) | is.vector(x) | is.matrix(x) | is_tibble(x))
+  .assert_that(is.list(x) | is.vector(x) | is.matrix(x) | is_tibble(x))
 
   # Do not reorder these conditionals (go from more to less specific)
   if (is_tibble(x)) x %<>% as.matrix() else
@@ -67,12 +67,12 @@ get_cue_dimensionality_from_model <- function(x, indices = NULL) {
 #'
 #' @export
 get_perceptual_noise_from_model <- function(model) {
-  assert_that("Sigma_noise" %in% names(model),
+  .assert_that("Sigma_noise" %in% names(model),
               msg = "No Sigma_noise found in model.")
 
   Sigma_noise <- unique(model$Sigma_noise)
 
-  assert_that(length(Sigma_noise) == 1,
+  .assert_that(length(Sigma_noise) == 1,
               msg = "More than one Sigma_noise found in model.")
   return(Sigma_noise[[1]])
 }
@@ -99,7 +99,7 @@ nest_cue_information_in_model <- function(model) {
     stop("Object not recognized.")
   }
 
-  assert_that(all(c("cue", "cue2") %in% names(model)),
+  .assert_that(all(c("cue", "cue2") %in% names(model)),
               msg = "cue and cue2 columns not found. There is nothing to nest.")
   model %>%
     group_by(across(-c(cue, cue2, !! sym(m), !! sym(S)))) %>%
@@ -129,7 +129,7 @@ unnest_cue_information_in_model <- function(model) {
     stop("Object not recognized.")
   }
 
-  assert_that(all(c("cue", "cue2") %nin% names(model)),
+  .assert_that(all(c("cue", "cue2") %nin% names(model)),
               msg = "Cannot create cue and cue2 columns since they already exist in the model.")
 
   cue.labels <- get_cue_labels_from_model(model)
@@ -152,11 +152,11 @@ unnest_cue_information_in_model <- function(model) {
 
 
 format_input_for_likelihood_calculation <- function(x, dim = 1) {
-  assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
+  .assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
   if (is.list(x)) x %<>% reduce(x, .f = ~ rbind(.x, format_input_for_likelihood_calculation(.y, dim = dim)))
   if (is_tibble(x)) x %<>% as.matrix() else
     if (is.vector(x)) {
-      assert_that(length(x) %% dim == 0,
+      .assert_that(length(x) %% dim == 0,
                   msg = paste("x cannot be coerced into matrix of observations with dimensionality", dim))
       x %<>% matrix(ncol = dim)
     }
@@ -255,13 +255,13 @@ evaluate_model <- function(
     ...,
     return_by_x = F
 ) {
-  assert_that(all(method %in% c("likelihood", "likelihood-up-to-constant", "accuracy")))
+  .assert_that(all(method %in% c("likelihood", "likelihood-up-to-constant", "accuracy")))
   # When the input isn't a list, that's ambiguous between the input being a single input or a set of
   # 1D inputs. Use the model's cue dimensionality to disambiguate between the two cases.
   if (!is.list(x)) {
     x <- if (get_cue_dimensionality_from_model(model) == 1) as.list(x) else list(x)
   }
-  assert_that(length(x) == length(response_category),
+  .assert_that(length(x) == length(response_category),
               msg = "Input x and response_category must be lists of the same length.")
 
   # Get counts of all k possible responses at all *unique* stimulus locations
@@ -287,7 +287,7 @@ evaluate_model <- function(
   if ("accuracy" %in% method) {
     r[["accuracy"]] <-
       d.unique.observations %>%
-      left_join(posterior, by = join_by(x == x, response_category == category))
+      left_join(posterior, by = c("x" = "x", "response_category" = "category"))
 
     if (return_by_x) {
       r[["accuracy"]] %<>%
@@ -319,7 +319,7 @@ evaluate_model <- function(
       # (n = 0) at each stimulus location. Then join in the predicted posterior
       # probabilities p for each stimulus location.
       d.unique.observations %>%
-      left_join(posterior, by = join_by(x == x, response_category == category)) %>%
+      left_join(posterior, by = c("x" = "x", "response_category" = "category")) %>%
       group_by(x) %>%
       summarise(
         N = sum(.data$n),
@@ -376,7 +376,7 @@ evaluate_model <- function(
         # using dmultinom below.
         complete(x, response_category) %>%
         replace_na(list(n = 0)) %>%
-        left_join(posterior, by = join_by(x == x, response_category == category)) %>%
+        left_join(posterior, by = c("x" = "x", "response_category" = "category")) %>%
         group_by(x) %>%
         summarise(
           N = sum(n),
@@ -384,7 +384,7 @@ evaluate_model <- function(
     } else {
       r[["likelihood"]] <-
         d.unique.observations %>%
-        left_join(posterior, by = join_by(x == x, response_category == category)) %>%
+        left_join(posterior, by = c("x" = "x", "response_category" = "category")) %>%
         summarise(log_likelihood = lfactorial(sum(n)) + sum(n * log(.data$posterior)) - sum(lfactorial(n)))
     }
   }
@@ -405,9 +405,10 @@ evaluate_model <- function(
 #' @rdname get_posterior_from_model
 #' @export
 #' @deprecated Use posterior() instead.
+#' @keywords internal
 get_posterior_from_model <- function(model, ...) {
   warning("get_posterior_from_model() is deprecated; use posterior() on an S7 cognitive model instead.", call. = FALSE)
-  if (.mvbu_is_s7_class(model, "MVBU_CognitiveModel")) {
+  if (S7::S7_inherits(model, MVBU_CognitiveModel)) {
     return(posterior(model, ...))
   }
   if (is.MVG_ideal_observer(model)) {
@@ -431,9 +432,10 @@ get_posterior_from_model <- function(model, ...) {
 #' @rdname get_categorization_from_model
 #' @export
 #' @deprecated Use categorize() instead.
+#' @keywords internal
 get_categorization_from_model <- function(model, decision_rule = "sampling", ...) {
   warning("get_categorization_from_model() is deprecated; use categorize() on an S7 cognitive model instead.", call. = FALSE)
-  if (.mvbu_is_s7_class(model, "MVBU_CognitiveModel")) {
+  if (S7::S7_inherits(model, MVBU_CognitiveModel)) {
     return(categorize(model, decision_rule = decision_rule, ...))
   }
   if (is.MVG_ideal_observer(model)) {
@@ -467,10 +469,11 @@ get_categorization_from_model <- function(model, decision_rule = "sampling", ...
 #' @description Deprecated. Use \code{\link{get_cue_labels}} instead.
 #' @export
 #' @deprecated Use get_cue_labels() instead.
+#' @keywords internal
 get_cue_labels_from_model <- function(x, indices = NULL) {
-  if (.mvbu_is_s7_class(x, "MVBU_CategoryRepresentation") ||
-      .mvbu_is_s7_class(x, "MVBU_CategoryRepresentationTemplate") ||
-      .mvbu_is_s7_class(x, "MVBU_CognitiveModel")) {
+  if (S7::S7_inherits(x, MVBU_CategoryRepresentation) ||
+      S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate) ||
+      S7::S7_inherits(x, MVBU_CognitiveModel)) {
     return(get_cue_labels(x, indices = indices))
   }
 
@@ -492,10 +495,11 @@ get_cue_labels_from_model <- function(x, indices = NULL) {
 #' @description Deprecated. Use \code{\link{get_category_labels}} instead.
 #' @export
 #' @deprecated Use get_category_labels() instead.
+#' @keywords internal
 get_category_labels_from_model <- function(x, indices = NULL) {
-  if (.mvbu_is_s7_class(x, "MVBU_CategoryRepresentation") ||
-      .mvbu_is_s7_class(x, "MVBU_CategoryRepresentationTemplate") ||
-      .mvbu_is_s7_class(x, "MVBU_CognitiveModel")) {
+  if (S7::S7_inherits(x, MVBU_CategoryRepresentation) ||
+      S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate) ||
+      S7::S7_inherits(x, MVBU_CognitiveModel)) {
     return(get_category_labels(x, indices = indices))
   }
 
@@ -518,10 +522,11 @@ get_category_labels_from_model <- function(x, indices = NULL) {
 #' @description Deprecated. Use \code{\link{get_category_labels}} and take its length instead.
 #' @export
 #' @deprecated Use length(get_category_labels()) instead.
+#' @keywords internal
 get_nlevels_of_category_labels_from_model <- function(x) {
-  if (.mvbu_is_s7_class(x, "MVBU_CategoryRepresentation") ||
-      .mvbu_is_s7_class(x, "MVBU_CategoryRepresentationTemplate") ||
-      .mvbu_is_s7_class(x, "MVBU_CognitiveModel")) {
+  if (S7::S7_inherits(x, MVBU_CategoryRepresentation) ||
+      S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate) ||
+      S7::S7_inherits(x, MVBU_CognitiveModel)) {
     category_labels <- get_category_labels_from_model(x)
     return(length(unique(category_labels)))
   }
@@ -545,8 +550,9 @@ get_nlevels_of_category_labels_from_model <- function(x) {
 #' @description Deprecated. Use \code{\link{get_category_prior}} instead.
 #' @export
 #' @deprecated Use get_category_prior() instead.
+#' @keywords internal
 get_priors_from_model <- function(model, categories = model$category) {
-  if (.mvbu_is_s7_class(model, "MVBU_CognitiveModel")) {
+  if (S7::S7_inherits(model, MVBU_CognitiveModel)) {
     prior <- get_category_prior(model)
     if (!is.null(names(prior))) {
       prior <- prior[match(as.character(categories), names(prior))]
@@ -554,7 +560,7 @@ get_priors_from_model <- function(model, categories = model$category) {
     return(as.numeric(prior))
   }
 
-  assert_that("prior" %in% names(model),
+  .assert_that("prior" %in% names(model),
               msg = "No prior found in model.")
 
   prior <-
@@ -574,17 +580,18 @@ get_priors_from_model <- function(model, categories = model$category) {
 #' @description Deprecated. Use \code{\link{get_lapse_rate}} instead.
 #' @export
 #' @deprecated Use get_lapse_rate() instead.
+#' @keywords internal
 get_lapse_rate_from_model <- function(model) {
-  if (.mvbu_is_s7_class(model, "MVBU_CognitiveModel")) {
+  if (S7::S7_inherits(model, MVBU_CognitiveModel)) {
     return(as.numeric(get_lapse_rate(model)))
   }
 
-  assert_that("lapse_rate" %in% names(model),
+  .assert_that("lapse_rate" %in% names(model),
               msg = "No lapse_rate found in model.")
 
   lapse_rate <- unique(model$lapse_rate)
 
-  assert_that(length(lapse_rate) == 1,
+  .assert_that(length(lapse_rate) == 1,
               msg = "More than one lapse_rate found in model.")
   return(lapse_rate)
 }
@@ -601,8 +608,9 @@ get_lapse_rate_from_model <- function(model) {
 #' @description Deprecated. Use \code{\link{get_lapse_bias}} instead.
 #' @export
 #' @deprecated Use get_lapse_bias() instead.
+#' @keywords internal
 get_lapse_biases_from_model <- function(model, categories = model$category) {
-  if (.mvbu_is_s7_class(model, "MVBU_CognitiveModel")) {
+  if (S7::S7_inherits(model, MVBU_CognitiveModel)) {
     lapse_bias <- get_lapse_bias(model)
     if (!is.null(names(lapse_bias))) {
       lapse_bias <- lapse_bias[match(as.character(categories), names(lapse_bias))]
@@ -610,7 +618,7 @@ get_lapse_biases_from_model <- function(model, categories = model$category) {
     return(as.numeric(lapse_bias))
   }
 
-  assert_that("lapse_bias" %in% names(model),
+  .assert_that("lapse_bias" %in% names(model),
               msg = "No lapse_bias found in model.")
 
   lapse_bias <-

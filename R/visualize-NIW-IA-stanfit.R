@@ -218,7 +218,7 @@ plot_parameter_correlations.ideal_adaptor_stanfit <- function(
   untransform_cues = FALSE,
   category.colors = get_default_colors("category", categories)
 ) {
-  assert_that(is.null(pars) || is.character(pars))
+  .assert_that(is.null(pars) || is.character(pars))
 
   d.pars <-
     model %>%
@@ -254,12 +254,12 @@ plot_parameter_correlations.ideal_adaptor_stanfit <- function(
       left_join(
         .,
         d.Rho %>% select(-Rho),
-        by = join_by(.chain, .iteration, .draw, group, category, kappa, nu, lapse_rate))
+        by = c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "lapse_rate"))
     } else . } %>%
     ungroup()
 
   if (!is.null(pars)) {
-    assert_that(
+    .assert_that(
       all(pars %in% colnames(d.pars)),
       msg = paste0("The following parameter(s) could not be found in the stanfit object: ", paste(setdiff(pars, colnames(d.pars)), collapse = ", "), "."))
 
@@ -381,13 +381,13 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
   untransform_cues = FALSE
 ) {
   if (is.null(data.test)) data.test <- get_test_data(model, .from_staninput = T)
-  assert_that(is.flag(summarize))
-  assert_that(is.null(confidence.intervals) |
+  .assert_that(is.flag(summarize))
+  .assert_that(is.null(confidence.intervals) |
                 all(is.numeric(confidence.intervals),
                     length(confidence.intervals) == 2,
                     all(between(confidence.intervals, 0, 1))),
               msg = "Confidence intervals must be NULL (if not CIs are desired) or a vector of two probabilities.")
-  assert_that(is.null(sort_by) | length(sort_by) == 1)
+  .assert_that(is.null(sort_by) | length(sort_by) == 1)
 
   # Set confidence intervals
   if (!is.null(confidence.intervals)) {
@@ -400,7 +400,7 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
   d.pars <- get_categorization_function(model, groups = groups, lapse_treatment = lapse_treatment, ndraws = ndraws)
 
   if (!is.null(sort_by))
-    assert_that(sort_by %in% groups,
+    .assert_that(sort_by %in% groups,
                 msg = paste("sort_by must be NULL or one of the groups:",
                       paste(groups, collapse = ", ")))
 
