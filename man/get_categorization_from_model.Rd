@@ -45,9 +45,18 @@ get_categorization_from_model(model, decision_rule = "sampling", ...)
 \description{
 Deprecated. Use \code{\link{categorize}} instead.
 
-Deprecated. Use \code{\link{categorize}} instead.
+Deprecated. Use categorize() instead.
 
 Deprecated. Use \code{\link{categorize}} instead.
 
+Deprecated. Use categorize() instead.
+
 Deprecated. Use \code{\link{categorize}} instead.
+
+Deprecated. Use categorize() instead.
+
+Deprecated. Use \code{\link{categorize}} instead.
+
+Deprecated. Use categorize() instead.
 }
+\keyword{internal}

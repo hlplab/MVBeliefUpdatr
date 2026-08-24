@@ -35,8 +35,8 @@ get_MVG_likelihood <- function(
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
   .assert_that(is.vector(x) | is.matrix(x) | is_tibble(x) | is.list(x))
-  .assert_that(is.vector(mu) | is.matrix(mu) | is_scalar_double(mu))
-  .assert_that(is.Sigma(Sigma))
+  .assert_that(is.vector(mu) | is.matrix(mu) | .is_non_NA_scalar_double(mu))
+  .assert_that(.is_sigma(Sigma))
 
   # do not reorder these conditionals (go from more to less specific)
   if (is.matrix(mu)) mu <- as.vector(mu)
@@ -44,11 +44,11 @@ get_MVG_likelihood <- function(
   .assert_that(dim(x)[2] == length(mu),
               msg = "Input x and m are not of compatible dimensions.")
 
-  .assert_that(is.flag(log))
+  .assert_that(.is_non_NA_scalar_logical(log))
   .assert_that(any(noise_treatment %in% c("no_noise", "marginalize", "sample")),
               msg = "noise_treatment must be one of 'no_noise', 'marginalize', or 'sample'.")
   if (noise_treatment != "no_noise") {
-    .assert_that(is.Sigma(Sigma_noise),
+    .assert_that(.is_sigma(Sigma_noise),
                 msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the category covariance matrices Sigma.')
     .assert_that(all(dim(Sigma) == dim(Sigma_noise)),
                 msg = 'If noise_treatment is not "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the category covariance matrices Sigma.')
@@ -56,7 +56,7 @@ get_MVG_likelihood <- function(
 
   D <- get_D(Sigma)
   if (D == 1) {
-    .assert_that(is_scalar_double(mu), msg = "Sigma and mu are not of compatible dimensions.")
+    .assert_that(.is_non_NA_scalar_double(mu), msg = "Sigma and mu are not of compatible dimensions.")
   } else {
     .assert_that(dim(Sigma)[2] == D,
                 msg = "Sigma is not a square matrix, and thus not a covariance matrix")
@@ -71,14 +71,14 @@ get_MVG_likelihood <- function(
       is_weakly_greater_than(nrow(x), 1),
       msg = "For noise sampling, x must be of length 1 or longer.")
 
-    x <- x + rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
+    x <- x + .rmvnorm(n = nrow(x), mean = rep(0, ncol(x)), sigma = Sigma_noise)
   }
 
   if (noise_treatment %in% c("sample", "marginalize")) {
     Sigma <- Sigma + Sigma_noise
   }
 
-  dmvnorm(x, mean = mu, sigma = Sigma, log = log) %>% as.numeric()
+  .dmvnorm(x, mean = mu, sigma = Sigma, log = log) %>% as.numeric()
 }
 
 
@@ -96,7 +96,7 @@ get_likelihood_from_MVG <- function(
   wide = FALSE
 ) {
   .assert_that(is.MVG(model))
-  .assert_that(any(is.null(category.label) | is.character(category.label)))
+  .assert_optional_character(category.label)
   .assert_that(any(noise_treatment == "no_noise", is.MVG_ideal_observer(model)),
               msg = 'No noise matrix Sigma_noise found. If noise_treatment is not "no_noise", then model must be an MVG_ideal_observer.')
 
@@ -106,7 +106,7 @@ get_likelihood_from_MVG <- function(
 
     category.label <-
       model %>%
-      pull(!! sym(category)) %>%
+      dplyr::pull(!! sym(category)) %>%
       unique()
   }
 
@@ -146,7 +146,7 @@ get_likelihood_from_MVG <- function(
 #' @description Deprecated. Use \code{\link{posterior}} instead.
 #' @rdname get_posterior_from_model
 #' @export
-#' @deprecated Use posterior() instead.
+#' @description Deprecated. Use posterior() instead.
 #' @keywords internal
 get_posterior_from_MVG_ideal_observer <- function(
     x,
@@ -154,7 +154,12 @@ get_posterior_from_MVG_ideal_observer <- function(
     noise_treatment = if (decision_rule == "sampling") "sample" else infer_default_noise_treatment(model$Sigma_noise),
     lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize"
 ) {
-  warning("get_posterior_from_MVG_ideal_observer() is deprecated; use posterior() on an S7 cognitive model instead.", call. = FALSE)
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "get_posterior_from_MVG_ideal_observer()",
+    with = "posterior()",
+    always = TRUE
+  )
 
   # TO DO: check dimensionality of x with regard to belief.
   assert_MVG_ideal_observer(model)
@@ -165,17 +170,34 @@ get_posterior_from_MVG_ideal_observer <- function(
   # 1D inputs. Use the model's cue dimensionality to disambiguate between the two cases.
   if (!is.list(x)) {
     x <- if (get_cue_dimensionality_from_model(model) == 1) as.list(x) else list(x)
+  } else if (
+    length(x) > 0L &&
+    all(vapply(x, function(value) length(value) == 1L && is.atomic(value), logical(1)))
+  ) {
+    x <- list(unlist(x, use.names = FALSE))
   }
 
+  x_input <- x
   n.distinct_categories <- length(get_category_labels(model))
+  if (!is.list(x_input)) {
+    x_input <- if (get_cue_dimensionality_from_model(model) == 1) as.list(x_input) else list(x_input)
+  }
+
   posterior_probabilities <-
     get_likelihood_from_MVG(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%
+    tibble::as_tibble() %>%
     mutate(
-      observationID = rep(1:length(.env$x), .env$n.distinct_categories),
-      x = rep(.env$x, .env$n.distinct_categories),
-      lapse_rate = get_lapse_rate(.env$model),
-      lapse_bias = get_lapse_bias(.env$model, categories = .data$category),
-      prior = get_category_prior(.env$model, categories = .data$category)) %>%
+      observationID = rep(seq_along(x_input), times = n.distinct_categories),
+      x = rep(x_input, times = n.distinct_categories)
+    )
+
+  lapse_rate <- get_lapse_rate(model)
+  posterior_probabilities$lapse_rate <- lapse_rate
+  posterior_probabilities$lapse_bias <- get_lapse_bias(model, categories = posterior_probabilities$category)
+  posterior_probabilities$prior <- get_category_prior(model, categories = posterior_probabilities$category)
+
+  posterior_probabilities <-
+    posterior_probabilities %>%
     group_by(observationID) %>%
     mutate(posterior_probability = (.data$likelihood * .data$prior) / sum(.data$likelihood * .data$prior))
 
@@ -185,45 +207,45 @@ get_posterior_from_MVG_ideal_observer <- function(
       mutate(
         posterior_probability = ifelse(
           rep(
-            rbinom(1, 1, .data$lapse_rate),
+            rbinom(1, 1, lapse_rate),
             length(get_category_labels(model))),
           .data$lapse_bias,                 # substitute lapse probabilities for posterior
           .data$posterior_probability))     # ... or not
   } else if (lapse_treatment == "marginalize") {
     posterior_probabilities %<>%
-      mutate(posterior_probability = .data$lapse_rate * .data$lapse_bias + (1 - .data$lapse_rate) * .data$posterior_probability)
+      mutate(posterior_probability = lapse_rate * .data$lapse_bias + (1 - lapse_rate) * .data$posterior_probability)
   }
 
   posterior_probabilities %<>%
     ungroup() %>%
     select(-c(likelihood)) %>%
-    select(observationID, x, category, posterior_probability)
+    select(observationID, x, category, posterior_probability) %>%
+    arrange(.data$observationID)
 
-  # Warn if any posteriors don't sum up  to 1.
+  # Warn if any posteriors don't sum up to 1.
   posterior.check <-
     posterior_probabilities %>%
     group_by(x, observationID) %>%
     summarise(posterior_probability = sum(.data$posterior_probability))
-  if (any(
-    is.na(posterior.check$posterior_probability),
-    is.nan(posterior.check$posterior_probability),
-    !near(posterior.check$posterior_probability, 1.0))) {
-    posterior.check %<>%
-      arrange(posterior_probability) %>%
-      filter(is.na(posterior_probability) | is.nan(posterior_probability) | !near(posterior_probability, 1.0))
+
+  posterior.check %<>%
+    arrange(posterior_probability) %>%
+    filter(is.na(posterior_probability) | is.nan(posterior_probability) | !isTRUE(all.equal(posterior_probability, 1.0, tolerance = 1e-8)))
+
+  if (nrow(posterior.check) > 0L) {
     s <- paste(
       nrow(posterior.check),
       "input(s) have an ill-defined posterior under the model. This can happen when inputs are far away from all category means.\n")
-    s %<>% paste0(
-      .,
-      posterior.check %>%
-        arrange(posterior_probability) %>%
-        filter(is.na(posterior_probability) | is.nan(posterior_probability) | !near(posterior_probability, 1.0)) %>%
-        mutate(string = pmap(
+    posterior.check %<>%
+      mutate(
+        string = purrr::pmap_chr(
           .l = list(posterior_probability, x, observationID),
-          .f = ~ paste0("Sum of posterior is ", ..1, " for observation ID = ", ..3, "; input = ", paste(..2, collapse = ","))) %>%
-            unlist()) %>%
-        pull(string) %>% paste(., collapse = ".\n"))
+          .f = function(posterior_probability, x, observationID) {
+            paste0("Sum of posterior is ", posterior_probability, " for observation ID = ", observationID, "; input = ", paste(x, collapse = ","))
+          }
+        )
+      )
+    s %<>% paste0(., paste(posterior.check$string, collapse = ".\n"))
     warning(s)
   }
 
@@ -235,7 +257,7 @@ get_posterior_from_MVG_ideal_observer <- function(
 #' @description Deprecated. Use \code{\link{categorize}} instead.
 #' @rdname get_categorization_from_model
 #' @export
-#' @deprecated Use categorize() instead.
+#' @description Deprecated. Use categorize() instead.
 #' @keywords internal
 get_categorization_from_MVG_ideal_observer <- function(
   x,
@@ -245,7 +267,12 @@ get_categorization_from_MVG_ideal_observer <- function(
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F
 ) {
-  warning("get_categorization_from_MVG_ideal_observer() is deprecated; use categorize() on an S7 cognitive model instead.", call. = FALSE)
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "get_categorization_from_MVG_ideal_observer()",
+    with = "categorize()",
+    always = TRUE
+  )
 
   posterior_probabilities <-
     get_posterior_from_MVG_ideal_observer(x = x, model = model, noise_treatment = noise_treatment, lapse_treatment = lapse_treatment)
@@ -270,7 +297,7 @@ get_categorization_from_MVG_ideal_observer <- function(
   } else if (decision_rule == "sampling") {
     posterior_probabilities %<>%
       group_by(observationID, x) %>%
-      mutate(response = rmultinom(1, 1, .data$posterior_probability) %>% as.vector())
+      mutate(response = .rmultinom(1, 1, .data$posterior_probability) %>% as.vector())
   } else if (decision_rule == "proportional") {
     posterior_probabilities %<>%
       mutate(response = .data$posterior_probability)

@@ -8,4 +8,7 @@ get_untransform_function_from_stanfit(...)
 }
 \description{
 Deprecated. Use \code{\link{get_untransform_function.ideal_adaptor_stanfit}} instead.
+
+Deprecated. Use get_untransform_function.ideal_adaptor_stanfit() instead.
 }
+\keyword{internal}

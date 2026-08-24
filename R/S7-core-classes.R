@@ -1,8 +1,9 @@
-# S7 foundation: base classes and core generic scaffolding.
-# This file is intentionally minimal and non-breaking.
-
+#' @include asserts.R
 #' @importFrom S7 new_class new_generic method S7_inherits
 NULL
+
+# S7 foundation: base classes and core generic scaffolding.
+# This file is intentionally minimal and non-breaking.
 
 # -------------------------
 # Base class hierarchy
@@ -357,14 +358,10 @@ MVBU_ModelDistribution <- S7::new_class(
 #' @return A single uppercase family name.
 #' @keywords internal
 .normalize_family_name <- function(family) {
-  if (!is.character(family) || length(family) != 1 || nchar(family) == 0) {
-    stop("family must be a non-empty scalar character value.", call. = FALSE)
-  }
+  .assert_non_NA_scalar_character(family)
   toupper(family)
 }
 
-#' Register an MVBU model family
-#' @keywords internal
 #' Register a model family in the MVBU family registry.
 #'
 #' @param family Model family name.
@@ -372,8 +369,13 @@ MVBU_ModelDistribution <- S7::new_class(
 #' @param cognitive_model_class Name of the cognitive-model class.
 #' @param model_distribution_class Name of the model-distribution class.
 #' @return Invisibly TRUE.
+#' @keywords internal
 .register_model_family <- function(family, category_representation_class, cognitive_model_class, model_distribution_class) {
   family <- .normalize_family_name(family)
+
+  .assert_non_NA_scalar_character(category_representation_class)
+  .assert_non_NA_scalar_character(cognitive_model_class)
+  .assert_non_NA_scalar_character(model_distribution_class)
 
   class_fields <- list(
     category_representation = category_representation_class,
@@ -381,29 +383,23 @@ MVBU_ModelDistribution <- S7::new_class(
     model_distribution = model_distribution_class
   )
 
-  if (!all(vapply(class_fields, function(x) is.character(x) && length(x) == 1 && nchar(x) > 0, logical(1)))) {
-    stop("category_representation_class, cognitive_model_class, and model_distribution_class must be non-empty scalar character values.", call. = FALSE)
-  }
-
   .mvbu_family_registry$families[[family]] <- class_fields
   invisible(TRUE)
 }
 
-#' Get registered MVBU model families
-#' @keywords internal
 #' Get the registered MVBU model families.
 #'
 #' @return A character vector of registered family names.
+#' @keywords internal
 .get_registered_model_families <- function() {
   sort(names(.mvbu_family_registry$families))
 }
 
-#' Get class registration for an MVBU model family
-#' @keywords internal
 #' Get the registration information for a model family.
 #'
 #' @param family Model family name.
 #' @return A list with the registered class names.
+#' @keywords internal
 .get_model_family_registration <- function(family) {
   family <- .normalize_family_name(family)
   registration <- .mvbu_family_registry$families[[family]]
@@ -413,8 +409,7 @@ MVBU_ModelDistribution <- S7::new_class(
   registration
 }
 
-#' Register Stan-family extension hooks
-#' @keywords internal
+
 #' Register Stan-family extension hooks.
 #'
 #' @param family Model family name.
@@ -423,6 +418,7 @@ MVBU_ModelDistribution <- S7::new_class(
 #' @param bridge_methods Character vector of bridge methods.
 #' @param dependency_rationale Character vector describing the dependency rationale.
 #' @return Invisibly TRUE.
+#' @keywords internal
 .register_stan_family_hooks <- function(
     family,
     stanfit_class = NULL,
@@ -432,18 +428,10 @@ MVBU_ModelDistribution <- S7::new_class(
 ) {
   family <- .normalize_family_name(family)
 
-  if (!is.null(stanfit_class) && (!is.character(stanfit_class) || length(stanfit_class) != 1)) {
-    stop("stanfit_class must be NULL or a scalar character value.", call. = FALSE)
-  }
-  if (!is.null(staninput_class) && (!is.character(staninput_class) || length(staninput_class) != 1)) {
-    stop("staninput_class must be NULL or a scalar character value.", call. = FALSE)
-  }
-  if (!is.character(bridge_methods)) {
-    stop("bridge_methods must be a character vector.", call. = FALSE)
-  }
-  if (!is.character(dependency_rationale)) {
-    stop("dependency_rationale must be a character vector.", call. = FALSE)
-  }
+  .assert_true(is.null(stanfit_class) || .is_non_NA_scalar_character(stanfit_class), msg = "stanfit_class must be NULL or a non-NA scalar character value.")
+  .assert_true(is.null(staninput_class) || .is_non_NA_scalar_character(staninput_class), msg = "staninput_class must be NULL or a non-NA scalar character value.")
+  .assert_non_NA_character(bridge_methods)
+  .assert_non_NA_character(dependency_rationale)
 
   if (is.null(.mvbu_family_registry$stan_hooks)) {
     .mvbu_family_registry$stan_hooks <- list()
@@ -459,12 +447,11 @@ MVBU_ModelDistribution <- S7::new_class(
   invisible(TRUE)
 }
 
-#' Get Stan-family extension hooks
-#' @keywords internal
 #' Get Stan-family extension hooks for a model family.
 #'
 #' @param family Optional model family name.
 #' @return A list of registered hooks.
+#' @keywords internal
 .get_stan_family_hooks <- function(family = NULL) {
   hooks <- .mvbu_family_registry$stan_hooks
   if (is.null(hooks)) {
@@ -1141,6 +1128,14 @@ Exemplar_ModelDistribution <- S7::new_class(
   MVBU_Object()
 }
 
+#' Construct a base MVBU object.
+#'
+#' @return A base S7 MVBU object.
+#' @export
+new_mvbu_object <- function() {
+  .new_mvbu_object()
+}
+
 #' Construct a base inferred-model object
 #' @keywords internal
 .new_model_distribution <- function(model_family, cache = list(), metadata = list(), group_label = "") {
@@ -1229,6 +1224,196 @@ Exemplar_ModelDistribution <- S7::new_class(
   )
 }
 
+#' Construct a general model distribution object.
+#'
+#' @param model_family Model-family name.
+#' @param cache Optional cache list.
+#' @param metadata Optional metadata list.
+#' @param group_label Optional group label.
+#' @return An S7 model-distribution object.
+#' @export
+new_model_distribution <- function(model_family, cache = list(), metadata = list(), group_label = "") {
+  .new_model_distribution(
+    model_family = model_family,
+    cache = cache,
+    metadata = metadata,
+    group_label = group_label
+  )
+}
+
+#' Construct a UVG model distribution object.
+#'
+#' @param cache Optional cache list.
+#' @param metadata Optional metadata list.
+#' @param group_label Optional group label.
+#' @return A UVG S7 model-distribution object.
+#' @export
+new_uvg_model_distribution <- function(cache = list(), metadata = list(), group_label = "") {
+  .new_uvg_model_distribution(
+    cache = cache,
+    metadata = metadata,
+    group_label = group_label
+  )
+}
+
+#' Construct a NIX model distribution object.
+#'
+#' @param cache Optional cache list.
+#' @param metadata Optional metadata list.
+#' @param group_label Optional group label.
+#' @return A NIX S7 model-distribution object.
+#' @export
+new_nix_model_distribution <- function(cache = list(), metadata = list(), group_label = "") {
+  .new_nix_model_distribution(
+    cache = cache,
+    metadata = metadata,
+    group_label = group_label
+  )
+}
+
+#' Construct a MUVG model distribution object.
+#'
+#' @param cache Optional cache list.
+#' @param metadata Optional metadata list.
+#' @param group_label Optional group label.
+#' @return A MUVG S7 model-distribution object.
+#' @export
+new_muvg_model_distribution <- function(cache = list(), metadata = list(), group_label = "") {
+  .new_muvg_model_distribution(
+    cache = cache,
+    metadata = metadata,
+    group_label = group_label
+  )
+}
+
+#' Construct a MNIX model distribution object.
+#'
+#' @param cache Optional cache list.
+#' @param metadata Optional metadata list.
+#' @param group_label Optional group label.
+#' @return A MNIX S7 model-distribution object.
+#' @export
+new_mnix_model_distribution <- function(cache = list(), metadata = list(), group_label = "") {
+  .new_mnix_model_distribution(
+    cache = cache,
+    metadata = metadata,
+    group_label = group_label
+  )
+}
+
+#' Construct a MVG model distribution object.
+#'
+#' @param cache Optional cache list.
+#' @param metadata Optional metadata list.
+#' @param group_label Optional group label.
+#' @return A MVG S7 model-distribution object.
+#' @export
+new_mvg_model_distribution <- function(cache = list(), metadata = list(), group_label = "") {
+  .new_mvg_model_distribution(
+    cache = cache,
+    metadata = metadata,
+    group_label = group_label
+  )
+}
+
+#' Construct a NIW model distribution object.
+#'
+#' @param cache Optional cache list.
+#' @param metadata Optional metadata list.
+#' @param group_label Optional group label.
+#' @return A NIW S7 model-distribution object.
+#' @export
+new_niw_model_distribution <- function(cache = list(), metadata = list(), group_label = "") {
+  .new_niw_model_distribution(
+    cache = cache,
+    metadata = metadata,
+    group_label = group_label
+  )
+}
+
+#' Construct an exemplar model distribution object.
+#'
+#' @param cache Optional cache list.
+#' @param metadata Optional metadata list.
+#' @param group_label Optional group label.
+#' @return An exemplar S7 model-distribution object.
+#' @export
+new_exemplar_model_distribution <- function(cache = list(), metadata = list(), group_label = "") {
+  .new_exemplar_model_distribution(
+    cache = cache,
+    metadata = metadata,
+    group_label = group_label
+  )
+}
+
+#' Register a model family in the MVBU family registry.
+#'
+#' @param family Model-family name.
+#' @param category_representation_class Name of the category-representation class.
+#' @param cognitive_model_class Name of the cognitive-model class.
+#' @param model_distribution_class Name of the model-distribution class.
+#' @return Invisibly TRUE.
+#' @export
+register_model_family <- function(family, category_representation_class, cognitive_model_class, model_distribution_class) {
+  .register_model_family(
+    family = family,
+    category_representation_class = category_representation_class,
+    cognitive_model_class = cognitive_model_class,
+    model_distribution_class = model_distribution_class
+  )
+}
+
+#' Get the registered MVBU model families.
+#'
+#' @return A character vector of registered family names.
+#' @export
+get_registered_model_families <- function() {
+  .get_registered_model_families()
+}
+
+#' Get the registration information for a model family.
+#'
+#' @param family Model-family name.
+#' @return A list with the registered class names.
+#' @export
+get_model_family_registration <- function(family) {
+  .get_model_family_registration(family)
+}
+
+#' Register Stan-family extension hooks.
+#'
+#' @param family Model-family name.
+#' @param stanfit_class Optional Stanfit class name.
+#' @param staninput_class Optional Staninput class name.
+#' @param bridge_methods Character vector of bridge methods.
+#' @param dependency_rationale Character vector describing the dependency rationale.
+#' @return Invisibly TRUE.
+#' @export
+register_stan_family_hooks <- function(
+    family,
+    stanfit_class = NULL,
+    staninput_class = NULL,
+    bridge_methods = character(0),
+    dependency_rationale = character(0)
+) {
+  .register_stan_family_hooks(
+    family = family,
+    stanfit_class = stanfit_class,
+    staninput_class = staninput_class,
+    bridge_methods = bridge_methods,
+    dependency_rationale = dependency_rationale
+  )
+}
+
+#' Get Stan-family extension hooks for a model family.
+#'
+#' @param family Optional model-family name.
+#' @return A list of registered hooks.
+#' @export
+get_stan_family_hooks <- function(family = NULL) {
+  .get_stan_family_hooks(family = family)
+}
+
 #' Construct a base cognitive model object
 #'
 #' By default, lapse_bias equals category_prior.
@@ -1242,26 +1427,16 @@ Exemplar_ModelDistribution <- S7::new_class(
   if (is.matrix(Sigma_noise)) {
     Sigma_noise <- as.matrix(Sigma_noise)
   } else if (is.numeric(Sigma_noise) && length(Sigma_noise) > 0 && is.null(dim(Sigma_noise))) {
-    if (length(Sigma_noise) != length(cue_labels)) {
-      stop("Sigma_noise length must match the number of cue labels.", call. = FALSE)
-    }
+    .assert_true(length(Sigma_noise) == length(cue_labels), msg = "Sigma_noise length must match the number of cue labels.")
     Sigma_noise <- diag(Sigma_noise, nrow = length(Sigma_noise), ncol = length(Sigma_noise))
   } else {
     stop("Sigma_noise must be NULL, a numeric vector, or a matrix.", call. = FALSE)
   }
 
-  if (!is.numeric(Sigma_noise)) {
-    stop("Sigma_noise must be numeric.", call. = FALSE)
-  }
-  if (any(!is.finite(Sigma_noise))) {
-    stop("Sigma_noise entries must be finite.", call. = FALSE)
-  }
-  if (any(Sigma_noise < 0)) {
-    stop("Sigma_noise entries must be non-negative.", call. = FALSE)
-  }
-  if (nrow(Sigma_noise) != length(cue_labels) || ncol(Sigma_noise) != length(cue_labels)) {
-    stop("Sigma_noise dimensions must match the number of cue labels.", call. = FALSE)
-  }
+  .assert_true(is.numeric(Sigma_noise), msg = "Sigma_noise must be numeric.")
+  .assert_true(all(is.finite(Sigma_noise)), msg = "Sigma_noise entries must be finite.")
+  .assert_true(all(Sigma_noise >= 0), msg = "Sigma_noise entries must be non-negative.")
+  .assert_true(nrow(Sigma_noise) == length(cue_labels) && ncol(Sigma_noise) == length(cue_labels), msg = "Sigma_noise dimensions must match the number of cue labels.")
 
   Sigma_noise
 }
@@ -1277,23 +1452,14 @@ new_cognitive_model <- function(
     lapse_treatment = "no_lapses",
     metadata = list()
 ) {
-  if (is.null(category_template)) {
-    stop("category_template must be supplied.", call. = FALSE)
-  }
-
-  if (!S7::S7_inherits(category_template, MVBU_CategoryRepresentationTemplate)) {
-    stop("category_template must be an MVBU_CategoryRepresentationTemplate.", call. = FALSE)
-  }
+  .assert_true(!is.null(category_template), msg = "category_template must be supplied.")
+  .assert_true(S7::S7_inherits(category_template, MVBU_CategoryRepresentationTemplate), msg = "category_template must be an MVBU_CategoryRepresentationTemplate.")
 
   n_repr <- length(category_template@representations)
   repr_names <- names(category_template@representations)
 
-  if (!noise_treatment %in% c("no_noise", "sample", "marginalize")) {
-    stop("noise_treatment must be one of 'no_noise', 'sample', or 'marginalize'.", call. = FALSE)
-  }
-  if (!lapse_treatment %in% c("no_lapses", "sample", "marginalize")) {
-    stop("lapse_treatment must be one of 'no_lapses', 'sample', or 'marginalize'.", call. = FALSE)
-  }
+  .assert_true(noise_treatment %in% c("no_noise", "sample", "marginalize"), msg = "noise_treatment must be one of 'no_noise', 'sample', or 'marginalize'.")
+  .assert_true(lapse_treatment %in% c("no_lapses", "sample", "marginalize"), msg = "lapse_treatment must be one of 'no_lapses', 'sample', or 'marginalize'.")
 
   if (is.null(category_prior)) {
     category_prior <- rep(1 / n_repr, n_repr)
@@ -1558,7 +1724,6 @@ new_category_representation_template <- function(representations, metadata = lis
 }
 
 #' Construct a base representation object
-#' @keywords internal
 new_category_representation <- function(category_labels, cue_labels, category_likelihood_function = NULL, metadata = list()) {
   if (is.null(category_likelihood_function)) {
     category_likelihood_function <- function(...) stop("category_likelihood not implemented.", call. = FALSE)
@@ -1636,7 +1801,6 @@ new_category_representation <- function(category_labels, cue_labels, category_li
 }
 
 #' Construct a UVG representation object
-#' @keywords internal
 new_uvg_category_representation <- function(
     category_labels,
     cue_labels,
@@ -1664,7 +1828,6 @@ new_uvg_category_representation <- function(
 }
 
 #' Construct a NIX representation object
-#' @keywords internal
 new_nix_category_representation <- function(
     category_labels,
     cue_labels,
@@ -1704,7 +1867,6 @@ new_nix_category_representation <- function(
 }
 
 #' Construct a MUVG representation object
-#' @keywords internal
 new_muvg_category_representation <- function(
     category_labels,
     cue_labels,
@@ -1753,7 +1915,6 @@ new_muvg_category_representation <- function(
 }
 
 #' Construct a MNIX representation object
-#' @keywords internal
 new_mnix_category_representation <- function(
     category_labels,
     cue_labels,
@@ -1818,7 +1979,6 @@ new_mnix_category_representation <- function(
 }
 
 #' Construct a MVG representation object
-#' @keywords internal
 new_mvg_category_representation <- function(
     category_labels,
     cue_labels,
@@ -1849,7 +2009,6 @@ new_mvg_category_representation <- function(
 }
 
 #' Construct a NIW representation object
-#' @keywords internal
 new_niw_category_representation <- function(
     category_labels,
     cue_labels,
@@ -1889,7 +2048,6 @@ new_niw_category_representation <- function(
 }
 
 #' Construct an Exemplar representation object
-#' @keywords internal
 new_exemplar_category_representation <- function(
     category_labels,
     cue_labels,
@@ -2014,7 +2172,6 @@ new_exemplar_category_representation <- function(
 }
 
 #' Construct a UVG ideal observer object
-#' @keywords internal
 new_uvg_ideal_observer <- function(
     category_template = NULL,
     decision_rule = "sampling",
@@ -2041,7 +2198,6 @@ new_uvg_ideal_observer <- function(
 }
 
 #' Construct a NIX ideal adaptor object
-#' @keywords internal
 new_nix_ideal_adaptor <- function(
     category_template = NULL,
     decision_rule = "sampling",
@@ -2068,7 +2224,6 @@ new_nix_ideal_adaptor <- function(
 }
 
 #' Construct a MUVG ideal observer object
-#' @keywords internal
 new_muvg_ideal_observer <- function(
     category_template = NULL,
     decision_rule = "sampling",
@@ -2095,7 +2250,6 @@ new_muvg_ideal_observer <- function(
 }
 
 #' Construct a MNIX ideal adaptor object
-#' @keywords internal
 new_mnix_ideal_adaptor <- function(
     category_template = NULL,
     decision_rule = "sampling",
@@ -2122,7 +2276,6 @@ new_mnix_ideal_adaptor <- function(
 }
 
 #' Construct a MVG ideal observer object
-#' @keywords internal
 new_mvg_ideal_observer <- function(
     category_template = NULL,
     decision_rule = "sampling",
@@ -2149,7 +2302,6 @@ new_mvg_ideal_observer <- function(
 }
 
 #' Construct a NIW ideal adaptor object
-#' @keywords internal
 new_niw_ideal_adaptor <- function(
     category_template = NULL,
     decision_rule = "sampling",
@@ -2176,7 +2328,6 @@ new_niw_ideal_adaptor <- function(
 }
 
 #' Construct an Exemplar model object
-#' @keywords internal
 new_exemplar_model <- function(
     category_template = NULL,
     decision_rule = "sampling",
@@ -2202,14 +2353,6 @@ new_exemplar_model <- function(
   )
 }
 
-#' Family-specific model constructors are canonical in v1
-#' @keywords internal
-new_model <- function(...) {
-  stop(
-    "Use family-specific constructors in v1 (e.g., new_niw_ideal_adaptor_model_from_data()).",
-    call. = FALSE
-  )
-}
 
 #' Validate a model object
 #' @keywords internal
@@ -2220,9 +2363,8 @@ validate_object <- function(x) {
   TRUE
 }
 
-#' Safe validation check
-#' @keywords internal
-is_valid <- function(x) {
+# Safe validation check.
+.is_valid <- function(x) {
   tryCatch({
     validate_object(x)
     TRUE

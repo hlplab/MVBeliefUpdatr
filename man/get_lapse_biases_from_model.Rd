@@ -18,4 +18,7 @@ Legacy wrapper for get_lapse_bias.
 }
 \description{
 Deprecated. Use \code{\link{get_lapse_bias}} instead.
+
+Deprecated. Use get_lapse_bias() instead.
 }
+\keyword{internal}

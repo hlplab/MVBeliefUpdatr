@@ -16,7 +16,7 @@ NULL
 ss <- function(x, center = TRUE) {
   if (center) {
     # Benchmarked to be more efficient than x - 1 %*% t(1) %*% x
-    xm <- colMeans(x)
+    xm <- .colMeans(x)
     xm <- matrix(xm, nrow = nrow(x), ncol = length(xm), byrow = T)
     x <- x - xm
   }
@@ -54,9 +54,9 @@ ss <- function(x, center = TRUE) {
 #' @importFrom LaplacesDemon is.positive.semidefinite
 #' @export
 uss2css <- function(uss, n, mean) {
-  if (!is.numeric(uss)) stop2("uss must be a numeric matrix.")
-  if (is.scalar(uss)) uss <- matrix(uss, nrow = 1, ncol = 1)
-  if (!is.positive.semidefinite(uss)) stop2("uss must be positive definite.")
+  .assert_numeric(uss, msg = "uss must be a numeric matrix.")
+  if (.is_scalar(uss)) uss <- matrix(uss, nrow = 1, ncol = 1)
+  .assert_true(is.positive.semidefinite(uss), msg = "uss must be positive definite.")
   .assert_that(length(mean) == dim(uss)[[1]],
               msg = "uss and mean are not of compatible dimensions.")
 
@@ -76,9 +76,9 @@ uss2cov <- function(uss, n, mean) {
 #' @rdname uss2css
 #' @export
 css2uss <- function(css, n, mean) {
-  if (!is.numeric(css)) stop2("css must be a numeric matrix.")
-  if (is.scalar(css)) css <- matrix(css, nrow = 1, ncol = 1)
-  if (!is.positive.semidefinite(css)) stop2("css must be positive definite.")
+  .assert_numeric(css, msg = "css must be a numeric matrix.")
+  if (.is_scalar(css)) css <- matrix(css, nrow = 1, ncol = 1)
+  .assert_true(is.positive.semidefinite(css), msg = "css must be positive definite.")
   .assert_that(length(mean) == dim(css)[[1]],
               msg = "uss and mean are not of compatible dimensions.")
 
@@ -90,9 +90,9 @@ css2uss <- function(css, n, mean) {
 #' @rdname uss2css
 #' @export
 css2cov <- function(css, n) {
-  if (!is.numeric(css)) stop2("css must be a numeric matrix.")
-  if (is.scalar(css)) css <- matrix(css, nrow = 1, ncol = 1)
-  if (!is.positive.semidefinite(css)) stop2("css must be positive definite.")
+  .assert_numeric(css, msg = "css must be a numeric matrix.")
+  if (.is_scalar(css)) css <- matrix(css, nrow = 1, ncol = 1)
+  .assert_true(is.positive.semidefinite(css), msg = "css must be positive definite.")
 
   return(css / (n - 1))
 }
@@ -100,9 +100,9 @@ css2cov <- function(css, n) {
 #' @rdname uss2css
 #' @export
 cov2css <- function(cov, n) {
-  if (!is.numeric(cov)) stop2("cov must be a numeric matrix.")
-  if (is.scalar(cov)) cov <- matrix(cov, nrow = 1, ncol = 1)
-  if (!is.positive.semidefinite(cov)) stop2("cov must be positive definite.")
+  .assert_numeric(cov, msg = "cov must be a numeric matrix.")
+  if (.is_scalar(cov)) cov <- matrix(cov, nrow = 1, ncol = 1)
+  .assert_true(is.positive.semidefinite(cov), msg = "cov must be positive definite.")
 
   return(cov * (n - 1))
 }
@@ -168,10 +168,10 @@ make_named_square_matrix = function(x, names) {
 #'
 #' Combine a number of columns into a new column in which each cell is the vector of values from the original columns.
 #'
-#' @param data `tibble` or `data.frame`.
-#' @param cols Vector of characters with names of variables to combine.
-#' @param vector_col Name of new column of vectors.
-#' @param .keep See [dplyr::mutate].
+#' @param data A tibble or data.frame.
+#' @param cols A character vector of variable names to combine.
+#' @param vector_col Name of the new vector-valued column.
+#' @param .keep A tidyselect option passed to dplyr::mutate.
 #'
 #' @return Same as \code{data}.
 #'
@@ -288,10 +288,10 @@ get_sufficient_category_statistics <- function(
       drop_na(!!! syms(cues)) %>%
       summarise(
         x_N = length(!! sym(cues[1])),
-        x_mean = list(colMeans(cbind(!!! syms(cues)))),
+        x_mean = list(.colMeans(cbind(!!! syms(cues)))),
         x_uss = list(get_sum_of_uncentered_squares_from_df(cbind(!!! syms(cues)), verbose = verbose)),
         x_css = list(get_sum_of_centered_squares_from_df(cbind(!!! syms(cues)), verbose = verbose)),
-        x_cov = list(cov(cbind(!!! syms(cues)))))
+        x_cov = list(.cov(cbind(!!! syms(cues)))))
   }
   # deprecated as of Version: 0.0.1.0007
   # else {
@@ -363,9 +363,9 @@ transform_cues <- function(
                   is.logical(return.transformed.data), is.logical(return.transform.parameters),
                   is.logical(return.transform.function), is.logical(return.untransform.function)))
   if (pca) center <- T
-  .assert_that(is.null(transform.parameters) | is.list(transform.parameters))
+  .assert_optional_list(transform.parameters)
   old_data <- data
-  groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
+  groups <- if (length(dplyr::groups(data)) == 0) character() else dplyr::groups(data) %>% as.character()
 
   if (is.null(transform.parameters)) {
     transform.parameters = list()
@@ -486,7 +486,7 @@ untransform_cues <- function(
   .assert_that(!is.null(transform.parameters) & is.list(transform.parameters),
               msg = "Must provide transform parameters.")
   old_data <- data
-  groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
+  groups <- if (length(dplyr::groups(data)) == 0) character() else dplyr::groups(data) %>% as.character()
 
   # By default untransform all transformations available in transform object
   if (is.null(unpca)) unpca = !is.null(transform.parameters[["pca"]])
@@ -582,7 +582,6 @@ untransform_cues <- function(
 #'   all dimensions, and---like PCA whitening---decorrelates the data but it aims to maintain the original orientation
 #'   of the data as close as possible. If `cue` is a single cue, whitening reduces to standardization.
 #'   (default : "identity")
-#' @param return
 #'
 #' @return A list with the following elements:
 #'  * `type`: A character vector of length 1, containing the type of transformation.
@@ -607,9 +606,8 @@ get_affine_transform <- function(
     cues,
     type = c("identity", "center", "scale", "PCA whiten", "ZCA whiten")[1]
 ) {
-  .assert_data_frame_like(data)
   .assert_that(is.character(cues))
-  .assert_that(all(cues %in% colnames(data)), msg = "Some cues cannot be found in the data.")
+  .assert_data_contains_cols(data, cues)
 
   # groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
 
@@ -632,7 +630,7 @@ get_affine_transform <- function(
     } else if (type %in% c("standardize", "PCA whiten", "ZCA whiten")) {
       transform.parameters[["SCALE"]] <- 1 / sd(data[, 1])
     } else {
-      stop2("Unknown type.")
+      .stop("Unknown type.")
     }
   } else {
     if (type %in% c("identity", "center")) {
@@ -640,7 +638,7 @@ get_affine_transform <- function(
     } else if (type == "standardize") {
       transform.parameters[["SCALE"]] <- diag(1 / apply(data, 2, sd))
     } else if (type %in% c("PCA whiten", "ZCA whiten")) {
-      eig <- eigen(cov(data))
+      eig <- eigen(.cov(data))
       U <- eig$vectors
       D_inv_half <- diag(1 / sqrt(eig$values))
 
@@ -649,10 +647,10 @@ get_affine_transform <- function(
       } else if (type == "ZCA whiten") {
         transform.parameters[["SCALE"]] <- U %*% D_inv_half %*% t(U)
       } else {
-        stop2("Unknown whitening type.")
+        .stop("Unknown whitening type.")
       }
     } else {
-      stop2("Unknown type.")
+      .stop("Unknown type.")
     }
   }
 
@@ -672,7 +670,7 @@ get_affine_transform <- function(
       names(newdata) <- cues
       data <- newdata
     } else {
-      stop2("Unknown return type.")
+      .stop("Unknown return type.")
     }
 
     return(data)
@@ -737,7 +735,7 @@ get_affine_transform <- function(
       }
   }
 
-  return(nlist(type, transform.parameters, transform.function, untransform.function))
+  return(.nlist(type, transform.parameters, transform.function, untransform.function))
 }
 
 
@@ -819,7 +817,11 @@ transform_category_mean <- function(m, transform) {
   }
 
   if (!is.null(transform$SCALE)) {
-    m <- m %*% t(transform$SCALE)
+    if (is.matrix(transform$SCALE) || (is.array(transform$SCALE) && length(dim(transform$SCALE)) > 1L)) {
+      m <- m %*% t(transform$SCALE)
+    } else {
+      m <- as.numeric(m) * as.numeric(transform$SCALE)
+    }
   }
 
   # Make sure m is a vector and that any potentially available cue names are maintained
@@ -875,7 +877,11 @@ transform_category_cov <- function(S, transform) {
 
   # For affine transforms
   if (!is.null(transform$SCALE)) {
-    S <- transform$SCALE %*% S %*% t(transform$SCALE)
+    if (is.matrix(transform$SCALE) || (is.array(transform$SCALE) && length(dim(transform$SCALE)) > 1L)) {
+      S <- transform$SCALE %*% S %*% t(transform$SCALE)
+    } else {
+      S <- as.numeric(transform$SCALE)^2 * S
+    }
   }
 
   dimnames(S) <- S_names
@@ -898,14 +904,14 @@ untransform_category_cov <- function(S, transform) {
 
   # For affine transforms
   if (!is.null(transform$SCALE)) {
-    S <- transform$INV_SCALE %*% S %*% t(transform$INV_SCALE)
+    if (is.matrix(transform$INV_SCALE) || (is.array(transform$INV_SCALE) && length(dim(transform$INV_SCALE)) > 1L)) {
+      S <- transform$INV_SCALE %*% S %*% t(transform$INV_SCALE)
+    } else {
+      S <- as.numeric(transform$INV_SCALE)^2 * S
+    }
   }
 
   dimnames(S) <- S_names
 
   return(S)
 }
-
-
-
-

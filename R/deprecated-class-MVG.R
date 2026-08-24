@@ -13,13 +13,17 @@ get_expected_columns_for_MVG <- function() c("category", "mu", "Sigma")
 #' @return A logical.
 #'
 #' @seealso TBD
-#' @description Deprecated. Use the S7-based predicates and constructors instead.
-#' @deprecated Use the S7-based predicates and constructors instead.
+#' @description Deprecated. Use the S7-based validators and constructors for multivariate Gaussian (MVG) categories instead.
 #' @keywords internal
 #' @export
 is.MVG <- function(x, group = NULL, category = "category", is.long = T, verbose = F) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "is.MVG()",
+    details = "Use the S7-based validators and constructors for multivariate Gaussian (MVG) categories."
+  )
   name_of_x <- deparse(substitute(x))
-  .assert_that(is.flag(is.long))
+  .assert_that(.is_non_NA_scalar_logical(is.long))
 
   if (!is.data.frame(x)) {
     if (verbose) message("Object is not a data frame-like object.")

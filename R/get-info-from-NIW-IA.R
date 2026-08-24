@@ -27,12 +27,9 @@
 #'   }
 #'
 #' @seealso TBD
-#' @keywords TBD
 #'
 #' @rdname get_NIW_categorization_function
-#' @importFrom dplyr between
 #' @importFrom purrr map_lgl
-#' @importFrom assertthat .assert_that
 #' @export
 get_NIW_categorization_function <- function(
     ms, Ss, kappas, nus,
@@ -44,16 +41,16 @@ get_NIW_categorization_function <- function(
     lapse_treatment = if (lapse_rate > 0) "marginalize" else "no_lapses"
 ) {
   tolerance = MVBU_PROB_TOL
-  .assert_that(are_equal(length(ms), length(Ss)),
-              are_equal(length(ms), length(priors)),
-              are_equal(length(ms), length(kappas)),
-              are_equal(length(ms), length(nus)),
+  .assert_that(.is_equal(length(ms), length(Ss)),
+              .is_equal(length(ms), length(priors)),
+              .is_equal(length(ms), length(kappas)),
+              .is_equal(length(ms), length(nus)),
               msg = "The number of ms, Ss, kappas, nus, and priors must be identical.")
   n.cat = length(ms)
 
   .assert_that(all(between(priors, 0, 1), between(sum(priors), 1 - tolerance, 1 + tolerance)),
               msg = "priors must sum to 1.")
-  .assert_that(is_scalar_double(lapse_rate),
+  .assert_that(.is_non_NA_scalar_double(lapse_rate),
               msg = "lapse_rate must be a scalar.")
   .assert_that(between(lapse_rate, 0, 1))
   if (any(is.null(lapse_biases),
@@ -103,32 +100,6 @@ get_NIW_categorization_function <- function(
   return(f)
 }
 
-#' Get categorization from an NIW ideal adaptor
-#'
-#' Categorize a single observation based on an NIW ideal adaptor The decision rule can be specified to be either the
-#' criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
-#' Luce's choice rule.
-#'
-#' @param x A vector of observations.
-#' @param model An \code{\link[=is.NIW_ideal_adaptor]{NIW_ideal_adaptor}} object.
-#' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
-#' @param noise_treatment Determines whether and how multivariate Gaussian noise is considered during categorization.
-#' See \code{\link[=get_NIW_posterior_predictive]{get_NIW_posterior_predictive}}. (default: "sample" if decision_rule is
-#' "sample"; "marginalize" otherwise).
-#' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
-#' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
-#' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
-#' will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
-#' perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
-#' @param simplify Should the output be simplified, and just the label of the selected category be returned? This
-#' option is only available for the criterion and sampling decision rules. (default: `FALSE`)
-#'
-#' @return Either a tibble of observations with posterior probabilities for each category (in long format), or a
-#' character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
-#'
-#' @seealso TBD
-#' @keywords TBD
-
 # Deprecated after S7-migration
 
 #' Legacy wrapper for get_category_posterior_function.
@@ -136,10 +107,14 @@ get_NIW_categorization_function <- function(
 #' @description Deprecated. Use \code{\link{get_category_posterior_function}} instead.
 #' @rdname get_NIW_categorization_function
 #' @export
-#' @deprecated Use get_category_posterior_function() instead.
+#' @description Deprecated. Use get_category_posterior_function() instead.
 #' @keywords internal
 get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
-  warning("get_categorization_function_from_NIW_ideal_adaptor() is deprecated; use get_category_posterior_function() on an S7 cognitive model instead.", call. = FALSE)
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "get_categorization_function_from_NIW_ideal_adaptor()",
+    with = "get_category_posterior_function()"
+  )
   # Could be used later in a function that checks internal consistency of model
   # if (nunique(model$lapse_rate) > 1) stop2("Model has more than one unique lapse_rate.")
   #
@@ -166,7 +141,7 @@ get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
 #' @description Deprecated. Use \code{\link{categorize}} instead.
 #' @rdname get_categorization_from_model
 #' @export
-#' @deprecated Use categorize() instead.
+#' @description Deprecated. Use categorize() instead.
 #' @keywords internal
 get_categorization_from_NIW_ideal_adaptor <- function(
   x,
@@ -177,7 +152,11 @@ get_categorization_from_NIW_ideal_adaptor <- function(
   simplify = F,
   verbose = F
 ) {
-  warning("get_categorization_from_NIW_ideal_adaptor() is deprecated; use categorize() on an S7 cognitive model instead.", call. = FALSE)
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "get_categorization_from_NIW_ideal_adaptor()",
+    with = "categorize()"
+  )
   # TO DO: check dimensionality of x with regard to model.
   assert_NIW_ideal_adaptor(model, verbose = verbose)
   .assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
@@ -234,7 +213,7 @@ get_categorization_from_NIW_ideal_adaptor <- function(
         response = ifelse(posterior_probability == max(posterior_probability), 1, 0))
   } else if (decision_rule == "sampling") {
     posterior_probabilities %<>%
-      mutate(response = rmultinom(1, 1, posterior_probability) %>% as.vector())
+      mutate(response = .rmultinom(1, 1, posterior_probability) %>% as.vector())
   } else if (decision_rule == "proportional") {
     posterior_probabilities %<>%
       mutate(response = posterior_probability)

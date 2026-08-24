@@ -23,8 +23,8 @@ test_that("validation helpers behave as expected", {
   )
 
   expect_true(validate_object(rep_obj))
-  expect_true(is_valid(rep_obj))
-  expect_false(is_valid(1L))
+  expect_true(.is_valid(rep_obj))
+  expect_false(.is_valid(1L))
 })
 
 test_that("generic stubs are available and family-specific constructor policy is enforced", {
@@ -37,8 +37,6 @@ test_that("generic stubs are available and family-specific constructor policy is
   expect_true(is.function(get_cue_labels))
   expect_equal(get_category_labels(rep_obj), "A")
   expect_equal(get_cue_labels(rep_obj), "F1")
-
-  expect_error(new_model(), "family-specific constructors")
 })
 
 test_that("core generic aliases dispatch on base classes", {

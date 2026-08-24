@@ -53,9 +53,10 @@ reshape_incremental_design_into_unique_exposure_test_combinations <- function(
 
   exposure_blocks <- unique(as.character(data[[block]][data[[phase]] == "exposure"]))
   test_blocks <- unique(as.character(data[[block]][data[[phase]] == "test"]))
-  if (any(exposure_blocks %in% test_blocks)) {
-    stop2("The levels of the block variable in the exposure phase must not overlap with those in the test phase. Please check your data.")
-  }
+  .assert_true(
+    !any(exposure_blocks %in% test_blocks),
+    msg = "The levels of the block variable in the exposure phase must not overlap with those in the test phase. Please check your data."
+  )
 
   if (verbose && length(setdiff(unique(as.character(data[[phase]])), c("exposure", "test"))) > 0) {
     message(

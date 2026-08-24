@@ -218,7 +218,7 @@ plot_parameter_correlations.ideal_adaptor_stanfit <- function(
   untransform_cues = FALSE,
   category.colors = get_default_colors("category", categories)
 ) {
-  .assert_that(is.null(pars) || is.character(pars))
+  .assert_optional_character(pars)
 
   d.pars <-
     model %>%
@@ -381,7 +381,7 @@ plot_expected_categorization.ideal_adaptor_stanfit <- function(
   untransform_cues = FALSE
 ) {
   if (is.null(data.test)) data.test <- get_test_data(model, .from_staninput = T)
-  .assert_that(is.flag(summarize))
+  .assert_that(.is_non_NA_scalar_logical(summarize))
   .assert_that(is.null(confidence.intervals) |
                 all(is.numeric(confidence.intervals),
                     length(confidence.intervals) == 2,

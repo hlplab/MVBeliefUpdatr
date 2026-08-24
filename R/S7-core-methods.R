@@ -139,7 +139,7 @@ S7::method(get_parameters, Exemplar_CategoryRepresentation) <- function(x) {
 #' lapse biases can be read from older list/data-frame shapes without duplicating
 #' the same coercion logic in each accessor.
 #'
-#' @deprecated This compatibility helper is only needed while legacy
+#' @description Deprecated. This compatibility helper is only needed while legacy
 #'   list/data-frame inputs are still supported. It can be removed once the
 #'   S7 interface is the only supported representation.
 #' @keywords internal
@@ -184,7 +184,9 @@ S7::method(get_category_prior, list(MVBU_Object, S7::class_any)) <- function(x, 
   .mvbu_not_implemented("get_category_prior", class(x)[1])
 }
 
-#' @deprecated Legacy compatibility method for list/data-frame inputs; remove once
+#' @name get_category_prior
+#' @title Legacy compatibility method for category priors
+#' @description Deprecated. Legacy compatibility method for list/data-frame inputs; remove once
 #'   S7-only representations are required.
 #' @keywords internal
 S7::method(get_category_prior, list(S7::class_any, S7::class_any)) <- function(x, categories) {
@@ -231,7 +233,9 @@ S7::method(get_lapse_rate, MVBU_Object) <- function(x) {
   .mvbu_not_implemented("get_lapse_rate", class(x)[1])
 }
 
-#' @deprecated Legacy compatibility method for list/data-frame inputs; remove once
+#' @name get_lapse_rate
+#' @title Legacy compatibility method for lapse rates
+#' @description Deprecated. Legacy compatibility method for list/data-frame inputs; remove once
 #'   S7-only representations are required.
 #' @keywords internal
 S7::method(get_lapse_rate, S7::class_any) <- function(x) {
@@ -266,7 +270,9 @@ S7::method(get_lapse_bias, list(MVBU_Object, S7::class_any)) <- function(x, cate
   .mvbu_not_implemented("get_lapse_bias", class(x)[1])
 }
 
-#' @deprecated Legacy compatibility method for list/data-frame inputs; remove once
+#' @name get_lapse_bias
+#' @title Legacy compatibility method for lapse biases
+#' @description Deprecated. Legacy compatibility method for list/data-frame inputs; remove once
 #'   S7-only representations are required.
 #' @keywords internal
 S7::method(get_lapse_bias, list(S7::class_any, S7::class_any)) <- function(x, categories) {
@@ -323,7 +329,9 @@ S7::method(get_cue_labels, list(MVBU_CognitiveModel, S7::class_any)) <- function
   S7::method(get_cue_labels, list(MVBU_CategoryRepresentationTemplate, S7::class_any))(template, indices)
 }
 
-#' @deprecated Legacy compatibility method for list/data-frame inputs; remove once
+#' @name get_category_labels
+#' @title Legacy compatibility method for category labels
+#' @description Deprecated. Legacy compatibility method for list/data-frame inputs; remove once
 #'   S7-only representations are required.
 #' @keywords internal
 S7::method(get_category_labels, list(S7::class_any, S7::class_any)) <- function(x, indices) {

@@ -1,18 +1,12 @@
-#' @import curl
-#' @import remotes
-
-library(curl)
-if (has_internet()) remotes::install_github("joeystanley/joeysvowels")
-library(joeysvowels)
-data("idahoans")
+idahoans <- make_vowel_test_data()
 
 test_that("make MVG", {
-  expect_true(is_tibble(make_MVG_from_data(idahoans, category = "vowel", cues = c("F1"))))
-  expect_true(is_tibble(make_MVG_from_data(idahoans, category = "vowel", cues = c("F1", "F2"))))
-  expect_true(is_tibble(make_MVG_from_data(idahoans, category = "vowel", cues = c("F1", "F2", "F3"))))
+  expect_true(is_tibble(suppressMessages(make_MVG_from_data(idahoans, category = "vowel", cues = c("F1")))))
+  expect_true(is_tibble(suppressMessages(make_MVG_from_data(idahoans, category = "vowel", cues = c("F1", "F2")))))
+  expect_true(is_tibble(suppressMessages(make_MVG_from_data(idahoans, category = "vowel", cues = c("F1", "F2", "F3")))))
 })
 
-x <- make_MVG_from_data(idahoans, category = "vowel", cues = c("F1", "F2"))
+x <- suppressMessages(make_MVG_from_data(idahoans, category = "vowel", cues = c("F1", "F2")))
 test_that("recognize MVG", {
   expect_false(is.exemplars(x))
   expect_false(is.exemplar_model(x))
@@ -30,14 +24,14 @@ test_that("get category and cue information from MVG", {
 })
 
 test_that("lift MVG model", {
-  expect_true(is_tibble(lift_MVG_to_MVG_ideal_observer(x)))
+  expect_true(is_tibble(suppressMessages(lift_MVG_to_MVG_ideal_observer(x))))
 })
 
 test_that("make MVG model", {
-  expect_true(is_tibble(make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1"))))
-  expect_true(is_tibble(make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1", "F2"))))
-  expect_true(is_tibble(make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1", "F2", "F3"))))
-  expect_true(is_tibble(make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1"), prior = rep(1/11, 11), lapse_rate = .05, lapse_bias = rep(1/11, 11))))
+  expect_true(is_tibble(suppressMessages(make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1")))))
+  expect_true(is_tibble(suppressMessages(make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1", "F2")))))
+  expect_true(is_tibble(suppressMessages(make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1", "F2", "F3")))))
+  expect_true(is_tibble(suppressMessages(make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1"), prior = rep(1/11, 11), lapse_rate = .05, lapse_bias = rep(1/11, 11)))))
   expect_no_message(make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1")))
   expect_no_message(is_tibble(make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1"), prior = rep(1/11, 11), lapse_rate = .05, lapse_bias = rep(1/11, 11))))
   expect_no_message(is_tibble(make_MVG_ideal_observer_from_data(idahoans %>% filter(vowel %in% c("AA", "OW")), category = "vowel", cues = c("F1"), prior = c("AA" = 1/2, "OW" = 1/2), lapse_rate = .05, lapse_bias = c("AA" = 1/2, "OW" = 1/2))))
@@ -46,7 +40,7 @@ test_that("make MVG model", {
   expect_error(make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1", "F2"), lapse_bias = rep(0, 10)))
 })
 
-x <- make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1", "F2"))
+x <- suppressMessages(make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1", "F2")))
 test_that("recognize MVG model", {
   expect_false(is.exemplars(x))
   expect_false(is.exemplar_model(x))

@@ -37,17 +37,38 @@ make_ideal_adaptor_stanfit_input(
   verbose = FALSE
 )
 }
+\arguments{
+\item{exposure}{A data frame or tibble with exposure data. Each row is assumed to contain one observation.}
+
+\item{test}{A data frame or tibble with test data. Each row is assumed to contain one observation.}
+
+\item{cues}{Names of columns with cue values. These columns must be present in both \code{exposure} and \code{test}.}
+
+\item{category}{Name of the column in \code{exposure} that stores the category information. (default: "category")}
+
+\item{response}{Name of the column in \code{test} that stores the response information. (default: "response")}
+
+\item{group}{Name of the column in \code{exposure} and \code{test} that stores the grouping information. (default: "group")}
+
+\item{group.unique}{Optional grouping column used to collapse repeated exposure conditions before constructing the Stan input.}
+
+\item{control}{A list of control parameters for the constructor, typically produced by \code{control_staninput()}.}
+
+\item{stanmodel}{Character string naming the Stan model. Must be one of \code{NIX_ideal_adaptor}, \code{NIW_ideal_adaptor}, or \code{MNIX_ideal_adaptor}.}
+
+\item{verbose}{Should verbose output be provided? (default: \code{FALSE})}
+}
 \value{
 A list with components \code{staninput}, \code{data}, and \code{transform_information}.
 
 A list with components \code{staninput}, \code{data}, and \code{transform_information}.
 }
 \description{
-Deprecated. Use \code{\link{new_ideal_adaptor_staninput}} instead.
+Deprecated. Use \code{\link{new_ideal_adaptor_stanfit_input}} instead.
 
-Deprecated. Use \code{\link{new_ideal_adaptor_staninput}} instead.
+Deprecated. Use \code{\link{new_ideal_adaptor_stanfit_input}} instead.
 }
 \seealso{
-\code{\link{new_ideal_adaptor_staninput}}
+\code{\link{new_ideal_adaptor_stanfit_input}}
 }
 \keyword{internal}

@@ -3,9 +3,9 @@
 # Functions for incremental bias change model
 
 emp_logit <- function(p, n)  {
-  .assert_true(p >= 0, msg = "p must be non-negative.")
-  .assert_true(p <= 1, msg = "p must be less than or equal to 1.")
-  .assert_true(n >= 0, msg = "n must be non-negative.")
+  .assert_non_negative(p)
+  .assert_between(p, 0, 1)
+  .assert_non_negative(n)
   log(p + .5 / n) - log((1 - p) + .5 / n)
 }
 
@@ -71,8 +71,8 @@ update_model_decision_bias_by_one_observation <- function(
   # (since they are in non-standard evaluations)
   observationID <- response <- delta_logodds <- NULL
 
-  .assert_true(all(is_scalar_character(noise_treatment)), msg = "noise_treatment must be a single character string.")
-  .assert_true(is_scalar_character(lapse_treatment), msg = "lapse_treatment must be a single character string.")
+  .assert_character_scalar(noise_treatment)
+  .assert_character_scalar(lapse_treatment)
   if (any(noise_treatment != "no_noise", lapse_treatment != "no_lapses")) {
     # implement check that this is a model
   }
@@ -160,8 +160,8 @@ update_model_decision_bias_incrementally <- function(
   if (lapse_treatment == "marginalize")
     warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.\n", call. = FALSE)
 
-  .assert_flag(keep.update_history)
-  .assert_flag(keep.exposure_data)
+  .assert_non_NA_scalar_logical(keep.update_history)
+  .assert_non_NA_scalar_logical(keep.exposure_data)
   .assert_data_frame_like(exposure)
   .assert_that(exposure.category %in% names(exposure),
               msg = paste0("exposure.category variable not found: ", exposure.category, " must be a column in the exposure data."))

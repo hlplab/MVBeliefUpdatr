@@ -12,7 +12,7 @@ new_ideal_adaptor_stanfit_input(
   response = "response",
   group = "group",
   group.unique = NULL,
-  fix_parameters = NULL,
+  fixed_parameters = NULL,
   control = control_staninput(),
   stanmodel = "NIW_ideal_adaptor",
   verbose = FALSE
@@ -33,16 +33,16 @@ new_ideal_adaptor_stanfit_input(
 
 \item{group.unique}{Optional grouping column used to collapse repeated exposure conditions before constructing the Stan input.}
 
-\item{fix_parameters}{Optional list of fixed model parameters. Currently recognized are the following parameters:
-\code{lapse_rate} Optional scalar lapse-rate value. If provided, must be between 0 and 1.
-\code{mu_0} Optional prior mean(s) for the category means. The shape should match the model requirements.
-\code{Sigma_0} Optional prior covariance matrix or matrices for the category covariance. The shape should match the model requirements.}
-
 \item{control}{A list of control parameters for the constructor, typically produced by \code{control_staninput()}.}
 
 \item{stanmodel}{Character string naming the Stan model. Must be one of \code{NIX_ideal_adaptor}, \code{NIW_ideal_adaptor}, or \code{MNIX_ideal_adaptor}.}
 
 \item{verbose}{Should verbose output be provided? (default: \code{FALSE})}
+
+\item{fix_parameters}{Optional list of fixed model parameters. Currently recognized are the following parameters:
+\code{lapse_rate} Optional scalar lapse-rate value. If provided, must be between 0 and 1.
+\code{mu_0} Optional prior mean(s) for the category means. The shape should match the model requirements.
+\code{Sigma_0} Optional prior covariance matrix or matrices for the category covariance. The shape should match the model requirements.}
 }
 \value{
 An object of class \code{IdealAdaptorStanfitInput} containing the prepared data, typed Stan input, and transform metadata.

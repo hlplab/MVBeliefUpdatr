@@ -1,10 +1,16 @@
 NULL
 
-#' @description Deprecated. Use the S7-based predicates and constructors instead.
-#' @deprecated Use the S7-based predicates and constructors instead.
+#' @name get_class
+#' @title Deprecated class-dispatch helper
+#' @description Deprecated. Use the S7-based validators and constructors instead.
 #' @keywords internal
 #' @export
 get_class <- function(x) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "get_class()",
+    details = "Use the S7-based validators and constructors."
+  )
   if (is.NIW_ideal_adaptor(x)) {
     return("NIW_ideal_adaptor")
   }
@@ -30,8 +36,9 @@ get_class <- function(x) {
   "Unrecognized class"
 }
 
+#' @name get_expected_columns_for_model
+#' @title Deprecated expected-column helper
 #' @description Deprecated. Use the S7-based predicates and constructors instead.
-#' @deprecated Use the S7-based predicates and constructors instead.
 #' @keywords internal
 get_expected_columns_for_model <- function() {
   c("prior", "lapse_rate", "lapse_bias", "Sigma_noise")
@@ -62,10 +69,14 @@ get_expected_columns_for_model <- function() {
 #'
 #' @seealso TBD
 #' @description Deprecated. Use the S7-based predicates and constructors instead.
-#' @deprecated Use the S7-based predicates and constructors instead.
 #' @keywords internal
 #' @export
 is.MVBU_representation <- function(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "is.MVBU_representation()",
+    details = "Use the S7-based predicates and constructors."
+  )
   name_of_x <- deparse(substitute(x))
 
   if (!is.data.frame(x)) {
@@ -107,10 +118,14 @@ is.MVBU_representation <- function(x, group = NULL, verbose = F, tolerance = MVB
 #'
 #' @seealso TBD
 #' @description Deprecated. Use the S7-based predicates and constructors instead.
-#' @deprecated Use the S7-based predicates and constructors instead.
 #' @keywords internal
 #' @export
 is.MVBU_model <- function(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "is.MVBU_model()",
+    details = "Use the S7-based validators and constructors."
+  )
   name_of_x <- deparse(substitute(x))
 
   if (!is.data.frame(x)) {
@@ -197,10 +212,14 @@ is.MVBU_model <- function(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TO
 #' @param x An \code{\link{MVBeliefUpdatr_model}} object.
 #'
 #' @description Deprecated. Use the S7-based predicates and constructors instead.
-#' @deprecated Use the S7-based predicates and constructors instead.
 #' @keywords internal
 #' @export
 print.MVBU_model <- function(x, ...) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "print.MVBU_model()",
+    details = "Use the S7-based validators and constructors."
+  )
   .assert_that(is.MVBU_model(x), msg = "Expected an MVBU model.")
 
   if (get_cue_dimensionality_from_model(x) == 1L) {

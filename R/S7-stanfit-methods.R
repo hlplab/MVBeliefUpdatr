@@ -1,3 +1,4 @@
+#' @include asserts.R
 #' @include S7-core-classes.R
 #' @include S7-generics.R
 #' @include S7-transform-information.R
@@ -5,6 +6,22 @@
 #' @include S7-stanfit-input.R
 #' @include S7-stanfit.R
 NULL
+
+get_ideal_adaptor_stanfit_constructor <- function(staninput = NULL) {
+  if (!is.null(staninput)) {
+    if (S7::S7_inherits(staninput, NIX_IdealAdaptorStaninput)) {
+      NIX_IdealAdaptorStanfit
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptorStaninput)) {
+      MNIX_IdealAdaptorStanfit
+    } else if (S7::S7_inherits(staninput, NIW_IdealAdaptorStaninput)) {
+      NIW_IdealAdaptorStanfit
+    } else {
+      IdealAdaptorStanfit
+    }
+  } else {
+    IdealAdaptorStanfit
+  }
+}
 
 S7::method(get_stanfit, S7::class_any) <- function(x) {
   stop("x must be an IdealAdaptorStanfit object.", call. = FALSE)

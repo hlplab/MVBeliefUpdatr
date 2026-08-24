@@ -1,3 +1,6 @@
 ^MVBeliefUpdatr\.Rproj$
 ^\.Rproj\.user$
 ^codecov\.yml$
+^tests/benchmarking\.R$
+docs/_some code for future classes.R
+inst/stan/DRAFT_full_cholesky for mvg_conj_sufficient_stats_lapse.txt

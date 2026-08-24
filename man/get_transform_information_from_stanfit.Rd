@@ -8,4 +8,7 @@ get_transform_information_from_stanfit(...)
 }
 \description{
 Deprecated. Use \code{\link{get_transform_information.ideal_adaptor_stanfit}} instead.
+
+Deprecated. Use get_transform_information.ideal_adaptor_stanfit() instead.
 }
+\keyword{internal}

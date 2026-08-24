@@ -165,7 +165,7 @@ example_data <- function(
     ...,
     Ns = 20
 ) {
-  .assert_that(is_scalar_character(model_type))
+  .assert_non_NA_scalar_character(model_type)
   .assert_that(model_type %in% c("exemplar_model", "MVG_ideal_observer", "NIX_ideal_adaptor", "MNIX_ideal_adaptor", "NIW_ideal_adaptor"),
               msg = paste0("model_type must be one of: exemplar_model, MVG_ideal_observer, NIX_ideal_adaptor, MNIX_ideal_adaptor, NIW_ideal_adaptor."))
 
@@ -212,7 +212,6 @@ make_exemplars_from_data <- function(
     sim_function = NULL,
     verbose = F
 ) {
-  .assert_data_frame_like(data)
   .assert_that(all(is.null(group) | all(is.character(group) | is_symbol(group))))
   .assert_that(all(is.character(category) | is_symbol(category), length(category) == 1))
   .assert_that(all(is.character(cues) | is_symbol(cues), length(cues) > 0))
@@ -224,10 +223,8 @@ make_exemplars_from_data <- function(
     cues <- syms(cues)
   }
 
-  .assert_that(as_name(category) %in% names(data),
-              msg = paste0("Category variable (", as_name(category), ") not found in data."))
-  .assert_that(all(cue_names %in% names(data)),
-              msg = paste0("Some cues not found in data: ", paste(setdiff(cue_names, intersect(cue_names, names(data))), collapse = ", ")))
+  .assert_data_contains_cols(data, as_name(category))
+  .assert_data_contains_cols(data, cue_names)
 
   if (verbose) if (!is.null(group))
     message(
@@ -365,10 +362,8 @@ make_MVG_from_data = function(
     cues <- syms(cues)
   }
 
-  .assert_that(as_name(category) %in% names(data),
-              msg = paste0("Category variable (", as_name(category), ") not found in data."))
-  .assert_that(all(cue_names %in% names(data)),
-              msg = paste0("Some cues not found in data: ", paste(setdiff(cue_names, intersect(cue_names, names(data))), collapse = ", ")))
+  .assert_data_contains_cols(data, as_name(category))
+  .assert_data_contains_cols(data, cue_names)
 
   if (verbose) if (!is.null(group))
     message(
@@ -588,7 +583,7 @@ lift_likelihood_to_model <- function(
     lapse_rate <- 0
   }
 
-  .assert_that(is.null(Sigma_noise) | is.matrix(Sigma_noise),
+  .assert_optional_matrix(Sigma_noise,
               msg = "Sigma_noise must be NULL or a matrix (noise is independent of, and thus constant across, categories).")
   if (!is.null(Sigma_noise)) {
     .assert_that(all(dim(Sigma_noise) == rep(get_cue_dimensionality_from_model(x), 2)),
