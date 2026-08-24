@@ -273,14 +273,14 @@ get_exposure_category_statistic.ideal_adaptor_stanfit <- function(
       # for all types of models (or all stats), rather than storing different stats for each model.
       # The stancode could then transform the input data to the correct quantities. This would make
       # the handling here a lot easier.
-      stop2("Extraction of uss, css, or cov not yet implemented for NIX ideal adaptor stanfit.")
+      .stop("Extraction of uss, css, or cov not yet implemented for NIX ideal adaptor stanfit.")
     } else if (stanmodelname == "NIW_ideal_adaptor") {
       s <- staninput$x_ss_exposure
     } else if (stanmodelname == "MNIX_ideal_adaptor") {
       s <- staninput$x_ss_exposure
-      stop2("Extraction of uss, css, or cov not yet implemented for MNIX ideal adaptor stanfit.")
+      .stop("Extraction of uss, css, or cov not yet implemented for MNIX ideal adaptor stanfit.")
     } else {
-      stop2("Unrecognized stanmodel. No method available to extract category variance.")
+      .stop("Unrecognized stanmodel. No method available to extract category variance.")
     }
 
     d <- dim(s)
@@ -541,35 +541,47 @@ get_cue_levels <- function(x, ...) {
 
 #' @rdname get_staninput_variable_levels
 #' @export
-get_staninput_variable_levels.ideal_adaptor_stanfit <- function(x, variable = c("category", "group", "cue"), indices = NULL) {
+get_staninput_variable_levels.IdealAdaptorStanfit <- function(x, variable = c("category", "group", "cue"), indices = NULL) {
   .assert_that(is.null(indices) | all(indices > 0))
   f <- get_constructor(x, variable)
+
+  if (is.null(f)) {
+    return(NULL)
+  }
 
   if (is.null(indices)) return(levels(f(c()))) else return(f(indices))
 }
 
-#' @rdname get_staninput_variable_levels
-#' @export
-get_category_levels.ideal_adaptor_stanfit <- function(x, indices = NULL) {
-  return(get_staninput_variable_levels(x, "category", indices))
-}
+get_staninput_variable_levels.ideal_adaptor_stanfit <- get_staninput_variable_levels.IdealAdaptorStanfit
 
 #' @rdname get_staninput_variable_levels
 #' @export
-get_group_levels.ideal_adaptor_stanfit <- function(x, indices = NULL, include_prior = F) {
+get_category_levels.IdealAdaptorStanfit <- function(x, indices = NULL) {
+  return(get_staninput_variable_levels(x, "category", indices))
+}
+
+get_category_levels.ideal_adaptor_stanfit <- get_category_levels.IdealAdaptorStanfit
+
+#' @rdname get_staninput_variable_levels
+#' @export
+get_group_levels.IdealAdaptorStanfit <- function(x, indices = NULL, include_prior = F) {
   groups <- get_staninput_variable_levels(x, "group", indices)
   if (include_prior) groups <- append("prior", groups)
 
   return(groups)
 }
 
+get_group_levels.ideal_adaptor_stanfit <- get_group_levels.IdealAdaptorStanfit
+
 #' @rdname get_staninput_variable_levels
 #' @export
-get_cue_levels.ideal_adaptor_stanfit <- function(x, indices = NULL) {
+get_cue_levels.IdealAdaptorStanfit <- function(x, indices = NULL) {
   cues <- get_staninput_variable_levels(x, "cue", indices)
 
   return(cues)
 }
+
+get_cue_levels.ideal_adaptor_stanfit <- get_cue_levels.IdealAdaptorStanfit
 
 
 #' Get tidybayes constructor from an ideal adaptor stanfit.
@@ -590,22 +602,34 @@ get_cue_levels.ideal_adaptor_stanfit <- function(x, indices = NULL) {
 #' @export
 #' @importFrom rlang sym
 get_constructor <- function(x, variable = NULL) {
-  .assert_that(class(x) %in% c("stanfit", "ideal_adaptor_stanfit"))
-  if (class(x) == "ideal_adaptor_stanfit") stanfit <- get_stanfit(x) else stanfit <- x
-
   available_constructors <- c("category", "group", "cue", "cue2")
-  if (is.null(variable)) return(attr(stanfit, "tidybayes_constructors"))
+
+  if (inherits(x, "stanfit")) {
+    stanfit <- x
+  } else if (is.ideal_adaptor_stanfit(x) || S7::S7_inherits(x, MVBU_Stanfit)) {
+    stanfit <- get_stanfit(x)
+  } else {
+    .assert_that(FALSE, msg = "x must be a stanfit or ideal adaptor fit object")
+  }
+
+  constructors <- if (!is.null(stanfit) && !is.null(attr(stanfit, "tidybayes_constructors"))) {
+    attr(stanfit, "tidybayes_constructors")
+  } else {
+    NULL
+  }
+
+  if (is.null(variable)) return(constructors)
 
   .assert_that(variable %in% available_constructors,
               msg = paste0("Variable name must be one of ", paste(available_constructors, collapse = "or"), "."))
 
-  if (is.null(attr(stanfit, "tidybayes_constructors")[[rlang::sym(variable)]])) {
-    warning(paste0(class(fit), " object ", deparse(substitute(fit)), " does not contain type information about the variable ", variable,
+  if (is.null(constructors[[variable]])) {
+    warning(paste0(class(x), " object ", deparse(substitute(x)), " does not contain type information about the variable ", variable,
                    ". Applying recover_types() to the object might fix this."))
     return(NULL)
   }
 
-  f <- attr(stanfit, "tidybayes_constructors")[[rlang::sym(variable)]]
+  f <- constructors[[variable]]
 
   return(f)
 }
@@ -834,8 +858,6 @@ get_categorization_function_from_stanfit_draws <- function(x, ...) {
 #' @keywords TBD
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
 #'
-#'
-#' @importFrom assertthat .assert_that
 #' @importFrom tidyselect ends_with
 #' @export
 get_draws <- function(fit, ...) {
@@ -881,12 +903,12 @@ get_draws.ideal_adaptor_stanfit <- function(
               msg = "which must be one of 'prior', 'posterior', or 'both'.")
   ##### END OF SPECIAL HANDLING
 
-  .assert_that(any(is.null(ndraws), is.count(ndraws)),
+  .assert_that(any(is.null(ndraws), .is_non_NA_scalar_count(ndraws)),
               msg = "If not NULL, ndraw must be a count.")
   .assert_that(any(is.null(ndraws), !is.null(seed)),
               msg = "If not ndraws is not NULL, seed must be specified.")
-  .assert_that(is.flag(summarize))
-  .assert_that(is.flag(wide))
+  .assert_that(.is_non_NA_scalar_logical(summarize))
+  .assert_that(.is_non_NA_scalar_logical(wide))
   .assert_that(!all(wide, !nest),
               msg = "Wide format is currently not implemented without nesting.")
 
@@ -969,7 +991,7 @@ get_draws.ideal_adaptor_stanfit <- function(
         across(
           c(kappa, nu, m, S, lapse_rate),
           ~ all(!is.na(.x) & !is.nan(.x) & !is.infinite(.x)))) %>%
-      { if (!all(.)) stop2("Some draws are not well-formed (NA, NaN, infinite values). This likely means that there was an issue during the fitting of the stanfit object") }
+      { if (!all(.)) .stop("Some draws are not well-formed (NA, NaN, infinite values). This likely means that there was an issue during the fitting of the stanfit object") }
 
     if (untransform_cues) {
       d.pars %<>%

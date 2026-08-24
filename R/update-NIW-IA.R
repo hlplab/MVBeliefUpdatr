@@ -134,16 +134,17 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
   response <- NULL
 
   # TO DO: check match between dimensionality of belief and of input, check that input category is part of belief, etc.
-  .assert_that(all(is_scalar_character(noise_treatment)), is_scalar_character(lapse_treatment))
+  .assert_character_scalar(noise_treatment)
+  .assert_character_scalar(lapse_treatment)
+  .assert_one_of(noise_treatment, c("no_noise", "sample", "marginalize"), msg = "noise_treatment must be one of no_noise, sample, or marginalize.")
+  .assert_one_of(lapse_treatment, c("no_lapses", "sample", "marginalize"), msg = "lapse_treatment must be one of no_lapses, sample, or marginalize.")
   if (any(noise_treatment != "no_noise", lapse_treatment != "no_lapses"))
     assert_NIW_ideal_adaptor(prior_model, verbose = verbose) else assert_NIW_belief(prior_model, verbose = verbose)
 
-  .assert_that(all(is.scalar(x_N), is.numeric(x_N)), msg = "x_N must be a scalar numeric.")
-  .assert_that(x_N >= 0, msg = paste("x_N is", x_N, "but must be >= 0."))
+  .assert_numeric_scalar(x_N)
+  .assert_non_negative(x_N)
 
   # Handle lapses
-  .assert_that(lapse_treatment %in% c("no_lapses", "sample", "marginalize"),
-              msg = paste(lapse_treatment, "is not an acceptable lapse_treatment. See details section of help page."))
   if (lapse_treatment == "sample") {
     x_N <- rbinom(1, x_N, 1 - get_lapse_rate_from_model(prior_model))
   } else if (lapse_treatment == "marginalize") {
@@ -187,7 +188,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
               decision_rule = "proportional", # perhaps decision_rule = "sampling" could be used here with simplify = T, pre-empting the remaining rows?
               simplify = F) %>%
             pull(response) %>%
-            rmultinom(1, x_N, .) %>%
+            .rmultinom(1, x_N, .) %>%
             as.list()
         }
 
@@ -199,8 +200,8 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(
                 msg = "If noise_treatment is 'sample', x_N must be a positive integer.")
     if (verbose) message("Sampling perceptual noise and adding it to each observation")
     warning("Updating while including noise_treatment = sample has not yet been thoroughly tested. If noise is included in perception but not in the prior beliefs, it should be discounted during the updating. This implementation has not been tested. You might want to construct the model while adding the perceptual noise to the category beliefs and use categorization that does not add the noise again (noise_treatment = 'no_noise').")
-    x <- rmvnorm(n = x_N, sigma = Sigma_noise)
-    x_mean <- x_mean + colMeans(x)
+    x <- .rmvnorm(n = x_N, sigma = Sigma_noise)
+    x_mean <- x_mean + .colMeans(x)
     # Add sampled stimulus-level noise and subtract expected noise
     if (x_N > 1) x_SS <- x_SS + (ss(x, center = T) - cov2css(Sigma_noise, n = x_N))
     # Handle (hopefuly very rare) case where subtraction results in negative diagonal values
@@ -317,8 +318,8 @@ update_NIW_ideal_adaptor_incrementally <- function(
   if (lapse_treatment == "marginalize")
     warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.", call. = FALSE)
 
-  .assert_flag(keep.update_history)
-  .assert_flag(keep.exposure_data)
+  .assert_non_NA_scalar_logical(keep.update_history)
+  .assert_non_NA_scalar_logical(keep.exposure_data)
   .assert_data_frame_like(exposure)
   .assert_that(exposure.category %in% names(exposure),
               msg = paste0("exposure.category variable not found: ", exposure.category, " must be a column in the exposure data."))
@@ -400,7 +401,7 @@ update_NIW_ideal_adaptor_batch <- function(
     group_by(!! sym(exposure.category)) %>%
     summarise(
       x_N = length(!! sym(exposure.category)),
-      x_mean = list(colMeans(cbind(!!! syms(exposure.cues)))),
+      x_mean = list(.colMeans(cbind(!!! syms(exposure.cues)))),
       x_SS = list(get_sum_of_centered_squares_from_df(cbind(!!! syms(exposure.cues)), verbose = verbose)))
 
   categories = unique(exposure[[exposure.category]])

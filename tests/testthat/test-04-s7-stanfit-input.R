@@ -1,3 +1,45 @@
+test_that("new_ideal_adaptor_stanfit_input rejects missing or empty cues", {
+  data <- build_shifted_prior_fit_example(
+    cues = c("VOT", "f0_semitones"),
+    n_exposure_per_condition = 20L,
+    n_test_per_condition = 10L,
+    seed = 321L
+  )
+
+  expect_error(
+    do.call(
+      new_ideal_adaptor_stanfit_input,
+      list(
+        exposure = data$exposure,
+        test = data$test,
+        category = "category",
+        response = "response",
+        group = "group",
+        group.unique = "Condition",
+        control = control_staninput(transform_type = "identity"),
+        stanmodel = "MNIX_ideal_adaptor"
+      )
+    ),
+    regexp = "Expected x to be a non-NA character",
+    fixed = TRUE
+  )
+
+  expect_error(
+    new_ideal_adaptor_stanfit_input(
+      exposure = data$exposure,
+      test = data$test,
+      cues = character(0),
+      category = "category",
+      response = "response",
+      group = "group",
+      group.unique = "Condition",
+      control = control_staninput(transform_type = "identity"),
+      stanmodel = "MNIX_ideal_adaptor"
+    ),
+    regexp = "Expected x to be a non-NA character",
+    fixed = TRUE
+  )
+})
 
 test_that("new_ideal_adaptor_stanfit_input returns a structured fit-input object", {
   exposure <- data.frame(
@@ -146,48 +188,134 @@ test_that("fixed_parameters are validated against the category labels", {
   )
 })
 
-test_that("fixed_parameters produce the expected arrays for each family", {
-  data <- make_minimal_staninput_data(cues = c("cue1", "cue2"))
+test_that("fixed_parameters support single, pairwise, and full combinations across Stan families", {
+  one_cue_data <- make_minimal_staninput_data(cues = "cue1")
+  two_cue_data <- make_minimal_staninput_data(cues = c("cue1", "cue2"))
 
-  nix_res <- new_ideal_adaptor_stanfit_input(
-    exposure = data$exposure,
-    test = data$test,
-    cues = "cue1",
-    category = "category",
-    response = "response",
-    group = "group",
-    control = control_staninput(transform_type = "identity"),
-    stanmodel = "NIX_ideal_adaptor",
-    fixed_parameters = list(
-      mu_0 = list("A1" = 0.1, "A2" = 0.1),
-      Sigma_0 = list("A1" = 0.1, "A2" = 0.1)
-    )
+  nix_fixed_sets <- list(
+    list(lapse_rate = 0.1),
+    list(mu_0 = list("A1" = 0.1, "A2" = 0.2)),
+    list(Sigma_0 = list("A1" = matrix(0.1, nrow = 1, ncol = 1), "A2" = matrix(0.2, nrow = 1, ncol = 1))),
+    list(lapse_rate = 0.1, mu_0 = list("A1" = 0.1, "A2" = 0.2)),
+    list(lapse_rate = 0.1, Sigma_0 = list("A1" = matrix(0.1, nrow = 1, ncol = 1), "A2" = matrix(0.2, nrow = 1, ncol = 1))),
+    list(mu_0 = list("A1" = 0.1, "A2" = 0.2), Sigma_0 = list("A1" = matrix(0.1, nrow = 1, ncol = 1), "A2" = matrix(0.2, nrow = 1, ncol = 1))),
+    list(lapse_rate = 0.1, mu_0 = list("A1" = 0.1, "A2" = 0.2), Sigma_0 = list("A1" = matrix(0.1, nrow = 1, ncol = 1), "A2" = matrix(0.2, nrow = 1, ncol = 1)))
   )
 
-  expect_equal(length(nix_res@staninput@values$mu_0_data), 2)
-  expect_equal(length(nix_res@staninput@values$Sigma_0_data), 2)
-
-  niw_res <- new_ideal_adaptor_stanfit_input(
-    exposure = data$exposure,
-    test = data$test,
-    cues = c("cue1", "cue2"),
-    category = "category",
-    response = "response",
-    group = "group",
-    control = control_staninput(transform_type = "identity"),
-    stanmodel = "NIW_ideal_adaptor",
-    fixed_parameters = list(
-      mu_0 = list("A1" = c(0.1, 0.2), "A2" = c(0.1, 0.2)),
-      Sigma_0 = list("A1" = diag(2), "A2" = diag(2))
-    )
+  mnix_niw_fixed_sets <- list(
+    list(lapse_rate = 0.1),
+    list(mu_0 = list("A1" = c(0.1, 0.2), "A2" = c(0.2, 0.3))),
+    list(Sigma_0 = list("A1" = diag(2), "A2" = diag(2))),
+    list(lapse_rate = 0.1, mu_0 = list("A1" = c(0.1, 0.2), "A2" = c(0.2, 0.3))),
+    list(lapse_rate = 0.1, Sigma_0 = list("A1" = diag(2), "A2" = diag(2))),
+    list(mu_0 = list("A1" = c(0.1, 0.2), "A2" = c(0.2, 0.3)), Sigma_0 = list("A1" = diag(2), "A2" = diag(2))),
+    list(lapse_rate = 0.1, mu_0 = list("A1" = c(0.1, 0.2), "A2" = c(0.2, 0.3)), Sigma_0 = list("A1" = diag(2), "A2" = diag(2)))
   )
 
-  expect_equal(dim(niw_res@staninput@values$mu_0_data), c(2, 2))
-  expect_equal(dim(niw_res@staninput@values$Sigma_0_data), c(2, 2, 2))
+  for (fixed_parameters in nix_fixed_sets) {
+    nix_res <- new_ideal_adaptor_stanfit_input(
+      exposure = one_cue_data$exposure,
+      test = one_cue_data$test,
+      cues = "cue1",
+      category = "category",
+      response = "response",
+      group = "group",
+      control = control_staninput(transform_type = "identity"),
+      stanmodel = "NIX_ideal_adaptor",
+      fixed_parameters = fixed_parameters
+    )
+
+    expect_true(S7::S7_inherits(nix_res, IdealAdaptorStanfitInput))
+    expect_equal(nix_res@staninput@values$lapse_rate_known, if (is.null(fixed_parameters$lapse_rate)) 0 else 1)
+    expect_equal(nix_res@staninput@values$mu_0_known, if (is.null(fixed_parameters$mu_0)) 0 else 1)
+    expect_equal(nix_res@staninput@values$Sigma_0_known, if (is.null(fixed_parameters$Sigma_0)) 0 else 1)
+  }
+
+  for (fixed_parameters in mnix_niw_fixed_sets) {
+    mnix_res <- new_ideal_adaptor_stanfit_input(
+      exposure = two_cue_data$exposure,
+      test = two_cue_data$test,
+      cues = c("cue1", "cue2"),
+      category = "category",
+      response = "response",
+      group = "group",
+      control = control_staninput(transform_type = "identity"),
+      stanmodel = "MNIX_ideal_adaptor",
+      fixed_parameters = fixed_parameters
+    )
+
+    expect_true(S7::S7_inherits(mnix_res, IdealAdaptorStanfitInput))
+    expect_equal(mnix_res@staninput@values$lapse_rate_known, if (is.null(fixed_parameters$lapse_rate)) 0 else 1)
+    expect_equal(mnix_res@staninput@values$mu_0_known, if (is.null(fixed_parameters$mu_0)) 0 else 1)
+    expect_equal(mnix_res@staninput@values$Sigma_0_known, if (is.null(fixed_parameters$Sigma_0)) 0 else 1)
+
+    niw_res <- new_ideal_adaptor_stanfit_input(
+      exposure = two_cue_data$exposure,
+      test = two_cue_data$test,
+      cues = c("cue1", "cue2"),
+      category = "category",
+      response = "response",
+      group = "group",
+      control = control_staninput(transform_type = "identity"),
+      stanmodel = "NIW_ideal_adaptor",
+      fixed_parameters = fixed_parameters
+    )
+
+    expect_true(S7::S7_inherits(niw_res, IdealAdaptorStanfitInput))
+    expect_equal(niw_res@staninput@values$lapse_rate_known, if (is.null(fixed_parameters$lapse_rate)) 0 else 1)
+    expect_equal(niw_res@staninput@values$mu_0_known, if (is.null(fixed_parameters$mu_0)) 0 else 1)
+    expect_equal(niw_res@staninput@values$Sigma_0_known, if (is.null(fixed_parameters$Sigma_0)) 0 else 1)
+  }
 })
 
+test_that("fixed_parameters reject invalid dimensionality or incomplete information", {
+  two_cue_data <- make_minimal_staninput_data(cues = c("cue1", "cue2"))
 
+  expect_error(
+    new_ideal_adaptor_stanfit_input(
+      exposure = two_cue_data$exposure,
+      test = two_cue_data$test,
+      cues = c("cue1", "cue2"),
+      category = "category",
+      response = "response",
+      group = "group",
+      control = control_staninput(transform_type = "identity"),
+      stanmodel = "NIW_ideal_adaptor",
+      fixed_parameters = list(mu_0 = list("A1" = 0.1, "A2" = c(0.1, 0.2, 0.3)))
+    ),
+    "mu_0 must be a named list with each entry a numeric vector of length 2"
+  )
 
+  expect_error(
+    new_ideal_adaptor_stanfit_input(
+      exposure = two_cue_data$exposure,
+      test = two_cue_data$test,
+      cues = c("cue1", "cue2"),
+      category = "category",
+      response = "response",
+      group = "group",
+      control = control_staninput(transform_type = "identity"),
+      stanmodel = "NIW_ideal_adaptor",
+      fixed_parameters = list(Sigma_0 = list("A1" = diag(1), "A2" = diag(2)))
+    ),
+    "Sigma_0 must be a named list with each entry a square matrix of dimension 2 x 2"
+  )
+
+  expect_error(
+    new_ideal_adaptor_stanfit_input(
+      exposure = two_cue_data$exposure,
+      test = two_cue_data$test,
+      cues = c("cue1", "cue2"),
+      category = "category",
+      response = "response",
+      group = "group",
+      control = control_staninput(transform_type = "identity"),
+      stanmodel = "MNIX_ideal_adaptor",
+      fixed_parameters = list(mu_0 = list("A1" = c(0.1, 0.2), "A2" = c(0.1, 0.2), "A3" = c(0.1, 0.2)))
+    ),
+    "mu_0 must be a named list with names matching the categories present in the exposure and test data"
+  )
+})
 
 test_that("stanmodel compatibility checks enforce the matching Stan program", {
   for (n_obs_exposure in c(0L, 1L, 3L)) {

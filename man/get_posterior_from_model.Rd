@@ -19,5 +19,10 @@ get_posterior_from_model(model, ...)
 \description{
 Deprecated. Use \code{\link{posterior}} instead.
 
+Deprecated. Use posterior() instead.
+
 Deprecated. Use \code{\link{posterior}} instead.
+
+Deprecated. Use posterior() instead.
 }
+\keyword{internal}

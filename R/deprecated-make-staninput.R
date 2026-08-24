@@ -1,9 +1,9 @@
 #' Legacy wrapper for Stan input construction.
 #'
-#' @description Deprecated. Use \code{\link{new_ideal_adaptor_staninput}} instead.
-#' @inheritParams new_ideal_adaptor_staninput
+#' @description Deprecated. Use \code{\link{new_ideal_adaptor_stanfit_input}} instead.
+#' @inheritParams new_ideal_adaptor_stanfit_input
 #' @return A list with components \code{staninput}, \code{data}, and \code{transform_information}.
-#' @seealso \code{\link{new_ideal_adaptor_staninput}}
+#' @seealso \code{\link{new_ideal_adaptor_stanfit_input}}
 #' @keywords internal
 #' @export
 make_staninput <- function(
@@ -15,7 +15,11 @@ make_staninput <- function(
     stanmodel = "NIW_ideal_adaptor",
     verbose = FALSE
 ) {
-  .Deprecated("new_ideal_adaptor_stanfit_input")
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "make_staninput()",
+    with = "new_ideal_adaptor_stanfit_input()"
+  )
   fixed_parameters <- list(
     lapse_rate = lapse_rate,
     mu_0 = mu_0,
@@ -38,10 +42,10 @@ make_staninput <- function(
 
 #' Legacy wrapper for Stan input construction.
 #'
-#' @description Deprecated. Use \code{\link{new_ideal_adaptor_staninput}} instead.
-#' @inheritParams new_ideal_adaptor_staninput
+#' @description Deprecated. Use \code{\link{new_ideal_adaptor_stanfit_input}} instead.
+#' @inheritParams new_ideal_adaptor_stanfit_input
 #' @return A list with components \code{staninput}, \code{data}, and \code{transform_information}.
-#' @seealso \code{\link{new_ideal_adaptor_staninput}}
+#' @seealso \code{\link{new_ideal_adaptor_stanfit_input}}
 #' @keywords internal
 #' @rdname make_staninput
 #' @export
@@ -54,7 +58,11 @@ make_ideal_adaptor_stanfit_input <- function(
     stanmodel = "NIW_ideal_adaptor",
     verbose = FALSE
 ) {
-  .Deprecated("new_ideal_adaptor_stanfit_input")
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "make_ideal_adaptor_stanfit_input()",
+    with = "new_ideal_adaptor_stanfit_input()"
+  )
   fixed_parameters <- list(
     lapse_rate = lapse_rate,
     mu_0 = mu_0,

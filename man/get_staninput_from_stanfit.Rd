@@ -8,4 +8,7 @@ get_staninput_from_stanfit(...)
 }
 \description{
 Deprecated. Use \code{\link{get_staninput.ideal_adaptor_stanfit}} instead.
+
+Deprecated. Use get_staninput.ideal_adaptor_stanfit() instead.
 }
+\keyword{internal}

@@ -18,4 +18,7 @@ Legacy wrapper for get_category_prior.
 }
 \description{
 Deprecated. Use \code{\link{get_category_prior}} instead.
+
+Deprecated. Use get_category_prior() instead.
 }
+\keyword{internal}

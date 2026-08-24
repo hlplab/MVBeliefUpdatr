@@ -95,7 +95,7 @@ control_params <- function(x, ...) {
 control_params.ideal_adaptor_stanfit <- function(x, pars = NULL, ...) {
   .assert_contains_draws(x)
 
-  if (is_equal(x$backend, "cmdstanr")) {
+  if (.is_equal(x$backend, "cmdstanr")) {
     out <- attr(x$stanfit, "metadata")$metadata
   } else {
     out <- attr(x$stanfit@sim$samples[[1]], "args")$control

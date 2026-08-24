@@ -4,7 +4,10 @@ n_exposure_trial <- 50
 n_test_trial <- 125
 
 make_data_for_stanfit <- function(example = 1, seed = NULL, verbose = F) {
-  require(tidyverse)
+  require(dplyr)
+  require(purrr)
+  require(rlang)
+  require(tidyr)
   require(magrittr)
   require(MVBeliefUpdatr)
 

@@ -1,11 +1,10 @@
 #' @include S7-core-classes.R
 #' @include S7-transform-information.R
 
-#' S7 base class for processed Stan input used by ideal adaptor fits.
-#'
 #' @name MVBU-Staninput-class
+#' @title S7 base class for processed Stan input
 #' @docType class
-#' @property values A named list containing the Stan input values.
+#' @slot values A named list containing the Stan input values.
 #' @export
 MVBU_Staninput <- S7::new_class(
   "MVBU_Staninput",
@@ -345,15 +344,15 @@ new_mnix_staninput <- function(exposure, test, cues, category, response, group, 
           x_mean_exposure[i, j] <- mean(cue_values[, 1])
           x_sd_exposure[i, j] <- if (n_obs > 1) stats::sd(cue_values[, 1]) else 0
         } else if (model == "MNIX")  {
-          x_mean_exposure[i, j, ] <- colMeans(cue_values)
+          x_mean_exposure[i, j, ] <- .colMeans(cue_values)
           if (n_obs > 1) {
-            centered <- sweep(cue_values, 2, colMeans(cue_values), "-")
+            centered <- sweep(cue_values, 2, .colMeans(cue_values), "-")
             x_ss_exposure[i, j, ] <- colSums(centered^2)
           } else {
             x_ss_exposure[i, j, ] <- rep(0, n_cues)
           }
         } else if (model == "NIW") {
-          x_mean_exposure[i, j, ] <- colMeans(cue_values)
+          x_mean_exposure[i, j, ] <- .colMeans(cue_values)
           if (n_obs > 1) {
             x_ss_exposure[i, j, , ] <- crossprod(cue_values)
           } else {

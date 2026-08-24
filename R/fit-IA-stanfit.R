@@ -100,8 +100,7 @@ fit_ideal_adaptor <- function(
   }
 
   # extract information from the S7 fit-input object
-  assert_stanfit_input(stanfit_input)
-  assert_staninput(stanfit_input@staninput)
+  assert_IdealAdaptorStaninput(stanfit_input@staninput)
   data <- stanfit_input@data
   transform_information <- stanfit_input@transform_information
   staninput <- stanfit_input@staninput
@@ -135,13 +134,16 @@ fit_ideal_adaptor <- function(
       stanvars = stanvars,
       save_pars = save_pars,
       backend = backend,
-      stan_args = nlist(init, silent, control, stan_model_args),
+      stan_args = .nlist(init, silent, control, stan_model_args),
       transform_information = transform_information,
       basis = basis,
       file = file)
 
   # Check that staninput has at least two categories (fitting with one category makes no sense)
-  if (get_staninput(fit)@values$M < 2) stop("staninput must have at least two categories.")
+  .assert_true(
+    get_staninput(fit)@values$M >= 2,
+    msg = "staninput must have at least two categories."
+  )
 
   stanfit <- NULL
   if (chains > 0 & iter > 0) {
@@ -180,14 +182,13 @@ fit_ideal_adaptor <- function(
 
     }
 
-    if (!.contains_draws(stanfit)) {
-      stop2("Sampling failed.")
-    } else {
-      fit <- set_stanfit(fit, stanfit)
-      fit <- recover_types(fit)
-
-      if (rename) fit <- .rename_pars(fit)
+    .assert_contains_draws(stanfit)
+    if (requireNamespace("tidybayes", quietly = TRUE)) {
+      stanfit <- tidybayes::recover_types(stanfit)
     }
+    fit <- set_stanfit(fit, stanfit)
+    if (rename) fit <- .rename_pars(fit)
+    
   } else if (!silent) message("No sampling requested. Returning empty model object.")
 
   if (!is.null(fit) && !is.null(file)) {

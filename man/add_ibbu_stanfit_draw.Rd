@@ -8,4 +8,7 @@ add_ibbu_stanfit_draw(...)
 }
 \description{
 Deprecated. Use \code{\link{get_draws}} instead.
+
+Deprecated. Use get_draws() instead.
 }
+\keyword{internal}

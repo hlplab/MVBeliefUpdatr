@@ -1,25 +1,26 @@
-if (!requireNamespace("assertthat", quietly = TRUE)) {
-  stop("The assertthat package is required for these S7 tests.")
-}
-if (!exists(".assert_that", inherits = TRUE)) {
-  suppressPackageStartupMessages(library("assertthat", character.only = TRUE, quietly = TRUE))
-}
 if (!exists("is_tibble", inherits = TRUE)) {
   suppressPackageStartupMessages(library("tibble", character.only = TRUE, quietly = TRUE))
 }
-if (!exists("nlist", inherits = TRUE)) {
+if (!exists(".nlist", inherits = TRUE)) {
   suppressPackageStartupMessages(library("rlang", character.only = TRUE, quietly = TRUE))
 }
 if (!exists("sampling", inherits = TRUE)) {
   suppressPackageStartupMessages(library("rstan", character.only = TRUE, quietly = TRUE))
+}
+if (!exists("recover_types", inherits = TRUE)) {
+  suppressPackageStartupMessages(library("tidybayes", character.only = TRUE, quietly = TRUE))
 }
 
 source_with_env <- function(path) {
   sys.source(path, envir = globalenv())
 }
 
-r_dir_candidates <- c("R", file.path("..", "..", "R"))
-r_dir <- r_dir_candidates[vapply(r_dir_candidates, function(path) file.exists(file.path(path, "globals.R")), logical(1))][1]
+r_dir_candidates <- c(
+  "R",
+  file.path("..", "..", "R"),
+  testthat::test_path("..", "..", "R")
+)
+r_dir <- r_dir_candidates[vapply(r_dir_candidates, function(path) file.exists(file.path(path, "internal-globals.R")), logical(1))][1]
 if (is.na(r_dir)) {
   stop("Could not locate the package R directory for test helper sourcing.")
 }
@@ -29,11 +30,13 @@ r_dir_abs <- normalizePath(file.path(pkg_root, "R"), winslash = "/", mustWork = 
 old_wd <- getwd()
 
 if (!exists("MVBU_PROB_TOL", inherits = TRUE)) {
-  source_with_env(file.path(r_dir_abs, "globals.R"))
+  source_with_env(file.path(r_dir_abs, "internal-globals.R"))
 }
+source_with_env(file.path(r_dir_abs, "internal-is.R"))
+source_with_env(file.path(r_dir_abs, "internal-utils-imported.R"))
+source_with_env(file.path(r_dir_abs, "internal-asserts.R"))
 source_with_env(file.path(r_dir_abs, "asserts.R"))
-source_with_env(file.path(r_dir_abs, "utils.R"))
-source_with_env(file.path(r_dir_abs, "misc_imported.R"))
+source_with_env(file.path(r_dir_abs, "internal-utils.R"))
 source_with_env(file.path(r_dir_abs, "to-array.R"))
 source_with_env(file.path(r_dir_abs, "basics.R"))
 source_with_env(file.path(r_dir_abs, "MVBeliefUpdatr-package.R"))
@@ -48,6 +51,7 @@ source_with_env(file.path(r_dir_abs, "S7-stanfit.R"))
 source_with_env(file.path(r_dir_abs, "S7-core-methods.R"))
 source_with_env(file.path(r_dir_abs, "S7-stanfit-methods.R"))
 source_with_env(file.path(r_dir_abs, "S7-stanfit-input-methods.R"))
+source_with_env(file.path(r_dir_abs, "..", "tests", "testthat", "helper-stanfit-test-utils.R"))
 
 # Source Stan model definitions from the package root so rstan can locate the
 # model files in inst/stan when this helper is loaded from the test directory.

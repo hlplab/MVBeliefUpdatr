@@ -8,4 +8,7 @@ get_test_data_from_stanfit(...)
 }
 \description{
 Deprecated. Use \code{\link{get_test_data}} instead.
+
+Deprecated. Use get_test_data() instead.
 }
+\keyword{internal}

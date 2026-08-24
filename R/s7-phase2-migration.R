@@ -1,19 +1,6 @@
-# Phase 2 migration adapters from legacy NIW/MVG/Exemplar structures to S7.
+# S7 migration adapters from legacy NIW/MVG/Exemplar structures to S7.
 # These adapters are intended to be used internally by MVBeliefUpdatr and are not part of the public API.
 # They will be removed after migration to S7 is complete and legacy structures are no longer supported.
-
-#' Normalize a scalar character input for phase-2 migration helpers.
-#'
-#' @param x Input value.
-#' @param arg_name Name of the argument.
-#' @return A scalar character value.
-#' @keywords internal
-.normalize_phase2_scalar_character <- function(x, arg_name) {
-  if (!is.character(x) || length(x) != 1 || nchar(x) == 0) {
-    stop(paste0(arg_name, " must be a non-empty scalar character value."), call. = FALSE)
-  }
-  x
-}
 
 #' Normalize a family name for phase-2 migration helpers.
 #'
@@ -22,7 +9,8 @@
 #' @return A normalized family name.
 #' @keywords internal
 .normalize_phase2_family <- function(family, allowed) {
-  family <- toupper(.normalize_phase2_scalar_character(family, "family"))
+  .assert_non_NA_scalar_character(family, msg = paste0("family must be a non-empty scalar character value."))
+  family <- toupper(family)
   if (!(family %in% allowed)) {
     stop("Unsupported family for Phase 2 migration adapter.", call. = FALSE)
   }
@@ -49,7 +37,7 @@
 #' Coerce legacy MVG rows to S7 representation objects
 #' @keywords internal
 .as_s7_mvg_representations <- function(x, category = "category") {
-  category <- .normalize_phase2_scalar_character(category, "category")
+  .assert_non_NA_scalar_character(category, msg = paste0("category must be a non-empty scalar character value."))
   .validate_legacy_table(x, required = c(category, "mu", "Sigma"), context = "MVG")
 
   reps <- vector("list", length = nrow(x))
@@ -76,7 +64,7 @@
 #' Coerce legacy NIW rows to S7 representation objects
 #' @keywords internal
 .as_s7_niw_representations <- function(x, category = "category") {
-  category <- .normalize_phase2_scalar_character(category, "category")
+  .assert_non_NA_scalar_character(category, msg = paste0("category must be a non-empty scalar character value."))
   required <- c(category, "m", "kappa", "nu", "S")
   .validate_legacy_table(x, required = required, context = "NIW")
 
@@ -106,7 +94,7 @@
 #' Coerce legacy exemplar rows to S7 representation objects
 #' @keywords internal
 .as_s7_exemplar_representations <- function(x, category = "category") {
-  category <- .normalize_phase2_scalar_character(category, "category")
+  .assert_non_NA_scalar_character(category, msg = paste0("category must be a non-empty scalar character value."))
   .validate_legacy_table(x, required = c(category, "exemplars"), context = "exemplar")
 
   reps <- vector("list", length = nrow(x))
@@ -135,7 +123,7 @@
 #' Coerce legacy MUVG rows to S7 representation objects
 #' @keywords internal
 .as_s7_muvg_representations <- function(x, category = "category") {
-  category <- .normalize_phase2_scalar_character(category, "category")
+  .assert_non_NA_scalar_character(category, msg = paste0("category must be a non-empty scalar character value."))
   .validate_legacy_table(x, required = c(category, "component_mu", "component_sigma2"), context = "MUVG")
 
   reps <- vector("list", length = nrow(x))
@@ -176,7 +164,7 @@
 #' Coerce legacy MNIX rows to S7 representation objects
 #' @keywords internal
 .as_s7_mnix_representations <- function(x, category = "category") {
-  category <- .normalize_phase2_scalar_character(category, "category")
+  .assert_non_NA_scalar_character(category, msg = paste0("category must be a non-empty scalar character value."))
   .validate_legacy_table(
     x,
     required = c(category, "component_m", "component_kappa", "component_nu", "component_sigma2"),
@@ -222,7 +210,7 @@
 #' @keywords internal
 .as_s7_category_representation_template <- function(x, family, category = "category") {
   family <- .normalize_phase2_family(family, allowed = c("MVG", "NIW", "EXEMPLAR", "MUVG", "MNIX"))
-  category <- .normalize_phase2_scalar_character(category, "category")
+  .assert_non_NA_scalar_character(category, msg = paste0("category must be a non-empty scalar character value."))
 
   reps <- switch(
     family,
@@ -234,11 +222,41 @@
     stop("Unsupported family for Phase 2 migration adapter.", call. = FALSE)
   )
 
-  .new_category_representation_template(representations = reps)
+  new_category_representation_template(representations = reps)
+}
+
+#' @export
+as_s7_category_representation_template <- function(x, family, category = "category") {
+  .as_s7_category_representation_template(x = x, family = family, category = category)
+}
+
+#' @export
+as_s7_mvg_representations <- function(x, category = "category") {
+  .as_s7_mvg_representations(x = x, category = category)
+}
+
+#' @export
+as_s7_niw_representations <- function(x, category = "category") {
+  .as_s7_niw_representations(x = x, category = category)
+}
+
+#' @export
+as_s7_exemplar_representations <- function(x, category = "category") {
+  .as_s7_exemplar_representations(x = x, category = category)
+}
+
+#' @export
+as_s7_muvg_representations <- function(x, category = "category") {
+  .as_s7_muvg_representations(x = x, category = category)
+}
+
+#' @export
+as_s7_mnix_representations <- function(x, category = "category") {
+  .as_s7_mnix_representations(x = x, category = category)
 }
 
 .legacy_model_priors <- function(x, category) {
-  category <- .normalize_phase2_scalar_character(category, "category")
+  .assert_non_NA_scalar_character(category, msg = paste0("category must be a non-empty scalar character value."))
   if ("prior" %in% names(x)) {
     p <- as.numeric(x$prior)
   } else {
@@ -258,7 +276,7 @@
 }
 
 .legacy_model_lapse_bias <- function(x, category) {
-  category <- .normalize_phase2_scalar_character(category, "category")
+  .assert_non_NA_scalar_character(category, msg = paste0("category must be a non-empty scalar character value."))
   if ("lapse_bias" %in% names(x)) {
     b <- as.numeric(x$lapse_bias)
   } else {
@@ -272,55 +290,70 @@
 #' Coerce legacy MVG ideal observer-like object to S7 model object
 #' @keywords internal
 .as_s7_mvg_ideal_observer <- function(x, category = "category", decision_rule = "sampling") {
-  category <- .normalize_phase2_scalar_character(category, "category")
-  decision_rule <- .normalize_phase2_scalar_character(decision_rule, "decision_rule")
+  .assert_non_NA_scalar_character(category, msg = paste0("category must be a non-empty scalar character value."))
+  .assert_non_NA_scalar_character(decision_rule, msg = paste0("decision_rule must be a non-empty scalar character value."))
   template <- .as_s7_category_representation_template(x, family = "MVG", category = category)
-  .new_mvg_ideal_observer(
+  new_mvg_ideal_observer(
     category_template = template,
     decision_rule = decision_rule,
     category_prior = .legacy_model_priors(x, category = category),
     lapse_rate = .legacy_model_lapse_rate(x),
     lapse_bias = .legacy_model_lapse_bias(x, category = category)
   )
+}
+
+#' @export
+as_s7_mvg_ideal_observer <- function(x, category = "category", decision_rule = "sampling") {
+  .as_s7_mvg_ideal_observer(x = x, category = category, decision_rule = decision_rule)
 }
 
 #' Coerce legacy NIW ideal adaptor-like object to S7 model object
 #' @keywords internal
 .as_s7_niw_ideal_adaptor <- function(x, category = "category", decision_rule = "sampling") {
-  category <- .normalize_phase2_scalar_character(category, "category")
-  decision_rule <- .normalize_phase2_scalar_character(decision_rule, "decision_rule")
+  .assert_non_NA_scalar_character(category, msg = paste0("category must be a non-empty scalar character value."))
+  .assert_non_NA_scalar_character(decision_rule, msg = paste0("decision_rule must be a non-empty scalar character value."))
   template <- .as_s7_category_representation_template(x, family = "NIW", category = category)
-  .new_niw_ideal_adaptor(
+  new_niw_ideal_adaptor(
     category_template = template,
     decision_rule = decision_rule,
     category_prior = .legacy_model_priors(x, category = category),
     lapse_rate = .legacy_model_lapse_rate(x),
     lapse_bias = .legacy_model_lapse_bias(x, category = category)
   )
+}
+
+#' @export
+as_s7_niw_ideal_adaptor <- function(x, category = "category", decision_rule = "sampling") {
+  .as_s7_niw_ideal_adaptor(x = x, category = category, decision_rule = decision_rule)
 }
 
 #' Coerce legacy exemplar model-like object to S7 model object
 #' @keywords internal
 .as_s7_exemplar_model <- function(x, category = "category", decision_rule = "sampling") {
-  category <- .normalize_phase2_scalar_character(category, "category")
-  decision_rule <- .normalize_phase2_scalar_character(decision_rule, "decision_rule")
+  .assert_non_NA_scalar_character(category, msg = paste0("category must be a non-empty scalar character value."))
+  .assert_non_NA_scalar_character(decision_rule, msg = paste0("decision_rule must be a non-empty scalar character value."))
   template <- .as_s7_category_representation_template(x, family = "EXEMPLAR", category = category)
-  .new_exemplar_model(
+  new_exemplar_model(
     category_template = template,
     decision_rule = decision_rule,
     category_prior = .legacy_model_priors(x, category = category),
     lapse_rate = .legacy_model_lapse_rate(x),
     lapse_bias = .legacy_model_lapse_bias(x, category = category)
   )
+}
+
+#' @export
+as_s7_exemplar_model <- function(x, category = "category", decision_rule = "sampling") {
+  .as_s7_exemplar_model(x = x, category = category, decision_rule = decision_rule)
 }
 
 #' Coerce legacy MUVG ideal observer-like object to S7 model object
 #' @keywords internal
 .as_s7_muvg_ideal_observer <- function(x, category = "category", decision_rule = "sampling") {
-  category <- .normalize_phase2_scalar_character(category, "category")
-  decision_rule <- .normalize_phase2_scalar_character(decision_rule, "decision_rule")
+  .assert_non_NA_scalar_character(category, msg = paste0("category must be a non-empty scalar character value."))
+  .assert_non_NA_scalar_character(decision_rule, msg = paste0("decision_rule must be a non-empty scalar character value."))
   template <- .as_s7_category_representation_template(x, family = "MUVG", category = category)
-  .new_muvg_ideal_observer(
+  new_muvg_ideal_observer(
     category_template = template,
     decision_rule = decision_rule,
     category_prior = .legacy_model_priors(x, category = category),
@@ -329,19 +362,29 @@
   )
 }
 
+#' @export
+as_s7_muvg_ideal_observer <- function(x, category = "category", decision_rule = "sampling") {
+  .as_s7_muvg_ideal_observer(x = x, category = category, decision_rule = decision_rule)
+}
+
 #' Coerce legacy MNIX ideal adaptor-like object to S7 model object
 #' @keywords internal
 .as_s7_mnix_ideal_adaptor <- function(x, category = "category", decision_rule = "sampling") {
-  category <- .normalize_phase2_scalar_character(category, "category")
-  decision_rule <- .normalize_phase2_scalar_character(decision_rule, "decision_rule")
+  .assert_non_NA_scalar_character(category, msg = paste0("category must be a non-empty scalar character value."))
+  .assert_non_NA_scalar_character(decision_rule, msg = paste0("decision_rule must be a non-empty scalar character value."))
   template <- .as_s7_category_representation_template(x, family = "MNIX", category = category)
-  .new_mnix_ideal_adaptor(
+  new_mnix_ideal_adaptor(
     category_template = template,
     decision_rule = decision_rule,
     category_prior = .legacy_model_priors(x, category = category),
     lapse_rate = .legacy_model_lapse_rate(x),
     lapse_bias = .legacy_model_lapse_bias(x, category = category)
   )
+}
+
+#' @export
+as_s7_mnix_ideal_adaptor <- function(x, category = "category", decision_rule = "sampling") {
+  .as_s7_mnix_ideal_adaptor(x = x, category = category, decision_rule = decision_rule)
 }
 
 .legacy_distribution_payload <- function(x) {
@@ -360,7 +403,8 @@
 #' Coerce a legacy NIW inferred/fit-like object to S7 model-distribution object
 #' @keywords internal
 .as_s7_niw_model_distribution <- function(x = NULL, group_label = "") {
-  group_label <- .normalize_phase2_scalar_character(as.character(group_label), "group_label")
+  group_label <- as.character(group_label)
+  .assert_non_NA_scalar_character(group_label, msg = paste0("group_label must be a non-empty scalar character value."))
   payload <- .legacy_distribution_payload(x)
 
   .new_niw_model_distribution(
@@ -374,10 +418,16 @@
   )
 }
 
+#' @export
+as_s7_niw_model_distribution <- function(x = NULL, group_label = "") {
+  .as_s7_niw_model_distribution(x = x, group_label = group_label)
+}
+
 #' Coerce a legacy MVG inferred/fit-like object to S7 model-distribution object
 #' @keywords internal
 .as_s7_mvg_model_distribution <- function(x = NULL, group_label = "") {
-  group_label <- .normalize_phase2_scalar_character(as.character(group_label), "group_label")
+  group_label <- as.character(group_label)
+  .assert_non_NA_scalar_character(group_label, msg = paste0("group_label must be a non-empty scalar character value."))
   payload <- .legacy_distribution_payload(x)
 
   .new_mvg_model_distribution(
@@ -391,10 +441,16 @@
   )
 }
 
+#' @export
+as_s7_mvg_model_distribution <- function(x = NULL, group_label = "") {
+  .as_s7_mvg_model_distribution(x = x, group_label = group_label)
+}
+
 #' Coerce a legacy exemplar inferred/fit-like object to S7 model-distribution object
 #' @keywords internal
 .as_s7_exemplar_model_distribution <- function(x = NULL, group_label = "") {
-  group_label <- .normalize_phase2_scalar_character(as.character(group_label), "group_label")
+  group_label <- as.character(group_label)
+  .assert_non_NA_scalar_character(group_label, msg = paste0("group_label must be a non-empty scalar character value."))
   payload <- .legacy_distribution_payload(x)
 
   .new_exemplar_model_distribution(
@@ -408,10 +464,16 @@
   )
 }
 
+#' @export
+as_s7_exemplar_model_distribution <- function(x = NULL, group_label = "") {
+  .as_s7_exemplar_model_distribution(x = x, group_label = group_label)
+}
+
 #' Coerce a legacy MUVG inferred/fit-like object to S7 model-distribution object
 #' @keywords internal
 .as_s7_muvg_model_distribution <- function(x = NULL, group_label = "") {
-  group_label <- .normalize_phase2_scalar_character(as.character(group_label), "group_label")
+  group_label <- as.character(group_label)
+  .assert_non_NA_scalar_character(group_label, msg = paste0("group_label must be a non-empty scalar character value."))
   payload <- .legacy_distribution_payload(x)
 
   .new_muvg_model_distribution(
@@ -425,10 +487,16 @@
   )
 }
 
+#' @export
+as_s7_muvg_model_distribution <- function(x = NULL, group_label = "") {
+  .as_s7_muvg_model_distribution(x = x, group_label = group_label)
+}
+
 #' Coerce a legacy MNIX inferred/fit-like object to S7 model-distribution object
 #' @keywords internal
 .as_s7_mnix_model_distribution <- function(x = NULL, group_label = "") {
-  group_label <- .normalize_phase2_scalar_character(as.character(group_label), "group_label")
+  group_label <- as.character(group_label)
+  .assert_non_NA_scalar_character(group_label, msg = paste0("group_label must be a non-empty scalar character value."))
   payload <- .legacy_distribution_payload(x)
 
   .new_mnix_model_distribution(
@@ -442,11 +510,17 @@
   )
 }
 
+#' @export
+as_s7_mnix_model_distribution <- function(x = NULL, group_label = "") {
+  .as_s7_mnix_model_distribution(x = x, group_label = group_label)
+}
+
 #' Coerce a legacy inferred/fit-like object to an S7 model-distribution object
 #' @keywords internal
 .as_s7_model_distribution <- function(x = NULL, family, group_label = "") {
   family <- .normalize_phase2_family(family, allowed = c("NIW", "MVG", "EXEMPLAR", "MUVG", "MNIX"))
-  group_label <- .normalize_phase2_scalar_character(as.character(group_label), "group_label")
+  group_label <- as.character(group_label)
+  .assert_non_NA_scalar_character(group_label, msg = paste0("group_label must be a non-empty scalar character value."))
 
   switch(
     family,
@@ -457,4 +531,9 @@
     MNIX = .as_s7_mnix_model_distribution(x = x, group_label = group_label),
     stop("Unsupported family for Phase 2 model-distribution migration adapter.", call. = FALSE)
   )
+}
+
+#' @export
+as_s7_model_distribution <- function(x = NULL, family, group_label = "") {
+  .as_s7_model_distribution(x = x, family = family, group_label = group_label)
 }

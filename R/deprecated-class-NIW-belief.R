@@ -15,13 +15,17 @@ get_expected_columns_for_NIW_belief <- function()
 #' @return A logical.
 #'
 #' @seealso TBD
-#' @description Deprecated. Use the S7-based predicates and constructors instead.
-#' @deprecated Use the S7-based predicates and constructors instead.
+#' @description Deprecated. Use the S7-based validators and constructors for Normal-Inverse-Wishart (NIW) beliefs instead.
 #' @keywords internal
 #' @export
 is.NIW_belief <- function(x, group = NULL, category = "category", is.long = T, verbose = F) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "is.NIW_belief()",
+    details = "Use the S7-based validators and constructors for Normal-Inverse-Wishart (NIW) beliefs."
+  )
   name_of_x <- deparse(substitute(x))
-  .assert_that(is.flag(is.long))
+  .assert_that(.is_non_NA_scalar_logical(is.long))
 
   if (!is.data.frame(x)) {
     if (verbose) message("Object is not a data frame-like object.")

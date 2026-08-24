@@ -3,7 +3,25 @@
 \docType{class}
 \name{MVBU-TransformInformation-class}
 \alias{MVBU-TransformInformation-class}
-\title{S7 base class for transformation information for Stan models.}
-\description{
-S7 base class for transformation information for Stan models.
+\alias{MVBU_TransformInformation}
+\title{S7 base class for transformation information}
+\usage{
+MVBU_TransformInformation(
+  transform.parameters = list(),
+  transform.function = function(x) x,
+  untransform.function = function(x) x
+)
 }
+\description{
+S7 base class for transformation information
+}
+\section{Slots}{
+
+\describe{
+\item{\code{transform.parameters}}{A list of sufficient parameters for the transform.}
+
+\item{\code{transform.function}}{Function to transform parameters.}
+
+\item{\code{untransform.function}}{Function to untransform parameters.}
+}}
+

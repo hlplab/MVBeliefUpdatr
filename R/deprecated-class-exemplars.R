@@ -12,11 +12,15 @@ get_expected_columns_for_exemplars <- function()
 #' @return A logical.
 #'
 #' @seealso TBD
-#' @description Deprecated. Use the S7-based predicates and constructors instead.
-#' @deprecated Use the S7-based predicates and constructors instead.
+#' @description Deprecated. Use the S7-based validators and constructors for exemplar categories instead.
 #' @keywords internal
 #' @export
 is.exemplars <- function(x, group = NULL, verbose = F) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "is.exemplars()",
+    details = "the S7-based validators and constructors for exemplar categories"
+  )
   name_of_x <- deparse(substitute(x))
 
   if (!is.data.frame(x)) {

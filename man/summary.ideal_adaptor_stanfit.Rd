@@ -27,7 +27,7 @@ names will be shown in separate columns (distribution, group, category, cue, ...
 
 \item{include_transformed_pars}{Should transformed parameters be included in the summary? (default: \code{FALSE})}
 
-\item{...}{Additional arguments passed to \link[rstan:\verb{summary,stanfit-method}]{rstan::\verb{summary,stanfit-method}}.}
+\item{...}{Additional arguments passed to \code{rstan::summary}.}
 }
 \description{
 \code{summary} method for \code{\link{ideal_adaptor_stanfit}} objects. Specifies reasonable defaults

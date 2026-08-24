@@ -13,4 +13,7 @@ Legacy wrapper for get_lapse_rate.}
 }
 \description{
 Deprecated. Use \code{\link{get_lapse_rate}} instead.
+
+Deprecated. Use get_lapse_rate() instead.
 }
+\keyword{internal}

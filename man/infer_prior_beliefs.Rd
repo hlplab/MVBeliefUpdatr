@@ -30,7 +30,23 @@ infer_prior_beliefs(
 )
 }
 \arguments{
-\item{stanmodel}{Name of stanmodel that should be used. Overrides any default selection.}
+\item{exposure}{A data frame or tibble with exposure data. Each row is assumed to contain one observation.}
+
+\item{test}{A data frame or tibble with test data. Each row is assumed to contain one observation.}
+
+\item{cues}{Names of columns with cue values. These columns must be present in both \code{exposure} and \code{test}.}
+
+\item{category}{Name of the column in \code{exposure} that stores the category information. (default: "category")}
+
+\item{response}{Name of the column in \code{test} that stores the response information. (default: "response")}
+
+\item{group}{Name of the column in \code{exposure} and \code{test} that stores the grouping information. (default: "group")}
+
+\item{group.unique}{Optional grouping column used to collapse repeated exposure conditions before constructing the Stan input.}
+
+\item{stanmodel}{Character string naming the Stan model. Must be one of \code{NIX_ideal_adaptor}, \code{NIW_ideal_adaptor}, or \code{MNIX_ideal_adaptor}.}
+
+\item{verbose}{Should verbose output be provided? (default: \code{FALSE})}
 
 \item{silent}{Verbosity level between \code{0} and \code{2}.
 If \code{1} (the default), most of the
@@ -44,4 +60,7 @@ as well. If using \code{backend = "rstan"} you can also set
 }
 \description{
 Deprecated. Use \code{\link{infer_NIW_ideal_adaptor}} together with \code{\link{make_staninput_for_NIW_ideal_adaptor}} instead.
+
+Deprecated. Use infer_NIW_ideal_adaptor() instead.
 }
+\keyword{internal}

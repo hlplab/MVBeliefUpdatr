@@ -1,6 +1,5 @@
 #' @importFrom mvtnorm dmvt
 #' @importFrom foreach foreach %do%
-#' @importFrom rlang is_scalar_double
 NULL
 
 
@@ -151,8 +150,8 @@ get_NIW_posterior_predictive <- function(
 ) {
   # mvtnorm::dmvt expects means to be vectors, and x to be either a vector or a matrix.
   # in the latter case, each *row* of the matrix is an input.
-  .assert_that(is.vector(m) | is.matrix(m) | is_scalar_double(m))
-  .assert_that(is.matrix(S) | is_scalar_double(S))
+  .assert_that(is.vector(m) | is.matrix(m) | .is_non_NA_scalar_double(m))
+  .assert_that(is.matrix(S) | .is_non_NA_scalar_numeric(S))
   # do not reorder these conditionals (go from more to less specific)
   if (is.matrix(m)) m <- as.vector(m)
 
@@ -160,12 +159,12 @@ get_NIW_posterior_predictive <- function(
   .assert_that(dim(x)[2] == length(m),
               msg = "Input x and m are not of compatible dimensions.")
 
-  .assert_that(all(is.number(kappa), is.number(nu)))
-  .assert_that(is.flag(log))
+  .assert_that(all(.is_non_NA_scalar_numeric(kappa), .is_non_NA_scalar_numeric(nu)))
+  .assert_that(.is_non_NA_scalar_logical(log))
   .assert_that(any(noise_treatment %in% c("no_noise", "sample", "marginalize")),
               msg = "noise_treatment must be one of 'no_noise', 'sample' or 'marginalize'.")
   if (noise_treatment != "no_noise") {
-    .assert_that(is.Sigma(Sigma_noise))
+    .assert_that(.is_sigma(Sigma_noise))
     .assert_that(all(dim(S) == dim(Sigma_noise)),
                 msg = 'Unless noise_treatment is "no_noise", Sigma_noise must be a covariance matrix of appropriate dimensions, matching those of the scatter matrices S.')
   }
@@ -176,7 +175,7 @@ get_NIW_posterior_predictive <- function(
               Normal.")
 
   if (D == 1) {
-    .assert_that(is_scalar_double(m), msg = "S and m are not of compatible dimensions.")
+    .assert_that(.is_non_NA_scalar_double(m), msg = "S and m are not of compatible dimensions.")
   } else {
     .assert_that(dim(S)[2] == D,
                 msg = "S is not a square matrix, and thus not a Scatter matrix")
@@ -192,7 +191,7 @@ get_NIW_posterior_predictive <- function(
       is_weakly_greater_than(length(x), 1),
       msg = "For noise sampling, x must be of length 1 or longer.")
 
-    x <- map(x, ~ rmvnorm(n = 1, mean = .x, sigma = Sigma_noise))
+    x <- map(x, ~ .rmvnorm(n = 1, mean = .x, sigma = Sigma_noise))
   }
 
 
@@ -201,7 +200,7 @@ get_NIW_posterior_predictive <- function(
     S = get_S_from_expected_Sigma(get_expected_Sigma_from_S(S, nu) + Sigma_noise, nu)
   }
 
-  dmvt(x,
+  .dmvt(x,
        delta = m,
        sigma = S * ((kappa + 1) / (kappa * (nu - D + 1))),
        df = nu - D + 1,
@@ -228,7 +227,7 @@ get_posterior_predictive_from_NIW_belief = function(
   wide = FALSE
 ) {
   .assert_that(is.NIW_belief(model))
-  .assert_that(any(is.null(category.label) | is.character(category.label)))
+  .assert_optional_character(category.label)
   .assert_that(any(noise_treatment == "no_noise", is.NIW_ideal_adaptor(model)),
               msg = 'No noise matrix Sigma_noise found. If noise_treatment is not "no_noise", then model must be an NIW_ideal_adaptor.')
 

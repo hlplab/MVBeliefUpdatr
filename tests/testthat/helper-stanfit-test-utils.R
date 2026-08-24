@@ -86,10 +86,11 @@ build_shifted_prior_fit_example <- function(
       }
     }
 
-    cue_matrix <- pmin(0.98, pmax(0.02, cue_matrix))
-    if (is.null(dim(cue_matrix))) {
-      cue_matrix <- matrix(cue_matrix, ncol = 1L)
-    }
+    cue_matrix <- matrix(
+      pmin(0.98, pmax(0.02, cue_matrix)),
+      nrow = n,
+      ncol = length(cue_names)
+    )
     colnames(cue_matrix) <- cue_names
     cue_matrix
   }
@@ -169,6 +170,33 @@ expect_staninput_structure <- function(input, expected_class, required_names, fo
   expect_true(is.list(input@staninput@values))
   expect_true(all(required_names %in% names(input@staninput@values)))
   expect_false(any(forbidden_names %in% names(input@staninput@values)))
+}
+
+.get_ideal_adaptor_fit_model_dir <- function() {
+  path <- if (exists("pkg_root", inherits = TRUE) && nzchar(pkg_root)) {
+    file.path(pkg_root, "tests", "testthat", "models")
+  } else {
+    file.path("tests", "testthat", "models")
+  }
+  if (!dir.exists(path)) {
+    dir.create(path, recursive = TRUE, showWarnings = FALSE)
+  }
+  normalizePath(path, winslash = "/", mustWork = FALSE)
+}
+
+save_ideal_adaptor_fit_model <- function(fit, name) {
+  model_dir <- .get_ideal_adaptor_fit_model_dir()
+  model_path <- file.path(model_dir, paste0(name, ".rds"))
+  saveRDS(fit, model_path, compress = TRUE)
+  model_path
+}
+
+load_ideal_adaptor_fit_model <- function(name) {
+  model_path <- file.path(.get_ideal_adaptor_fit_model_dir(), paste0(name, ".rds"))
+  if (!file.exists(model_path)) {
+    stop("Model file not found: ", model_path)
+  }
+  readRDS(model_path)
 }
 
 run_fixed_param_stan_program <- function(stan_file, input, model_name) {

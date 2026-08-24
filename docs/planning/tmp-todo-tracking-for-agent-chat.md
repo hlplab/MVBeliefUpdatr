@@ -24,10 +24,10 @@ Here's an update list of steps for the conversion of legacy functionality into t
 # To do in Phase 3
 
 ## Next steps
-+ currently ongoing:
-  + test whether handing of fixed_parameters works for all three models (NIX with 1 cue, MNIX|NIW with 2 cues):
-    + test single fixed parameter, all pairwise combinations, and use of all fixed parameters
-    + test whether it fails when parameters do not have right dimensionality or are missing information.
++ create likelihood functions and deprecate old ones. deprecate fully depcrecated R files.
+
+
++ currently ongoing: 
 
 I don't like that we have to explicit use the constructor in set_stanfit:
 if (S7::S7_inherits(x, NIX_IdealAdaptorStanfit)) {
@@ -58,22 +58,21 @@ if (S7::S7_inherits(x, NIX_IdealAdaptorStanfit)) {
     labels = x@labels
   )
 
-+ test-05-s7-legacy-wrappers-stanfit might be renamed. those don't seem to be legacy tests?
-
 + clean up get-info-from-NIW-IA-stanfit.R, making those functions methods and removing functions no longer needed.
 + change handling/storage of label information in stanfit objects to follow the same structure used in the core model/representation/etc. objects
 + make new constructors to replace make_*_from data, turn those legacy functions into wrappers and deprecate them.
++ change current wrappers as_{.class}* to replace the lift-* methods
++ make print methods for the new S7 classes. summary should yield same as print, except for stanfit.
++ check which utils are needed. 
+++ if almost all checks of scalars are actually for non-NA scalars change the .is_X to include requirement for non-NA, remove .is_non_NA_x, and also adjust .assert functions accordingly.
+++ for overridden functions check whether they are still necessary.
 
 + integrate the fitted stanfit objects with the model distribution object as part of fit_ideal_adaptor
 
 ## Code clarity 
-+ make asserts for all new representation, template, model, and model distribution classes, but keep their documentation streamlined by giving them all a shared help page.
-+ collect util functions in utils.R and standardize their naming format. 
-+ can we remove:
 
 ## Testing
 + Minimal example of fitted models that can be evaluated. And where should they be stored?
-
 
 # To do after Phase 3
 + check whether we can get rid of the functions in override.R 
@@ -89,6 +88,12 @@ if (S7::S7_inherits(x, NIX_IdealAdaptorStanfit)) {
 
 ### Stan-related
 + Check MNIX cue weighting
++ MNIX fitting is current commented out. AI comments for MNIX failure:
+
+" The root cause is visible now: the MNIX Stan program expects a covariance-style summary array, but the current builder is providing a sum-of-squares vector array instead. I’m aligning that data structure with the model’s declared interface before I verify again."
+
+
+
 + temporarily change stan programs to echo inputs so that the correct structure of inputs can get verified. at that point revisit for broad range of inputs (1d-3d, nix/mnix/niw, w/ or w/o zero exposure) whether a simpler alternative to to_array can be found.
 
 + Ultimately, we need tests that generate test responses based on posterior (post-exposure) NIX/MNIX/NIW beliefs that were obtained by updating prior (pre-exposure) NIX/MNIX/NIW beliefs with the exposure data. That will let us check whether the 'forward updating' and the inferences of the prior beliefs are aligned---i.e., whether we can recover the prior beliefs provided there are sufficiently information exposure-test combinations in the data used to fit the stanfit model.

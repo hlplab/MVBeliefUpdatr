@@ -44,7 +44,7 @@ loo.ideal_adaptor_stanfit <- function(
 #'   names will be shown in separate columns (distribution, group, category, cue, ...). (default: `TRUE`)
 #' @param sufficient_only Should only the sufficient parameters be summarized? (default: `FALSE`)
 #' @param include_transformed_pars Should transformed parameters be included in the summary? (default: `FALSE`)
-#' @param ... Additional arguments passed to \link[rstan:`summary,stanfit-method`]{rstan::`summary,stanfit-method`}.
+#' @param ... Additional arguments passed to \code{rstan::summary}.
 #'
 #' @method summary ideal_adaptor_stanfit
 #'
@@ -115,7 +115,7 @@ summary.ideal_adaptor_stanfit <- function(x, pars = NULL, indices_as_names = TRU
 
   Rhats <- full_summary[, "Rhat"]
   if (any(Rhats > 1.05, na.rm = TRUE)) {
-    warning2(
+    .warning(
       "Parts of the model have not converged (some Rhats are > 1.05). ",
       "Be careful when analysing the results! We recommend running ",
       "more iterations and/or setting stronger priors."
@@ -124,7 +124,7 @@ summary.ideal_adaptor_stanfit <- function(x, pars = NULL, indices_as_names = TRU
   div_trans <- sum(nuts_params(x, pars = "divergent__")$Value)
   adapt_delta <- control_params(x)$adapt_delta
   if (div_trans > 0) {
-    warning2(
+    .warning(
       "There were ", div_trans, " divergent transitions after warmup. ",
       "Increasing adapt_delta above ", adapt_delta, " may help. See ",
       "http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup"
@@ -213,7 +213,7 @@ summary.ideal_adaptor_stanfit <- function(x, pars = NULL, indices_as_names = TRU
 #'   # if (check) {
 #'   #   yhash_loo <- attr(loo, "yhash")
 #'   #   yhash_fit <- hash_response(x, newdata = newdata)
-#'   #   if (!is_equal(yhash_loo, yhash_fit)) {
+#'   #   if (!.is_equal(yhash_loo, yhash_fit)) {
 #'   #     stop2(
 #'   #       "Response values used in 'loo' and 'x' do not match. ",
 #'   #       "If this is a false positive, please set 'check' to FALSE."
@@ -236,7 +236,7 @@ summary.ideal_adaptor_stanfit <- function(x, pars = NULL, indices_as_names = TRU
 #'       # newdata = newdata,
 #'       # resp = resp,
 #'       ...))
-#'   if (is_try_error(out)) {
+#'   if (.is_try_error(out)) {
 #'     stop2(
 #'       "Moment matching failed. Perhaps you did not set ",
 #'       "'save_pars = save_pars(all = TRUE)' when fitting your model? "

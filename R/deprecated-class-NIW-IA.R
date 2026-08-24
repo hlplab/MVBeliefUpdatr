@@ -41,14 +41,18 @@ get_expected_columns_for_NIW_ideal_adaptor <- function()
 #' @return A logical.
 #'
 #' @seealso TBD
-#' @description Deprecated. Use the S7-based predicates and constructors instead.
-#' @deprecated Use the S7-based predicates and constructors instead.
+#' @description Deprecated. Use the S7-based validators and constructors for NIW ideal adaptor objects instead.
 #' @keywords internal
 #' @export
 is.NIW_ideal_adaptor <- function(x, group = NULL, category = "category", is.long = T, with.prior = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = MVBU_PROB_TOL) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "is.NIW_ideal_adaptor()",
+    details = "Use the S7-based validators and constructors for NIW ideal adaptor objects."
+  )
   name_of_x <- deparse(substitute(x))
-  .assert_flag(with.lapse)
-  .assert_flag(with.lapse_bias)
+  .assert_non_NA_scalar_logical(with.lapse)
+  .assert_non_NA_scalar_logical(with.lapse_bias)
 
   if (!is.MVBU_model(x, group = group, verbose = verbose, tolerance = tolerance)) {
     return(FALSE)

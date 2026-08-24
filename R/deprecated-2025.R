@@ -2,33 +2,61 @@
 #'
 #' @description Deprecated. Use \code{\link{get_transform_information.ideal_adaptor_stanfit}} instead.
 #' @export
-#' @deprecated Use get_transform_information.ideal_adaptor_stanfit() instead.
+#' @description Deprecated. Use get_transform_information.ideal_adaptor_stanfit() instead.
 #' @keywords internal
-get_transform_information_from_stanfit <- function(...) get_transform_information.ideal_adaptor_stanfit(...)
+get_transform_information_from_stanfit <- function(...) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "get_transform_information_from_stanfit()",
+    with = "get_transform_information.ideal_adaptor_stanfit()"
+  )
+  get_transform_information.ideal_adaptor_stanfit(...)
+}
 
 #' Legacy wrapper for get_transform_function.ideal_adaptor_stanfit.
 #'
 #' @description Deprecated. Use \code{\link{get_transform_function.ideal_adaptor_stanfit}} instead.
 #' @export
-#' @deprecated Use get_transform_function.ideal_adaptor_stanfit() instead.
+#' @description Deprecated. Use get_transform_function.ideal_adaptor_stanfit() instead.
 #' @keywords internal
-get_transform_function_from_stanfit <- function(...) get_transform_function.ideal_adaptor_stanfit(...)
+get_transform_function_from_stanfit <- function(...) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "get_transform_function_from_stanfit()",
+    with = "get_transform_function.ideal_adaptor_stanfit()"
+  )
+  get_transform_function.ideal_adaptor_stanfit(...)
+}
 
 #' Legacy wrapper for get_untransform_function.ideal_adaptor_stanfit.
 #'
 #' @description Deprecated. Use \code{\link{get_untransform_function.ideal_adaptor_stanfit}} instead.
 #' @export
-#' @deprecated Use get_untransform_function.ideal_adaptor_stanfit() instead.
+#' @description Deprecated. Use get_untransform_function.ideal_adaptor_stanfit() instead.
 #' @keywords internal
-get_untransform_function_from_stanfit <- function(...) get_untransform_function.ideal_adaptor_stanfit(...)
+get_untransform_function_from_stanfit <- function(...) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "get_untransform_function_from_stanfit()",
+    with = "get_untransform_function.ideal_adaptor_stanfit()"
+  )
+  get_untransform_function.ideal_adaptor_stanfit(...)
+}
 
 #' Legacy wrapper for get_staninput.ideal_adaptor_stanfit.
 #'
 #' @description Deprecated. Use \code{\link{get_staninput.ideal_adaptor_stanfit}} instead.
 #' @export
-#' @deprecated Use get_staninput.ideal_adaptor_stanfit() instead.
+#' @description Deprecated. Use get_staninput.ideal_adaptor_stanfit() instead.
 #' @keywords internal
-get_staninput_from_stanfit <- function(...) get_staninput.ideal_adaptor_stanfit(...)
+get_staninput_from_stanfit <- function(...) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "get_staninput_from_stanfit()",
+    with = "get_staninput.ideal_adaptor_stanfit()"
+  )
+  get_staninput.ideal_adaptor_stanfit(...)
+}
 
 # get_exposure_category_statistic_from_stanfit <- get_exposure_category_statistic.ideal_adaptor_stanfit
 # get_exposure_mean_from_stanfit <- get_exposure_category_mean.ideal_adaptor_stanfit
@@ -40,9 +68,16 @@ get_staninput_from_stanfit <- function(...) get_staninput.ideal_adaptor_stanfit(
 #'
 #' @description Deprecated. Use \code{\link{get_test_data}} instead.
 #' @export
-#' @deprecated Use get_test_data() instead.
+#' @description Deprecated. Use get_test_data() instead.
 #' @keywords internal
-get_test_data_from_stanfit <- function(...) get_test_data(...)
+get_test_data_from_stanfit <- function(...) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "get_test_data_from_stanfit()",
+    with = "get_test_data()"
+  )
+  get_test_data(...)
+}
 
 # get_original_variable_levels_from_stanfit <- get_staninput_variable_levels
 # get_category_levels_from_stanfit <- get_category_levels
@@ -57,9 +92,16 @@ get_test_data_from_stanfit <- function(...) get_test_data(...)
 #'
 #' @description Deprecated. Use \code{\link{get_draws}} instead.
 #' @export
-#' @deprecated Use get_draws() instead.
+#' @description Deprecated. Use get_draws() instead.
 #' @keywords internal
-add_ibbu_stanfit_draw <- function(...) get_draws(...)
+add_ibbu_stanfit_draw <- function(...) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "add_ibbu_stanfit_draw()",
+    with = "get_draws()"
+  )
+  get_draws(...)
+}
 
 #' Legacy wrapper for the old prior-belief inference workflow.
 #'
@@ -67,7 +109,7 @@ add_ibbu_stanfit_draw <- function(...) get_draws(...)
 #' @inheritParams make_staninput
 #' @inheritParams fit_ideal_adaptor
 #' @export
-#' @deprecated Use infer_NIW_ideal_adaptor() instead.
+#' @description Deprecated. Use infer_NIW_ideal_adaptor() instead.
 #' @keywords internal
 infer_prior_beliefs <- function(
   # arguments for make_staninput
@@ -83,6 +125,11 @@ infer_prior_beliefs <- function(
   silent = 1,
   ...
 ) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "infer_prior_beliefs()",
+    with = "infer_NIW_ideal_adaptor()"
+  )
   if (verbose) message("Entering verbose mode.")
 
   # Currently the make_staninput function is creating both the transforms *and* the data.
@@ -131,7 +178,7 @@ infer_prior_beliefs <- function(
         verbose = verbose,
         stanmodel = "NIW_ideal_adaptor")
   } else {
-    stop2("Either transform or center.observations, scale.observations, or pca.observations must be specified.")
+    .stop("Either transform or center.observations, scale.observations, or pca.observations must be specified.")
   }
 
   fit_ideal_adaptor(staninput = staninput, stanmodel = stanmodel, silent = silent, verbose = verbose, ...)
@@ -173,6 +220,11 @@ make_staninput_deprecated <- function(
     use_univariate_updating = FALSE,
     verbose = F
 ) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "make_staninput_deprecated()",
+    with = "fit_ideal_adaptor()"
+  )
   message("This variant of make_staninput() is DEPRECATED and is called internally because you used the DEPRECATED function infer_prior_beliefs().
           This function will be removed in a future version of MVBeliefUpdatr. Please use fit_ideal_adaptor() instead.")
   if (!center.observations)
@@ -181,7 +233,7 @@ make_staninput_deprecated <- function(
   if (pca.observations)
     .assert_that(between(pca.cutoff, 0, 1), msg = "pca.cutoff must be between 0 and 1.")
   if (!is.null(lapse_rate)) {
-    .assert_that(is.number(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
+    .assert_that(.is_non_NA_scalar_numeric(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
     .assert_that(between(lapse_rate, 0, 1), msg = "If not NULL, lapse rate must be a number between 0 and 1.")
   }
 
@@ -362,7 +414,7 @@ make_staninput_deprecated <- function(
         # Different from make_staninput_for_NIX_ideal_adaptor (since mean and cov are vector and matrix):
         simplify = list(T, F, F),
         verbose = verbose,
-        N_exposure = nrow, x_mean_exposure = colMeans, x_ss_exposure = get_sum_of_uncentered_squares_from_df) %>%
+        N_exposure = nrow, x_mean_exposure = .colMeans, x_ss_exposure = get_sum_of_uncentered_squares_from_df) %>%
       within({
         M <- dim(x_mean_exposure)[1]
         L <- dim(x_mean_exposure)[2]
@@ -397,7 +449,7 @@ make_staninput_deprecated <- function(
         split_loglik_per_observation <- split_loglik_per_observation
       })
   } else if (use_univariate_updating) {
-    if (length(cues) > 1) stop2("Univariate updating is only implemented for univariate data.")
+    if (length(cues) > 1) .stop("Univariate updating is only implemented for univariate data.")
 
     staninput <-
       exposure %>%

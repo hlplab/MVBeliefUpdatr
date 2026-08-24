@@ -1,3 +1,4 @@
+#' @include asserts.R
 #' @include S7-core-classes.R
 #' @include S7-transform-information.R
 #' @include S7-staninput.R
@@ -137,55 +138,50 @@ new_ideal_adaptor_stanfit_input <- function(
     stanmodel = "NIW_ideal_adaptor",
     verbose = FALSE
 ) {
-  if (!is.list(control)) {
-    stop("control must be a list.")
-  }
+  .assert_list(control)
 
   expected_control <- c("tau_scale", "L_omega_eta", "split_loglik_per_observation", "transform_type")
-  if (!all(expected_control %in% names(control))) {
-    stop("control must contain tau_scale, L_omega_eta, split_loglik_per_observation, and transform_type.")
-  }
+  .assert_all(
+    expected_control %in% names(control),
+    msg = "control must contain tau_scale, L_omega_eta, split_loglik_per_observation, and transform_type."
+  )
 
-  if (!is.character(cues) || length(cues) < 1) {
-    stop("cues must be a non-empty character vector.")
-  }
+  .assert_non_NA_character(cues)
   cues <- unique(cues)
 
   if (!is.data.frame(exposure)) exposure <- as.data.frame(exposure)
   if (!is.data.frame(test)) test <- as.data.frame(test)
 
-  if (!all(cues %in% names(exposure))) {
-    stop("All cue columns must be present in exposure.")
-  }
-  if (!all(cues %in% names(test))) {
-    stop("All cue columns must be present in test.")
-  }
+  .assert_data_contains_cols(exposure, c(cues, group), msg = "exposure data must contain all cues and the group column.")
+  .assert_data_contains_cols(test, c(cues, group), msg = "test data must contain all cues and the group column.")
 
-  if (!group %in% names(exposure) || !group %in% names(test)) {
-    stop("group column must be present in both exposure and test.")
-  }
-  if (!is.null(category) && !category %in% names(exposure)) {
-    stop("category column must be present in exposure.")
-  }
-  if (!is.null(response) && !response %in% names(test)) {
-    stop("response column must be present in test.")
-  }
+  .assert_true(
+    is.null(category) || category %in% names(exposure),
+    msg = "category column must be present in exposure."
+  )
+  .assert_true(
+    is.null(response) || response %in% names(test),
+    msg = "response column must be present in test."
+  )
 
-  if (nrow(test) < 1) {
-    stop("new_ideal_adaptor_stanfit_input requires non-empty test data.")
-  }
+  .assert_true(nrow(test) >= 1, msg = "new_ideal_adaptor_stanfit_input requires non-empty test data.")
 
   if (is.null(fixed_parameters)) {
     fixed_parameters <- list()
-  } else if (!is.list(fixed_parameters)) {
-    stop("fixed_parameters must be a list.")
+  } else {
+    .assert_list(fixed_parameters)
   }
 
   if (!is.null(fixed_parameters$lapse_rate)) {
     lapse_rate <- fixed_parameters$lapse_rate
-    if (!is.numeric(lapse_rate) || length(lapse_rate) != 1 || is.na(lapse_rate) || lapse_rate < 0 || lapse_rate > 1) {
-      stop("lapse_rate must be a numeric value between 0 and 1.")
-    }
+    .assert_all(
+      is.numeric(lapse_rate),
+      length(lapse_rate) == 1L,
+      !is.na(lapse_rate),
+      lapse_rate >= 0,
+      lapse_rate <= 1,
+      msg = "lapse_rate must be a numeric value between 0 and 1."
+    )
   } else {
     lapse_rate <- NULL
   }
@@ -195,28 +191,31 @@ new_ideal_adaptor_stanfit_input <- function(
 
   stanmodel <- match.arg(stanmodel, c("NIX_ideal_adaptor", "NIW_ideal_adaptor", "MNIX_ideal_adaptor"))
 
-  if (stanmodel == "NIX_ideal_adaptor" && length(cues) != 1) {
-    stop("NIX_ideal_adaptor requires exactly one cue.")
-  }
-  if (stanmodel == "MNIX_ideal_adaptor" && length(cues) < 2) {
-    stop("MNIX_ideal_adaptor requires at least two cues.")
-  }
+  n_cues <- length(cues)
+  .assert_any(
+    stanmodel != "NIX_ideal_adaptor",
+    n_cues == 1,
+    msg = "NIX_ideal_adaptor requires exactly one cue."
+  )
+  .assert_any(
+    stanmodel != "MNIX_ideal_adaptor",
+    n_cues >= 2,
+    msg = "MNIX_ideal_adaptor requires at least two cues."
+  )
 
   tau_scale <- control$tau_scale
   if (length(tau_scale) == 1) tau_scale <- rep(tau_scale, length(cues))
   tau_scale <- as.numeric(tau_scale)
 
-  if (length(tau_scale) != length(cues)) {
-    stop("tau_scale must have length 1 or length(cues).")
-  }
+  .assert_true(length(tau_scale) == length(cues), msg = "tau_scale must have length 1 or length(cues).")
 
   transform_type <- control$transform_type
-  if (!is.character(transform_type) || length(transform_type) != 1) {
-    stop("transform_type must be a single character value.")
-  }
-  if (!transform_type %in% c("identity", "center", "standardize", "PCA whiten", "ZCA whiten")) {
-    stop("transform_type must be one of identity, center, standardize, PCA whiten, or ZCA whiten.")
-  }
+  .assert_all(
+    is.character(transform_type),
+    length(transform_type) == 1L,
+    msg = "transform_type must be a single character value."
+  )
+  .assert_true(transform_type %in% c("identity", "center", "standardize", "PCA whiten", "ZCA whiten"), msg = "transform_type must be one of identity, center, standardize, PCA whiten, or ZCA whiten.")
 
   exposure <- .prepare_staninput_frame(
     exposure,
@@ -238,9 +237,7 @@ new_ideal_adaptor_stanfit_input <- function(
   )
 
   if (!is.null(group.unique)) {
-    if (!group.unique %in% names(exposure)) {
-      stop("group.unique column must be present in exposure.")
-    }
+    .assert_data_contains_cols(exposure, group.unique)
     exposure[[group.unique]] <- factor(exposure[[group.unique]])
     key <- interaction(exposure[[group.unique]], exposure[[category]], do.call("interaction", exposure[, cues, drop = FALSE]), drop = TRUE)
     keep_idx <- !duplicated(key)
@@ -264,10 +261,10 @@ new_ideal_adaptor_stanfit_input <- function(
   test <- transform$transform.function(test, return_type = "replace")
 
   if (!is.null(mu_0)) {
-    mu_0 <- .validate_and_transform_prior_likelihood(mu_0, exposure[[category]], transform, which = "mu_0")
+    mu_0 <- .validate_and_transform_prior_likelihood(mu_0, exposure[[category]], n_cues = n_cues, transform, which = "mu_0")
   }
   if (!is.null(Sigma_0)) {
-    Sigma_0 <- .validate_and_transform_prior_likelihood(Sigma_0, exposure[[category]], transform, which = "Sigma_0")
+    Sigma_0 <- .validate_and_transform_prior_likelihood(Sigma_0, exposure[[category]], n_cues = n_cues, transform, which = "Sigma_0")
   }
 
   n_cues <- length(cues)
@@ -360,6 +357,12 @@ new_ideal_adaptor_stanfit_input <- function(
     cues = cues
   )
 
+  attr(data, "category") <- category
+  attr(data, "group") <- group
+  attr(data, "response") <- response
+  attr(data, "group.unique") <- group.unique
+  attr(data, "cues") <- cues
+
   IdealAdaptorStanfitInput(
     data = data,
     staninput = staninput,
@@ -384,18 +387,16 @@ new_ideal_adaptor_stanfit_input <- function(
 #' @noRd
 .prepare_staninput_frame <- function(data, cues, category, response, group, group.unique = NULL, verbose = FALSE) {
   data <- as.data.frame(data)
+  .assert_non_NA_character(cues)
   required_cols <- c(group)
   if (!is.null(category)) required_cols <- c(required_cols, category)
   if (!is.null(response)) required_cols <- c(required_cols, response)
   if (!is.null(group.unique)) required_cols <- c(required_cols, group.unique)
+  required_cols <- unique(required_cols)
   missing_cols <- setdiff(required_cols, names(data))
-  if (length(missing_cols) > 0) {
-    stop(sprintf("Missing columns in data: %s", paste(missing_cols, collapse = ", ")))
-  }
+  .assert_true(length(missing_cols) == 0, msg = sprintf("Missing columns in data: %s", paste(missing_cols, collapse = ", ")))
   missing_cues <- setdiff(cues, names(data))
-  if (length(missing_cues) > 0) {
-    stop(sprintf("Missing cue columns in data: %s", paste(missing_cues, collapse = ", ")))
-  }
+  .assert_true(length(missing_cues) == 0, msg = sprintf("Missing cue columns in data: %s", paste(missing_cues, collapse = ", ")))
 
   keep_cols <- unique(c(group, cues, required_cols))
   data <- data[, keep_cols, drop = FALSE]
@@ -467,44 +468,49 @@ new_ideal_adaptor_stanfit_input <- function(
 #'
 #' @param prior Prior likelihood values supplied by the user.
 #' @param category_var Factor of category labels.
+#' @param n_cues Number of cue dimensions expected for the supplied prior values.
 #' @param transform Affine transform object.
 #' @param which Whether the prior is for `mu_0` or `Sigma_0`.
 #' @keywords internal
 #' @noRd
-.validate_and_transform_prior_likelihood <- function(prior, category_var, transform, which = c("mu_0", "Sigma_0")) {
+.validate_and_transform_prior_likelihood <- function(prior, category_var, n_cues, transform, which = c("mu_0", "Sigma_0")) {
+  .assert_numeric_scalar(n_cues)
+  n_cues <- as.integer(n_cues)
+
   which <- match.arg(which)
   category_levels <- levels(category_var)
 
   if (length(category_levels) == 1) {
     if (which == "mu_0") {
-      if (!is.vector(prior)) {
-        stop("mu_0 must be a vector when there is only one category.")
-      }
+      .assert_true(is.vector(prior), msg = "mu_0 must be a vector when there is only one category.")
       prior <- list(as.numeric(prior))
     } else if (which == "Sigma_0") {
-      if (!is.array(prior) && !is.matrix(prior)) {
-        stop("Sigma_0 must be a matrix when there is only one category.")
-      }
+      .assert_true(is.array(prior) || is.matrix(prior), msg = "Sigma_0 must be a matrix when there is only one category.")
       prior <- list(as.matrix(prior))
     }
   } else {
-    if (!is.list(prior)) {
-      stop(sprintf("%s must be a list with one entry per category.", which))
-    }
+    .assert_list(prior)
 
-    if (length(prior) != length(category_levels)) {
-      stop(sprintf("%s must be a named list with names matching the categories present in the exposure and test data.", which))
-    }
+    .assert_true(length(prior) == length(category_levels), msg = sprintf("%s must be a named list with names matching the categories present in the exposure and test data.", which))
 
     prior_names <- names(prior)
-    if (is.null(prior_names) || !setequal(prior_names, category_levels)) {
-      stop(sprintf("%s must be a named list with names matching the categories present in the exposure and test data.", which))
-    }
+    .assert_true(!is.null(prior_names) && setequal(prior_names, category_levels), msg = sprintf("%s must be a named list with names matching the categories present in the exposure and test data.", which))
   }
 
   if (which == "mu_0") {
+    .assert_true(
+      all(vapply(prior, function(x) is.numeric(x) && length(as.numeric(x)) == n_cues, logical(1))),
+      msg = sprintf("mu_0 must be a named list with each entry a numeric vector of length %s", n_cues)
+    )
     prior <- lapply(prior, function(x) transform_category_mean(as.numeric(x), transform))
   } else {
+    .assert_true(
+      all(vapply(prior, function(x) {
+        x <- as.matrix(x)
+        is.numeric(x) && nrow(x) == n_cues && ncol(x) == n_cues
+      }, logical(1))),
+      msg = sprintf("Sigma_0 must be a named list with each entry a square matrix of dimension %s x %s", n_cues, n_cues)
+    )
     prior <- lapply(prior, function(x) transform_category_cov(as.matrix(x), transform))
   }
   prior

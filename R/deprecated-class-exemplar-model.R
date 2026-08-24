@@ -14,10 +14,14 @@ get_expected_columns_for_exemplar_model <- function() append(get_expected_column
 #'
 #' @seealso TBD
 #' @description Deprecated. Use the S7-based predicates and constructors instead.
-#' @deprecated Use the S7-based predicates and constructors instead.
 #' @keywords internal
 #' @export
 is.exemplar_model <- function(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "is.exemplar_model()",
+    details = "Use the S7-based validators and constructors for exemplar models."
+  )
   name_of_x <- deparse(substitute(x))
 
   if (!is.MVBU_model(x, group = group, verbose = verbose, tolerance = tolerance)) {

@@ -38,11 +38,11 @@ to_array <- function(
   }
 
   if (is.atomic(x)) {
-    found_inner_dims <- dim2(x)
+    found_inner_dims <- .dim(x)
 
     if (is.null(inner_dims)) inner_dims <- found_inner_dims
     if (any(found_inner_dims != inner_dims)) {
-      stop2(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ", "), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
+      .stop(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ", "), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
     }
 
     if (length(found_inner_dims) != length(inner_dims)) {
@@ -53,7 +53,7 @@ to_array <- function(
           x <- matrix(x, nrow = inner_dims[1], ncol = inner_dims[2])
         }
       } else {
-        stop2(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ", "), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
+        .stop(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ", "), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
       }
     }
 
@@ -74,16 +74,16 @@ to_array <- function(
   }
 
   if (is.list(x)) {
-    found_inner_dims <- dim2(x[[1]])
+    found_inner_dims <- .dim(x[[1]])
 
     if (is.null(inner_dims)) inner_dims <- found_inner_dims
     if (any(found_inner_dims != inner_dims)) {
-      stop2(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ", "), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
+      .stop(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ", "), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
     }
 
     expected_len <- if (length(outer_dims) == 0) 1 else prod(outer_dims)
     if (length(x) != expected_len) {
-      stop2(paste0("Length of list (", length(x), ") input does not match product of provided outer dimensions (", expected_len, ")."))
+      .stop(paste0("Length of list (", length(x), ") input does not match product of provided outer dimensions (", expected_len, ")."))
     }
 
     arr <- simplify2array(x, except = NULL)
@@ -94,5 +94,5 @@ to_array <- function(
     return(arr)
   }
 
-  stop2("Unsupported input type for to_array.")
+  .stop("Unsupported input type for to_array.")
 }

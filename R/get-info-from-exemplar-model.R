@@ -33,119 +33,6 @@ get_likelihood_from_exemplars <- function(
 
 }
 
-
-#' Get categorization from an exemplar model
-#'
-#' Categorize a single observation based on an exemplar model. The decision rule can be specified to be either the
-#' criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
-#' Luce's choice rule.
-#'
-#' @param x A vector of observations.
-#' @param model An \code{\link[=is.exemplar_model]{exemplar_model}} object.
-#' @param decision_rule Must be one of "criterion", "proportional", or "sampling".
-#' @param noise_treatment Determines whether and how multivariate Gaussian noise is considered during categorization.
-#' See \code{\link[=get_likelihood_from_exemplars]{get_likelihood_from_exemplars}}. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
-#' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
-#' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
-#' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
-#' will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
-#' perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
-#' @param simplify Should the output be simplified, and just the label of the selected category be returned? This
-#' option is only available for the criterion and sampling decision rules. (default: `FALSE`)
-#'
-#' @return Either a tibble of observations with posterior probabilities for each category (in long format), or a
-#' character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
-#'
-#' @seealso TBD
-#' @keywords TBD
-#' @export
-get_categorization_from_exemplar_model <- function(
-  x,
-  model,
-  decision_rule,
-  noise_treatment = if (decision_rule == "sampling") "sample" else infer_default_noise_treatment(model$Sigma_noise),
-  lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
-  simplify = F
-) {
-  .assert_that(is.exemplar_model(model))
-  .assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
-              msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
-  .assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
-              msg = "lapse_treatment must be one of 'no_lapses', 'sample' or 'marginalize'.")
-
-  # In case a single x is handed as argument, make sure it's made a list so that the length check below
-  # correctly treats it as length 1 (rather than the dimensionality of the one observation).
-  if (!is.list(x)) x <- list(x)
-
-  posterior_probabilities <-
-    get_likelihood_from_exemplars(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%
-    group_by(category) %>%
-    mutate(
-      observationID = 1:length(x),
-      x = x,
-      lapse_rate = get_lapse_rate(model),
-      lapse_bias = get_lapse_bias(model, categories = category),
-      prior = get_category_prior(model, categories = category)) %>%
-    group_by(observationID) %>%
-    mutate(posterior_probability = (likelihood * prior) / sum(likelihood * prior))
-
-  # How should lapses be treated?
-  if (lapse_treatment == "sample") {
-    posterior_probabilities %<>%
-      mutate(
-        posterior_probability = ifelse(
-          rep(
-            rbinom(1, 1, lapse_rate),
-            length(get_category_labels(model))),
-          lapse_bias,                 # substitute lapse probabilities for posterior
-          posterior_probability))     # ... or not
-  } else if (lapse_treatment == "marginalize") {
-    posterior_probabilities %<>%
-      mutate(posterior_probability =  lapse_rate * lapse_bias + (1 - lapse_rate) * posterior_probability)
-  }
-
-  # Apply decision rule
-  if (decision_rule == "criterion") {
-    posterior_probabilities %<>%
-      mutate(
-        # tie breaker in case of uniform probabilities
-        posterior_probability = ifelse(
-          rep(
-            sum(posterior_probability == max(posterior_probability)) > 1,
-            length(get_category_labels(model))),
-          posterior_probability + runif(
-            length(get_category_labels(model)),
-            min = 0,
-            max = 0),
-          posterior_probability),
-        # select most probable category
-        response = ifelse(posterior_probability == max(posterior_probability), 1, 0))
-  } else if (decision_rule == "sampling") {
-    posterior_probabilities %<>%
-      mutate(response = rmultinom(1, 1, posterior_probability) %>% as.vector())
-  } else if (decision_rule == "proportional") {
-    posterior_probabilities %<>%
-      mutate(response = posterior_probability)
-  } else warning("Unsupported decision rule. This should be impossible to happen. Do not trust the results.")
-
-  posterior_probabilities %<>%
-    ungroup() %>%
-    select(-c(likelihood, posterior_probability)) %>%
-    select(observationID, x, category, response)
-
-  if (simplify) {
-    .assert_that(decision_rule  %in% c("criterion", "sampling"),
-                msg = "For simplify = T, decision rule must be either criterion or sampling.")
-    return(posterior_probabilities %>%
-             filter(response == 1) %>%
-             select(observationID, category) %>%
-             arrange(observationID) %>%
-             rename(response = category) %>%
-             ungroup() %>%
-             pull(response))
-  } else return(posterior_probabilities)
-}
-
 # Deprecated after S7-migration
 
 #' Legacy wrapper for categorize.
@@ -153,7 +40,7 @@ get_categorization_from_exemplar_model <- function(
 #' @description Deprecated. Use \code{\link{categorize}} instead.
 #' @rdname get_categorization_from_model
 #' @export
-#' @deprecated Use categorize() instead.
+#' @description Deprecated. Use categorize() instead.
 #' @keywords internal
 get_categorization_from_exemplar_model <- function(
   x,
@@ -163,7 +50,11 @@ get_categorization_from_exemplar_model <- function(
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F
 ) {
-  warning("get_categorization_from_exemplar_model() is deprecated; use categorize() on an S7 cognitive model instead.", call. = FALSE)
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "get_categorization_from_exemplar_model()",
+    with = "categorize()"
+  )
   .assert_that(is.exemplar_model(model))
   .assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
               msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
@@ -219,7 +110,7 @@ get_categorization_from_exemplar_model <- function(
         response = ifelse(posterior_probability == max(posterior_probability), 1, 0))
   } else if (decision_rule == "sampling") {
     posterior_probabilities %<>%
-      mutate(response = rmultinom(1, 1, posterior_probability) %>% as.vector())
+      mutate(response = .rmultinom(1, 1, posterior_probability) %>% as.vector())
   } else if (decision_rule == "proportional") {
     posterior_probabilities %<>%
       mutate(response = posterior_probability)

@@ -13,8 +13,8 @@ test_that("deprecated wrappers forward to the S7 fit-input constructor", {
     cue2 = c(0.25, 0.35)
   )
 
-  obj <- expect_warning(
-    make_staninput(
+  expect_warning(
+    obj <- make_staninput(
       exposure = exposure,
       test = test,
       cues = c("cue1", "cue2"),

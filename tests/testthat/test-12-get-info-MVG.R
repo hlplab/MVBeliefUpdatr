@@ -1,12 +1,6 @@
-#' @import curl
-#' @import remotes
+idahoans <- make_vowel_test_data()
 
-library(curl)
-if (has_internet()) remotes::install_github("joeystanley/joeysvowels")
-library(joeysvowels)
-data("idahoans")
-
-my_model <- make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1", "F2"), verbose = T)
+my_model <- suppressMessages(make_MVG_ideal_observer_from_data(idahoans, category = "vowel", cues = c("F1", "F2"), verbose = FALSE))
 x.1 <- idahoans %>% mutate(x = map(F1, ~ c(...))) %>% pull(x)
 x.2 <- idahoans %>% mutate(x = map2(F1, F2, ~ c(...))) %>% pull(x)
 x.3 <- idahoans %>% mutate(x = pmap(.l = list(F1, F2, F3), ~ c(...))) %>% pull(x)
@@ -18,9 +12,9 @@ test_that("Test is.MVG_ideal_observer", {
   expect_false(is.MVG_ideal_observer("1"))
   expect_false(is.MVG_ideal_observer(TRUE))
   expect_false(is.MVG_ideal_observer(list(1)))
-  expect_false(is.MVG_ideal_observer(example_exemplar_model(1)))
-  expect_true(is.MVG_ideal_observer(example_MVG_ideal_observer(1)))
-  expect_false(is.MVG_ideal_observer(example_NIW_ideal_adaptor(1)))
+  expect_false(is.MVG_ideal_observer(suppressMessages(suppressWarnings(example_exemplar_model(1)))))
+  expect_true(is.MVG_ideal_observer(suppressMessages(suppressWarnings(example_MVG_ideal_observer(1)))))
+  expect_false(is.MVG_ideal_observer(suppressMessages(suppressWarnings(example_NIW_ideal_adaptor(1)))))
 #  expect_false(is.MVG_ideal_observer(example_ideal_adaptor_stanfit(1)))
 })
 
@@ -145,5 +139,20 @@ test_that("Get categorization from MVG ideal observer - input check x", {
   )
 
   expect_true(is.list(result))
+})
+
+test_that("MVG categorization aligns categories with observations", {
+  x <- x.2[1:3]
+  category_labels <- as.character(unique(my_model$category))
+
+  result <- suppressWarnings(get_categorization_from_MVG_ideal_observer(
+    x = x,
+    model = my_model,
+    decision_rule = "proportional"
+  ))
+
+  expect_equal(result$observationID, rep(seq_along(x), each = length(category_labels)))
+  expect_equal(as.character(result$category), rep(category_labels, times = length(x)))
+  expect_equal(result$x, rep(x, each = length(category_labels)))
 })
 

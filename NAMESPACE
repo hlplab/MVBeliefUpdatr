@@ -3,8 +3,8 @@
 S3method(control_params,ideal_adaptor_stanfit)
 S3method(ellipse,pmap)
 S3method(get_categorization_function,ideal_adaptor_stanfit)
-S3method(get_category_levels,ideal_adaptor_stanfit)
-S3method(get_cue_levels,ideal_adaptor_stanfit)
+S3method(get_category_levels,IdealAdaptorStanfit)
+S3method(get_cue_levels,IdealAdaptorStanfit)
 S3method(get_data,ideal_adaptor_stanfit)
 S3method(get_draws,ideal_adaptor_stanfit)
 S3method(get_expected_category_statistic,ideal_adaptor_stanfit)
@@ -16,8 +16,8 @@ S3method(get_exposure_category_mean,ideal_adaptor_stanfit)
 S3method(get_exposure_category_statistic,ideal_adaptor_stanfit)
 S3method(get_exposure_category_uss,ideal_adaptor_stanfit)
 S3method(get_exposure_data,ideal_adaptor_stanfit)
-S3method(get_group_levels,ideal_adaptor_stanfit)
-S3method(get_staninput_variable_levels,ideal_adaptor_stanfit)
+S3method(get_group_levels,IdealAdaptorStanfit)
+S3method(get_staninput_variable_levels,IdealAdaptorStanfit)
 S3method(get_stanmodelname,ideal_adaptor_stanfit)
 S3method(get_test_data,ideal_adaptor_stanfit)
 S3method(log_posterior,ideal_adaptor_stanfit)
@@ -46,6 +46,7 @@ export(IdealAdaptorStanfitInput)
 export(IdealAdaptorStaninput)
 export(MVBU_Stanfit)
 export(MVBU_Staninput)
+export(MVBU_TransformInformation)
 export(NIW_ideal_adaptor)
 export(add_exposure_data_to_1D_plot)
 export(add_exposure_data_to_2D_plot)
@@ -56,25 +57,40 @@ export(add_noise)
 export(add_test_data_to_1D_plot)
 export(add_test_data_to_2D_plot)
 export(aggregate_models_by_group_structure)
-export(assert_ideal_adaptor_stanfit)
+export(as_s7_category_representation_template)
+export(as_s7_exemplar_model)
+export(as_s7_exemplar_model_distribution)
+export(as_s7_exemplar_representations)
+export(as_s7_mnix_ideal_adaptor)
+export(as_s7_mnix_model_distribution)
+export(as_s7_mnix_representations)
+export(as_s7_model_distribution)
+export(as_s7_muvg_ideal_observer)
+export(as_s7_muvg_model_distribution)
+export(as_s7_muvg_representations)
+export(as_s7_mvg_ideal_observer)
+export(as_s7_mvg_model_distribution)
+export(as_s7_mvg_representations)
+export(as_s7_niw_ideal_adaptor)
+export(as_s7_niw_model_distribution)
+export(as_s7_niw_representations)
+export(assert_IdealAdaptorStanfit)
+export(assert_IdealAdaptorStaninput)
+export(assert_MVBU_CategoryRepresentation)
+export(assert_MVBU_CategoryRepresentationTemplate)
+export(assert_MVBU_CognitiveModel)
+export(assert_MVBU_ModelDistribution)
 export(assert_MVG_ideal_observer)
 export(assert_NIW_belief)
 export(assert_NIW_ideal_adaptor)
-export(assert_stanfit_input)
-export(assert_staninput)
 export(categorize)
-export(colMeans)
 export(control_params)
 export(control_staninput)
 export(cor2cov)
-export(cov)
 export(cov2css)
 export(cov2tau)
 export(css2cov)
 export(css2uss)
-export(dmvnorm)
-export(dmvt)
-export(do_call)
 export(evaluate_model)
 export(example_MVG_ideal_observer)
 export(example_NIW_ideal_adaptor)
@@ -89,8 +105,6 @@ export(get_NIW_posterior_predictive)
 export(get_NIW_posterior_predictive.pmap)
 export(get_S_from_expected_Sigma)
 export(get_affine_transform)
-export(get_aggregates_from_grouped_data_as_list_of_arrays)
-export(get_aggregates_from_grouped_data_as_list_of_lists)
 export(get_categorization_from_MVG_ideal_observer)
 export(get_categorization_from_NIW_ideal_adaptor)
 export(get_categorization_from_exemplar_model)
@@ -134,6 +148,7 @@ export(get_likelihood_from_MVG)
 export(get_likelihood_from_exemplars)
 export(get_limits)
 export(get_m_from_expected_mu)
+export(get_model_family_registration)
 export(get_nlevels_of_category_labels_from_model)
 export(get_number_of_draws)
 export(get_params)
@@ -143,6 +158,8 @@ export(get_posterior_from_MVG_ideal_observer)
 export(get_posterior_from_model)
 export(get_posterior_predictive_from_NIW_belief)
 export(get_priors_from_model)
+export(get_registered_model_families)
+export(get_stan_family_hooks)
 export(get_stanfit)
 export(get_staninput)
 export(get_staninput_from_stanfit)
@@ -170,7 +187,6 @@ export(is.MVG)
 export(is.MVG_ideal_observer)
 export(is.NIW_belief)
 export(is.NIW_ideal_adaptor)
-export(is.Sigma)
 export(is.exemplar_model)
 export(is.exemplars)
 export(is.ideal_adaptor_stanfit)
@@ -192,7 +208,16 @@ export(make_staninput)
 export(make_vector_column)
 export(neff_ratio)
 export(nest_cue_information_in_model)
+export(new_exemplar_model_distribution)
 export(new_ideal_adaptor_stanfit_input)
+export(new_mnix_model_distribution)
+export(new_model_distribution)
+export(new_muvg_model_distribution)
+export(new_mvbu_object)
+export(new_mvg_model_distribution)
+export(new_niw_model_distribution)
+export(new_nix_model_distribution)
+export(new_uvg_model_distribution)
 export(nuts_params)
 export(plot_expected_categories)
 export(plot_expected_categories_contour)
@@ -207,11 +232,10 @@ export(plot_pairwise_cue_correlation_matrix)
 export(plot_parameter_correlations)
 export(plot_parameters)
 export(posterior)
+export(register_model_family)
+export(register_stan_family_hooks)
 export(reshape_incremental_design_into_unique_exposure_test_combinations)
 export(rhat)
-export(rmultinom)
-export(rmvnorm)
-export(rmvt)
 export(sample_MVG_data)
 export(sample_NIW_data)
 export(sample_data_from_model)
@@ -256,135 +280,173 @@ import(rstantools)
 import(transformr)
 import(viridis)
 importFrom(Hmisc,"%nin%")
-importFrom(LaplacesDemon,is.positive.definite)
-importFrom(LaplacesDemon,is.positive.semidefinite)
+importFrom(LaplacesDemon,
+  is.positive.definite,
+  is.positive.semidefinite
+)
 importFrom(Rdpack,reprompt)
-importFrom(S7,S7_inherits)
-importFrom(S7,class_name)
-importFrom(S7,method)
-importFrom(S7,new_class)
-importFrom(S7,new_generic)
-importFrom(S7,new_object)
-importFrom(S7,props)
-importFrom(bayesplot,log_posterior)
-importFrom(bayesplot,neff_ratio)
-importFrom(bayesplot,nuts_params)
-importFrom(colorspace,darken)
-importFrom(colorspace,lighten)
-importFrom(dplyr,"%>%")
-importFrom(dplyr,across)
-importFrom(dplyr,arrange)
-importFrom(dplyr,between)
-importFrom(dplyr,case_when)
-importFrom(dplyr,cross_join)
-importFrom(dplyr,distinct)
-importFrom(dplyr,do)
-importFrom(dplyr,filter)
-importFrom(dplyr,first)
-importFrom(dplyr,group_by)
-importFrom(dplyr,group_map)
-importFrom(dplyr,left_join)
-importFrom(dplyr,mutate)
-importFrom(dplyr,mutate_at)
-importFrom(dplyr,near)
-importFrom(dplyr,pull)
-importFrom(dplyr,relocate)
-importFrom(dplyr,rename)
-importFrom(dplyr,rename_all)
-importFrom(dplyr,rename_at)
-importFrom(dplyr,rename_with)
-importFrom(dplyr,right_join)
-importFrom(dplyr,sample_frac)
-importFrom(dplyr,select)
-importFrom(dplyr,slice_sample)
-importFrom(dplyr,summarise)
-importFrom(dplyr,summarise_at)
-importFrom(dplyr,tally)
-importFrom(dplyr,transmute)
-importFrom(dplyr,ungroup)
+importFrom(S7,
+  S7_inherits,
+  class_name,
+  method,
+  new_class,
+  new_generic,
+  new_object,
+  props
+)
+importFrom(bayesplot,
+  log_posterior,
+  neff_ratio,
+  nuts_params
+)
+importFrom(colorspace,
+  darken,
+  lighten
+)
+importFrom(dplyr,
+  "%>%",
+  across,
+  arrange,
+  between,
+  case_when,
+  cross_join,
+  do,
+  filter,
+  first,
+  group_by,
+  left_join,
+  mutate,
+  mutate_at,
+  pull,
+  relocate,
+  rename,
+  rename_all,
+  rename_at,
+  rename_with,
+  right_join,
+  sample_frac,
+  select,
+  slice_sample,
+  summarise,
+  summarise_at,
+  transmute,
+  ungroup
+)
 importFrom(ellipse,ellipse)
-importFrom(extraDistr,dlst)
-importFrom(extraDistr,rlst)
+importFrom(extraDistr,
+  dlst,
+  rlst
+)
 importFrom(forcats,fct_rev)
-importFrom(foreach,"%do%")
-importFrom(foreach,foreach)
-importFrom(ggforce,facet_matrix)
-importFrom(ggforce,geom_autodensity)
+importFrom(foreach,
+  "%do%",
+  foreach
+)
+importFrom(ggforce,
+  facet_matrix,
+  geom_autodensity
+)
 importFrom(ggnewscale,new_scale)
 importFrom(ggridges,geom_density_ridges)
-importFrom(loo,extract_log_lik)
-importFrom(loo,loo)
-importFrom(loo,loo.array)
-importFrom(loo,relative_eff)
-importFrom(magrittr,"%<>%")
-importFrom(magrittr,"%T>%")
-importFrom(magrittr,is_weakly_greater_than)
-importFrom(mvtnorm,dmvnorm)
-importFrom(mvtnorm,dmvt)
-importFrom(mvtnorm,rmvnorm)
+importFrom(loo,
+  extract_log_lik,
+  loo,
+  loo.array,
+  relative_eff
+)
+importFrom(magrittr,
+  "%<>%",
+  "%T>%",
+  is_weakly_greater_than
+)
+importFrom(mvtnorm,
+  dmvnorm,
+  dmvt,
+  rmvnorm
+)
 importFrom(posterior,rhat)
-importFrom(purrr,invoke_map)
-importFrom(purrr,map)
-importFrom(purrr,map2)
-importFrom(purrr,map2_dbl)
-importFrom(purrr,map_chr)
-importFrom(purrr,map_dbl)
-importFrom(purrr,map_lgl)
-importFrom(purrr,pmap)
-importFrom(purrr,reduce)
-importFrom(rlang,"!!!")
-importFrom(rlang,"!!")
-importFrom(rlang,":=")
-importFrom(rlang,.data)
-importFrom(rlang,.env)
-importFrom(rlang,as_name)
-importFrom(rlang,expr)
-importFrom(rlang,is_missing)
-importFrom(rlang,is_scalar_double)
-importFrom(rlang,is_scalar_integerish)
-importFrom(rlang,is_symbol)
-importFrom(rlang,quo_is_null)
-importFrom(rlang,sym)
-importFrom(rlang,syms)
-importFrom(rstan,nlist)
-importFrom(rstan,sampling)
-importFrom(rstan,summary)
+importFrom(purrr,
+  invoke_map,
+  map,
+  map2,
+  map2_dbl,
+  map_chr,
+  map_dbl,
+  map_lgl,
+  pmap,
+  reduce
+)
+importFrom(rlang,
+  "!!!",
+  "!!",
+  ":=",
+  .data,
+  .env,
+  as_name,
+  expr,
+  is_missing,
+  is_scalar_integerish,
+  is_symbol,
+  quo_is_null,
+  sym,
+  syms
+)
+importFrom(rstan,
+  nlist,
+  sampling,
+  summary
+)
 importFrom(scales,trans_new)
-importFrom(stats,cov2cor)
-importFrom(stats,density)
-importFrom(stats,dmultinom)
-importFrom(stats,dnorm)
-importFrom(stats,plogis)
-importFrom(stats,prcomp)
-importFrom(stats,predict)
-importFrom(stats,qlogis)
-importFrom(stats,quantile)
-importFrom(stats,rbinom)
-importFrom(stats,rmultinom)
-importFrom(stats,rnorm)
-importFrom(stats,runif)
-importFrom(stats,sd)
-importFrom(stats,var)
-importFrom(tibble,is_tibble)
-importFrom(tibble,rownames_to_column)
-importFrom(tibble,tibble)
-importFrom(tidybayes,mean_hdi)
-importFrom(tidybayes,recover_types)
-importFrom(tidybayes,spread_draws)
-importFrom(tidyr,as_tibble)
-importFrom(tidyr,crossing)
-importFrom(tidyr,gather)
-importFrom(tidyr,nest)
-importFrom(tidyr,pivot_longer)
-importFrom(tidyr,pivot_wider)
-importFrom(tidyr,spread)
-importFrom(tidyr,unite)
-importFrom(tidyr,unnest)
-importFrom(tidyselect,all_of)
-importFrom(tidyselect,ends_with)
-importFrom(tidyselect,everything)
-importFrom(tidyselect,starts_with)
-importFrom(utils,data)
-importFrom(utils,globalVariables)
-importFrom(utils,packageVersion)
+importFrom(stats,
+  cov2cor,
+  density,
+  dmultinom,
+  dnorm,
+  plogis,
+  prcomp,
+  predict,
+  qlogis,
+  quantile,
+  rbinom,
+  rmultinom,
+  rnorm,
+  runif,
+  sd,
+  var
+)
+importFrom(tibble,
+  is_tibble,
+  rownames_to_column,
+  tibble
+)
+importFrom(tidybayes,
+  mean_hdi,
+  recover_types,
+  spread_draws
+)
+importFrom(tidyr,
+  as_tibble,
+  complete,
+  crossing,
+  drop_na,
+  gather,
+  nest,
+  pivot_longer,
+  pivot_wider,
+  replace_na,
+  spread,
+  unite,
+  unnest
+)
+importFrom(tidyselect,
+  all_of,
+  ends_with,
+  everything,
+  starts_with
+)
+importFrom(utils,
+  data,
+  globalVariables,
+  packageVersion
+)
 useDynLib(MVBeliefUpdatr, .registration=TRUE)

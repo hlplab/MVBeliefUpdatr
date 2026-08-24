@@ -1,13 +1,12 @@
 #' @include S7-core-classes.R
-#'
-#' S7 base class for transformation information for Stan models.
-#'
+
 #' @name MVBU-TransformInformation-class
+#' @title S7 base class for transformation information
 #' @docType class
 #'
-#' @property transform.parameters A list of sufficient parameters for the transform.
-#' @property transform.function Function to transform parameters.
-#' @property untransform.function Function to untransform parameters.
+#' @slot transform.parameters A list of sufficient parameters for the transform.
+#' @slot transform.function Function to transform parameters.
+#' @slot untransform.function Function to untransform parameters.
 #' @export
 MVBU_TransformInformation <- S7::new_class(
   "MVBU_TransformInformation",

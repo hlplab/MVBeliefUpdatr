@@ -1,18 +1,12 @@
-#' @import curl
-#' @import remotes
-
-library(curl)
-if (has_internet()) remotes::install_github("joeystanley/joeysvowels")
-library(joeysvowels)
-data("idahoans")
+idahoans <- make_vowel_test_data()
 
 test_that("make NIW belief", {
-  expect_true(is_tibble(make_NIW_belief_from_data(idahoans, category = "vowel", cues = c("F1"))))
-  expect_true(is_tibble(make_NIW_belief_from_data(idahoans, category = "vowel", cues = c("F1", "F2"))))
-  expect_true(is_tibble(make_NIW_belief_from_data(idahoans, category = "vowel", cues = c("F1", "F2", "F3"))))
+  expect_true(is_tibble(suppressMessages(make_NIW_belief_from_data(idahoans, category = "vowel", cues = c("F1")))))
+  expect_true(is_tibble(suppressMessages(make_NIW_belief_from_data(idahoans, category = "vowel", cues = c("F1", "F2")))))
+  expect_true(is_tibble(suppressMessages(make_NIW_belief_from_data(idahoans, category = "vowel", cues = c("F1", "F2", "F3")))))
 })
 
-x <- make_NIW_belief_from_data(idahoans, category = "vowel", cues = c("F1", "F2"))
+x <- suppressMessages(make_NIW_belief_from_data(idahoans, category = "vowel", cues = c("F1", "F2")))
 test_that("recognize NIW", {
   expect_false(is.exemplars(x))
   expect_false(is.exemplar_model(x))
@@ -30,14 +24,14 @@ test_that("get category and cue information from NIW", {
 })
 
 test_that("lift NIW ideal adaptor model", {
-  expect_true(is_tibble(lift_NIW_belief_to_NIW_ideal_adaptor(x)))
+  expect_true(is_tibble(suppressMessages(lift_NIW_belief_to_NIW_ideal_adaptor(x))))
 })
 
 test_that("make NIW ideal adaptor model", {
-  expect_true(is_tibble(make_NIW_ideal_adaptor_from_data(idahoans, category = "vowel", cues = c("F1"))))
-  expect_true(is_tibble(make_NIW_ideal_adaptor_from_data(idahoans, category = "vowel", cues = c("F1", "F2"))))
-  expect_true(is_tibble(make_NIW_ideal_adaptor_from_data(idahoans, category = "vowel", cues = c("F1", "F2", "F3"))))
-  expect_true(is_tibble(make_NIW_ideal_adaptor_from_data(idahoans, category = "vowel", cues = c("F1"), prior = rep(1/11, 11), lapse_rate = .05, lapse_bias = rep(1/11, 11))))
+  expect_true(is_tibble(suppressMessages(make_NIW_ideal_adaptor_from_data(idahoans, category = "vowel", cues = c("F1")))))
+  expect_true(is_tibble(suppressMessages(make_NIW_ideal_adaptor_from_data(idahoans, category = "vowel", cues = c("F1", "F2")))))
+  expect_true(is_tibble(suppressMessages(make_NIW_ideal_adaptor_from_data(idahoans, category = "vowel", cues = c("F1", "F2", "F3")))))
+  expect_true(is_tibble(suppressMessages(make_NIW_ideal_adaptor_from_data(idahoans, category = "vowel", cues = c("F1"), prior = rep(1/11, 11), lapse_rate = .05, lapse_bias = rep(1/11, 11)))))
   expect_message(make_NIW_ideal_adaptor_from_data(idahoans, category = "vowel", cues = c("F1")))
   expect_message(is_tibble(make_NIW_ideal_adaptor_from_data(idahoans, category = "vowel", cues = c("F1"), prior = rep(1/11, 11), lapse_rate = .05, lapse_bias = rep(1/11, 11))))
   expect_message(is_tibble(make_NIW_ideal_adaptor_from_data(idahoans %>% filter(vowel %in% c("AA", "OW")), category = "vowel", cues = c("F1"), prior = c("AA" = 1/2, "OW" = 1/2), lapse_rate = .05, lapse_bias = c("AA" = 1/2, "OW" = 1/2))))
@@ -46,7 +40,7 @@ test_that("make NIW ideal adaptor model", {
   expect_error(make_NIW_ideal_adaptor_from_data(idahoans, category = "vowel", cues = c("F1", "F2"), lapse_bias = rep(0, 10)))
 })
 
-x <- make_NIW_ideal_adaptor_from_data(idahoans, category = "vowel", cues = c("F1", "F2"))
+x <- suppressMessages(make_NIW_ideal_adaptor_from_data(idahoans, category = "vowel", cues = c("F1", "F2")))
 test_that("recognize NIW ideal adaptor model", {
   expect_false(is.exemplars(x))
   expect_false(is.exemplar_model(x))

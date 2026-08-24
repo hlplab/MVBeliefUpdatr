@@ -164,55 +164,6 @@ format_input_for_likelihood_calculation <- function(x, dim = 1) {
   return(x)
 }
 
-
-#' Get posterior from model
-#'
-#' Categorize a single observation based a model. The decision rule can be specified to be either the
-#' criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
-#' Luce's choice rule.
-#'
-#' @param x A vector of observations.
-#' @param model A model object.
-#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input.
-#' See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
-#' "sample"; "marginalize" otherwise).
-#' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
-#' If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
-#' a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
-#' will be adjusted based on the lapse formula lapse_rate * lapse_bias + (1 - lapse_rate) * posterior probability from
-#' perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
-#'
-#' @return A tibble of observations with posterior probabilities for each category (in long format).
-#'
-#' @seealso TBD
-#' @keywords TBD
-#' Get categorization from model
-#'
-#' Categorize a single observation based a model. The decision rule can be specified to be either the
-#' criterion choice rule, proportional matching (Luce's choice rule), or the sampling-based interpretation of
-#' Luce's choice rule.
-#'
-#' @param x A vector of observations.
-#' @param model A model object.
-#' @param decision_rule Must be one of "criterion", "proportional", or "sampling". (default: "sampling")
-#' @param noise_treatment Determines whether and how multivariate Gaussian noise is added to the input.
-#'   See \code{\link[=get_MVG_likelihood]{get_MVG_likelihood}}. (default: "sample" if decision_rule is
-#'   "sample"; "marginalize" otherwise).
-#' @param lapse_treatment Determines whether and how lapses will be treated. Can be "no_lapses", "sample" or "marginalize".
-#'   If "sample", whether a trial is lapsing or not will be sampled for each observations. If a trial is sampled to be
-#'   a lapsing trial the lapse biases are used as the posterior for that trial. If "marginalize", the posterior probability
-#'   will be adjusted based on the lapse formula lapse_rate \emph{lapse_bias + (1 - lapse_rate)} posterior probability from
-#'   perceptual model. (default: "sample" if decision_rule is "sample"; "marginalize" otherwise).
-#' @param simplify Should the output be simplified, and just the label of the selected category be returned? This
-#'   option is only available for the criterion and sampling decision rules. (default: `FALSE`)
-#'
-#' @return Either a tibble of observations with posterior probabilities for each category (in long format), or a
-#'   character vector indicating the chosen category in the same order as the observations in x (if simplify = `TRUE`).
-#'
-#' @seealso TBD
-#' @keywords TBD
-#' Evaluate the fit of a model
-#'
 #' Evaluate the fit of a categorization model against a ground truth (e.g., human responses or the category intended
 #' by a talker).
 #'
@@ -255,6 +206,13 @@ evaluate_model <- function(
     ...,
     return_by_x = F
 ) {
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "evaluate_model()",
+    with = "score_model()",
+    always = TRUE
+  )
+
   .assert_that(all(method %in% c("likelihood", "likelihood-up-to-constant", "accuracy")))
   # When the input isn't a list, that's ambiguous between the input being a single input or a set of
   # 1D inputs. Use the model's cue dimensionality to disambiguate between the two cases.
@@ -271,17 +229,17 @@ evaluate_model <- function(
       x = .env$x,
       response_category = .env$response_category) %>%
     group_by(x, response_category) %>%
-    tally() %>%
+    dplyr::tally() %>%
     ungroup()
 
   # Get predicted posterior probabilities of all k possible responses at all
   # *unique* stimulus locations (unique cue combinations)
   posterior <-
     d.unique.observations %>%
-    distinct(x) %>%
-    summarise(categorization = list(get_categorization_from_model(x = .data$x, model = .env$model, decision_rule = decision_rule, ...))) %>%
-    unnest(categorization) %>%
-    rename(posterior = response)
+    dplyr::distinct(x) %>%
+    dplyr::summarise(categorization = list(get_categorization_from_model(x = .data$x, model = .env$model, decision_rule = decision_rule, ...))) %>%
+    tidyr::unnest(categorization) %>%
+    dplyr::rename(posterior = response)
 
   r <- list()
   if ("accuracy" %in% method) {
@@ -404,10 +362,15 @@ evaluate_model <- function(
 #' @description Deprecated. Use \code{\link{posterior}} instead.
 #' @rdname get_posterior_from_model
 #' @export
-#' @deprecated Use posterior() instead.
+#' @description Deprecated. Use posterior() instead.
 #' @keywords internal
 get_posterior_from_model <- function(model, ...) {
-  warning("get_posterior_from_model() is deprecated; use posterior() on an S7 cognitive model instead.", call. = FALSE)
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "get_posterior_from_model()",
+    with = "posterior()",
+    always = TRUE
+  )
   if (S7::S7_inherits(model, MVBU_CognitiveModel)) {
     return(posterior(model, ...))
   }
@@ -431,10 +394,15 @@ get_posterior_from_model <- function(model, ...) {
 #' @description Deprecated. Use \code{\link{categorize}} instead.
 #' @rdname get_categorization_from_model
 #' @export
-#' @deprecated Use categorize() instead.
+#' @description Deprecated. Use categorize() instead.
 #' @keywords internal
 get_categorization_from_model <- function(model, decision_rule = "sampling", ...) {
-  warning("get_categorization_from_model() is deprecated; use categorize() on an S7 cognitive model instead.", call. = FALSE)
+  lifecycle::deprecate_warn(
+    when = "0.0.3",
+    what = "get_categorization_from_model()",
+    with = "categorize()",
+    always = TRUE
+  )
   if (S7::S7_inherits(model, MVBU_CognitiveModel)) {
     return(categorize(model, decision_rule = decision_rule, ...))
   }
@@ -468,7 +436,7 @@ get_categorization_from_model <- function(model, decision_rule = "sampling", ...
 #'
 #' @description Deprecated. Use \code{\link{get_cue_labels}} instead.
 #' @export
-#' @deprecated Use get_cue_labels() instead.
+#' @description Deprecated. Use get_cue_labels() instead.
 #' @keywords internal
 get_cue_labels_from_model <- function(x, indices = NULL) {
   if (S7::S7_inherits(x, MVBU_CategoryRepresentation) ||
@@ -494,7 +462,7 @@ get_cue_labels_from_model <- function(x, indices = NULL) {
 #'
 #' @description Deprecated. Use \code{\link{get_category_labels}} instead.
 #' @export
-#' @deprecated Use get_category_labels() instead.
+#' @description Deprecated. Use get_category_labels() instead.
 #' @keywords internal
 get_category_labels_from_model <- function(x, indices = NULL) {
   if (S7::S7_inherits(x, MVBU_CategoryRepresentation) ||
@@ -521,7 +489,7 @@ get_category_labels_from_model <- function(x, indices = NULL) {
 #'
 #' @description Deprecated. Use \code{\link{get_category_labels}} and take its length instead.
 #' @export
-#' @deprecated Use length(get_category_labels()) instead.
+#' @description Deprecated. Use length(get_category_labels()) instead.
 #' @keywords internal
 get_nlevels_of_category_labels_from_model <- function(x) {
   if (S7::S7_inherits(x, MVBU_CategoryRepresentation) ||
@@ -549,7 +517,7 @@ get_nlevels_of_category_labels_from_model <- function(x) {
 #'
 #' @description Deprecated. Use \code{\link{get_category_prior}} instead.
 #' @export
-#' @deprecated Use get_category_prior() instead.
+#' @description Deprecated. Use get_category_prior() instead.
 #' @keywords internal
 get_priors_from_model <- function(model, categories = model$category) {
   if (S7::S7_inherits(model, MVBU_CognitiveModel)) {
@@ -579,7 +547,7 @@ get_priors_from_model <- function(model, categories = model$category) {
 #'
 #' @description Deprecated. Use \code{\link{get_lapse_rate}} instead.
 #' @export
-#' @deprecated Use get_lapse_rate() instead.
+#' @description Deprecated. Use get_lapse_rate() instead.
 #' @keywords internal
 get_lapse_rate_from_model <- function(model) {
   if (S7::S7_inherits(model, MVBU_CognitiveModel)) {
@@ -607,7 +575,7 @@ get_lapse_rate_from_model <- function(model) {
 #'
 #' @description Deprecated. Use \code{\link{get_lapse_bias}} instead.
 #' @export
-#' @deprecated Use get_lapse_bias() instead.
+#' @description Deprecated. Use get_lapse_bias() instead.
 #' @keywords internal
 get_lapse_biases_from_model <- function(model, categories = model$category) {
   if (S7::S7_inherits(model, MVBU_CognitiveModel)) {

@@ -13,8 +13,11 @@ Legacy wrapper for get_category_labels.}
 }
 \description{
 Deprecated. Use \code{\link{get_category_labels}} instead.
+
+Deprecated. Use get_category_labels() instead.
 }
 \details{
 Get the unique labels for all categories from a likelihood (e.g., MVG or NIW_belief) or model (e.g., an MVG ideal observer
 or NIW ideal adaptor) object.
 }
+\keyword{internal}
