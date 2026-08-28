@@ -421,15 +421,13 @@ S7::method(get_group_labels, list(MVBU_ModelDistribution, S7::class_any)) <- fun
   prior
 }
 
-.mvbu_posterior_matrix <- function(x, new_data, categories = NULL, noise_treatment = "no_noise", lapse_treatment = "no_lapses") {
+.mvbu_likelihood_matrix <- function(x, new_data, categories = NULL, log = FALSE, noise_treatment = "no_noise", Sigma_noise = NULL) {
   representations <- get_category_representations(x)
   n_cat <- length(representations)
   category_names <- .mvbu_category_names(representations)
-  prior <- .mvbu_prior_in_repr_order(x, category_names)
 
   first_d <- length(get_cue_labels(representations[[1]]))
-  x_mat <- .as_observation_matrix(new_data, d = first_d, arg_name = "new_data")
-  n_obs <- nrow(x_mat)
+  n_obs <- nrow(.as_observation_matrix(new_data, d = first_d, arg_name = "new_data"))
 
   log_lik <- matrix(NA_real_, nrow = n_obs, ncol = n_cat)
   for (j in seq_len(n_cat)) {
@@ -441,9 +439,33 @@ S7::method(get_group_labels, list(MVBU_ModelDistribution, S7::class_any)) <- fun
       x_j,
       log = TRUE,
       noise_treatment = noise_treatment,
-      Sigma_noise = x@noise_behavior$Sigma_noise
+      Sigma_noise = Sigma_noise
     ))
   }
+
+  if (!is.null(categories)) {
+    category_idx <- match(as.character(categories), category_names)
+    log_lik <- log_lik[, category_idx, drop = FALSE]
+    category_names <- category_names[category_idx]
+  }
+
+  colnames(log_lik) <- category_names
+  if (log) log_lik else exp(log_lik)
+}
+
+.mvbu_posterior_matrix <- function(x, new_data, categories = NULL, noise_treatment = "no_noise", lapse_treatment = "no_lapses") {
+  representations <- get_category_representations(x)
+  n_cat <- length(representations)
+  category_names <- .mvbu_category_names(representations)
+  prior <- .mvbu_prior_in_repr_order(x, category_names)
+
+  log_lik <- .mvbu_likelihood_matrix(
+    x, new_data,
+    log = TRUE,
+    noise_treatment = noise_treatment,
+    Sigma_noise = x@noise_behavior$Sigma_noise
+  )
+  n_obs <- nrow(log_lik)
 
   log_joint <- sweep(log_lik, 2, log(prior), "+")
   log_norm <- .logsumexp_rows(log_joint)
@@ -453,7 +475,7 @@ S7::method(get_group_labels, list(MVBU_ModelDistribution, S7::class_any)) <- fun
     lapse_rate <- as.numeric(x@lapse_behavior$lapse_rate)
     lapse_bias <- as.numeric(x@lapse_behavior$lapse_bias)
     if (length(lapse_bias) != n_cat) {
-      stop("lapse_bias length must match the number of category representations.", call. = FALSE)
+      .stop("lapse_bias length must match the number of category representations.")
     }
     if (lapse_rate > 0) {
       for (i in seq_len(n_obs)) {
@@ -466,20 +488,58 @@ S7::method(get_group_labels, list(MVBU_ModelDistribution, S7::class_any)) <- fun
     lapse_rate <- as.numeric(x@lapse_behavior$lapse_rate)
     lapse_bias <- as.numeric(x@lapse_behavior$lapse_bias)
     if (length(lapse_bias) != n_cat) {
-      stop("lapse_bias length must match the number of category representations.", call. = FALSE)
+      .stop("lapse_bias length must match the number of category representations.")
     }
     posterior <- (1 - lapse_rate) * posterior + lapse_rate * matrix(lapse_bias, nrow = n_obs, ncol = n_cat, byrow = TRUE)
   }
 
   if (!is.null(categories)) {
-    categories <- as.character(categories)
-    category_idx <- match(categories, names(representations))
+    category_idx <- match(as.character(categories), category_names)
     posterior <- posterior[, category_idx, drop = FALSE]
     category_names <- category_names[category_idx]
   }
 
   colnames(posterior) <- category_names
   posterior
+}
+
+S7::method(get_category_likelihood_function, MVBU_CategoryRepresentationTemplate) <- function(x) {
+  representations <- get_category_representations(x)
+  function(new_data, log = FALSE, noise_treatment = "no_noise", Sigma_noise = NULL, categories = NULL) {
+    .mvbu_likelihood_matrix(
+      x, new_data,
+      categories = categories, log = log,
+      noise_treatment = noise_treatment, Sigma_noise = Sigma_noise
+    )
+  }
+}
+
+S7::method(likelihood, list(MVBU_CategoryRepresentation, S7::class_any, S7::class_any)) <- function(x, new_data, categories) {
+  lik_fn <- x@category_likelihood_function
+  d <- length(get_cue_labels(x))
+  new_data <- .as_observation_matrix(new_data, d = d, arg_name = "new_data")
+  as.numeric(lik_fn(new_data, log = FALSE, noise_treatment = "no_noise", Sigma_noise = NULL))
+}
+
+S7::method(likelihood, list(MVBU_CategoryRepresentationTemplate, S7::class_any, S7::class_any)) <- function(x, new_data, categories) {
+  if (missing(categories)) categories <- NULL
+  .mvbu_likelihood_matrix(x, new_data, categories = categories, log = FALSE)
+}
+
+S7::method(likelihood, list(MVBU_CognitiveModel, S7::class_list, S7::class_any)) <- function(x, new_data, categories) {
+  if (missing(categories)) categories <- NULL
+  lapply(new_data, function(batch) likelihood(x, batch, categories))
+}
+
+S7::method(likelihood, list(MVBU_CognitiveModel, S7::class_any, S7::class_any)) <- function(x, new_data, categories) {
+  if (missing(categories)) categories <- NULL
+  .mvbu_likelihood_matrix(
+    x, new_data,
+    categories = categories,
+    log = FALSE,
+    noise_treatment = x@noise_behavior$noise_treatment,
+    Sigma_noise = x@noise_behavior$Sigma_noise
+  )
 }
 
 S7::method(get_category_posterior_function, list(MVBU_CognitiveModel, S7::class_any, S7::class_any)) <- function(x, noise_treatment, lapse_treatment) {
@@ -502,10 +562,12 @@ S7::method(get_category_posterior_function, list(MVBU_CognitiveModel, S7::class_
 }
 
 S7::method(posterior, list(MVBU_CognitiveModel, S7::class_list, S7::class_any)) <- function(x, new_data, categories) {
+  if (missing(categories)) categories <- NULL
   lapply(new_data, function(batch) posterior(x, batch, categories))
 }
 
 S7::method(posterior, list(MVBU_CognitiveModel, S7::class_any, S7::class_any)) <- function(x, new_data, categories) {
+  if (missing(categories)) categories <- NULL
   pf <- S7::method(get_category_posterior_function, list(MVBU_CognitiveModel, S7::class_any, S7::class_any))(x)
   pf(new_data, categories = categories)
 }
@@ -519,25 +581,20 @@ S7::method(categorize, list(MVBU_CognitiveModel, S7::class_any, S7::class_any)) 
     decision_rule <- x@decision_rule
   }
   posterior_matrix <- posterior(x, new_data, categories = NULL)
-  if (identical(decision_rule, "sampling")) {
-    sampled <- vapply(seq_len(nrow(posterior_matrix)), function(i) {
-      sample(colnames(posterior_matrix), size = 1, prob = posterior_matrix[i, ])
-    }, character(1))
-    chosen_idx <- match(sampled, colnames(posterior_matrix))
-    probability <- posterior_matrix[cbind(seq_len(nrow(posterior_matrix)), chosen_idx)]
-    return(data.frame(category = as.character(sampled), probability = as.numeric(probability), stringsAsFactors = FALSE))
+  categories <- colnames(posterior_matrix)
+  n_obs <- nrow(posterior_matrix)
+
+  chosen_idx <- if (identical(decision_rule, "sampling")) {
+    vapply(seq_len(n_obs), function(i) sample.int(length(categories), 1L, prob = posterior_matrix[i, ]), integer(1))
+  } else if (identical(decision_rule, "criterion") || identical(decision_rule, "proportional")) {
+    apply(posterior_matrix, 1, which.max)
+  } else {
+    .stop("Invalid decision_rule: ", decision_rule, ". Must be one of 'criterion', 'sampling', or 'proportional'.")
   }
-  if (identical(decision_rule, "criterion")) {
-    best_idx <- apply(posterior_matrix, 1, which.max)
-    category <- colnames(posterior_matrix)[best_idx]
-    probability <- posterior_matrix[cbind(seq_len(nrow(posterior_matrix)), best_idx)]
-    return(data.frame(category = as.character(category), probability = as.numeric(probability), stringsAsFactors = FALSE))
-  }
-  if (identical(decision_rule, "proportional")) {
-    best_idx <- apply(posterior_matrix, 1, which.max)
-    category <- colnames(posterior_matrix)[best_idx]
-    probability <- posterior_matrix[cbind(seq_len(nrow(posterior_matrix)), best_idx)]
-    return(data.frame(category = as.character(category), probability = as.numeric(probability), stringsAsFactors = FALSE))
-  }
-  stop("unsupported decision_rule", call. = FALSE)
+
+  data.frame(
+    category = as.character(categories[chosen_idx]),
+    probability = as.numeric(posterior_matrix[cbind(seq_len(n_obs), chosen_idx)]),
+    stringsAsFactors = FALSE
+  )
 }

@@ -164,8 +164,7 @@ format_input_for_likelihood_calculation <- function(x, dim = 1) {
   return(x)
 }
 
-#' Evaluate the fit of a categorization model against a ground truth (e.g., human responses or the category intended
-#' by a talker).
+#' Evaluate the fit of a categorization model 
 #'
 #' @param model A model object.
 #' @param x A vector of inputs (cue values).
@@ -206,13 +205,6 @@ evaluate_model <- function(
     ...,
     return_by_x = F
 ) {
-  lifecycle::deprecate_warn(
-    when = "0.0.3",
-    what = "evaluate_model()",
-    with = "score_model()",
-    always = TRUE
-  )
-
   .assert_that(all(method %in% c("likelihood", "likelihood-up-to-constant", "accuracy")))
   # When the input isn't a list, that's ambiguous between the input being a single input or a set of
   # 1D inputs. Use the model's cue dimensionality to disambiguate between the two cases.
@@ -234,11 +226,10 @@ evaluate_model <- function(
 
   # Get predicted posterior probabilities of all k possible responses at all
   # *unique* stimulus locations (unique cue combinations)
+  d.unique.x <- dplyr::distinct(d.unique.observations, x)
   posterior <-
-    d.unique.observations %>%
-    dplyr::distinct(x) %>%
-    dplyr::summarise(categorization = list(get_categorization_from_model(x = .data$x, model = .env$model, decision_rule = decision_rule, ...))) %>%
-    tidyr::unnest(categorization) %>%
+    .legacy_long_posterior(model, d.unique.x$x, noise_treatment = "no_noise", lapse_treatment = "marginalize") %>%
+    .legacy_apply_decision_rule(decision_rule) %>%
     dplyr::rename(posterior = response)
 
   r <- list()
@@ -357,6 +348,64 @@ evaluate_model <- function(
 
 # Deprecated after S7-migration
 
+# Reduce legacy `x` inputs (vector, matrix, data frame, or list of any of these)
+# into a single n x d observation matrix.
+.legacy_observation_matrix <- function(x, d, arg_name = "x") {
+  if (is.list(x) && !is.data.frame(x)) {
+    if (length(x) == 0L) .stop(arg_name, " must contain at least one observation.")
+    return(do.call(rbind, lapply(x, function(v) .as_observation_matrix(v, d = d, arg_name = arg_name))))
+  }
+  .as_observation_matrix(x, d = d, arg_name = arg_name)
+}
+
+.legacy_observation_list <- function(x_mat) {
+  lapply(seq_len(nrow(x_mat)), function(i) unname(x_mat[i, ]))
+}
+
+# Long-format posterior table matching the legacy column layout, built from S7 methods.
+.legacy_long_posterior <- function(model, x, noise_treatment, lapse_treatment) {
+  d <- length(get_cue_labels(model))
+  x_mat <- .legacy_observation_matrix(x, d)
+  x_list <- .legacy_observation_list(x_mat)
+
+  pf <- get_category_posterior_function(model, noise_treatment, lapse_treatment)
+  post <- pf(x_mat, categories = NULL)
+  cats <- colnames(post)
+
+  tibble(
+    observationID = rep(seq_len(nrow(post)), each = length(cats)),
+    x = rep(x_list, each = length(cats)),
+    category = rep(cats, times = nrow(post)),
+    posterior_probability = as.vector(t(post))
+  )
+}
+
+.legacy_apply_decision_rule <- function(d.post, decision_rule) {
+  n_cats <- length(unique(d.post$category))
+  probs <- matrix(d.post$posterior_probability, ncol = n_cats, byrow = TRUE)
+
+  response <- if (identical(decision_rule, "proportional")) {
+    probs
+  } else if (identical(decision_rule, "criterion")) {
+    t(apply(probs, 1, function(p) as.numeric(seq_along(p) == which.max(p))))
+  } else if (identical(decision_rule, "sampling")) {
+    t(apply(probs, 1, function(p) as.numeric(stats::rmultinom(1, 1, p))))
+  } else {
+    .stop("Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
+  }
+
+  d.post$response <- as.vector(t(matrix(response, ncol = n_cats)))
+  d.post[, c("observationID", "x", "category", "response")]
+}
+
+.legacy_simplify_categorization <- function(d.response, decision_rule) {
+  .assert_that(decision_rule %in% c("criterion", "sampling"),
+               msg = "For simplify = T, decision rule must be either criterion or sampling.")
+  winners <- d.response[d.response$response == 1, c("observationID", "category")]
+  winners <- winners[order(winners$observationID), ]
+  winners$category
+}
+
 #' Legacy wrapper for posterior.
 #'
 #' @description Deprecated. Use \code{\link{posterior}} instead.
@@ -371,8 +420,13 @@ get_posterior_from_model <- function(model, ...) {
     with = "posterior()",
     always = TRUE
   )
+  dots <- list(...)
+  if (!is.null(dots$x) && is.null(dots$new_data)) {
+    dots$new_data <- dots$x
+    dots$x <- NULL
+  }
   if (S7::S7_inherits(model, MVBU_CognitiveModel)) {
-    return(posterior(model, ...))
+    return(do.call(posterior, c(list(model), dots)))
   }
   if (is.MVG_ideal_observer(model)) {
     c <- get_posterior_from_MVG_ideal_observer(model = model, ...)
@@ -403,8 +457,13 @@ get_categorization_from_model <- function(model, decision_rule = "sampling", ...
     with = "categorize()",
     always = TRUE
   )
+  dots <- list(...)
+  if (!is.null(dots$x) && is.null(dots$new_data)) {
+    dots$new_data <- dots$x
+    dots$x <- NULL
+  }
   if (S7::S7_inherits(model, MVBU_CognitiveModel)) {
-    return(categorize(model, decision_rule = decision_rule, ...))
+    return(do.call(categorize, c(list(model), dots, list(decision_rule = decision_rule))))
   }
   if (is.MVG_ideal_observer(model)) {
     c <- get_categorization_from_MVG_ideal_observer(model = model, decision_rule = decision_rule, ...)
@@ -475,7 +534,7 @@ get_category_labels_from_model <- function(x, indices = NULL) {
     return(sort(unique(x$category)))
   }
 
-  stop("Object not recognized.", call. = FALSE)
+  .stop("Object not recognized.")
 }
 
 #' Get number of categories from likelihood or model
@@ -503,7 +562,7 @@ get_nlevels_of_category_labels_from_model <- function(x) {
     return(length(unique(x$category)))
   }
 
-  stop("Object not recognized.", call. = FALSE)
+  .stop("Object not recognized.")
 }
 
 #' Get priors from model

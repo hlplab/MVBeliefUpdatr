@@ -30,6 +30,10 @@ is.MVG_ideal_observer <- function(x, group = NULL, category = "category", is.lon
   .assert_non_NA_scalar_logical(with.lapse)
   .assert_non_NA_scalar_logical(with.lapse_bias)
 
+  if (S7::S7_inherits(x, MVBU_Object)) {
+    return(S7::S7_inherits(x, MVG_IdealObserver))
+  }
+
   if (!is.MVBU_model(x, group = group, verbose = verbose, tolerance = tolerance)) {
     return(FALSE)
   }

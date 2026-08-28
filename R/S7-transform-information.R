@@ -19,7 +19,7 @@ MVBU_TransformInformation <- S7::new_class(
   ),
   constructor = function(transform.parameters = list(), transform.function = function(x) x, untransform.function = function(x) x) {
     S7::new_object(
-      MVBU_TransformInformation,
+      MVBU_Object(),
       transform.parameters = as.list(transform.parameters),
       transform.function = transform.function,
       untransform.function = untransform.function

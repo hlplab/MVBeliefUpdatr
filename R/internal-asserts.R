@@ -645,16 +645,6 @@ NULL
 #' Internal assertion helper.
 #'
 #' @param x Object to test.
-#' @param msg Optional error message.
-#' @return Invisibly TRUE if the object is a stanfit object.
-#' @noRd
-.assert_stanfit <- function(x, msg = NULL) {
-  .assert_true(inherits(x, "stanfit"), msg = if (is.null(msg)) "Expected a stanfit object." else msg)
-}
-
-#' Internal assertion helper.
-#'
-#' @param x Object to test.
 #' @return Invisibly TRUE if the object contains draws.
 #' @noRd
 .assert_contains_draws <- function(x) {

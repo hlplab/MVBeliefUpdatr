@@ -13,10 +13,12 @@ plot_prep_mvbu <- S7::new_generic("plot_prep_mvbu", "x")
 
 get_model_family <- S7::new_generic("get_model_family", "x")
 get_metadata <- S7::new_generic("get_metadata", "x")
-get_category_likelihood_function <- S7::new_generic("get_category_likelihood_function", "x")
-get_category_template <- S7::new_generic("get_category_template", "x")
-get_category_representations <- S7::new_generic("get_category_representations", "x")
 get_parameters <- S7::new_generic("get_parameters", "x")
+
+get_category_representations <- S7::new_generic("get_category_representations", "x")
+get_category_template <- S7::new_generic("get_category_template", "x")
+
+
 
 #' Get the stored Stan fit from an S7 fit object.
 #'
@@ -105,6 +107,17 @@ get_cue_labels <- S7::new_generic("get_cue_labels", c("x", "indices"))
 get_category_labels <- S7::new_generic("get_category_labels", c("x", "indices"))
 get_group_labels <- S7::new_generic("get_group_labels", c("x", "indices"))
 
+
+#' Extract the category-likelihood function from a representation, template, or model.
+#'
+#' For NIX, MNIX, and NIW families the returned function evaluates the posterior
+#' predictive, which is the category likelihood for those families.
+#'
+#' @param x A category representation, representation template, or cognitive model.
+#' @return A function of `(new_data, log, noise_treatment, Sigma_noise)` returning category likelihoods.
+#' @export
+get_category_likelihood_function <- S7::new_generic("get_category_likelihood_function", "x")
+
 #' Extract a category-posterior function from a cognitive model.
 #'
 #' @param x A cognitive model object.
@@ -113,6 +126,19 @@ get_group_labels <- S7::new_generic("get_group_labels", c("x", "indices"))
 #' @return A function that computes category posterior probabilities for one or more observations.
 #' @export
 get_category_posterior_function <- S7::new_generic("get_category_posterior_function", c("x", "noise_treatment", "lapse_treatment"))
+
+#' Compute category likelihoods for one or more observations.
+#'
+#' For NIX, MNIX, and NIW families the likelihood is the posterior predictive of
+#' the category, so this generic supersedes the family-specific posterior
+#' predictive helpers.
+#'
+#' @param x A category representation, representation template, or cognitive model.
+#' @param new_data A numeric matrix of observations, a vector, or a list of observations.
+#' @param categories An optional subset of categories to restrict the result to.
+#' @return A matrix of category likelihoods with one row per observation and one column per category.
+#' @export
+likelihood <- S7::new_generic("likelihood", c("x", "new_data", "categories"))
 
 #' Compute posterior category probabilities for one or more observations.
 #'
@@ -132,8 +158,25 @@ posterior <- S7::new_generic("posterior", c("x", "new_data", "categories"))
 #' @export
 categorize <- S7::new_generic("categorize", c("x", "new_data", "decision_rule"))
 
-update_model <- S7::new_generic("update_model", c("x", "data"))
-update_category_likelihood <- S7::new_generic("update_category_likelihood", c("x", "data"))
+#' Update a model's category-representation template from observations.
+#'
+#' Currently implemented for `NIW_IdealAdaptor`; methods for other model types
+#' will be added as their update workflows are migrated to S7.
+#' @param x A model object.
+#' @param observations Observations used for updating.
+#' @return An updated model, or a history of updated models when requested by a method.
+#' @export
+update_template <- S7::new_generic("update_template", c("x", "observations"))
+
+#' Update a category representation from observations.
+#'
+#' @param x A category representation object.
+#' @param x_N Number of observations represented by the sufficient statistics.
+#' @param x_mean Mean vector of the represented observations.
+#' @param x_SS Centered sum-of-squares matrix of the represented observations.
+#' @return An updated category representation.
+#' @export
+update_category_representation <- S7::new_generic("update_category_representation", c("x", "x_N", "x_mean", "x_SS"))
 
 get_expected_category <- S7::new_generic("get_expected_category", "x")
 

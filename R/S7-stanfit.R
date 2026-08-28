@@ -87,7 +87,7 @@ MVBU_Stanfit <- S7::new_class(
     }
 
     S7::new_object(
-      MVBU_Stanfit,
+      MVBU_Object(),
       data = as.data.frame(data),
       staninput = staninput,
       stanvars = stanvars,
@@ -121,7 +121,13 @@ MVBU_Stanfit <- S7::new_class(
         return("`stanfit` must inherit from stanfit when provided")
       }
       if (!(self@stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels))) {
-        return("`stanfit` model_name is not recognized")
+        return(
+          paste(
+            "`stanfit` model_name is not recognized. `stanfit` has to be created by one of the accepted stanmodels:\n\t",
+            paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),
+            "\n(you can get the name of your model from your_stanfit@model_name)."
+          )
+        )
       }
     }
     if (!is.list(self@criteria)) {
@@ -162,20 +168,21 @@ IdealAdaptorStanfit <- S7::new_class(
     labels = list()
   ) {
     S7::new_object(
-      IdealAdaptorStanfit,
-      data = data,
-      staninput = staninput,
-      stanvars = stanvars,
-      backend = as.character(backend),
-      save_pars = save_pars,
-      stan_args = as.list(stan_args),
-      stanfit = stanfit,
-      basis = basis,
-      transform_information = if (is.null(transform_information)) MVBU_TransformInformation() else transform_information,
-      criteria = as.list(criteria),
-      file = as.character(file),
-      version = if (is.null(version)) get_current_versions() else version,
-      labels = as.list(labels)
+      MVBU_Stanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = as.character(backend),
+        save_pars = save_pars,
+        stan_args = as.list(stan_args),
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = if (is.null(transform_information)) MVBU_TransformInformation() else transform_information,
+        criteria = as.list(criteria),
+        file = as.character(file),
+        version = if (is.null(version)) get_current_versions() else version,
+        labels = as.list(labels)
+      )
     )
   }
 )
@@ -200,20 +207,21 @@ NIX_IdealAdaptorStanfit <- S7::new_class(
     labels = list()
   ) {
     S7::new_object(
-      NIX_IdealAdaptorStanfit,
-      data = data,
-      staninput = staninput,
-      stanvars = stanvars,
-      backend = as.character(backend),
-      save_pars = save_pars,
-      stan_args = as.list(stan_args),
-      stanfit = stanfit,
-      basis = basis,
-      transform_information = if (is.null(transform_information)) MVBU_TransformInformation() else transform_information,
-      criteria = as.list(criteria),
-      file = as.character(file),
-      version = if (is.null(version)) get_current_versions() else version,
-      labels = as.list(labels)
+      IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = as.character(backend),
+        save_pars = save_pars,
+        stan_args = as.list(stan_args),
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = if (is.null(transform_information)) MVBU_TransformInformation() else transform_information,
+        criteria = as.list(criteria),
+        file = as.character(file),
+        version = if (is.null(version)) get_current_versions() else version,
+        labels = as.list(labels)
+      )
     )
   }
 )
@@ -238,20 +246,21 @@ MNIX_IdealAdaptorStanfit <- S7::new_class(
     labels = list()
   ) {
     S7::new_object(
-      MNIX_IdealAdaptorStanfit,
-      data = data,
-      staninput = staninput,
-      stanvars = stanvars,
-      backend = as.character(backend),
-      save_pars = save_pars,
-      stan_args = as.list(stan_args),
-      stanfit = stanfit,
-      basis = basis,
-      transform_information = if (is.null(transform_information)) MVBU_TransformInformation() else transform_information,
-      criteria = as.list(criteria),
-      file = as.character(file),
-      version = if (is.null(version)) get_current_versions() else version,
-      labels = as.list(labels)
+      IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = as.character(backend),
+        save_pars = save_pars,
+        stan_args = as.list(stan_args),
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = if (is.null(transform_information)) MVBU_TransformInformation() else transform_information,
+        criteria = as.list(criteria),
+        file = as.character(file),
+        version = if (is.null(version)) get_current_versions() else version,
+        labels = as.list(labels)
+      )
     )
   }
 )
@@ -276,20 +285,21 @@ NIW_IdealAdaptorStanfit <- S7::new_class(
     labels = list()
   ) {
     S7::new_object(
-      NIW_IdealAdaptorStanfit,
-      data = data,
-      staninput = staninput,
-      stanvars = stanvars,
-      backend = as.character(backend),
-      save_pars = save_pars,
-      stan_args = as.list(stan_args),
-      stanfit = stanfit,
-      basis = basis,
-      transform_information = if (is.null(transform_information)) MVBU_TransformInformation() else transform_information,
-      criteria = as.list(criteria),
-      file = as.character(file),
-      version = if (is.null(version)) get_current_versions() else version,
-      labels = as.list(labels)
+      IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = as.character(backend),
+        save_pars = save_pars,
+        stan_args = as.list(stan_args),
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = if (is.null(transform_information)) MVBU_TransformInformation() else transform_information,
+        criteria = as.list(criteria),
+        file = as.character(file),
+        version = if (is.null(version)) get_current_versions() else version,
+        labels = as.list(labels)
+      )
     )
   }
 )
