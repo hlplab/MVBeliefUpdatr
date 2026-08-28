@@ -1,4 +1,6 @@
-Compacted conversationI’m formatting the checklist into a copy-ready Markdown block for you.
+## Current Status
+
+Phase 3 is in progress. The S7 foundation, model constructors, family coercions, and modern example/test infrastructure are substantially migrated. The remaining work is concentrated in NIW updating, higher-level legacy consumers, and the Stanfit/model-distribution integration.
 
 ## Implementation checklist for the S7 Stanfit migration
 
@@ -10,15 +12,15 @@ Compacted conversationI’m formatting the checklist into a copy-ready Markdown 
 - [x] Add validators for the new classes and enforce the required slots
 
 ### Phase 2: Split the Stan input and fit pipeline
-- [ ] Rename the current Stan-input preparation file `make-staninput.R` to `R/S7-staninput.R`
-- [ ] Update the input-preparation code to construct the new S7 Stan-input object instead of returning the old list-based structure
+- [x] Rename the current Stan-input preparation file `make-staninput.R` to `R/S7-staninput.R`
+- [x] Update the input-preparation code to construct the new S7 Stan-input object instead of returning the old list-based structure
 - [ ] Update the fit pipeline so it constructs a new Stan-fit object and attaches it to the relevant model-distribution object
 - [x] Preserve transformed/untransformed input and transform metadata in the new fit object
 
 ### Phase 3: Move Stan accessors and helpers to S7
-- [ ] Rename the core class file to `R/S7-core-classes.R`
-- [ ] Rename the generics file to `R/S7-core-generics.R`
-- [ ] Rename the methods file to `R/S7-core-methods.R`
+- [x] Rename the core class file to `R/S7-core-classes.R`
+- [x] Rename the generics file to `R/S7-generics.R`
+- [x] Rename the methods file to `R/S7-core-methods.R`
 - [ ] Add `get_model_type()` as a generic and implement it for standard model objects and S7 objects
 - [ ] Add `get_representation_type()` as a generic and implement it for representation objects
 - [x] Implement Stan-facing accessors in the S7 methods layer:
@@ -30,8 +32,17 @@ Compacted conversationI’m formatting the checklist into a copy-ready Markdown 
   - [x] `get_untransform_function()`
 - [ ] Add forwarding methods for standard rstan-style access patterns where appropriate
 
+### Completed adjacent S7 migration work
+- [x] Add S7 constructors from data for representations, templates, and models across UVG, NIX, MUVG, MNIX, MVG, NIW, and EXEMPLAR.
+- [x] Add generic `type` dispatchers for the from-data constructors.
+- [x] Add family coercions for representations, templates, and models, including multi-cue MUVG/MNIX support.
+- [x] Move examples to `R/S7-example-objects.R` and provide representation, template, model, and generic example functions.
+- [x] Replace legacy sampling helpers with `sample_observations()` for S7 objects.
+- [x] Reduce `make_*`/`lift_*` functions to deprecated wrappers.
+- [x] Consolidate modern constructor, coercion, example, and deprecated-wrapper tests.
+
 ### Phase 4: Consolidate helpers and utilities
-- [ ] Create `R/S7-stanfit-utils.R` for general helper functions
+- [ ] Create `R/S7-stanfit-utils.R` for general stanfit-related helper functions
 - [ ] Rename helper functions to neutral names where appropriate:
   - [ ] `read_stanfit()` instead of `read_ideal_adaptor_stanfit()`
   - [ ] `write_stanfit()` instead of `write_ideal_adaptor_stanfit()`
@@ -43,22 +54,20 @@ Compacted conversationI’m formatting the checklist into a copy-ready Markdown 
 - [ ] Delete or simplify any now-unnecessary helper functions such as old `is.ideal_adaptor_stanfit_input`-style shims if they are redundant with S7 validators or new class checks
 - [ ] Fix any broken or convoluted logic introduced during earlier migration attempts, especially around transform handling, fit-object persistence, Stan input validation, and draws detection
 
-### Files to modify or create
-- [ ] S7-classes.R
-- [ ] S7-generics.R
-- [ ] s7-methods.R
-- [ ] class-NIW-IA-stanfit.R
-- [ ] fit-IA-stanfit.R
-- [ ] `R/S7-stanfit-staninput.R`
-- [ ] `R/S7-stanfit-utils.R`
-- [ ] get-info-from-NIW-IA-stanfit.R
-- [ ] methods-NIW-IA-stanfit.R
-
 ### Testing plan
-- [ ] Add regression tests for the new Stan-input classes
-- [ ] Add regression tests for the new Stan-fit classes
+- [x] Add regression tests for the new Stan-input classes
+- [x] Add regression tests for the new Stan-fit classes
 - [ ] Add regression tests for `get_model_type()` and `get_representation_type()`
 - [ ] Add regression tests for Stan accessors such as `get_stanfit()`, `set_stanfit()`, and `get_staninput()`
-- [ ] Verify the package still loads and the S7-focused tests pass after each phase
+- [x] Verify the package still loads and the S7-focused tests pass after each phase
+
+## Next Work
+
+- [ ] Migrate NIW updating to operate on S7 models.
+- [ ] Migrate likelihood, categorization, evaluation, and legacy info consumers that still require tibble models.
+- [ ] Finish `tests/functions-to-make-or-load-models.R` S7 migration. `sample_data_from_model()` is gone; one `lift_MVG_ideal_observer_to_NIW_ideal_adaptor()` call remains and depends on the not-yet-migrated NIW workflow.
+- [ ] Integrate fitted Stanfit objects with model-distribution objects.
+- [ ] Clean up `get-info-from-NIW-IA-stanfit.R`, persistence helpers, compatibility shims, and fully deprecated files.
+- [ ] Run the complete Stan-dependent test suite after the NIW workflow migration.
 
 If you want, I can also turn this into a slightly more polished project-plan version with sections like “Goal”, “Scope”, and “Done criteria.”
