@@ -150,9 +150,9 @@ test_that("Get posterior predictive - output check", {
 })
 
 test_that("NIW categorization aligns categories with observations", {
-  model <- suppressMessages(suppressWarnings(example_NIW_ideal_adaptor(1)))
+  model <- suppressMessages(suppressWarnings(example_niw_ideal_adaptor(n_cues = 1)))
   x <- list(-1, 0, 1)
-  category_labels <- as.character(unique(model$category))
+  category_labels <- as.character(get_category_labels(model))
 
   result <- suppressWarnings(get_categorization_from_NIW_ideal_adaptor(
     x = x,
@@ -171,4 +171,3 @@ test_that("NIW categorization aligns categories with observations", {
     expect_equal(sum(observation$response), 1)
   }
 })
-

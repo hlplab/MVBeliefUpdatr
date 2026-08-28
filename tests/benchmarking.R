@@ -1,4 +1,4 @@
-source("functions-to-make-or-load-models.R")
+source("testthat/helper-stanfit-example-models.R")
 
 library(microbenchmark)
 

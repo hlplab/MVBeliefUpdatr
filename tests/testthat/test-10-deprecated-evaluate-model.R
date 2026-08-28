@@ -1,16 +1,17 @@
 
 make_evaluate_model_test_data <- function() {
-  my_model <- suppressMessages(suppressWarnings(example_MVG_ideal_observer(5)))
+  my_model <- suppressMessages(suppressWarnings(example_mvg_ideal_observer(n_cues = 2)))
   my_data <- tidyr::crossing(cue1 = seq(-2, 2, .25), cue2 = seq(-2, 2, .25))
   my_data$cues <- purrr::map2(my_data$cue1, my_data$cue2, ~ c(...))
   my_data$response <- vapply(my_data$cues, function(x) {
     as.character(
-      get_categorization_from_MVG_ideal_observer(
-        x = x,
-        model = my_model,
-        decision_rule = "sampling",
-        simplify = TRUE
-      ))
+      suppressWarnings(
+        get_categorization_from_MVG_ideal_observer(
+          x = x,
+          model = my_model,
+          decision_rule = "sampling",
+          simplify = TRUE
+        )))
   }, character(1))
 
   list(model = my_model, data = my_data)
@@ -107,4 +108,3 @@ test_that("evaluate_model - output check (method default)", {
   expect_true(is.atomic(default_proportional))
   expect_true(is.infinite(default_criterion))
 })
-

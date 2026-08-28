@@ -11,50 +11,28 @@ if (!exists("recover_types", inherits = TRUE)) {
   suppressPackageStartupMessages(library("tidybayes", character.only = TRUE, quietly = TRUE))
 }
 
-source_with_env <- function(path) {
-  sys.source(path, envir = globalenv())
-}
-
 r_dir_candidates <- c(
   "R",
   file.path("..", "..", "R"),
   testthat::test_path("..", "..", "R")
 )
-r_dir <- r_dir_candidates[vapply(r_dir_candidates, function(path) file.exists(file.path(path, "internal-globals.R")), logical(1))][1]
-if (is.na(r_dir)) {
+r_dir_hits <- vapply(r_dir_candidates, function(path) file.exists(file.path(path, "internal-globals.R")), logical(1))
+r_dir <- r_dir_candidates[r_dir_hits]
+if (length(r_dir) == 0L || all(is.na(r_dir))) {
   stop("Could not locate the package R directory for test helper sourcing.")
 }
+r_dir <- r_dir[1]
 
 pkg_root <- normalizePath(file.path(r_dir, ".."), winslash = "/", mustWork = TRUE)
+pkg_root <- pkg_root[1]
 r_dir_abs <- normalizePath(file.path(pkg_root, "R"), winslash = "/", mustWork = TRUE)
 old_wd <- getwd()
 
-if (!exists("MVBU_PROB_TOL", inherits = TRUE)) {
-  source_with_env(file.path(r_dir_abs, "internal-globals.R"))
-}
-source_with_env(file.path(r_dir_abs, "internal-is.R"))
-source_with_env(file.path(r_dir_abs, "internal-utils-imported.R"))
-source_with_env(file.path(r_dir_abs, "internal-asserts.R"))
-source_with_env(file.path(r_dir_abs, "asserts.R"))
-source_with_env(file.path(r_dir_abs, "internal-utils.R"))
-source_with_env(file.path(r_dir_abs, "to-array.R"))
-source_with_env(file.path(r_dir_abs, "basics.R"))
-source_with_env(file.path(r_dir_abs, "MVBeliefUpdatr-package.R"))
-source_with_env(file.path(r_dir_abs, "get-info-from-NIW-IA-stanfit.R"))
-source_with_env(file.path(r_dir_abs, "S7-core-classes.R"))
-source_with_env(file.path(r_dir_abs, "S7-generics.R"))
-source_with_env(file.path(r_dir_abs, "S7-transform-information.R"))
-source_with_env(file.path(r_dir_abs, "S7-staninput.R"))
-source_with_env(file.path(r_dir_abs, "S7-stanfit-input.R"))
-source_with_env(file.path(r_dir_abs, "deprecated-make-staninput.R"))
-source_with_env(file.path(r_dir_abs, "S7-stanfit.R"))
-source_with_env(file.path(r_dir_abs, "S7-core-methods.R"))
-source_with_env(file.path(r_dir_abs, "S7-stanfit-methods.R"))
-source_with_env(file.path(r_dir_abs, "S7-stanfit-input-methods.R"))
-source_with_env(file.path(r_dir_abs, "..", "tests", "testthat", "helper-stanfit-test-utils.R"))
+# Package code comes from the loaded namespace. Re-sourcing R/ into the global
+# environment would shadow the S7 generics with method-less copies, breaking dispatch
+# for any code whose enclosing environment is the global environment.
 
-# Source Stan model definitions from the package root so rstan can locate the
-# model files in inst/stan when this helper is loaded from the test directory.
+# rstan resolves the model files in inst/stan relative to the package root.
 setwd(pkg_root)
 on.exit <- function() {
   if (is.character(old_wd) && length(old_wd) == 1L && nzchar(old_wd)) {
@@ -63,6 +41,3 @@ on.exit <- function() {
 }
 reg.finalizer(environment(), function(e) on.exit(), onexit = TRUE)
 
-source_with_env(file.path(r_dir_abs, "stanmodels.R"))
-source_with_env(file.path(r_dir_abs, "fit-IA-stanfit.R"))
-source_with_env(file.path(r_dir_abs, "S7-phase2-migration.R"))

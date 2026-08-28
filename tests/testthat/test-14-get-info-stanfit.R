@@ -1,6 +1,5 @@
 
-source("../functions-to-make-or-load-models.R")
-
+skip_if_not(file.exists(example_stanfit_path(1, stanmodel = "NIW_ideal_adaptor")), "cached example stanfit not generated")
 fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", file_refit = "never")
 test_that("Test is.ideal_adaptor_stanfit", {
   expect_false(is.ideal_adaptor_stanfit(NULL))
@@ -9,9 +8,9 @@ test_that("Test is.ideal_adaptor_stanfit", {
   expect_false(is.ideal_adaptor_stanfit("1"))
   expect_false(is.ideal_adaptor_stanfit(TRUE))
   expect_false(is.ideal_adaptor_stanfit(list(1)))
-  expect_false(is.ideal_adaptor_stanfit(example_exemplar_model(1)))
-  expect_false(is.ideal_adaptor_stanfit(example_MVG_ideal_observer(1)))
-  expect_false(is.ideal_adaptor_stanfit(example_NIW_ideal_adaptor(1)))
+  expect_false(is.ideal_adaptor_stanfit(example_exemplar_model(n_cues = 1)))
+  expect_false(is.ideal_adaptor_stanfit(example_mvg_ideal_observer(n_cues = 1)))
+  expect_false(is.ideal_adaptor_stanfit(example_niw_ideal_adaptor(n_cues = 1)))
   expect_true(is.ideal_adaptor_stanfit(fit))
 })
 

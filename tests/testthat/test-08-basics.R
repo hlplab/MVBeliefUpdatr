@@ -1,6 +1,6 @@
-.cues <- c("cue1", "cue2")
-.io <- suppressMessages(suppressWarnings(example_MVG_ideal_observer(5)))
-.data <- sample_data_from_model(model = .io, Ns = 50)
+.io <- suppressMessages(suppressWarnings(example_mvg_ideal_observer(n_cues = 2)))
+.cues <- get_cue_labels(.io)
+.data <- sample_observations(.io, Ns = 50)
 
 test_that("uss2css, css2cov - does sum-of-square to cov conversion work?", {
   expect_equivalent(
