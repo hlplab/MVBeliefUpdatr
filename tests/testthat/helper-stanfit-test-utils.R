@@ -173,11 +173,12 @@ expect_staninput_structure <- function(input, expected_class, required_names, fo
 }
 
 .get_ideal_adaptor_fit_model_dir <- function() {
-  path <- if (exists("pkg_root", inherits = TRUE) && nzchar(pkg_root)) {
-    file.path(pkg_root, "tests", "testthat", "models")
+  root <- if (exists("pkg_root", inherits = TRUE) && length(pkg_root) > 0L && is.character(pkg_root)) {
+    pkg_root[1]
   } else {
-    file.path("tests", "testthat", "models")
+    "."
   }
+  path <- file.path(root, "tests", "testthat", "models")
   if (!dir.exists(path)) {
     dir.create(path, recursive = TRUE, showWarnings = FALSE)
   }

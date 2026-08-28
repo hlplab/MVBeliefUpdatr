@@ -89,7 +89,11 @@ test_that("fit_ideal_adaptor loads an existing model from file when file_refit i
   )
 
   expect_true(S7::S7_inherits(reloaded_fit, IdealAdaptorStanfit))
-  expect_true(isTRUE(all.equal(reloaded_fit@stanfit, fit@stanfit)))
+  # stanfit@.MISC holds rstan's C++ module pointer, which is rebuilt on every
+  # deserialization, so compare the recovered content rather than the whole object.
+  expect_equal(reloaded_fit@stanfit@sim$samples, fit@stanfit@sim$samples)
+  expect_identical(reloaded_fit@stanfit@model_name, fit@stanfit@model_name)
+  expect_identical(reloaded_fit@stanfit@model_pars, fit@stanfit@model_pars)
 })
 
 test_that("recover_types works on stanfit objects nested in S7 IdealAdaptorStanfit objects", {

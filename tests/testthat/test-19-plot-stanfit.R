@@ -1,5 +1,8 @@
 
-source("../functions-to-make-or-load-models.R")
+skip_if_not(
+  all(vapply(1:3, function(ex) file.exists(example_stanfit_path(ex, stanmodel = "NIW_ideal_adaptor")), logical(1))),
+  "cached example stanfits not generated"
+)
 
 # 1D stanfit with all conditions having exposure
 fit1 <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", file_refit = "never")
