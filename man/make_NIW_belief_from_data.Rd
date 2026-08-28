@@ -3,7 +3,6 @@
 \name{make_NIW_belief_from_data}
 \alias{make_NIW_belief_from_data}
 \alias{make_NIW_prior_from_data}
-\alias{make_NIW_ideal_adaptor_from_data}
 \title{Make NIW belief from data.}
 \usage{
 make_NIW_belief_from_data(
@@ -25,61 +24,26 @@ make_NIW_prior_from_data(
   nu = length(cues) + 2,
   verbose = F
 )
-
-make_NIW_ideal_adaptor_from_data(
-  data,
-  group = NULL,
-  category = "category",
-  cues,
-  kappa = nu,
-  nu = length(cues) + 2,
-  ...,
-  verbose = F
-)
 }
 \arguments{
-\item{data}{The tibble or data.frame from which to construct the prior.}
+\item{data}{The tibble or data.frame from which to construct the exemplar representations.}
 
-\item{group}{Optionally, one or more grouping variables can be specified. If group is not NULL, one NIW_belief or
-ideal adaptor will be derived for each level of \code{group}. (default: NULL)}
+\item{group}{No longer supported; must be \code{NULL}.}
 
 \item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
 
 \item{cues}{Name(s) of variables in \code{data} that contain the cue information.}
 
-\item{kappa}{The strength of the beliefs over the category mean (pseudocounts). (default: same as nu)}
+\item{kappa}{Strength of belief (pseudocount) about the category mean. (default: same as \code{nu})}
 
-\item{nu}{The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
-cues + 2)}
+\item{nu}{Strength of belief (pseudocount) about the category covariance matrix. (default: number of cues + 2)}
 
-\item{verbose}{If true provides more information. (default: FALSE)}
-
-\item{prior}{Optionally specify a prior probability for each category (in each group). (default: a uniform
-prior over all categories).}
-
-\item{lapse_rate}{Optionally specify a lapse rate. (default: \code{NA})}
-
-\item{lapse_bias}{Optionally specify a lapse bias. (default: \code{NA})}
-
-\item{Sigma_noise}{Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This argument will be
-ignored if NULL. (default: NULL)}
+\item{verbose}{If true provides more information. (default: \code{FALSE})}
 }
 \value{
-A tibble that is an NIW_belief or NIW_ideal_adaptor object.
+An \code{MVBU_CategoryRepresentationTemplate} of NIW category representations.
 }
 \description{
-Constructs an \code{\link[=NIW_belief]{NIW_belief}} or \code{\link[=NIW_ideal_adaptor]{NIW_ideal_adaptor}} object,
-representing Normal-Inverse Wishart (NIW) parameters for all categories found in the data. This object can be used
-as a prior for functions like \code{\link{update_NIW_beliefs_incrementally}}.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{\link{new_niw_category_representation_template_from_data}} instead.
 }
-\details{
-Currently, \code{make_NIW_prior_from_data()} does not infer kappa or nu, nor does it fit hierarchical data. Rather
-the function simply estimates the category mean and covariance matrix from the sample (\code{data}), assumes them
-to be the expected category mean (mu) and covariance (Sigma), and derives the m and S parameters
-of the NIW from mu and Sigma based on the user-provided kappa and nu. That means m = mu and S = Sigma * (nu - D -1),
-where D is the dimensionality of the data.
-}
-\seealso{
-TBD
-}
-\keyword{TBD}
+\keyword{internal}

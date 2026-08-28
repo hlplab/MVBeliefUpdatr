@@ -6,16 +6,14 @@
 \alias{lift_MVG_to_MVG_ideal_observer}
 \alias{lift_NIW_belief_to_NIW_ideal_adaptor}
 \alias{lift_MVG_ideal_observer_to_NIW_ideal_adaptor}
-\title{Turn an MVG/NIW_belief object into an ideal observer/adaptor}
+\title{Turn a representation (template) into a cognitive model.}
 \usage{
 lift_likelihood_to_model(
   x,
   group = NULL,
-  prior = rep(1/get_nlevels_of_category_labels_from_model(x),
-    get_nlevels_of_category_labels_from_model(x)),
+  prior = NULL,
   lapse_rate = 0,
-  lapse_bias = rep(1/get_nlevels_of_category_labels_from_model(x),
-    get_nlevels_of_category_labels_from_model(x)),
+  lapse_bias = NULL,
   Sigma_noise = NULL,
   verbose = F
 )
@@ -23,9 +21,9 @@ lift_likelihood_to_model(
 lift_exemplars_to_exemplar_model(
   x,
   group = NULL,
-  prior = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
+  prior = NULL,
   lapse_rate = 0,
-  lapse_bias = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
+  lapse_bias = NULL,
   Sigma_noise = NULL,
   verbose = F
 )
@@ -33,9 +31,9 @@ lift_exemplars_to_exemplar_model(
 lift_MVG_to_MVG_ideal_observer(
   x,
   group = NULL,
-  prior = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
+  prior = NULL,
   lapse_rate = 0,
-  lapse_bias = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
+  lapse_bias = NULL,
   Sigma_noise = NULL,
   verbose = F
 )
@@ -43,9 +41,9 @@ lift_MVG_to_MVG_ideal_observer(
 lift_NIW_belief_to_NIW_ideal_adaptor(
   x,
   group = NULL,
-  prior = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
+  prior = NULL,
   lapse_rate = 0,
-  lapse_bias = rep(1/(n.cat <- get_nlevels_of_category_labels_from_model(x)), n.cat),
+  lapse_bias = NULL,
   Sigma_noise = NULL,
   verbose = F
 )
@@ -59,39 +57,25 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor(
 )
 }
 \arguments{
-\item{x}{Either an MVG or NIW_belief object.}
+\item{x}{An MVG, NIW_belief, or exemplars legacy tibble.}
 
-\item{group}{Optionally, a grouping structure can be specified. If group structure is not NULL, one
-NIW belief or ideal adaptor will be derived for each level of \code{group_structure}. (default: NULL)}
+\item{group}{No longer supported; must be \code{NULL}.}
 
-\item{prior}{Optionally specify a prior probability for each category (in each group). (default: a uniform
-prior over all categories).}
+\item{prior}{Optional category-prior vector. (default: uniform over categories)}
 
-\item{lapse_rate}{Optionally specify a lapse rate. (default: 0)}
+\item{lapse_rate}{Optional lapse rate. (default: 0)}
 
-\item{lapse_bias}{Optionally specify a lapse bias for each category. (default: uniform bias for all categories)}
+\item{lapse_bias}{Optional lapse-bias vector. (default: same as \code{prior})}
 
-\item{Sigma_noise}{Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This argument will be
-ignored if NULL. (default: NULL)}
+\item{Sigma_noise}{Optional perceptual-noise covariance matrix. (default: \code{NULL})}
 
-\item{verbose}{If true provides more information. (default: FALSE)}
-
-\item{kappa}{The strength of the beliefs over the category mean (pseudocounts). (default: same as nu)}
-
-\item{nu}{The strength of the beliefs over the category covariance matrix (pseudocounts). (default: number of
-cues + 2)}
-
-\item{keep.category_parameters}{Should categories' mu and Sigma be included in the output (in addition to m
-and S of the prior)? (default: FALSE)}
+\item{verbose}{Ignored.}
 }
 \value{
-A tibble that is an NIW_belief or NIW_ideal_adaptor object.
+An S7 cognitive-model object of the family matching \code{x}.
 }
 \description{
-Make an ideal observer or adaptor out of an MVG or NIW_belief object, respectively, by providing the missing
-information about the prior, lapse rate, bias, and perceptual noise (if any).
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{\link{new_mvg_ideal_observer}}, \code{\link{new_niw_ideal_adaptor}},
+or \code{\link{new_exemplar_model}} with an S7 \code{category_template} instead.
 }
-\seealso{
-TBD
-}
-\keyword{TBD}
+\keyword{internal}

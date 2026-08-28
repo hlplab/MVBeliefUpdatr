@@ -2,8 +2,7 @@
 % Please edit documentation in R/make-objects.R
 \name{make_MVG_from_data}
 \alias{make_MVG_from_data}
-\alias{make_MVG_ideal_observer_from_data}
-\title{Make multivariate Gaussian ideal observer(s) from data.}
+\title{Make multivariate Gaussian representation(s) from data.}
 \usage{
 make_MVG_from_data(
   data,
@@ -12,58 +11,22 @@ make_MVG_from_data(
   cues,
   verbose = F
 )
-
-make_MVG_ideal_observer_from_data(
-  data,
-  group = NULL,
-  category = "category",
-  cues,
-  ...,
-  verbose = F
-)
 }
 \arguments{
-\item{data}{The tibble or data.frame from which to construct the MVG or MVG ideal observer object.}
+\item{data}{The tibble or data.frame from which to construct the exemplar representations.}
 
-\item{group}{Optionally, a vector of one or more grouping variables. If group is not NULL, one MVG or
-ideal observers will be derived for each level of \code{group}. (default: NULL)}
+\item{group}{No longer supported; must be \code{NULL}.}
 
 \item{category}{Name of variable in \code{data} that contains the category information. (default: "category")}
 
 \item{cues}{Name(s) of variables in \code{data} that contain the cue information.}
 
-\item{verbose}{If true provides more information. (default: FALSE)}
-
-\item{prior}{Optionally specify a prior probability for each category (in each group). (default: a uniform
-prior over all categories).}
-
-\item{lapse_rate}{Optionally specify a lapse rate. (default: \code{NA})}
-
-\item{lapse_bias}{Optionally specify a lapse bias. (default: \code{NA})}
-
-\item{Sigma_noise}{Optionally specify a (multivariate Gaussian) covariance matrix of perceptual noise. This
-argument will be ignored if NULL. (default: NULL)}
+\item{verbose}{If true provides more information. (default: \code{FALSE})}
 }
 \value{
-A tibble that is an MVG or MVG ideal observer object.
+An \code{MVBU_CategoryRepresentationTemplate} of MVG category representations.
 }
 \description{
-Constructs an \code{\link[=is.MVG]{MVG}} or \code{\link[=is.MVG_ideal_observer]{MVG_ideal_observer}} object with category
-information for all categories found in the data. Currently, this functions does nothing fancy. It simply gets the mean
-and covariance matrix of the cues for each category and group from the data. No cross-validation or other measures against
-overfitting are implemented, though it is recommended that such methods are applied.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{\link{new_mvg_category_representation_template_from_data}} instead.
 }
-\details{
-Alternative approaches include the use of \code{brms::brm()} to fit a multivariate Normal model to the data. While this approach
-allows fitting of both the means and variances of each category (including for hierarchically organized grouped data), it
-currently does not provide a way to model category-specific correlations (or covariances) between cues. Instead, the
-approach implemented in \code{brms} only models correlation at the population-level (residual correlations).
-
-Yet another alternative would be to write a separate \code{Stan} program specifically for this purpose. However, while this is
-relatively straightforward for data from a single talker, a hierarchical model for grouped data essentially requires an
-extension of the multivariate model approach implemented in \code{brms} and described in the preceding paragraph.
-}
-\seealso{
-TBD
-}
-\keyword{TBD}
+\keyword{internal}
