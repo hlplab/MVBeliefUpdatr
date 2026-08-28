@@ -89,54 +89,33 @@ get_MVG_likelihood <- function(
 get_likelihood_from_MVG <- function(
   x,
   model,
-  noise_treatment = infer_default_noise_treatment(model$Sigma_noise),
+  noise_treatment = "no_noise",
   log = T,
   category = "category",
   category.label = NULL,
   wide = FALSE
 ) {
-  .assert_that(is.MVG(model))
   .assert_optional_character(category.label)
-  .assert_that(any(noise_treatment == "no_noise", is.MVG_ideal_observer(model)),
-              msg = 'No noise matrix Sigma_noise found. If noise_treatment is not "no_noise", then model must be an MVG_ideal_observer.')
 
-  if (is.null(category.label)) {
-    model %<>%
-      droplevels()
+  d <- length(get_cue_labels(model))
+  x_mat <- .legacy_observation_matrix(x, d)
+  lik <- likelihood(model, x_mat, categories = category.label)
+  if (log) lik <- log(lik)
 
-    category.label <-
-      model %>%
-      dplyr::pull(!! sym(category)) %>%
-      unique()
+  cats <- colnames(lik)
+  value_name <- if (log) "log_likelihood" else "likelihood"
+
+  if (wide) {
+    out <- tibble::as_tibble(as.data.frame(lik), .name_repair = "minimal")
+    names(out) <- paste0(value_name, ".", cats)
+    return(out)
   }
 
-  likelihood <- foreach(c = category.label) %do% {
-    m <-
-      model %>%
-      filter(!! sym(category) == c)
-
-    get_MVG_likelihood(
-      x = x,
-      mu = m$mu[[1]],
-      Sigma = m$Sigma[[1]],
-      log = log,
-      noise_treatment = noise_treatment,
-      Sigma_noise = if (noise_treatment == "no_noise") NULL else m$Sigma_noise[[1]]) %>%
-      as_tibble(.name_repair = "unique") %>%
-      rename_with(~ if (log) { "log_likelihood" } else { "likelihood" }) %>%
-      mutate(!! sym(category) := c)
-  }
-  likelihood %<>% reduce(rbind)
-
-  if (wide)
-    likelihood %<>%
-    pivot_wider(
-      values_from = if (log) "log_likelihood" else "likelihood",
-      names_from = !! sym(category),
-      names_prefix = if (log) "log_likelihood." else "likelihood.") %>%
-    unnest()
-
-  return(likelihood)
+  out <- tibble(
+    !! sym(value_name) := as.vector(lik),
+    !! sym(category) := rep(cats, each = nrow(lik))
+  )
+  out
 }
 
 # Deprecated after S7-migration
@@ -151,7 +130,8 @@ get_likelihood_from_MVG <- function(
 get_posterior_from_MVG_ideal_observer <- function(
     x,
     model,
-    noise_treatment = if (decision_rule == "sampling") "sample" else infer_default_noise_treatment(model$Sigma_noise),
+    decision_rule = "sampling",
+    noise_treatment = if (decision_rule == "sampling") "sample" else "no_noise",
     lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize"
 ) {
   lifecycle::deprecate_warn(
@@ -161,95 +141,7 @@ get_posterior_from_MVG_ideal_observer <- function(
     always = TRUE
   )
 
-  # TO DO: check dimensionality of x with regard to belief.
-  assert_MVG_ideal_observer(model)
-  .assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
-              msg = "lapse_treatment must be one of 'no_lapses', 'sample' or 'marginalize'.")
-
-  # When the input isn't a list, that's ambiguous between the input being a single input or a set of
-  # 1D inputs. Use the model's cue dimensionality to disambiguate between the two cases.
-  if (!is.list(x)) {
-    x <- if (get_cue_dimensionality_from_model(model) == 1) as.list(x) else list(x)
-  } else if (
-    length(x) > 0L &&
-    all(vapply(x, function(value) length(value) == 1L && is.atomic(value), logical(1)))
-  ) {
-    x <- list(unlist(x, use.names = FALSE))
-  }
-
-  x_input <- x
-  n.distinct_categories <- length(get_category_labels(model))
-  if (!is.list(x_input)) {
-    x_input <- if (get_cue_dimensionality_from_model(model) == 1) as.list(x_input) else list(x_input)
-  }
-
-  posterior_probabilities <-
-    get_likelihood_from_MVG(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%
-    tibble::as_tibble() %>%
-    mutate(
-      observationID = rep(seq_along(x_input), times = n.distinct_categories),
-      x = rep(x_input, times = n.distinct_categories)
-    )
-
-  lapse_rate <- get_lapse_rate(model)
-  posterior_probabilities$lapse_rate <- lapse_rate
-  posterior_probabilities$lapse_bias <- get_lapse_bias(model, categories = posterior_probabilities$category)
-  posterior_probabilities$prior <- get_category_prior(model, categories = posterior_probabilities$category)
-
-  posterior_probabilities <-
-    posterior_probabilities %>%
-    group_by(observationID) %>%
-    mutate(posterior_probability = (.data$likelihood * .data$prior) / sum(.data$likelihood * .data$prior))
-
-  # How should lapses be treated?
-  if (lapse_treatment == "sample") {
-    posterior_probabilities %<>%
-      mutate(
-        posterior_probability = ifelse(
-          rep(
-            rbinom(1, 1, lapse_rate),
-            length(get_category_labels(model))),
-          .data$lapse_bias,                 # substitute lapse probabilities for posterior
-          .data$posterior_probability))     # ... or not
-  } else if (lapse_treatment == "marginalize") {
-    posterior_probabilities %<>%
-      mutate(posterior_probability = lapse_rate * .data$lapse_bias + (1 - lapse_rate) * .data$posterior_probability)
-  }
-
-  posterior_probabilities %<>%
-    ungroup() %>%
-    select(-c(likelihood)) %>%
-    select(observationID, x, category, posterior_probability) %>%
-    arrange(.data$observationID)
-
-  # Warn if any posteriors don't sum up to 1.
-  posterior.check <-
-    posterior_probabilities %>%
-    group_by(x, observationID) %>%
-    summarise(posterior_probability = sum(.data$posterior_probability))
-
-  posterior.check %<>%
-    arrange(posterior_probability) %>%
-    filter(is.na(posterior_probability) | is.nan(posterior_probability) | !isTRUE(all.equal(posterior_probability, 1.0, tolerance = 1e-8)))
-
-  if (nrow(posterior.check) > 0L) {
-    s <- paste(
-      nrow(posterior.check),
-      "input(s) have an ill-defined posterior under the model. This can happen when inputs are far away from all category means.\n")
-    posterior.check %<>%
-      mutate(
-        string = purrr::pmap_chr(
-          .l = list(posterior_probability, x, observationID),
-          .f = function(posterior_probability, x, observationID) {
-            paste0("Sum of posterior is ", posterior_probability, " for observation ID = ", observationID, "; input = ", paste(x, collapse = ","))
-          }
-        )
-      )
-    s %<>% paste0(., paste(posterior.check$string, collapse = ".\n"))
-    warning(s)
-  }
-
-  return(posterior_probabilities)
+  .legacy_long_posterior(model, x, noise_treatment, lapse_treatment)
 }
 
 #' Legacy wrapper for categorize.
@@ -263,7 +155,7 @@ get_categorization_from_MVG_ideal_observer <- function(
   x,
   model,
   decision_rule = "sampling",
-  noise_treatment = if (decision_rule == "sampling") "sample" else infer_default_noise_treatment(model$Sigma_noise),
+  noise_treatment = if (decision_rule == "sampling") "sample" else "no_noise",
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F
 ) {
@@ -274,49 +166,9 @@ get_categorization_from_MVG_ideal_observer <- function(
     always = TRUE
   )
 
-  posterior_probabilities <-
-    get_posterior_from_MVG_ideal_observer(x = x, model = model, noise_treatment = noise_treatment, lapse_treatment = lapse_treatment)
+  d.response <-
+    .legacy_long_posterior(model, x, noise_treatment, lapse_treatment) %>%
+    .legacy_apply_decision_rule(decision_rule)
 
-  # Apply decision rule
-  if (decision_rule == "criterion") {
-    posterior_probabilities %<>%
-      group_by(observationID, x) %>%
-      mutate(
-        # tie breaker in case of uniform probabilities
-        posterior_probability = ifelse(
-          rep(
-            sum(.data$posterior_probability == max(.data$posterior_probability)) > 1,
-            length(get_category_labels(model))),
-          posterior_probability + runif(
-            length(get_category_labels(model)),
-            min = 0,
-            max = 1),
-          .data$posterior_probability),
-        # select most probable category
-        response = ifelse(.data$posterior_probability == max(.data$posterior_probability), 1, 0))
-  } else if (decision_rule == "sampling") {
-    posterior_probabilities %<>%
-      group_by(observationID, x) %>%
-      mutate(response = .rmultinom(1, 1, .data$posterior_probability) %>% as.vector())
-  } else if (decision_rule == "proportional") {
-    posterior_probabilities %<>%
-      mutate(response = .data$posterior_probability)
-  } else warning("Unsupported decision rule. This should be impossible to happen. Do not trust the results.")
-
-  posterior_probabilities %<>%
-    ungroup() %>%
-    select(-c(posterior_probability)) %>%
-    select(observationID, x, category, response)
-
-  if (simplify) {
-    .assert_that(decision_rule  %in% c("criterion", "sampling"),
-                msg = "For simplify = T, decision rule must be either criterion or sampling.")
-    return(posterior_probabilities %>%
-             filter(response == 1) %>%
-             select(observationID, category) %>%
-             arrange(observationID) %>%
-             rename(response = category) %>%
-             ungroup() %>%
-             pull(response))
-  } else return(posterior_probabilities)
+  if (simplify) .legacy_simplify_categorization(d.response, decision_rule) else d.response
 }

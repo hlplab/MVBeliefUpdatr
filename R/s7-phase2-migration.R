@@ -12,7 +12,7 @@
   .assert_non_NA_scalar_character(family, msg = paste0("family must be a non-empty scalar character value."))
   family <- toupper(family)
   if (!(family %in% allowed)) {
-    stop("Unsupported family for Phase 2 migration adapter.", call. = FALSE)
+    .stop("Unsupported family for Phase 2 migration adapter.")
   }
   family
 }
@@ -26,11 +26,11 @@
 #' @keywords internal
 .validate_legacy_table <- function(x, required, context) {
   if (!is.data.frame(x)) {
-    stop("x must be a data.frame or tibble.", call. = FALSE)
+    .stop("x must be a data.frame or tibble.")
   }
   missing_cols <- setdiff(required, names(x))
   if (length(missing_cols) > 0) {
-    stop(paste0("x must contain ", paste(required, collapse = ", "), " columns for ", context, " conversion."), call. = FALSE)
+    .stop(paste0("x must contain ", paste(required, collapse = ", "), " columns for ", context, " conversion."))
   }
 }
 
@@ -219,7 +219,7 @@
     EXEMPLAR = .as_s7_exemplar_representations(x, category = category),
     MUVG = .as_s7_muvg_representations(x, category = category),
     MNIX = .as_s7_mnix_representations(x, category = category),
-    stop("Unsupported family for Phase 2 migration adapter.", call. = FALSE)
+    .stop("Unsupported family for Phase 2 migration adapter.")
   )
 
   new_category_representation_template(representations = reps)
@@ -529,7 +529,7 @@ as_s7_mnix_model_distribution <- function(x = NULL, group_label = "") {
     EXEMPLAR = .as_s7_exemplar_model_distribution(x = x, group_label = group_label),
     MUVG = .as_s7_muvg_model_distribution(x = x, group_label = group_label),
     MNIX = .as_s7_mnix_model_distribution(x = x, group_label = group_label),
-    stop("Unsupported family for Phase 2 model-distribution migration adapter.", call. = FALSE)
+    .stop("Unsupported family for Phase 2 model-distribution migration adapter.")
   )
 }
 

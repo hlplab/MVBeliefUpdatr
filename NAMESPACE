@@ -57,6 +57,24 @@ export(add_noise)
 export(add_test_data_to_1D_plot)
 export(add_test_data_to_2D_plot)
 export(aggregate_models_by_group_structure)
+export(as_exemplar_category_representation)
+export(as_exemplar_category_representation_template)
+export(as_exemplar_model)
+export(as_mnix_category_representation)
+export(as_mnix_category_representation_template)
+export(as_mnix_ideal_adaptor)
+export(as_muvg_category_representation)
+export(as_muvg_category_representation_template)
+export(as_muvg_ideal_observer)
+export(as_mvg_category_representation)
+export(as_mvg_category_representation_template)
+export(as_mvg_ideal_observer)
+export(as_niw_category_representation)
+export(as_niw_category_representation_template)
+export(as_niw_ideal_adaptor)
+export(as_nix_category_representation)
+export(as_nix_category_representation_template)
+export(as_nix_ideal_adaptor)
 export(as_s7_category_representation_template)
 export(as_s7_exemplar_model)
 export(as_s7_exemplar_model_distribution)
@@ -74,6 +92,9 @@ export(as_s7_mvg_representations)
 export(as_s7_niw_ideal_adaptor)
 export(as_s7_niw_model_distribution)
 export(as_s7_niw_representations)
+export(as_uvg_category_representation)
+export(as_uvg_category_representation_template)
+export(as_uvg_ideal_observer)
 export(assert_IdealAdaptorStanfit)
 export(assert_IdealAdaptorStaninput)
 export(assert_MVBU_CategoryRepresentation)
@@ -92,10 +113,30 @@ export(cov2tau)
 export(css2cov)
 export(css2uss)
 export(evaluate_model)
-export(example_MVG_ideal_observer)
-export(example_NIW_ideal_adaptor)
-export(example_data)
+export(example_category_representation)
+export(example_category_representation_template)
+export(example_exemplar_category_representation)
+export(example_exemplar_category_representation_template)
 export(example_exemplar_model)
+export(example_mnix_category_representation)
+export(example_mnix_category_representation_template)
+export(example_mnix_ideal_adaptor)
+export(example_model)
+export(example_muvg_category_representation)
+export(example_muvg_category_representation_template)
+export(example_muvg_ideal_observer)
+export(example_mvg_category_representation)
+export(example_mvg_category_representation_template)
+export(example_mvg_ideal_observer)
+export(example_niw_category_representation)
+export(example_niw_category_representation_template)
+export(example_niw_ideal_adaptor)
+export(example_nix_category_representation)
+export(example_nix_category_representation_template)
+export(example_nix_ideal_adaptor)
+export(example_uvg_category_representation)
+export(example_uvg_category_representation_template)
+export(example_uvg_ideal_observer)
 export(facet_or_animate)
 export(fit_ideal_adaptor)
 export(get_D)
@@ -115,6 +156,7 @@ export(get_category_constructor)
 export(get_category_labels)
 export(get_category_labels_from_model)
 export(get_category_levels)
+export(get_category_likelihood_function)
 export(get_category_posterior_function)
 export(get_category_prior)
 export(get_class)
@@ -190,6 +232,7 @@ export(is.NIW_ideal_adaptor)
 export(is.exemplar_model)
 export(is.exemplars)
 export(is.ideal_adaptor_stanfit)
+export(likelihood)
 export(lift_MVG_ideal_observer_to_NIW_ideal_adaptor)
 export(lift_MVG_to_MVG_ideal_observer)
 export(lift_NIW_belief_to_NIW_ideal_adaptor)
@@ -208,15 +251,39 @@ export(make_staninput)
 export(make_vector_column)
 export(neff_ratio)
 export(nest_cue_information_in_model)
+export(new_category_representation_from_data)
+export(new_category_representation_template_from_data)
+export(new_exemplar_category_representation_from_data)
+export(new_exemplar_category_representation_template_from_data)
 export(new_exemplar_model_distribution)
+export(new_exemplar_model_from_data)
 export(new_ideal_adaptor_stanfit_input)
+export(new_mnix_category_representation_from_data)
+export(new_mnix_category_representation_template_from_data)
+export(new_mnix_ideal_adaptor_from_data)
 export(new_mnix_model_distribution)
 export(new_model_distribution)
+export(new_model_from_data)
+export(new_muvg_category_representation_from_data)
+export(new_muvg_category_representation_template_from_data)
+export(new_muvg_ideal_observer_from_data)
 export(new_muvg_model_distribution)
 export(new_mvbu_object)
+export(new_mvg_category_representation_from_data)
+export(new_mvg_category_representation_template_from_data)
+export(new_mvg_ideal_observer_from_data)
 export(new_mvg_model_distribution)
+export(new_niw_category_representation_from_data)
+export(new_niw_category_representation_template_from_data)
+export(new_niw_ideal_adaptor_from_data)
 export(new_niw_model_distribution)
+export(new_nix_category_representation_from_data)
+export(new_nix_category_representation_template_from_data)
+export(new_nix_ideal_adaptor_from_data)
 export(new_nix_model_distribution)
+export(new_uvg_category_representation_from_data)
+export(new_uvg_category_representation_template_from_data)
+export(new_uvg_ideal_observer_from_data)
 export(new_uvg_model_distribution)
 export(nuts_params)
 export(plot_expected_categories)
@@ -236,10 +303,7 @@ export(register_model_family)
 export(register_stan_family_hooks)
 export(reshape_incremental_design_into_unique_exposure_test_combinations)
 export(rhat)
-export(sample_MVG_data)
-export(sample_NIW_data)
-export(sample_data_from_model)
-export(sample_exemplar_data)
+export(sample_observations)
 export(set_stanfit)
 export(set_staninput)
 export(ss)
@@ -264,8 +328,10 @@ export(update_NIW_belief_nu)
 export(update_NIW_beliefs_incrementally)
 export(update_NIW_ideal_adaptor_batch)
 export(update_NIW_ideal_adaptor_incrementally)
+export(update_category_representation)
 export(update_model_decision_bias_by_one_observation)
 export(update_model_decision_bias_incrementally)
+export(update_template)
 export(uss2cov)
 export(uss2css)
 exportClasses(NIW_ideal_adaptor)
@@ -320,13 +386,10 @@ importFrom(dplyr,
   pull,
   relocate,
   rename,
-  rename_all,
   rename_at,
   rename_with,
   right_join,
-  sample_frac,
   select,
-  slice_sample,
   summarise,
   summarise_at,
   transmute,
@@ -356,8 +419,7 @@ importFrom(loo,
 )
 importFrom(magrittr,
   "%<>%",
-  "%T>%",
-  is_weakly_greater_than
+  "%T>%"
 )
 importFrom(mvtnorm,
   dmvnorm,
@@ -369,7 +431,6 @@ importFrom(purrr,
   invoke_map,
   map,
   map2,
-  map2_dbl,
   map_chr,
   map_dbl,
   map_lgl,
@@ -385,7 +446,6 @@ importFrom(rlang,
   as_name,
   expr,
   is_missing,
-  is_scalar_integerish,
   is_symbol,
   quo_is_null,
   sym,
@@ -441,7 +501,6 @@ importFrom(tidyr,
 importFrom(tidyselect,
   all_of,
   ends_with,
-  everything,
   starts_with
 )
 importFrom(utils,

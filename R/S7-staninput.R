@@ -15,7 +15,7 @@ MVBU_Staninput <- S7::new_class(
   ),
   constructor = function(values = list()) {
     S7::new_object(
-      MVBU_Staninput,
+      MVBU_Object(),
       values = as.list(values)
     )
   },
@@ -38,8 +38,7 @@ IdealAdaptorStaninput <- S7::new_class(
   parent = MVBU_Staninput,
   constructor = function(values = list()) {
     S7::new_object(
-      IdealAdaptorStaninput,
-      values = as.list(values)
+      MVBU_Staninput(values = as.list(values))
     )
   }
 )
@@ -50,8 +49,7 @@ NIX_IdealAdaptorStaninput <- S7::new_class(
   parent = IdealAdaptorStaninput,
   constructor = function(values = list()) {
     S7::new_object(
-      NIX_IdealAdaptorStaninput,
-      values = as.list(values)
+      IdealAdaptorStaninput(values = as.list(values))
     )
   }
 )
@@ -62,8 +60,7 @@ MNIX_IdealAdaptorStaninput <- S7::new_class(
   parent = IdealAdaptorStaninput,
   constructor = function(values = list()) {
     S7::new_object(
-      MNIX_IdealAdaptorStaninput,
-      values = as.list(values)
+      IdealAdaptorStaninput(values = as.list(values))
     )
   }
 )
@@ -74,8 +71,7 @@ NIW_IdealAdaptorStaninput <- S7::new_class(
   parent = IdealAdaptorStaninput,
   constructor = function(values = list()) {
     S7::new_object(
-      NIW_IdealAdaptorStaninput,
-      values = as.list(values)
+      IdealAdaptorStaninput(values = as.list(values))
     )
   }
 )

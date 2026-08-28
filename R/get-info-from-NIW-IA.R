@@ -147,7 +147,7 @@ get_categorization_from_NIW_ideal_adaptor <- function(
   x,
   model,
   decision_rule = "sampling",
-  noise_treatment = if (decision_rule == "sampling") "sample" else infer_default_noise_treatment(model$Sigma_noise),
+  noise_treatment = if (decision_rule == "sampling") "sample" else "no_noise",
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize",
   simplify = F,
   verbose = F
@@ -157,82 +157,10 @@ get_categorization_from_NIW_ideal_adaptor <- function(
     what = "get_categorization_from_NIW_ideal_adaptor()",
     with = "categorize()"
   )
-  # TO DO: check dimensionality of x with regard to model.
-  assert_NIW_ideal_adaptor(model, verbose = verbose)
-  .assert_that(decision_rule  %in% c("criterion", "proportional", "sampling"),
-              msg = "Decision rule must be one of: 'criterion', 'proportional', or 'sampling'.")
-  .assert_that(any(lapse_treatment %in% c("no_lapses", "sample", "marginalize")),
-              msg = "lapse_treatment must be one of 'no_lapses', 'sample' or 'marginalize'.")
 
-  # In case a single x is handed as argument, make sure it's made a list so that the length check below
-  # correctly treats it as length 1 (rather than the dimensionality of the one observation).
-  if (!is.list(x)) x <- list(x)
+  d.response <-
+    .legacy_long_posterior(model, x, noise_treatment, lapse_treatment) %>%
+    .legacy_apply_decision_rule(decision_rule)
 
-  n.distinct_categories <- length(get_category_labels(model))
-  posterior_probabilities <-
-    get_posterior_predictive_from_NIW_belief(x = x, model = model, log = F, noise_treatment = noise_treatment) %>%
-    mutate(
-      observationID = rep(1:length(.env$x), .env$n.distinct_categories),
-      x = rep(.env$x, .env$n.distinct_categories),
-      lapse_rate = get_lapse_rate(.env$model),
-      lapse_bias = get_lapse_bias(.env$model, categories = .data$category),
-      prior = get_category_prior(.env$model, categories = .data$category)) %>%
-    group_by(observationID) %>%
-    mutate(posterior_probability = (posterior_predictive * prior) / sum(posterior_predictive * prior))
-
-  # How should lapses be treated?
-  if (lapse_treatment == "sample") {
-    posterior_probabilities %<>%
-      mutate(
-        posterior_probability = ifelse(
-          rep(
-            rbinom(1, 1, lapse_rate),
-            length(get_category_labels(model))),
-          lapse_bias,                 # substitute lapse probabilities for posterior
-          posterior_probability))     # ... or not
-  } else if (lapse_treatment == "marginalize") {
-    posterior_probabilities %<>%
-      mutate(posterior_probability =  lapse_rate * lapse_bias + (1 - lapse_rate) * posterior_probability)
-  }
-
-  # Apply decision rule
-  if (decision_rule == "criterion") {
-    posterior_probabilities %<>%
-      mutate(
-        # tie breaker in case of uniform probabilities
-        posterior_probability = ifelse(
-          rep(
-            sum(posterior_probability == max(posterior_probability)) > 1,
-            length(get_category_labels(model))),
-          posterior_probability + runif(
-            length(get_category_labels(model)),
-            min = 0,
-            max = 0),
-          posterior_probability),
-        # select most probable category
-        response = ifelse(posterior_probability == max(posterior_probability), 1, 0))
-  } else if (decision_rule == "sampling") {
-    posterior_probabilities %<>%
-      mutate(response = .rmultinom(1, 1, posterior_probability) %>% as.vector())
-  } else if (decision_rule == "proportional") {
-    posterior_probabilities %<>%
-      mutate(response = posterior_probability)
-  } else warning("Unsupported decision rule. This should be impossible to happen. Do not trust the results.")
-
-  posterior_probabilities %<>%
-    ungroup() %>%
-    select(-c(posterior_predictive, posterior_probability)) %>%
-    select(observationID, x, category, response)
-
-  if (simplify) {
-    .assert_that(decision_rule  %in% c("criterion", "sampling"),
-                msg = "For simplify = T, decision rule must be either criterion or sampling.")
-    return(posterior_probabilities %>%
-             filter(response == 1) %>%
-             select(observationID, category) %>%
-             arrange(observationID) %>%
-             rename(response = category) %>%
-             ungroup() %>%
-             pull(response))
-  } else return(posterior_probabilities)
+  if (simplify) .legacy_simplify_categorization(d.response, decision_rule) else d.response
 }

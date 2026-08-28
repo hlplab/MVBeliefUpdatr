@@ -158,7 +158,7 @@ update_model_decision_bias_incrementally <- function(
 ){
   if (verbose) message("Assuming that category variable in model is called category.")
   if (lapse_treatment == "marginalize")
-    warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.\n", call. = FALSE)
+    .warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.\n")
 
   .assert_non_NA_scalar_logical(keep.update_history)
   .assert_non_NA_scalar_logical(keep.exposure_data)

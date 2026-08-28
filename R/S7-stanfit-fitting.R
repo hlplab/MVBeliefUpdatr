@@ -184,7 +184,9 @@ fit_ideal_adaptor <- function(
 
     .assert_contains_draws(stanfit)
     if (requireNamespace("tidybayes", quietly = TRUE)) {
-      stanfit <- tidybayes::recover_types(stanfit)
+      # Passing the data lets tidybayes record factor levels, so index variables
+      # can later be recovered as their original factors.
+      stanfit <- tidybayes::recover_types(stanfit, data)
     }
     fit <- set_stanfit(fit, stanfit)
     if (rename) fit <- .rename_pars(fit)

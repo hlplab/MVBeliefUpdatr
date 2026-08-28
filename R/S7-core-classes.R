@@ -404,7 +404,7 @@ MVBU_ModelDistribution <- S7::new_class(
   family <- .normalize_family_name(family)
   registration <- .mvbu_family_registry$families[[family]]
   if (is.null(registration)) {
-    stop(paste0("No model family registered for '", family, "'."), call. = FALSE)
+    .stop(paste0("No model family registered for '", family, "'."))
   }
   registration
 }
@@ -1430,7 +1430,7 @@ get_stan_family_hooks <- function(family = NULL) {
     .assert_true(length(Sigma_noise) == length(cue_labels), msg = "Sigma_noise length must match the number of cue labels.")
     Sigma_noise <- diag(Sigma_noise, nrow = length(Sigma_noise), ncol = length(Sigma_noise))
   } else {
-    stop("Sigma_noise must be NULL, a numeric vector, or a matrix.", call. = FALSE)
+    .stop("Sigma_noise must be NULL, a numeric vector, or a matrix.")
   }
 
   .assert_true(is.numeric(Sigma_noise), msg = "Sigma_noise must be numeric.")
@@ -1476,7 +1476,7 @@ new_cognitive_model <- function(
     if (is.null(value_names)) {
       if (!is.null(target_names) && length(target_names) == length(values)) {
         if (any(target_names == "") || anyDuplicated(target_names) > 0) {
-          stop(paste0(arg_name, " names cannot be validated because category_template names are missing or invalid."), call. = FALSE)
+          .stop(paste0(arg_name, " names cannot be validated because category_template names are missing or invalid."))
         }
         names(values) <- target_names
       }
@@ -1484,15 +1484,15 @@ new_cognitive_model <- function(
     }
 
     if (length(value_names) != length(values) || any(value_names == "") || anyDuplicated(value_names) > 0) {
-      stop(paste0(arg_name, " names must be non-empty and unique when provided."), call. = FALSE)
+      .stop(paste0(arg_name, " names must be non-empty and unique when provided."))
     }
 
     if (is.null(target_names) || length(target_names) != length(values) || any(target_names == "") || anyDuplicated(target_names) > 0) {
-      stop(paste0(arg_name, " names cannot be validated because category_template names are missing or invalid."), call. = FALSE)
+      .stop(paste0(arg_name, " names cannot be validated because category_template names are missing or invalid."))
     }
 
     if (!setequal(value_names, target_names)) {
-      stop(paste0(arg_name, " names must match category_template names."), call. = FALSE)
+      .stop(paste0(arg_name, " names must match category_template names."))
     }
 
     values <- values[match(target_names, value_names)]
@@ -1504,10 +1504,10 @@ new_cognitive_model <- function(
   lapse_bias <- .mvbu_align_probability_vector(lapse_bias, repr_names, "lapse_bias")
 
   if (length(category_prior) != n_repr) {
-    stop("category_prior length must match the number of category representations.", call. = FALSE)
+    .stop("category_prior length must match the number of category representations.")
   }
   if (length(lapse_bias) != n_repr) {
-    stop("lapse_bias length must match the number of category representations.", call. = FALSE)
+    .stop("lapse_bias length must match the number of category representations.")
   }
 
   cue_labels <- get_cue_labels(category_template)
@@ -1624,7 +1624,7 @@ new_cognitive_model <- function(
   for (i in seq_along(representations)[-1]) {
     rep_cues <- .mvbu_extract_label_metadata(representations[[i]])$cue
     if (!identical(as.character(rep_cues), as.character(reference_cues))) {
-      stop("cue labels must be consistent across all representations in a template.", call. = FALSE)
+      .stop("cue labels must be consistent across all representations in a template.")
     }
   }
 
@@ -1650,13 +1650,13 @@ new_cognitive_model <- function(
 
 add_category_representation <- function(template, representation, name = NULL) {
   if (!S7::S7_inherits(template, MVBU_CategoryRepresentationTemplate)) {
-    stop("template must be an MVBU_CategoryRepresentationTemplate.", call. = FALSE)
+    .stop("template must be an MVBU_CategoryRepresentationTemplate.")
   }
   if (!S7::S7_inherits(representation, MVBU_CategoryRepresentation)) {
-    stop("representation must be an MVBU_CategoryRepresentation.", call. = FALSE)
+    .stop("representation must be an MVBU_CategoryRepresentation.")
   }
   if (!is.null(name) && (length(name) != 1 || !nzchar(name))) {
-    stop("name must be a non-empty scalar character value.", call. = FALSE)
+    .stop("name must be a non-empty scalar character value.")
   }
 
   representations <- template@representations
@@ -1672,7 +1672,7 @@ add_category_representation <- function(template, representation, name = NULL) {
   rep_labels <- .mvbu_extract_label_metadata(representation)
   template_labels <- .mvbu_extract_label_metadata(template)
   if (length(template_labels$cue) > 0 && length(rep_labels$cue) > 0 && !identical(as.character(template_labels$cue), as.character(rep_labels$cue))) {
-    stop("cue labels must be consistent across all representations in a template.", call. = FALSE)
+    .stop("cue labels must be consistent across all representations in a template.")
   }
   if (length(template_labels$cue) == 0 && length(rep_labels$cue) > 0) {
     metadata$label_information$cue <- rep_labels$cue
@@ -1691,15 +1691,15 @@ add_category_representation <- function(template, representation, name = NULL) {
 
 new_category_representation_template <- function(representations, metadata = list()) {
   if (!is.list(representations) || length(representations) < 1) {
-    stop("representations must contain at least one category representation object.", call. = FALSE)
+    .stop("representations must contain at least one category representation object.")
   }
   if (!all(vapply(representations, function(r) S7::S7_inherits(r, MVBU_CategoryRepresentation), logical(1)))) {
-    stop("all representations entries must inherit from MVBU_CategoryRepresentation.", call. = FALSE)
+    .stop("all representations entries must inherit from MVBU_CategoryRepresentation.")
   }
 
   rep_names <- names(representations)
   if (!is.null(rep_names) && (length(rep_names) != length(representations) || any(rep_names == "") || anyDuplicated(rep_names) > 0)) {
-    stop("if representations are named, names must be non-empty and unique.", call. = FALSE)
+    .stop("if representations are named, names must be non-empty and unique.")
   }
 
   template <- NULL
@@ -1726,7 +1726,7 @@ new_category_representation_template <- function(representations, metadata = lis
 #' Construct a base representation object
 new_category_representation <- function(category_labels, cue_labels, category_likelihood_function = NULL, metadata = list()) {
   if (is.null(category_likelihood_function)) {
-    category_likelihood_function <- function(...) stop("category_likelihood not implemented.", call. = FALSE)
+    category_likelihood_function <- function(...) .stop("category_likelihood not implemented.")
   }
 
   MVBU_CategoryRepresentation(
@@ -1742,10 +1742,10 @@ new_category_representation <- function(category_labels, cue_labels, category_li
 
   if (is.matrix(x)) {
     if (!is.numeric(x)) {
-      stop(arg_name, " must be numeric.", call. = FALSE)
+      .stop(arg_name, " must be numeric.")
     }
     if (ncol(x) != d) {
-      stop(arg_name, " must have ", d, " column(s).", call. = FALSE)
+      .stop(arg_name, " must have ", d, " column(s).")
     }
     return(x)
   }
@@ -1755,12 +1755,12 @@ new_category_representation <- function(category_labels, cue_labels, category_li
       return(matrix(as.numeric(x), ncol = 1))
     }
     if (length(x) %% d != 0) {
-      stop(arg_name, " length must be a multiple of ", d, ".", call. = FALSE)
+      .stop(arg_name, " length must be a multiple of ", d, ".")
     }
     return(matrix(as.numeric(x), ncol = d, byrow = TRUE))
   }
 
-  stop(arg_name, " must be a numeric vector, matrix, or data frame.", call. = FALSE)
+  .stop(arg_name, " must be a numeric vector, matrix, or data frame.")
 }
 
 .logsumexp_rows <- function(log_mat) {
@@ -1877,17 +1877,17 @@ new_muvg_category_representation <- function(
 ) {
   n_comp <- length(component_mu)
   if (n_comp < 1) {
-    stop("component_mu must contain at least one element.", call. = FALSE)
+    .stop("component_mu must contain at least one element.")
   }
   if (!is.numeric(component_mu) || !is.numeric(component_sigma2)) {
-    stop("component_mu and component_sigma2 must be numeric.", call. = FALSE)
+    .stop("component_mu and component_sigma2 must be numeric.")
   }
   if (is.null(component_weights)) {
     precision <- 1 / as.numeric(component_sigma2)
     component_weights <- precision / sum(precision)
   }
   if (!is.numeric(component_weights)) {
-    stop("component_weights must be numeric.", call. = FALSE)
+    .stop("component_weights must be numeric.")
   }
 
   MUVG_CategoryRepresentation(
@@ -1927,16 +1927,16 @@ new_mnix_category_representation <- function(
 ) {
   n_comp <- length(component_m)
   if (n_comp < 1) {
-    stop("component_m must contain at least one element.", call. = FALSE)
+    .stop("component_m must contain at least one element.")
   }
   if (!is.numeric(component_m) || !is.numeric(component_kappa) || !is.numeric(component_nu) || !is.numeric(component_sigma2)) {
-    stop("component_m, component_kappa, component_nu, and component_sigma2 must be numeric.", call. = FALSE)
+    .stop("component_m, component_kappa, component_nu, and component_sigma2 must be numeric.")
   }
   if (is.null(component_weights)) {
     component_weights <- rep(1 / n_comp, n_comp)
   }
   if (!is.numeric(component_weights)) {
-    stop("component_weights must be numeric.", call. = FALSE)
+    .stop("component_weights must be numeric.")
   }
 
   MNIX_CategoryRepresentation(
@@ -2057,14 +2057,14 @@ new_exemplar_category_representation <- function(
 ) {
   exemplars <- as.matrix(exemplars)
   if (!is.numeric(exemplars)) {
-    stop("exemplars must be numeric.", call. = FALSE)
+    .stop("exemplars must be numeric.")
   }
   n_ex <- nrow(exemplars)
   if (is.null(exemplar_weights)) {
     exemplar_weights <- rep(1 / n_ex, n_ex)
   }
   if (!is.numeric(exemplar_weights)) {
-    stop("exemplar_weights must be numeric.", call. = FALSE)
+    .stop("exemplar_weights must be numeric.")
   }
 
   Exemplar_CategoryRepresentation(
@@ -2129,19 +2129,18 @@ new_exemplar_category_representation <- function(
     metadata = list()
 ) {
   if (is.null(category_template)) {
-    stop("category_template must be supplied.", call. = FALSE)
+    .stop("category_template must be supplied.")
   }
 
   if (!S7::S7_inherits(category_template, MVBU_CategoryRepresentationTemplate)) {
-    stop("category_template must be an MVBU_CategoryRepresentationTemplate.", call. = FALSE)
+    .stop("category_template must be an MVBU_CategoryRepresentationTemplate.")
   }
 
   family_representations <- category_template@representations
 
   if (!all(vapply(family_representations, function(r) S7::S7_inherits(r, category_representation_class), logical(1)))) {
-    stop(
-      paste0("All category_likelihood_template entries must inherit from ", family_label, " category representation class."),
-      call. = FALSE
+    .stop(
+      paste0("All category_likelihood_template entries must inherit from ", family_label, " category representation class.")
     )
   }
 
@@ -2358,7 +2357,7 @@ new_exemplar_model <- function(
 #' @keywords internal
 validate_object <- function(x) {
   if (!S7::S7_inherits(x, MVBU_Object)) {
-    stop("x must be an S7 object.", call. = FALSE)
+    .stop("x must be an S7 object.")
   }
   TRUE
 }
@@ -2372,9 +2371,8 @@ validate_object <- function(x) {
 }
 
 .mvbu_not_implemented <- function(generic_name, class_name) {
-  stop(
-    paste0("Method for ", generic_name, "() not yet implemented for class ", class_name, "."),
-    call. = FALSE
+  .stop(
+    paste0("Method for ", generic_name, "() not yet implemented for class ", class_name, ".")
   )
 }
 

@@ -64,7 +64,7 @@ IdealAdaptorStanfitInput <- S7::new_class(
     }
 
     S7::new_object(
-      IdealAdaptorStanfitInput,
+      MVBU_Object(),
       data = as.data.frame(data),
       staninput = staninput,
       transform_information = transform_information
