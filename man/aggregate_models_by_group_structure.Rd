@@ -2,7 +2,13 @@
 % Please edit documentation in R/make-objects.R
 \name{aggregate_models_by_group_structure}
 \alias{aggregate_models_by_group_structure}
-\title{Aggregate multiple ideal observers/adaptors into an average ('typical') ideal observer/adaptor}
+\title{Takes a grouped collection of ideal observers or adaptors (or MVG / NIW_belief objects) and averages them into a single
+object. Aggregation proceeds sequentially from
+the first to the last element of \code{group_structure}: first, a mean and covariance matrix will be obtained for all combinations
+of grouping variables; then the first grouping variable is collapsed over, creating an average for all combinations of the remaining
+grouping variables; and so on. For this process to have a reasonable outcome, it is important that the grouping variables are hierarchically
+organized from more specific to less specific: the second group variable should be a superset of the first group variable; the third group
+variable should be a superset of the second group variable; etc.}
 \usage{
 aggregate_models_by_group_structure(x, group_structure = NULL)
 }
