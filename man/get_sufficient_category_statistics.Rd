@@ -11,37 +11,42 @@ get_sufficient_category_statistics(
   group = NULL,
   categories = NULL,
   groups = NULL,
+  verbose = FALSE,
   ...
 )
 }
 \arguments{
-\item{data}{\code{tibble} or \code{data.frame} with the data. Each row should be an observation of a category,
-and contain information about the category label, the cue values of the observation, and optionally grouping variables.}
+\item{data}{A \code{data.frame} with the data. Each row should be an observation
+of a category, containing the category label, the cue values of the
+observation, and optionally grouping variables.}
 
 \item{cues}{Names of columns with cue values.}
 
-\item{category}{Name of column that contains the category label for the exposure data. Can be \code{NULL} for unsupervised updating
-(not yet implemented). (default: "category")}
+\item{category}{Name of column that contains the category label for the
+exposure data. (default: "category")}
 
-\item{group}{Name of column(s) that contains information about which observations form a group. This could be individual
-subjects or conditions in an experiment. The latter is more efficient, but should only be used if exposure is
-identical for every individual within the group. Test does not have to be identical for every individual within
-the same group. For example, one can group multiple groups of subjects that have received the same exposure
-but were tested on different test tokens. If \code{NULL} no grouping variable will be considered. (default: \code{NULL})}
+\item{group}{Name of column(s) that contains information about which
+observations form a group. This could be individual subjects or conditions
+in an experiment. (default: \code{NULL})}
 
-\item{categories, groups}{Character vector of categories/groups to be summarize. If \code{NULL}, all categories/groups will be
-included. (default: \code{NULL})}
+\item{categories, groups}{Character vector of categories/groups to be
+summarized. If \code{NULL}, all categories/groups will be included.
+(default: \code{NULL})}
 
-\item{test}{\code{tibble} or \code{data.frame} with the test data. Each row should be an observation, and contain information
-about the cue values of the test stimulus and the participant's response.}
+\item{verbose}{Logical; if \code{TRUE}, produce verbose output. (default: \code{FALSE})}
+
+\item{...}{Additional arguments (currently unused).}
 }
 \value{
-A tibble of sufficient statistics for each combination of category and group. This includes the count, mean,
-uncentered and centered sums-of-squares and the covariance matrix (or, for univariate, stimuli: the standard deviation).
+A \code{data.frame} of sufficient statistics for each combination of
+category and group. This includes the count (\code{x_N}), mean vector
+(\code{x_mean}), uncentered and centered sums-of-squares (\code{x_uss}, \code{x_css}), and
+the covariance matrix (\code{x_cov}).
 }
 \description{
-Get sufficient statistics from data. Calculates functions for the specified cues for
-any combination of groups (optional) and categories, and returns them as a tibble.
-Rows with missing values for cues will be ignored in the calculation of the sufficient statistics.
+Get sufficient statistics from data. Calculates functions for the specified
+cues for any combination of groups (optional) and categories, and returns
+them as a data.frame. Rows with missing values for cues will be ignored in the
+calculation of the sufficient statistics.
 }
 \keyword{TBD}

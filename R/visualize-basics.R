@@ -31,10 +31,11 @@ inv_symlog <- function(x, C = 0) sign(x) * (10^abs(x) * 10^C - 10^C)
 
 #' @rdname symlog
 #' @export
-symlog_trans <- function(){
+symlog_trans <- function() {
   scales::trans_new("symlog",
-                    transform = function(x) sign(x) * log10(1 + abs(x)),
-                    inverse = function(x) sign(x) * (10^abs(x) - 1))
+    transform = function(x) sign(x) * log10(1 + abs(x)),
+    inverse = function(x) sign(x) * (10^abs(x) - 1)
+  )
 }
 
 
@@ -60,7 +61,7 @@ get_default_colors <- function(var, levels) {
     if ("prior" %in% levels) {
       .assert_that(n - 1 <= 36, msg = "Cannot provide default colors for more than 36 levels.")
       color <- c()
-      color[which(levels != "prior")] <- palette.colors(n-1, "Polychrome 36")
+      color[which(levels != "prior")] <- palette.colors(n - 1, "Polychrome 36")
       color[which(levels == "prior")] <- "darkgray"
     } else {
       .assert_that(n <= 36, msg = "Cannot provide default colors for more than 36 levels.")
@@ -95,7 +96,6 @@ get_default_linetypes <- function(var, levels) {
 }
 
 
-
 #' Get plot limits.
 #'
 #' Get x and y limits from a ggplot.
@@ -109,11 +109,11 @@ get_default_linetypes <- function(var, levels) {
 #'
 #' @export
 get_plot_limits <- function(plot) {
-  list(x = ggplot_build(plot)$layout$panel_scales_x[[1]]$range$range,
-       y = ggplot_build(obj)$layout$panel_scales_y[[1]]$range$range)
+  list(
+    x = ggplot_build(plot)$layout$panel_scales_x[[1]]$range$range,
+    y = ggplot_build(obj)$layout$panel_scales_y[[1]]$range$range
+  )
 }
-
-
 
 
 #' Get suitable limits for coordinate system based on the MCMC samples of a variable.
@@ -133,19 +133,24 @@ get_plot_limits <- function(plot) {
 #' @keywords TBD
 #'
 #' @export
-get_limits = function(data, measure, by = NULL, hdi.prob = .99, min = NULL, max = NULL) {
+get_limits <- function(data, measure, by = NULL, hdi.prob = .99, min = NULL, max = NULL) {
   data %>%
-    mean_hdi((!! rlang::sym(measure)), .width = hdi.prob) %>%
+    mean_hdi((!!rlang::sym(measure)), .width = hdi.prob) %>%
     ungroup() %>%
-    { if (!is.null(by)) group_by(., by) else . } %>%
-    summarise(.lower = if (!is.null(min)) min else min(.data$.lower),
-              .upper = if (!is.null(max)) max else max(.data$.upper)) %>%
+    {
+      if (!is.null(by)) group_by(., by) else .
+    } %>%
+    summarise(
+      .lower = if (!is.null(min)) min else min(.data$.lower),
+      .upper = if (!is.null(max)) max else max(.data$.upper)
+    ) %>%
     as.numeric()
 }
 
 #' @export
-ellipse.pmap <- function(x, centre, level, ...)
+ellipse.pmap <- function(x, centre, level, ...) {
   ellipse(x = x, centre = centre, level = level, ...)
+}
 
 #' Add exposure/test data to a plot as points or ellipse
 #'
@@ -175,7 +180,7 @@ add_exposure_data_to_1D_plot <- function(
   category.labels,
   category.colors
 ) {
-  cue.labels[2] = "cue2"
+  cue.labels[2] <- "cue2"
   data %<>% mutate(cue2 = 0)
   add_exposure_data_to_2D_plot(data, cue.labels, category.ids, category.labels, category.colors)
 }
@@ -183,14 +188,14 @@ add_exposure_data_to_1D_plot <- function(
 #' @rdname add_data_to_plot
 #' @export
 add_test_data_to_1D_plot <- function(data, cue.labels) {
-  cue.labels[2] = "cue2"
+  cue.labels[2] <- "cue2"
   data %<>% mutate(cue2 = 0)
   add_test_data_to_2D_plot(data, cue.labels)
 }
 
 #' @rdname add_data_to_plot
 #' @export
-add_exposure_data_to_2D_plot = function(
+add_exposure_data_to_2D_plot <- function(
   data,
   cue.labels,
   category.ids,
@@ -204,46 +209,57 @@ add_exposure_data_to_2D_plot = function(
         x = .data[[cue.labels[1]]],
         y = .data[[cue.labels[2]]],
         shape = .data$category,
-        color = .data$category),
-      size = 3, alpha = .9),
+        color = .data$category
+      ),
+      size = 3, alpha = .9
+    ),
     scale_shape("Category",
-                breaks = category.ids,
-                labels = category.labels),
+      breaks = category.ids,
+      labels = category.labels
+    ),
     scale_color_manual("Category",
-                       breaks = category.ids,
-                       labels = category.labels,
-                       values = category.colors))
+      breaks = category.ids,
+      labels = category.labels,
+      values = category.colors
+    )
+  )
 }
 
 #' @rdname add_data_to_plot
 #' @export
-add_test_data_to_2D_plot = function(data, cue.labels) {
+add_test_data_to_2D_plot <- function(data, cue.labels) {
   list(
     geom_point(
       data = data,
       mapping = aes(
         x = .data[[cue.labels[1]]],
-        y = .data[[cue.labels[2]]]),
+        y = .data[[cue.labels[2]]]
+      ),
       inherit.aes = F,
-      color = "black", size = 1, alpha = .75))
+      color = "black", size = 1, alpha = .75
+    )
+  )
 }
 
 #' @rdname add_data_to_plot
 #' @export
 add_exposure_summary_to_1D_plot <- function(
-    data
+  data
 ) {
   data %>%
     group_by(category) %>%
     summarise(mean = list(mean(.data$cue1)), sd = list(sd(.data$cue1))) %>%
     group_map(
       ~ stat_function(
-          fun = function(x) dnorm(x, mean = .x$mean, sd = .x$sd),
-          mapping = aes(
-            x = .data$cue1,
-            color = .data$category),
-          linetype = 2,
-          inherit.aes = F))
+        fun = function(x) dnorm(x, mean = .x$mean, sd = .x$sd),
+        mapping = aes(
+          x = .data$cue1,
+          color = .data$category
+        ),
+        linetype = 2,
+        inherit.aes = F
+      )
+    )
 }
 
 #' @rdname add_data_to_plot
@@ -256,54 +272,64 @@ add_exposure_summary_to_2D_plot <- function(
     geom_point(
       data =
         data %>%
-        mutate(cue1 = map_dbl(.data$mean, ~ .x[1]), cue2 = map_dbl(.data$mean, ~ .x[2])),
+          mutate(cue1 = map_dbl(.data$mean, ~ .x[1]), cue2 = map_dbl(.data$mean, ~ .x[2])),
       mapping = aes(
         x = .data$cue1,
         y = .data$cue2,
-        color = .data$category),
-      inherit.aes = F, size = 1),
+        color = .data$category
+      ),
+      inherit.aes = F, size = 1
+    ),
     geom_path(
       data =
         data %>%
-        crossing(level = level) %>%
-        mutate(ellipse = pmap(.l = list(cov, mean, level), ellipse.pmap)) %>%
-        unnest(ellipse) %>%
-        group_by(across(-ellipse)) %>%
-        transmute(cue1 = ellipse[,1], cue2 = ellipse[,2]),
+          crossing(level = level) %>%
+          mutate(ellipse = pmap(.l = list(cov, mean, level), ellipse.pmap)) %>%
+          unnest(ellipse) %>%
+          group_by(across(-ellipse)) %>%
+          transmute(cue1 = ellipse[, 1], cue2 = ellipse[, 2]),
       mapping = aes(
         x = .data$cue1,
         y = .data$cue2,
-        color = .data$category),
+        color = .data$category
+      ),
       linetype = 2,
-      inherit.aes = F))
+      inherit.aes = F
+    )
+  )
 }
 
 #' @export
-facet_or_animate = function(p, facet_rows_by, facet_cols_by, facet_wrap_by, animate_by, animation_follow) {
-  facet_rows_by = enquo(facet_rows_by)
-  facet_cols_by = enquo(facet_cols_by)
-  facet_wrap_by = enquo(facet_wrap_by)
-  animate_by = enquo(animate_by)
+facet_or_animate <- function(p, facet_rows_by, facet_cols_by, facet_wrap_by, animate_by, animation_follow) {
+  facet_rows_by <- enquo(facet_rows_by)
+  facet_cols_by <- enquo(facet_cols_by)
+  facet_wrap_by <- enquo(facet_wrap_by)
+  animate_by <- enquo(animate_by)
 
   if (!quo_is_null(facet_rows_by) | !quo_is_null(facet_cols_by)) {
-    p = p + facet_grid(
-      rows = vars(!! facet_rows_by),
-      cols = vars(!! facet_cols_by),
-      labeller = label_both)
+    p <- p + facet_grid(
+      rows = vars(!!facet_rows_by),
+      cols = vars(!!facet_cols_by),
+      labeller = label_both
+    )
   } else if (!quo_is_null(facet_wrap_by)) {
-    p = p + facet_wrap(
-      facets = vars(!! facet_wrap_by),
-      labeller = label_both)
+    p <- p + facet_wrap(
+      facets = vars(!!facet_wrap_by),
+      labeller = label_both
+    )
   }
 
   if (!quo_is_null(animate_by)) {
     message("Preparing for rendering. This might take a moment.\n")
-    p = p +
+    p <- p +
       labs(title = paste0(as_name(animate_by), ": {closest_state}")) +
-      transition_states(!! animate_by,
-                        transition_length = 1,
-                        state_length = 1) +
-      { if (animation_follow) view_follow() } +
+      transition_states(!!animate_by,
+        transition_length = 1,
+        state_length = 1
+      ) +
+      {
+        if (animation_follow) view_follow()
+      } +
       enter_fade() +
       exit_fade()
   }
@@ -337,19 +363,20 @@ plot_pairwise_cue_correlation_matrix <- function(
   # Binding variables that RMD Check gets confused about otherwise
   # (since they are in non-standard evaluations)
   .panel_x <- .panel_y <- NULL
-  cues = enquos(cues)
-  category = enquo(category)
+  cues <- enquos(cues)
+  category <- enquo(category)
 
   data %>%
-    ggplot(aes(x = .panel_x, y = .panel_y, colour = !! category, fill = !! category)) +
+    ggplot(aes(x = .panel_x, y = .panel_y, colour = !!category, fill = !!category)) +
     scale_colour_manual(values = category.colors) +
     scale_fill_manual(values = category.colors) +
     geom_point(alpha = 0.6, shape = 16, size = 1) +
     geom_autodensity(alpha = .04, position = "identity") +
     stat_ellipse(type = "norm") +
     facet_matrix(
-      vars(!!! cues),
+      vars(!!!cues),
       layer.diag = 2,
       layer.upper = 3,
-      grid.y.diag= FALSE)
+      grid.y.diag = FALSE
+    )
 }

@@ -19,7 +19,7 @@ IdealAdaptorStanfit(
   criteria = list(),
   file = NULL,
   version = NULL,
-  labels = list()
+  metadata = list()
 )
 }
 \description{

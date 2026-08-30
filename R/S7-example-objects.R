@@ -32,13 +32,15 @@ example_nix_category_representation <- function(n_cues = 1, category = "/b/", ka
 
 #' @rdname example-s7-objects
 #' @export
-example_muvg_category_representation <- function(n_cues = 1, category = "/b/") {
+example_muvg_category_representation <- function(n_cues = 2, category = "/b/") {
+  .assert_true(n_cues >= 2, msg = "MUVG examples require n_cues >= 2.")
   new_muvg_category_representation_from_data(.example_data(n_cues, category), cues = c("VOT", "f0_semitones", "vowel_duration")[seq_len(n_cues)])
 }
 
 #' @rdname example-s7-objects
 #' @export
-example_mnix_category_representation <- function(n_cues = 1, category = "/b/", kappa = 10, nu = 30) {
+example_mnix_category_representation <- function(n_cues = 2, category = "/b/", kappa = 10, nu = 30) {
+  .assert_true(n_cues >= 2, msg = "MNIX examples require n_cues >= 2.")
   new_mnix_category_representation_from_data(.example_data(n_cues, category), cues = c("VOT", "f0_semitones", "vowel_duration")[seq_len(n_cues)], kappa = kappa, nu = nu)
 }
 
@@ -63,8 +65,11 @@ example_exemplar_category_representation <- function(n_cues = 1, category = "/b/
 
 #' @rdname example-s7-objects
 #' @export
-example_category_representation <- function(type, n_cues = 1, category = "/b/", ...) {
+example_category_representation <- function(type, n_cues = NULL, category = "/b/", ...) {
   type <- toupper(type)
+  if (is.null(n_cues)) {
+    n_cues <- if (type %in% c("MUVG", "MNIX")) 2 else 1
+  }
   constructor <- switch(
     type,
     UVG = example_uvg_category_representation,
@@ -95,13 +100,15 @@ example_nix_category_representation_template <- function(n_cues = 1, categories 
 
 #' @rdname example-s7-objects
 #' @export
-example_muvg_category_representation_template <- function(n_cues = 1, categories = NULL) {
+example_muvg_category_representation_template <- function(n_cues = 2, categories = NULL) {
+  .assert_true(n_cues >= 2, msg = "MUVG examples require n_cues >= 2.")
   new_muvg_category_representation_template_from_data(.example_data(n_cues, categories), cues = c("VOT", "f0_semitones", "vowel_duration")[seq_len(n_cues)])
 }
 
 #' @rdname example-s7-objects
 #' @export
-example_mnix_category_representation_template <- function(n_cues = 1, categories = NULL, kappa = 10, nu = 30) {
+example_mnix_category_representation_template <- function(n_cues = 2, categories = NULL, kappa = 10, nu = 30) {
+  .assert_true(n_cues >= 2, msg = "MNIX examples require n_cues >= 2.")
   new_mnix_category_representation_template_from_data(.example_data(n_cues, categories), cues = c("VOT", "f0_semitones", "vowel_duration")[seq_len(n_cues)], kappa = kappa, nu = nu)
 }
 
@@ -126,8 +133,11 @@ example_exemplar_category_representation_template <- function(n_cues = 1, catego
 
 #' @rdname example-s7-objects
 #' @export
-example_category_representation_template <- function(type, n_cues = 1, categories = NULL, ...) {
+example_category_representation_template <- function(type, n_cues = NULL, categories = NULL, ...) {
   type <- toupper(type)
+  if (is.null(n_cues)) {
+    n_cues <- if (type %in% c("MUVG", "MNIX")) 2 else 1
+  }
   constructor <- switch(
     type,
     UVG = example_uvg_category_representation_template,
@@ -158,13 +168,15 @@ example_nix_ideal_adaptor <- function(n_cues = 1, categories = NULL, kappa = 10,
 
 #' @rdname example-s7-objects
 #' @export
-example_muvg_ideal_observer <- function(n_cues = 1, categories = NULL, ...) {
+example_muvg_ideal_observer <- function(n_cues = 2, categories = NULL, ...) {
+  .assert_true(n_cues >= 2, msg = "MUVG examples require n_cues >= 2.")
   new_muvg_ideal_observer_from_data(.example_data(n_cues, categories), cues = c("VOT", "f0_semitones", "vowel_duration")[seq_len(n_cues)], ...)
 }
 
 #' @rdname example-s7-objects
 #' @export
-example_mnix_ideal_adaptor <- function(n_cues = 1, categories = NULL, kappa = 10, nu = 30, ...) {
+example_mnix_ideal_adaptor <- function(n_cues = 2, categories = NULL, kappa = 10, nu = 30, ...) {
+  .assert_true(n_cues >= 2, msg = "MNIX examples require n_cues >= 2.")
   new_mnix_ideal_adaptor_from_data(.example_data(n_cues, categories), cues = c("VOT", "f0_semitones", "vowel_duration")[seq_len(n_cues)], kappa = kappa, nu = nu, ...)
 }
 
@@ -189,8 +201,11 @@ example_exemplar_model <- function(n_cues = 1, categories = NULL, ...) {
 
 #' @rdname example-s7-objects
 #' @export
-example_model <- function(type, n_cues = 1, categories = NULL, ...) {
+example_model <- function(type, n_cues = NULL, categories = NULL, ...) {
   type <- toupper(type)
+  if (is.null(n_cues)) {
+    n_cues <- if (type %in% c("MUVG", "MNIX")) 2 else 1
+  }
   constructor <- switch(
     type,
     UVG = example_uvg_ideal_observer,

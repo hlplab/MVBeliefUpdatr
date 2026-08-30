@@ -2,122 +2,105 @@
 % Please edit documentation in R/S7-example-objects.R
 \name{example-s7-objects}
 \alias{example-s7-objects}
-\alias{example_uvg_category_representation_from_data}
-\alias{example_nix_category_representation_from_data}
-\alias{example_muvg_category_representation_from_data}
-\alias{example_mnix_category_representation_from_data}
-\alias{example_mvg_category_representation_from_data}
-\alias{example_niw_category_representation_from_data}
-\alias{example_exemplar_category_representation_from_data}
-\alias{example_category_representation_from_data}
-\alias{example_uvg_category_representation_template_from_data}
-\alias{example_nix_category_representation_template_from_data}
-\alias{example_muvg_category_representation_template_from_data}
-\alias{example_mnix_category_representation_template_from_data}
-\alias{example_mvg_category_representation_template_from_data}
-\alias{example_niw_category_representation_template_from_data}
-\alias{example_exemplar_category_representation_template_from_data}
-\alias{example_category_representation_template_from_data}
-\alias{example_uvg_ideal_observer_from_data}
-\alias{example_nix_ideal_adaptor_from_data}
-\alias{example_muvg_ideal_observer_from_data}
-\alias{example_mnix_ideal_adaptor_from_data}
-\alias{example_mvg_ideal_observer_from_data}
-\alias{example_niw_ideal_adaptor_from_data}
-\alias{example_exemplar_model_from_data}
-\alias{example_model_from_data}
+\alias{example_uvg_category_representation}
+\alias{example_nix_category_representation}
+\alias{example_muvg_category_representation}
+\alias{example_mnix_category_representation}
+\alias{example_mvg_category_representation}
+\alias{example_niw_category_representation}
+\alias{example_exemplar_category_representation}
+\alias{example_category_representation}
+\alias{example_uvg_category_representation_template}
+\alias{example_nix_category_representation_template}
+\alias{example_muvg_category_representation_template}
+\alias{example_mnix_category_representation_template}
+\alias{example_mvg_category_representation_template}
+\alias{example_niw_category_representation_template}
+\alias{example_exemplar_category_representation_template}
+\alias{example_category_representation_template}
+\alias{example_uvg_ideal_observer}
+\alias{example_nix_ideal_adaptor}
+\alias{example_muvg_ideal_observer}
+\alias{example_mnix_ideal_adaptor}
+\alias{example_mvg_ideal_observer}
+\alias{example_niw_ideal_adaptor}
+\alias{example_exemplar_model}
+\alias{example_model}
 \title{Example S7 objects built from the bundled Chodroff-Wilson data.}
 \usage{
-example_uvg_category_representation_from_data(n_cues = 1, category = "/b/")
+example_uvg_category_representation(n_cues = 1, category = "/b/")
 
-example_nix_category_representation_from_data(
+example_nix_category_representation(
   n_cues = 1,
   category = "/b/",
   kappa = 10,
   nu = 30
 )
 
-example_muvg_category_representation_from_data(n_cues = 1, category = "/b/")
+example_muvg_category_representation(n_cues = 2, category = "/b/")
 
-example_mnix_category_representation_from_data(
-  n_cues = 1,
+example_mnix_category_representation(
+  n_cues = 2,
   category = "/b/",
   kappa = 10,
   nu = 30
 )
 
-example_mvg_category_representation_from_data(n_cues = 1, category = "/b/")
+example_mvg_category_representation(n_cues = 1, category = "/b/")
 
-example_niw_category_representation_from_data(
+example_niw_category_representation(
   n_cues = 1,
   category = "/b/",
   kappa = 10,
   nu = NULL
 )
 
-example_exemplar_category_representation_from_data(
-  n_cues = 1,
-  category = "/b/"
-)
+example_exemplar_category_representation(n_cues = 1, category = "/b/")
 
-example_category_representation_from_data(
-  type,
-  n_cues = 1,
-  category = "/b/",
-  ...
-)
+example_category_representation(type, n_cues = NULL, category = "/b/", ...)
 
-example_uvg_category_representation_template_from_data(
-  n_cues = 1,
-  categories = NULL
-)
+example_uvg_category_representation_template(n_cues = 1, categories = NULL)
 
-example_nix_category_representation_template_from_data(
+example_nix_category_representation_template(
   n_cues = 1,
   categories = NULL,
   kappa = 10,
   nu = 30
 )
 
-example_muvg_category_representation_template_from_data(
-  n_cues = 1,
-  categories = NULL
-)
+example_muvg_category_representation_template(n_cues = 2, categories = NULL)
 
-example_mnix_category_representation_template_from_data(
-  n_cues = 1,
+example_mnix_category_representation_template(
+  n_cues = 2,
   categories = NULL,
   kappa = 10,
   nu = 30
 )
 
-example_mvg_category_representation_template_from_data(
-  n_cues = 1,
-  categories = NULL
-)
+example_mvg_category_representation_template(n_cues = 1, categories = NULL)
 
-example_niw_category_representation_template_from_data(
+example_niw_category_representation_template(
   n_cues = 1,
   categories = NULL,
   kappa = 10,
   nu = NULL
 )
 
-example_exemplar_category_representation_template_from_data(
+example_exemplar_category_representation_template(
   n_cues = 1,
   categories = NULL
 )
 
-example_category_representation_template_from_data(
+example_category_representation_template(
   type,
-  n_cues = 1,
+  n_cues = NULL,
   categories = NULL,
   ...
 )
 
-example_uvg_ideal_observer_from_data(n_cues = 1, categories = NULL, ...)
+example_uvg_ideal_observer(n_cues = 1, categories = NULL, ...)
 
-example_nix_ideal_adaptor_from_data(
+example_nix_ideal_adaptor(
   n_cues = 1,
   categories = NULL,
   kappa = 10,
@@ -125,19 +108,19 @@ example_nix_ideal_adaptor_from_data(
   ...
 )
 
-example_muvg_ideal_observer_from_data(n_cues = 1, categories = NULL, ...)
+example_muvg_ideal_observer(n_cues = 2, categories = NULL, ...)
 
-example_mnix_ideal_adaptor_from_data(
-  n_cues = 1,
+example_mnix_ideal_adaptor(
+  n_cues = 2,
   categories = NULL,
   kappa = 10,
   nu = 30,
   ...
 )
 
-example_mvg_ideal_observer_from_data(n_cues = 1, categories = NULL, ...)
+example_mvg_ideal_observer(n_cues = 1, categories = NULL, ...)
 
-example_niw_ideal_adaptor_from_data(
+example_niw_ideal_adaptor(
   n_cues = 1,
   categories = NULL,
   kappa = 10,
@@ -145,9 +128,9 @@ example_niw_ideal_adaptor_from_data(
   ...
 )
 
-example_exemplar_model_from_data(n_cues = 1, categories = NULL, ...)
+example_exemplar_model(n_cues = 1, categories = NULL, ...)
 
-example_model_from_data(type, n_cues = 1, categories = NULL, ...)
+example_model(type, n_cues = NULL, categories = NULL, ...)
 }
 \description{
 \code{n_cues} selects VOT, VOT plus f0, or all three bundled cues. UVG and NIX

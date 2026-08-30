@@ -279,3 +279,27 @@ Phase gate:
 - Attach explicit go/no-go criteria to each phase before coding starts
 - If phase gate fails, resolve blockers before entering next phase
 - Revisit grouped-model containers: group labels currently identify model instances in model combinations; formal grouped-model class/container design should be addressed in later phases.
+
+## Later planned extensions
+
+### Issues to fix
++ Check MNIX cue weighting: there are at least two possible implementations:
+  + adapt after integration (single nix sitting on top of integrated cue dimension)
+  + adapt before integration (one nix for each cue; then integration)
+  + make sure that whatever is implemented for Stan is also what is implemented in R
+  + make sure that these choices are documented verbosely in roxygen
++ MNIX fitting is currently commented out. AI comments for MNIX failure:
+  > "The root cause is visible now: the MNIX Stan program expects a covariance-style summary array, but the current builder is providing a sum-of-squares vector array instead. I’m aligning that data structure with the model’s declared interface before I verify again."
+
+### Extensions
++ Inverse MUVG/MNIX models (both as Stanfit model and S7 representation/template/model): a model that accepts multiple cues as input but maintains and updates representations/templates/models over the single integrated cue dimension (e.g. UVG-I / NIX-I).
++ Write forward-updating functions for NIX, MNIX, NIW, revising existing NIW forward-updating.
+  + Include equivalence checks verifying that 1-cue NIX and 1-cue NIW forward updating yield identical analytical belief parameters given identical prior beliefs and exposure data.
++ Add specification of category prior and lapse bias via `fixed_parameters` and extend Stan program to include category prior.
++ For stanfit fitting, allow specification of fixed parameters"
+  + for *some* mu and some sigma. that will require changes to the stan code (and might require making multiple versions of each stan model to maintain efficiency for the most common case in which none or all of the mu, sigma's are fixed.)
+  + category priors and lapse bias 
++ make extensions of plot_categories and plot_categorization_functions functions that animate model updates (both for histories of update_model or for stanfit ideal adaptors by stepping from prior to posterior for a number of equally-spaced draws)
+
+### Efficiency considerations
++ Consider making separate versions of stan models for 0, 1, or more observations. Functions could be shared between them to ease maintenance.

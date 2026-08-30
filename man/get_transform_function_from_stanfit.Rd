@@ -2,13 +2,13 @@
 % Please edit documentation in R/deprecated-2025.R
 \name{get_transform_function_from_stanfit}
 \alias{get_transform_function_from_stanfit}
-\title{Legacy wrapper for get_transform_function.ideal_adaptor_stanfit.}
+\title{Legacy wrapper for get_transform_function.}
 \usage{
 get_transform_function_from_stanfit(...)
 }
 \description{
-Deprecated. Use \code{\link{get_transform_function.ideal_adaptor_stanfit}} instead.
+Deprecated. Use \code{\link{get_transform_function}} instead.
 
-Deprecated. Use get_transform_function.ideal_adaptor_stanfit() instead.
+Deprecated. Use get_transform_function() instead.
 }
 \keyword{internal}

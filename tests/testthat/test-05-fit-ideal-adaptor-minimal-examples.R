@@ -108,7 +108,12 @@ test_that("recover_types works on stanfit objects nested in S7 IdealAdaptorStanf
 
   expect_true(S7::S7_inherits(recovered_fit, IdealAdaptorStanfit))
   expect_s4_class(get_stanfit(recovered_fit), "stanfit")
-  expect_true(!is.null(attr(get_stanfit(recovered_fit), "tidybayes_constructors")))
-  expect_true(is.function(get_constructor(recovered_fit, "group")))
-  expect_equal(get_staninput_variable_levels(recovered_fit, "group"), get_group_levels(recovered_fit))
+  expect_warning(
+    expect_true(is.function(get_constructor(recovered_fit, "group"))),
+    class = "lifecycle_warning_deprecated"
+  )
+  expect_warning(
+    expect_equal(get_staninput_variable_levels(recovered_fit, "group"), get_group_levels(recovered_fit)),
+    class = "lifecycle_warning_deprecated"
+  )
 })

@@ -2,13 +2,13 @@
 % Please edit documentation in R/deprecated-2025.R
 \name{get_staninput_from_stanfit}
 \alias{get_staninput_from_stanfit}
-\title{Legacy wrapper for get_staninput.ideal_adaptor_stanfit.}
+\title{Legacy wrapper for get_staninput.}
 \usage{
 get_staninput_from_stanfit(...)
 }
 \description{
-Deprecated. Use \code{\link{get_staninput.ideal_adaptor_stanfit}} instead.
+Deprecated. Use \code{\link{get_staninput}} instead.
 
-Deprecated. Use get_staninput.ideal_adaptor_stanfit() instead.
+Deprecated. Use get_staninput() instead.
 }
 \keyword{internal}

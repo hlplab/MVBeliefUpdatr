@@ -1,6 +1,9 @@
 #' @include S7-core-methods.R S7-generics.R
 NULL
 
+# Order of application matters: all update helper functions assume inputs (kappa, nu, m, S)
+# that reflect the state prior to the current update step.
+
 .update_NIW_category_representation_kappa <- function(kappa_0, x_N) {
   kappa_0 + x_N
 }
@@ -14,15 +17,19 @@ NULL
 }
 
 .update_NIW_category_representation_S <- function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) {
+  # Conjugate updating of scatter matrix S with between-mean scatter contribution
   S_0 + x_SS + ((kappa_0 * x_N) / (kappa_0 + x_N)) * (x_mean - m_0) %*% t(x_mean - m_0)
 }
 
 .update_NIW_category_representation_by_sufficient_statistics <- function(
-    representation, x_mean, x_SS, x_N
+  representation, x_mean, x_SS, x_N
 ) {
   .assert_true(S7::S7_inherits(representation, NIW_CategoryRepresentation),
-              msg = "representation must be an NIW_CategoryRepresentation.")
-  if (x_N == 0 || anyNA(x_mean)) return(representation)
+    msg = "representation must be an NIW_CategoryRepresentation."
+  )
+  if (x_N == 0 || anyNA(x_mean)) {
+    return(representation)
+  }
 
   new_niw_category_representation(
     category_labels = get_category_labels(representation)[1],
@@ -37,7 +44,9 @@ NULL
 
 .distribute_evidence_across_categories <- function(model, observation, update_method) {
   categories <- get_category_labels(model)
-  if (update_method == "nolabel-uniform") return(rep(1 / length(categories), length(categories)))
+  if (update_method == "nolabel-uniform") {
+    return(rep(1 / length(categories), length(categories)))
+  }
   probabilities <- posterior(model, matrix(as.numeric(observation), nrow = 1), categories = categories)[1, ]
   if (update_method == "nolabel-criterion") {
     weights <- numeric(length(categories))
@@ -53,7 +62,7 @@ NULL
 }
 
 S7::method(update_category_representation, list(NIW_CategoryRepresentation, S7::class_any, S7::class_any, S7::class_any)) <- function(
-    x, x_N, x_mean, x_SS
+  x, x_N, x_mean, x_SS
 ) {
   .assert_true(is.numeric(x_N) && length(x_N) == 1L && !is.na(x_N) && x_N >= 0, msg = "x_N must be a non-negative numeric scalar.")
   .assert_true(is.numeric(x_mean) && length(x_mean) == length(get_cue_labels(x)), msg = "x_mean must contain one value per cue.")
@@ -85,9 +94,9 @@ S7::method(update_category_representation, list(NIW_CategoryRepresentation, S7::
 #'   `updating = "incremental"` and `keep_history = TRUE`.
 #' @export
 S7::method(update_template, list(NIW_IdealAdaptor, S7::class_any)) <- function(
-    x, observations, updating = c("batch", "incremental"), keep_history = FALSE,
-    lapse_treatment = "no_lapses", noise_treatment = "no_noise",
-    update_method = "label-certain"
+  x, observations, updating = c("batch", "incremental"), keep_history = FALSE,
+  lapse_treatment = "no_lapses", noise_treatment = "no_noise",
+  update_method = "label-certain"
 ) {
   updating <- match.arg(updating)
   update_methods <- c("no-updating", "label-certain", "nolabel-criterion", "nolabel-sampling", "nolabel-proportional", "nolabel-uniform")
@@ -101,9 +110,12 @@ S7::method(update_template, list(NIW_IdealAdaptor, S7::class_any)) <- function(
   if (update_method == "label-certain") .assert_data_contains_cols(observations, "category")
   .assert_true(updating == "incremental" || update_method == "label-certain", msg = "Batch updating currently supports only update_method = 'label-certain'.")
 
-  if (update_method == "no-updating") return(if (keep_history && updating == "incremental") list(x) else x)
+  if (update_method == "no-updating") {
+    return(if (keep_history && updating == "incremental") list(x) else x)
+  }
 
   if (updating == "batch") {
+    # Prepare exposure data
     values <- as.matrix(observations[, cue_labels, drop = FALSE])
     if (noise_treatment == "sample" && !is.null(x@noise_behavior$Sigma_noise)) {
       values <- values + mvtnorm::rmvnorm(nrow(values), sigma = x@noise_behavior$Sigma_noise)
@@ -119,7 +131,9 @@ S7::method(update_template, list(NIW_IdealAdaptor, S7::class_any)) <- function(
     representations <- x@category_template@representations
     updated <- lapply(seq_along(representations), function(i) {
       rows <- observations[as.character(observations$category) == as.character(categories[i]), cue_labels, drop = FALSE]
-      if (nrow(rows) == 0L) return(representations[[i]])
+      if (nrow(rows) == 0L) {
+        return(representations[[i]])
+      }
       values <- as.matrix(rows)
       mean_values <- .colMeans(values)
       centered <- sweep(values, 2, mean_values, "-")

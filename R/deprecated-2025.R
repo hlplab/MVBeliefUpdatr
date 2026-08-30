@@ -1,61 +1,61 @@
-#' Legacy wrapper for get_transform_information.ideal_adaptor_stanfit.
+#' Legacy wrapper for get_transform_information.
 #'
-#' @description Deprecated. Use \code{\link{get_transform_information.ideal_adaptor_stanfit}} instead.
+#' @description Deprecated. Use \code{\link{get_transform_information}} instead.
 #' @export
-#' @description Deprecated. Use get_transform_information.ideal_adaptor_stanfit() instead.
+#' @description Deprecated. Use get_transform_information() instead.
 #' @keywords internal
 get_transform_information_from_stanfit <- function(...) {
   lifecycle::deprecate_warn(
     when = "0.0.3",
     what = "get_transform_information_from_stanfit()",
-    with = "get_transform_information.ideal_adaptor_stanfit()"
+    with = "get_transform_information()"
   )
-  get_transform_information.ideal_adaptor_stanfit(...)
+  get_transform_information(...)
 }
 
-#' Legacy wrapper for get_transform_function.ideal_adaptor_stanfit.
+#' Legacy wrapper for get_transform_function.
 #'
-#' @description Deprecated. Use \code{\link{get_transform_function.ideal_adaptor_stanfit}} instead.
+#' @description Deprecated. Use \code{\link{get_transform_function}} instead.
 #' @export
-#' @description Deprecated. Use get_transform_function.ideal_adaptor_stanfit() instead.
+#' @description Deprecated. Use get_transform_function() instead.
 #' @keywords internal
 get_transform_function_from_stanfit <- function(...) {
   lifecycle::deprecate_warn(
     when = "0.0.3",
     what = "get_transform_function_from_stanfit()",
-    with = "get_transform_function.ideal_adaptor_stanfit()"
+    with = "get_transform_function()"
   )
-  get_transform_function.ideal_adaptor_stanfit(...)
+  get_transform_function(...)
 }
 
-#' Legacy wrapper for get_untransform_function.ideal_adaptor_stanfit.
+#' Legacy wrapper for get_untransform_function.
 #'
-#' @description Deprecated. Use \code{\link{get_untransform_function.ideal_adaptor_stanfit}} instead.
+#' @description Deprecated. Use \code{\link{get_untransform_function}} instead.
 #' @export
-#' @description Deprecated. Use get_untransform_function.ideal_adaptor_stanfit() instead.
+#' @description Deprecated. Use get_untransform_function() instead.
 #' @keywords internal
 get_untransform_function_from_stanfit <- function(...) {
   lifecycle::deprecate_warn(
     when = "0.0.3",
     what = "get_untransform_function_from_stanfit()",
-    with = "get_untransform_function.ideal_adaptor_stanfit()"
+    with = "get_untransform_function()"
   )
-  get_untransform_function.ideal_adaptor_stanfit(...)
+  get_untransform_function(...)
 }
 
-#' Legacy wrapper for get_staninput.ideal_adaptor_stanfit.
+#' Legacy wrapper for get_staninput.
 #'
-#' @description Deprecated. Use \code{\link{get_staninput.ideal_adaptor_stanfit}} instead.
+#' @description Deprecated. Use \code{\link{get_staninput}} instead.
 #' @export
-#' @description Deprecated. Use get_staninput.ideal_adaptor_stanfit() instead.
+#' @description Deprecated. Use get_staninput() instead.
 #' @keywords internal
 get_staninput_from_stanfit <- function(...) {
   lifecycle::deprecate_warn(
     when = "0.0.3",
     what = "get_staninput_from_stanfit()",
-    with = "get_staninput.ideal_adaptor_stanfit()"
+    with = "get_staninput()"
   )
-  get_staninput.ideal_adaptor_stanfit(...)
+  get_staninput(...)
 }
 
 # get_exposure_category_statistic_from_stanfit <- get_exposure_category_statistic.ideal_adaptor_stanfit

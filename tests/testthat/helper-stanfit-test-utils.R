@@ -100,13 +100,13 @@ build_shifted_prior_fit_example <- function(
 
   exposure_condition <- factor(character(n_exposure), levels = conditions)
   exposure_category <- factor(character(n_exposure), levels = categories)
-  exposure_group <- factor(character(n_exposure), levels = "g1")
+  exposure_group <- factor(character(n_exposure), levels = conditions)
   exposure_cues <- matrix(0, nrow = n_exposure, ncol = length(cue_names))
   colnames(exposure_cues) <- cue_names
 
   test_condition <- factor(character(n_test), levels = conditions)
   test_response <- factor(character(n_test), levels = categories)
-  test_group <- factor(character(n_test), levels = "g1")
+  test_group <- factor(character(n_test), levels = conditions)
   test_cues <- matrix(0, nrow = n_test, ncol = length(cue_names))
   colnames(test_cues) <- cue_names
 
@@ -121,7 +121,7 @@ build_shifted_prior_fit_example <- function(
     for (i in seq_len(n_exposure_per_condition)) {
       exposure_condition[exposure_idx] <- condition
       exposure_category[exposure_idx] <- category_labels[[i]]
-      exposure_group[exposure_idx] <- "g1"
+      exposure_group[exposure_idx] <- condition
       exposure_cues[exposure_idx, ] <- cues_matrix[i, , drop = FALSE]
       exposure_idx <- exposure_idx + 1L
     }
@@ -132,7 +132,7 @@ build_shifted_prior_fit_example <- function(
     for (i in seq_len(n_test_per_condition)) {
       test_condition[test_idx] <- condition
       test_response[test_idx] <- test_category_labels[[i]]
-      test_group[test_idx] <- "g1"
+      test_group[test_idx] <- condition
       test_cues[test_idx, ] <- test_cues_matrix[i, , drop = FALSE]
       test_idx <- test_idx + 1L
     }
@@ -147,7 +147,7 @@ build_shifted_prior_fit_example <- function(
   )
   exposure$Condition <- factor(exposure$Condition, levels = conditions)
   exposure$category <- factor(exposure$category, levels = categories)
-  exposure$group <- factor(exposure$group, levels = "g1")
+  exposure$group <- factor(exposure$group, levels = conditions)
 
   test <- data.frame(
     Condition = test_condition,
@@ -203,11 +203,26 @@ load_ideal_adaptor_fit_model <- function(name) {
 run_fixed_param_stan_program <- function(stan_file, input, model_name) {
   skip_if_not_installed("rstan")
 
-  model <- rstan::stan_model(
-    file = stan_file,
-    model_name = model_name,
-    auto_write = FALSE
-  )
+  model_key <- sub("_compat$", "", model_name)
+  model <- NULL
+  if (exists("stanmodels", envir = asNamespace("MVBeliefUpdatr"), inherits = FALSE)) {
+    pkg_models <- get("stanmodels", envir = asNamespace("MVBeliefUpdatr"))
+    if (!is.null(pkg_models[[model_name]])) {
+      model <- pkg_models[[model_name]]
+    } else if (!is.null(pkg_models[[model_key]])) {
+      model <- pkg_models[[model_key]]
+    } else if (!is.null(pkg_models[[paste0(model_key, "_ideal_adaptor")]])) {
+      model <- pkg_models[[paste0(model_key, "_ideal_adaptor")]]
+    }
+  }
+
+  if (is.null(model)) {
+    model <- rstan::stan_model(
+      file = stan_file,
+      model_name = model_name,
+      auto_write = FALSE
+    )
+  }
 
   fit <- rstan::sampling(
     object = model,

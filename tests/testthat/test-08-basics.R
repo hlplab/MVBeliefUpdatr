@@ -3,7 +3,7 @@
 .data <- sample_observations(.io, Ns = 50)
 
 test_that("uss2css, css2cov - does sum-of-square to cov conversion work?", {
-  expect_equivalent(
+  expect_equal(
     .data %>%
       get_sufficient_category_statistics(cues = .cues) %>%
       dplyr::pull(x_cov),
@@ -13,6 +13,8 @@ test_that("uss2css, css2cov - does sum-of-square to cov conversion work?", {
         x_css_from_uss = purrr::pmap(list(x_uss, x_N, x_mean), ~ uss2css(..1, ..2, ..3)),
         x_cov_from_uss = purrr::map2(x_css_from_uss, x_N, ~ css2cov(.x, n = .y))
       ) %>%
-      dplyr::pull(x_cov_from_uss))
+      dplyr::pull(x_cov_from_uss),
+    ignore_attr = TRUE
+  )
 })
 

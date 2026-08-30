@@ -9,9 +9,23 @@
 IdealAdaptorStanfitInput(
   data = data.frame(),
   staninput = NULL,
-  transform_information = NULL
+  transform_information = NULL,
+  metadata = list()
 )
 }
 \description{
 An S7 class for ideal-adaptor fit-input objects.
 }
+\section{Slots}{
+
+\describe{
+\item{\code{data}}{A \code{data.frame} containing the input data.}
+
+\item{\code{staninput}}{An \code{\link{IdealAdaptorStaninput}} object.}
+
+\item{\code{transform_information}}{An \code{\link{MVBU_TransformInformation}} object.}
+
+\item{\code{metadata}}{A named \code{list} containing \code{label_information}
+with character vectors (\code{cue}, \code{category}, and \code{group}).}
+}}
+

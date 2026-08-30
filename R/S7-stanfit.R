@@ -31,7 +31,8 @@ NULL
 #'   or loaded from.
 #' @slot version The versions of \pkg{MVBeliefUpdatr} and \pkg{rstan} with
 #'   which the model was fitted.
-#' @slot labels List of labels
+#' @slot metadata List containing auxiliary information including
+#'   \code{label_information}.
 #'
 #' @rawNamespace if (getRversion() < "4.3.0") importFrom(S7, "@")
 #' @importFrom purrr map_lgl map_chr
@@ -54,7 +55,7 @@ MVBU_Stanfit <- S7::new_class(
     criteria = S7::class_list,
     file = S7::class_character,
     version = S7::class_any,
-    labels = S7::class_list
+    metadata = S7::class_list
   ),
   constructor = function(
     data = data.frame(),
@@ -69,7 +70,7 @@ MVBU_Stanfit <- S7::new_class(
     criteria = list(),
     file = NULL,
     version = NULL,
-    labels = list()
+    metadata = list()
   ) {
     if (is.null(transform_information)) {
       transform_information <- MVBU_TransformInformation()
@@ -86,6 +87,23 @@ MVBU_Stanfit <- S7::new_class(
       file <- character(0)
     }
 
+    if (!is.list(metadata)) {
+      metadata <- list()
+    }
+
+    label_info <- if (!is.null(metadata$label_information) &&
+      is.list(metadata$label_information)) {
+      metadata$label_information
+    } else {
+      list()
+    }
+
+    metadata$label_information <- list(
+      cue = if (!is.null(label_info$cue)) as.character(label_info$cue) else character(0),
+      category = if (!is.null(label_info$category)) as.character(label_info$category) else character(0),
+      group = if (!is.null(label_info$group)) as.character(label_info$group) else character(0)
+    )
+
     S7::new_object(
       MVBU_Object(),
       data = as.data.frame(data),
@@ -100,7 +118,7 @@ MVBU_Stanfit <- S7::new_class(
       criteria = as.list(criteria),
       file = as.character(file),
       version = version,
-      labels = as.list(labels)
+      metadata = metadata
     )
   },
   validator = function(self) {
@@ -139,6 +157,9 @@ MVBU_Stanfit <- S7::new_class(
     if (!is.null(self@transform_information) && !S7::S7_inherits(self@transform_information, MVBU_TransformInformation)) {
       return("`transform_information` must inherit from MVBU_TransformInformation")
     }
+    if (!is.list(self@metadata)) {
+      return("`metadata` must be a list")
+    }
     NULL
   }
 )
@@ -165,8 +186,13 @@ IdealAdaptorStanfit <- S7::new_class(
     criteria = list(),
     file = NULL,
     version = NULL,
-    labels = list()
+    metadata = list()
   ) {
+    ti <- if (is.null(transform_information)) {
+      MVBU_TransformInformation()
+    } else {
+      transform_information
+    }
     S7::new_object(
       MVBU_Stanfit(
         data = data,
@@ -177,11 +203,11 @@ IdealAdaptorStanfit <- S7::new_class(
         stan_args = as.list(stan_args),
         stanfit = stanfit,
         basis = basis,
-        transform_information = if (is.null(transform_information)) MVBU_TransformInformation() else transform_information,
+        transform_information = ti,
         criteria = as.list(criteria),
         file = as.character(file),
         version = if (is.null(version)) get_current_versions() else version,
-        labels = as.list(labels)
+        metadata = as.list(metadata)
       )
     )
   }
@@ -204,8 +230,13 @@ NIX_IdealAdaptorStanfit <- S7::new_class(
     criteria = list(),
     file = NULL,
     version = NULL,
-    labels = list()
+    metadata = list()
   ) {
+    ti <- if (is.null(transform_information)) {
+      MVBU_TransformInformation()
+    } else {
+      transform_information
+    }
     S7::new_object(
       IdealAdaptorStanfit(
         data = data,
@@ -216,11 +247,11 @@ NIX_IdealAdaptorStanfit <- S7::new_class(
         stan_args = as.list(stan_args),
         stanfit = stanfit,
         basis = basis,
-        transform_information = if (is.null(transform_information)) MVBU_TransformInformation() else transform_information,
+        transform_information = ti,
         criteria = as.list(criteria),
         file = as.character(file),
         version = if (is.null(version)) get_current_versions() else version,
-        labels = as.list(labels)
+        metadata = as.list(metadata)
       )
     )
   }
@@ -243,8 +274,13 @@ MNIX_IdealAdaptorStanfit <- S7::new_class(
     criteria = list(),
     file = NULL,
     version = NULL,
-    labels = list()
+    metadata = list()
   ) {
+    ti <- if (is.null(transform_information)) {
+      MVBU_TransformInformation()
+    } else {
+      transform_information
+    }
     S7::new_object(
       IdealAdaptorStanfit(
         data = data,
@@ -255,11 +291,11 @@ MNIX_IdealAdaptorStanfit <- S7::new_class(
         stan_args = as.list(stan_args),
         stanfit = stanfit,
         basis = basis,
-        transform_information = if (is.null(transform_information)) MVBU_TransformInformation() else transform_information,
+        transform_information = ti,
         criteria = as.list(criteria),
         file = as.character(file),
         version = if (is.null(version)) get_current_versions() else version,
-        labels = as.list(labels)
+        metadata = as.list(metadata)
       )
     )
   }
@@ -282,8 +318,13 @@ NIW_IdealAdaptorStanfit <- S7::new_class(
     criteria = list(),
     file = NULL,
     version = NULL,
-    labels = list()
+    metadata = list()
   ) {
+    ti <- if (is.null(transform_information)) {
+      MVBU_TransformInformation()
+    } else {
+      transform_information
+    }
     S7::new_object(
       IdealAdaptorStanfit(
         data = data,
@@ -294,11 +335,11 @@ NIW_IdealAdaptorStanfit <- S7::new_class(
         stan_args = as.list(stan_args),
         stanfit = stanfit,
         basis = basis,
-        transform_information = if (is.null(transform_information)) MVBU_TransformInformation() else transform_information,
+        transform_information = ti,
         criteria = as.list(criteria),
         file = as.character(file),
         version = if (is.null(version)) get_current_versions() else version,
-        labels = as.list(labels)
+        metadata = as.list(metadata)
       )
     )
   }
@@ -318,7 +359,7 @@ ideal_adaptor_stanfit <- function(
   criteria = list(),
   file = NULL,
   version = NULL,
-  labels = list()
+  metadata = list()
 ) {
   constructor <- get_ideal_adaptor_stanfit_constructor(staninput)
 
@@ -335,7 +376,7 @@ ideal_adaptor_stanfit <- function(
     criteria = criteria,
     file = file,
     version = version,
-    labels = labels
+    metadata = metadata
   )
 }
 
@@ -390,7 +431,7 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
   if (include_original_pars) stanfit@model_pars <- .rename(stanfit@model_pars)
   stanfit@sim$fnames_oi <- vapply(stanfit@sim$fnames_oi, .rename, FUN.VALUE = character(1))
 
-  for (i in seq_len(chains)) names(stanfit@sim$samples[[i]])  <- vapply(names(stanfit@sim$samples[[i]]), .rename, FUN.VALUE = character(1))
+  for (i in seq_len(chains)) names(stanfit@sim$samples[[i]]) <- vapply(names(stanfit@sim$samples[[i]]), .rename, FUN.VALUE = character(1))
 
   set_stanfit(x, stanfit)
 }
@@ -408,7 +449,7 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
   if (S7::S7_inherits(x, IdealAdaptorStanfit)) {
     return(.contains_draws(x@stanfit))
   }
-  
+
   if (inherits(x, "stanfit")) {
     return(length(x@sim) > 0)
   }
@@ -460,10 +501,10 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
 #'
 #' @keywords internal
 .stanfit_needs_refit <- function(
-    x,
-    current_version = get_current_versions(),
-    data = NULL, staninput = NULL,
-    silent = FALSE, verbose = FALSE
+  x,
+  current_version = get_current_versions(),
+  data = NULL, staninput = NULL,
+  silent = FALSE, verbose = FALSE
 ) {
   assert_IdealAdaptorStanfit(x)
   silent <- .as_one_logical(silent)
@@ -538,9 +579,9 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
 #' @keywords internal
 .read_ideal_adaptor_stanfit <- function(file) {
   file <- .check_stanfit_file(file)
-  dir <- dirname(file)
-  .assert_true(dir.exists(dir), msg = paste0("The directory '", dir, "' does not exist. Please choose an existing directory where the model can be saved after fitting."))
-
+  if (!file.exists(file)) {
+    return(NULL)
+  }
   x <- suppressWarnings(try(readRDS(file), silent = TRUE))
   if (.is_try_error(x)) {
     return(NULL)
@@ -548,7 +589,14 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
 
   .assert_true(
     S7::S7_inherits(x, IdealAdaptorStanfit),
-    msg = "Object loaded from 'file' is not an IdealAdaptorStanfit object. This might indicate that it was fit with an outdated version of MVBeliefUpdatr and needs to be refit."
+    msg = "Object loaded from 'file' is not an IdealAdaptorStanfit object. This indicates that it was fit with an outdated version of MVBeliefUpdatr and needs to be refit."
+  )
+
+  label_info <- try(x@metadata$label_information, silent = TRUE)
+  .assert_true(
+    !is.null(label_info) && is.list(label_info) &&
+      !is.null(label_info$cue) && !is.null(label_info$category) && !is.null(label_info$group),
+    msg = "Object loaded from 'file' is missing label_information in metadata. Please refit the model."
   )
 
   x@file <- file
