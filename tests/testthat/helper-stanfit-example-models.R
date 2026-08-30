@@ -61,7 +61,7 @@ make_test_grid <- function(.exposure, .cues, n_per_cue) {
 
   .test <- grid[index$row, , drop = FALSE]
   .test$Condition <- index$Condition
-  .test$Subject <- factor(index$Subject, levels = seq_len(n_subject))
+  .test$Subject <- factor(paste0(index$Condition, "_", index$Subject))
   rownames(.test) <- NULL
 
   .test
@@ -95,13 +95,13 @@ get_test_responses_after_updating_based_on_exposure <- function(.io, .exposure, 
   .test_with_responses$Phase <- "test"
   .test_with_responses$category <- NA_character_
 
-  # Exposure is shared across subjects.
+  # Exposure is shared across subjects within each condition.
   index <- expand.grid(
     row = seq_len(nrow(.exposure)),
     Subject = seq_len(n_subject),
     KEEP.OUT.ATTRS = FALSE)
   .exposure_by_subject <- .exposure[index$row, , drop = FALSE]
-  .exposure_by_subject$Subject <- factor(index$Subject, levels = seq_len(n_subject))
+  .exposure_by_subject$Subject <- factor(paste0(.exposure$Condition[index$row], "_", index$Subject))
   .exposure_by_subject$category <- as.character(.exposure_by_subject$category)
   .exposure_by_subject$Response <- NA_character_
 
@@ -254,9 +254,13 @@ get_example_stanfit <- function(
     stanmodel = "NIW_ideal_adaptor",
     lapse_rate = NULL, mu_0 = NULL, Sigma_0 = NULL,
     control = control_staninput(),
+    transform_type = NULL,
     filename = NULL,
     ...
 ) {
+  if (!is.null(transform_type)) {
+    control$transform_type <- transform_type
+  }
   transform_type <- control$transform_type
 
   if (is.null(filename))

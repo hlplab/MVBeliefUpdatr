@@ -107,7 +107,8 @@ fit_ideal_adaptor <- function(
 
   if (!is.null(stanmodel)) {
     .assert_that(!is.null(stanmodels[[stanmodel]]),
-                msg = paste("The specified stanmodel does not exist. Allowable models include:", paste(names(MVBeliefUpdatr:::stanmodels), collapse = ", ")))
+      msg = paste("The specified stanmodel does not exist. Allowable models include:", paste(names(MVBeliefUpdatr:::stanmodels), collapse = ", "))
+    )
   }
 
   # Check whether model actually needs to be refit
@@ -119,12 +120,21 @@ fit_ideal_adaptor <- function(
           x_from_file,
           current_version = get_current_versions(),
           data = data, staninput = staninput,
-          silent = silent, verbose = verbose)
+          silent = silent, verbose = verbose
+        )
       if (!needs_refit) {
         if (silent == 0) message("No refitting needed. Loading existing model from file.")
         return(x_from_file)
       }
     }
+  }
+
+  metadata <- if (
+    !is.null(stanfit_input@metadata) && length(stanfit_input@metadata) > 0
+  ) {
+    stanfit_input@metadata
+  } else {
+    list(label_information = get_labels(stanfit_input))
   }
 
   fit <-
@@ -137,7 +147,9 @@ fit_ideal_adaptor <- function(
       stan_args = .nlist(init, silent, control, stan_model_args),
       transform_information = transform_information,
       basis = basis,
-      file = file)
+      file = file,
+      metadata = metadata
+    )
 
   # Check that staninput has at least two categories (fitting with one category makes no sense)
   .assert_true(
@@ -151,13 +163,15 @@ fit_ideal_adaptor <- function(
     # Future file reduction could be achieved via the shredder package for stanfit
     # post-processing (https://github.com/yonicd/shredder)
     exclude_pars <-
-      c("lapse_rate_param",
+      c(
+        "lapse_rate_param",
         "m_0_param", "m_0_tau", "m_0_tau_param", "m_0_L_omega", "m_0_L_omega_param",
         "tau_0_param", "L_omega_0_param", "L_S_0", "L_S_n", "L_t_scale",
-        "p_test_conj", "log_p_test_conj")
+        "p_test_conj", "log_p_test_conj"
+      )
 
     if (is.null(stanmodel)) {
-      current_default_modelname <- 'NIW_ideal_adaptor'
+      current_default_modelname <- "NIW_ideal_adaptor"
       stanfit <-
         sampling(
           MVBeliefUpdatr:::stanmodels[[current_default_modelname]],
@@ -167,30 +181,39 @@ fit_ideal_adaptor <- function(
           chains = chains, iter = iter, warmup = warmup,
           init = init, control = control,
           show_messages = !silent,
-          ...)
+          ...
+        )
     } else if (stanmodel %in% names(MVBeliefUpdatr:::stanmodels)) {
-        stanfit <-
-          sampling(
-            MVBeliefUpdatr:::stanmodels[[stanmodel]],
-            data = get_staninput(fit)@values,
-            check_data = TRUE,
-            pars = exclude_pars, include = FALSE,
-            chains = chains, iter = iter, warmup = warmup,
-            init = init, control = control,
-            show_messages = !silent,
-            ...)
-
+      stanfit <-
+        sampling(
+          MVBeliefUpdatr:::stanmodels[[stanmodel]],
+          data = get_staninput(fit)@values,
+          check_data = TRUE,
+          pars = exclude_pars, include = FALSE,
+          chains = chains, iter = iter, warmup = warmup,
+          init = init, control = control,
+          show_messages = !silent,
+          ...
+        )
     }
 
     .assert_contains_draws(stanfit)
     if (requireNamespace("tidybayes", quietly = TRUE)) {
-      # Passing the data lets tidybayes record factor levels, so index variables
-      # can later be recovered as their original factors.
-      stanfit <- tidybayes::recover_types(stanfit, data)
+      category_labels <- get_category_labels(stanfit_input)
+      group_labels <- get_group_labels(stanfit_input)
+      cue_labels <- get_cue_labels(stanfit_input)
+      stanfit <- tidybayes::recover_types(
+        stanfit,
+        list(
+          category = factor(category_labels, levels = category_labels),
+          group = factor(group_labels, levels = group_labels),
+          cue = factor(cue_labels, levels = cue_labels),
+          cue2 = factor(cue_labels, levels = cue_labels)
+        )
+      )
     }
     fit <- set_stanfit(fit, stanfit)
     if (rename) fit <- .rename_pars(fit)
-    
   } else if (!silent) message("No sampling requested. Returning empty model object.")
 
   if (!is.null(fit) && !is.null(file)) {

@@ -118,15 +118,54 @@ NIW_IdealAdaptorStaninput <- S7::new_class(
 #'
 #' @keywords internal
 #' @noRd
-new_nix_staninput <- function(exposure, test, cues, category, response, group, category_levels, group_levels, tau_scale, L_omega_eta, split_loglik_per_observation, lapse_rate, mu_0, Sigma_0, transform, n_cues, n_categories, n_groups) {
-  exposure_summary <- .summarize_exposure(exposure, cues, category, group, category_levels, group_levels, model = "NIX")
-  test_summary <- .summarize_test(test, cues, response, group, category_levels, group_levels, model = "NIX")
+new_nix_staninput <- function(
+  exposure,
+  test,
+  cues,
+  category,
+  response,
+  group,
+  category_levels,
+  group_levels,
+  tau_scale,
+  L_omega_eta,
+  split_loglik_per_observation,
+  lapse_rate,
+  mu_0,
+  Sigma_0,
+  transform,
+  n_cues,
+  n_categories,
+  n_groups
+) {
+  exposure_summary <- .summarize_exposure(
+    exposure,
+    cues,
+    category,
+    group,
+    category_levels,
+    group_levels,
+    model = "NIX"
+  )
+  test_summary <- .summarize_test(
+    test,
+    cues,
+    response,
+    group,
+    category_levels,
+    group_levels,
+    model = "NIX"
+  )
 
   staninput <- list(
     K = n_cues,
     M = n_categories,
     L = n_groups,
-    tau_scale = if (n_cues == 1) as.numeric(tau_scale[1]) else .make_stan_tauscale(tau_scale, n_cues),
+    tau_scale = if (n_cues == 1) {
+      as.numeric(tau_scale[1])
+    } else {
+      .make_stan_tauscale(tau_scale, n_cues)
+    },
     L_omega_eta = as.numeric(L_omega_eta),
     split_loglik_per_observation = as.numeric(split_loglik_per_observation),
     lapse_rate_known = if (is.null(lapse_rate)) 0 else 1,
@@ -139,8 +178,16 @@ new_nix_staninput <- function(exposure, test, cues, category, response, group, c
     N_test = test_summary$N_test,
     mu_0_known = if (is.null(mu_0)) 0 else 1,
     Sigma_0_known = if (is.null(Sigma_0)) 0 else 1,
-    shift = if (n_cues == 1) as.numeric(transform$transform.parameters[["shift"]][1]) else .make_stan_shift(transform$transform.parameters[["shift"]], n_cues),
-    INV_SCALE = if (n_cues == 1) as.numeric(transform$transform.parameters[["INV_SCALE"]]) else .make_stan_inv_scale(transform$transform.parameters[["INV_SCALE"]], n_cues)
+    shift = if (n_cues == 1) {
+      as.numeric(transform$transform.parameters[["shift"]][1])
+    } else {
+      .make_stan_shift(transform$transform.parameters[["shift"]], n_cues)
+    },
+    INV_SCALE = if (n_cues == 1) {
+      as.numeric(transform$transform.parameters[["INV_SCALE"]])
+    } else {
+      .make_stan_inv_scale(transform$transform.parameters[["INV_SCALE"]], n_cues)
+    }
   )
 
   if (!is.null(lapse_rate)) {
@@ -180,9 +227,44 @@ new_nix_staninput <- function(exposure, test, cues, category, response, group, c
 #'
 #' @keywords internal
 #' @noRd
-new_niw_staninput <- function(exposure, test, cues, category, response, group, category_levels, group_levels, tau_scale, L_omega_eta, split_loglik_per_observation, lapse_rate, mu_0, Sigma_0, transform, n_cues, n_categories, n_groups) {
-  exposure_summary <- .summarize_exposure(exposure, cues, category, group, category_levels, group_levels, model = "NIW")
-  test_summary <- .summarize_test(test, cues, response, group, category_levels, group_levels, model = "NIW")
+new_niw_staninput <- function(
+  exposure,
+  test,
+  cues,
+  category,
+  response,
+  group,
+  category_levels,
+  group_levels,
+  tau_scale,
+  L_omega_eta,
+  split_loglik_per_observation,
+  lapse_rate,
+  mu_0,
+  Sigma_0,
+  transform,
+  n_cues,
+  n_categories,
+  n_groups
+) {
+  exposure_summary <- .summarize_exposure(
+    exposure,
+    cues,
+    category,
+    group,
+    category_levels,
+    group_levels,
+    model = "NIW"
+  )
+  test_summary <- .summarize_test(
+    test,
+    cues,
+    response,
+    group,
+    category_levels,
+    group_levels,
+    model = "NIW"
+  )
 
   staninput <- list(
     K = n_cues,
@@ -202,7 +284,10 @@ new_niw_staninput <- function(exposure, test, cues, category, response, group, c
     mu_0_known = if (is.null(mu_0)) 0 else 1,
     Sigma_0_known = if (is.null(Sigma_0)) 0 else 1,
     shift = .make_stan_shift(transform$transform.parameters[["shift"]], n_cues),
-    INV_SCALE = .make_stan_inv_scale(transform$transform.parameters[["INV_SCALE"]], n_cues)
+    INV_SCALE = .make_stan_inv_scale(
+      transform$transform.parameters[["INV_SCALE"]],
+      n_cues
+    )
   )
 
   if (!is.null(lapse_rate)) {
@@ -244,9 +329,44 @@ new_niw_staninput <- function(exposure, test, cues, category, response, group, c
 #'
 #' @keywords internal
 #' @noRd
-new_mnix_staninput <- function(exposure, test, cues, category, response, group, category_levels, group_levels, tau_scale, L_omega_eta, split_loglik_per_observation, lapse_rate, mu_0, Sigma_0, transform, n_cues, n_categories, n_groups) {
-  exposure_summary <- .summarize_exposure(exposure, cues, category, group, category_levels, group_levels, model = "MNIX")
-  test_summary <- .summarize_test(test, cues, response, group, category_levels, group_levels, model = "MNIX")
+new_mnix_staninput <- function(
+  exposure,
+  test,
+  cues,
+  category,
+  response,
+  group,
+  category_levels,
+  group_levels,
+  tau_scale,
+  L_omega_eta,
+  split_loglik_per_observation,
+  lapse_rate,
+  mu_0,
+  Sigma_0,
+  transform,
+  n_cues,
+  n_categories,
+  n_groups
+) {
+  exposure_summary <- .summarize_exposure(
+    exposure,
+    cues,
+    category,
+    group,
+    category_levels,
+    group_levels,
+    model = "MNIX"
+  )
+  test_summary <- .summarize_test(
+    test,
+    cues,
+    response,
+    group,
+    category_levels,
+    group_levels,
+    model = "MNIX"
+  )
 
   staninput <- list(
     K = n_cues,
@@ -267,7 +387,10 @@ new_mnix_staninput <- function(exposure, test, cues, category, response, group, 
     mu_0_known = if (is.null(mu_0)) 0 else 1,
     Sigma_0_known = if (is.null(Sigma_0)) 0 else 1,
     shift = .make_stan_shift(transform$transform.parameters[["shift"]], n_cues),
-    INV_SCALE = .make_stan_inv_scale(transform$transform.parameters[["INV_SCALE"]], n_cues)
+    INV_SCALE = .make_stan_inv_scale(
+      transform$transform.parameters[["INV_SCALE"]],
+      n_cues
+    )
   )
 
   if (!is.null(lapse_rate)) {
@@ -289,13 +412,13 @@ new_mnix_staninput <- function(exposure, test, cues, category, response, group, 
   if (!is.null(Sigma_0)) {
     Sigma_0_data <- to_array(
       lapply(Sigma_0, function(x) as.matrix(x)),
-      inner_dims = c(n_cues, n_cues),
+      inner_dims = c(n_cues),
       outer_dims = c(length(Sigma_0)),
       simplify = FALSE
     )
     staninput$Sigma_0_data <- Sigma_0_data
   } else {
-    staninput$Sigma_0_data <- array(0, dim = c(0, 0, 0))
+    staninput$Sigma_0_data <- array(0, dim = c(0, 0))
   }
 
   MNIX_IdealAdaptorStaninput(values = staninput)
@@ -391,16 +514,21 @@ new_mnix_staninput <- function(exposure, test, cues, category, response, group, 
 #'
 #' @keywords internal
 #' @noRd
-.summarize_test <- function(test, cues, response, group, category_levels, group_levels, model) {
+.summarize_test <- function(
+  test,
+  cues,
+  response,
+  group,
+  category_levels,
+  group_levels,
+  model
+) {
   n_cues <- length(cues)
   n_categories <- length(category_levels)
   n_groups <- length(group_levels)
-  group_codes <- match(levels(test[[group]]), group_levels)
-  if (length(group_codes) == 0) {
-    group_codes <- integer(0)
-  }
 
-  unique_rows <- unique(test[, c(group, cues), drop = FALSE])
+  unique_cols <- unique(c(group, cues))
+  unique_rows <- unique(test[, unique_cols, drop = FALSE])
   n_test <- nrow(unique_rows)
   if (n_test == 0) {
     x_test <- if (model == "NIX") {
@@ -410,7 +538,14 @@ new_mnix_staninput <- function(exposure, test, cues, category, response, group, 
     }
     y_test <- array(integer(0), dim = c(0))
     z_test_counts <- matrix(0L, nrow = 0, ncol = n_categories)
-    return(list(x_test = x_test, y_test = y_test, z_test_counts = z_test_counts, N_test = 0))
+    return(
+      list(
+        x_test = x_test,
+        y_test = y_test,
+        z_test_counts = z_test_counts,
+        N_test = 0
+      )
+    )
   }
 
   x_test <- if (model == "NIX") {
@@ -423,11 +558,17 @@ new_mnix_staninput <- function(exposure, test, cues, category, response, group, 
 
   for (i in seq_len(n_test)) {
     row <- unique_rows[i, , drop = FALSE]
-    matching_rows <- which(test[[group]] == row[[group]] & apply(test[, cues, drop = FALSE], 1, function(x) all(x == row[1, cues])))
+    matching_rows <- which(
+      test[[group]] == row[[group]] &
+        apply(test[, cues, drop = FALSE], 1, function(x) all(x == row[1, cues]))
+    )
     if (length(matching_rows) == 0) {
       next
     }
-    response_values <- factor(test[[response]][matching_rows], levels = category_levels)
+    response_values <- factor(
+      test[[response]][matching_rows],
+      levels = category_levels
+    )
     counts <- tabulate(as.integer(response_values), nbins = n_categories)
     z_test_counts[i, ] <- counts
     y_test[i] <- match(as.character(row[[group]]), group_levels)
@@ -438,6 +579,11 @@ new_mnix_staninput <- function(exposure, test, cues, category, response, group, 
     }
   }
 
-  list(x_test = x_test, y_test = y_test, z_test_counts = z_test_counts, N_test = n_test)
+  list(
+    x_test = x_test,
+    y_test = y_test,
+    z_test_counts = z_test_counts,
+    N_test = n_test
+  )
 }
 

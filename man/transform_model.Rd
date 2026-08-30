@@ -22,22 +22,31 @@ transform_category_cov(S, transform)
 untransform_category_cov(S, transform)
 }
 \arguments{
-\item{model}{A model with columns that specify category means (mu or m) and covariance information (Sigma or S).}
+\item{model}{An \code{\link{MVBU_CognitiveModel}} object.}
 
-\item{transform}{A transform or transform parameter object of the type returned by \code{\link{transform_cues}}.}
+\item{transform}{A transform or transform parameter object returned by \code{\link{transform_cues}} or \code{\link{get_affine_transform}}.}
 
-\item{m}{A single category mean or alike.}
+\item{m}{A single category mean vector (or scalar for univariate representations).}
 
-\item{S}{A single covariance matrix or alike.}
+\item{S}{A single covariance matrix (or scalar variance for univariate representations).}
 }
 \value{
-A model, category mean, or covariance matrix of the same type as the input.
+A model, category mean, or covariance matrix of the same class as the input.
 }
 \description{
-Applies the transformation specified in \code{transform} object (e.g., centering, scaling, PCA) to the category
-mean(s) and/or covariance(s) in the model.
+Applies an affine (linear) transformation specified in a \code{transform} object
+(e.g., centering, scaling, PCA, ZCA whitening from \code{\link{transform_cues}} or \code{\link{get_affine_transform}})
+to the category mean(s) and covariance(s) within an S7 cognitive model.
 }
 \details{
+Only linear/affine transformations are supported because Gaussian and Normal-Inverse-Wishart
+distributions transform analytically under affine maps \eqn{y = A x + b}:
+\deqn{\mu' = A \mu + b, \quad \Sigma' = A \Sigma A^T}
+Models containing \code{\link{MVG_CategoryRepresentation}}, \code{\link{UVG_CategoryRepresentation}},
+\code{\link{NIW_CategoryRepresentation}}, \code{\link{NIX_CategoryRepresentation}}, or
+\code{\link{MNIX_CategoryRepresentation}} are supported. Exemplar representations are transformed
+by transforming their exemplar cues directly.
+
 Note that \code{(un)transform_category_cov} can also be used for centered sums-of-squares matrices, but not for
 uncentered sums-of-squares matrices. The latter require additional adjustments that might be implemented in the
 future (see https://chatgpt.com/c/683b3ed6-4924-800c-8f22-e61680f3360f).

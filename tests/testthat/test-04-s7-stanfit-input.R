@@ -580,4 +580,83 @@ test_that("NIW supports 1, 2, and 2+ cues and matches the NIW Stan input structu
   }
 })
 
+test_that("group.unique correctly checks identity and simplifies staninput", {
+  # Case 1: Identical exposure stats across groups within unique groups
+  exp1 <- data.frame(
+    Condition = factor(c("c1", "c1", "c1", "c1", "c2", "c2")),
+    group = factor(c("g1", "g1", "g2", "g2", "g3", "g3")),
+    category = factor(c("A", "B", "A", "B", "A", "B")),
+    cue1 = c(1, 2, 1, 2, 5, 6),
+    cue2 = c(3, 4, 3, 4, 7, 8)
+  )
+  test1 <- data.frame(
+    Condition = factor(c("c1", "c1", "c2")),
+    group = factor(c("g1", "g2", "g3")),
+    response = factor(c("A", "B", "A")),
+    cue1 = c(1.1, 2.1, 5.1),
+    cue2 = c(3.1, 4.1, 7.1)
+  )
+
+  input1 <- new_ideal_adaptor_stanfit_input(
+    exposure = exp1,
+    test = test1,
+    cues = c("cue1", "cue2"),
+    category = "category",
+    response = "response",
+    group = "group",
+    group.unique = "Condition",
+    check_unique_group_identity = TRUE,
+    control = control_staninput(transform_type = "identity"),
+    stanmodel = "NIW_ideal_adaptor"
+  )
+
+  expect_equal(input1@staninput@values$L, 2L)
+  expect_equal(dim(input1@staninput@values$N_exposure), c(2L, 2L))
+  expect_equal(dim(input1@staninput@values$x_mean_exposure), c(2L, 2L, 2L))
+  expect_equal(dim(input1@staninput@values$x_ss_exposure), c(2L, 2L, 2L, 2L))
+  expect_equal(
+    get_labels(input1)$group,
+    c("c1", "c2")
+  )
+  # Test rows map to c1 (index 1) and c2 (index 2)
+  expect_equal(input1@staninput@values$y_test, c(1L, 1L, 2L))
+
+  # Case 2: Mismatching exposure stats with check_unique_group_identity = TRUE
+  exp_mismatch <- exp1
+  exp_mismatch$cue1[3] <- 99 # g2 in c1 now has different mean
+
+  expect_error(
+    new_ideal_adaptor_stanfit_input(
+      exposure = exp_mismatch,
+      test = test1,
+      cues = c("cue1", "cue2"),
+      category = "category",
+      response = "response",
+      group = "group",
+      group.unique = "Condition",
+      check_unique_group_identity = TRUE,
+      control = control_staninput(transform_type = "identity"),
+      stanmodel = "NIW_ideal_adaptor"
+    ),
+    regexp = "Non-identical exposure sufficient statistics found within unique group(s): c1",
+    fixed = TRUE
+  )
+
+  # Case 3: Mismatching exposure stats with check_unique_group_identity = FALSE
+  input_no_check <- new_ideal_adaptor_stanfit_input(
+    exposure = exp_mismatch,
+    test = test1,
+    cues = c("cue1", "cue2"),
+    category = "category",
+    response = "response",
+    group = "group",
+    group.unique = "Condition",
+    check_unique_group_identity = FALSE,
+    control = control_staninput(transform_type = "identity"),
+    stanmodel = "NIW_ideal_adaptor"
+  )
+  expect_equal(input_no_check@staninput@values$L, 2L)
+  expect_equal(get_labels(input_no_check)$group, c("c1", "c2"))
+})
+
 

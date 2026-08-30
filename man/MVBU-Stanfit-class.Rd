@@ -19,7 +19,7 @@ MVBU_Stanfit(
   criteria = list(),
   file = NULL,
   version = NULL,
-  labels = list()
+  metadata = list()
 )
 }
 \description{
@@ -60,6 +60,7 @@ or loaded from.}
 \item{\code{version}}{The versions of \pkg{MVBeliefUpdatr} and \pkg{rstan} with
 which the model was fitted.}
 
-\item{\code{labels}}{List of labels}
+\item{\code{metadata}}{List containing auxiliary information including
+\code{label_information}.}
 }}
 

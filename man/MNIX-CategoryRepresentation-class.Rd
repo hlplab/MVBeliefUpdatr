@@ -16,35 +16,36 @@ MNIX_CategoryRepresentation(
 )
 }
 \description{
-Category-level representation for a Mixture of Normal-Inverse-chi^2
+Category-level representation for a Multi-cue Normal-Inverse-chi^2
 (\code{MNIX}) family.
 }
 \details{
 Assumed parameterization:
 \itemize{
-\item \code{component_m}: per-component location hyperparameters.
-\item \code{component_kappa}: per-component positive precision scalings.
-\item \code{component_nu}: per-component positive degrees-of-freedom-like values.
-\item \code{component_sigma2}: per-component positive scale/variance parameters.
-\item \code{component_weights}: per-component mixture weights in \verb{[0,1]} summing to 1.
+\item \code{component_m}: per-cue location hyperparameters.
+\item \code{component_kappa}: per-cue positive precision scalings.
+\item \code{component_nu}: per-cue positive degrees-of-freedom-like values.
+\item \code{component_sigma2}: per-cue positive scale/variance parameters.
+\item \code{component_weights}: per-cue weights in \verb{[0,1]} summing to 1 (optional).
 }
 
 Structural assumptions:
 \itemize{
-\item exactly one cue dimension (\code{length(cue_labels) == 1}).
-\item all component parameter vectors have equal length.
+\item at least two or more cue dimensions (\code{length(cue_labels) >= 2}).
+\item all cue parameter vectors have equal length matching the number of cues.
 }
 
 Category likelihood:
-a weighted finite mixture of Student-\eqn{t} predictive components.
-For component \eqn{i}, let
+Under independent cue integration, the category likelihood is the product of
+marginal Student-\eqn{t} predictive components across cues:
+For cue \eqn{i}, let
 \eqn{s_i = \sqrt{\sigma_i^2(\kappa_i+1)/\kappa_i}}.
 Then
 
-\deqn{p(x\mid c) = \sum_{i=1}^{K} w_i \frac{1}{s_i} t_{\nu_i}\!\left(\frac{x-m_i}{s_i}\right).}
+\deqn{p(x\mid c) = \prod_{i=1}^{D} \frac{1}{s_i} t_{\nu_i}\!\left(\frac{x_i-m_i}{s_i}\right).}
 
 With \code{log = TRUE}, the implementation returns
-\eqn{\log p(x\mid c)} computed in log-space via log-sum-exp.
+\eqn{\log p(x\mid c) = \sum_{i=1}^{D} \log p(x_i\mid c)}.
 }
 \seealso{
 \link{MNIX_IdealAdaptor}, \link{MUVG_CategoryRepresentation}

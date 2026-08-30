@@ -51,11 +51,8 @@ test_that("core generic aliases dispatch on base classes", {
   expect_identical(construct_mvbu(rep_obj), rep_obj)
   expect_true(validate_mvbu(rep_obj))
 
-  summary_stub <- summarize_mvbu(rep_obj)
-  expect_equal(summary_stub$class, "MVBU_CategoryRepresentation")
-  expect_equal(summary_stub$model_family, "MVBU_CategoryRepresentation")
-
-  expect_invisible(print_mvbu(rep_obj))
+  expect_invisible(summary(rep_obj))
+  expect_invisible(print(rep_obj))
 
   expect_error(
     posterior(model, data.frame(x = 1), categories = NULL),
@@ -275,7 +272,7 @@ test_that("MUVG representation schema validators and constructor defaults work",
 test_that("MNIX representation schema validators and typed model constructor work", {
   mnix_rep <- new_mnix_category_representation(
     category_labels = "A",
-    cue_labels = "F1",
+    cue_labels = c("F1", "F2"),
     component_m = c(0, 1),
     component_kappa = c(1, 2),
     component_nu = c(3, 4),
@@ -319,7 +316,7 @@ test_that("MNIX representation schema validators and typed model constructor wor
 
   mnix_rep_b <- new_mnix_category_representation(
     category_labels = "B",
-    cue_labels = "F1",
+    cue_labels = c("F1", "F2"),
     component_m = c(2, 3),
     component_kappa = c(1, 2),
     component_nu = c(3, 4),
@@ -404,7 +401,7 @@ test_that("MVG/NIW/UVG/NIX/Exemplar typed constructors and validators work", {
 
   mnix_rep_lik <- new_mnix_category_representation(
     category_labels = "A",
-    cue_labels = "F1",
+    cue_labels = c("F1", "F2"),
     component_m = c(0, 1),
     component_kappa = c(1, 2),
     component_nu = c(3, 4),
@@ -445,6 +442,35 @@ test_that("MVG/NIW/UVG/NIX/Exemplar typed constructors and validators work", {
     category_template = new_category_representation_template(representations = list(A = ex_rep))
   )
   expect_true(S7::S7_inherits(ex_model, Exemplar_Model))
+
+  # Test get_parameter_names for representation objects
+  expect_equal(get_parameter_names(uvg_rep), c("mu", "sigma2"))
+  expect_equal(get_parameter_names(nix_rep), c("m", "kappa", "nu", "sigma2"))
+  expect_equal(get_parameter_names(mvg_rep), c("mu", "Sigma"))
+  expect_equal(get_parameter_names(niw_rep), c("m", "kappa", "nu", "S"))
+  expect_equal(get_parameter_names(ex_rep), c("exemplars", "exemplar_weights"))
+
+  # Test get_parameter_names for cognitive model objects
+  expect_equal(
+    get_parameter_names(uvg_model),
+    c("mu", "sigma2", "category_prior", "lapse_rate", "lapse_bias", "Sigma_noise")
+  )
+  expect_equal(
+    get_parameter_names(nix_model),
+    c("m", "kappa", "nu", "sigma2", "category_prior", "lapse_rate", "lapse_bias", "Sigma_noise")
+  )
+  expect_equal(
+    get_parameter_names(mvg_model),
+    c("mu", "Sigma", "category_prior", "lapse_rate", "lapse_bias", "Sigma_noise")
+  )
+  expect_equal(
+    get_parameter_names(niw_model),
+    c("m", "kappa", "nu", "S", "category_prior", "lapse_rate", "lapse_bias", "Sigma_noise")
+  )
+  expect_equal(
+    get_parameter_names(ex_model),
+    c("exemplars", "exemplar_weights", "category_prior", "lapse_rate", "lapse_bias", "Sigma_noise")
+  )
 
   expect_error(
     new_mvg_category_representation(
@@ -513,8 +539,8 @@ test_that("MVG/NIW/UVG/NIX/Exemplar typed constructors and validators work", {
   expect_true(all(is.finite(ex_d)))
   expect_equal(ex_ld, log(ex_d), tolerance = 1e-10)
 
-  mnix_d <- mnix_rep_lik@category_likelihood_function(c(0, 1))
-  mnix_ld <- mnix_rep_lik@category_likelihood_function(c(0, 1), log = TRUE)
+  mnix_d <- mnix_rep_lik@category_likelihood_function(matrix(c(0, 1, 1, 2), ncol = 2, byrow = TRUE))
+  mnix_ld <- mnix_rep_lik@category_likelihood_function(matrix(c(0, 1, 1, 2), ncol = 2, byrow = TRUE), log = TRUE)
   expect_length(mnix_d, 2)
   expect_true(all(is.finite(mnix_d)))
   expect_equal(mnix_ld, log(mnix_d), tolerance = 1e-10)

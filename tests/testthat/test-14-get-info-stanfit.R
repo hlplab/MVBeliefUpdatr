@@ -24,8 +24,8 @@ test_that("add draws - input check (1 cue)", {
 })
 
 test_that("add draws - output check (1 cue)", {
-  expect_equal(nrow(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F) %>% distinct(.draw)), 10)
-  expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), 2)
+  expect_equal(length(unique(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F)$.draw)), 10)
+  expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), length(get_category_labels(fit)))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T)),
                c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "m", "S", "lapse_rate"))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T, nest = T)),
@@ -45,8 +45,8 @@ test_that("add draws - input check (2 cues)", {
 })
 
 test_that("add draws - output check (2 cues)", {
-  expect_equal(nrow(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F) %>% distinct(.draw)), 10)
-  expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), 2)
+  expect_equal(length(unique(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F)$.draw)), 10)
+  expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), length(get_category_labels(fit)))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T)),
                c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "m", "S", "lapse_rate"))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T, nest = T)),
@@ -148,8 +148,8 @@ test_that("add ibbu draws - input check (3 cues)", {
 })
 
 test_that("add draws - output check (3 cues)", {
-  expect_equal(nrow(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F) %>% distinct(.draw)), 10)
-  expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), 2)
+  expect_equal(length(unique(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F)$.draw)), 10)
+  expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), length(get_category_labels(fit)))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T)),
                c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "m", "S", "lapse_rate"))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T, nest = T)),
@@ -158,8 +158,20 @@ test_that("add draws - output check (3 cues)", {
                c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "cue", "cue2", "m", "S", "lapse_rate"))
 })
 
-# test_that("Add draws - check wide = T", {
-#   expect_equal(nrow(get_draws(fit, groups = "prior", wide = T, summarize = T)), 1)
-#   expect_equal(nrow(get_draws(fit, groups = "prior", wide = T, summarize = F)), 10)
-# })
+test_that("get_parameter_names and get_params", {
+  pars <- get_parameter_names(fit)
+  expect_true(is.character(pars))
+  expect_true(length(pars) > 0)
+  expect_true("kappa_0" %in% pars || "m_0" %in% pars || "lp__" %in% pars)
+
+  pars_orig <- get_parameter_names(fit, original_pars = TRUE)
+  expect_true(is.character(pars_orig))
+  expect_true(length(pars_orig) > 0)
+
+  expect_warning(
+    pars_dep <- get_params(fit),
+    "deprecated"
+  )
+  expect_equal(pars_dep, pars)
+})
 

@@ -178,7 +178,7 @@
     cue_labels <- if ("cue_labels" %in% names(x)) {
       as.character(x$cue_labels[[i]])
     } else {
-      "cue1"
+      paste0("cue", seq_along(x$component_m[[i]]))
     }
 
     if ("component_weights" %in% names(x)) {

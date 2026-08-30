@@ -1,0 +1,9 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "Rscript": true,
+        "/^cd /Users/tiflo/Documents/GitHub/MVBeliefUpdatr && python - <<'PY'\nfrom pathlib import Path\np = Path\\('R/S7-stanfit\\.R'\\)\ntext = p\\.read_text\\(\\)\nfor i, line in enumerate\\(text\\.splitlines\\(\\), 1\\):\n    if 370 <= i <= 400:\n        print\\(i, line\\)\nPY$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
