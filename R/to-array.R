@@ -1,4 +1,4 @@
-#' Convert atomic values or lists into arrays with explicit inner/outer dimensions.
+#' Convert atomic values or lists into arrays with explicit inner/outer dimensions
 #'
 #' This helper is used to shape prior information and other Stan inputs into the
 #' dimensionality expected by the Stan programs.

@@ -15,6 +15,7 @@ NULL
 #' @keywords internal
 NULL
 
+#' Deprecated: update_NIW_belief_kappa
 #' @rdname update_NIW_parameters
 #' @export
 update_NIW_belief_kappa <- function(kappa_0, x_N) {
@@ -22,6 +23,7 @@ update_NIW_belief_kappa <- function(kappa_0, x_N) {
   .update_NIW_category_representation_kappa(kappa_0, x_N)
 }
 
+#' Deprecated: update_NIW_belief_nu
 #' @rdname update_NIW_parameters
 #' @export
 update_NIW_belief_nu <- function(nu_0, x_N) {
@@ -29,6 +31,7 @@ update_NIW_belief_nu <- function(nu_0, x_N) {
   .update_NIW_category_representation_nu(nu_0, x_N)
 }
 
+#' Deprecated: update_NIW_belief_m
 #' @rdname update_NIW_parameters
 #' @export
 update_NIW_belief_m <- function(kappa_0, m_0, x_N, x_mean) {
@@ -36,6 +39,7 @@ update_NIW_belief_m <- function(kappa_0, m_0, x_N, x_mean) {
   .update_NIW_category_representation_m(kappa_0, m_0, x_N, x_mean)
 }
 
+#' Deprecated: update_NIW_belief_S
 #' @rdname update_NIW_parameters
 #' @export
 update_NIW_belief_S <- function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) {
@@ -43,7 +47,7 @@ update_NIW_belief_S <- function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) {
   .update_NIW_category_representation_S(kappa_0, m_0, S_0, x_N, x_mean, x_SS)
 }
 
-#' Update one NIW category representation from sufficient statistics.
+#' Deprecated: update_NIW_belief_by_sufficient_statistics_of_one_category
 #' @param prior_model An NIW S7 category representation.
 #' @param x_category Deprecated and ignored for S7 representations.
 #' @param x_mean Observation mean.
@@ -58,7 +62,7 @@ update_NIW_belief_by_sufficient_statistics_of_one_category <- function(prior_mod
   .update_NIW_category_representation_by_sufficient_statistics(prior_model, x_mean, x_SS, x_N)
 }
 
-#' Update one NIW category representation from one observation.
+#' Deprecated: update_NIW_belief_by_one_observation
 #' @param prior_model An NIW category representation or ideal-adaptor model.
 #' @param x_category Category label for the observation.
 #' @param x Numeric observation vector.
@@ -95,7 +99,7 @@ update_NIW_belief_by_one_observation <- function(prior_model, x_category, x, noi
   )
 }
 
-#' Incrementally update an NIW ideal-adaptor model.
+#' Deprecated: update_NIW_ideal_adaptor_incrementally
 #' @param prior_model An NIW S7 ideal-adaptor model.
 #' @param exposure Observation data.
 #' @param exposure.category Name of the category column.
@@ -117,7 +121,7 @@ update_NIW_ideal_adaptor_incrementally <- function(prior_model, exposure, exposu
   update_template(prior_model, observations, updating = "incremental", keep_history = keep.update_history, lapse_treatment = lapse_treatment, noise_treatment = noise_treatment, update_method = method)
 }
 
-#' Batch update an NIW ideal-adaptor model.
+#' Deprecated: update_NIW_ideal_adaptor_batch
 #' @rdname update_NIW_ideal_adaptor_incrementally
 #' @export
 update_NIW_ideal_adaptor_batch <- function(prior_model, exposure, exposure.category = "category", exposure.cues = get_cue_labels(prior_model), noise_treatment = "no_noise", verbose = FALSE) {
@@ -128,7 +132,7 @@ update_NIW_ideal_adaptor_batch <- function(prior_model, exposure, exposure.categ
   update_template(prior_model, observations, updating = "batch", lapse_treatment = "no_lapses", noise_treatment = noise_treatment, update_method = "label-certain")
 }
 
-#' Incrementally update an NIW model.
+#' Deprecated: update_NIW_beliefs_incrementally
 #' @rdname update_NIW_ideal_adaptor_incrementally
 #' @export
 update_NIW_beliefs_incrementally <- function(prior_model, exposure, ...) {

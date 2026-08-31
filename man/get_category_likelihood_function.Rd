@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R
 \name{get_category_likelihood_function}
 \alias{get_category_likelihood_function}
-\title{Extract the category-likelihood function from a representation, template, or model.}
+\title{Extract the category-likelihood function from a representation, template, or model}
 \usage{
 get_category_likelihood_function(x, ...)
 }

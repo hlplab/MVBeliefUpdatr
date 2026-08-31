@@ -4,7 +4,7 @@
 \name{get_category_labels}
 \alias{get_category_labels}
 \alias{get_category_labels,MVBU_Stanfit-method}
-\title{Get category labels from a representation, template, model, or model distribution.}
+\title{Get category labels from a representation, template, or model}
 \usage{
 get_category_labels(x, indices = NULL, ...)
 

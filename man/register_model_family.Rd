@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-core-classes.R
 \name{register_model_family}
 \alias{register_model_family}
-\title{Register a model family in the MVBU family registry.}
+\title{Register a model family in the MVBU family registry}
 \usage{
 register_model_family(
   family,
@@ -22,5 +22,5 @@ class.}
 Invisibly TRUE.
 }
 \description{
-Register a model family in the MVBU family registry.
+Register a model family in the MVBU family registry
 }

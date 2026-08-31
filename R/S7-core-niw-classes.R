@@ -96,13 +96,6 @@ NIW_CategoryRepresentation <- S7::new_class(
 
 #' @rdname family-niw
 #' @export
-NIW_IdealAdaptor <- S7::new_class(
-  "NIW_IdealAdaptor",
-  parent = MVBU_CognitiveModel
-)
-
-#' @rdname family-niw
-#' @export
 new_niw_category_representation <- function(
   category_labels,
   cue_labels,
@@ -158,6 +151,105 @@ new_niw_category_representation <- function(
 
 #' @rdname family-niw
 #' @export
+new_niw_category_representation_from_data <- function(
+  data,
+  category = "category",
+  cues,
+  kappa = nu,
+  nu = length(cues) + 2
+) {
+  .assert_non_NA_scalar_numeric(
+    kappa,
+    msg = "kappa must be a non-NA scalar numeric value."
+  )
+  .assert_non_NA_scalar_numeric(
+    nu,
+    msg = "nu must be a non-NA scalar numeric value."
+  )
+  .assert_true(
+    nu > length(cues) + 1,
+    msg = paste0(
+      "nu must be larger than dimensionality of cues + 1 (>",
+      length(cues) + 1, ")."
+    )
+  )
+
+  mvg <- new_mvg_category_representation_from_data(
+    data,
+    category = category,
+    cues = cues
+  )
+  as_niw_category_representation(mvg, kappa = kappa, nu = nu)
+}
+
+#' @rdname family-niw
+#' @export
+new_niw_category_representation_template_from_data <- function(
+  data,
+  category = "category",
+  cues,
+  kappa = nu,
+  nu = length(cues) + 2,
+  verbose = FALSE
+) {
+  .assert_non_NA_scalar_numeric(
+    kappa,
+    msg = "kappa must be a non-NA scalar numeric value."
+  )
+  .assert_non_NA_scalar_numeric(
+    nu,
+    msg = "nu must be a non-NA scalar numeric value."
+  )
+  .assert_true(
+    nu > length(cues) + 1,
+    msg = paste0(
+      "nu must be larger than dimensionality of cues + 1 (>",
+      length(cues) + 1, ")."
+    )
+  )
+
+  mvg_template <- new_mvg_category_representation_template_from_data(
+    data,
+    category = category,
+    cues = cues,
+    verbose = FALSE
+  )
+
+  representations <- lapply(
+    names(mvg_template@representations),
+    function(label) {
+      new_niw_category_representation_from_data(
+        data[data[[category]] == label, , drop = FALSE],
+        category = category,
+        cues = cues,
+        kappa = kappa,
+        nu = nu
+      )
+    }
+  )
+  names(representations) <- names(mvg_template@representations)
+
+  if (verbose) {
+    message(
+      "S is set so that the expected category covariance matrix Sigma ",
+      "matches the category covariance in the sample (given nu). ",
+      "It might be safer to fit an Inverse-Wishart distribution to the ",
+      "entire set of covariance matrices."
+    )
+  }
+
+  new_category_representation_template(representations)
+}
+
+#' @rdname family-niw
+#' @export
+NIW_IdealAdaptor <- S7::new_class(
+  "NIW_IdealAdaptor",
+  parent = MVBU_CognitiveModel
+)
+
+#' @rdname family-niw
+#' @export
 new_niw_ideal_adaptor <- function(
   category_template = NULL,
   decision_rule = "sampling",
@@ -182,5 +274,42 @@ new_niw_ideal_adaptor <- function(
     noise_treatment = noise_treatment,
     lapse_treatment = lapse_treatment,
     metadata = metadata
+  )
+}
+
+#' @rdname family-niw
+#' @export
+new_niw_ideal_adaptor_from_data <- function(
+  data,
+  category = "category",
+  cues,
+  kappa = nu,
+  nu = length(cues) + 2,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  verbose = FALSE
+) {
+  template <- new_niw_category_representation_template_from_data(
+    data,
+    category = category,
+    cues = cues,
+    kappa = kappa,
+    nu = nu,
+    verbose = verbose
+  )
+  new_niw_ideal_adaptor(
+    category_template = template,
+    decision_rule = decision_rule,
+    category_prior = category_prior,
+    lapse_rate = lapse_rate,
+    lapse_bias = lapse_bias,
+    Sigma_noise = Sigma_noise,
+    noise_treatment = noise_treatment,
+    lapse_treatment = lapse_treatment
   )
 }

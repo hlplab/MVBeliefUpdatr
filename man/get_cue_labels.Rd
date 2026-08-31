@@ -3,7 +3,7 @@
 \name{get_cue_labels}
 \alias{get_cue_labels}
 \alias{get_cue_labels,MVBU_Stanfit-method}
-\title{Get cue labels from a representation, template, model, or model distribution.}
+\title{Get cue labels from a representation, template, or model}
 \usage{
 get_cue_labels(x, indices = NULL, ...)
 
@@ -21,5 +21,5 @@ get_cue_labels(x, indices = NULL, ...)
 A character vector of cue labels.
 }
 \description{
-Get cue labels from a representation, template, model, or model distribution.
+Get cue labels from a representation, template, or model
 }

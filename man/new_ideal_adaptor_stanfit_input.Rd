@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-stanfit-input.R
 \name{new_ideal_adaptor_stanfit_input}
 \alias{new_ideal_adaptor_stanfit_input}
-\title{Construct a streamlined ideal-adaptor Stanfit input object.}
+\title{Construct a streamlined ideal-adaptor Stanfit input object}
 \usage{
 new_ideal_adaptor_stanfit_input(
   exposure,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-update-NIW-IA.R
 \name{update_NIW_belief_by_sufficient_statistics_of_one_category}
 \alias{update_NIW_belief_by_sufficient_statistics_of_one_category}
-\title{Update one NIW category representation from sufficient statistics.}
+\title{Deprecated: update_NIW_belief_by_sufficient_statistics_of_one_category}
 \usage{
 update_NIW_belief_by_sufficient_statistics_of_one_category(
   prior_model,
@@ -30,5 +30,5 @@ update_NIW_belief_by_sufficient_statistics_of_one_category(
 An updated NIW category representation.
 }
 \description{
-Update one NIW category representation from sufficient statistics.
+Deprecated: update_NIW_belief_by_sufficient_statistics_of_one_category
 }

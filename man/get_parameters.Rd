@@ -52,5 +52,5 @@ get_expected_sigma(x, ...)
 A list, vector, matrix, or data frame of parameters or expected statistics.
 }
 \description{
-Extract parameters or expected parameters from representations, templates, models, or model distributions.
+Extract parameters or expected parameters from representations, templates, models, or model distributions
 }

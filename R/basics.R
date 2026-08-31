@@ -387,7 +387,7 @@ get_sufficient_category_statistics <- function(
   return(res)
 }
 
-#' Transform and untransform cues by applying or undoing PCA, centering, and/or scaling.
+#' Transform and untransform cues by applying or undoing PCA, centering, and/or scaling
 #'
 #' If the `transform.parameters` argument
 #' is specified, the transforms in that object will be applied. This can be useful when the goal is to transform one

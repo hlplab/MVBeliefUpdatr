@@ -63,7 +63,7 @@ NULL
 
 # Deprecated functions
 
-#' Get cue dimensionality from likelihood or model (deprecated)
+#' Deprecated: get_cue_dimensionality_from_model
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -84,7 +84,7 @@ get_cue_dimensionality_from_model <- function(x, indices = NULL) {
   length(get_cue_labels(x))
 }
 
-#' Get noise covariance matrix from model (deprecated)
+#' Deprecated: get_perceptual_noise_from_model
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -103,7 +103,7 @@ get_perceptual_noise_from_model <- function(model) {
   get_noise(model)
 }
 
-#' Legacy wrapper for posterior.
+#' Deprecated: get_posterior_from_model
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -130,7 +130,7 @@ get_posterior_from_model <- function(model, ...) {
   do.call(posterior, c(list(model), dots))
 }
 
-#' Legacy wrapper for categorize.
+#' Deprecated: get_categorization_from_model
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -158,7 +158,7 @@ get_categorization_from_model <- function(model, decision_rule = "sampling", ...
   do.call(categorize, c(list(model), dots, list(decision_rule = decision_rule)))
 }
 
-#' Get cue labels from likelihood or model (deprecated)
+#' Deprecated: get_cue_labels_from_model
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -178,7 +178,7 @@ get_cue_labels_from_model <- function(x, indices = NULL) {
   get_cue_labels(x, indices = indices)
 }
 
-#' Get category labels from likelihood or model (deprecated)
+#' Deprecated: get_category_labels_from_model
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -198,7 +198,7 @@ get_category_labels_from_model <- function(x, indices = NULL) {
   get_category_labels(x, indices = indices)
 }
 
-#' Get number of categories from likelihood or model (deprecated)
+#' Deprecated: get_nlevels_of_category_labels_from_model
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -217,7 +217,7 @@ get_nlevels_of_category_labels_from_model <- function(x) {
   length(get_category_labels(x))
 }
 
-#' Get category priors from model (deprecated)
+#' Deprecated: get_priors_from_model
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -241,7 +241,7 @@ get_priors_from_model <- function(model, categories = NULL) {
   as.numeric(prior)
 }
 
-#' Get lapse rate from model (deprecated)
+#' Deprecated: get_lapse_rate_from_model
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -260,7 +260,7 @@ get_lapse_rate_from_model <- function(model) {
   as.numeric(get_lapse_rate(model))
 }
 
-#' Get lapse biases from model (deprecated)
+#' Deprecated: get_lapse_biases_from_model
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`

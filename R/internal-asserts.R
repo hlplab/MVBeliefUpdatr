@@ -26,7 +26,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param ... Conditions to evaluate.
 #' @param msg Optional error message.
@@ -48,7 +48,7 @@ NULL
   invisible(TRUE)
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param ... Conditions to evaluate.
 #' @param msg Optional error message.
@@ -58,7 +58,7 @@ NULL
   .assert_that(..., msg = msg)
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param ... Conditions to evaluate.
 #' @param msg Optional error message.
@@ -80,7 +80,7 @@ NULL
   invisible(TRUE)
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param cond Condition to evaluate.
 #' @param msg Optional error message.
@@ -90,7 +90,7 @@ NULL
   .assert_that(cond, msg = if (is.null(msg)) "Assertion failed." else msg)
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param cond Condition to evaluate.
 #' @param msg Optional error message.
@@ -124,7 +124,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -139,7 +139,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -154,7 +154,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -169,7 +169,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -184,7 +184,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -199,7 +199,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -214,7 +214,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -229,7 +229,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -244,7 +244,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -259,7 +259,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -274,7 +274,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -289,7 +289,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -304,7 +304,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -319,7 +319,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -334,7 +334,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -361,7 +361,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -376,7 +376,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -391,7 +391,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -406,7 +406,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -421,7 +421,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -436,7 +436,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -460,7 +460,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -473,7 +473,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -488,7 +488,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -503,7 +503,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -530,7 +530,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -545,7 +545,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -560,7 +560,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -575,7 +575,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -590,7 +590,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -603,7 +603,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param lower Lower bound.
@@ -618,7 +618,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param choices Allowed values.
@@ -632,7 +632,7 @@ NULL
   )
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @param msg Optional error message.
@@ -642,7 +642,7 @@ NULL
   .assert_true(is.data.frame(x) || is_tibble(x), msg = if (is.null(msg)) "Expected a data.frame or tibble." else msg)
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param x Object to test.
 #' @return Invisibly TRUE if the object contains draws.
@@ -651,7 +651,7 @@ NULL
   if (!.contains_draws(x)) .stop(paste("", deparse(substitute(x)), "does not contain any samples."))
 }
 
-#' Internal assertion helper.
+#' Internal assertion helper
 #'
 #' @param data Data object to inspect.
 #' @param cols Column names to inspect.

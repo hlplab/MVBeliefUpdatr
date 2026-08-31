@@ -17,6 +17,7 @@ NULL
 #' @keywords internal
 NULL
 
+#' Deprecated: plot_expected_categorization_function_1D
 #' @rdname deprecated-functions
 #' @export
 plot_expected_categorization_function_1D <- function(x, ...) {
@@ -28,6 +29,7 @@ plot_expected_categorization_function_1D <- function(x, ...) {
   plot_categorization_function(x, ...)
 }
 
+#' Deprecated: plot_expected_categorization_function_2D
 #' @rdname deprecated-functions
 #' @export
 plot_expected_categorization_function_2D <- function(x, ...) {

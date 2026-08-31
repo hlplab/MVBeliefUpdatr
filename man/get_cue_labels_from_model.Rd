@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-model.R
 \name{get_cue_labels_from_model}
 \alias{get_cue_labels_from_model}
-\title{Get cue labels from likelihood or model (deprecated)}
+\title{Deprecated: get_cue_labels_from_model}
 \usage{
 get_cue_labels_from_model(x, indices = NULL)
 }

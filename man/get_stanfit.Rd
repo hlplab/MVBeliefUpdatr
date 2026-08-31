@@ -6,7 +6,7 @@
 \alias{get_stanfit,MVBU_Stanfit-method}
 \alias{set_stanfit,any,any-method}
 \alias{set_stanfit,MVBU_Stanfit,any-method}
-\title{Get the stored Stan fit from an S7 fit object.}
+\title{Get the stored Stan fit from an S7 fit object}
 \usage{
 get_stanfit(x, ...)
 
@@ -29,5 +29,5 @@ set_stanfit(x, stanfit)
 The stored \link[rstan:stanfit]{rstan::stanfit} object when present.
 }
 \description{
-Get the stored Stan fit from an S7 fit object.
+Get the stored Stan fit from an S7 fit object
 }

@@ -124,7 +124,7 @@ a mixture of Gaussians, or an exemplar-based representation.
 \item \link{MVBU_CategoryRepresentationTemplate} collects one or more
 category-representation objects into a validated set used by a model.
 This corresponds to the notion of "templates" in e.g.,
-\cite{nearey-assmann07}.
+\insertCite{nearey-assmann2007}{MVBeliefUpdatr}.
 \item \link{MVBU_CognitiveModel} combines category-template structure with model-level
 decision behavior (\code{decision_rule}, \code{category_prior},
 \code{lapse_rate}, \code{lapse_bias}).

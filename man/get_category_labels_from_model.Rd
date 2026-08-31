@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-model.R
 \name{get_category_labels_from_model}
 \alias{get_category_labels_from_model}
-\title{Get category labels from likelihood or model (deprecated)}
+\title{Deprecated: get_category_labels_from_model}
 \usage{
 get_category_labels_from_model(x, indices = NULL)
 }

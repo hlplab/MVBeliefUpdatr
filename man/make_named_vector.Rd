@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-nest-model.R
 \name{make_named_vector}
 \alias{make_named_vector}
-\title{Make a named vector (deprecated)}
+\title{Deprecated: make_named_vector}
 \usage{
 make_named_vector(x, names)
 }

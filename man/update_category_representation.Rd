@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R
 \name{update_category_representation}
 \alias{update_category_representation}
-\title{Update a category representation from observations.}
+\title{Update a category representation from observations}
 \usage{
 update_category_representation(x, x_N, x_mean, x_SS, ...)
 }
@@ -19,5 +19,5 @@ update_category_representation(x, x_N, x_mean, x_SS, ...)
 An updated category representation.
 }
 \description{
-Update a category representation from observations.
+Update a category representation from observations
 }

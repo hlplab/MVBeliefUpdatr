@@ -3,7 +3,7 @@
 \name{get_MVG_likelihood}
 \alias{get_MVG_likelihood}
 \alias{get_likelihood_from_MVG}
-\title{Get likelihood for MVG parameters (deprecated)}
+\title{Deprecated: get_MVG_likelihood}
 \usage{
 get_MVG_likelihood(
   x,

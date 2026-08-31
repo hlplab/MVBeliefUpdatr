@@ -13,7 +13,7 @@ NULL
 # deprecated ------------------------------------------------------------------
 
 
-#' Get the name of the stanmodel from an ideal adaptor stanfit (deprecated)
+#' Deprecated: get_stanmodelname
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -32,7 +32,7 @@ get_stanmodelname <- function(x, ...) {
   get_model_type(x)
 }
 
-#' Get or restore the original group or category levels (deprecated)
+#' Deprecated: get_staninput_variable_levels
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -62,7 +62,7 @@ get_staninput_variable_levels <- function(
   )
 }
 
-#' Get category levels from model (deprecated)
+#' Deprecated: get_category_levels
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -82,7 +82,7 @@ get_category_levels <- function(x, indices = NULL, ...) {
   get_category_labels(x, indices = indices, ...)
 }
 
-#' Get group levels from model (deprecated)
+#' Deprecated: get_group_levels
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -103,7 +103,7 @@ get_group_levels <- function(x, indices = NULL, include_prior = FALSE, ...) {
   get_group_labels(x, indices = indices, include_prior = include_prior, ...)
 }
 
-#' Get cue levels from model (deprecated)
+#' Deprecated: get_cue_levels
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -123,7 +123,7 @@ get_cue_levels <- function(x, indices = NULL, ...) {
   get_cue_labels(x, indices = indices, ...)
 }
 
-#' Get parameter names from stanfit (deprecated)
+#' Deprecated: get_params
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`

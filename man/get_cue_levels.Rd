@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-NIW-IA-stanfit.R
 \name{get_cue_levels}
 \alias{get_cue_levels}
-\title{Get cue levels from model (deprecated)}
+\title{Deprecated: get_cue_levels}
 \usage{
 get_cue_levels(x, indices = NULL, ...)
 }

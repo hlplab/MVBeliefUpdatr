@@ -104,13 +104,6 @@ MNIX_CategoryRepresentation <- S7::new_class(
 
 #' @rdname family-mnix
 #' @export
-MNIX_IdealAdaptor <- S7::new_class(
-  "MNIX_IdealAdaptor",
-  parent = MVBU_CognitiveModel
-)
-
-#' @rdname family-mnix
-#' @export
 new_mnix_category_representation <- function(
   category_labels,
   cue_labels,
@@ -202,6 +195,74 @@ new_mnix_category_representation <- function(
 
 #' @rdname family-mnix
 #' @export
+new_mnix_category_representation_from_data <- function(
+  data,
+  category = "category",
+  cues,
+  kappa = nu,
+  nu = 3
+) {
+  .assert_non_NA_scalar_numeric(
+    kappa,
+    msg = "kappa must be a non-NA scalar numeric value."
+  )
+  .assert_non_NA_scalar_numeric(
+    nu,
+    msg = "nu must be a non-NA scalar numeric value."
+  )
+  .assert_true(
+    nu > 2,
+    msg = "nu must be greater than 2 for each MNIX component."
+  )
+
+  muvg <- new_muvg_category_representation_from_data(
+    data,
+    category = category,
+    cues = cues
+  )
+  as_mnix_category_representation(muvg, kappa = kappa, nu = nu)
+}
+
+#' @rdname family-mnix
+#' @export
+new_mnix_category_representation_template_from_data <- function(
+  data,
+  category = "category",
+  cues,
+  kappa = nu,
+  nu = 3,
+  verbose = FALSE
+) {
+  category_labels <- sort(unique(as.character(data[[category]])))
+  representations <- lapply(category_labels, function(label) {
+    new_mnix_category_representation_from_data(
+      data[data[[category]] == label, , drop = FALSE],
+      category = category,
+      cues = cues,
+      kappa = kappa,
+      nu = nu
+    )
+  })
+  names(representations) <- category_labels
+  if (verbose) {
+    message(
+      "Constructed a MNIX category-representation template with ",
+      length(category_labels), " categories and ",
+      length(cues), " cue(s)."
+    )
+  }
+  new_category_representation_template(representations)
+}
+
+#' @rdname family-mnix
+#' @export
+MNIX_IdealAdaptor <- S7::new_class(
+  "MNIX_IdealAdaptor",
+  parent = MVBU_CognitiveModel
+)
+
+#' @rdname family-mnix
+#' @export
 new_mnix_ideal_adaptor <- function(
   category_template = NULL,
   decision_rule = "sampling",
@@ -226,5 +287,42 @@ new_mnix_ideal_adaptor <- function(
     noise_treatment = noise_treatment,
     lapse_treatment = lapse_treatment,
     metadata = metadata
+  )
+}
+
+#' @rdname family-mnix
+#' @export
+new_mnix_ideal_adaptor_from_data <- function(
+  data,
+  category = "category",
+  cues,
+  kappa = nu,
+  nu = 3,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  verbose = FALSE
+) {
+  template <- new_mnix_category_representation_template_from_data(
+    data,
+    category = category,
+    cues = cues,
+    kappa = kappa,
+    nu = nu,
+    verbose = verbose
+  )
+  new_mnix_ideal_adaptor(
+    category_template = template,
+    decision_rule = decision_rule,
+    category_prior = category_prior,
+    lapse_rate = lapse_rate,
+    lapse_bias = lapse_bias,
+    Sigma_noise = Sigma_noise,
+    noise_treatment = noise_treatment,
+    lapse_treatment = lapse_treatment
   )
 }

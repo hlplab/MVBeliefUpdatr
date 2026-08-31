@@ -2,7 +2,7 @@
 % Please edit documentation in R/update-decision-model.R
 \name{update_model_decision_bias_incrementally}
 \alias{update_model_decision_bias_incrementally}
-\title{Update model's decision biases based on exposure data.}
+\title{Update model's decision biases based on exposure data}
 \usage{
 update_model_decision_bias_incrementally(
   model,

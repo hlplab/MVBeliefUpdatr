@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-2025.R
 \name{make_staninput_deprecated}
 \alias{make_staninput_deprecated}
-\title{Legacy wrapper for the older make_staninput interface.}
+\title{Deprecated: make_staninput_deprecated}
 \usage{
 make_staninput_deprecated(
   exposure,

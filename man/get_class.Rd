@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-class.R
 \name{get_class}
 \alias{get_class}
-\title{Deprecated class-dispatch helper}
+\title{Deprecated: get_class}
 \usage{
 get_class(x)
 }

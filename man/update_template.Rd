@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R
 \name{update_template}
 \alias{update_template}
-\title{Update a model's category-representation template from observations.}
+\title{Update a model's category-representation template from observations}
 \usage{
 update_template(x, observations, ...)
 }

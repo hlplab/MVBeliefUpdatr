@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-model.R
 \name{get_perceptual_noise_from_model}
 \alias{get_perceptual_noise_from_model}
-\title{Get noise covariance matrix from model (deprecated)}
+\title{Deprecated: get_perceptual_noise_from_model}
 \usage{
 get_perceptual_noise_from_model(model)
 }

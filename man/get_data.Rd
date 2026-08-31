@@ -3,7 +3,7 @@
 \name{get_data}
 \alias{get_data}
 \alias{get_data,MVBU_Stanfit-method}
-\title{Get the data from an S7 stanfit or stanfit-input object.}
+\title{Get the data from an S7 stanfit or stanfit-input object}
 \usage{
 get_data(x, ...)
 
@@ -24,7 +24,7 @@ get_data(
 A tibble containing the underlying data.
 }
 \description{
-Get the data from an S7 stanfit or stanfit-input object.
+Get the data from an S7 stanfit or stanfit-input object
 }
 \seealso{
 \code{\link{get_exposure_data}}, \code{\link{get_test_data}}

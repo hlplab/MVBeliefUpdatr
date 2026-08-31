@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-class-NIW-belief.R
 \name{is.NIW_belief}
 \alias{is.NIW_belief}
-\title{Is this a Normal-Inverse-Wishart (NIW) belief?}
+\title{Deprecated: is.NIW_belief}
 \usage{
 is.NIW_belief(x, group = NULL, category = "category", is.long = T, verbose = F)
 }

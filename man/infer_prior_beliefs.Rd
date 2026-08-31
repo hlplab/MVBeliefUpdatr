@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-2025.R
 \name{infer_prior_beliefs}
 \alias{infer_prior_beliefs}
-\title{Legacy wrapper for the old prior-belief inference workflow.}
+\title{Deprecated: infer_prior_beliefs}
 \usage{
 infer_prior_beliefs(
   exposure,

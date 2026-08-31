@@ -1,91 +1,49 @@
-#' An S4 class for NIW ideal adaptor objects.
+#' @include S7-core-niw-classes.R
+#' @importFrom lifecycle deprecate_warn
+#' @importFrom S7 S7_inherits
+NULL
+
+#' Deprecated: An S4 class for legacy NIW ideal adaptor objects
 #'
 #' @name NIW_ideal_adaptor-class
 #' @aliases NIW_ideal_adaptor
-#'
-#' @details
-#' See \code{methods(class = "NIW_ideal_adaptor")} for an overview of available methods.
-#'
-#' @export
+#' @keywords internal
+#' @noRd
 NIW_ideal_adaptor <-
   setClass(
     "NIW_ideal_adaptor",
     contains = "tbl_df",
-    package = "MVBeliefUpdatr")
+    package = "MVBeliefUpdatr"
+  )
 
 # Call class constructor function
 NIW_ideal_adaptor
 
-get_expected_columns_for_NIW_ideal_adaptor <- function()
-  c(get_expected_columns_for_NIW_belief(), get_expected_columns_for_model())
-
-#' Is this an ideal adaptor with Normal-Inverse-Wishart (NIW) beliefs?
-#'
-#' Check whether \code{x} is an ideal adaptor with \link[=is.NIW_belief]{Normal-Inverse-Wishard (NIW) beliefs}. An ideal adaptor
-#' describes a distribution over \link[=is.MVG_ideal_observer]{ideal observers with multivariate Gaussian categories}. In this
-#' sense, an ideal adaptor describes uncertainty about the true ideal observer. Optionally, one can also check whether a lapse
-#' rate and lapse bias is part of the ideal adaptor.
-#'
-#' So far, the ideal adaptor is assumed to have perfect certainty about the prior, lapse rate and lapse bias (if present).
-#' Future implementations might allow uncertainty over these parameters.
-#'
-#' @param x Object to be checked.
-#' @param group Name of one or more group variables, each unique combination of which describes an NIW_ideal_adaptor. (default: NULL)
-#' @param category Name of the category variable. (default: "category")
-#' @param is.long Is this check assessing whether the ideal adaptor is in long format (`TRUE`) or wide format (`FALSE`)?
-#' (default: `TRUE`)
-#' @param with.lapse Does this ideal adaptor have a lapse rate? (default: `FALSE`)
-#' @param with.lapse_bias Does this ideal adaptor have a lapse bias? (default: `FALSE`)
-#' @param verbose Should verbose output be provided? (default: `TRUE`)
-#'
-#' @return A logical.
-#'
-#' @seealso TBD
-#' @description Deprecated. Use the S7-based validators and constructors for NIW ideal adaptor objects instead.
 #' @keywords internal
-#' @export
-is.NIW_ideal_adaptor <- function(x, group = NULL, category = "category", is.long = T, with.prior = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = MVBU_PROB_TOL) {
-  lifecycle::deprecate_warn(
-    when = "0.0.3",
-    what = "is.NIW_ideal_adaptor()",
-    details = "Use the S7-based validators and constructors for NIW ideal adaptor objects."
-  )
-  name_of_x <- deparse(substitute(x))
-  .assert_non_NA_scalar_logical(with.lapse)
-  .assert_non_NA_scalar_logical(with.lapse_bias)
-
-  if (!is.MVBU_model(x, group = group, verbose = verbose, tolerance = tolerance)) {
-    return(FALSE)
-  }
-
-  # When no groups are specified, infer groups from object.
-  if (is.null(group)) {
-    group <- setdiff(names(x), get_expected_columns_for_NIW_ideal_adaptor())
-    if (length(group) == 0) group <- NULL else {
-      if (verbose) message(paste(name_of_x, "has additional columns beyond those expected:", paste(group, collapse = ", "), "Interpreting those columns as group variables."))
-    }
-  }
-
-  if (!is.NIW_belief(x, group = group)) {
-    if (verbose) message(paste(deparse(substitute(x)), "does not contain NIW beliefs."))
-    return(FALSE)
-  }
-
-  if (
-    any(
-      !with.prior | "prior" %nin% names(x),
-      with.lapse & "lapse_rate" %nin% names(x),
-      with.lapse_bias & "lapse_bias" %nin% names(x)
-    )
-  ) {
-    if (verbose) message(paste(name_of_x, " is missing prior, lapse rate, or lapse bias."))
-    return(FALSE)
-  }
-
-  if (any(!is.factor(get(category, x)))) return(FALSE)
-
-  return(TRUE)
+#' @noRd
+get_expected_columns_for_NIW_ideal_adaptor <- function() {
+  c(get_expected_columns_for_NIW_belief(), get_expected_columns_for_model())
 }
 
+# deprecated ------------------------------------------------------------------
 
-
+#' Deprecated: is.NIW_ideal_adaptor
+#'
+#' @description
+#' `r lifecycle::badge("deprecated")`
+#' `is.NIW_ideal_adaptor()` is deprecated. Use
+#' `S7::S7_inherits(x, NIW_IdealAdaptor)` instead.
+#'
+#' @param x Object to check.
+#' @param ... Additional arguments (ignored; for compatibility).
+#' @return Logical indicating whether `x` inherits from [NIW_IdealAdaptor].
+#' @rdname deprecated-functions
+#' @export
+is.NIW_ideal_adaptor <- function(x, ...) {
+  lifecycle::deprecate_warn(
+    when = "0.2.0",
+    what = "is.NIW_ideal_adaptor()",
+    details = "Use S7::S7_inherits(x, NIW_IdealAdaptor) instead."
+  )
+  S7::S7_inherits(x, NIW_IdealAdaptor)
+}

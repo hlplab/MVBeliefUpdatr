@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-model.R
 \name{get_lapse_biases_from_model}
 \alias{get_lapse_biases_from_model}
-\title{Get lapse biases from model (deprecated)}
+\title{Deprecated: get_lapse_biases_from_model}
 \usage{
 get_lapse_biases_from_model(model, categories = NULL)
 }

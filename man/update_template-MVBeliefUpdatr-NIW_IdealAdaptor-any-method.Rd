@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-update-model.R
 \name{update_template,MVBeliefUpdatr::NIW_IdealAdaptor,any-method}
 \alias{update_template,MVBeliefUpdatr::NIW_IdealAdaptor,any-method}
-\title{Update an S7 NIW ideal adaptor's category template from observations.}
+\title{Update an S7 NIW ideal adaptor's category template from observations}
 \usage{
 ## S7 method for classes <MVBeliefUpdatr::NIW_IdealAdaptor>, <any>
 update_template(

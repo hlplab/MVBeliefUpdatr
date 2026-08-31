@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-NIW-IA-stanfit.R
 \name{get_stanmodelname}
 \alias{get_stanmodelname}
-\title{Get the name of the stanmodel from an ideal adaptor stanfit (deprecated)}
+\title{Deprecated: get_stanmodelname}
 \usage{
 get_stanmodelname(x, ...)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-NIW-IA-stanfit.R
 \name{get_staninput_variable_levels}
 \alias{get_staninput_variable_levels}
-\title{Get or restore the original group or category levels (deprecated)}
+\title{Deprecated: get_staninput_variable_levels}
 \usage{
 get_staninput_variable_levels(
   x,

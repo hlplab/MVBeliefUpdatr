@@ -3,7 +3,7 @@
 \name{make_staninput}
 \alias{make_staninput}
 \alias{make_ideal_adaptor_stanfit_input}
-\title{Legacy wrapper for Stan input construction.}
+\title{Deprecated: make_staninput}
 \usage{
 make_staninput(
   exposure,

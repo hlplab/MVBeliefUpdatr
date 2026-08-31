@@ -4,7 +4,7 @@
 \name{get_posterior_from_MVG_ideal_observer}
 \alias{get_posterior_from_MVG_ideal_observer}
 \alias{get_posterior_from_model}
-\title{Legacy wrapper for posterior.}
+\title{Deprecated: get_posterior_from_MVG_ideal_observer}
 \usage{
 get_posterior_from_MVG_ideal_observer(
   x,

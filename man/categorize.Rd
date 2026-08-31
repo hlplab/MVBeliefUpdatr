@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R
 \name{categorize}
 \alias{categorize}
-\title{Categorize one or more observations under the model's decision rule.}
+\title{Categorize one or more observations under the model's decision rule}
 \usage{
 categorize(x, new_data, decision_rule, ...)
 }
@@ -17,5 +17,5 @@ categorize(x, new_data, decision_rule, ...)
 A data frame with one row per observation and the winning category plus its probability.
 }
 \description{
-Categorize one or more observations under the model's decision rule.
+Categorize one or more observations under the model's decision rule
 }

@@ -9,7 +9,9 @@ Authors@R:
            role = c("aut", "cre"),
            email = "fjaeger@ur.rochester.edu",
            comment = c(ORCID = "0000-0002-1158-7308"))
-Description: Model and visualize incremental Bayesian categorization and belief-updating over uni- or multivariate Gaussian categories. 
+Description: Model, fit, and visualize incremental Bayesian categorization
+    and belief updating for uni- and multivariate Gaussian, cue integration,
+    and exemplar-based cognitive models using S7 class architecture.
 License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true
@@ -129,6 +131,7 @@ Collate:
     'deprecated-update-NIW-IA.R'
     'deprecated-visualize-NIW-IA-stanfit.R'
     'deprecated-visualize-NIW-IA.R'
+    'deprecated-visualize-basics.R'
     'internal-globals.R'
     'internal-overrides-of-external-functions.R'
     'internal-utils.R'
@@ -136,7 +139,6 @@ Collate:
     'stanmodels.R'
     'to-array.R'
     'update-decision-model.R'
-    'visualize-basics.R'
     'zzz.R'
 Config/testthat/edition: 3
 Config/testthat/parallel: true

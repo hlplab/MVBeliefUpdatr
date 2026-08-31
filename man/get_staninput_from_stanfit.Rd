@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-2025.R
 \name{get_staninput_from_stanfit}
 \alias{get_staninput_from_stanfit}
-\title{Legacy wrapper for get_staninput.}
+\title{Deprecated: get_staninput_from_stanfit}
 \usage{
 get_staninput_from_stanfit(...)
 }

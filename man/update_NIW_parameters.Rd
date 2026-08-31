@@ -33,5 +33,13 @@ update_NIW_belief_S(kappa_0, m_0, S_0, x_N, x_mean, x_SS)
 }
 \description{
 Deprecated NIW parameter helpers
+
+Deprecated: update_NIW_belief_kappa
+
+Deprecated: update_NIW_belief_nu
+
+Deprecated: update_NIW_belief_m
+
+Deprecated: update_NIW_belief_S
 }
 \keyword{internal}

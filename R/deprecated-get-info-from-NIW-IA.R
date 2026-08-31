@@ -5,7 +5,7 @@ NULL
 
 # deprecated ------------------------------------------------------------------
 
-#' Get NIW categorization function (deprecated)
+#' Deprecated: get_NIW_categorization_function
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -104,7 +104,7 @@ get_NIW_categorization_function <- function(
   return(f)
 }
 
-#' Legacy wrapper for get_category_posterior_function.
+#' Deprecated: get_categorization_function_from_NIW_ideal_adaptor
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -140,7 +140,7 @@ get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
   ))
 }
 
-#' Legacy wrapper for categorize.
+#' Deprecated: get_categorization_from_NIW_ideal_adaptor
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`

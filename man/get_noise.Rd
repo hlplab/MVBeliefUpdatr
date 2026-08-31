@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R, R/S7-core-methods.R
 \name{get_noise}
 \alias{get_noise}
-\title{Get perceptual noise covariance matrix from a cognitive model.}
+\title{Get perceptual noise covariance matrix from a cognitive model}
 \usage{
 get_noise(x, ...)
 

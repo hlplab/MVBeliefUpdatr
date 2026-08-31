@@ -11,7 +11,7 @@
 \alias{get_exposure_category_css,MVBU_Stanfit-method}
 \alias{get_exposure_category_uss,MVBU_Stanfit-method}
 \alias{get_exposure_category_cov,MVBU_Stanfit-method}
-\title{Get exposure category statistics from an S7 stanfit or stanfit-input object.}
+\title{Get exposure category statistics from an S7 stanfit or stanfit-input object}
 \usage{
 get_exposure_category_statistic(x, ...)
 
@@ -54,7 +54,7 @@ get_exposure_category_cov(x, ...)
 A tibble, vector, or matrix of exposure category statistics.
 }
 \description{
-Get exposure category statistics from an S7 stanfit or stanfit-input object.
+Get exposure category statistics from an S7 stanfit or stanfit-input object
 }
 \seealso{
 \code{\link{get_exposure_category_mean}}, \code{\link{get_exposure_category_cov}}

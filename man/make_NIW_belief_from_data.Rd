@@ -3,7 +3,7 @@
 \name{make_NIW_belief_from_data}
 \alias{make_NIW_belief_from_data}
 \alias{make_NIW_prior_from_data}
-\title{Make NIW belief from data.}
+\title{Deprecated: make_NIW_belief_from_data}
 \usage{
 make_NIW_belief_from_data(
   data,

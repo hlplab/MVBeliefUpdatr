@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-2025.R
 \name{add_ibbu_stanfit_draw}
 \alias{add_ibbu_stanfit_draw}
-\title{Legacy wrapper for get_draws.}
+\title{Deprecated: add_ibbu_stanfit_draw}
 \usage{
 add_ibbu_stanfit_draw(...)
 }

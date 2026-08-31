@@ -2,7 +2,7 @@
 % Please edit documentation in R/NIX-NIW-basics.R
 \name{get_NIX_posterior_predictive}
 \alias{get_NIX_posterior_predictive}
-\title{Get posterior predictive for NIX distribution}
+\title{Deprecated: get_NIX_posterior_predictive}
 \usage{
 get_NIX_posterior_predictive(
   x,

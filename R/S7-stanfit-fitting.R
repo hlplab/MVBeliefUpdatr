@@ -4,15 +4,17 @@
 #' types of ideal adaptor models are available, each using a conjugate prior over Gaussian or multivariate
 #' Gaussian categories:
 #'
-#' \itemize{
-#'  \item{\code{NIW_ideal_adaptor}:} A Normal-Inverse-Wishart (NIW) prior over the ideal adaptor. This is the
-#'    default model with multivariate Gaussian categories. Accepts univariate and multivariate input, though
-#'    the NIX model should be faster for univariate input.
-#'  \item{\code{NIX_ideal_adaptor}:} A Normal-Inverse-Chisquare (NIX) prior over the ideal adaptor with with
-#'    univariate Gaussian categories. Accepts only univariate input.
-#'  \item{\code{MNIX_ideal_adaptor}:} Separate NIXs for each of multiple cues that are integrated over during
-#'    categorization(cue integration) assuming ideal cue weights based on the relative informativity of each cue.
-#'    Accepts univariate and multivariate input, though the NIX model should be faster for univariate input.
+#' \describe{
+#'   \item{`NIW_ideal_adaptor`}{A Normal-Inverse-Wishart (NIW) prior over the
+#'     ideal adaptor. This is the default model with multivariate Gaussian
+#'     categories. Accepts univariate and multivariate input, though the NIX
+#'     model should be faster for univariate input.}
+#'   \item{`NIX_ideal_adaptor`}{A Normal-Inverse-Chisquare (NIX) prior over
+#'     the ideal adaptor with univariate Gaussian categories. Accepts only
+#'     univariate input.}
+#'   \item{`MNIX_ideal_adaptor`}{Separate NIXs for each of multiple cues that
+#'     are integrated over during categorization assuming ideal cue weights
+#'     based on the relative informativity of each cue.}
 #' }
 #'
 #' @param stanfit_input An object of class \code{\link{IdealAdaptorStanfitInput}} containing the prepared Stan input, data, and transform metadata.

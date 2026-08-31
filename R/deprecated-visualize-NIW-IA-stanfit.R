@@ -17,6 +17,7 @@ NULL
 #' @keywords internal
 NULL
 
+#' Deprecated: plot_parameters.ideal_adaptor_stanfit
 #' @rdname deprecated-functions
 #' @export
 plot_parameters.ideal_adaptor_stanfit <- function(model, ...) {
@@ -28,6 +29,7 @@ plot_parameters.ideal_adaptor_stanfit <- function(model, ...) {
   plot_parameters(model, ...)
 }
 
+#' Deprecated: plot_parameter_correlations.ideal_adaptor_stanfit
 #' @rdname deprecated-functions
 #' @export
 plot_parameter_correlations.ideal_adaptor_stanfit <- function(model, ...) {
@@ -40,6 +42,7 @@ plot_parameter_correlations.ideal_adaptor_stanfit <- function(model, ...) {
 }
 
 
+#' Deprecated: plot_expected_categorization_function_from_stanfit
 #' @rdname deprecated-functions
 #' @export
 plot_expected_categorization_function_from_stanfit <- function(

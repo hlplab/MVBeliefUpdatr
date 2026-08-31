@@ -7,7 +7,7 @@ NULL
 
 # deprecated ------------------------------------------------------------------
 
-#' Get likelihood from exemplar model (deprecated)
+#' Deprecated: get_likelihood_from_exemplars
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -52,7 +52,7 @@ get_likelihood_from_exemplars <- function(
   tibble::tibble()
 }
 
-#' Legacy wrapper for categorize.
+#' Deprecated: get_categorization_from_exemplar_model
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`

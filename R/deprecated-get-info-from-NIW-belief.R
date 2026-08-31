@@ -9,7 +9,7 @@ NULL
 
 # deprecated ------------------------------------------------------------------
 
-#' Get NIW posterior predictive via pmap (deprecated)
+#' Deprecated: get_NIW_posterior_predictive.pmap
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -27,7 +27,7 @@ get_NIW_posterior_predictive.pmap <- function(x, m, S, kappa, nu, ...) {
   get_NIW_posterior_predictive(x = x, m = m, S = S, kappa = kappa, nu = nu, ...)
 }
 
-#' Legacy wrapper for NIW posterior predictive.
+#' Deprecated: get_posterior_predictive_from_NIW_belief
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -118,7 +118,7 @@ get_posterior_predictive_from_NIW_belief <- function(
   return(posterior_predictive)
 }
 
-#' Legacy wrapper for grouped NIW posterior predictive.
+#' Deprecated: get_posterior_predictives_from_NIW_beliefs
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`

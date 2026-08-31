@@ -4,7 +4,7 @@
 \alias{get_staninput}
 \alias{get_staninput,any-method}
 \alias{get_staninput,MVBU_Stanfit-method}
-\title{Get the stored Stan input from an S7 fit or fit-input object.}
+\title{Get the stored Stan input from an S7 fit or fit-input object}
 \usage{
 get_staninput(x, ...)
 
@@ -21,5 +21,5 @@ get_staninput(x)
 The stored S7 Stan input object.
 }
 \description{
-Get the stored Stan input from an S7 fit or fit-input object.
+Get the stored Stan input from an S7 fit or fit-input object
 }

@@ -16,7 +16,7 @@
 \alias{as_draws_matrix.MVBU_Stanfit}
 \alias{as_draws_list.MVBU_Stanfit}
 \alias{as_draws_rvars.MVBU_Stanfit}
-\title{Extract log posterior draws}
+\title{Extract diagnostic information from MVBU_Stanfit object}
 \usage{
 log_posterior(x, ...)
 

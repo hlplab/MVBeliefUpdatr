@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-core-classes.R
 \name{get_stan_family_hooks}
 \alias{get_stan_family_hooks}
-\title{Get Stan-family extension hooks.}
+\title{Get Stan-family extension hooks}
 \usage{
 get_stan_family_hooks(family = NULL)
 }
@@ -13,5 +13,5 @@ get_stan_family_hooks(family = NULL)
 A list with hook definitions.
 }
 \description{
-Get Stan-family extension hooks.
+Get Stan-family extension hooks
 }

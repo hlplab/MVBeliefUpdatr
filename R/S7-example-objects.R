@@ -1,7 +1,7 @@
 #' @include S7-make-objects.R
 NULL
 
-#' Example S7 objects built from the bundled Chodroff-Wilson data.
+#' Example S7 objects built from the bundled Chodroff-Wilson data
 #'
 #' `n_cues` selects VOT, VOT plus f0, or all three bundled cues. UVG and NIX
 #' examples require `n_cues = 1`.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-make-objects.R
 \name{aggregate_models_by_group_structure}
 \alias{aggregate_models_by_group_structure}
-\title{Aggregate models by group structure (Deprecated)}
+\title{Deprecated: aggregate_models_by_group_structure}
 \usage{
 aggregate_models_by_group_structure(x, group_structure = NULL)
 }

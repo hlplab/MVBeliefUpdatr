@@ -1,4 +1,4 @@
-#' Legacy wrapper for Stan input construction.
+#' Deprecated: make_staninput
 #'
 #' @description Deprecated. Use \code{\link{new_ideal_adaptor_stanfit_input}} instead.
 #' @inheritParams new_ideal_adaptor_stanfit_input
@@ -40,7 +40,7 @@ make_staninput <- function(
   )
 }
 
-#' Legacy wrapper for Stan input construction.
+#' Deprecated: make_ideal_adaptor_stanfit_input
 #'
 #' @description Deprecated. Use \code{\link{new_ideal_adaptor_stanfit_input}} instead.
 #' @inheritParams new_ideal_adaptor_stanfit_input

@@ -4,7 +4,7 @@
 \alias{get_transform_information}
 \alias{get_transform_information,any-method}
 \alias{get_transform_information,MVBU_Stanfit-method}
-\title{Get transform metadata from an S7 fit or fit-input object.}
+\title{Get transform metadata from an S7 fit or fit-input object}
 \usage{
 get_transform_information(x, ...)
 
@@ -21,5 +21,5 @@ get_transform_information(x)
 A transform-information object.
 }
 \description{
-Get transform metadata from an S7 fit or fit-input object.
+Get transform metadata from an S7 fit or fit-input object
 }

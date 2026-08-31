@@ -3,7 +3,7 @@
 \name{get_exposure_data}
 \alias{get_exposure_data}
 \alias{get_exposure_data,MVBU_Stanfit-method}
-\title{Get the exposure data from an S7 stanfit or stanfit-input object.}
+\title{Get the exposure data from an S7 stanfit or stanfit-input object}
 \usage{
 get_exposure_data(x, ...)
 
@@ -19,7 +19,7 @@ get_exposure_data(x, groups = get_group_labels(x, include_prior = FALSE), ...)
 A tibble containing the exposure data.
 }
 \description{
-Get the exposure data from an S7 stanfit or stanfit-input object.
+Get the exposure data from an S7 stanfit or stanfit-input object
 }
 \seealso{
 \code{\link{get_data}}, \code{\link{get_test_data}}

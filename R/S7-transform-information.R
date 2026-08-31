@@ -39,7 +39,7 @@ MVBU_TransformInformation <- S7::new_class(
   }
 )
 
-#' Construct transform-information from an affine-transform object.
+#' Construct transform-information from an affine-transform object
 #'
 #' @param transform An affine-transform object produced by get_affine_transform().
 #' @return An S7 object of class MVBU_TransformInformation.

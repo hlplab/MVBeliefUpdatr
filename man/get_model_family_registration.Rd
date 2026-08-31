@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-core-classes.R
 \name{get_model_family_registration}
 \alias{get_model_family_registration}
-\title{Get the registration information for a model family.}
+\title{Get the registration information for a model family}
 \usage{
 get_model_family_registration(family)
 }
@@ -13,5 +13,5 @@ get_model_family_registration(family)
 A list with the registered class names.
 }
 \description{
-Get the registration information for a model family.
+Get the registration information for a model family
 }

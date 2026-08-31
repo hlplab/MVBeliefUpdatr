@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-exemplar-model.R
 \name{get_likelihood_from_exemplars}
 \alias{get_likelihood_from_exemplars}
-\title{Get likelihood from exemplar model (deprecated)}
+\title{Deprecated: get_likelihood_from_exemplars}
 \usage{
 get_likelihood_from_exemplars(
   x,

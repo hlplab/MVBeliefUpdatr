@@ -8,7 +8,7 @@
 \alias{get_categorization_from_NIW_ideal_adaptor}
 \alias{get_categorization_from_exemplar_model}
 \alias{get_categorization_from_model}
-\title{Legacy wrapper for categorize.}
+\title{Deprecated: get_categorization_from_MVG_ideal_observer}
 \usage{
 get_categorization_from_MVG_ideal_observer(
   x,

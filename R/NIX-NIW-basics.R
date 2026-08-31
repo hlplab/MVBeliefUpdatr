@@ -4,7 +4,7 @@
 #' @importFrom mvtnorm dmvt rmvnorm
 NULL
 
-#' Get dimensionality of cue representation from model (deprecated)
+#' Deprecated: get_D
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -22,7 +22,7 @@ get_D <- function(x) {
   length(get_cue_labels(x))
 }
 
-#' Get expected category mu from mean of means m
+#' Deprecated: get_expected_mu_from_m
 #'
 #' See Murphy (2012, p. 134).
 #'
@@ -38,7 +38,7 @@ get_expected_mu_from_m <- function(m) {
   return(mu)
 }
 
-#' Get mean of means from expected category mean mu
+#' Deprecated: get_m_from_expected_mu
 #'
 #' @param mu Expected category mean \eqn{\mu}.
 #' @return Mean of means \eqn{m = \mu}.
@@ -52,7 +52,7 @@ get_m_from_expected_mu <- function(mu) {
   return(m)
 }
 
-#' Get expected category covariance from Scatter matrix S and pseudocount nu
+#' Deprecated: get_expected_Sigma_from_S
 #'
 #' See Murphy (2012, p. 134).
 #'
@@ -78,7 +78,7 @@ get_expected_Sigma_from_S <- function(S, nu) {
   return(Sigma)
 }
 
-#' Get Scatter matrix S from expected category covariance Sigma and pseudocount nu
+#' Deprecated: get_S_from_expected_Sigma
 #'
 #' @param Sigma Expected category covariance matrix.
 #' @param nu Strength of belief (pseudocount) about \eqn{\Sigma}.
@@ -101,7 +101,7 @@ get_S_from_expected_Sigma <- function(Sigma, nu) {
   return(S)
 }
 
-#' Get posterior predictive for NIW distribution
+#' Deprecated: get_NIW_posterior_predictive
 #'
 #' Get posterior predictive density of observations x given the Normal-Inverse-Wishart (NIW)
 #' parameters m, S, kappa, and nu. This is the density of a multivariate Student-T distribution
@@ -170,7 +170,7 @@ get_NIW_posterior_predictive <- function(
   .dmvt(x, delta = m, sigma = scale_mat, df = df_val, log = log)
 }
 
-#' Get posterior predictive for NIX distribution
+#' Deprecated: get_NIX_posterior_predictive
 #'
 #' Get posterior predictive density of 1D observations x given the Normal-Inverse-Chi-Squared (NIX)
 #' parameters m, sigma2 (or S), kappa, and nu. In 1D, this evaluates a Student-T density.

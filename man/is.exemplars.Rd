@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-class-exemplars.R
 \name{is.exemplars}
 \alias{is.exemplars}
-\title{Is this a set of exemplar categories?}
+\title{Deprecated: is.exemplars}
 \usage{
 is.exemplars(x, group = NULL, verbose = F)
 }

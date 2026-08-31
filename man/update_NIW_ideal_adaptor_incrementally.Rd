@@ -4,7 +4,7 @@
 \alias{update_NIW_ideal_adaptor_incrementally}
 \alias{update_NIW_ideal_adaptor_batch}
 \alias{update_NIW_beliefs_incrementally}
-\title{Incrementally update an NIW ideal-adaptor model.}
+\title{Deprecated: update_NIW_ideal_adaptor_incrementally}
 \usage{
 update_NIW_ideal_adaptor_incrementally(
   prior_model,
@@ -58,9 +58,9 @@ update_NIW_beliefs_incrementally(prior_model, exposure, ...)
 An updated S7 model or model history.
 }
 \description{
-Incrementally update an NIW ideal-adaptor model.
+Deprecated: update_NIW_ideal_adaptor_incrementally
 
-Batch update an NIW ideal-adaptor model.
+Deprecated: update_NIW_ideal_adaptor_batch
 
-Incrementally update an NIW model.
+Deprecated: update_NIW_beliefs_incrementally
 }

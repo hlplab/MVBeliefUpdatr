@@ -6,7 +6,7 @@
 \alias{get_group_constructor}
 \alias{get_cue_constructor}
 \alias{get_cue2_constructor}
-\title{Get tidybayes constructor from an ideal adaptor stanfit (deprecated)}
+\title{Deprecated: get_constructor}
 \usage{
 get_constructor(x, variable = NULL)
 

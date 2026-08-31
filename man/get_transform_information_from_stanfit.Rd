@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-2025.R
 \name{get_transform_information_from_stanfit}
 \alias{get_transform_information_from_stanfit}
-\title{Legacy wrapper for get_transform_information.}
+\title{Deprecated: get_transform_information_from_stanfit}
 \usage{
 get_transform_information_from_stanfit(...)
 }

@@ -3,7 +3,7 @@
 \name{transform_cues}
 \alias{transform_cues}
 \alias{untransform_cues}
-\title{Transform and untransform cues by applying or undoing PCA, centering, and/or scaling.}
+\title{Transform and untransform cues by applying or undoing PCA, centering, and/or scaling}
 \usage{
 transform_cues(
   data,

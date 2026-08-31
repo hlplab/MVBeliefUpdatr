@@ -1,7 +1,7 @@
 get_expected_columns_for_exemplars <- function()
   c("category", "exemplars", "sim_function")
 
-#' Is this a set of exemplar categories?
+#' Deprecated: is.exemplars
 #'
 #' Check whether \code{x} is a set of exemplar categories.
 #'

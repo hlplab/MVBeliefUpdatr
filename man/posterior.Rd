@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R
 \name{posterior}
 \alias{posterior}
-\title{Compute posterior category probabilities for one or more observations.}
+\title{Compute posterior category probabilities for one or more observations}
 \usage{
 posterior(x, new_data, categories, ...)
 }
@@ -17,5 +17,5 @@ posterior(x, new_data, categories, ...)
 A matrix of posterior category probabilities with one row per observation.
 }
 \description{
-Compute posterior category probabilities for one or more observations.
+Compute posterior category probabilities for one or more observations
 }

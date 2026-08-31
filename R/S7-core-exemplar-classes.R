@@ -178,13 +178,6 @@ Exemplar_CategoryRepresentation <- S7::new_class(
 
 #' @rdname family-exemplar
 #' @export
-Exemplar_Model <- S7::new_class(
-  "Exemplar_Model",
-  parent = MVBU_CognitiveModel
-)
-
-#' @rdname family-exemplar
-#' @export
 new_exemplar_category_representation <- function(
   category_labels,
   cue_labels,
@@ -289,6 +282,90 @@ new_exemplar_category_representation <- function(
 
 #' @rdname family-exemplar
 #' @export
+new_exemplar_category_representation_from_data <- function(
+  data,
+  category = "category",
+  cues,
+  c = NULL
+) {
+  .assert_data_frame_like(data)
+  .assert_non_NA_scalar_character(
+    category,
+    msg = "category must be a non-empty scalar character value."
+  )
+  .assert_true(
+    is.character(cues) && length(cues) > 0,
+    msg = "cues must be a non-empty character vector."
+  )
+  .assert_data_contains_cols(data, category)
+  .assert_data_contains_cols(data, cues)
+  category_labels <- unique(as.character(data[[category]]))
+  .assert_true(
+    length(category_labels) == 1L,
+    msg = "data must contain exactly one category."
+  )
+
+  new_exemplar_category_representation(
+    category_labels = category_labels,
+    cue_labels = cues,
+    exemplars = as.matrix(data[, cues, drop = FALSE]),
+    c = c
+  )
+}
+
+#' @rdname family-exemplar
+#' @export
+new_exemplar_category_representation_template_from_data <- function(
+  data,
+  category = "category",
+  cues,
+  c = NULL,
+  verbose = FALSE
+) {
+  .assert_data_frame_like(data)
+  .assert_non_NA_scalar_character(
+    category,
+    msg = "category must be a non-empty scalar character value."
+  )
+  .assert_true(
+    is.character(cues) && length(cues) > 0,
+    msg = "cues must be a non-empty character vector."
+  )
+  .assert_data_contains_cols(data, category)
+  .assert_data_contains_cols(data, cues)
+
+  category_labels <- sort(unique(as.character(data[[category]])))
+  representations <- vector("list", length(category_labels))
+  names(representations) <- category_labels
+
+  for (label in category_labels) {
+    representations[[label]] <- new_exemplar_category_representation_from_data(
+      data[data[[category]] == label, , drop = FALSE],
+      category = category,
+      cues = cues,
+      c = c
+    )
+  }
+
+  if (verbose) {
+    message(
+      "Constructed an exemplar category-representation template with ",
+      length(category_labels), " categories and ", length(cues), " cue(s)."
+    )
+  }
+
+  new_category_representation_template(representations)
+}
+
+#' @rdname family-exemplar
+#' @export
+Exemplar_Model <- S7::new_class(
+  "Exemplar_Model",
+  parent = MVBU_CognitiveModel
+)
+
+#' @rdname family-exemplar
+#' @export
 new_exemplar_model <- function(
   category_template = NULL,
   decision_rule = "sampling",
@@ -313,5 +390,40 @@ new_exemplar_model <- function(
     noise_treatment = noise_treatment,
     lapse_treatment = lapse_treatment,
     metadata = metadata
+  )
+}
+
+#' @rdname family-exemplar
+#' @export
+new_exemplar_model_from_data <- function(
+  data,
+  category = "category",
+  cues,
+  c = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  verbose = FALSE
+) {
+  template <- new_exemplar_category_representation_template_from_data(
+    data,
+    category = category,
+    cues = cues,
+    c = c,
+    verbose = verbose
+  )
+  new_exemplar_model(
+    category_template = template,
+    decision_rule = decision_rule,
+    category_prior = category_prior,
+    lapse_rate = lapse_rate,
+    lapse_bias = lapse_bias,
+    Sigma_noise = Sigma_noise,
+    noise_treatment = noise_treatment,
+    lapse_treatment = lapse_treatment
   )
 }
