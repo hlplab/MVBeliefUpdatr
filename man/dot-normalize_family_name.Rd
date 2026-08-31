@@ -7,10 +7,10 @@
 .normalize_family_name(family)
 }
 \arguments{
-\item{family}{The family name to normalize.}
+\item{family}{Model family name.}
 }
 \value{
-A single uppercase family name.
+Uppercase character string representing the family name.
 }
 \description{
 Normalize a model-family name to a canonical uppercase form.

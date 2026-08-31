@@ -7,18 +7,16 @@
 register_model_family(
   family,
   category_representation_class,
-  cognitive_model_class,
-  model_distribution_class
+  cognitive_model_class
 )
 }
 \arguments{
 \item{family}{Model-family name.}
 
-\item{category_representation_class}{Name of the category-representation class.}
+\item{category_representation_class}{Name of the category-representation
+class.}
 
 \item{cognitive_model_class}{Name of the cognitive-model class.}
-
-\item{model_distribution_class}{Name of the model-distribution class.}
 }
 \value{
 Invisibly TRUE.

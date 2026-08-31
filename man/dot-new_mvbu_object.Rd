@@ -6,6 +6,9 @@
 \usage{
 .new_mvbu_object()
 }
+\value{
+A new instance of \code{MVBU_Object}.
+}
 \description{
 Construct a base MVBU object
 }

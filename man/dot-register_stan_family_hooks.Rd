@@ -8,8 +8,8 @@
   family,
   stanfit_class = NULL,
   staninput_class = NULL,
-  bridge_methods = character(0),
-  dependency_rationale = character(0)
+  bridge_methods = character(),
+  dependency_rationale = character()
 )
 }
 \arguments{
@@ -21,7 +21,8 @@
 
 \item{bridge_methods}{Character vector of bridge methods.}
 
-\item{dependency_rationale}{Character vector describing the dependency rationale.}
+\item{dependency_rationale}{Character vector describing the dependency
+rationale.}
 }
 \value{
 Invisibly TRUE.

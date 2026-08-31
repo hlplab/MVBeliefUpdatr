@@ -2,4 +2,4 @@
 trigger: always_on
 ---
 
-In the agent chat, always render latex equations in chat, rather than displaying raw latex.
+Always render equations in chat, rather than displaying raw latex.

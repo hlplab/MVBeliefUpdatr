@@ -38,15 +38,6 @@ assert_MVBU_CognitiveModel <- function(x, msg = NULL) {
 
 #' @rdname assert_mvbu_s7_classes
 #' @export
-assert_MVBU_ModelDistribution <- function(x, msg = NULL) {
-  .assert_true(
-    S7::S7_inherits(x, MVBU_ModelDistribution),
-    msg = if (is.null(msg)) paste(deparse(substitute(x)), "must inherit from MVBU_ModelDistribution") else msg
-  )
-}
-
-#' @rdname assert_mvbu_s7_classes
-#' @export
 assert_IdealAdaptorStanfit <- function(x, msg = NULL) {
   .assert_true(
     S7::S7_inherits(x, IdealAdaptorStanfit),
