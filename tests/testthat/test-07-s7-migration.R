@@ -62,33 +62,7 @@ test_that("Phase 2 adapters migrate legacy model rows to S7 models", {
   expect_true(S7::S7_inherits(ex_model, Exemplar_Model))
 })
 
-test_that("Phase 2 adapters migrate legacy inferred objects to S7 model distributions", {
-  legacy_fit_like <- list(
-    stanfit = structure(list(model_name = "NIW_ideal_adaptor"), class = "stanfit"),
-    staninput = list(dummy = TRUE),
-    data = data.frame(x = 1)
-  )
 
-  niw_dist <- as_s7_niw_model_distribution(legacy_fit_like, group_label = "g1")
-  expect_true(S7::S7_inherits(niw_dist, NIW_IdealAdaptorDistribution))
-  expect_equal(get_model_family(niw_dist), "NIW")
-  expect_equal(get_group_labels(niw_dist), "g1")
-  expect_true(isTRUE(niw_dist@metadata$migrated))
-  expect_true("stanfit" %in% names(niw_dist@cache))
-
-  mvg_dist <- as_s7_model_distribution(legacy_fit_like, family = "MVG", group_label = "g2")
-  expect_true(S7::S7_inherits(mvg_dist, MVG_IdealObserverDistribution))
-  expect_equal(get_model_family(mvg_dist), "MVG")
-
-  ex_dist <- as_s7_model_distribution(legacy_fit_like, family = "EXEMPLAR", group_label = "g3")
-  expect_true(S7::S7_inherits(ex_dist, Exemplar_ModelDistribution))
-  expect_equal(get_model_family(ex_dist), "EXEMPLAR")
-
-  expect_error(
-    as_s7_model_distribution(legacy_fit_like, family = "UVG"),
-    "Unsupported family"
-  )
-})
 
 test_that("Phase 2 adapters normalize and validate constructor arguments consistently", {
   legacy_mvg <- data.frame(category = factor(c("A", "B")))
@@ -109,10 +83,7 @@ test_that("Phase 2 adapters normalize and validate constructor arguments consist
     "decision_rule must be a non-empty scalar character value"
   )
 
-  expect_error(
-    as_s7_model_distribution(list(), family = "NIW", group_label = c("g1", "g2")),
-    "group_label must be a non-empty scalar character value"
-  )
+
 
   expect_error(
     as_s7_mvg_representations(legacy_mvg, category = ""),
@@ -145,14 +116,7 @@ test_that("Phase 2 migration pattern is reusable for MUVG/MNIX prototype familie
   mnix_model <- as_s7_mnix_ideal_adaptor(legacy_mnix)
   expect_true(S7::S7_inherits(mnix_model, MNIX_IdealAdaptor))
 
-  legacy_fit_like <- list(dummy = TRUE)
-  muvg_dist <- as_s7_model_distribution(legacy_fit_like, family = "MUVG", group_label = "g-muvg")
-  expect_true(S7::S7_inherits(muvg_dist, MUVG_IdealObserverDistribution))
-  expect_equal(get_model_family(muvg_dist), "MUVG")
 
-  mnix_dist <- as_s7_model_distribution(legacy_fit_like, family = "MNIX", group_label = "g-mnix")
-  expect_true(S7::S7_inherits(mnix_dist, MNIX_IdealAdaptorDistribution))
-  expect_equal(get_model_family(mnix_dist), "MNIX")
 })
 
 test_that("Phase 2 migrated adapter outputs are S7-only (no S4 construction path)", {
@@ -175,13 +139,10 @@ test_that("Phase 2 migrated adapter outputs are S7-only (no S4 construction path
   objs <- list(
     as_s7_category_representation_template(legacy_mvg, family = "MVG"),
     as_s7_mvg_ideal_observer(legacy_mvg),
-    as_s7_model_distribution(list(dummy = TRUE), family = "MVG", group_label = "g-mvg"),
     as_s7_category_representation_template(legacy_niw, family = "NIW"),
     as_s7_niw_ideal_adaptor(legacy_niw),
-    as_s7_model_distribution(list(dummy = TRUE), family = "NIW", group_label = "g-niw"),
     as_s7_category_representation_template(legacy_ex, family = "EXEMPLAR"),
-    as_s7_exemplar_model(legacy_ex),
-    as_s7_model_distribution(list(dummy = TRUE), family = "EXEMPLAR", group_label = "g-ex")
+    as_s7_exemplar_model(legacy_ex)
   )
 
   expect_true(all(vapply(objs, function(x) S7::S7_inherits(x, MVBU_Object), logical(1))))

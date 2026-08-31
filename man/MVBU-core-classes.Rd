@@ -6,7 +6,6 @@
 \alias{MVBU_CategoryRepresentation}
 \alias{MVBU_CategoryRepresentationTemplate}
 \alias{MVBU_CognitiveModel}
-\alias{MVBU_ModelDistribution}
 \title{MVBU Core S7 Class Architecture}
 \usage{
 MVBU_Object()
@@ -81,20 +80,21 @@ MVBU_CognitiveModel(
  {
      if (length(self@representations) < 1) {
         
-    return("representations must contain at least one category representation object.")
- 
-       }
-     if (!all(vapply(self@representations, function(r) S7::S7_inherits(r,
-    MVBU_CategoryRepresentation), logical(1)))) {
+    return(paste0("representations must contain at least one ",
+    "category representation object."))
+     }
+     if (!all(vapply(self@representations,
+    function(r) S7::S7_inherits(r, MVBU_CategoryRepresentation), logical(1)))) {
         
-    return("all representations entries must inherit from MVBU_CategoryRepresentation.")
-
-        }
-     repr_names <- names(self@representations)
-     if (!is.null(repr_names))
-    {
-         if (length(repr_names) != length(self@representations) || any(repr_names
-    == "") || anyDuplicated(repr_names) > 0) {
+    return(paste0("all representations entries must inherit from ",
+    "MVBU_CategoryRepresentation."))
+     }
+     repr_names <-
+    names(self@representations)
+     if (!is.null(repr_names)) {
+         if
+    (length(repr_names) != length(self@representations) || any(repr_names == "") ||
+    anyDuplicated(repr_names) > 0) {
             
     return("if representations are named, names must be non-empty and unique.")
         
@@ -108,13 +108,6 @@ MVBU_CognitiveModel(
   lapse_behavior = list(),
   noise_behavior = list(),
   metadata = list()
-)
-
-MVBU_ModelDistribution(
-  model_family = character(0),
-  cache = list(),
-  metadata = list(),
-  group_label = character(0)
 )
 }
 \description{
@@ -130,15 +123,15 @@ representational object. This could be a uni- or multivariate Gaussian,
 a mixture of Gaussians, or an exemplar-based representation.
 \item \link{MVBU_CategoryRepresentationTemplate} collects one or more
 category-representation objects into a validated set used by a model.
-This corresponds to the notion of "templates" in e.g., \cite{nearey-assmann07}.
+This corresponds to the notion of "templates" in e.g.,
+\cite{nearey-assmann07}.
 \item \link{MVBU_CognitiveModel} combines category-template structure with model-level
-decision behavior (\code{decision_rule}, \code{category_prior}, \code{lapse_rate}, \code{lapse_bias}).
-\item \link{MVBU_ModelDistribution} represents distributions over models, which are
-needed, for example, to represent researchers' uncertainty about a model as
-resulting, for example, from fitting models to behavioral data.
+decision behavior (\code{decision_rule}, \code{category_prior},
+\code{lapse_rate}, \code{lapse_bias}).
 }
 
-Family-level semantics are layered on top of these base classes. Ideal observer/adaptor pairings follow:
+Family-level semantics are layered on top of these base classes.
+Ideal observer/adaptor pairings follow:
 \itemize{
 \item \link{UVG_IdealObserver} \code{UVG} <-> \link{NIX_IdealAdaptor} \code{NIX}
 \item \link{MUVG_IdealObserver} \code{MUVG} <-> \link{MNIX_IdealAdaptor} \code{MNIX}
@@ -160,7 +153,8 @@ Expected properties:
 \itemize{
 \item \code{category_labels}: one or more category labels associated with the object.
 \item \code{cue_labels}: one or more cue-dimension labels.
-\item \code{category_likelihood_function}: family-specific likelihood function placeholder.
+\item \code{category_likelihood_function}: family-specific likelihood function
+placeholder.
 \item \code{metadata}: optional auxiliary metadata list.
 }
 }
@@ -188,28 +182,16 @@ model-level decision and uncertainty parameters.
 Expected properties:
 \itemize{
 \item \code{category_template}: \code{MVBU_CategoryRepresentationTemplate}.
-\item \code{category_posterior_functions}: named list of treatment-specific posterior functions.
+\item \code{category_posterior_functions}: named list of treatment-specific
+posterior functions.
 \item \code{decision_rule}: scalar character rule label.
 \item \code{category_prior}: numeric probability vector over represented categories.
-\item \code{lapse_behavior}: list with \code{lapse_rate}, \code{lapse_bias}, and \code{lapse_treatment}.
+\item \code{lapse_behavior}: list with \code{lapse_rate}, \code{lapse_bias}, and
+\code{lapse_treatment}.
 \item \code{noise_behavior}: list with \code{Sigma_noise} and \code{noise_treatment}.
 \code{Sigma_noise} is stored as a square matrix and may be supplied as a vector
 (which is converted to a diagonal matrix) or as a matrix.
 \item \code{metadata}: optional model metadata.
-}
-}
-
-\section{MVBU_ModelDistribution}{
-
-Abstract inferred-model/distribution class for family-specific fitted or
-posterior-oriented objects.
-
-Expected properties:
-\itemize{
-\item \code{model_family}: scalar family identifier.
-\item \code{cache}: list for optional computed intermediates.
-\item \code{metadata}: list for provenance/schema tags.
-\item \code{group_label}: scalar grouping label for grouped workflows.
 }
 }
 

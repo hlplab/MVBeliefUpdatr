@@ -544,7 +544,8 @@ NULL
         category_labels = cat_labels,
         cue_labels = cues,
         exemplars = coords,
-        exemplar_weights = r@exemplar_weights
+        exemplar_weights = r@exemplar_weights,
+        c = r@c
       ))
     }
   }
@@ -591,7 +592,8 @@ NULL
         category_labels = cat_labels,
         cue_labels = cues,
         exemplars = coords,
-        exemplar_weights = r@exemplar_weights
+        exemplar_weights = r@exemplar_weights,
+        c = r@c
       ))
     }
   }
@@ -954,7 +956,7 @@ NULL
     )
   }
   if ("contour" %in% aes || length(reps) == 1L) {
-    p <- p + ggplot2::geom_line(linewidth = 0.35)
+    p <- p + ggplot2::geom_line(linewidth = 0.30)
   }
 
   ex_df_1d <- .make_exemplar_sample_df(reps, cues[1L], n_exemplars = NULL)
@@ -968,7 +970,7 @@ NULL
       sides = "b",
       length = ggplot2::unit(0.04, "npc"),
       alpha = 0.7,
-      linewidth = 0.35,
+      linewidth = 0.30,
       inherit.aes = FALSE,
       show.legend = FALSE
     )
@@ -1939,7 +1941,7 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
 
     if ("fill-discrete" %in% aes) {
       df_first <- df_all_cats[df_all_cats$Category == target_cat, ]
-      breaks_all <- c(0, sort(unique(lvl_spec$fill)), 1)
+      breaks_all <- c(-Inf, sort(unique(lvl_spec$fill)), Inf)
       n_bands <- length(breaks_all) - 1L
       band_colors <- scales::alpha(
         cat_colors[target_cat],
@@ -1972,17 +1974,23 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
         scale_alpha_continuous(
           range = c(0, 0.85),
           limits = c(0, 1),
-          name = "Response\n probability",
+          name = "Response\nprobability",
           breaks = c(0, 0.25, 0.50, 0.75, 1.0),
           labels = c("0.0", "0.25", "0.50", "0.75", "1.0")
         ) +
         guides(
           fill = guide_legend(order = 1),
-          alpha = guide_legend(order = 2)
+          alpha = guide_legend(order = 2, reverse = TRUE)
         )
     }
 
     if (has_contour) {
+      n_dec <- max(
+        2L,
+        nchar(sub("^[^.]*\\.?", "", as.character(lvl_spec$contour)))
+      )
+      fmt_str <- paste0("%.", n_dec, "f")
+
       if (has_fill) {
         df_first <- df_all_cats[df_all_cats$Category == target_cat, ]
         p <- p + geomtextpath::geom_textcontour(
@@ -1990,7 +1998,8 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
           aes(
             x = .data[[cues[1L]]],
             y = .data[[cues[2L]]],
-            z = .data$Probability
+            z = .data$Probability,
+            label = after_stat(sprintf(fmt_str, level))
           ),
           breaks = lvl_spec$contour,
           color = "darkgray",
@@ -2008,7 +2017,8 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
             x = .data[[cues[1L]]],
             y = .data[[cues[2L]]],
             z = .data$Probability,
-            color = .data$Category
+            color = .data$Category,
+            label = after_stat(sprintf(fmt_str, level))
           ),
           breaks = lvl_spec$contour,
           linewidth = 0.35,
@@ -2547,7 +2557,11 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
         color = .data$Category
       )
     ) +
-      geom_density(alpha = 0.5, show.legend = c(color = TRUE, fill = FALSE)) +
+      geom_density(
+        alpha = 0.5,
+        linewidth = 0.30,
+        show.legend = c(color = TRUE, fill = FALSE)
+      ) +
       scale_fill_discrete(guide = "none") +
       guides(fill = "none") +
       facet_grid(Group ~ Cue, scales = "free", labeller = label_parsed) +
@@ -2589,7 +2603,11 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
         color = .data$Category
       )
     ) +
-      geom_density(alpha = 0.5, show.legend = c(color = TRUE, fill = FALSE)) +
+      geom_density(
+        alpha = 0.5,
+        linewidth = 0.30,
+        show.legend = c(color = TRUE, fill = FALSE)
+      ) +
       scale_fill_discrete(guide = "none") +
       guides(fill = "none") +
       scale_x_log10() +
@@ -2626,7 +2644,11 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
         color = .data$Category
       )
     ) +
-      geom_density(alpha = 0.5, show.legend = c(color = TRUE, fill = FALSE)) +
+      geom_density(
+        alpha = 0.5,
+        linewidth = 0.30,
+        show.legend = c(color = TRUE, fill = FALSE)
+      ) +
       scale_fill_discrete(guide = "none") +
       guides(fill = "none") +
       scale_x_log10() +
@@ -2645,7 +2667,12 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
       draws,
       aes(x = .data$lapse_rate)
     ) +
-      geom_density(fill = "darkgray", color = "darkgray", alpha = 0.5) +
+      geom_density(
+        fill = "darkgray",
+        color = "darkgray",
+        alpha = 0.5,
+        linewidth = 0.30
+      ) +
       scale_fill_discrete(guide = "none") +
       guides(fill = "none", color = "none") +
       facet_wrap(~ group) +
@@ -3270,6 +3297,7 @@ S7::method(plot_parameters_pairwise, MVBU_Stanfit) <- function(
           color = .data$Group,
           fill = .data$Group
         ),
+        linewidth = 0.25,
         alpha = 0.25,
         show.legend = FALSE
       )

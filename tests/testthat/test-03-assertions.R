@@ -115,19 +115,17 @@ test_that("public S7 class assertions validate the expected S7 classes", {
     metadata = list()
   )
 
-  distribution <- MVBU_ModelDistribution(
-    model_family = "MVG",
-    cache = list(),
-    metadata = list(),
-    group_label = "group"
-  )
-
   stanfit <- IdealAdaptorStanfit()
 
-  expect_true(MVBeliefUpdatr::assert_MVBU_CategoryRepresentation(representation))
-  expect_true(MVBeliefUpdatr::assert_MVBU_CategoryRepresentationTemplate(template))
-  expect_true(MVBeliefUpdatr::assert_MVBU_CognitiveModel(model))
-  expect_true(MVBeliefUpdatr::assert_MVBU_ModelDistribution(distribution))
+  expect_true(
+    MVBeliefUpdatr::assert_MVBU_CategoryRepresentation(representation)
+  )
+  expect_true(
+    MVBeliefUpdatr::assert_MVBU_CategoryRepresentationTemplate(template)
+  )
+  expect_true(
+    MVBeliefUpdatr::assert_MVBU_CognitiveModel(model)
+  )
   expect_true(MVBeliefUpdatr::assert_IdealAdaptorStanfit(stanfit))
 
   expect_error(MVBeliefUpdatr::assert_MVBU_CategoryRepresentation(list()), "must inherit from MVBU_CategoryRepresentation")

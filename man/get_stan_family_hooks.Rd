@@ -2,16 +2,16 @@
 % Please edit documentation in R/S7-core-classes.R
 \name{get_stan_family_hooks}
 \alias{get_stan_family_hooks}
-\title{Get Stan-family extension hooks for a model family.}
+\title{Get Stan-family extension hooks.}
 \usage{
 get_stan_family_hooks(family = NULL)
 }
 \arguments{
-\item{family}{Optional model-family name.}
+\item{family}{Optional model-family name. If NULL, returns all hooks.}
 }
 \value{
-A list of registered hooks.
+A list with hook definitions.
 }
 \description{
-Get Stan-family extension hooks for a model family.
+Get Stan-family extension hooks.
 }

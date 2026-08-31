@@ -2,13 +2,13 @@
 % Please edit documentation in R/S7-core-classes.R
 \name{new_mvbu_object}
 \alias{new_mvbu_object}
-\title{Construct a base MVBU object.}
+\title{Construct a base MVBU object}
 \usage{
 new_mvbu_object()
 }
 \value{
-A base S7 MVBU object.
+A new instance of \code{MVBU_Object}.
 }
 \description{
-Construct a base MVBU object.
+Construct a base MVBU object
 }

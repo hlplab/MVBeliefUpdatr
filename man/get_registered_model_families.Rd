@@ -2,13 +2,13 @@
 % Please edit documentation in R/S7-core-classes.R
 \name{get_registered_model_families}
 \alias{get_registered_model_families}
-\title{Get the registered MVBU model families.}
+\title{Get registered model families in MVBU.}
 \usage{
 get_registered_model_families()
 }
 \value{
-A character vector of registered family names.
+Character vector of registered family names.
 }
 \description{
-Get the registered MVBU model families.
+Get registered model families in MVBU.
 }

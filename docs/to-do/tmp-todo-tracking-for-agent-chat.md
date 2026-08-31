@@ -28,7 +28,7 @@
 # To do in Phase 3
 
 ## Next steps
-+ fit example stanfits for NIX model
+
 
 + there is quite a bit of overlap between the different plotting methods for different object types. if it does not make the code to opaque, try to streamline this through shared helper functions. consider whether some compute-intensive tasks during plotting could take advantage of parallelization (e.g. when working with samples from stanfit models; or when calculating grids for densities). keep in mind that we eventually also want to plot 3d plots. 
 
@@ -36,6 +36,8 @@
 + make 3d plot functions, too
 
 WAIT, do not go beyond this point: 
+
+
 
 + Known remaining failures (pre-existing, not caused by the above): MNIX representation validator (test-01, test-07), NIX stanfit validator (test-05), rstan/TBB toolchain dlopen (test-04-stanfit-input-compatibility), and `tests/functions-to-make-or-load-models.R` still calling `mutate()` on S7 models (test-14-get-info-stanfit, test-19-plot-stanfit).
 

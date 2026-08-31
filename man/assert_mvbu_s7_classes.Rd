@@ -4,7 +4,6 @@
 \alias{assert_MVBU_CategoryRepresentation}
 \alias{assert_MVBU_CategoryRepresentationTemplate}
 \alias{assert_MVBU_CognitiveModel}
-\alias{assert_MVBU_ModelDistribution}
 \alias{assert_IdealAdaptorStanfit}
 \alias{assert_IdealAdaptorStaninput}
 \title{Assert that an object inherits from one of the new S7 classes.}
@@ -14,8 +13,6 @@ assert_MVBU_CategoryRepresentation(x, msg = NULL)
 assert_MVBU_CategoryRepresentationTemplate(x, msg = NULL)
 
 assert_MVBU_CognitiveModel(x, msg = NULL)
-
-assert_MVBU_ModelDistribution(x, msg = NULL)
 
 assert_IdealAdaptorStanfit(x, msg = NULL)
 

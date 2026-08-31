@@ -7,20 +7,24 @@
 aggregate_models(models, weights = NULL, ...)
 }
 \arguments{
-\item{models}{A non-empty list of S7 cognitive model objects (all of the same class).}
+\item{models}{A non-empty list of S7 cognitive model objects (all of the
+same class).}
 
-\item{weights}{An optional numeric vector of positive weights corresponding to each model in \code{models}.
-If \code{NULL}, uniform weights are used. Weights are automatically normalized to sum to 1.}
+\item{weights}{An optional numeric vector of positive weights corresponding
+to each model in \code{models}. If \code{NULL}, uniform weights are used. Weights
+are automatically normalized to sum to 1.}
 
 \item{...}{Additional arguments (currently unused).}
 }
 \value{
-An S7 cognitive model of the same class as the elements in \code{models}, with averaged parameters.
+An S7 cognitive model of the same class as the elements in \code{models},
+with averaged parameters.
 }
 \description{
-Takes a list of S7 cognitive models of the same class and averages their parameters
-and category representations into a single aggregated model.
+Takes a list of S7 cognitive models of the same class and averages their
+parameters and category representations into a single aggregated model.
 }
 \seealso{
-\code{\link{new_mvg_ideal_observer}}, \code{\link{new_niw_ideal_adaptor}}
+\code{\link{new_mvg_ideal_observer}},
+\code{\link{new_niw_ideal_adaptor}}
 }

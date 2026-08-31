@@ -1,4 +1,11 @@
 #' @include S7-core-classes.R
+#' @include S7-core-uvg-classes.R
+#' @include S7-core-nix-classes.R
+#' @include S7-core-muvg-classes.R
+#' @include S7-core-mnix-classes.R
+#' @include S7-core-mvg-classes.R
+#' @include S7-core-niw-classes.R
+#' @include S7-core-exemplar-classes.R
 NULL
 
 # Cross-family coercion between S7 category representations, templates, and cognitive models.

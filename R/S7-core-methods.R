@@ -1,4 +1,11 @@
 #' @include S7-core-classes.R
+#' @include S7-core-uvg-classes.R
+#' @include S7-core-nix-classes.R
+#' @include S7-core-muvg-classes.R
+#' @include S7-core-mnix-classes.R
+#' @include S7-core-mvg-classes.R
+#' @include S7-core-niw-classes.R
+#' @include S7-core-exemplar-classes.R
 #' @include S7-generics.R
 NULL
 
@@ -291,14 +298,21 @@ S7::method(get_category_representations, MVBU_CategoryRepresentationTemplate) <-
 
 # Helper to map S7 class name to model family
 .get_family_from_class_name <- function(class_name) {
-  registry <- .mvbu_family_registry$families
-  for (fam in names(registry)) {
-    reg <- registry[[fam]]
-    if (class_name %in% c(reg$category_representation, reg$cognitive_model, reg$model_distribution)) {
+  families <- .list_model_families()
+  for (fam in families) {
+    reg <- .get_model_family_entry(fam)
+    if (class_name %in% c(reg$category_representation, reg$cognitive_model)) {
       return(fam)
     }
   }
-  clean_name <- gsub("_(IdealObserver|IdealObserverDistribution|IdealAdaptor|IdealAdaptorDistribution|IdealAdaptorStanfit|CategoryRepresentation|CategoryRepresentationTemplate)$", "", class_name)
+  clean_name <- gsub(
+    paste0(
+      "_(IdealObserver|IdealAdaptor|IdealAdaptorStanfit|",
+      "CategoryRepresentation|CategoryRepresentationTemplate|Model)$"
+    ),
+    "",
+    class_name
+  )
   if (toupper(clean_name) == "EXEMPLAR") return("EXEMPLAR")
   toupper(clean_name)
 }
@@ -518,9 +532,6 @@ S7::method(get_expected_category_statistic, MVBU_Object) <- function(
   rep(as.numeric(values[1]), length(categories))
 }
 
-S7::method(get_model_family, MVBU_ModelDistribution) <- function(x) {
-  x@model_family
-}
 
 S7::method(get_category_prior, list(MVBU_Object, S7::class_any)) <- function(x, categories) {
   .mvbu_not_implemented("get_category_prior", class(x)[1])
@@ -742,15 +753,6 @@ S7::method(get_group_labels, MVBU_Object) <- function(x, indices = NULL, ...) {
   group_labels[indices]
 }
 
-# NOTE: group labels currently identify model instances in combinations of
-# models. Revisit later for richer grouped-model containers.
-S7::method(get_group_labels, MVBU_ModelDistribution) <- function(x, indices = NULL, ...) {
-  group_labels <- x@group_label
-  if (missing(indices) || is.null(indices)) {
-    return(group_labels)
-  }
-  group_labels[indices]
-}
 
 S7::method(get_labels, MVBU_Object) <- function(x, ...) {
   list(

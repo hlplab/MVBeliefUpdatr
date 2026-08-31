@@ -2,12 +2,11 @@
 % Please edit documentation in R/S7-core-classes.R
 \name{.mvbu_normalize_sigma_noise}
 \alias{.mvbu_normalize_sigma_noise}
-\title{Construct a base cognitive model object}
+\title{Normalize perceptual noise covariance matrix.}
 \usage{
 .mvbu_normalize_sigma_noise(Sigma_noise, cue_labels)
 }
 \description{
-By default, lapse_bias equals category_prior.
-Category association is by order unless explicit names are supplied.
+Normalize perceptual noise covariance matrix.
 }
 \keyword{internal}
