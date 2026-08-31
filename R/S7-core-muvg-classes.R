@@ -100,13 +100,6 @@ MUVG_CategoryRepresentation <- S7::new_class(
 
 #' @rdname family-muvg
 #' @export
-MUVG_IdealObserver <- S7::new_class(
-  "MUVG_IdealObserver",
-  parent = MVBU_CognitiveModel
-)
-
-#' @rdname family-muvg
-#' @export
 new_muvg_category_representation <- function(
   category_labels,
   cue_labels,
@@ -180,6 +173,73 @@ new_muvg_category_representation <- function(
 
 #' @rdname family-muvg
 #' @export
+new_muvg_category_representation_from_data <- function(
+  data,
+  category = "category",
+  cues
+) {
+  .assert_data_frame_like(data)
+  .assert_non_NA_scalar_character(
+    category,
+    msg = "category must be a non-empty scalar character value."
+  )
+  .assert_true(
+    is.character(cues) && length(cues) > 0,
+    msg = "cues must be a non-empty character vector."
+  )
+  .assert_data_contains_cols(data, category)
+  .assert_data_contains_cols(data, cues)
+  category_labels <- unique(as.character(data[[category]]))
+  .assert_true(
+    length(category_labels) == 1L,
+    msg = "data must contain exactly one category."
+  )
+
+  cue_values <- as.matrix(data[, cues, drop = FALSE])
+  new_muvg_category_representation(
+    category_labels = category_labels,
+    cue_labels = cues,
+    component_mu = .colMeans(cue_values),
+    component_sigma2 = diag(.cov(cue_values))
+  )
+}
+
+#' @rdname family-muvg
+#' @export
+new_muvg_category_representation_template_from_data <- function(
+  data,
+  category = "category",
+  cues,
+  verbose = FALSE
+) {
+  category_labels <- sort(unique(as.character(data[[category]])))
+  representations <- lapply(category_labels, function(label) {
+    new_muvg_category_representation_from_data(
+      data[data[[category]] == label, , drop = FALSE],
+      category = category,
+      cues = cues
+    )
+  })
+  names(representations) <- category_labels
+  if (verbose) {
+    message(
+      "Constructed a MUVG category-representation template with ",
+      length(category_labels), " categories and ",
+      length(cues), " cue(s)."
+    )
+  }
+  new_category_representation_template(representations)
+}
+
+#' @rdname family-muvg
+#' @export
+MUVG_IdealObserver <- S7::new_class(
+  "MUVG_IdealObserver",
+  parent = MVBU_CognitiveModel
+)
+
+#' @rdname family-muvg
+#' @export
 new_muvg_ideal_observer <- function(
   category_template = NULL,
   decision_rule = "sampling",
@@ -204,5 +264,38 @@ new_muvg_ideal_observer <- function(
     noise_treatment = noise_treatment,
     lapse_treatment = lapse_treatment,
     metadata = metadata
+  )
+}
+
+#' @rdname family-muvg
+#' @export
+new_muvg_ideal_observer_from_data <- function(
+  data,
+  category = "category",
+  cues,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  verbose = FALSE
+) {
+  template <- new_muvg_category_representation_template_from_data(
+    data,
+    category = category,
+    cues = cues,
+    verbose = verbose
+  )
+  new_muvg_ideal_observer(
+    category_template = template,
+    decision_rule = decision_rule,
+    category_prior = category_prior,
+    lapse_rate = lapse_rate,
+    lapse_bias = lapse_bias,
+    Sigma_noise = Sigma_noise,
+    noise_treatment = noise_treatment,
+    lapse_treatment = lapse_treatment
   )
 }

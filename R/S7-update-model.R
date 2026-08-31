@@ -73,7 +73,7 @@ S7::method(update_category_representation, list(NIW_CategoryRepresentation, S7::
   )
 }
 
-#' Update an S7 NIW ideal adaptor's category template from observations.
+#' Update an S7 NIW ideal adaptor's category template from observations
 #'
 #' `update_template()` is currently implemented for `NIW_IdealAdaptor` models.
 #' Future methods will support additional model types.

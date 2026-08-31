@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-NIW-IA-stanfit.R
 \name{get_group_levels}
 \alias{get_group_levels}
-\title{Get group levels from model (deprecated)}
+\title{Deprecated: get_group_levels}
 \usage{
 get_group_levels(x, indices = NULL, include_prior = FALSE, ...)
 }

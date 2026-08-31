@@ -1,4 +1,4 @@
-#' Make exemplar models from data.
+#' Deprecated: make_exemplars_from_data
 #'
 #' @description `r lifecycle::badge("deprecated")` Use \code{\link{new_exemplar_category_representation_template_from_data}} instead.
 #' @param data The tibble or data.frame from which to construct the exemplar representations.
@@ -17,7 +17,7 @@ make_exemplars_from_data <- function(data, group = NULL, category = "category", 
   new_exemplar_category_representation_template_from_data(data = data, category = category, cues = cues, verbose = verbose)
 }
 
-#' Make exemplar model from data.
+#' Deprecated: make_exemplar_model_from_data
 #'
 #' @description `r lifecycle::badge("deprecated")` Use \code{\link{new_exemplar_model_from_data}} instead.
 #' @inheritParams make_exemplars_from_data
@@ -39,7 +39,7 @@ make_exemplar_model_from_data <- function(data, group = NULL, category = "catego
 }
 
 
-#' Make multivariate Gaussian representation(s) from data.
+#' Deprecated: make_MVG_from_data
 #'
 #' @description `r lifecycle::badge("deprecated")` Use \code{\link{new_mvg_category_representation_template_from_data}} instead.
 #' @inheritParams make_exemplars_from_data
@@ -52,7 +52,7 @@ make_MVG_from_data <- function(data, group = NULL, category = "category", cues, 
   new_mvg_category_representation_template_from_data(data = data, category = category, cues = cues, verbose = verbose)
 }
 
-#' Make multivariate Gaussian ideal observer(s) from data.
+#' Deprecated: make_MVG_ideal_observer_from_data
 #'
 #' @description `r lifecycle::badge("deprecated")` Use \code{\link{new_mvg_ideal_observer_from_data}} instead.
 #' @inheritParams make_exemplar_model_from_data
@@ -69,7 +69,7 @@ make_MVG_ideal_observer_from_data <- function(data, group = NULL, category = "ca
 }
 
 
-#' Make NIW belief from data.
+#' Deprecated: make_NIW_belief_from_data
 #'
 #' @description `r lifecycle::badge("deprecated")` Use \code{\link{new_niw_category_representation_template_from_data}} instead.
 #' @inheritParams make_exemplars_from_data
@@ -89,7 +89,7 @@ make_NIW_belief_from_data <- function(data, group = NULL, category = "category",
 #' @export
 make_NIW_prior_from_data <- make_NIW_belief_from_data
 
-#' Make NIW ideal adaptor from data.
+#' Deprecated: make_NIW_ideal_adaptor_from_data
 #'
 #' @description `r lifecycle::badge("deprecated")` Use \code{\link{new_niw_ideal_adaptor_from_data}} instead.
 #' @inheritParams make_NIW_belief_from_data
@@ -110,7 +110,7 @@ make_NIW_ideal_adaptor_from_data <- function(data, group = NULL, category = "cat
 }
 
 
-#' Turn a representation (template) into a cognitive model.
+#' Deprecated: lift_likelihood_to_model
 #'
 #' @description `r lifecycle::badge("deprecated")` Use \code{\link{new_mvg_ideal_observer}}, \code{\link{new_niw_ideal_adaptor}},
 #'   or \code{\link{new_exemplar_model}} with an S7 \code{category_template} instead.
@@ -146,6 +146,7 @@ lift_likelihood_to_model <- function(x, group = NULL, prior = NULL, lapse_rate =
 }
 
 
+#' Deprecated: lift_exemplars_to_exemplar_model
 #' @keywords internal
 #' @export
 #' @rdname lift_likelihood_to_model
@@ -158,6 +159,7 @@ lift_exemplars_to_exemplar_model <- function(x, group = NULL, prior = NULL, laps
 }
 
 
+#' Deprecated: lift_MVG_to_MVG_ideal_observer
 #' @keywords internal
 #' @export
 #' @rdname lift_likelihood_to_model
@@ -169,6 +171,7 @@ lift_MVG_to_MVG_ideal_observer <- function(x, group = NULL, prior = NULL, lapse_
     category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
 }
 
+#' Deprecated: lift_NIW_belief_to_NIW_ideal_adaptor
 #' @keywords internal
 #' @export
 #' @rdname lift_likelihood_to_model
@@ -180,6 +183,7 @@ lift_NIW_belief_to_NIW_ideal_adaptor <- function(x, group = NULL, prior = NULL, 
     category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
 }
 
+#' Deprecated: lift_MVG_ideal_observer_to_NIW_ideal_adaptor
 #' @keywords internal
 #' @export
 #' @rdname lift_likelihood_to_model
@@ -191,7 +195,7 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor <- function(x, group = NULL, kappa,
 }
 
 
-#' Aggregate models by group structure (Deprecated)
+#' Deprecated: aggregate_models_by_group_structure
 #'
 #' @description `r lifecycle::badge("deprecated")` Deprecated in MVBeliefUpdatr 0.0.9.
 #'   Use \code{purrr::map()} to create lists of models and \code{\link{aggregate_models}} instead.

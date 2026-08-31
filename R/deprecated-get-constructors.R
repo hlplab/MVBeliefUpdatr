@@ -51,7 +51,7 @@ NULL
   constructors[[variable]]
 }
 
-#' Get tidybayes constructor from an ideal adaptor stanfit (deprecated)
+#' Deprecated: get_constructor
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -75,6 +75,7 @@ get_constructor <- function(x, variable = NULL) {
   .get_constructor(x, variable)
 }
 
+#' Deprecated: get_category_constructor
 #' @rdname get_constructor
 #' @export
 get_category_constructor <- function(x) {
@@ -86,6 +87,7 @@ get_category_constructor <- function(x) {
   .get_constructor(x, "category")
 }
 
+#' Deprecated: get_group_constructor
 #' @rdname get_constructor
 #' @export
 get_group_constructor <- function(x) {
@@ -97,6 +99,7 @@ get_group_constructor <- function(x) {
   .get_constructor(x, "group")
 }
 
+#' Deprecated: get_cue_constructor
 #' @rdname get_constructor
 #' @export
 get_cue_constructor <- function(x) {
@@ -108,6 +111,7 @@ get_cue_constructor <- function(x) {
   .get_constructor(x, "cue")
 }
 
+#' Deprecated: get_cue2_constructor
 #' @rdname get_constructor
 #' @export
 get_cue2_constructor <- function(x) {

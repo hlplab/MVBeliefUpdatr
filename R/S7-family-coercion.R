@@ -206,7 +206,7 @@ NULL
   )
 }
 
-#' Coerce category representations, templates, and cognitive models between families.
+#' Coerce category representations, templates, and cognitive models between families
 #'
 #' These functions coerce between the point-estimate families (UVG, MUVG, MVG), the corresponding
 #' uncertainty families (NIX, MNIX, NIW), and the non-parametric Exemplar family. Supported coercions
@@ -290,7 +290,7 @@ as_niw_ideal_adaptor <- function(x, kappa, nu) .mvbu_coerce_cognitive_model(x, t
 #' @export
 as_exemplar_model <- function(x, n) .mvbu_coerce_cognitive_model(x, to = "EXEMPLAR", n = n)
 
-#' Sample observations from an S7 category representation, template, or cognitive model.
+#' Sample observations from an S7 category representation, template, or cognitive model
 #'
 #' @param x An MVBU_CategoryRepresentation, MVBU_CategoryRepresentationTemplate, or MVBU_CognitiveModel object.
 #' @param Ns Number of observations to sample. Either a single whole number (recycled across categories) or

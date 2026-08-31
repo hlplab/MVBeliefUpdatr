@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-core-classes.R
 \name{register_stan_family_hooks}
 \alias{register_stan_family_hooks}
-\title{Register Stan-family extension hooks.}
+\title{Register Stan-family extension hooks}
 \usage{
 register_stan_family_hooks(
   family,
@@ -28,5 +28,5 @@ rationale.}
 Invisibly TRUE.
 }
 \description{
-Register Stan-family extension hooks.
+Register Stan-family extension hooks
 }

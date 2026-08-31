@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R
 \name{get_expected_category_statistic}
 \alias{get_expected_category_statistic}
-\title{Extract expected category statistics from an S7 model, representation, or fit object.}
+\title{Extract expected category statistics from an S7 model, representation, or fit object}
 \usage{
 get_expected_category_statistic(x, ...)
 }

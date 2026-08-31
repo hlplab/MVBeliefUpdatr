@@ -3,7 +3,7 @@
 \name{nest_cue_information_in_model}
 \alias{nest_cue_information_in_model}
 \alias{unnest_cue_information_in_model}
-\title{Nest/unnest the cue information in a model (deprecated)}
+\title{Deprecated: nest_cue_information_in_model}
 \usage{
 nest_cue_information_in_model(model)
 

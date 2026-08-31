@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-model.R
 \name{get_nlevels_of_category_labels_from_model}
 \alias{get_nlevels_of_category_labels_from_model}
-\title{Get number of categories from likelihood or model (deprecated)}
+\title{Deprecated: get_nlevels_of_category_labels_from_model}
 \usage{
 get_nlevels_of_category_labels_from_model(x)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-2025.R
 \name{get_test_data_from_stanfit}
 \alias{get_test_data_from_stanfit}
-\title{Legacy wrapper for get_test_data.}
+\title{Deprecated: get_test_data_from_stanfit}
 \usage{
 get_test_data_from_stanfit(...)
 }

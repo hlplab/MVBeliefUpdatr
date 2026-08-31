@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-nest-model.R
 \name{make_named_square_matrix}
 \alias{make_named_square_matrix}
-\title{Make a named square matrix (deprecated)}
+\title{Deprecated: make_named_square_matrix}
 \usage{
 make_named_square_matrix(x, names)
 }

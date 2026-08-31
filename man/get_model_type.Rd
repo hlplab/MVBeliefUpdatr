@@ -3,7 +3,7 @@
 \name{get_model_type}
 \alias{get_model_type}
 \alias{get_model_type,MVBU_Stanfit-method}
-\title{Get the model type of a cognitive model or model distribution.}
+\title{Get the model type of a cognitive model or model distribution}
 \usage{
 get_model_type(x, ...)
 
@@ -17,5 +17,5 @@ get_model_type(x)
 A character scalar identifying the model family/type.
 }
 \description{
-Get the model type of a cognitive model or model distribution.
+Get the model type of a cognitive model or model distribution
 }

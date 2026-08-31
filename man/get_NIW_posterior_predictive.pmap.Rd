@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-NIW-belief.R
 \name{get_NIW_posterior_predictive.pmap}
 \alias{get_NIW_posterior_predictive.pmap}
-\title{Get NIW posterior predictive via pmap (deprecated)}
+\title{Deprecated: get_NIW_posterior_predictive.pmap}
 \usage{
 get_NIW_posterior_predictive.pmap(x, m, S, kappa, nu, ...)
 }

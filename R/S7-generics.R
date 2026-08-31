@@ -11,7 +11,7 @@ plot_prep_mvbu <- S7::new_generic("plot_prep_mvbu", "x")
 get_model_family <- S7::new_generic("get_model_family", "x")
 get_metadata <- S7::new_generic("get_metadata", "x")
 
-#' Extract parameters or expected parameters from representations, templates, models, or model distributions.
+#' Extract parameters or expected parameters from representations, templates, models, or model distributions
 #'
 #' @name get_parameters
 #' @title Extract parameters or expected category statistics
@@ -31,14 +31,14 @@ get_category_representations <- S7::new_generic("get_category_representations", 
 get_category_template <- S7::new_generic("get_category_template", "x")
 
 
-#' Get the stored Stan fit from an S7 fit object.
+#' Get the stored Stan fit from an S7 fit object
 #'
 #' @param x An S7 fit object.
 #' @return The stored [rstan::stanfit] object when present.
 #' @export
 get_stanfit <- S7::new_generic("get_stanfit", "x")
 
-#' Set the stored Stan fit on an S7 fit object.
+#' Set the stored Stan fit on an S7 fit object
 #'
 #' @param x An S7 fit object.
 #' @param stanfit An [rstan::stanfit] object.
@@ -55,7 +55,7 @@ set_stanfit <- S7::new_generic("set_stanfit", c("x", "stanfit"))
 #' @export
 control_params <- S7::new_generic("control_params", "x", function(x, ...) S7::S7_dispatch())
 
-#' Extract log posterior draws
+#' Extract diagnostic information from MVBU_Stanfit object
 #'
 #' @param x An S7 fit object or stanfit object.
 #' @param ... Additional arguments.
@@ -119,14 +119,14 @@ neff_ratio <- S7::new_generic("neff_ratio", "x", function(x, ...) {
 })
 
 
-#' Get the stored Stan input from an S7 fit or fit-input object.
+#' Get the stored Stan input from an S7 fit or fit-input object
 #'
 #' @param x An S7 fit or fit-input object.
 #' @return The stored S7 Stan input object.
 #' @export
 get_staninput <- S7::new_generic("get_staninput", "x")
 
-#' Set the stored Stan input on an S7 fit or fit-input object.
+#' Set the stored Stan input on an S7 fit or fit-input object
 #'
 #' @param x An S7 fit or fit-input object.
 #' @param staninput An S7 Stan input object.
@@ -134,14 +134,14 @@ get_staninput <- S7::new_generic("get_staninput", "x")
 #' @export
 set_staninput <- S7::new_generic("set_staninput", c("x", "staninput"))
 
-#' Get transform metadata from an S7 fit or fit-input object.
+#' Get transform metadata from an S7 fit or fit-input object
 #'
 #' @param x An S7 fit or fit-input object.
 #' @return A transform-information object.
 #' @export
 get_transform_information <- S7::new_generic("get_transform_information", "x")
 
-#' Get category-prior values from a cognitive model or legacy input.
+#' Get category-prior values from a cognitive model
 #'
 #' Compatibility methods accept older list/data-frame shapes such as scalars,
 #' named vectors, or table-like objects with a category column. These shims are
@@ -153,7 +153,7 @@ get_transform_information <- S7::new_generic("get_transform_information", "x")
 #' @export
 get_category_prior <- S7::new_generic("get_category_prior", c("x", "categories"))
 
-#' Get lapse-rate values from a cognitive model or legacy input.
+#' Get lapse-rate values from a cognitive model
 #'
 #' Compatibility methods handle older list/data-frame inputs while the S7 API
 #' becomes the standard interface.
@@ -162,7 +162,7 @@ get_category_prior <- S7::new_generic("get_category_prior", c("x", "categories")
 #' @export
 get_lapse_rate <- S7::new_generic("get_lapse_rate", "x")
 
-#' Get lapse-bias values from a cognitive model or legacy input.
+#' Get lapse-bias values from a cognitive model
 #'
 #' Compatibility methods handle older list/data-frame inputs while the S7 API
 #' becomes the standard interface.
@@ -172,14 +172,14 @@ get_lapse_rate <- S7::new_generic("get_lapse_rate", "x")
 #' @export
 get_lapse_bias <- S7::new_generic("get_lapse_bias", c("x", "categories"))
 
-#' Get perceptual noise covariance matrix from a cognitive model.
+#' Get perceptual noise covariance matrix from a cognitive model
 #'
 #' @param x A cognitive model or legacy input object.
 #' @return A matrix or numeric value representing perceptual noise covariance (\eqn{\Sigma_{\text{noise}}}), or `NULL` if no noise is specified.
 #' @export
 get_noise <- S7::new_generic("get_noise", "x")
 
-#' Get cue labels from a representation, template, model, or model distribution.
+#' Get cue labels from a representation, template, or model
 #'
 #' @param x A representation, representation template, or cognitive model.
 #' @param indices An optional integer vector of indices to subset the returned labels.
@@ -188,7 +188,7 @@ get_noise <- S7::new_generic("get_noise", "x")
 #' @export
 get_cue_labels <- S7::new_generic("get_cue_labels", "x", function(x, indices = NULL, ...) S7::S7_dispatch())
 
-#' Get category labels from a representation, template, model, or model distribution.
+#' Get category labels from a representation, template, or model
 #'
 #' Compatibility methods also accept older list/data-frame inputs for
 #' transitional support while the S7 API becomes the canonical interface.
@@ -199,7 +199,7 @@ get_cue_labels <- S7::new_generic("get_cue_labels", "x", function(x, indices = N
 #' @export
 get_category_labels <- S7::new_generic("get_category_labels", "x", function(x, indices = NULL, ...) S7::S7_dispatch())
 
-#' Get group labels from a model, stanfit, or fit-input object.
+#' Get group labels from a model, stanfit, or fit-input object
 #'
 #' @param x A model, stanfit, or fit-input object.
 #' @param indices An optional integer vector of indices to subset the returned labels.
@@ -209,7 +209,7 @@ get_category_labels <- S7::new_generic("get_category_labels", "x", function(x, i
 #' @export
 get_group_labels <- S7::new_generic("get_group_labels", "x", function(x, indices = NULL, ...) S7::S7_dispatch())
 
-#' Get all labels from a representation, template, model, stanfit, or fit-input object.
+#' Get all labels from a representation, template, model, stanfit, or fit-input object
 #'
 #' @param x A representation, representation template, cognitive model, stanfit, or fit-input object.
 #' @param ... Additional arguments passed to methods.
@@ -219,7 +219,7 @@ get_group_labels <- S7::new_generic("get_group_labels", "x", function(x, indices
 get_labels <- S7::new_generic("get_labels", "x", function(x, ...) S7::S7_dispatch())
 
 
-#' Extract the category-likelihood function from a representation, template, or model.
+#' Extract the category-likelihood function from a representation, template, or model
 #'
 #' For NIX, MNIX, and NIW families the returned function evaluates the posterior
 #' predictive, which is the category likelihood for those families.
@@ -229,7 +229,7 @@ get_labels <- S7::new_generic("get_labels", "x", function(x, ...) S7::S7_dispatc
 #' @export
 get_category_likelihood_function <- S7::new_generic("get_category_likelihood_function", "x")
 
-#' Extract a category-posterior function from a cognitive model.
+#' Extract a category-posterior function from a cognitive model
 #'
 #' @param x A cognitive model object.
 #' @param noise_treatment Optional noise-handling mode for the returned function.
@@ -238,7 +238,7 @@ get_category_likelihood_function <- S7::new_generic("get_category_likelihood_fun
 #' @export
 get_category_posterior_function <- S7::new_generic("get_category_posterior_function", c("x", "noise_treatment", "lapse_treatment"))
 
-#' Compute category likelihoods for one or more observations.
+#' Compute category likelihoods for one or more observations
 #'
 #' For NIX, MNIX, and NIW families the likelihood is the posterior predictive of
 #' the category, so this generic supersedes the family-specific posterior
@@ -251,7 +251,7 @@ get_category_posterior_function <- S7::new_generic("get_category_posterior_funct
 #' @export
 likelihood <- S7::new_generic("likelihood", c("x", "new_data", "categories"))
 
-#' Compute posterior category probabilities for one or more observations.
+#' Compute posterior category probabilities for one or more observations
 #'
 #' @param x A cognitive model object.
 #' @param new_data A numeric matrix of observations or a list of matrices.
@@ -260,7 +260,7 @@ likelihood <- S7::new_generic("likelihood", c("x", "new_data", "categories"))
 #' @export
 posterior <- S7::new_generic("posterior", c("x", "new_data", "categories"))
 
-#' Categorize one or more observations under the model's decision rule.
+#' Categorize one or more observations under the model's decision rule
 #'
 #' @param x A cognitive model object.
 #' @param new_data A numeric matrix of observations or a list of matrices.
@@ -269,7 +269,7 @@ posterior <- S7::new_generic("posterior", c("x", "new_data", "categories"))
 #' @export
 categorize <- S7::new_generic("categorize", c("x", "new_data", "decision_rule"))
 
-#' Update a model's category-representation template from observations.
+#' Update a model's category-representation template from observations
 #'
 #' Currently implemented for `NIW_IdealAdaptor`; methods for other model types
 #' will be added as their update workflows are migrated to S7.
@@ -279,7 +279,7 @@ categorize <- S7::new_generic("categorize", c("x", "new_data", "decision_rule"))
 #' @export
 update_template <- S7::new_generic("update_template", c("x", "observations"))
 
-#' Update a category representation from observations.
+#' Update a category representation from observations
 #'
 #' @param x A category representation object.
 #' @param x_N Number of observations represented by the sufficient statistics.
@@ -291,14 +291,14 @@ update_category_representation <- S7::new_generic("update_category_representatio
 
 get_expected_category <- S7::new_generic("get_expected_category", "x")
 
-#' Get the model type of a cognitive model or model distribution.
+#' Get the model type of a cognitive model or model distribution
 #'
 #' @param x A model object.
 #' @return A character scalar identifying the model family/type.
 #' @export
 get_model_type <- S7::new_generic("get_model_type", "x")
 
-#' Get the representation type of a category representation.
+#' Get the representation type of a category representation
 #'
 #' @param x A representation object.
 #' @return A character scalar identifying the representation family/type.
@@ -313,7 +313,7 @@ get_expected_mu <- S7::new_generic("get_expected_mu", "x", function(x, ...) S7::
 #' @export
 get_expected_sigma <- S7::new_generic("get_expected_sigma", "x", function(x, ...) S7::S7_dispatch())
 
-#' Extract expected category statistics from an S7 model, representation, or fit object.
+#' Extract expected category statistics from an S7 model, representation, or fit object
 #'
 #' Computes the expected value of category parameters such as mean vectors (\eqn{\mu}) or
 #' covariance/scatter matrices (\eqn{\Sigma} / \eqn{S}) under the model's distribution.
@@ -358,7 +358,7 @@ get_expected_category_statistic <- S7::new_generic(
 #' @export
 get_draws <- S7::new_generic("get_draws", "fit", function(fit, ...) S7::S7_dispatch())
 
-#' Get the data from an S7 stanfit or stanfit-input object.
+#' Get the data from an S7 stanfit or stanfit-input object
 #'
 #' @param x An S7 stanfit or stanfit-input object.
 #' @param ... Additional arguments passed to methods.
@@ -367,7 +367,7 @@ get_draws <- S7::new_generic("get_draws", "fit", function(fit, ...) S7::S7_dispa
 #' @export
 get_data <- S7::new_generic("get_data", "x", function(x, ...) S7::S7_dispatch())
 
-#' Get the exposure data from an S7 stanfit or stanfit-input object.
+#' Get the exposure data from an S7 stanfit or stanfit-input object
 #'
 #' @param x An S7 stanfit or stanfit-input object.
 #' @param ... Additional arguments passed to methods.
@@ -380,7 +380,7 @@ get_exposure_data <- S7::new_generic(
   function(x, ...) S7::S7_dispatch()
 )
 
-#' Get the test data from an S7 stanfit or stanfit-input object.
+#' Get the test data from an S7 stanfit or stanfit-input object
 #'
 #' @param x An S7 stanfit or stanfit-input object.
 #' @param groups Optional character vector of group labels to filter the test data by.
@@ -396,7 +396,7 @@ get_test_data <- S7::new_generic(
   function(x, ...) S7::S7_dispatch()
 )
 
-#' Get exposure category statistics from an S7 stanfit or stanfit-input object.
+#' Get exposure category statistics from an S7 stanfit or stanfit-input object
 #'
 #' @param x An S7 stanfit or stanfit-input object.
 #' @param ... Additional arguments passed to methods.
@@ -441,7 +441,7 @@ get_exposure_category_cov <- S7::new_generic(
   function(x, ...) S7::S7_dispatch()
 )
 
-#' Get the transform/untransform function from an object.
+#' Get the transform/untransform function from an object
 #'
 #' @param x An S7 fit, fit-input, or transform-information object.
 #' @param ... Additional arguments.
@@ -626,4 +626,6 @@ evaluate_model <- S7::new_generic("evaluate_model", "model", function(
   decision_rule = if (identical(method, "accuracy")) "criterion" else "proportional",
   return_by_x = FALSE,
   ...
-) S7::S7_dispatch())
+) {
+  S7::S7_dispatch()
+})

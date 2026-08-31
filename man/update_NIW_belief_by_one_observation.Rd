@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-update-NIW-IA.R
 \name{update_NIW_belief_by_one_observation}
 \alias{update_NIW_belief_by_one_observation}
-\title{Update one NIW category representation from one observation.}
+\title{Deprecated: update_NIW_belief_by_one_observation}
 \usage{
 update_NIW_belief_by_one_observation(
   prior_model,
@@ -33,5 +33,5 @@ update_NIW_belief_by_one_observation(
 An updated S7 representation or model.
 }
 \description{
-Update one NIW category representation from one observation.
+Deprecated: update_NIW_belief_by_one_observation
 }

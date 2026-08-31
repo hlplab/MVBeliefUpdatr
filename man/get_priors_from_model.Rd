@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-model.R
 \name{get_priors_from_model}
 \alias{get_priors_from_model}
-\title{Get category priors from model (deprecated)}
+\title{Deprecated: get_priors_from_model}
 \usage{
 get_priors_from_model(model, categories = NULL)
 }

@@ -7,7 +7,7 @@ NULL
 
 # deprecated ------------------------------------------------------------------
 
-#' Get likelihood for MVG parameters (deprecated)
+#' Deprecated: get_MVG_likelihood
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -64,7 +64,7 @@ get_MVG_likelihood <- function(
   .dmvnorm(x, mean = mu, sigma = Sigma, log = log) %>% as.numeric()
 }
 
-#' Get likelihood from MVG model (deprecated)
+#' Deprecated: get_likelihood_from_MVG
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -117,7 +117,7 @@ get_likelihood_from_MVG <- function(
   )
 }
 
-#' Legacy wrapper for posterior.
+#' Deprecated: get_posterior_from_MVG_ideal_observer
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -148,7 +148,7 @@ get_posterior_from_MVG_ideal_observer <- function(
   .legacy_long_posterior(model, x, noise_treatment, lapse_treatment)
 }
 
-#' Legacy wrapper for categorize.
+#' Deprecated: get_categorization_from_MVG_ideal_observer
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`

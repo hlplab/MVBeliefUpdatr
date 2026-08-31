@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R
 \name{get_representation_type}
 \alias{get_representation_type}
-\title{Get the representation type of a category representation.}
+\title{Get the representation type of a category representation}
 \usage{
 get_representation_type(x, ...)
 }
@@ -13,5 +13,5 @@ get_representation_type(x, ...)
 A character scalar identifying the representation family/type.
 }
 \description{
-Get the representation type of a category representation.
+Get the representation type of a category representation
 }

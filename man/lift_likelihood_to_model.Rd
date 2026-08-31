@@ -6,7 +6,7 @@
 \alias{lift_MVG_to_MVG_ideal_observer}
 \alias{lift_NIW_belief_to_NIW_ideal_adaptor}
 \alias{lift_MVG_ideal_observer_to_NIW_ideal_adaptor}
-\title{Turn a representation (template) into a cognitive model.}
+\title{Deprecated: lift_likelihood_to_model}
 \usage{
 lift_likelihood_to_model(
   x,

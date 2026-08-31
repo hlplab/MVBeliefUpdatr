@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-NIW-IA-stanfit.R
 \name{get_category_levels}
 \alias{get_category_levels}
-\title{Get category levels from model (deprecated)}
+\title{Deprecated: get_category_levels}
 \usage{
 get_category_levels(x, indices = NULL, ...)
 }

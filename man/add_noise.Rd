@@ -2,7 +2,7 @@
 % Please edit documentation in R/add_noise.R
 \name{add_noise}
 \alias{add_noise}
-\title{Add Gaussian noise to cues in a data set.}
+\title{Add Gaussian noise to cues in a data set}
 \usage{
 add_noise(data, cues, method = c("sample", "marginalize"), Sigma)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-make-objects.R
 \name{make_exemplars_from_data}
 \alias{make_exemplars_from_data}
-\title{Make exemplar models from data.}
+\title{Deprecated: make_exemplars_from_data}
 \usage{
 make_exemplars_from_data(
   data,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R, R/S7-core-methods.R
 \name{get_lapse_bias}
 \alias{get_lapse_bias}
-\title{Get lapse-bias values from a cognitive model or legacy input.}
+\title{Get lapse-bias values from a cognitive model}
 \usage{
 get_lapse_bias(x, categories, ...)
 

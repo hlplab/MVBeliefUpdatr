@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-class-MVG.R
 \name{is.MVG}
 \alias{is.MVG}
-\title{Is this a set of multivariate Gaussian (MVG) categories?}
+\title{Deprecated: is.MVG}
 \usage{
 is.MVG(x, group = NULL, category = "category", is.long = T, verbose = F)
 }

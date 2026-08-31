@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R
 \name{likelihood}
 \alias{likelihood}
-\title{Compute category likelihoods for one or more observations.}
+\title{Compute category likelihoods for one or more observations}
 \usage{
 likelihood(x, new_data, categories, ...)
 }

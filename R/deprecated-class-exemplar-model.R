@@ -1,6 +1,6 @@
 get_expected_columns_for_exemplar_model <- function() append(get_expected_columns_for_exemplars(), get_expected_columns_for_model())
 
-#' Is this an exemplar model?
+#' Deprecated: is.exemplar_model
 #'
 #' Check whether \code{x} is an exemplar model. Optionally, one can also check whether a lapse rate
 #' and lapse bias is part of the model.

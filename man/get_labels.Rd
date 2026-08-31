@@ -3,7 +3,7 @@
 \name{get_labels}
 \alias{get_labels}
 \alias{get_labels,MVBU_Stanfit-method}
-\title{Get all labels from a representation, template, model, stanfit, or fit-input object.}
+\title{Get all labels from a representation, template, model, stanfit, or fit-input object}
 \usage{
 get_labels(x, ...)
 
@@ -19,7 +19,7 @@ get_labels(x, ...)
 A named list of character vectors with elements \code{cue}, \code{category}, and \code{group}.
 }
 \description{
-Get all labels from a representation, template, model, stanfit, or fit-input object.
+Get all labels from a representation, template, model, stanfit, or fit-input object
 }
 \seealso{
 \code{\link{get_cue_labels}}, \code{\link{get_category_labels}}, \code{\link{get_group_labels}}

@@ -6,69 +6,85 @@
 \alias{MVBeliefUpdatr-package}
 \title{MVBeliefUpdatr: Fitting, Summarizing, and Visualizing of Gaussian Ideal Observers and Adaptors}
 \description{
-Model and visualize incremental Bayesian categorization and belief-updating over uni- or multivariate Gaussian categories.
+Model, fit, and visualize incremental Bayesian categorization and belief updating for uni- and multivariate Gaussian, cue integration, and exemplar-based cognitive models using S7 class architecture.
 }
 \section{Overview}{
 
-This package provides convenience functions to model Bayesian ideal observers with multivariate Gaussian categories and
-incremental Bayesian belief-updating for multivariate Gaussian categories. This includes conjugate belief-updating from
-a Normal-Inverse-Wishart (NIW) prior based on exposure
-data. Users can specify priors manually or based on existing data, prepare exposure data, update NIW beliefs under a
-variety of assumptions (noise-free, noise added, etc.) both for labeled and unlabeled exposure data. Expected categories,
-categorization functions, and categorizations under various decisions rules (e.g., criterion, proportional matching,
-sampling) can be obtained and visualized.
+\code{MVBeliefUpdatr} provides a unified, object-oriented framework for
+Bayesian ideal observers, ideal adaptors, incremental belief updating,
+and hierarchical Bayesian cognitive modeling.
 
-Additionally, the package provides a number of Stan programs that try to \emph{infer} NIW priors for multiple categories
-from behavioral test responses. These functions use participants' categorization responses during test and, for example,
-the sufficient statistics of the exposure data to infer a posterior distribution of the parameters of NIW priors for each
-category. Users can either infer the strength of prior beliefs given a specified m and S parameter, or infer all four NIW
-parameters together, although the latter requires test responses from multiple different exposure conditions.
-Functions are provided to interact with stan through rstan, to (1) prepare data as input for the stan program
-that implements the multivariate Bayesian belief-updating, and to (2) to summarize and visualize the prior and posterior
-beliefs represented by the resulting fit.
+The package supports continuous distributional representations (univariate
+Gaussian, multivariate Gaussian, multi-univariate Gaussian cue integration),
+conjugate prior distributions over category parameters (Normal-Inverse-
+Chisquare, Normal-Inverse-Wishart), and exemplar-based representations.
+
+Using analytical conjugate updating or hierarchical Bayesian inference
+in Stan via \pkg{rstan}, \code{MVBeliefUpdatr} facilitates simulation, parameter
+estimation, categorization prediction, and visualization of speech
+perception and perceptual adaptation experiments.
 }
 
-\section{Basic class structure}{
+\section{S7 Core Class Architecture}{
 
-The package defines a number of new classes that are essentially tibbles with certain information.
-\itemize{
-\item{\code{MVG}: }{one or more multivariate Gaussian categories, by default in long format with one category per row.
-Each row contains the mean mu and covariance matrix Sigma of the multivariate Gaussian.}
-\item{\code{MVG_ideal_observer}: }{an ideal observer with multivariate Gaussian categories, by default in long format
-with one category per row. In addition to the Gaussian categories the ideal observer contains the prior probability of
-each category and, optionally, a lapse rate, lapse bias, and/or perceptual noise matrix.}
-\item{\code{NIW_belief}: }{one or more Normal-Inverse-Wishart beliefs, by default in long format with one belief per row.
-A Normal-Inverse-Wishart belief specifies \emph{uncertainty} about the about the location (i.e., mean mu) and shape (i.e.,
-covariance matrix Sigma) of a multivariate Gaussian. It does so in a specific way that makes assumptions about the
-way that the covariance of cues within a category relates to the covariance of the category means across contexts (e.g.,
-talkers). See the documentation for details.}
-\item{\code{NIW_ideal_adaptor}: }{an ideal adaptor with Normal-Inverse-Wishart beliefs, by default in long format with
-one row each for each belief. In addition to the Normal-Inverse-Wishart beliefs, the ideal adaptor contains the prior
-probability of each category (currently without uncertainty about those prior probabilities) and, optionally, a lapse
-rate, lapse bias, and/or perceptual noise matrix.}
-\item{\code{NIW_ideal_adaptor_MCMC}: }{a collection of MCMC samples, each of which constitutes an NIW ideal adaptor. In
-other words, this object describes uncertainty about the parameters of the NIW ideal adaptor (specifically, in the
-current implementation about the NIW beliefs and the lapse rate and lapse bias, but not yet about the category priors). This is
-used, for example, to represent the researchers uncertainty about the prior or posterior beliefs of an ideal adaptor.}
-\item{\code{ideal_adaptor_stanfit}: }{The stanfit resulting from inferring an \code{ideal_adaptor} from a collection
-of exposure and test data. This object contains an \code{ideal_adaptor_MCMC} object.}
+All model objects are organized under an explicit, compositional S7 class
+hierarchy:
+\describe{
+\item{\code{MVBU_CategoryRepresentation}}{Abstract base class for individual
+category representations, encapsulating category parameters, cue
+labels, and likelihood functions.}
+\item{\code{MVBU_CategoryRepresentationTemplate}}{Validated collection of
+category representations forming a perceptual inventory or template.}
+\item{\code{MVBU_CognitiveModel}}{Decision model pairing a category template
+with decision behavior (decision rule, category priors, lapse rate,
+lapse bias, and perceptual noise).}
+\item{\code{MVBU_IdealObserver}}{Subclass of \code{MVBU_CognitiveModel} for
+observers with fixed generative category distributions.}
+\item{\code{MVBU_IdealAdaptor}}{Subclass of \code{MVBU_CognitiveModel} for adaptors
+with conjugate prior beliefs that update incrementally from exposure.}
+\item{\code{MVBU_Stanfit}}{Wrapper for \code{rstan} \code{stanfit} objects inferring
+prior beliefs, lapse parameters, and noise from behavioral test data.}
+\item{\code{MVBU_StanfitInput}}{Container for exposure data, test data,
+priors, and transformation functions used to prepare Stan inputs.}
+\item{\code{MVBU_Staninput}}{Validated input data list passed to Stan models.}
+}
+}
+
+\section{Supported Model Families}{
+
+\code{MVBeliefUpdatr} provides concrete S7 classes and constructors across seven
+families:
+\describe{
+\item{\code{UVG} / \code{NIX}}{Univariate Gaussian ideal observers
+(\link{UVG_IdealObserver}) and Normal-Inverse-Chisquare ideal adaptors
+(\link{NIX_IdealAdaptor}).}
+\item{\code{MUVG} / \code{MNIX}}{Multi-univariate Gaussian ideal observers
+(\link{MUVG_IdealObserver}) and independent Normal-Inverse-Chisquare cue
+integration adaptors (\link{MNIX_IdealAdaptor}).}
+\item{\code{MVG} / \code{NIW}}{Multivariate Gaussian ideal observers
+(\link{MVG_IdealObserver}) and Normal-Inverse-Wishart ideal adaptors
+(\link{NIW_IdealAdaptor}).}
+\item{\code{EXEMPLAR}}{Exemplar-based categorization models (\link{Exemplar_Model})
+with kernel density estimation over stored exemplars.}
 }
 }
 
 \section{Acknowledgments}{
 
-The belief-updating formulas are taken from Murphy (2012). The package incorporates code
-from Dave Kleinschmidt's BeliefUpdatr (Kleinschmidt and Jaeger, 2011, 2012, 2015, 2016) and Shaorong Yan's modeling of
-unsupervised adaptation (Yan and Jaeger, 2018). Pull requests and suggestions from Zach Burchill, Anna Persson, and Xin Xie
-are gratefully acknowledged.
-}
-
-\section{Package options}{
- TBD
+Belief-updating formulations build upon conjugate Bayesian theory
+\insertCite{murphy2012}{MVBeliefUpdatr}, phonetic sliding template models
+\insertCite{nearey-assmann2007}{MVBeliefUpdatr}, Dave Kleinschmidt's
+\code{BeliefUpdatr} \insertCite{kleinschmidt-jaeger2011}{MVBeliefUpdatr},
+\insertCite{kleinschmidt-jaeger2012}{MVBeliefUpdatr},
+\insertCite{kleinschmidt-jaeger2015}{MVBeliefUpdatr},
+\insertCite{kleinschmidt-jaeger2016cogsci}{MVBeliefUpdatr},
+and unsupervised adaptation modeling
+\insertCite{yan:jaeger2018}{MVBeliefUpdatr}. Contributions and feedback from
+Zach Burchill, Anna Persson, and Xin Xie are gratefully acknowledged.
 }
 
 \references{
-TBD
+\insertAllCited{}
 }
 \seealso{
 Useful links:

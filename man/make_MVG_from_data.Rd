@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-make-objects.R
 \name{make_MVG_from_data}
 \alias{make_MVG_from_data}
-\title{Make multivariate Gaussian representation(s) from data.}
+\title{Deprecated: make_MVG_from_data}
 \usage{
 make_MVG_from_data(
   data,

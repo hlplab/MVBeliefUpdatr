@@ -487,7 +487,7 @@ S7::method(get_expected_category_statistic, MVBU_Object) <- function(
 # Model property accessors
 # -------------------------
 
-#' Normalize category-scoped values from legacy list/data-frame inputs.
+#' Normalize category-scoped values from legacy list/data-frame inputs
 #'
 #' This helper resolves a single value, a vector of values, or a named vector
 #' into a value vector aligned to the requested category labels. It is used by
@@ -499,6 +499,7 @@ S7::method(get_expected_category_statistic, MVBU_Object) <- function(
 #'   list/data-frame inputs are still supported. It can be removed once the
 #'   S7 interface is the only supported representation.
 #' @keywords internal
+#' @noRd
 .mvbu_resolve_values_for_categories <- function(values, categories = NULL) {
   if (is.null(values)) {
     return(NULL)

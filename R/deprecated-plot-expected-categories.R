@@ -10,13 +10,14 @@ NULL
 # deprecated
 # -----------------------------------------------------------------------------
 
-#' Deprecated Expected Categories Functions
+#' Deprecated: Plot functions
 #'
 #' @name deprecated-expected-categories-plots
 #' @rdname deprecated-functions
 #' @keywords internal
 NULL
 
+#' Deprecated: plot_expected_categories
 #' @rdname deprecated-functions
 #' @export
 plot_expected_categories <- function(model, ...) {
@@ -28,6 +29,7 @@ plot_expected_categories <- function(model, ...) {
   plot_categories(model, ...)
 }
 
+#' Deprecated: plot_expected_categories_contour
 #' @rdname deprecated-functions
 #' @export
 plot_expected_categories_contour <- function(model, ...) {
@@ -39,6 +41,7 @@ plot_expected_categories_contour <- function(model, ...) {
   plot_categories(model, aes = "contour", ...)
 }
 
+#' Deprecated: plot_expected_categories_density
 #' @rdname deprecated-functions
 #' @export
 plot_expected_categories_density <- function(model, ...) {
@@ -50,6 +53,7 @@ plot_expected_categories_density <- function(model, ...) {
   plot_categories(model, aes = "fill", ...)
 }
 
+#' Deprecated: plot_expected_categories_contour2D
 #' @rdname deprecated-functions
 #' @export
 plot_expected_categories_contour2D <- function(model, ...) {
@@ -61,6 +65,7 @@ plot_expected_categories_contour2D <- function(model, ...) {
   plot_categories(model, aes = "contour", ...)
 }
 
+#' Deprecated: plot_expected_categories_density1D
 #' @rdname deprecated-functions
 #' @export
 plot_expected_categories_density1D <- function(model, ...) {
@@ -72,6 +77,7 @@ plot_expected_categories_density1D <- function(model, ...) {
   plot_categories(model, aes = "fill", ...)
 }
 
+#' Deprecated: plot_expected_categories_density2D
 #' @rdname deprecated-functions
 #' @export
 plot_expected_categories_density2D <- function(model, ...) {
@@ -83,6 +89,7 @@ plot_expected_categories_density2D <- function(model, ...) {
   plot_categories(model, aes = "fill", ...)
 }
 
+#' Deprecated: plot_expected_categories.ideal_adaptor_stanfit
 #' @rdname deprecated-functions
 #' @export
 plot_expected_categories.ideal_adaptor_stanfit <- function(

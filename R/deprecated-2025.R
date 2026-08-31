@@ -1,4 +1,4 @@
-#' Legacy wrapper for get_transform_information.
+#' Deprecated: get_transform_information_from_stanfit
 #'
 #' @description Deprecated. Use \code{\link{get_transform_information}} instead.
 #' @export
@@ -13,7 +13,7 @@ get_transform_information_from_stanfit <- function(...) {
   get_transform_information(...)
 }
 
-#' Legacy wrapper for get_transform_function.
+#' Deprecated: get_transform_function_from_stanfit
 #'
 #' @description Deprecated. Use \code{\link{get_transform_function}} instead.
 #' @export
@@ -28,7 +28,7 @@ get_transform_function_from_stanfit <- function(...) {
   get_transform_function(...)
 }
 
-#' Legacy wrapper for get_untransform_function.
+#' Deprecated: get_untransform_function_from_stanfit
 #'
 #' @description Deprecated. Use \code{\link{get_untransform_function}} instead.
 #' @export
@@ -43,7 +43,7 @@ get_untransform_function_from_stanfit <- function(...) {
   get_untransform_function(...)
 }
 
-#' Legacy wrapper for get_staninput.
+#' Deprecated: get_staninput_from_stanfit
 #'
 #' @description Deprecated. Use \code{\link{get_staninput}} instead.
 #' @export
@@ -64,7 +64,7 @@ get_staninput_from_stanfit <- function(...) {
 # get_exposure_uss_from_stanfit <- get_exposure_category_uss.ideal_adaptor_stanfit
 # get_exposure_cov_from_stanfit <- get_exposure_category_cov.ideal_adaptor_stanfit
 
-#' Legacy wrapper for get_test_data.
+#' Deprecated: get_test_data_from_stanfit
 #'
 #' @description Deprecated. Use \code{\link{get_test_data}} instead.
 #' @export
@@ -88,7 +88,7 @@ get_test_data_from_stanfit <- function(...) {
 # get_expected_mu_from_stanfit <- get_expected_mu
 # get_expected_sigma_from_stanfit <- get_expected_sigma
 
-#' Legacy wrapper for get_draws.
+#' Deprecated: add_ibbu_stanfit_draw
 #'
 #' @description Deprecated. Use \code{\link{get_draws}} instead.
 #' @export
@@ -103,7 +103,7 @@ add_ibbu_stanfit_draw <- function(...) {
   get_draws(...)
 }
 
-#' Legacy wrapper for the old prior-belief inference workflow.
+#' Deprecated: infer_prior_beliefs
 #'
 #' @description Deprecated. Use \code{\link{infer_NIW_ideal_adaptor}} together with \code{\link{make_staninput_for_NIW_ideal_adaptor}} instead.
 #' @inheritParams make_staninput
@@ -184,7 +184,7 @@ infer_prior_beliefs <- function(
   fit_ideal_adaptor(staninput = staninput, stanmodel = stanmodel, silent = silent, verbose = verbose, ...)
 }
 
-#' Legacy wrapper for the older make_staninput interface.
+#' Deprecated: make_staninput_deprecated
 #'
 #' @description Deprecated. Use \code{\link{fit_ideal_adaptor}} or \code{\link{new_ideal_adaptor_staninput}} instead.
 #' @param center.observations Should the data be centered based on cues' means during exposure? Note that the cues' means

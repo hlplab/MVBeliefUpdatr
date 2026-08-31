@@ -26,7 +26,7 @@
 \alias{example_niw_ideal_adaptor}
 \alias{example_exemplar_model}
 \alias{example_model}
-\title{Example S7 objects built from the bundled Chodroff-Wilson data.}
+\title{Example S7 objects built from the bundled Chodroff-Wilson data}
 \usage{
 example_uvg_category_representation(n_cues = 1, category = "/b/")
 

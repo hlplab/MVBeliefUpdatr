@@ -3,7 +3,7 @@
 \name{get_expected_Sigma_from_S}
 \alias{get_expected_Sigma_from_S}
 \alias{get_S_from_expected_Sigma}
-\title{Get expected category covariance from Scatter matrix S and pseudocount nu}
+\title{Deprecated: get_expected_Sigma_from_S}
 \usage{
 get_expected_Sigma_from_S(S, nu)
 

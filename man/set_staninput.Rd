@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R
 \name{set_staninput}
 \alias{set_staninput}
-\title{Set the stored Stan input on an S7 fit or fit-input object.}
+\title{Set the stored Stan input on an S7 fit or fit-input object}
 \usage{
 set_staninput(x, staninput, ...)
 }
@@ -15,5 +15,5 @@ set_staninput(x, staninput, ...)
 The updated S7 object.
 }
 \description{
-Set the stored Stan input on an S7 fit or fit-input object.
+Set the stored Stan input on an S7 fit or fit-input object
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/NIX-NIW-basics.R
 \name{get_D}
 \alias{get_D}
-\title{Get dimensionality of cue representation from model (deprecated)}
+\title{Deprecated: get_D}
 \usage{
 get_D(x)
 }

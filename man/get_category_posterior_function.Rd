@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R
 \name{get_category_posterior_function}
 \alias{get_category_posterior_function}
-\title{Extract a category-posterior function from a cognitive model.}
+\title{Extract a category-posterior function from a cognitive model}
 \usage{
 get_category_posterior_function(x, noise_treatment, lapse_treatment, ...)
 }
@@ -17,5 +17,5 @@ get_category_posterior_function(x, noise_treatment, lapse_treatment, ...)
 A function that computes category posterior probabilities for one or more observations.
 }
 \description{
-Extract a category-posterior function from a cognitive model.
+Extract a category-posterior function from a cognitive model
 }

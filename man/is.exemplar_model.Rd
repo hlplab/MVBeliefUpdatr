@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-class-exemplar-model.R
 \name{is.exemplar_model}
 \alias{is.exemplar_model}
-\title{Is this an exemplar model?}
+\title{Deprecated: is.exemplar_model}
 \usage{
 is.exemplar_model(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL)
 }

@@ -3,7 +3,7 @@
 \name{get_posterior_predictive_from_NIW_belief}
 \alias{get_posterior_predictive_from_NIW_belief}
 \alias{get_posterior_predictives_from_NIW_beliefs}
-\title{Legacy wrapper for NIW posterior predictive.}
+\title{Deprecated: get_posterior_predictive_from_NIW_belief}
 \usage{
 get_posterior_predictive_from_NIW_belief(
   x,

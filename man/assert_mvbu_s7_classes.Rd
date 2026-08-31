@@ -4,9 +4,13 @@
 \alias{assert_MVBU_CategoryRepresentation}
 \alias{assert_MVBU_CategoryRepresentationTemplate}
 \alias{assert_MVBU_CognitiveModel}
+\alias{assert_MVBU_Stanfit}
 \alias{assert_IdealAdaptorStanfit}
+\alias{assert_MVBU_StanfitInput}
+\alias{assert_IdealAdaptorStanfitInput}
+\alias{assert_MVBU_Staninput}
 \alias{assert_IdealAdaptorStaninput}
-\title{Assert that an object inherits from one of the new S7 classes.}
+\title{Assert That an Object Inherits from an MVBeliefUpdatr S7 Class}
 \usage{
 assert_MVBU_CategoryRepresentation(x, msg = NULL)
 
@@ -14,7 +18,15 @@ assert_MVBU_CategoryRepresentationTemplate(x, msg = NULL)
 
 assert_MVBU_CognitiveModel(x, msg = NULL)
 
+assert_MVBU_Stanfit(x, msg = NULL)
+
 assert_IdealAdaptorStanfit(x, msg = NULL)
+
+assert_MVBU_StanfitInput(x, msg = NULL)
+
+assert_IdealAdaptorStanfitInput(x, msg = NULL)
+
+assert_MVBU_Staninput(x, msg = NULL)
 
 assert_IdealAdaptorStaninput(x, msg = NULL)
 }
@@ -24,10 +36,10 @@ assert_IdealAdaptorStaninput(x, msg = NULL)
 \item{msg}{Optional error message.}
 }
 \value{
-Invisibly TRUE if the assertion passes.
+Invisibly \code{TRUE} if the assertion passes.
 }
 \description{
 These helpers validate whether an object inherits from the
 S7 classes introduced for category representations, templates, cognitive
-models, model distributions, and ideal-adaptor Stanfit objects.
+models, Stan input objects, and Stan fit objects.
 }

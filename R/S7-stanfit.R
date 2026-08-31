@@ -6,24 +6,26 @@
 #' @importFrom S7 new_class new_object new_generic method class_name props
 NULL
 
-#' An S7 base class for Stan fit objects.
+#' An S7 base class for Stan fit objects
 #'
-#' @name MVBU-Stanfit-class
+#' @name MVBU_Stanfit
+#' @rdname MVBU_Stanfit
+#' @title MVBeliefUpdatr Stanfit Classes and Constructors
 #' @docType class
 #'
 #' @slot data A \code{data.frame} containing the data used to fit the model.
 #' @slot staninput A Stan input object containing the data handed to rstan through
-#'   \code{\link{make_staninput}}. The staninput object contains at least two components:
-#'   \code{transformed} and \code{untransformed}.
+#'   \code{\link{make_staninput}}. The staninput object contains at
+#'   least two components: \code{transformed} and \code{untransformed}.
 #' @slot stanvars A \code{\link{stanvars}} object or \code{NULL}.
 #' @slot backend The name of the backend used to fit the model (character).
 #' @slot save_pars Optional storage for saved parameter names.
 #' @slot stan_args Named list of additional control arguments that were passed
 #'   to the Stan backend directly. NOT YET USED
-#' @slot stanfit An object of class \code{\link[rstan:stanfit-class]{stanfit}}
-#'   containing the posterior draws.
+#' @slot stanfit An object of class
+#'   \code{\link[rstan:stanfit-class]{stanfit}} containing posterior draws.
 #' @slot basis An object that contains a small subset of the Stan data
-#'   created at fitting time, which is needed to process new data correctly. NOT YET USED
+#'   created at fitting time, needed to process new data. NOT YET USED
 #' @slot transform_information An object of type \code{\link{MVBU_TransformInformation}}.
 #' @slot criteria An empty \code{list} for adding model fit criteria
 #'   after estimation of the model. NOT YET USED
@@ -140,10 +142,12 @@ MVBU_Stanfit <- S7::new_class(
       }
       if (!(self@stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels))) {
         return(
-          paste(
-            "`stanfit` model_name is not recognized. `stanfit` has to be created by one of the accepted stanmodels:\n\t",
+          paste0(
+            "`stanfit` model_name is not recognized. `stanfit` has to be ",
+            "created by one of the accepted stanmodels:\n\t",
             paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),
-            "\n(you can get the name of your model from your_stanfit@model_name)."
+            "\n(you can get the name of your model from ",
+            "your_stanfit@model_name)."
           )
         )
       }
@@ -154,7 +158,9 @@ MVBU_Stanfit <- S7::new_class(
     if (!is.null(self@file) && !is.character(self@file)) {
       return("`file` must be NULL or a character")
     }
-    if (!is.null(self@transform_information) && !S7::S7_inherits(self@transform_information, MVBU_TransformInformation)) {
+    if (!is.null(self@transform_information) &&
+        !S7::S7_inherits(self@transform_information,
+                         MVBU_TransformInformation)) {
       return("`transform_information` must inherit from MVBU_TransformInformation")
     }
     if (!is.list(self@metadata)) {
@@ -164,10 +170,7 @@ MVBU_Stanfit <- S7::new_class(
   }
 )
 
-#' An S7 class for ideal-adaptor Stan fit objects.
-#'
-#' @name IdealAdaptorStanfit-class
-#' @docType class
+#' @rdname MVBU_Stanfit
 #' @export
 IdealAdaptorStanfit <- S7::new_class(
   "IdealAdaptorStanfit",
@@ -397,23 +400,25 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
 # Utilities ported from original file
 # -------------------------
 
-#' Build parameter names for a rectangular grid of indices.
+#' Build parameter names for a rectangular grid of indices
 #'
 #' @param prefix Character prefix for the parameter names.
 #' @param ... Arguments passed to \code{expand.grid}.
 #' @return A character vector of parameter names.
 #' @keywords internal
+#' @noRd
 .make_parnames <- function(prefix, ...) {
   combinations <- expand.grid(..., stringsAsFactors = FALSE)
   paste0(prefix, "[", apply(combinations, 1, paste0, collapse = ","), "]")
 }
 
-#' Rename fitted parameter names to their transformed equivalents.
+#' Rename fitted parameter names to their transformed equivalents
 #'
 #' @param x An ideal adaptor Stanfit object.
 #' @param include_original_pars Whether to preserve original parameter names.
 #' @return The updated Stanfit object.
 #' @keywords internal
+#' @noRd
 .rename_pars <- function(x, include_original_pars = FALSE) {
   assert_IdealAdaptorStanfit(x)
   stanfit <- get_stanfit(x)
@@ -439,12 +444,13 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
 # --- contains_draws temporary dispatch shim ---
 # NOTE: legacy S7/S4 mixed generic syntax is temporarily replaced to keep
 # package loadable during S7 migration and roxygen generation.
-#' Check whether a Stanfit object contains posterior draws.
+#' Check whether a Stanfit object contains posterior draws
 #'
 #' @param x Object to inspect.
 #' @param ... Additional arguments (currently unused).
 #' @return A logical scalar.
 #' @keywords internal
+#' @noRd
 .contains_draws <- function(x, ...) {
   if (S7::S7_inherits(x, IdealAdaptorStanfit)) {
     return(.contains_draws(x@stanfit))
@@ -458,11 +464,12 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
 }
 
 # --- file helpers ---
-#' Normalize a fit file path to include the .rds suffix.
+#' Normalize a fit file path to include the .rds suffix
 #'
 #' @param file File path or base name.
 #' @return A character scalar with the normalized file path.
 #' @keywords internal
+#' @noRd
 .check_stanfit_file <- function(file) {
   file <- .as_one_character(file)
   file_ending <- tolower(.get_matches("\\.[^\\.]+$", file))
@@ -472,15 +479,16 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
   file
 }
 
-#' Return the supported refit-policy options for cached Stanfits.
+#' Return the supported refit-policy options for cached Stanfits
 #'
 #' @return A character vector of supported options.
 #' @keywords internal
+#' @noRd
 .file_refit_options <- function() {
   c("never", "always", "on_change")
 }
 
-#' Check if cached \code{ideal_adaptor_stanfit} can be used.
+#' Check if cached \code{ideal_adaptor_stanfit} can be used
 #'
 #' Checks whether a given cached fit can be used without refitting when
 #' \code{file_refit = "on_change"} is used.
@@ -500,6 +508,7 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
 #' fit differs from the given data and code.
 #'
 #' @keywords internal
+#' @noRd
 .stanfit_needs_refit <- function(
   x,
   current_version = get_current_versions(),
@@ -572,11 +581,12 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
 }
 
 # read/write functions
-#' Read a cached ideal adaptor Stanfit from disk.
+#' Read a cached ideal adaptor Stanfit from disk
 #'
 #' @param file File path to the cached fit.
 #' @return A cached fit object or \code{NULL} if none is available.
 #' @keywords internal
+#' @noRd
 .read_ideal_adaptor_stanfit <- function(file) {
   file <- .check_stanfit_file(file)
   if (!file.exists(file)) {
@@ -596,20 +606,24 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
   .assert_true(
     !is.null(label_info) && is.list(label_info) &&
       !is.null(label_info$cue) && !is.null(label_info$category) && !is.null(label_info$group),
-    msg = "Object loaded from 'file' is missing label_information in metadata. Please refit the model."
+    msg = paste0(
+      "Object loaded from 'file' is missing label_information in metadata. ",
+      "Please refit the model."
+    )
   )
 
   x@file <- file
   x
 }
 
-#' Write a fitted ideal adaptor Stanfit object to disk.
+#' Write a fitted ideal adaptor Stanfit object to disk
 #'
 #' @param x The fitted object to save.
 #' @param file File path for the saved object.
 #' @param compress Compression level passed to \code{saveRDS}.
 #' @return The saved object, invisibly.
 #' @keywords internal
+#' @noRd
 .write_ideal_adaptor_stanfit <- function(x, file, compress = TRUE) {
   assert_IdealAdaptorStanfit(x)
   file <- .check_stanfit_file(file)

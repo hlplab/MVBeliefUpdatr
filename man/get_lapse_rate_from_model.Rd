@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-model.R
 \name{get_lapse_rate_from_model}
 \alias{get_lapse_rate_from_model}
-\title{Get lapse rate from model (deprecated)}
+\title{Deprecated: get_lapse_rate_from_model}
 \usage{
 get_lapse_rate_from_model(model)
 }

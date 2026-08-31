@@ -3,7 +3,7 @@
 \name{get_group_labels}
 \alias{get_group_labels}
 \alias{get_group_labels,MVBU_Stanfit-method}
-\title{Get group labels from a model, stanfit, or fit-input object.}
+\title{Get group labels from a model, stanfit, or fit-input object}
 \usage{
 get_group_labels(x, indices = NULL, ...)
 
@@ -21,7 +21,7 @@ get_group_labels(x, indices = NULL, include_prior = FALSE, ...)
 A character vector of group labels.
 }
 \description{
-Get group labels from a model, stanfit, or fit-input object.
+Get group labels from a model, stanfit, or fit-input object
 }
 \seealso{
 \code{\link{get_cue_labels}}, \code{\link{get_category_labels}}, \code{\link{get_labels}}

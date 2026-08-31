@@ -1,7 +1,7 @@
 get_expected_columns_for_NIW_belief <- function()
   c("category", "m", "S", "kappa", "nu")
 
-#' Is this a Normal-Inverse-Wishart (NIW) belief?
+#' Deprecated: is.NIW_belief
 #'
 #' Check whether \code{x} is a Normal-Inverse-Wishard (NIW) belief/set of NIW beliefs. An NIW belief describes a distribution of
 #' \link[=is.MVG]{multivariate Gaussian categories}.

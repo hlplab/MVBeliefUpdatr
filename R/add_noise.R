@@ -1,4 +1,4 @@
-#' Add Gaussian noise to cues in a data set.
+#' Add Gaussian noise to cues in a data set
 #'
 #' Adds Gaussian noise to cues in a data set.
 #'

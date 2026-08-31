@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-make-objects.R
 \name{make_NIW_ideal_adaptor_from_data}
 \alias{make_NIW_ideal_adaptor_from_data}
-\title{Make NIW ideal adaptor from data.}
+\title{Deprecated: make_NIW_ideal_adaptor_from_data}
 \usage{
 make_NIW_ideal_adaptor_from_data(
   data,

@@ -23,7 +23,7 @@
 \alias{as_mvg_ideal_observer}
 \alias{as_niw_ideal_adaptor}
 \alias{as_exemplar_model}
-\title{Coerce category representations, templates, and cognitive models between families.}
+\title{Coerce category representations, templates, and cognitive models between families}
 \usage{
 as_uvg_category_representation(x)
 

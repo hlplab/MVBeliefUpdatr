@@ -22,7 +22,7 @@ NULL
 #' - [MVBU_CategoryRepresentationTemplate] collects one or more
 #'   category-representation objects into a validated set used by a model.
 #'   This corresponds to the notion of "templates" in e.g.,
-#'   \cite{nearey-assmann07}.
+#'   \insertCite{nearey-assmann2007}{MVBeliefUpdatr}.
 #' - [MVBU_CognitiveModel] combines category-template structure with model-level
 #'   decision behavior (`decision_rule`, `category_prior`,
 #'   `lapse_rate`, `lapse_bias`).
@@ -370,17 +370,18 @@ MVBU_CognitiveModel <- S7::new_class(
   )
 )
 
-#' Normalize a model-family name to a canonical uppercase form.
+#' Normalize a model-family name to a canonical uppercase form
 #'
 #' @param family Model family name.
 #' @return Uppercase character string representing the family name.
 #' @keywords internal
+#' @noRd
 .normalize_family_name <- function(family) {
   .assert_non_NA_scalar_character(family)
   toupper(trimws(family))
 }
 
-#' Register a model family in the MVBU family registry.
+#' Register a model family in the MVBU family registry
 #'
 #' @param family Model family name.
 #' @param category_representation_class Name of the category-representation
@@ -388,6 +389,7 @@ MVBU_CognitiveModel <- S7::new_class(
 #' @param cognitive_model_class Name of the cognitive-model class.
 #' @return Invisibly TRUE.
 #' @keywords internal
+#' @noRd
 .register_model_family <- function(
   family,
   category_representation_class,
@@ -409,11 +411,12 @@ MVBU_CognitiveModel <- S7::new_class(
   sort(names(.mvbu_family_registry$families))
 }
 
-#' Get the registration information for a model family.
+#' Get the registration information for a model family
 #'
 #' @param family Model family name.
 #' @return A list with the registered class names.
 #' @keywords internal
+#' @noRd
 .get_model_family_registration <- function(family) {
   family <- .normalize_family_name(family)
   registration <- .mvbu_family_registry$families[[family]]
@@ -423,7 +426,7 @@ MVBU_CognitiveModel <- S7::new_class(
   registration
 }
 
-#' Register Stan-family extension hooks.
+#' Register Stan-family extension hooks
 #'
 #' @param family Model family name.
 #' @param stanfit_class Optional Stanfit class name.
@@ -433,6 +436,7 @@ MVBU_CognitiveModel <- S7::new_class(
 #'   rationale.
 #' @return Invisibly TRUE.
 #' @keywords internal
+#' @noRd
 .register_stan_family_hooks <- function(
   family,
   stanfit_class = NULL,
@@ -497,6 +501,7 @@ MVBU_CognitiveModel <- S7::new_class(
 #'
 #' @return A new instance of `MVBU_Object`.
 #' @keywords internal
+#' @noRd
 .new_mvbu_object <- function() {
   MVBU_Object()
 }
@@ -509,7 +514,7 @@ new_mvbu_object <- function() {
   .new_mvbu_object()
 }
 
-#' Register a model family in the MVBU family registry.
+#' Register a model family in the MVBU family registry
 #'
 #' @param family Model-family name.
 #' @param category_representation_class Name of the category-representation
@@ -529,7 +534,7 @@ register_model_family <- function(
   )
 }
 
-#' Get registered model families in MVBU.
+#' Get registered model families in MVBU
 #'
 #' @return Character vector of registered family names.
 #' @export
@@ -537,7 +542,7 @@ get_registered_model_families <- function() {
   .get_registered_model_families()
 }
 
-#' List registered model families in MVBU.
+#' List registered model families in MVBU
 #'
 #' @return Character vector of registered family names.
 #' @export
@@ -545,7 +550,7 @@ list_model_families <- function() {
   .get_registered_model_families()
 }
 
-#' Get the registration information for a model family.
+#' Get the registration information for a model family
 #'
 #' @param family Model-family name.
 #' @return A list with the registered class names.
@@ -554,7 +559,7 @@ get_model_family_registration <- function(family) {
   .get_model_family_registration(family)
 }
 
-#' Register Stan-family extension hooks.
+#' Register Stan-family extension hooks
 #'
 #' @param family Model-family name.
 #' @param stanfit_class Optional Stanfit class name.
@@ -580,7 +585,7 @@ register_stan_family_hooks <- function(
   )
 }
 
-#' Get Stan-family extension hooks.
+#' Get Stan-family extension hooks
 #'
 #' @param family Optional model-family name. If NULL, returns all hooks.
 #' @return A list with hook definitions.
@@ -593,8 +598,9 @@ get_stan_family_hooks <- function(family = NULL) {
 # Internal Shared Model and Representation Construction Helpers
 # -------------------------
 
-#' Normalize perceptual noise covariance matrix.
+#' Normalize perceptual noise covariance matrix
 #' @keywords internal
+#' @noRd
 .mvbu_normalize_sigma_noise <- function(Sigma_noise, cue_labels) {
   if (is.null(Sigma_noise)) {
     return(NULL)

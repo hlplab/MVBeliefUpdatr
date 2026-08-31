@@ -3,7 +3,7 @@
 \name{get_NIW_categorization_function}
 \alias{get_NIW_categorization_function}
 \alias{get_categorization_function_from_NIW_ideal_adaptor}
-\title{Get NIW categorization function (deprecated)}
+\title{Deprecated: get_NIW_categorization_function}
 \usage{
 get_NIW_categorization_function(
   ms,

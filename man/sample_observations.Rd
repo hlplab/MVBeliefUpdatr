@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-family-coercion.R
 \name{sample_observations}
 \alias{sample_observations}
-\title{Sample observations from an S7 category representation, template, or cognitive model.}
+\title{Sample observations from an S7 category representation, template, or cognitive model}
 \usage{
 sample_observations(x, Ns, randomize.order = TRUE)
 }
@@ -18,5 +18,5 @@ a vector with one element per category represented in \code{x}.}
 A tibble with one row per sampled observation, containing a \code{category} column and one column per cue.
 }
 \description{
-Sample observations from an S7 category representation, template, or cognitive model.
+Sample observations from an S7 category representation, template, or cognitive model
 }

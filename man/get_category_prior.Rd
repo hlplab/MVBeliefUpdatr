@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R, R/S7-core-methods.R
 \name{get_category_prior}
 \alias{get_category_prior}
-\title{Get category-prior values from a cognitive model or legacy input.}
+\title{Get category-prior values from a cognitive model}
 \usage{
 get_category_prior(x, categories, ...)
 

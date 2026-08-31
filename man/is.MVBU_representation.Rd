@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-class.R
 \name{is.MVBU_representation}
 \alias{is.MVBU_representation}
-\title{Is this an MVBeliefUpdatr representation?}
+\title{Deprecated: is.MVBU_representation}
 \usage{
 is.MVBU_representation(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL)
 }

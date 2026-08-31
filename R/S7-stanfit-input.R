@@ -9,18 +9,14 @@ NULL
 #' This function is used to specify control parameters for the `new_ideal_adaptor_stanfit_input()` function, and to provide
 #' reasonable defaults for any of the unspecified parameters.
 #'
-#' @param tau_scale A vector of scales for the Cauchy priors for each cue's standard deviations. Used in
-#'   both the prior for m_0 and the prior for S_0. (default: vector of `5`s, assuming that the data are standardized).
-#' @param L_omega_eta A vector of etas of the LKJ prior for the correlations of the covariance matrix of \code{mu_0}. Only used for
-#'   models with multivariate categories (e.g., NIW_ideal_adaptor). (default: `1`,
-#'   which corresponds to a uniform prior of correlation matrices)
-#' @param split_loglik_per_observation Optionally, split the log likelihood per observation. This can be helpful of leave-one-out
-#'   estimation in order to avoid high Pareto k, but it also makes the stored stanfit object much larger. (default: `0`)
-#' @param transform_type An affine transformation that can be applied to the data. See `type` in \code{\link{get_affine_transform}}
-#'    for details. (default: "standardize", which standardizes each cue separately)
+#' @param tau_scale A vector of scales for the Cauchy priors for each cue's
+#'   standard deviations.
+#' @param L_omega_eta LKJ prior parameter for correlation matrices.
+#' @param split_loglik_per_observation Split log likelihood per observation.
+#' @param transform_type Affine transformation type applied to the data.
 #'
-#' @return A list of control parameters that can be passed to \code{\link{new_ideal_adaptor_stanfit_input}}.
-#'
+#' @return A list of control parameters.
+#' @rdname MVBU_StanfitInput
 #' @export
 control_staninput <- function(
   tau_scale = 5,
@@ -36,9 +32,11 @@ control_staninput <- function(
   )
 }
 
-#' An S7 class for ideal-adaptor fit-input objects.
+#' An S7 Class for Ideal-Adaptor Fit-Input Objects
 #'
-#' @name IdealAdaptorStanfitInput-class
+#' @name MVBU_StanfitInput
+#' @rdname MVBU_StanfitInput
+#' @title MVBeliefUpdatr Stanfit Input Classes and Constructors
 #' @docType class
 #' @slot data A \code{data.frame} containing the input data.
 #' @slot staninput An \code{\link{IdealAdaptorStaninput}} object.
@@ -112,7 +110,7 @@ IdealAdaptorStanfitInput <- S7::new_class(
   }
 )
 
-#' Construct a streamlined ideal-adaptor Stanfit input object.
+#' Construct a streamlined ideal-adaptor Stanfit input object
 #'
 #' This function composes the exposure and test data in a compact form that can
 #' be used as input to the ideal-adaptor Stan models. It accepts empty exposure
@@ -474,7 +472,7 @@ new_ideal_adaptor_stanfit_input <- function(
   )
 }
 
-#' Prepare a data frame for Stan input construction.
+#' Prepare a data frame for Stan input construction
 #'
 #' Internal helper that retains the required columns, coerces cue values to
 #' numeric data, removes rows with missing values, and converts the required
@@ -532,7 +530,7 @@ new_ideal_adaptor_stanfit_input <- function(
   data
 }
 
-#' Align factor levels across exposure and test data.
+#' Align factor levels across exposure and test data
 #'
 #' Internal helper that ensures the grouping and category factors are aligned
 #' with the levels present in the reference data.
@@ -565,7 +563,7 @@ new_ideal_adaptor_stanfit_input <- function(
   data
 }
 
-#' Validate and transform prior likelihood information.
+#' Validate and transform prior likelihood information
 #'
 #' Internal helper that checks the dimensionality of supplied priors and
 #' applies the affine transform to the category means and covariance matrices.
@@ -620,7 +618,7 @@ new_ideal_adaptor_stanfit_input <- function(
   prior
 }
 
-#' Ensure scalar control values are passed to Stan as the correct R object type.
+#' Ensure scalar control values are passed to Stan as the correct R object type
 #'
 #' Internal helper that preserves vector semantics for single-cue models so
 #' Stan receives arrays rather than bare scalars for vector-valued data.
@@ -653,7 +651,7 @@ new_ideal_adaptor_stanfit_input <- function(
   matrix(as.numeric(inv_scale), nrow = n_cues, ncol = n_cues)
 }
 
-#' Build the combined exposure and test data frame.
+#' Build the combined exposure and test data frame
 #'
 #' Internal helper that stacks the processed exposure and test rows into a
 #' single data frame annotated with a phase column.
@@ -690,7 +688,7 @@ new_ideal_adaptor_stanfit_input <- function(
   data
 }
 
-#' Validate unique group mapping consistency.
+#' Validate unique group mapping consistency
 #'
 #' @param exposure Exposure data frame.
 #' @param group Grouping column name.
@@ -718,7 +716,7 @@ new_ideal_adaptor_stanfit_input <- function(
   }
 }
 
-#' Check Stan exposure statistics across unique groups.
+#' Check Stan exposure statistics across unique groups
 #'
 #' @param staninput_obj S7 Stan input object.
 #' @param exposure Exposure data frame.
@@ -887,7 +885,7 @@ new_ideal_adaptor_stanfit_input <- function(
   invisible(TRUE)
 }
 
-#' Simplify Stan exposure statistics to unique groups.
+#' Simplify Stan exposure statistics to unique groups
 #'
 #' @param staninput_obj S7 Stan input object.
 #' @param exposure Exposure data frame.

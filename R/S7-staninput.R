@@ -1,8 +1,9 @@
 #' @include S7-core-classes.R
 #' @include S7-transform-information.R
 
-#' @name MVBU-Staninput-class
-#' @title S7 base class for processed Stan input
+#' @name MVBU_Staninput
+#' @rdname MVBU_Staninput
+#' @title MVBeliefUpdatr Stan Input Classes and Constructors
 #' @docType class
 #' @slot values A named list containing the Stan input values.
 #' @export
@@ -27,10 +28,7 @@ MVBU_Staninput <- S7::new_class(
   }
 )
 
-#' S7 class for ideal-adaptor Stan input.
-#'
-#' @name IdealAdaptorStaninput-class
-#' @docType class
+#' @rdname MVBU_Staninput
 #' @export
 IdealAdaptorStaninput <- S7::new_class(
   "IdealAdaptorStaninput",
@@ -76,7 +74,7 @@ NIW_IdealAdaptorStaninput <- S7::new_class(
   }
 )
 
-#' Ensure scalar control values are passed to Stan as the correct R object type.
+#' Ensure scalar control values are passed to Stan as the correct R object type
 #'
 #' Internal helper that preserves vector semantics for single-cue models so
 #' Stan receives arrays rather than bare scalars for vector-valued data.
@@ -110,7 +108,7 @@ NIW_IdealAdaptorStaninput <- S7::new_class(
 }
 
 
-#' Build the typed Stan input object for the NIX ideal-adaptor model.
+#' Build the typed Stan input object for the NIX ideal-adaptor model
 #'
 #' Internal helper that summarizes exposure and test data and assembles the
 #' model-specific list expected by the NIX Stan program, then wraps it in an
@@ -219,7 +217,7 @@ new_nix_staninput <- function(
   NIX_IdealAdaptorStaninput(values = staninput)
 }
 
-#' Build the typed Stan input object for the NIW ideal-adaptor model.
+#' Build the typed Stan input object for the NIW ideal-adaptor model
 #'
 #' Internal helper that summarizes exposure and test data and assembles the
 #' model-specific list expected by the NIW Stan program, then wraps it in an
@@ -321,7 +319,7 @@ new_niw_staninput <- function(
   NIW_IdealAdaptorStaninput(values = staninput)
 }
 
-#' Build the typed Stan input object for the MNIX ideal-adaptor model.
+#' Build the typed Stan input object for the MNIX ideal-adaptor model
 #'
 #' Internal helper that summarizes exposure and test data and assembles the
 #' model-specific list expected by the MNIX Stan program, then wraps it in an
@@ -424,7 +422,7 @@ new_mnix_staninput <- function(
   MNIX_IdealAdaptorStaninput(values = staninput)
 }
 
-#' Summarize exposure data for Stanfit input construction.
+#' Summarize exposure data for Stanfit input construction
 #'
 #' Internal helper that computes exposure counts and category- or group-specific
 #' cue summaries needed by the model-specific Stan input builders.
@@ -507,7 +505,7 @@ new_mnix_staninput <- function(
   }
 }
 
-#' Summarize test data for Stanfit input construction.
+#' Summarize test data for Stanfit input construction
 #'
 #' Internal helper that aggregates the test responses into the counts and cue
 #' vectors expected by the Stan input builders.

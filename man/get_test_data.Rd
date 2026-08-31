@@ -3,7 +3,7 @@
 \name{get_test_data}
 \alias{get_test_data}
 \alias{get_test_data,MVBU_Stanfit-method}
-\title{Get the test data from an S7 stanfit or stanfit-input object.}
+\title{Get the test data from an S7 stanfit or stanfit-input object}
 \usage{
 get_test_data(x, ...)
 
@@ -29,7 +29,7 @@ is missing or empty, attempts to reconstruct test data from \code{@staninput}. (
 A tibble containing the test data.
 }
 \description{
-Get the test data from an S7 stanfit or stanfit-input object.
+Get the test data from an S7 stanfit or stanfit-input object
 }
 \seealso{
 \code{\link{get_data}}, \code{\link{get_exposure_data}}

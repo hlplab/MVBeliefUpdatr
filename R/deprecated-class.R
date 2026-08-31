@@ -1,7 +1,7 @@
 NULL
 
 #' @name get_class
-#' @title Deprecated class-dispatch helper
+#' @title Deprecated: get_class
 #' @description Deprecated. Use the S7-based validators and constructors instead.
 #' @keywords internal
 #' @export
@@ -37,7 +37,7 @@ get_class <- function(x) {
 }
 
 #' @name get_expected_columns_for_model
-#' @title Deprecated expected-column helper
+#' @title Deprecated: get_expected_columns_for_model
 #' @description Deprecated. Use the S7-based predicates and constructors instead.
 #' @keywords internal
 get_expected_columns_for_model <- function() {
@@ -57,7 +57,7 @@ get_expected_columns_for_model <- function() {
   split(seq_len(nrow(x)), group_key)
 }
 
-#' Is this an MVBeliefUpdatr representation?
+#' Deprecated: is.MVBU_representation
 #'
 #' Check whether \code{x} is recognized as an MVBeliefUpdatr category representation.
 #'
@@ -106,7 +106,7 @@ is.MVBU_representation <- function(x, group = NULL, verbose = F, tolerance = MVB
   TRUE
 }
 
-#' Is this an MVBeliefUpdatr model?
+#' Deprecated: is.MVBU_model
 #'
 #' Check whether \code{x} is a model with lapse rates, biases, priors, and perceptual noise.
 #'
@@ -205,7 +205,7 @@ is.MVBU_model <- function(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TO
   TRUE
 }
 
-#' Print MVBeliefUpdatr model
+#' Deprecated: print.MVBU_model
 #'
 #' Specifies reasonable defaults for the parameters to be summarized for the MVBeliefUpdatr_model object.
 #'

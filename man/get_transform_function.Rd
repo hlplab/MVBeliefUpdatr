@@ -5,7 +5,7 @@
 \alias{get_untransform_function}
 \alias{get_transform_function,any-method}
 \alias{get_untransform_function,any-method}
-\title{Get the transform/untransform function from an object.}
+\title{Get the transform/untransform function from an object}
 \usage{
 get_transform_function(x, ...)
 
@@ -26,5 +26,5 @@ get_untransform_function(x, ...)
 A function.
 }
 \description{
-Get the transform/untransform function from an object.
+Get the transform/untransform function from an object
 }

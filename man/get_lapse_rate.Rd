@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R, R/S7-core-methods.R
 \name{get_lapse_rate}
 \alias{get_lapse_rate}
-\title{Get lapse-rate values from a cognitive model or legacy input.}
+\title{Get lapse-rate values from a cognitive model}
 \usage{
 get_lapse_rate(x, ...)
 

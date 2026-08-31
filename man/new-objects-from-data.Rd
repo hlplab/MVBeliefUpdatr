@@ -5,7 +5,7 @@
 \alias{new_category_representation_from_data}
 \alias{new_category_representation_template_from_data}
 \alias{new_model_from_data}
-\title{Construct S7 Objects from Data by Family Type}
+\title{Construct S7 Category Representations, Templates, and Models from Data}
 \usage{
 new_category_representation_from_data(
   data,
@@ -26,33 +26,48 @@ new_category_representation_template_from_data(
 new_model_from_data(data, type, category = "category", cues, ...)
 }
 \arguments{
-\item{data}{A data frame or tibble containing category and cue
-observations. For category representations, data must contain
-observations from exactly one category.}
+\item{data}{A data frame containing observation cues and category labels.
+For individual category representations, data must contain observations
+from exactly one category.}
 
 \item{type}{Family type string: \code{"UVG"}, \code{"NIX"}, \code{"MUVG"}, \code{"MNIX"},
 \code{"MVG"}, \code{"NIW"}, or \code{"EXEMPLAR"}.}
 
-\item{category}{Name of the column in \code{data} containing category labels.
+\item{category}{Character string giving the category column name in \code{data}.
 Defaults to \code{"category"}.}
 
-\item{cues}{Column name(s) in \code{data} containing cue observations.}
+\item{cues}{Character vector of cue column names in \code{data}.}
 
-\item{...}{Additional arguments forwarded to the specific family
-constructor (e.g., \code{kappa}, \code{nu}, \code{c}, \code{decision_rule}, \code{Sigma_noise}).}
+\item{...}{Additional family-specific parameters (such as \code{kappa}, \code{nu},
+\code{m_0}, \code{S_0}, \code{c}, or \code{bandwidth}).}
+
+\item{category_prior}{Optional numeric vector of prior category
+probabilities summing to 1.}
+
+\item{decision_rule}{Categorization decision rule: \code{"sampling"} or
+\code{"argmax"}. Defaults to \code{"sampling"}.}
+
+\item{lapse_rate}{Numeric scalar lapse probability in \verb{[0, 1]}. Defaults
+to 0.}
+
+\item{lapse_bias}{Optional numeric vector of lapse category probabilities.}
+
+\item{Sigma_noise}{Optional perceptual noise covariance matrix.}
+
+\item{noise_treatment}{Treatment of noise: \code{"no_noise"}, \code{"sample"}, or
+\code{"marginalize"}.}
+
+\item{lapse_treatment}{Treatment of lapses: \code{"no_lapses"}, \code{"sample"}, or
+\code{"marginalize"}.}
 }
 \value{
-An S7 object of the requested type (category representation,
-template, or cognitive model).
+An S7 representation, template, or cognitive model object.
 }
 \description{
-Generic dynamic-dispatch constructors that create category representations,
-representation templates, or full cognitive models from empirical data by
-specifying the model family type string.
+Dynamic constructors that inspect the input \code{type} (or \code{family}) argument
+and dispatch to the appropriate family-specific constructor from data.
 }
 \seealso{
-\link{UVG_CategoryRepresentation}, \link{NIX_CategoryRepresentation},
-\link{MUVG_CategoryRepresentation}, \link{MNIX_CategoryRepresentation},
-\link{MVG_CategoryRepresentation}, \link{NIW_CategoryRepresentation},
-\link{Exemplar_CategoryRepresentation}
+\link{family-uvg}, \link{family-nix}, \link{family-muvg}, \link{family-mnix},
+\link{family-mvg}, \link{family-niw}, \link{family-exemplar}
 }

@@ -36,8 +36,7 @@
 + make 3d plot functions, too
 
 WAIT, do not go beyond this point: 
-
-
+ + legacy workflows outside of this package often assume that the relevant model objects are tibbles. They might thus use mutate, filter, and other dplyr methods on those objects. Let's add (and deprecated) dplyr method for the new S7 objects. for this, let's first write as_tibble methods that convert the S7 objects to tibbles that follow the legacy format (while throwing a deprecation message that also warns that the old legacy tibbles do not capture all information from the new S7 objects + points to a vignette that will illustrate the new workflow). we can then define mutate, transmute, filte, etc. methods for the S7 objects that first call as_tibble().
 
 + Known remaining failures (pre-existing, not caused by the above): MNIX representation validator (test-01, test-07), NIX stanfit validator (test-05), rstan/TBB toolchain dlopen (test-04-stanfit-input-compatibility), and `tests/functions-to-make-or-load-models.R` still calling `mutate()` on S7 models (test-14-get-info-stanfit, test-19-plot-stanfit).
 

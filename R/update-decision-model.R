@@ -116,7 +116,7 @@ update_model_decision_bias_by_one_observation <- function(
     ungroup()
 }
 
-#' Update model's decision biases based on exposure data.
+#' Update model's decision biases based on exposure data
 #'
 #' Returns the model with updated decision biases.
 #'

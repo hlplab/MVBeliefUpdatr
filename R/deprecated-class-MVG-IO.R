@@ -1,6 +1,6 @@
 get_expected_columns_for_MVG_ideal_observer <- function() append(get_expected_columns_for_MVG(), get_expected_columns_for_model())
 
-#' Is this an ideal observer with multivariate Gaussian (MVG) categories?
+#' Deprecated: is.MVG_ideal_observer
 #'
 #' Check whether \code{x} is an ideal observer with \link[=is.MVG]{multivariate Gaussian (MVG) categories}. Optionally, one can also check whether a lapse rate
 #' and lapse bias is part of the ideal observer.

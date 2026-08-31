@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-class.R
 \name{get_expected_columns_for_model}
 \alias{get_expected_columns_for_model}
-\title{Deprecated expected-column helper}
+\title{Deprecated: get_expected_columns_for_model}
 \usage{
 get_expected_columns_for_model()
 }

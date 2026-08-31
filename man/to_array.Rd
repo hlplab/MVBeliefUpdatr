@@ -2,7 +2,7 @@
 % Please edit documentation in R/to-array.R
 \name{to_array}
 \alias{to_array}
-\title{Convert atomic values or lists into arrays with explicit inner/outer dimensions.}
+\title{Convert atomic values or lists into arrays with explicit inner/outer dimensions}
 \usage{
 to_array(
   x,

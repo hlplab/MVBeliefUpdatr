@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R
 \name{set_stanfit}
 \alias{set_stanfit}
-\title{Set the stored Stan fit on an S7 fit object.}
+\title{Set the stored Stan fit on an S7 fit object}
 \usage{
 set_stanfit(x, stanfit, ...)
 }
@@ -15,5 +15,5 @@ set_stanfit(x, stanfit, ...)
 The updated S7 fit object.
 }
 \description{
-Set the stored Stan fit on an S7 fit object.
+Set the stored Stan fit on an S7 fit object
 }

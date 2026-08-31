@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-class-MVG-IO.R
 \name{is.MVG_ideal_observer}
 \alias{is.MVG_ideal_observer}
-\title{Is this an ideal observer with multivariate Gaussian (MVG) categories?}
+\title{Deprecated: is.MVG_ideal_observer}
 \usage{
 is.MVG_ideal_observer(
   x,

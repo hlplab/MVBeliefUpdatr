@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-get-info-from-NIW-IA-stanfit.R
 \name{get_params}
 \alias{get_params}
-\title{Get parameter names from stanfit (deprecated)}
+\title{Deprecated: get_params}
 \usage{
 get_params(fit, original_pars = FALSE)
 }

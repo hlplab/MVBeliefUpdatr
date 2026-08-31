@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-class.R
 \name{print.MVBU_model}
 \alias{print.MVBU_model}
-\title{Print MVBeliefUpdatr model}
+\title{Deprecated: print.MVBU_model}
 \usage{
 \method{print}{MVBU_model}(x, ...)
 }

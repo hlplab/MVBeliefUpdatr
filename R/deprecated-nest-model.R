@@ -7,7 +7,7 @@ NULL
 
 # deprecated ------------------------------------------------------------------
 
-#' Make a named vector (deprecated)
+#' Deprecated: make_named_vector
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -27,7 +27,7 @@ make_named_vector <- function(x, names) {
   return(x)
 }
 
-#' Make a named square matrix (deprecated)
+#' Deprecated: make_named_square_matrix
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -46,7 +46,7 @@ make_named_square_matrix <- function(x, names) {
   return(x)
 }
 
-#' Nest/unnest the cue information in a model (deprecated)
+#' Deprecated: nest_cue_information_in_model
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
@@ -94,6 +94,7 @@ nest_cue_information_in_model <- function(model) {
     dplyr::relocate(dplyr::starts_with(c("lapse_", "prior")), .after = !!rlang::sym(S))
 }
 
+#' Deprecated: unnest_cue_information_in_model
 #' @rdname nest_model
 #' @export
 unnest_cue_information_in_model <- function(model) {
