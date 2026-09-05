@@ -307,8 +307,8 @@ NULL
   pf <- if (S7::S7_inherits(x, MVBU_CognitiveModel)) {
     get_category_posterior_function(
       x,
-      noise_treatment = noise_treatment %||% x@noise_behavior$noise_treatment,
-      lapse_treatment = lapse_treatment %||% x@lapse_behavior$lapse_treatment
+      noise_treatment = noise_treatment %||% get_noise_treatment(x),
+      lapse_treatment = lapse_treatment %||% get_lapse_treatment(x)
     )
   } else {
     function(m, categories = NULL) posterior(x, m, categories = categories)
@@ -340,11 +340,11 @@ NULL
 
   # Effective lapse rate and bias depending on lapse_treatment
   effective_lapse_rate <- if (S7::S7_inherits(x, MVBU_CognitiveModel)) {
-    eff_lapse_trt <- lapse_treatment %||% x@lapse_behavior$lapse_treatment
+    eff_lapse_trt <- lapse_treatment %||% get_lapse_treatment(x)
     if (identical(eff_lapse_trt, "no_lapses")) 0 else x@lapse_behavior$lapse_rate
   } else 0
   effective_lapse_bias <- if (S7::S7_inherits(x, MVBU_CognitiveModel)) {
-    eff_lapse_trt <- lapse_treatment %||% x@lapse_behavior$lapse_treatment
+    eff_lapse_trt <- lapse_treatment %||% get_lapse_treatment(x)
     if (identical(eff_lapse_trt, "no_lapses")) NULL else x@lapse_behavior$lapse_bias
   } else NULL
 

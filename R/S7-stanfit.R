@@ -383,17 +383,25 @@ ideal_adaptor_stanfit <- function(
   )
 }
 
-#' Is this an NIW ideal adaptor stanfit?
+#' Deprecated: is.ideal_adaptor_stanfit
 #'
-#' Check whether \code{x} is of class \code{\link{ideal_adaptor_stanfit}}.
+#' @description
+#' `r lifecycle::badge("deprecated")`
+#' `is.ideal_adaptor_stanfit()` is deprecated; use
+#' `S7::S7_inherits(x, IdealAdaptorStanfit)` instead.
 #'
 #' @param x Object to be checked.
 #' @param verbose Currently being ignored.
 #' @return A logical.
+#' @rdname deprecated-functions
 #' @export
 is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
-  inherits(x, "ideal_adaptor_stanfit") ||
-    S7::S7_inherits(x, IdealAdaptorStanfit)
+  lifecycle::deprecate_warn(
+    "0.2.0",
+    "is.ideal_adaptor_stanfit()",
+    details = "Use S7::S7_inherits(x, IdealAdaptorStanfit) instead."
+  )
+  S7::S7_inherits(x, IdealAdaptorStanfit)
 }
 
 # -------------------------
@@ -441,193 +449,21 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
   set_stanfit(x, stanfit)
 }
 
-# --- contains_draws temporary dispatch shim ---
-# NOTE: legacy S7/S4 mixed generic syntax is temporarily replaced to keep
-# package loadable during S7 migration and roxygen generation.
-#' Check whether a Stanfit object contains posterior draws
+#' Check whether an IdealAdaptorStanfit or stanfit object contains posterior draws
 #'
-#' @param x Object to inspect.
-#' @param ... Additional arguments (currently unused).
-#' @return A logical scalar.
+#' Internal utility for verifying that a fitted Stanfit object has samples
+#' available for downstream operations (e.g., draws extraction, diagnostics).
+#'
+#' @param x An \code{IdealAdaptorStanfit} or S4 \code{stanfit} object.
+#' @return A logical scalar: `TRUE` if draws are present.
 #' @keywords internal
 #' @noRd
-.contains_draws <- function(x, ...) {
-  if (S7::S7_inherits(x, IdealAdaptorStanfit)) {
-    return(.contains_draws(x@stanfit))
+.contains_draws <- function(x) {
+  sf <- if (S7::S7_inherits(x, IdealAdaptorStanfit)) x@stanfit else x
+  if (inherits(sf, "stanfit")) {
+    length(sf@sim) > 0 && length(sf@sim$samples) > 0
+  } else {
+    FALSE
   }
-
-  if (inherits(x, "stanfit")) {
-    return(length(x@sim) > 0)
-  }
-
-  FALSE
 }
 
-# --- file helpers ---
-#' Normalize a fit file path to include the .rds suffix
-#'
-#' @param file File path or base name.
-#' @return A character scalar with the normalized file path.
-#' @keywords internal
-#' @noRd
-.check_stanfit_file <- function(file) {
-  file <- .as_one_character(file)
-  file_ending <- tolower(.get_matches("\\.[^\\.]+$", file))
-  if (!isTRUE(file_ending == ".rds")) {
-    file <- paste0(file, ".rds")
-  }
-  file
-}
-
-#' Return the supported refit-policy options for cached Stanfits
-#'
-#' @return A character vector of supported options.
-#' @keywords internal
-#' @noRd
-.file_refit_options <- function() {
-  c("never", "always", "on_change")
-}
-
-#' Check if cached \code{ideal_adaptor_stanfit} can be used
-#'
-#' Checks whether a given cached fit can be used without refitting when
-#' \code{file_refit = "on_change"} is used.
-#'
-#' @param x Old \code{ideal_adaptor_stanfit} object (e.g., loaded from file).
-#' @param current_version Current version of relevant packages. (default: will be automatically
-#'  obtained from current packages).
-#' @param data New data to check consistency of factor level names. (default: \code{NULL}))
-#' @param staninput New Stan data (result of a call to \code{\link{make_staninput}}).
-#'   Pass \code{NULL} to avoid this data check. (default: \code{NULL}))
-#' @param silent Logical. If \code{TRUE}, no messages will be given. (default: \code{FALSE}))
-#' @param verbose Logical. If \code{TRUE} detailed report of the differences
-#'   is printed to the console. (default: \code{FALSE}))
-#' @return A boolean indicating whether a refit is needed.
-#'
-#' @details
-#' fit differs from the given data and code.
-#'
-#' @keywords internal
-#' @noRd
-.stanfit_needs_refit <- function(
-  x,
-  current_version = get_current_versions(),
-  data = NULL, staninput = NULL,
-  silent = FALSE, verbose = FALSE
-) {
-  assert_IdealAdaptorStanfit(x)
-  silent <- .as_one_logical(silent)
-  verbose <- .as_one_logical(verbose)
-
-  if (!isTRUE(all.equal(x@version, current_version))) {
-    if (!silent) {
-      message("Version of MVBeliefUpdatr or rstan has changed (current version is", paste(purrr::map_chr(current_version, ~ paste(.x, collapse = ", ")), collapse = "; "), ").")
-      if (verbose) {
-        print(x@version)
-      }
-    }
-    return(TRUE)
-  }
-
-  if (!is.null(staninput)) {
-    assert_IdealAdaptorStaninput(staninput)
-    cached_staninput <- get_staninput(x)
-    staninput <- staninput@values
-  }
-  if (!is.null(data)) {
-    .assert_data_frame_like(data)
-    cached_data <- x@data
-  }
-
-  refit <- FALSE
-
-  if (!is.null(staninput)) {
-    staninput_equality <- all.equal(staninput, cached_staninput, check.attributes = FALSE, use.names = TRUE)
-    if (!isTRUE(staninput_equality)) {
-      if (!silent) {
-        message("The processed input for Stan has changed.")
-        if (verbose) print(staninput_equality)
-      }
-      refit <- TRUE
-    }
-  }
-  if (!is.null(data)) {
-    factor_level_message <- FALSE
-    for (var in names(cached_data)) {
-      if (.is_like_factor(cached_data[[var]])) {
-        cached_levels <- levels(factor(cached_data[[var]]))
-        new_levels <- levels(factor(data[[var]]))
-        if (!.is_equal(cached_levels, new_levels)) {
-          if (!silent) {
-            factor_level_message <- TRUE
-            if (verbose) {
-              cat(paste0(
-                "Names of factor levels in data have changed for variable '", var, "' ",
-                "with cached levels (", paste(as.character(cached_levels), collapse = ", "), ") ",
-                "but new levels (", paste(as.character(new_levels), collapse = ", "), ").\n"
-              ))
-            }
-          }
-          refit <- TRUE
-          if (!verbose) break
-        }
-      }
-    }
-    if (factor_level_message) message("Names of factor levels in data have changed.")
-  }
-
-  if (!silent && refit) message("Model needs to be refit.")
-  refit
-}
-
-# read/write functions
-#' Read a cached ideal adaptor Stanfit from disk
-#'
-#' @param file File path to the cached fit.
-#' @return A cached fit object or \code{NULL} if none is available.
-#' @keywords internal
-#' @noRd
-.read_ideal_adaptor_stanfit <- function(file) {
-  file <- .check_stanfit_file(file)
-  if (!file.exists(file)) {
-    return(NULL)
-  }
-  x <- suppressWarnings(try(readRDS(file), silent = TRUE))
-  if (.is_try_error(x)) {
-    return(NULL)
-  }
-
-  .assert_true(
-    S7::S7_inherits(x, IdealAdaptorStanfit),
-    msg = "Object loaded from 'file' is not an IdealAdaptorStanfit object. This indicates that it was fit with an outdated version of MVBeliefUpdatr and needs to be refit."
-  )
-
-  label_info <- try(x@metadata$label_information, silent = TRUE)
-  .assert_true(
-    !is.null(label_info) && is.list(label_info) &&
-      !is.null(label_info$cue) && !is.null(label_info$category) && !is.null(label_info$group),
-    msg = paste0(
-      "Object loaded from 'file' is missing label_information in metadata. ",
-      "Please refit the model."
-    )
-  )
-
-  x@file <- file
-  x
-}
-
-#' Write a fitted ideal adaptor Stanfit object to disk
-#'
-#' @param x The fitted object to save.
-#' @param file File path for the saved object.
-#' @param compress Compression level passed to \code{saveRDS}.
-#' @return The saved object, invisibly.
-#' @keywords internal
-#' @noRd
-.write_ideal_adaptor_stanfit <- function(x, file, compress = TRUE) {
-  assert_IdealAdaptorStanfit(x)
-  file <- .check_stanfit_file(file)
-  x@file <- file
-  saveRDS(x, file = file, compress = compress)
-  invisible(x)
-}

@@ -26,6 +26,28 @@ get_parameters <- S7::new_generic("get_parameters", "x", function(x, ...) S7::S7
 #' @export
 get_parameter_names <- S7::new_generic("get_parameter_names", "x", function(x, ...) S7::S7_dispatch())
 
+#' Aggregate representations, templates, or cognitive models
+#'
+#' @name aggregate
+#' @rdname aggregate_models
+#' @param x An S7 representation, template, cognitive model, or list of such objects.
+#'   When `x` is not an S7 object or list of S7 objects, dispatch falls back to
+#'   \code{\link[stats]{aggregate}}.
+#' @param ... Additional objects of the same class (for variadic usage) or arguments
+#'   passed to methods.
+#' @param weights Optional numeric vector of positive weights with the same length as
+#'   the number of objects being aggregated. If \code{NULL} (default), uniform weights
+#'   \code{1/N} are used.
+#' @return An aggregated S7 object of the same class.
+#' @export
+aggregate <- S7::new_generic("aggregate", "x", function(x, ...) {
+  if (S7::S7_inherits(x, MVBU_Object) || (is.list(x) && length(x) > 0 && S7::S7_inherits(x[[1]], MVBU_Object))) {
+    S7::S7_dispatch()
+  } else {
+    stats::aggregate(x, ...)
+  }
+})
+
 
 get_category_representations <- S7::new_generic("get_category_representations", "x")
 get_category_template <- S7::new_generic("get_category_template", "x")
@@ -179,6 +201,20 @@ get_lapse_bias <- S7::new_generic("get_lapse_bias", c("x", "categories"))
 #' @export
 get_noise <- S7::new_generic("get_noise", "x")
 
+#' Get lapse treatment from a cognitive model
+#'
+#' @param x A cognitive model or legacy input object.
+#' @return A character string representing the lapse treatment (`"no_lapses"`, `"sample"`, or `"marginalize"`).
+#' @export
+get_lapse_treatment <- S7::new_generic("get_lapse_treatment", "x")
+
+#' Get perceptual noise treatment from a cognitive model
+#'
+#' @param x A cognitive model or legacy input object.
+#' @return A character string representing the noise treatment (`"no_noise"`, `"sample"`, or `"marginalize"`).
+#' @export
+get_noise_treatment <- S7::new_generic("get_noise_treatment", "x")
+
 #' Get cue labels from a representation, template, or model
 #'
 #' @param x A representation, representation template, or cognitive model.
@@ -265,7 +301,12 @@ posterior <- S7::new_generic("posterior", c("x", "new_data", "categories"))
 #' @param x A cognitive model object.
 #' @param new_data A numeric matrix of observations or a list of matrices.
 #' @param decision_rule An optional override for the model's decision rule.
-#' @return A data frame with one row per observation and the winning category plus its probability.
+#' @return A data frame with one row per observation containing the assigned category
+#'   (column \code{category}) and the underlying posterior category probability \eqn{P(c \mid x)}
+#'   of that chosen category (column \code{probability}). Note that the \code{probability}
+#'   column reports the posterior probability \eqn{P(c \mid x)} from the model's posterior
+#'   belief distribution, rather than the response probability under the decision rule
+#'   (which for deterministic rules like 'criterion' would be 1 for the selected category).
 #' @export
 categorize <- S7::new_generic("categorize", c("x", "new_data", "decision_rule"))
 
@@ -333,9 +374,8 @@ get_expected_category_statistic <- S7::new_generic(
 
 #' Get MCMC prior or posterior draws from a stanfit object
 #'
-#' Get MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) as a tibble. Both wide
-#' (\code{wide = TRUE}) or long format (\code{wide = FALSE}) can be chosen as output. By default all post-warmup draws are
-#' returned, but if \code{summarize = TRUE} then just the mean of each parameter is returned instead.
+#' Get MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) as a tibble in long format.
+#' By default all post-warmup draws are returned, but if \code{summarize = TRUE} then just the mean of each parameter is returned instead.
 #'
 #' By default, the category means and scatter matrices are nested, rather than each of their elements being
 #' stored separately (\code{nest = TRUE}).
@@ -347,7 +387,6 @@ get_expected_category_statistic <- S7::new_generic(
 #' @param ndraws Number of random draws or \code{NULL} if all draws are to be returned. (default: \code{NULL})
 #' @param untransform_cues Should m_0 and S_0 be transformed back into the original cue space? (default: \code{FALSE})
 #' @param summarize Should the mean of the draws be returned instead of all of the draws? (default: \code{FALSE})
-#' @param wide Should all parameters be returned in one row? (default: \code{FALSE})
 #' @param nest Should the category mean vectors and scatter matrices be nested into one cell each, or should each element
 #'   be stored in a separate column? (default: \code{TRUE})
 #' @param seed Optional seed for reproducibility when sampling draws. (default: \code{NULL})
@@ -746,8 +785,4 @@ sample_observations <- S7::new_generic(
     S7::S7_dispatch()
   }
 )
-
-#' @rdname sample_observations
-#' @export
-sample_observation <- sample_observations
 

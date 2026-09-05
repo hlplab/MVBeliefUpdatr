@@ -116,13 +116,21 @@ S7::method(get_labels, IdealAdaptorStanfitInput) <- function(x, ...) {
   )
 }
 
-S7::method(get_model_type, IdealAdaptorStanfitInput) <- function(x) {
-  if (S7::S7_inherits(x@staninput, NIX_IdealAdaptorStaninput)) {
+S7::method(get_model_type, IdealAdaptorStaninput) <- function(x) {
+  if (S7::S7_inherits(x, NIX_IdealAdaptorStaninput)) {
     "NIX_ideal_adaptor"
-  } else if (S7::S7_inherits(x@staninput, MNIX_IdealAdaptorStaninput)) {
+  } else if (S7::S7_inherits(x, MNIX_IdealAdaptorStaninput)) {
     "MNIX_ideal_adaptor"
-  } else if (S7::S7_inherits(x@staninput, NIW_IdealAdaptorStaninput)) {
+  } else if (S7::S7_inherits(x, NIW_IdealAdaptorStaninput)) {
     "NIW_ideal_adaptor"
+  } else {
+    "ideal_adaptor"
+  }
+}
+
+S7::method(get_model_type, IdealAdaptorStanfitInput) <- function(x) {
+  if (!is.null(x@staninput)) {
+    get_model_type(x@staninput)
   } else {
     "ideal_adaptor"
   }

@@ -1655,7 +1655,6 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
     groups = groups,
     ndraws = ndraws,
     summarize = FALSE,
-    wide = FALSE,
     ...
   )
 
@@ -2205,12 +2204,12 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
 
     pf <- get_category_posterior_function(
       mod_proj,
-      noise_treatment = noise_treatment %||% mod_proj@noise_behavior$noise_treatment,
-      lapse_treatment = lapse_treatment %||% mod_proj@lapse_behavior$lapse_treatment
+      noise_treatment = noise_treatment %||% get_noise_treatment(mod_proj),
+      lapse_treatment = lapse_treatment %||% get_lapse_treatment(mod_proj)
     )
     post_raw <- pf(test_mat, categories = all_cats)
 
-    eff_l_trt <- lapse_treatment %||% mod_proj@lapse_behavior$lapse_treatment
+    eff_l_trt <- lapse_treatment %||% get_lapse_treatment(mod_proj)
     resp_mat <- .apply_decision_rule_to_posteriors(
       post_raw,
       decision_rule = decision_rule,
@@ -2321,12 +2320,12 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
 
     pf <- get_category_posterior_function(
       mod_proj,
-      noise_treatment = noise_treatment %||% mod_proj@noise_behavior$noise_treatment,
-      lapse_treatment = lapse_treatment %||% mod_proj@lapse_behavior$lapse_treatment
+      noise_treatment = noise_treatment %||% get_noise_treatment(mod_proj),
+      lapse_treatment = lapse_treatment %||% get_lapse_treatment(mod_proj)
     )
     post_raw <- pf(test_mat, categories = all_cats)
 
-    eff_l_trt <- lapse_treatment %||% mod_proj@lapse_behavior$lapse_treatment
+    eff_l_trt <- lapse_treatment %||% get_lapse_treatment(mod_proj)
     resp_mat <- .apply_decision_rule_to_posteriors(
       post_raw,
       decision_rule = decision_rule,
@@ -2551,7 +2550,6 @@ S7::method(plot_categorization_function, MVBU_Stanfit) <- function(
     groups = groups,
     ndraws = ndraws,
     summarize = FALSE,
-    wide = FALSE,
     ...
   )
 
@@ -3145,7 +3143,6 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
     groups = groups,
     ndraws = ndraws,
     summarize = FALSE,
-    wide = FALSE,
     ...
   )
   if (is.null(draws) || nrow(draws) == 0L) {
@@ -3447,7 +3444,6 @@ S7::method(plot_parameter_correlations, MVBU_Stanfit) <- function(
     categories = categories,
     ndraws = ndraws,
     summarize = FALSE,
-    wide = FALSE,
     ...
   )
 
@@ -3676,7 +3672,6 @@ S7::method(plot_parameters_pairwise, MVBU_Stanfit) <- function(
     categories = categories,
     ndraws = ndraws,
     summarize = FALSE,
-    wide = FALSE,
     ...
   )
 

@@ -57,7 +57,7 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor(
 )
 }
 \arguments{
-\item{x}{An MVG, NIW_belief, or exemplars legacy tibble.}
+\item{x}{An S7 \code{\link{MVBU_CategoryRepresentationTemplate}} object.}
 
 \item{group}{No longer supported; must be \code{NULL}.}
 

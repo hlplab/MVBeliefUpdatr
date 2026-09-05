@@ -1,3 +1,6 @@
+#' @include S7-stanfit-utils.R
+NULL
+
 #' Fit ideal adaptor
 #'
 #' Infers a prior and posterior distribution of ideal adaptors from the input data using Stan. Currently, three
@@ -70,7 +73,7 @@
 #'   Make sure to read the notes about the \code{Sigma_0} argument in the help page on \code{\link{make_staninput}}.
 #'   Use \code{methods(class = "ideal_adaptor_stanfit")} for an overview on available methods.
 #'
-#' @seealso \code{\link{is.ideal_adaptor_stanfit}} for information about ideal_adaptor_stanfit objects,
+#' @seealso \code{\link{IdealAdaptorStanfit}} for information about ideal adaptor stanfit objects,
 #' \code{\link{get_draws}} to draw samples from the stanfit.
 #'
 #' @importFrom rstan nlist
@@ -94,7 +97,7 @@ fit_ideal_adaptor <- function(
   # The "on_change" option needs more information
   file_refit <- match.arg(file_refit, .file_refit_options())
   if (!is.null(file) && file_refit == "never") {
-    fit <- .read_ideal_adaptor_stanfit(file)
+    fit <- read_stanfit(file)
     if (!is.null(fit)) {
       if (silent == 0) message("Loading existing model from file.")
       return(fit)
@@ -115,7 +118,7 @@ fit_ideal_adaptor <- function(
 
   # Check whether model actually needs to be refit
   if (!is.null(file) && file_refit == "on_change") {
-    x_from_file <- .read_ideal_adaptor_stanfit(file)
+    x_from_file <- read_stanfit(file)
     if (!is.null(x_from_file)) {
       needs_refit <-
         .stanfit_needs_refit(
@@ -219,7 +222,7 @@ fit_ideal_adaptor <- function(
   } else if (!silent) message("No sampling requested. Returning empty model object.")
 
   if (!is.null(fit) && !is.null(file)) {
-    fit <- .write_ideal_adaptor_stanfit(x = fit, file = file, compress = file_compress)
+    fit <- write_stanfit(x = fit, file = file, compress = file_compress)
   }
 
   return(fit)

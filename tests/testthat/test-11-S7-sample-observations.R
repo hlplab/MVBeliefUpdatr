@@ -64,9 +64,3 @@ test_that("sample_observations handles with_replacement FALSE and error guards o
     "Cannot sample 5 observations without replacement"
   )
 })
-
-test_that("sample_observation alias dispatches identically", {
-  repA <- new_uvg_category_representation("A", "F1", mu = 100, sigma2 = 25)
-  draws1 <- sample_observation(repA, n = 5L)
-  expect_equal(nrow(draws1), 5L)
-})

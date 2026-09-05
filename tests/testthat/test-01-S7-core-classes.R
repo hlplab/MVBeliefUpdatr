@@ -664,3 +664,29 @@ test_that("Stan-family extension hooks can be registered and retrieved", {
   expect_equal(uvg_hooks$stanfit_class, "UVG_Stanfit")
   expect_equal(uvg_hooks$bridge_methods, c("get_stanfit", "summary"))
 })
+
+test_that("get_model_type and get_representation_type work across core objects", {
+  rep_uvg <- example_category_representation("UVG")
+  rep_mvg <- example_category_representation("MVG")
+  rep_niw <- example_category_representation("NIW")
+  rep_nix <- example_category_representation("NIX")
+  rep_ex <- example_category_representation("EXEMPLAR")
+
+  expect_equal(get_representation_type(rep_uvg), "UVG")
+  expect_equal(get_representation_type(rep_mvg), "MVG")
+  expect_equal(get_representation_type(rep_niw), "NIW")
+  expect_equal(get_representation_type(rep_nix), "NIX")
+  expect_equal(get_representation_type(rep_ex), "EXEMPLAR")
+
+  tpl_mvg <- example_category_representation_template("MVG")
+  tpl_niw <- example_category_representation_template("NIW")
+  expect_equal(get_representation_type(tpl_mvg), "MVG")
+  expect_equal(get_representation_type(tpl_niw), "NIW")
+
+  mod_mvg <- example_mvg_ideal_observer()
+  mod_niw <- example_niw_ideal_adaptor()
+  mod_ex <- example_exemplar_model()
+  expect_equal(get_model_type(mod_mvg), "MVG")
+  expect_equal(get_model_type(mod_niw), "NIW")
+  expect_equal(get_model_type(mod_ex), "EXEMPLAR")
+})

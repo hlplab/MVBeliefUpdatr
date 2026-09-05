@@ -81,9 +81,9 @@ S7::method(print, MVBU_Object) <- function(x, ...) {
     )
   } else if (S7::S7_inherits(r, MUVG_CategoryRepresentation)) {
     sprintf(
-      "MUVG(mu = %s, sigma2 = %s)",
-      .format_param_inline(r@mu),
-      .format_param_inline(r@sigma2)
+      "MUVG(component_mu = %s, component_sigma2 = %s)",
+      .format_param_inline(r@component_mu),
+      .format_param_inline(r@component_sigma2)
     )
   } else if (S7::S7_inherits(r, NIW_CategoryRepresentation)) {
     sprintf(
@@ -95,11 +95,11 @@ S7::method(print, MVBU_Object) <- function(x, ...) {
     )
   } else if (S7::S7_inherits(r, MNIX_CategoryRepresentation)) {
     sprintf(
-      "MNIX(kappa = %s, nu = %s, m = %s, S = %s)",
-      .format_param_inline(r@kappa),
-      .format_param_inline(r@nu),
-      .format_param_inline(r@m),
-      .format_param_inline(r@S)
+      "MNIX(component_kappa = %s, component_nu = %s, component_m = %s, component_sigma2 = %s)",
+      .format_param_inline(r@component_kappa),
+      .format_param_inline(r@component_nu),
+      .format_param_inline(r@component_m),
+      .format_param_inline(r@component_sigma2)
     )
   } else if (S7::S7_inherits(r, Exemplar_CategoryRepresentation)) {
     ex <- r@exemplars
@@ -128,12 +128,18 @@ S7::method(print, MVBU_CategoryRepresentation) <- function(x, ...) {
   cat("<", cls, ">\n", sep = "")
   cats <- get_category_labels(x)
   cues <- get_cue_labels(x)
-  cat("  Category: ", paste(cats, collapse = ", "), "\n", sep = "")
-  cat("  Cues (", length(cues), "): ", paste(cues, collapse = ", "), "\n", sep = "")
-
+  if (length(cats) > 0) {
+    cat("  Category: ", paste(cats, collapse = ", "), "\n", sep = "")
+  }
+  if (length(cues) > 0) {
+    cat("  Cues (", length(cues), "): ", paste(cues, collapse = ", "), "\n", sep = "")
+  }
   if (S7::S7_inherits(x, UVG_CategoryRepresentation)) {
     cat("  mu: ", format(x@mu, digits = 4), "\n", sep = "")
     cat("  sigma2: ", format(x@sigma2, digits = 4), "\n", sep = "")
+  } else if (S7::S7_inherits(x, MUVG_CategoryRepresentation)) {
+    cat("  component_mu: c(", paste(format(x@component_mu, digits = 4), collapse = ", "), ")\n", sep = "")
+    cat("  component_sigma2: c(", paste(format(x@component_sigma2, digits = 4), collapse = ", "), ")\n", sep = "")
   } else if (S7::S7_inherits(x, NIX_CategoryRepresentation)) {
     cat("  kappa: ", format(x@kappa, digits = 4), "\n", sep = "")
     cat("  nu: ", format(x@nu, digits = 4), "\n", sep = "")
@@ -166,26 +172,10 @@ S7::method(print, MVBU_CategoryRepresentation) <- function(x, ...) {
       print(x@S)
     }
   } else if (S7::S7_inherits(x, MNIX_CategoryRepresentation)) {
-    if (length(x@kappa) == 1L) {
-      cat("  kappa: ", format(x@kappa, digits = 4), "\n", sep = "")
-    } else {
-      cat("  kappa: c(", paste(format(x@kappa, digits = 4), collapse = ", "), ")\n", sep = "")
-    }
-    if (length(x@nu) == 1L) {
-      cat("  nu: ", format(x@nu, digits = 4), "\n", sep = "")
-    } else {
-      cat("  nu: c(", paste(format(x@nu, digits = 4), collapse = ", "), ")\n", sep = "")
-    }
-    if (length(x@m) == 1L) {
-      cat("  m: ", format(x@m, digits = 4), "\n", sep = "")
-    } else {
-      cat("  m: c(", paste(format(x@m, digits = 4), collapse = ", "), ")\n", sep = "")
-    }
-    if (length(x@S) == 1L) {
-      cat("  S: ", format(as.numeric(x@S), digits = 4), "\n", sep = "")
-    } else {
-      cat("  S: c(", paste(format(x@S, digits = 4), collapse = ", "), ")\n", sep = "")
-    }
+    cat("  component_kappa: c(", paste(format(x@component_kappa, digits = 4), collapse = ", "), ")\n", sep = "")
+    cat("  component_nu: c(", paste(format(x@component_nu, digits = 4), collapse = ", "), ")\n", sep = "")
+    cat("  component_m: c(", paste(format(x@component_m, digits = 4), collapse = ", "), ")\n", sep = "")
+    cat("  component_sigma2: c(", paste(format(x@component_sigma2, digits = 4), collapse = ", "), ")\n", sep = "")
   } else if (S7::S7_inherits(x, Exemplar_CategoryRepresentation)) {
     ex <- x@exemplars
     n_pts <- if (is.null(ex)) 0L else nrow(ex)
@@ -239,10 +229,10 @@ S7::method(print, MVBU_CognitiveModel) <- function(x, ...) {
   }
 
   lapse_r <- get_lapse_rate(x)
-  lapse_trt <- x@lapse_behavior$lapse_treatment %||% "no_lapses"
+  lapse_trt <- get_lapse_treatment(x)
   cat("  Lapse rate: ", format(lapse_r, digits = 3), " (treatment: ", lapse_trt, ")\n", sep = "")
 
-  noise_trt <- x@noise_behavior$noise_treatment %||% "no_noise"
+  noise_trt <- get_noise_treatment(x)
   if (is.null(x@noise_behavior$Sigma_noise)) {
     cat("  Perceptual noise: none (treatment: ", noise_trt, ")\n", sep = "")
   } else {
@@ -298,16 +288,17 @@ S7::method(get_category_representations, MVBU_CategoryRepresentationTemplate) <-
 
 # Helper to map S7 class name to model family
 .get_family_from_class_name <- function(class_name) {
-  families <- .list_model_families()
+  class_name <- sub("^.*::", "", class_name)
+  families <- list_model_families()
   for (fam in families) {
-    reg <- .get_model_family_entry(fam)
+    reg <- .get_model_family_registration(fam)
     if (class_name %in% c(reg$category_representation, reg$cognitive_model)) {
       return(fam)
     }
   }
   clean_name <- gsub(
     paste0(
-      "_(IdealObserver|IdealAdaptor|IdealAdaptorStanfit|",
+      "_(IdealObserver|IdealAdaptor|IdealAdaptorStanfit|IdealAdaptorStaninput|",
       "CategoryRepresentation|CategoryRepresentationTemplate|Model)$"
     ),
     "",
@@ -674,6 +665,50 @@ S7::method(get_noise, S7::class_any) <- function(x) {
   NULL
 }
 
+S7::method(get_lapse_treatment, MVBU_Object) <- function(x) {
+  .mvbu_not_implemented("get_lapse_treatment", class(x)[1])
+}
+
+#' @name get_lapse_treatment
+#' @title Get lapse treatment from a cognitive model
+#' @description Extract lapse treatment from a cognitive model.
+#' @keywords internal
+S7::method(get_lapse_treatment, MVBU_CognitiveModel) <- function(x) {
+  x@lapse_behavior$lapse_treatment %||% "no_lapses"
+}
+
+S7::method(get_lapse_treatment, S7::class_any) <- function(x) {
+  if (is.list(x) && !is.null(x[["lapse_treatment"]])) {
+    return(as.character(x[["lapse_treatment"]][1]))
+  }
+  if (is.data.frame(x) && "lapse_treatment" %in% names(x)) {
+    return(as.character(x[["lapse_treatment"]][1]))
+  }
+  "no_lapses"
+}
+
+S7::method(get_noise_treatment, MVBU_Object) <- function(x) {
+  .mvbu_not_implemented("get_noise_treatment", class(x)[1])
+}
+
+#' @name get_noise_treatment
+#' @title Get perceptual noise treatment from a cognitive model
+#' @description Extract perceptual noise treatment from a cognitive model.
+#' @keywords internal
+S7::method(get_noise_treatment, MVBU_CognitiveModel) <- function(x) {
+  x@noise_behavior$noise_treatment %||% "no_noise"
+}
+
+S7::method(get_noise_treatment, S7::class_any) <- function(x) {
+  if (is.list(x) && !is.null(x[["noise_treatment"]])) {
+    return(as.character(x[["noise_treatment"]][1]))
+  }
+  if (is.data.frame(x) && "noise_treatment" %in% names(x)) {
+    return(as.character(x[["noise_treatment"]][1]))
+  }
+  "no_noise"
+}
+
 # -------------------------
 # Label accessors
 # -------------------------
@@ -910,18 +945,18 @@ S7::method(likelihood, list(MVBU_CognitiveModel, S7::class_any, S7::class_any)) 
     x, new_data,
     categories = categories,
     log = FALSE,
-    noise_treatment = x@noise_behavior$noise_treatment,
+    noise_treatment = get_noise_treatment(x),
     Sigma_noise = x@noise_behavior$Sigma_noise
   )
 }
 
 S7::method(get_category_posterior_function, list(MVBU_CognitiveModel, S7::class_any, S7::class_any)) <- function(x, noise_treatment, lapse_treatment) {
   if (missing(noise_treatment) && missing(lapse_treatment)) {
-    noise_treatment <- x@noise_behavior$noise_treatment
-    lapse_treatment <- x@lapse_behavior$lapse_treatment
+    noise_treatment <- get_noise_treatment(x)
+    lapse_treatment <- get_lapse_treatment(x)
   } else {
-    noise_treatment <- if (missing(noise_treatment) || is.null(noise_treatment)) x@noise_behavior$noise_treatment else as.character(noise_treatment)
-    lapse_treatment <- if (missing(lapse_treatment) || is.null(lapse_treatment)) x@lapse_behavior$lapse_treatment else as.character(lapse_treatment)
+    noise_treatment <- if (missing(noise_treatment) || is.null(noise_treatment)) get_noise_treatment(x) else as.character(noise_treatment)
+    lapse_treatment <- if (missing(lapse_treatment) || is.null(lapse_treatment)) get_lapse_treatment(x) else as.character(lapse_treatment)
   }
   key <- paste(noise_treatment, lapse_treatment, sep = "__")
 

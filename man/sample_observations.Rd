@@ -2,18 +2,9 @@
 % Please edit documentation in R/S7-generics.R
 \name{sample_observations}
 \alias{sample_observations}
-\alias{sample_observation}
 \title{Sample observations from category representations, templates, or cognitive models}
 \usage{
 sample_observations(
-  x,
-  n = 1L,
-  with_replacement = TRUE,
-  randomize_order = TRUE,
-  ...
-)
-
-sample_observation(
   x,
   n = 1L,
   with_replacement = TRUE,

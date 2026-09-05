@@ -1,0 +1,674 @@
+---
+title: "S7 Class Architecture, Constructors, and Workflows"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{S7 Class Architecture, Constructors, and Workflows}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+
+if (requireNamespace("pkgload", quietly = TRUE)) {
+  pkgload::load_all("..", quiet = TRUE)
+}
+```
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var tocLinks = document.querySelectorAll('#TOC a[href^="#"]');
+  tocLinks.forEach(function(anchor) {
+    anchor.addEventListener('click', function(e) {
+      var href = this.getAttribute('href');
+      var targetId = href.substring(1);
+      var targetEl = document.getElementById(targetId) || 
+                     document.getElementById('id_' + targetId) || 
+                     document.querySelector('[name="' + targetId + '"]');
+      if (targetEl) {
+        e.preventDefault();
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (history.pushState) {
+          history.pushState(null, null, href);
+        }
+      }
+    });
+  });
+});
+</script>
+
+# 1. Introduction and The S7 Object Model {#introduction-and-s7-object-model}
+
+The **MVBeliefUpdatr** package provides computational cognitive models of category representation, multidimensional perceptual decision making, and Bayesian belief updating. Version 1.0 of the package redesigns the underlying architecture around R's new **S7** object-oriented system (PEP / R Consortium object system).
+
+In previous versions, category distributions and cognitive models were represented as nested tibbles with list-columns of vectors and matrices. While accessible for simple data-wrangling pipelines, weakly typed tabular models suffered from several limitations:
+
+- Parameter matrices and dimensions were validated only at the point of computation, making errors hard to trace.
+- Model metadata, cue labels, and decision rules were loosely coupled with distributional parameters.
+- Method dispatch was split across ad-hoc S3 methods, legacy S4 classes, and family-specific wrapper functions.
+
+The **S7 class architecture** replaces this with strongly typed, validated, and composable objects:
+
+1. **Category Representations** (`MVBU_CategoryRepresentation`): Distributional beliefs about a single category in continuous multidimensional cue space (e.g., Gaussian [UVG/MVG/MUVG], Normal-Inverse-Wishart [NIW], Normal-Inverse-$\chi^2$ [NIX/MNIX], or exemplar sets).
+2. **Category Representation Templates** (`MVBU_CategoryRepresentationTemplate`): Sets of category representations sharing a common cue space and coordinate system.
+3. **Cognitive Decision Models** (`MVBU_CognitiveModel`): Complete observer or adaptor models composing a category template with category priors $P(c)$, decision rules (e.g., criterion, proportional, sampling), internal perceptual noise, and lapse behaviors.
+4. **Stan Input & Fit Objects** (`MVBU_Staninput`, `MVBU_Stanfit`): Typed data bundles and Bayesian posterior fits for incremental belief-updating models.
+
+For visualization workflows corresponding to these objects, see the companion vignette:
+[Visualizing Categories, Categorization Functions, and Belief Updating](visualizing-models-and-categories.html).
+
+For legacy code compatibility, see:
+[Backward Compatibility: Working with Old Code](backward-compatibility-working-with-old-code.html).
+
+```{r setup}
+library(MVBeliefUpdatr)
+library(tibble)
+library(dplyr)
+```
+
+---
+
+# 2. Quick Exploration with `example_*()` Functions {#quick-exploration-with-example-functions}
+
+To immediately inspect the structure, labels, and parameters of any class in the package without manually assembling matrices, **MVBeliefUpdatr** provides a suite of lightweight `example_*()` constructors.
+
+## Example Category Representations
+
+Single-category representations can be instantiated for any supported family:
+
+```{r example_representations}
+# Multivariate Gaussian representation (2D: F1, F2)
+rep_mvg <- example_category_representation("MVG")
+rep_mvg
+
+# Multivariate Univariate Gaussian representation (2D: independent variances)
+rep_muvg <- example_category_representation("MUVG")
+rep_muvg
+
+# Normal-Inverse-Wishart belief distribution (2D)
+rep_niw <- example_category_representation("NIW")
+rep_niw
+
+# Multivariate Normal-Inverse-Chi-Squared belief distribution (2D)
+rep_mnix <- example_category_representation("MNIX")
+rep_mnix
+
+# Non-parametric Exemplar representation (2D)
+rep_ex <- example_category_representation("EXEMPLAR")
+rep_ex
+```
+
+Family-specific example helpers are also available, such as `example_uvg_category_representation()`, `example_mvg_category_representation()`, `example_muvg_category_representation()`, `example_niw_category_representation()`, `example_mnix_category_representation()`, and `example_exemplar_category_representation()`.
+
+## Example Category Representation Templates
+
+Templates bind multiple category representations together into a shared space:
+
+```{r example_templates}
+# 2-category vowel template (/i/, /u/)
+tpl_mvg <- example_category_representation_template("MVG")
+tpl_mvg
+
+# Inspect the categories and cues in the template
+get_category_labels(tpl_mvg)
+get_cue_labels(tpl_mvg)
+```
+
+## Example Cognitive Decision Models
+
+Full decision models can be generated directly across all supported model families:
+
+```{r example_models}
+# Ideal Observer with MVG category representations
+mod_observer <- example_mvg_ideal_observer()
+mod_observer
+
+# Ideal Observer with MUVG category representations
+mod_muvg <- example_muvg_ideal_observer()
+mod_muvg
+
+# Ideal Adaptor with NIW category representations
+mod_adaptor <- example_niw_ideal_adaptor()
+mod_adaptor
+
+# Ideal Adaptor with MNIX category representations
+mod_mnix <- example_mnix_ideal_adaptor()
+mod_mnix
+
+# Exemplar decision model
+mod_exemplar <- example_exemplar_model()
+mod_exemplar
+```
+
+## Example Fitted Stan Models
+
+Fitted incremental belief-updating models (`MVBU_Stanfit`) can be accessed through `get_example_stanfit()`:
+
+```{r example_stanfit}
+# Load cached 1-cue NIW ideal adaptor stanfit
+fit_1cue <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", file_refit = "never")
+fit_1cue
+```
+
+---
+
+# 3. Object Hierarchy and Constructors {#object-hierarchy-and-constructors}
+
+The class system is organized into three hierarchical levels:
+
+```
+MVBU_Object
+  ├── MVBU_CategoryRepresentation
+  │     ├── UVG_CategoryRepresentation
+  │     ├── MVG_CategoryRepresentation
+  │     ├── MUVG_CategoryRepresentation
+  │     ├── NIW_CategoryRepresentation
+  │     ├── NIX_CategoryRepresentation
+  │     ├── MNIX_CategoryRepresentation
+  │     └── Exemplar_CategoryRepresentation
+  ├── MVBU_CategoryRepresentationTemplate
+  ├── MVBU_CognitiveModel
+  │     ├── MVG_IdealObserver
+  │     ├── MUVG_IdealObserver
+  │     ├── NIW_IdealAdaptor
+  │     ├── MNIX_IdealAdaptor
+  │     └── Exemplar_Model
+  ├── MVBU_Staninput
+  │     └── IdealAdaptorStaninput
+  │           ├── NIX_IdealAdaptorStaninput
+  │           └── NIW_IdealAdaptorStaninput
+  └── MVBU_Stanfit
+        └── IdealAdaptorStanfit
+              ├── NIX_IdealAdaptorStanfit
+              └── NIW_IdealAdaptorStanfit
+```
+
+## Level 1: Category Representations {#level-1-category-representations}
+
+### Low-Level Bare Constructors
+
+When category parameters are already known, representations can be constructed by passing numeric vectors and matrices directly:
+
+```{r bare_representation_constructors}
+# Multivariate Gaussian: mean vector mu and covariance matrix Sigma
+mu_b <- c(F1 = 350, F2 = 1100)
+Sigma_b <- matrix(c(2500, 500, 500, 3600), nrow = 2, ncol = 2,
+                  dimnames = list(names(mu_b), names(mu_b)))
+
+rep_b <- new_mvg_category_representation(
+  category_labels = "/b/",
+  cue_labels = c("F1", "F2"),
+  mu = mu_b,
+  Sigma = Sigma_b
+)
+rep_b
+
+# MUVG: Multivariate Univariate Gaussian (diagonal variances sigma2)
+rep_muvg_custom <- new_muvg_category_representation(
+  category_labels = "/b/",
+  cue_labels = c("F1", "F2"),
+  component_mu = mu_b,
+  component_sigma2 = c(F1 = 2500, F2 = 3600)
+)
+rep_muvg_custom
+```
+
+For conjugate prior representations like NIW or MNIX, specify prior parameter moments:
+
+```{r bare_niw_constructor}
+rep_niw_custom <- new_niw_category_representation(
+  category_labels = "/b/",
+  cue_labels = c("F1", "F2"),
+  m = c(F1 = 350, F2 = 1100),
+  S = matrix(c(25000, 5000, 5000, 36000), nrow = 2, ncol = 2),
+  kappa = 10,
+  nu = 12
+)
+rep_niw_custom
+
+# MNIX (Multivariate Normal-Inverse-Chi-Squared for independent cues)
+rep_mnix_custom <- new_mnix_category_representation(
+  category_labels = "/b/",
+  cue_labels = c("F1", "F2"),
+  component_m = c(F1 = 350, F2 = 1100),
+  component_sigma2 = c(F1 = 2500, F2 = 3600),
+  component_kappa = c(F1 = 10, F2 = 10),
+  component_nu = c(F1 = 12, F2 = 12)
+)
+rep_mnix_custom
+```
+
+### Empirical Constructors from Data
+
+When starting from empirical observations, use `new_category_representation_from_data()` (or family-specific constructors like `new_mvg_category_representation_from_data()`):
+
+```{r data_representation_constructors}
+# Sample acoustic data for a category
+set.seed(42)
+obs_data <- data.frame(
+  F1 = rnorm(50, mean = 400, sd = 40),
+  F2 = rnorm(50, mean = 1800, sd = 120),
+  vowel = "ih"
+)
+
+# Estimate MVG representation from observations
+rep_from_data <- new_mvg_category_representation_from_data(
+  data = obs_data,
+  category = "vowel",
+  cues = c("F1", "F2")
+)
+rep_from_data
+```
+
+## Level 2: Category Representation Templates {#level-2-category-representation-templates}
+
+Templates aggregate multiple category representations into a unified inventory.
+
+### Manual Template Construction
+
+```{r manual_template}
+mu_d <- c(F1 = 450, F2 = 1700)
+Sigma_d <- matrix(c(3000, 200, 200, 4000), nrow = 2, ncol = 2,
+                  dimnames = list(names(mu_d), names(mu_d)))
+rep_d <- new_mvg_category_representation(
+  category_labels = "/d/",
+  cue_labels = c("F1", "F2"),
+  mu = mu_d,
+  Sigma = Sigma_d
+)
+
+# Combine representations into a template
+tpl_custom <- new_category_representation_template(
+  representations = list(rep_b, rep_d)
+)
+tpl_custom
+```
+
+### Empirical Template from Data
+
+```{r empirical_template}
+# Multi-category training data
+train_data <- data.frame(
+  F1 = c(rnorm(40, 300, 30), rnorm(40, 600, 40)),
+  F2 = c(rnorm(40, 2200, 80), rnorm(40, 1100, 70)),
+  category = rep(c("/i/", "/u/"), each = 40)
+)
+
+tpl_empirical <- new_mvg_category_representation_template_from_data(
+  data = train_data,
+  category = "category",
+  cues = c("F1", "F2")
+)
+tpl_empirical
+```
+
+## Level 3: Cognitive Decision Models {#level-3-cognitive-decision-models}
+
+A cognitive model combines a category template with:
+
+- `category_prior`: Prior probabilities $P(c)$ across categories (must sum to 1).
+- `decision_rule`: How posterior probabilities map to categorization responses (`"criterion"`, `"proportional"`, or `"sampling"`).
+- `lapse_rate` and `lapse_bias`: Probability and distribution of lapse responses (unrelated to cue values).
+- `Sigma_noise` and `noise_treatment`: Internal perceptual noise covariance and handling (`"no_noise"`, `"sample"`, or `"marginalize"`).
+
+```{r cognitive_model_constructors}
+# Instantiate an Ideal Observer model from the template
+observer_model <- new_mvg_ideal_observer(
+  category_template = tpl_empirical,
+  category_prior = c("/i/" = 0.5, "/u/" = 0.5),
+  decision_rule = "proportional",
+  lapse_rate = 0.02
+)
+observer_model
+```
+
+Similarly, empirical constructors can build the complete cognitive model directly from data in a single step:
+
+```{r model_from_data}
+model_from_data <- new_mvg_ideal_observer_from_data(
+  data = train_data,
+  category = "category",
+  cues = c("F1", "F2"),
+  decision_rule = "criterion"
+)
+model_from_data
+```
+
+---
+
+# 4. Standard Generics: Inspection, Evaluation, and Sampling {#standard-generics}
+
+The S7 architecture provides consistent generic functions across all model families.
+
+## Label Accessors
+
+```{r label_accessors}
+# Extract cue names
+get_cue_labels(observer_model)
+
+# Extract category names
+get_category_labels(observer_model)
+
+# Extract combined label structure
+get_labels(observer_model)
+```
+
+## Type and Family Introspection
+
+```{r introspection}
+# Model family
+get_model_type(observer_model)
+
+# Representation family
+get_representation_type(rep_b)
+```
+
+## Parameter Extraction
+
+Extract category parameters or expected moments across representations, templates, models, and fitted Bayesian models:
+
+```{r parameter_extraction}
+# Extract parameters across template categories (mu, Sigma for MVG)
+get_parameters(observer_model)
+
+# For Bayesian belief distributions (like the NIW ideal adaptor),
+# extract expected moments under the prior distribution:
+get_expected_mu(mod_adaptor)
+get_expected_sigma(mod_adaptor)
+```
+
+## Likelihood and Posterior Computation
+
+Evaluate category likelihoods $p(x \mid c)$ and posterior probabilities $P(c \mid x)$ for new observations:
+
+```{r likelihood_and_posterior}
+# New test observations in cue space
+test_points <- matrix(
+  c(320, 2100,
+    580, 1150),
+  nrow = 2, byrow = TRUE,
+  dimnames = list(NULL, c("F1", "F2"))
+)
+
+# Compute category likelihoods
+lik_mat <- likelihood(observer_model, test_points)
+lik_mat
+
+# Compute posterior category probabilities P(c | x)
+post_mat <- posterior(observer_model, test_points)
+post_mat
+```
+
+## Categorization Under Decision Rules
+
+First, let's inspect the configured decision rule of our cognitive model:
+
+```{r check_decision_rule}
+# Inspect the configured decision rule of the model
+observer_model@decision_rule
+```
+
+Now call `categorize()` to apply the model's decision rule to the test observations:
+
+```{r categorize}
+# Categorize test points using the model's configured decision rule
+cat_results <- categorize(observer_model, test_points)
+cat_results
+
+# Override decision rule to deterministic criterion ("winner-take-all")
+categorize(observer_model, test_points, decision_rule = "criterion")
+```
+
+### Understanding the `probability` Column in `categorize()`
+
+The `probability` column in the data frame returned by `categorize()` reports the **posterior category probability** $P(c \mid x)$ of the selected category, calculated directly from the model's posterior belief distribution:
+
+$$P(c \mid x) = \frac{p(x \mid c) \, P(c)}{\sum_{c'} p(x \mid c') \, P(c')}$$
+
+It does **not** represent the *response choice probability* under the decision rule. For example, under a deterministic decision rule like `'criterion'`, the model always selects the MAP category with response probability $1$, but the `probability` column displays $P(c_{\text{MAP}} \mid x) = 0.94$, indicating the observer's degree of posterior certainty in that classification decision.
+
+## Sampling Observations
+
+Generate synthetic perceptual tokens drawn from category representations:
+
+```{r sample_observations}
+# Sample 5 observations from the /i/ category representation
+sample_observations(tpl_empirical@representations[["/i/"]], n = 5)
+
+# Sample 6 observations across categories weighted by category priors
+sample_observations(observer_model, n = 6)
+```
+
+---
+
+# 5. Bayesian Fitting Architecture: `Staninput` and `Stanfit` {#bayesian-fitting-architecture}
+
+Fitting ideal adaptor models with incremental belief updating (IBBU) follows a clean two-tier pipeline.
+
+```
+Observations (data.frame)
+        │
+        ▼
+prepare_staninput() ───► IdealAdaptorStanfitInput (S7)
+                                 │
+                                 ▼
+                         fit() / stan()
+                                 │
+                                 ▼
+                         MVBU_Stanfit (S7)
+```
+
+## Preparing Typed Stan Input (`prepare_staninput`)
+
+`prepare_staninput()` transforms empirical exposure data, priors, and cue specifications into a typed S7 `IdealAdaptorStanfitInput` object:
+
+```{r prepare_staninput, eval = FALSE}
+# (Workflow demonstration; requires model specification)
+stan_input <- prepare_staninput(
+  data = train_data,
+  cues = c("F1", "F2"),
+  category_col = "category",
+  stanmodel = "NIW_ideal_adaptor"
+)
+
+# Inspect typed staninput slots
+class(stan_input)
+get_cue_labels(stan_input)
+get_transform_information(stan_input)
+```
+
+## Inspecting Fitted Stan Models (`MVBU_Stanfit`)
+
+Fitted models encapsulate the Stan MCMC output, typed Stan input, cue transform metadata, and prior parameters:
+
+```{r stanfit_inspection}
+# Inspect example fitted model
+fit_1cue
+get_model_type(fit_1cue)
+
+# Extract underlying rstan stanfit object
+raw_stanfit <- get_stanfit(fit_1cue)
+class(raw_stanfit)
+
+# Extract MCMC draws in tidy format
+draws_df <- get_draws(fit_1cue)
+head(draws_df)
+```
+
+## Posterior Draws and Diagnostics
+
+`MVBU_Stanfit` supports standard diagnostics and posterior formats from the **posterior**, **bayesplot**, and **loo** ecosystems:
+
+```{r stanfit_diagnostics}
+# Rhat convergence diagnostic
+head(rhat(fit_1cue))
+
+# Effective sample size ratio
+head(neff_ratio(fit_1cue))
+
+# Model summary
+summary(fit_1cue)
+```
+
+---
+
+# 6. Aggregating Models and Representations {#aggregating-models}
+
+In many experimental and modeling scenarios (e.g., combining individual-participant models or creating group-level representations), multiple cognitive models or category templates need to be aggregated into a single combined model. The `aggregate_models()` function and `aggregate()` generic handle this across S7 classes.
+
+## Aggregating Multivariate Gaussian (MVG) Models
+
+Consider three individual observer models representing vowel categories with distinctly different estimated means and covariances (e.g., positive correlation, negative correlation, and uncorrelated cues):
+
+```{r mvg_aggregation}
+library(ggplot2)
+library(patchwork)
+
+# Individual Observer 1: Positive cue covariance, shifted top-left
+mvg1 <- new_mvg_ideal_observer(
+  category_template = new_category_representation_template(
+    representations = list(
+      "/i/" = new_mvg_category_representation("/i/", c("F1", "F2"), mu = c(250, 2400), Sigma = matrix(c(800, 600, 600, 3000), 2, 2, dimnames = list(c("F1", "F2"), c("F1", "F2")))),
+      "/u/" = new_mvg_category_representation("/u/", c("F1", "F2"), mu = c(420, 1200), Sigma = matrix(c(900, 500, 500, 2500), 2, 2, dimnames = list(c("F1", "F2"), c("F1", "F2"))))
+    )
+  ),
+  lapse_rate = 0.01
+)
+
+# Individual Observer 2: Negative cue covariance and larger variance, shifted right
+mvg2 <- new_mvg_ideal_observer(
+  category_template = new_category_representation_template(
+    representations = list(
+      "/i/" = new_mvg_category_representation("/i/", c("F1", "F2"), mu = c(350, 2200), Sigma = matrix(c(2000, -1200, -1200, 6000), 2, 2, dimnames = list(c("F1", "F2"), c("F1", "F2")))),
+      "/u/" = new_mvg_category_representation("/u/", c("F1", "F2"), mu = c(580, 1000), Sigma = matrix(c(1800, -800, -800, 4500), 2, 2, dimnames = list(c("F1", "F2"), c("F1", "F2"))))
+    )
+  ),
+  lapse_rate = 0.05
+)
+
+# Individual Observer 3: Uncorrelated cues, shifted down
+mvg3 <- new_mvg_ideal_observer(
+  category_template = new_category_representation_template(
+    representations = list(
+      "/i/" = new_mvg_category_representation("/i/", c("F1", "F2"), mu = c(300, 2000), Sigma = matrix(c(1200, 0, 0, 4000), 2, 2, dimnames = list(c("F1", "F2"), c("F1", "F2")))),
+      "/u/" = new_mvg_category_representation("/u/", c("F1", "F2"), mu = c(500, 800), Sigma = matrix(c(1500, 0, 0, 3500), 2, 2, dimnames = list(c("F1", "F2"), c("F1", "F2"))))
+    )
+  ),
+  lapse_rate = 0.03
+)
+
+# Inspect individual models before aggregation
+cat("--- Individual Model 1 ---\n")
+mvg1
+cat("\n--- Individual Model 2 ---\n")
+mvg2
+cat("\n--- Individual Model 3 ---\n")
+mvg3
+
+# Aggregate all three models (unweighted mean)
+mvg_aggregated <- aggregate_models(list(mvg1, mvg2, mvg3))
+
+cat("\n--- Aggregated MVG Model ---\n")
+mvg_aggregated
+```
+
+To see how category representation parameters change during aggregation, we can explicitly compare the category means ($\mu$) and covariance matrices ($\Sigma$) before and after aggregation:
+
+```{r mvg_aggregation_comparison}
+# Compare category parameters before and after aggregation
+for (cat_name in c("/i/", "/u/")) {
+  cat(sprintf("\n=== Category: %s ===\n", cat_name))
+  cat("Model 1 mu:", mvg1@category_template@representations[[cat_name]]@mu, "\n")
+  cat("Model 2 mu:", mvg2@category_template@representations[[cat_name]]@mu, "\n")
+  cat("Model 3 mu:", mvg3@category_template@representations[[cat_name]]@mu, "\n")
+  cat("Aggregated mu:", mvg_aggregated@category_template@representations[[cat_name]]@mu, "\n\n")
+  
+  cat("Model 1 Sigma:\n")
+  print(mvg1@category_template@representations[[cat_name]]@Sigma)
+  cat("Model 2 Sigma:\n")
+  print(mvg2@category_template@representations[[cat_name]]@Sigma)
+  cat("Model 3 Sigma:\n")
+  print(mvg3@category_template@representations[[cat_name]]@Sigma)
+  cat("Aggregated Sigma:\n")
+  print(mvg_aggregated@category_template@representations[[cat_name]]@Sigma)
+}
+```
+
+We can also visualize the category likelihood ellipses of the individual models alongside the aggregated model:
+
+```{r mvg_aggregation_plots, fig.width=9, fig.height=7, echo=TRUE}
+p1 <- plot(mvg1) + ggtitle("Model 1 (Pos Corr)")
+p2 <- plot(mvg2) + ggtitle("Model 2 (Neg Corr)")
+p3 <- plot(mvg3) + ggtitle("Model 3 (Uncorrelated)")
+p_agg <- plot(mvg_aggregated) + ggtitle("Aggregated Model (Average)")
+
+(p1 + p2) / (p3 + p_agg)
+```
+
+
+
+## Aggregating Exemplar Models
+
+Exemplar models are aggregated by concatenating their underlying exemplar sets, normalizing exemplar weights, and averaging lapse rates and tuning parameters:
+
+```{r exemplar_aggregation}
+# Create three exemplar models with distinct stored exemplars
+ex_data1 <- matrix(c(300, 2200, 310, 2180), ncol = 2, dimnames = list(NULL, c("F1", "F2")))
+ex_data2 <- matrix(c(320, 2150, 325, 2130), ncol = 2, dimnames = list(NULL, c("F1", "F2")))
+ex_data3 <- matrix(c(280, 2250, 290, 2230), ncol = 2, dimnames = list(NULL, c("F1", "F2")))
+
+ex_m1 <- new_exemplar_model(
+  category_template = new_category_representation_template(
+    representations = list(
+      "/i/" = new_exemplar_category_representation("/i/", c("F1", "F2"), exemplars = ex_data1, c = 1.0)
+    )
+  ),
+  lapse_rate = 0.02
+)
+
+ex_m2 <- new_exemplar_model(
+  category_template = new_category_representation_template(
+    representations = list(
+      "/i/" = new_exemplar_category_representation("/i/", c("F1", "F2"), exemplars = ex_data2, c = 1.5)
+    )
+  ),
+  lapse_rate = 0.04
+)
+
+ex_m3 <- new_exemplar_model(
+  category_template = new_category_representation_template(
+    representations = list(
+      "/i/" = new_exemplar_category_representation("/i/", c("F1", "F2"), exemplars = ex_data3, c = 2.0)
+    )
+  ),
+  lapse_rate = 0.03
+)
+
+# Inspect individual exemplar models before aggregation
+cat("--- Individual Exemplar Model 1 ---\n")
+ex_m1
+cat("\n--- Individual Exemplar Model 2 ---\n")
+ex_m2
+cat("\n--- Individual Exemplar Model 3 ---\n")
+ex_m3
+
+# Aggregate all three exemplar models
+ex_aggregated <- aggregate_models(list(ex_m1, ex_m2, ex_m3))
+
+cat("\n--- Aggregated Exemplar Model ---\n")
+ex_aggregated
+
+# Total combined exemplars stored in the aggregated model:
+nrow(ex_aggregated@category_template@representations[["/i/"]]@exemplars)
+```

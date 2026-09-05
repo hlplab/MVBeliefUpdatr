@@ -267,7 +267,7 @@ get_example_stanfit <- function(
     filename <- example_stanfit_path(example, stanmodel = stanmodel, seed = seed, control = control)
   if (file.exists(filename) && file_refit == "never") {
     if (verbose) message("File already exists and file_refit is set to 'never'. Loading existing model from file.")
-    return(MVBeliefUpdatr:::.read_ideal_adaptor_stanfit(filename))
+    return(read_stanfit(filename))
   }
 
   .staninput <-

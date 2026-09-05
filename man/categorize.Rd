@@ -14,7 +14,12 @@ categorize(x, new_data, decision_rule, ...)
 \item{decision_rule}{An optional override for the model's decision rule.}
 }
 \value{
-A data frame with one row per observation and the winning category plus its probability.
+A data frame with one row per observation containing the assigned category
+(column \code{category}) and the underlying posterior category probability \eqn{P(c \mid x)}
+of that chosen category (column \code{probability}). Note that the \code{probability}
+column reports the posterior probability \eqn{P(c \mid x)} from the model's posterior
+belief distribution, rather than the response probability under the decision rule
+(which for deterministic rules like 'criterion' would be 1 for the selected category).
 }
 \description{
 Categorize one or more observations under the model's decision rule
