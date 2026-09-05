@@ -676,11 +676,14 @@ S7::method(get_draws, MVBU_Stanfit) <- function(
   ndraws = NULL,
   untransform_cues = FALSE,
   summarize = FALSE,
-  wide = FALSE,
   nest = TRUE,
   seed = if (!is.null(ndraws)) runif(1, -1e6, 1e6) else NULL,
   ...
 ) {
+  dots <- list(...)
+  if ("wide" %in% names(dots)) {
+    lifecycle::deprecate_warn("0.0.9", "get_draws(wide = )")
+  }
   .assert_contains_draws(fit)
   .assert_that(
     any(is.factor(categories), is.character(categories), is.numeric(categories))
@@ -717,11 +720,6 @@ S7::method(get_draws, MVBU_Stanfit) <- function(
     msg = "If ndraws is not NULL, seed must be specified."
   )
   .assert_that(.is_non_NA_scalar_logical(summarize))
-  .assert_that(.is_non_NA_scalar_logical(wide))
-  .assert_that(
-    !all(wide, !nest),
-    msg = "Wide format is currently not implemented without nesting."
-  )
 
   if ("prior" %in% groups && length(groups) > 1) {
     d.prior <- get_draws(
@@ -731,7 +729,6 @@ S7::method(get_draws, MVBU_Stanfit) <- function(
       ndraws = ndraws,
       untransform_cues = untransform_cues,
       summarize = summarize,
-      wide = wide,
       nest = nest,
       seed = seed,
       ...
@@ -743,7 +740,6 @@ S7::method(get_draws, MVBU_Stanfit) <- function(
       ndraws = ndraws,
       untransform_cues = untransform_cues,
       summarize = summarize,
-      wide = wide,
       nest = nest,
       seed = seed,
       ...
@@ -909,22 +905,6 @@ S7::method(get_draws, MVBU_Stanfit) <- function(
       group = factor(.data$group, levels = groups)
     )
 
-  if (wide) {
-    cols_to_pivot <- if ("prior" %in% groups) {
-      c("m", "S")
-    } else {
-      c("kappa", "nu", "m", "S")
-    }
-    d.pars <- d.pars %>%
-      tidyr::pivot_longer(
-        cols = dplyr::all_of(cols_to_pivot),
-        names_to = "variable",
-        values_to = "value"
-      ) %>%
-      tidyr::unite("temp", !!!rlang::syms(pars.index), .data$variable) %>%
-      tidyr::pivot_wider(names_from = "temp", values_from = "value")
-  }
-
   d.pars
 }
 
@@ -965,7 +945,6 @@ S7::method(get_expected_category_statistic, MVBU_Stanfit) <- function(
     x,
     categories = categories,
     groups = groups,
-    wide = FALSE,
     nest = TRUE,
     summarize = FALSE,
     ...
@@ -1080,7 +1059,6 @@ get_categorization_function <- function(
     x,
     groups = groups,
     summarize = FALSE,
-    wide = FALSE,
     ...
   )
 
@@ -1358,9 +1336,13 @@ S7::method(summary, MVBU_Stanfit) <- function(
           TRUE ~ ""
         )
       ) %>%
-      dplyr::relocate(.data$Parameter, .data$`Dist.`, .data$Group, .data$Category, .data$Cue1, .data$Cue2, tidyselect::everything())
+      dplyr::relocate(
+        tidyselect::all_of(c("Parameter", "Dist.", "Group", "Category", "Cue1", "Cue2")),
+        tidyselect::everything()
+      )
   } else {
-    full_summary <- full_summary %>% dplyr::relocate(.data$Parameter, tidyselect::everything())
+    full_summary <- full_summary %>%
+      dplyr::relocate(tidyselect::all_of("Parameter"), tidyselect::everything())
   }
 
   full_summary <-

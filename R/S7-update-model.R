@@ -148,9 +148,9 @@ S7::method(update_template, list(NIW_IdealAdaptor, S7::class_any)) <- function(
     return(new_niw_ideal_adaptor(
       category_template = new_category_representation_template(updated, metadata = x@category_template@metadata),
       decision_rule = x@decision_rule, category_prior = x@category_prior,
-      lapse_rate = x@lapse_behavior$lapse_rate, lapse_bias = x@lapse_behavior$lapse_bias,
-      Sigma_noise = x@noise_behavior$Sigma_noise, noise_treatment = x@noise_behavior$noise_treatment,
-      lapse_treatment = x@lapse_behavior$lapse_treatment, metadata = x@metadata
+      lapse_rate = get_lapse_rate(x), lapse_bias = get_lapse_bias(x),
+      Sigma_noise = get_noise(x), noise_treatment = get_noise_treatment(x),
+      lapse_treatment = get_lapse_treatment(x), metadata = x@metadata
     ))
   }
 
@@ -192,11 +192,11 @@ S7::method(update_template, list(NIW_IdealAdaptor, S7::class_any)) <- function(
       category_template = new_category_representation_template(updated, metadata = current@category_template@metadata),
       decision_rule = current@decision_rule,
       category_prior = current@category_prior,
-      lapse_rate = current@lapse_behavior$lapse_rate,
-      lapse_bias = current@lapse_behavior$lapse_bias,
-      Sigma_noise = current@noise_behavior$Sigma_noise,
-      noise_treatment = current@noise_behavior$noise_treatment,
-      lapse_treatment = current@lapse_behavior$lapse_treatment,
+      lapse_rate = get_lapse_rate(current),
+      lapse_bias = get_lapse_bias(current),
+      Sigma_noise = get_noise(current),
+      noise_treatment = get_noise_treatment(current),
+      lapse_treatment = get_lapse_treatment(current),
       metadata = current@metadata
     )
     if (keep_history) history[[length(history) + 1L]] <- current

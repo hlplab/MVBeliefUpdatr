@@ -109,6 +109,6 @@ Make sure to read the notes about the \code{Sigma_0} argument in the help page o
 Use \code{methods(class = "ideal_adaptor_stanfit")} for an overview on available methods.
 }
 \seealso{
-\code{\link{is.ideal_adaptor_stanfit}} for information about ideal_adaptor_stanfit objects,
+\code{\link{IdealAdaptorStanfit}} for information about ideal adaptor stanfit objects,
 \code{\link{get_draws}} to draw samples from the stanfit.
 }

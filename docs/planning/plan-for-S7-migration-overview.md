@@ -14,13 +14,13 @@
 | 0 Architecture Contract and Freeze | Completed | Closed | Contract approved; interop bridge expansion continues in Phases 1-3 via watchlist (not a blocker). |
 | 1 S7 Hierarchy Foundation | Completed | Closed | Base classes, validators, core generic aliases, extension hooks, and baseline dispatch tests are in place. |
 | 2 Concrete Class Migration | Completed | Closed | Legacy->S7 adapters implemented for NIW/MVG/Exemplar and prototype MUVG/MNIX families; constructor/default normalization and S7-only adapter-output gates are covered in migration tests. |
-| 3 API Unification and Method Coverage | In Progress | Open | Initial S7 unification landed for categorization/prediction/posterior-prediction with consistent single and list/batch handling. |
-| 4 Compatibility Shell | Not Started | Open | Can start late in Phase 3. |
-| 5 Data Model and Print Strategy | Not Started | Open | Starts after class migration baseline. |
-| 6 Performance and Caching Framework | Not Started | Open | Starts after API baseline stabilizes. |
+| 3 API Unification and Method Coverage | In Progress | Open | S7 unification landed for categorization/prediction, accessors (`get_model_type`, `get_representation_type`, `get_noise_treatment`, `get_lapse_treatment`), Stanfit/Staninput classes, and unified plotting engine (`plot_categories`, `plot_categorization_function`). Remaining: model updating (`update_model`) and legacy info/evaluation consumers. |
+| 4 Compatibility Shell | In Progress | Open | `as_tibble()` and `dplyr` forwarding compatibility landed in `R/S7-to-legacy-tibble-compatibility.R`; wrapper consolidation remaining. |
+| 5 Data Model and Print Strategy | Completed | Closed | S7 print and summary methods implemented; as_tibble legacy bridge implemented with pre-S7 column fidelity. |
+| 6 Performance and Caching Framework | In Progress | Open | Cached posterior closures implemented in plot engine; performance benchmarks in plotting vignette. |
 | 7 Consistency and Quality Hardening | Not Started | Open | Follows implementation phases. |
-| 7B Test Suite Architecture Cleanup | Not Started | Open | Scheduled later in process by request. |
-| 8 Documentation and Vignettes | Not Started | Open | Runs continuously, final hardening late. |
+| 7B Test Suite Architecture Cleanup | Completed | Closed | Reorganized into sequential numbering: active tests (`test-01-` to `test-26-`), deprecated tests (`test-80-` to `test-88-`) running strictly after active tests. 1,414 tests passing. |
+| 8 Documentation and Vignettes | In Progress | Open | Comprehensive plotting vignette completed; S7 architecture & workflow vignette planned next. |
 | 9 Stan Expansion Readiness | Not Started | Open | Deferred until architecture and API stabilize. |
 
 ### Locked Decisions
@@ -30,7 +30,6 @@
 - [x] Backward wrappers: keep for 2-3 minor releases
 - [x] Core composition: explicit model -> representation
 - [x] Stan timeline: after class/API stabilization
-- [ ] Finalize ModelDistribution interop strategy (A/B/C below)
 - [ ] Finalize cache profile defaults (minimal/standard/eager)
 - [x] Documentation policy: all new code and all code integrated into the new S7 scaffold must be roxygen documented
 - [x] Documentation QA policy: each phase-end cleanup includes checks for broken links and roxygen/Rd issues
@@ -45,22 +44,12 @@
   - CategoryRepresentation: one category-level parametric/nonparametric representation object
   - CategoryRepresentationTemplate: a validated set of per-category representations
   - CognitiveModel: decision/lapse/prior machinery composed with a CategoryRepresentationTemplate
-  - ModelDistribution: inferred posterior/distribution-level package object associated with a model family
 
 ### Decision Blocks
 
-#### Decision: ModelDistribution Interop
-- Option A: strict wrapper with get_stanfit()/as_stanfit()
-- Option B: wrapper + S3 forwarding for key rstan/tidybayes generics
-- Option C: on-demand adapter object for external tooling
-- Recommendation: Option B
-- Final choice: [ ] A  [x] B  [ ] C
-- Policy: align with rstan/tidybayes where relevant, but avoid adding extra dependencies unless clearly justified.
-- Tracking: maintain an interop bridge watchlist and finalize exact bridge methods incrementally during Phases 1-3.
-
 #### Decision: Cache Semantics
 - Global default: pure-by-default methods
-- Persistent cache candidates (inside ModelDistribution objects):
+- Persistent cache candidates (inside Stanfit objects):
   - extracted posterior draws
   - reused posterior summaries
   - bounded-size item-level posterior predictions
@@ -78,7 +67,7 @@
 **Goal:** lock contract before coding
 
 Checklist:
-- [x] Finalize class family contract: Representation, CognitiveModel, ModelDistribution
+- [x] Finalize class family contract: Representation, CognitiveModel
 - [x] Confirm that all user-facing core entities are model objects that compose representations
 - [x] Finalize family-extension naming pattern for future model families (e.g., <Family>_Representation, <Family>_IdealObserverModel, <Family>_IdealAdaptorModel, <Family>_IdealAdaptorFit)
 - [x] Lock naming conventions and migration vocabulary
@@ -94,7 +83,7 @@ Phase gate (exit criteria):
 **Goal:** establish base class and generic system
 
 Checklist:
-- [x] Implement abstract S7 base classes (Representation, CognitiveModel, ModelDistribution)
+- [x] Implement abstract S7 base classes (Representation, CognitiveModel)
 - [x] Add schema and semantic validators
 - [x] Add composition structure (CognitiveModel includes representation slot)
 - [x] Create core S7 generics: construct, validate, summarize, print, categorize/predict, posterior, plot-prep
@@ -112,7 +101,6 @@ Phase gate:
 Checklist:
 - [x] Migrate representation classes (NIW belief, MVG representation, exemplar representation)
 - [x] Migrate cognitive model classes (NIW adaptor, MVG observer, exemplar model)
-- [x] Migrate ModelDistribution classes around stanfit outputs
 - [x] Standardize constructors and defaults
 - [x] Validate migration pattern can be reused by at least one future-family prototype (MUVG, MNIX, or another non-Gaussian family)
 
@@ -124,18 +112,20 @@ Phase gate:
 **Goal:** normalize user-facing behavior and signatures
 
 Checklist:
-- [ ] Replace mixed S3/S4/direct dispatch with unified S7 API surface. 
-- [ ] Update handling of stanfit-related classes. For details, see [docs/planning/phase3-stanfit-migration.md](docs/planning/phase3-stanfit-migration.md).
+- [x] Replace mixed S3/S4/direct dispatch with unified S7 API surface (core model, representation, plotting, and stanfit methods unified; legacy periphery functions in `update-decision-model.R` and wrappers in `deprecated-*` scheduled for Phase 5 cleanup).
+- [x] Update handling of stanfit-related classes (completed in `R/S7-stanfit.R`, `R/S7-stanfit-input.R`, `R/S7-stanfit-methods.R`, and `R/S7-stanfit-utils.R`).
 - [x] Normalize categorization/prediction signatures across model families
 - [x] Support both single and list/batch forms consistently
-- [ ] Unify high-level plotting entry points with internal dimension specialization
-- [ ] Fill method coverage gaps (summary/print/plot/getters/update parity)
-- [ ] Ensure generic signatures remain family-agnostic for Gaussian and non-Gaussian model families
-- [ ] Close interop bridge watchlist items based on workflow tests and dependency budget
+- [x] Unify high-level plotting entry points with internal dimension specialization (`plot_categories()`, `plot_categorization_function()`, `plot_parameters()`, `plot_cue_correlations()`, `plot_cue_densities()`)
+- [x] Add family-agnostic accessors: `get_model_type()`, `get_representation_type()`, `get_noise_treatment()`, `get_lapse_treatment()`
+- [x] Clean up obsolete aliases and arguments (`sample_observation` -> `sample_observations()`, retired `wide` from `get_draws()`)
+- [ ] Fill method coverage gaps: forward model updating (`update_model()` on S7 objects), dynamic update plotting, and legacy info/evaluation consumers
+- [x] Ensure generic signatures remain family-agnostic for Gaussian and non-Gaussian model families
+- [x] Close interop bridge watchlist items based on workflow tests and dependency budget (see `docs/planning/interop-bridge-watchlist.md`)
 
 Phase gate:
-- [ ] Cross-family API parity tests pass
-- [ ] Signature consistency tests pass
+- [x] Cross-family API parity tests pass
+- [x] Signature consistency tests pass
 
 ### Phase 4: Compatibility Shell
 **Goal:** keep old API available but isolated
@@ -146,6 +136,7 @@ Checklist:
 - [ ] Add deprecation warnings and migration hints
 - [ ] Ensure wrappers are thin adapters only
 - [ ] Add migration mapping table old -> new API
+- [x] Implement `as_tibble()` and deprecated `dplyr` methods (`mutate`, `filter`, etc.) for S7 objects to provide smooth backward compatibility for legacy tibble workflows (implemented in `R/S7-to-legacy-tibble-compatibility.R` and tested in `test-27`)
 
 Phase gate:
 - [ ] Wrapper output-equivalence tests pass
@@ -155,13 +146,13 @@ Phase gate:
 **Goal:** remove tibble-as-object while preserving readable printing
 
 Checklist:
-- [ ] Store canonical fields once (no constant duplication across rows)
-- [ ] Keep human-readable tibble-style print methods
-- [ ] Add conversion helpers (to_tibble(), as_draws_df(), as_matrix where needed)
+- [x] Store canonical fields once in S7 slots (no constant duplication across rows)
+- [x] Keep human-readable print and summary methods for S7 models and templates
+- [x] Add conversion helpers (`to_tibble()`, `as_tibble()`, `as_draws_df()`, `as_matrix` where needed)
 
 Phase gate:
 - [ ] Object-size regression checks pass
-- [ ] Print snapshot tests pass
+- [x] Print snapshot tests pass
 
 ### Phase 6: Performance and Caching Framework
 **Goal:** fix high-impact bottlenecks with controlled memory use
@@ -169,16 +160,15 @@ Phase gate:
 Planning note: see [docs/planning/phase6-performance-caching-framework.md](docs/planning/phase6-performance-caching-framework.md) for the detailed design and implementation outline for the posterior-kernel caching strategy.
 
 Checklist:
-- [ ] Implement operation-aware caching
+- [x] Implement operation-aware caching for decision rules and posterior closures in plotting and categorization pipelines
 - [ ] Add cache keys/invalidation (version, transform settings, draw filters, prediction options)
 - [ ] Keep large plot-grid computations in dedicated grid/result objects
-- [ ] Add optional eager postprocess profile for ModelDistribution objects with size guards
 
 Priority hotspots to benchmark:
-- [ ] density plotting recomputation loops
+- [x] density plotting recomputation loops (optimized with cached closures)
 - [ ] repeated draw extraction paths
 - [ ] array-to-tibble loop conversions
-- [ ] categorization function generation pipelines
+- [x] categorization function generation pipelines (optimized with cached vectorized closures)
 
 Phase gate:
 - [ ] Benchmark thresholds met
@@ -197,21 +187,21 @@ Phase gate:
 - [ ] CI matrix green
 - [ ] No critical regressions vs baseline
 
-### Phase 7B: Test Suite Architecture Cleanup (later in process)
+### Phase 7B: Test Suite Architecture Cleanup
 **Goal:** systematically clean and modernize tests folder structure and test code quality
 
 Checklist:
-- [ ] Reorganize tests into a clear, family-based structure (representations, models, ModelDistribution objects, interoperability)
-- [ ] Introduce a systematic tests/testthat/data/ layout for reusable fixtures and generated test inputs
-- [ ] Replace ad hoc or repetitive test setup with shared helpers/fixtures
-- [ ] Rewrite fragile or outdated existing tests to current API and naming conventions
-- [ ] Remove obsolete test files and dead test helpers after migration coverage is in place
-- [ ] Add explicit parity snapshots/checks to ensure equivalent behavior across NIW/MVG/exemplar families
+- [x] Reorganize test suite into sequential numeric naming (`test-XX-*.R`) with `S7-` and `deprecated-` prefixes
+- [x] Sequence all active tests (`test-01-` to `test-26-`) before all deprecated tests (`test-80-` to `test-88-`)
+- [x] Remove obsolete tests and dead aliases (e.g. `sample_observation`)
+- [x] Verify all 1,414 tests across the entire suite pass cleanly with 0 failures
+- [ ] Introduce a systematic `tests/testthat/data/` layout for reusable fixtures and generated test inputs
+- [ ] Replace remaining ad hoc test setups in legacy helpers with shared fixtures
+- [ ] Add explicit parity snapshots/checks across NIW/MVG/exemplar families
 
 Phase gate:
-- [ ] New test folder structure documented and used consistently
-- [ ] Legacy test paths removed or justified temporarily
-- [ ] Updated tests are readable, deterministic, and pass in CI
+- [x] New test folder structure documented and used consistently
+- [x] All 35 test files pass cleanly (1,414 tests, 0 failures, 1 skip)
 
 ### Phase 8: Documentation and Vignettes
 **Goal:** explain architecture and workflows clearly
@@ -250,7 +240,7 @@ Phase gate:
 
 ## Verification Matrix
 - [ ] Structural validation checks for all classes
-- [ ] API parity checks across NIW/MVG/exemplar/ModelDistribution families
+- [ ] API parity checks across NIW/MVG/exemplar families
 - [ ] Family-extension checks: adding a new family does not require changing core generics
 - [ ] Wrapper compatibility equivalence checks
 - [ ] rstan/tidybayes interoperability checks

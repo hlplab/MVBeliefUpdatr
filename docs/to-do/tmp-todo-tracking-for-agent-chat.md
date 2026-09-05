@@ -52,6 +52,10 @@
 + DONE: updated default `levels` from 1:4 sigmas to 1:3 sigmas (`2 * stats::pnorm(1:3) - 1`) across all category and sliced plots.
 + DONE: set default aesthetic for 2D interactive `plot_categorization_function()` to `"fill-discrete"`, rendering a solid 3D response surface with opacity 0.85.
 + DONE: corrected 3D exemplar sliced contour plot in vignette by setting slices along `vowel_duration` (50, 100, 150 ms) to resolve empty panels.
++ DONE: defined `get_noise_treatment` and `get_lapse_treatment` S7 generics and methods on `MVBU_CognitiveModel`, `MVBU_Object`, and `S7::class_any`, replacing direct slot accesses across `R/S7-core-methods.R`, `R/S7-plot-engine.R`, `R/S7-plot-methods.R`, `R/S7-family-coercion.R`, `R/S7-make-objects.R`, and `R/S7-update-model.R`.
++ DONE: removed `sample_observation` alias, retaining only `sample_observations`.
++ DONE: retired `wide` argument from `get_draws()` generic and method (issuing `lifecycle::deprecate_warn("0.0.9", "get_draws(wide = )")` if supplied), and removed redundant `wide = FALSE` calls across plotting and stanfit methods.
++ DONE: reorganized and standardized test suite naming and execution order: all 26 non-deprecated tests are sequentially numbered `test-01-` through `test-26-` (with `S7-` prefix for S7 tests), and all 9 deprecated test files are numbered `test-80-` through `test-88-` (`test-80-deprecated-...` through `test-88-deprecated-...`) to run strictly after all non-deprecated tests; verified all 1,414 tests pass cleanly with 0 failures.
 
 # To do in Phase 3
 
@@ -59,27 +63,18 @@
 
 ## Next steps
 
-+ define get_noise_treatment and get_lapse_treatment generics and replace code that extract lapse/noise treatment from model with those methods.
-
-+ both sample_observation and sample_observations seem to exist. keep only the latter.
-
-+ is the wide = T option ever used in get_draws()? if not, let's retire it.
-
-+ check which tests are still needed. make sure they all follow the rules laid out for test naming. all tests of deprecated functions should be run AFTER tests for non-deprecated functions.
-
 WAIT, do not go beyond this point:
 
-+ make a vignette that introduces the S7 class structure of the library. in it we can also show how to go from the bare constructors to the from_data constructors, and also to print, summarize, and coerce objects (e.g. as_tibble). link to the plotting vignette. then introduce the stanfit, and stanfit input classes. let's also point out the example_* functions that can be used to quickly inspect the different types of objects. the final section should talk about functionality (not yet introduced that allows to coerce the new S7 structures into the legacy tibble structure.)
+
++ develop plotting methods that dynamically show model updates, both based on stanfits (from prior to posterior) or from update_model() outputs.
 
 + expand stan programs to allow users to specify prior m, S for each category (not fixed point estimates). and is that really different from what can already be done by handing mu, Sigma and inferring kappa, nu?
 
- + legacy workflows outside of this package often assume that the relevant model objects are tibbles. They might thus use mutate, filter, and other dplyr methods on those objects. Let's add (and deprecated) dplyr method for the new S7 objects. for this, let's first write as_tibble methods that convert the S7 objects to tibbles that follow the legacy format (while throwing a deprecation message that also warns that the old legacy tibbles do not capture all information from the new S7 objects + points to a vignette that will illustrate the new workflow). we can then define mutate, transmute, filte, etc. methods for the S7 objects that first call as_tibble().
-
-+ Known remaining failures (pre-existing, not caused by the above): MNIX representation validator (test-01, test-07), NIX stanfit validator (test-05), rstan/TBB toolchain dlopen (test-04-stanfit-input-compatibility), and `tests/functions-to-make-or-load-models.R` still calling `mutate()` on S7 models (test-14-get-info-stanfit, test-19-plot-stanfit).
-
-+ for the aggregate_models function, provide more documentation how the aggregation takes place, i.e., how exemplars, means, sigmas, m, S, etc. aggregated? for each model parameter, list the function used to create the aggregate. this might become clearner if we defined an aggregate S7 method that can aggregate category representations, templates, and models (Described in detail on a shared help page)
++ Known remaining failures (pre-existing, not caused by the above): MNIX representation validator (test-01, test-07)/
 
 + the 2d example stanfit doesn't seem to be a great example since the categories overlap too much. this makes the categorization surface not particularly informative. perhaps change the example so that it has less category overlap and refit that model. 
+
++ consider moving all deprecated functions and all bridging to lecacy objects into a separate library MVBeliefUpdatrLecacyBridge that imports the new S7 MVBeliefUpdatr library. at that point the legacy.R file will no longer be needed. 
 
 # General cleanup at end of Phase 3
 + check which utils are needed. 

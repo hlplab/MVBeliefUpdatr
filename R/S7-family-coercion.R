@@ -209,11 +209,11 @@ NULL
     category_template = template,
     decision_rule = x@decision_rule,
     category_prior = x@category_prior,
-    lapse_rate = x@lapse_behavior$lapse_rate,
-    lapse_bias = x@lapse_behavior$lapse_bias,
-    Sigma_noise = x@noise_behavior$Sigma_noise,
-    noise_treatment = x@noise_behavior$noise_treatment,
-    lapse_treatment = x@lapse_behavior$lapse_treatment,
+    lapse_rate = get_lapse_rate(x),
+    lapse_bias = get_lapse_bias(x),
+    Sigma_noise = get_noise(x),
+    noise_treatment = get_noise_treatment(x),
+    lapse_treatment = get_lapse_treatment(x),
     metadata = x@metadata
   )
 }

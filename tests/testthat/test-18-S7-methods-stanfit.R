@@ -50,5 +50,11 @@ test_that("Stanfit diagnostic and posterior methods", {
   expect_true(inherits(posterior::as_draws_matrix(fit_1cue), "draws_matrix"))
   expect_true(inherits(posterior::as_draws_list(fit_1cue), "draws_list"))
   expect_true(inherits(posterior::as_draws_rvars(fit_1cue), "draws_rvars"))
+
+  expect_equal(get_model_type(fit_1cue), "NIW_ideal_adaptor")
+  if (!is.null(fit_3cue)) {
+    expect_equal(get_model_type(fit_3cue), "NIW_ideal_adaptor")
+  }
+  expect_equal(get_model_type(get_staninput(fit_1cue)), "NIW_ideal_adaptor")
 })
 

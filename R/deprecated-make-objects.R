@@ -114,7 +114,7 @@ make_NIW_ideal_adaptor_from_data <- function(data, group = NULL, category = "cat
 #'
 #' @description `r lifecycle::badge("deprecated")` Use \code{\link{new_mvg_ideal_observer}}, \code{\link{new_niw_ideal_adaptor}},
 #'   or \code{\link{new_exemplar_model}} with an S7 \code{category_template} instead.
-#' @param x An MVG, NIW_belief, or exemplars legacy tibble.
+#' @param x An S7 \code{\link{MVBU_CategoryRepresentationTemplate}} object.
 #' @param group No longer supported; must be `NULL`.
 #' @param prior Optional category-prior vector. (default: uniform over categories)
 #' @param lapse_rate Optional lapse rate. (default: 0)
@@ -131,18 +131,19 @@ lift_likelihood_to_model <- function(x, group = NULL, prior = NULL, lapse_rate =
     details = "Use new_mvg_ideal_observer(), new_niw_ideal_adaptor(), or new_exemplar_model() with an S7 category_template instead."
   )
   if (!is.null(group)) .stop("group is no longer supported. Use purrr::map() to call this function once per group instead.")
-  representations <-
-    if (is.MVG(x)) as_s7_mvg_representations(x)
-    else if (is.NIW_belief(x)) as_s7_niw_representations(x)
-    else if (is.exemplars(x)) as_s7_exemplar_representations(x)
-    else .stop("x must be an MVG, NIW_belief, or exemplars object.")
-  constructor <-
-    if (is.MVG(x)) new_mvg_ideal_observer
-    else if (is.NIW_belief(x)) new_niw_ideal_adaptor
-    else new_exemplar_model
-  constructor(
-    category_template = new_category_representation_template(representations),
-    category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
+  if (!S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
+    .stop("x must be an MVBU_CategoryRepresentationTemplate object.")
+  }
+  rep_type <- get_representation_type(x)
+  if (rep_type %in% c("MVG", "UVG")) {
+    new_mvg_ideal_observer(category_template = x, category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
+  } else if (rep_type %in% c("NIW", "NIX")) {
+    new_niw_ideal_adaptor(category_template = x, category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
+  } else if (rep_type == "Exemplar") {
+    new_exemplar_model(category_template = x, category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
+  } else {
+    .stop("Unsupported category representation type in template: ", rep_type)
+  }
 }
 
 
@@ -153,8 +154,11 @@ lift_likelihood_to_model <- function(x, group = NULL, prior = NULL, lapse_rate =
 lift_exemplars_to_exemplar_model <- function(x, group = NULL, prior = NULL, lapse_rate = 0, lapse_bias = NULL, Sigma_noise = NULL, verbose = F) {
   lifecycle::deprecate_warn("0.0.9", "lift_exemplars_to_exemplar_model()", "new_exemplar_model()")
   if (!is.null(group)) .stop("group is no longer supported. Use purrr::map() to call this function once per group instead.")
+  if (!S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
+    .stop("x must be an MVBU_CategoryRepresentationTemplate object.")
+  }
   new_exemplar_model(
-    category_template = new_category_representation_template(as_s7_exemplar_representations(x)),
+    category_template = x,
     category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
 }
 
@@ -166,8 +170,11 @@ lift_exemplars_to_exemplar_model <- function(x, group = NULL, prior = NULL, laps
 lift_MVG_to_MVG_ideal_observer <- function(x, group = NULL, prior = NULL, lapse_rate = 0, lapse_bias = NULL, Sigma_noise = NULL, verbose = F) {
   lifecycle::deprecate_warn("0.0.9", "lift_MVG_to_MVG_ideal_observer()", "new_mvg_ideal_observer()")
   if (!is.null(group)) .stop("group is no longer supported. Use purrr::map() to call this function once per group instead.")
+  if (!S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
+    .stop("x must be an MVBU_CategoryRepresentationTemplate object.")
+  }
   new_mvg_ideal_observer(
-    category_template = new_category_representation_template(as_s7_mvg_representations(x)),
+    category_template = x,
     category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
 }
 
@@ -178,8 +185,11 @@ lift_MVG_to_MVG_ideal_observer <- function(x, group = NULL, prior = NULL, lapse_
 lift_NIW_belief_to_NIW_ideal_adaptor <- function(x, group = NULL, prior = NULL, lapse_rate = 0, lapse_bias = NULL, Sigma_noise = NULL, verbose = F) {
   lifecycle::deprecate_warn("0.0.9", "lift_NIW_belief_to_NIW_ideal_adaptor()", "new_niw_ideal_adaptor()")
   if (!is.null(group)) .stop("group is no longer supported. Use purrr::map() to call this function once per group instead.")
+  if (!S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
+    .stop("x must be an MVBU_CategoryRepresentationTemplate object.")
+  }
   new_niw_ideal_adaptor(
-    category_template = new_category_representation_template(as_s7_niw_representations(x)),
+    category_template = x,
     category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
 }
 
@@ -190,8 +200,10 @@ lift_NIW_belief_to_NIW_ideal_adaptor <- function(x, group = NULL, prior = NULL, 
 lift_MVG_ideal_observer_to_NIW_ideal_adaptor <- function(x, group = NULL, kappa, nu, verbose = F) {
   lifecycle::deprecate_warn("0.0.9", "lift_MVG_ideal_observer_to_NIW_ideal_adaptor()", "as_niw_ideal_adaptor()")
   if (!is.null(group)) .stop("group is no longer supported. Use purrr::map() to call this function once per group instead.")
-  model <- if (S7::S7_inherits(x, MVG_IdealObserver)) x else as_s7_mvg_ideal_observer(x)
-  as_niw_ideal_adaptor(model, kappa = kappa, nu = nu)
+  if (!S7::S7_inherits(x, MVG_IdealObserver)) {
+    .stop("x must be an S7 MVG_IdealObserver object.")
+  }
+  as_niw_ideal_adaptor(x, kappa = kappa, nu = nu)
 }
 
 

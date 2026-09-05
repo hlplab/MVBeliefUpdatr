@@ -1,0 +1,88 @@
+---
+title: "Backward Compatibility: Working with Old Code"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Backward Compatibility: Working with Old Code}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+
+if (requireNamespace("pkgload", quietly = TRUE)) {
+  pkgload::load_all("..", quiet = TRUE)
+}
+```
+
+# Introduction and Overview
+
+Many existing pipelines and user scripts built against pre-v1.0 versions of **MVBeliefUpdatr** expect models and templates to be formatted as `tibble` data frames with list-columns of parameters (`mu`, `Sigma`, `m`, `S`, etc.).
+
+To provide a non-breaking migration path, **MVBeliefUpdatr** implements a bidirectional compatibility bridge in `R/S7-to-legacy-tibble-compatibility.R`.
+
+```{r setup}
+library(MVBeliefUpdatr)
+library(tibble)
+library(dplyr)
+```
+
+---
+
+# 1. Coercing S7 Objects with `as_tibble()` {#as-tibble}
+
+Calling `as_tibble()` on any S7 representation, template, or cognitive model produces a tibble matching the pre-S7 column schema, names, types, and column order:
+
+```{r as_tibble_bridge}
+# Create an S7 cognitive model
+observer_model <- example_mvg_ideal_observer()
+
+# Coerce an S7 cognitive model to a legacy tibble
+model_tibble <- as_tibble(observer_model)
+model_tibble
+
+# Inspect column names and list-column contents
+names(model_tibble)
+model_tibble$mu
+model_tibble$Sigma
+```
+
+When called, `as_tibble()` issues an informative deprecation warning noting that S7 objects are the canonical format and that some metadata (such as noise behavior and internal validators) are lost in tabular representations.
+
+---
+
+# 2. Deprecated `dplyr` Verb Forwarding {#dplyr-forwarding}
+
+For workflows that previously called `dplyr` verbs directly on model objects (e.g., `model %>% mutate(...)` or `model %>% filter(...)`), S3 method forwarding intercepts these calls, converts the object to a tibble, applies the requested verb, and informs the user:
+
+```{r dplyr_forwarding}
+# Legacy workflow: calling filter() or select() on an S7 model
+filtered_df <- suppressWarnings(filter(observer_model, category == "/i/"))
+filtered_df
+
+selected_df <- suppressWarnings(select(observer_model, category, mu, Sigma))
+selected_df
+```
+
+---
+
+# 3. Migration Recommendations {#migration-recommendations}
+
+When modernizing legacy code to the S7 architecture:
+
+1. **Replace `as_tibble()` calls with direct S7 methods:** Instead of extracting parameters by indexing list-columns (`model_df$mu[[1]]`), use `get_parameters(model, statistic = "mu")` or `get_expected_mu(model)`.
+
+2. **Use S7 constructors directly:** Replace legacy `make_*` and `lift_*` functions with `new_*_category_representation()` and `new_*_ideal_observer()`.
+
+3. **Dispatch evaluation directly:** Call `categorize(model, data)` and `posterior(model, data)` directly on S7 objects rather than passing tibbles to legacy wrappers.

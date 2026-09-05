@@ -29,21 +29,67 @@ get_expected_columns_for_NIW_ideal_adaptor <- function() {
 
 #' Deprecated: is.NIW_ideal_adaptor
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `is.NIW_ideal_adaptor()` is deprecated. Use
-#' `S7::S7_inherits(x, NIW_IdealAdaptor)` instead.
+#' Check whether \code{x} is an ideal adaptor with \link[=is.NIW_belief]{Normal-Inverse-Wishart (NIW) beliefs}.
 #'
 #' @param x Object to check.
-#' @param ... Additional arguments (ignored; for compatibility).
-#' @return Logical indicating whether `x` inherits from [NIW_IdealAdaptor].
+#' @param group Name of one or more group variables. (default: NULL)
+#' @param category Name of the category variable. (default: "category")
+#' @param is.long Is this check assessing whether the ideal adaptor is in long format? (default: `TRUE`)
+#' @param with.prior Does this ideal adaptor have a prior? (default: `TRUE`)
+#' @param with.lapse Does this ideal adaptor have a lapse rate? (default: `FALSE`)
+#' @param with.lapse_bias Does this ideal adaptor have a lapse bias? (default: `FALSE`)
+#' @param verbose Should verbose output be provided? (default: `FALSE`)
+#' @param tolerance Tolerance for sum-to-one probability checks. (default: MVBU_PROB_TOL)
+#' @param ... Additional arguments.
+#' @return Logical indicating whether `x` is a valid NIW ideal adaptor.
 #' @rdname deprecated-functions
 #' @export
-is.NIW_ideal_adaptor <- function(x, ...) {
+is.NIW_ideal_adaptor <- function(x, group = NULL, category = "category", is.long = T, with.prior = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = MVBU_PROB_TOL, ...) {
   lifecycle::deprecate_warn(
     when = "0.2.0",
     what = "is.NIW_ideal_adaptor()",
     details = "Use S7::S7_inherits(x, NIW_IdealAdaptor) instead."
   )
-  S7::S7_inherits(x, NIW_IdealAdaptor)
+  name_of_x <- deparse(substitute(x))
+  .assert_non_NA_scalar_logical(with.lapse)
+  .assert_non_NA_scalar_logical(with.lapse_bias)
+
+  if (S7::S7_inherits(x, MVBU_Object)) {
+    return(S7::S7_inherits(x, NIW_IdealAdaptor))
+  }
+
+  if (!is.MVBU_model(x, group = group, verbose = verbose, tolerance = tolerance)) {
+    return(FALSE)
+  }
+
+  # When no groups are specified, infer groups from object.
+  if (is.null(group)) {
+    group <- setdiff(names(x), get_expected_columns_for_NIW_ideal_adaptor())
+    if (length(group) == 0) group <- NULL else {
+      if (verbose) message(paste(name_of_x, "has additional columns beyond those expected:", paste(group, collapse = ", "), "Interpreting those columns as group variables."))
+    }
+  }
+
+  if (!is.null(group)) {
+    if (verbose) message("Checking whether ", name_of_x, " is an NIW_ideal_adaptor within each unique combination of group values.")
+    x %<>% group_by(!!! syms(group))
+  }
+
+  if (!is.NIW_belief(x, group = group)) {
+    if (verbose) message(paste(deparse(substitute(x)), "does not contain NIW beliefs."))
+    return(FALSE)
+  }
+
+  if (
+    any(
+      !with.prior | "prior" %nin% names(x),
+      with.lapse & "lapse_rate" %nin% names(x),
+      with.lapse_bias & "lapse_bias" %nin% names(x)
+    )
+  ) {
+    if (verbose) message(paste(name_of_x, " is missing prior, lapse rate, or lapse bias."))
+    return(FALSE)
+  }
+
+  return(TRUE)
 }

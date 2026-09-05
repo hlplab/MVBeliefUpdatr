@@ -23,7 +23,6 @@ get_draws(
   ndraws = NULL,
   untransform_cues = FALSE,
   summarize = FALSE,
-  wide = FALSE,
   nest = TRUE,
   seed = if (!is.null(ndraws)) runif(1, -1e+06, 1e+06) else NULL,
   ...
@@ -46,8 +45,6 @@ get_draws(
 
 \item{summarize}{Should the mean of the draws be returned instead of all of the draws? (default: \code{FALSE})}
 
-\item{wide}{Should all parameters be returned in one row? (default: \code{FALSE})}
-
 \item{nest}{Should the category mean vectors and scatter matrices be nested into one cell each, or should each element
 be stored in a separate column? (default: \code{TRUE})}
 
@@ -57,9 +54,8 @@ be stored in a separate column? (default: \code{TRUE})}
 A tibble with MCMC draws of the model parameters.
 }
 \description{
-Get MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) as a tibble. Both wide
-(\code{wide = TRUE}) or long format (\code{wide = FALSE}) can be chosen as output. By default all post-warmup draws are
-returned, but if \code{summarize = TRUE} then just the mean of each parameter is returned instead.
+Get MCMC draws of all parameters from incremental Bayesian belief-updating (IBBU) as a tibble in long format.
+By default all post-warmup draws are returned, but if \code{summarize = TRUE} then just the mean of each parameter is returned instead.
 }
 \details{
 By default, the category means and scatter matrices are nested, rather than each of their elements being

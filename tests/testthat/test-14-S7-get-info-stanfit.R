@@ -1,18 +1,7 @@
 
 skip_if_not(file.exists(example_stanfit_path(1, stanmodel = "NIW_ideal_adaptor")), "cached example stanfit not generated")
 fit <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", file_refit = "never")
-test_that("Test is.ideal_adaptor_stanfit", {
-  expect_false(is.ideal_adaptor_stanfit(NULL))
-  expect_false(is.ideal_adaptor_stanfit(NA))
-  expect_false(is.ideal_adaptor_stanfit(1))
-  expect_false(is.ideal_adaptor_stanfit("1"))
-  expect_false(is.ideal_adaptor_stanfit(TRUE))
-  expect_false(is.ideal_adaptor_stanfit(list(1)))
-  expect_false(is.ideal_adaptor_stanfit(example_exemplar_model(n_cues = 1)))
-  expect_false(is.ideal_adaptor_stanfit(example_mvg_ideal_observer(n_cues = 1)))
-  expect_false(is.ideal_adaptor_stanfit(example_niw_ideal_adaptor(n_cues = 1)))
-  expect_true(is.ideal_adaptor_stanfit(fit))
-})
+
 
 test_that("add draws - input check (1 cue)", {
   expect_true(is_tibble(get_draws(fit, groups = "prior")))
@@ -24,8 +13,8 @@ test_that("add draws - input check (1 cue)", {
 })
 
 test_that("add draws - output check (1 cue)", {
-  expect_equal(length(unique(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F)$.draw)), 10)
-  expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), length(get_category_labels(fit)))
+  expect_equal(length(unique(get_draws(fit, groups = "prior", ndraws = 10, seed = 1)$.draw)), 10)
+  expect_equal(nrow(get_draws(fit, groups = "prior", summarize = T)), length(get_category_labels(fit)))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T)),
                c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "m", "S", "lapse_rate"))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T, nest = T)),
@@ -45,8 +34,8 @@ test_that("add draws - input check (2 cues)", {
 })
 
 test_that("add draws - output check (2 cues)", {
-  expect_equal(length(unique(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F)$.draw)), 10)
-  expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), length(get_category_labels(fit)))
+  expect_equal(length(unique(get_draws(fit, groups = "prior", ndraws = 10, seed = 1)$.draw)), 10)
+  expect_equal(nrow(get_draws(fit, groups = "prior", summarize = T)), length(get_category_labels(fit)))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T)),
                c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "m", "S", "lapse_rate"))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T, nest = T)),
@@ -148,8 +137,8 @@ test_that("add ibbu draws - input check (3 cues)", {
 })
 
 test_that("add draws - output check (3 cues)", {
-  expect_equal(length(unique(get_draws(fit, groups = "prior", ndraws = 10, seed = 1, wide = F)$.draw)), 10)
-  expect_equal(nrow(get_draws(fit, groups = "prior", wide = F, summarize = T)), length(get_category_labels(fit)))
+  expect_equal(length(unique(get_draws(fit, groups = "prior", ndraws = 10, seed = 1)$.draw)), 10)
+  expect_equal(nrow(get_draws(fit, groups = "prior", summarize = T)), length(get_category_labels(fit)))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T)),
                c(".chain", ".iteration", ".draw", "group", "category", "kappa", "nu", "m", "S", "lapse_rate"))
   expect_equal(names(get_draws(fit, groups = "prior", summarize = T, nest = T)),
@@ -173,5 +162,12 @@ test_that("get_parameter_names and get_params", {
     "deprecated"
   )
   expect_equal(pars_dep, pars)
+})
+
+test_that("get_draws warns when wide argument is supplied", {
+  expect_warning(
+    get_draws(fit, groups = "prior", ndraws = 2, seed = 1, wide = TRUE),
+    class = "lifecycle_warning_deprecated"
+  )
 })
 
