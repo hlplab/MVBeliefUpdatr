@@ -7,6 +7,7 @@
 #' @include S7-core-methods.R
 #' @include S7-stanfit.R
 #' @include S7-stanfit-methods.R
+#' @include S7-plot-engine.R
 NULL
 
 # -----------------------------------------------------------------------------
@@ -76,44 +77,48 @@ NULL
     return(sprintf("%dD exemplar model", D))
   }
   if (S7::S7_inherits(x, UVG_CategoryRepresentation)) {
-    return("1D univariate Gaussian category representation")
+    return("1D univariate Gaussian category")
   }
   if (S7::S7_inherits(x, MVG_CategoryRepresentation)) {
-    return(sprintf("%dD multivariate Gaussian category representation", D))
+    return(sprintf("%dD multivariate Gaussian category", D))
   }
   if (S7::S7_inherits(x, NIX_CategoryRepresentation)) {
     return(paste0(
       "1D normal-inverse-chi-squared ",
-      "(N\u03c7\u207b\u00b2) category representation"
+      "(N\u03c7\u207b\u00b2) category"
     ))
   }
   if (S7::S7_inherits(x, MNIX_CategoryRepresentation)) {
     return(sprintf(
       paste0(
         "%dD independent normal-inverse-chi-squared ",
-        "(MN\u03c7\u207b\u00b2) representation"
+        "(MN\u03c7\u207b\u00b2) category"
       ),
       D
     ))
   }
   if (S7::S7_inherits(x, NIW_CategoryRepresentation)) {
     return(sprintf(
-      "%dD normal-inverse-Wishart (NW\u207b\u00b9) category representation",
+      "%dD normal-inverse-Wishart (NW\u207b\u00b9) category",
       D
     ))
   }
   if (S7::S7_inherits(x, Exemplar_CategoryRepresentation)) {
-    return(sprintf("%dD exemplar category representation", D))
+    return(sprintf("%dD exemplar category", D))
   }
   if (S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
-    return(sprintf(
-      "%dD category template (%d categories)",
-      D,
-      length(x@representations)
-    ))
+    first_rep <- if (length(x@representations) > 0L) x@representations[[1L]] else NULL
+    if (!is.null(first_rep)) {
+      fam_rep <- .format_model_family_name(first_rep)
+      fam_rep <- sub(" category$", " category template", fam_rep)
+      fam_rep <- sub(" representation$", " template", fam_rep)
+      if (!grepl("template$", fam_rep)) fam_rep <- paste0(fam_rep, " template")
+      return(fam_rep)
+    }
+    return(sprintf("%dD category template", D))
   }
   if (S7::S7_inherits(x, MVBU_Stanfit)) {
-    mtype <- get_model_type(x)
+    mtype <- gsub("_", " ", get_model_type(x))
     return(sprintf("%dD %s (Stanfit)", D, mtype))
   }
   "MVBU object"
@@ -162,7 +167,7 @@ NULL
   fam <- .format_model_family_name(x)
 
   if (S7::S7_inherits(x, MVBU_CategoryRepresentation) ||
-      S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
+    S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
     return(list(title = main_title, subtitle = fam))
   }
 
@@ -183,8 +188,8 @@ NULL
     noise_trt <- noise_beh$noise_treatment %||% "no_noise"
 
     noise_txt <- if (!is.null(sigma_n) &&
-                     !identical(noise_trt, "no_noise") &&
-                     !identical(noise_trt, "none")) {
+      !identical(noise_trt, "no_noise") &&
+      !identical(noise_trt, "none")) {
       sd_n <- round(sqrt(diag(as.matrix(sigma_n))), 2)
       sprintf(
         "Noise: %s (\u03c3_noise = %s)",
@@ -213,10 +218,18 @@ NULL
       lb <- lapse_beh$lapse_bias
       l_rate <- lapse_beh$lapse_rate %||% 0
 
+      .format_prior_vec <- function(vec) {
+        if (is.null(vec) || length(vec) == 0L) return("")
+        if (length(vec) > 1L && length(unique(round(as.numeric(vec), 4))) == 1L) {
+          return(sprintf("all = %s", round(vec[1L], 2)))
+        }
+        paste(names(vec), round(vec, 2), sep = "=", collapse = ", ")
+      }
+
       priors_equal <- FALSE
       if (!is.null(cp) && !is.null(lb) && length(cp) == length(lb)) {
         if (all(names(cp) == names(lb)) &&
-            isTRUE(all.equal(as.numeric(cp), as.numeric(lb)))) {
+          isTRUE(all.equal(as.numeric(cp), as.numeric(lb)))) {
           priors_equal <- TRUE
         }
       }
@@ -224,17 +237,17 @@ NULL
       if (isTRUE(priors_equal)) {
         pri_bias_txt <- sprintf(
           "Category prior & lapse bias: %s",
-          paste(names(cp), round(cp, 2), sep = "=", collapse = ", ")
+          .format_prior_vec(cp)
         )
       } else {
         pri_txt <- sprintf(
           "Category prior: %s",
-          paste(names(cp), round(cp, 2), sep = "=", collapse = ", ")
+          .format_prior_vec(cp)
         )
         bias_txt <- if (!is.null(lb)) {
           sprintf(
             "Lapse bias: %s",
-            paste(names(lb), round(lb, 2), sep = "=", collapse = ", ")
+            .format_prior_vec(lb)
           )
         } else {
           ""
@@ -281,7 +294,9 @@ NULL
 #' @noRd
 #' @keywords internal
 .parse_cue_limits <- function(limits, cues) {
-  if (is.null(limits)) return(NULL)
+  if (is.null(limits)) {
+    return(NULL)
+  }
   if (is.numeric(limits) && length(limits) == 2L && length(cues) == 1L) {
     res <- list()
     res[[cues[1L]]] <- limits
@@ -297,7 +312,9 @@ NULL
         res[[c_name]] <- limits[[i]]
       }
     }
-    if (length(res) > 0L) return(res)
+    if (length(res) > 0L) {
+      return(res)
+    }
   }
   NULL
 }
@@ -309,8 +326,8 @@ NULL
 #' @noRd
 #' @keywords internal
 .parse_category_levels <- function(levels, aes) {
-  # Default levels correspond to two-tailed 1, 2, 3, 4 sigma
-  def_levels <- 2 * stats::pnorm(1:4) - 1
+  # Default levels correspond to two-tailed 1, 2, 3 sigma
+  def_levels <- 2 * stats::pnorm(1:3) - 1
   if (is.null(levels)) {
     return(list(contour = def_levels, fill = def_levels))
   }
@@ -386,9 +403,21 @@ NULL
     return(default_aes)
   }
   aes <- as.character(aes)
-  # "fill" defaults to "fill-gradient" in all cases
-  aes[aes == "fill"] <- "fill-gradient"
-  unique(aes)
+  res <- character()
+  for (a in aes) {
+    if (a %in% c("both", "fill_gradient_contour", "fill-gradient-contour")) {
+      res <- c(res, "fill-gradient", "contour")
+    } else if (a %in% c("fill_discrete_contour", "fill-discrete-contour")) {
+      res <- c(res, "fill-discrete", "contour")
+    } else if (a %in% c("fill", "fill_gradient", "fill-gradient")) {
+      res <- c(res, "fill-gradient")
+    } else if (a %in% c("fill_discrete", "fill-discrete")) {
+      res <- c(res, "fill-discrete")
+    } else {
+      res <- c(res, a)
+    }
+  }
+  unique(res)
 }
 
 #' Parse levels argument into contour and fill levels (legacy compatibility)
@@ -598,7 +627,55 @@ NULL
     }
   }
 
-  stop("Marginalization is currently supported down to 1 or 2 cues.")
+  if (length(cues) == 3L) {
+    idx <- match(cues, rep_cues)
+    if (any(is.na(idx))) {
+      stop("Requested cues not found in representation cue labels.")
+    }
+
+    if (S7::S7_inherits(r, MVG_CategoryRepresentation)) {
+      return(new_mvg_category_representation(
+        category_labels = cat_labels,
+        cue_labels = cues,
+        mu = r@mu[idx],
+        Sigma = r@Sigma[idx, idx]
+      ))
+    }
+    if (S7::S7_inherits(r, MNIX_CategoryRepresentation)) {
+      return(new_mnix_category_representation(
+        category_labels = cat_labels,
+        cue_labels = cues,
+        m = r@m[idx],
+        kappa = r@kappa[idx],
+        nu = r@nu[idx],
+        sigma2 = r@sigma2[idx]
+      ))
+    }
+    if (S7::S7_inherits(r, NIW_CategoryRepresentation)) {
+      D_orig <- length(rep_cues)
+      nu_sub <- r@nu - (D_orig - 3L)
+      return(new_niw_category_representation(
+        category_labels = cat_labels,
+        cue_labels = cues,
+        m = r@m[idx],
+        S = r@S[idx, idx],
+        kappa = r@kappa,
+        nu = max(nu_sub, 4.01)
+      ))
+    }
+    if (S7::S7_inherits(r, Exemplar_CategoryRepresentation)) {
+      coords <- r@exemplars[, idx, drop = FALSE]
+      return(new_exemplar_category_representation(
+        category_labels = cat_labels,
+        cue_labels = cues,
+        exemplars = coords,
+        exemplar_weights = r@exemplar_weights,
+        c = r@c
+      ))
+    }
+  }
+
+  stop("Marginalization is currently supported down to 1, 2, or 3 cues.")
 }
 
 #' Extract expected mean and covariance matrix from representation
@@ -672,12 +749,7 @@ NULL
 
   for (cat_name in names(params)) {
     p <- params[[cat_name]]
-    r <- p$rep
-    dens <- if (S7::S7_inherits(r, Exemplar_CategoryRepresentation)) {
-      r@category_likelihood_function(grid_mat)
-    } else {
-      stats::dnorm(grid_x, mean = p$mu, sd = p$sd)
-    }
+    dens <- likelihood(p$rep, grid_mat)
     df <- tibble::tibble(
       cue = grid_x,
       density = dens,
@@ -713,25 +785,29 @@ NULL
 #' Create 2D exemplar sample points data frame
 #' @noRd
 #' @keywords internal
-.make_exemplar_sample_df <- function(reps, cues, n_exemplars = 100) {
+.make_exemplar_sample_df <- function(reps, cues, n_exemplars = 0L) {
+  if (is.null(n_exemplars) || n_exemplars <= 0L) {
+    return(NULL)
+  }
   rows <- list()
   for (cat_name in names(reps)) {
     r <- reps[[cat_name]]
     if (S7::S7_inherits(r, Exemplar_CategoryRepresentation)) {
       mat <- as.matrix(r@exemplars)
       N <- nrow(mat)
-      idx <- if (is.null(n_exemplars) || N <= n_exemplars) {
-        seq_len(N)
-      } else {
-        sample.int(N, n_exemplars, replace = FALSE)
+      n_to_draw <- min(as.integer(n_exemplars), N)
+      if (n_to_draw > 0L) {
+        idx <- sample.int(N, n_to_draw, replace = FALSE)
+        sub_mat <- mat[idx, cues, drop = FALSE]
+        df <- as.data.frame(sub_mat)
+        df$Category <- cat_name
+        rows[[length(rows) + 1]] <- df
       }
-      sub_mat <- mat[idx, cues, drop = FALSE]
-      df <- as.data.frame(sub_mat)
-      df$Category <- cat_name
-      rows[[length(rows) + 1]] <- df
     }
   }
-  if (length(rows) == 0L) return(NULL)
+  if (length(rows) == 0L) {
+    return(NULL)
+  }
   dplyr::bind_rows(rows)
 }
 
@@ -740,22 +816,59 @@ NULL
 #' @keywords internal
 .make_2D_category_ellipse_df <- function(reps, cues, levels = c(0.5, 0.95)) {
   dfs <- list()
+  sort_lvls <- sort(levels, decreasing = TRUE)
 
   for (cat_name in names(reps)) {
     r <- reps[[cat_name]]
-    mc <- .get_rep_mean_and_cov(r)
-    mu_vec <- mc$mu
-    sigma_mat <- mc$Sigma
+    if (S7::S7_inherits(r, Exemplar_CategoryRepresentation)) {
+      dens_df <- .make_2D_category_density_grid_df(
+        reps = stats::setNames(list(r), cat_name),
+        cues = cues,
+        resolution = 60
+      )
+      sub_dens <- dens_df[dens_df$Category == cat_name, ]
+      gx <- sort(unique(sub_dens[[cues[1L]]]))
+      gy <- sort(unique(sub_dens[[cues[2L]]]))
+      z_mat <- matrix(sub_dens$Density, nrow = length(gx), ncol = length(gy))
+      d_vals <- sort(sub_dens$Density, decreasing = TRUE)
+      c_mass <- cumsum(d_vals) / max(sum(d_vals), 1e-12)
 
-    for (lvl in levels) {
-      el <- ellipse::ellipse(sigma_mat, centre = mu_vec, level = lvl)
-      df <- tibble::as_tibble(el)
-      names(df) <- cues[1:2]
-      df$level <- lvl
-      df$level_label <- sprintf("%d%%", round(lvl * 100))
-      df$alpha_val <- 1 - lvl
-      df$Category <- cat_name
-      dfs[[length(dfs) + 1]] <- df
+      for (k in seq_along(sort_lvls)) {
+        lvl <- sort_lvls[k]
+        brk <- d_vals[which.min(abs(c_mass - lvl))]
+        cl <- grDevices::contourLines(x = gx, y = gy, z = z_mat, levels = brk)
+        for (j in seq_along(cl)) {
+          n_pts <- length(cl[[j]]$x)
+          df_p <- data.frame(
+            x_val = cl[[j]]$x,
+            y_val = cl[[j]]$y,
+            level = lvl,
+            level_label = sprintf("%d%%", round(lvl * 100)),
+            alpha_val = (k / length(sort_lvls)) * 0.35,
+            Category = cat_name,
+            group = paste0(cat_name, ".", lvl, ".", j),
+            stringsAsFactors = FALSE
+          )
+          names(df_p)[1:2] <- cues
+          dfs[[length(dfs) + 1L]] <- df_p
+        }
+      }
+    } else {
+      mc <- .get_rep_mean_and_cov(r)
+      mu_vec <- mc$mu
+      sigma_mat <- mc$Sigma
+
+      for (lvl in levels) {
+        el <- ellipse::ellipse(sigma_mat, centre = mu_vec, level = lvl)
+        df <- tibble::as_tibble(el)
+        names(df) <- cues[1:2]
+        df$level <- lvl
+        df$level_label <- sprintf("%d%%", round(lvl * 100))
+        df$alpha_val <- 1 - lvl
+        df$Category <- cat_name
+        df$group <- interaction(cat_name, lvl)
+        dfs[[length(dfs) + 1L]] <- df
+      }
     }
   }
 
@@ -819,12 +932,7 @@ NULL
   dfs <- list()
   for (cat_name in names(params)) {
     r <- params[[cat_name]]$rep
-    dens <- if (S7::S7_inherits(r, Exemplar_CategoryRepresentation)) {
-      r@category_likelihood_function(grid_mat)
-    } else {
-      mc <- .get_rep_mean_and_cov(r)
-      mvtnorm::dmvnorm(grid_mat, mean = mc$mu, sigma = mc$Sigma)
-    }
+    dens <- likelihood(r, grid_mat)
     df_cat <- grid_df
     df_cat$Density <- dens
     df_cat$Category <- cat_name
@@ -911,12 +1019,18 @@ NULL
   aes = "contour",
   levels = NULL,
   limits = NULL,
+  n_exemplars = 0L,
   resolution = 200,
   t_sub = list(title = "", subtitle = "")
 ) {
   aes <- .normalize_plot_aes(aes, default_aes = "contour")
   lvl_spec <- .parse_category_levels(levels, aes)
   lim_spec <- .parse_cue_limits(limits, cues)
+
+  ex_df_1d <- .make_exemplar_sample_df(reps, cues[1L], n_exemplars = n_exemplars)
+  if (!is.null(ex_df_1d) && nrow(ex_df_1d) > 0L) {
+    t_sub$subtitle <- paste0(t_sub$subtitle, sprintf(" (sampling %d exemplars)", nrow(ex_df_1d)))
+  }
 
   df <- .make_1D_category_density_df(
     reps,
@@ -948,18 +1062,26 @@ NULL
     ggplot2::scale_color_manual(values = c_colors, name = "Category") +
     ggplot2::scale_fill_manual(values = c_colors, name = "Category")
 
-  has_fill <- any(c("fill-gradient", "fill-discrete", "fill") %in% aes)
-  if (has_fill || length(reps) == 1L) {
+  has_fill <- any(c("fill-discrete", "fill", "fill-gradient") %in% aes)
+  if (has_fill) {
     p <- p + ggplot2::geom_ribbon(
       ggplot2::aes(ymin = 0, ymax = .data$density),
-      alpha = 0.2
+      alpha = 0.2,
+      key_glyph = ggplot2::draw_key_rect
     )
   }
-  if ("contour" %in% aes || length(reps) == 1L) {
-    p <- p + ggplot2::geom_line(linewidth = 0.30)
+  if ("contour" %in% aes || !has_fill) {
+    p <- p + ggplot2::geom_line(linewidth = 0.30, key_glyph = ggplot2::draw_key_rect)
   }
 
-  ex_df_1d <- .make_exemplar_sample_df(reps, cues[1L], n_exemplars = NULL)
+  p <- p + ggplot2::guides(
+    color = ggplot2::guide_legend(
+      title = "Category",
+      override.aes = list(fill = c_colors, alpha = 0.5)
+    ),
+    fill = "none"
+  )
+
   if (!is.null(ex_df_1d) && nrow(ex_df_1d) > 0L) {
     p <- p + ggplot2::geom_rug(
       data = ex_df_1d,
@@ -968,8 +1090,8 @@ NULL
         color = .data$Category
       ),
       sides = "b",
-      length = ggplot2::unit(0.04, "npc"),
-      alpha = 0.7,
+      length = ggplot2::unit(0.0225, "npc"),
+      alpha = 1 / length(reps),
       linewidth = 0.30,
       inherit.aes = FALSE,
       show.legend = FALSE
@@ -991,7 +1113,7 @@ NULL
   aes = "contour",
   levels = NULL,
   limits = NULL,
-  n_exemplars = 100,
+  n_exemplars = 0L,
   resolution = 100,
   t_sub = list(title = "", subtitle = "")
 ) {
@@ -999,18 +1121,15 @@ NULL
   lvl_spec <- .parse_category_levels(levels, aes)
   lim_spec <- .parse_cue_limits(limits, cues)
 
+  ex_df <- .make_exemplar_sample_df(reps, cues, n_exemplars = n_exemplars)
+  if (!is.null(ex_df) && nrow(ex_df) > 0L) {
+    t_sub$subtitle <- paste0(t_sub$subtitle, sprintf(" (sampling %d exemplars)", nrow(ex_df)))
+  }
+
   has_ex <- any(sapply(reps, function(r) {
     S7::S7_inherits(r, Exemplar_CategoryRepresentation)
   }))
 
-  if ("fill-discrete" %in% aes && has_ex) {
-    .stop(
-      "'fill-discrete' is only supported for parametric category ",
-      "representations."
-    )
-  }
-
-  has_fill <- any(c("fill-gradient", "fill-discrete") %in% aes)
   has_contour <- "contour" %in% aes
 
   all_c <- names(reps)
@@ -1026,6 +1145,7 @@ NULL
     ) +
     .mvbu_theme()
 
+  dens_df <- NULL
   # 1. Fill Layer
   if ("fill-gradient" %in% aes) {
     dens_df <- .make_2D_category_density_grid_df(
@@ -1034,7 +1154,7 @@ NULL
       resolution = max(resolution, 60),
       limits = limits
     )
-    dens_df <- dens_df %>%
+    dens_df_tile <- dens_df %>%
       dplyr::group_by(.data$Category) %>%
       dplyr::mutate(
         rel_dens = .data$Density / max(.data$Density, 1e-12)
@@ -1042,7 +1162,7 @@ NULL
       dplyr::ungroup()
 
     p <- p + ggplot2::geom_tile(
-      data = dens_df,
+      data = dens_df_tile,
       ggplot2::aes(
         x = .data[[cues[1L]]],
         y = .data[[cues[2L]]],
@@ -1057,7 +1177,7 @@ NULL
         limits = c(0, 1),
         guide = "none"
       )
-  } else if ("fill-discrete" %in% aes) {
+  } else if (any(c("fill-discrete", "fill") %in% aes)) {
     df_el_fill <- .make_2D_category_ellipse_df(
       reps,
       cues,
@@ -1070,7 +1190,7 @@ NULL
         y = .data[[cues[2L]]],
         fill = .data$Category,
         alpha = .data$alpha_val,
-        group = interaction(.data$Category, .data$level)
+        group = .data$group
       ),
       show.legend = c(fill = TRUE, alpha = FALSE)
     ) +
@@ -1081,12 +1201,14 @@ NULL
   # 2. Contour Layer
   if (has_contour) {
     if (has_ex) {
-      dens_df <- .make_2D_category_density_grid_df(
-        reps,
-        cues,
-        resolution = max(resolution, 60),
-        limits = limits
-      )
+      if (is.null(dens_df)) {
+        dens_df <- .make_2D_category_density_grid_df(
+          reps,
+          cues,
+          resolution = max(resolution, 60),
+          limits = limits
+        )
+      }
       for (c_name in all_c) {
         sub_dens <- dens_df[dens_df$Category == c_name, ]
         d_vals <- sort(sub_dens$Density, decreasing = TRUE)
@@ -1107,6 +1229,7 @@ NULL
             breaks = brks,
             linewidth = 0.35,
             alpha = 1.0,
+            key_glyph = ggplot2::draw_key_rect,
             show.legend = c(color = TRUE)
           )
         }
@@ -1127,15 +1250,24 @@ NULL
           x = .data[[cues[1L]]],
           y = .data[[cues[2L]]],
           color = .data$Category,
-          group = interaction(.data$Category, .data$level)
+          group = .data$group
         ),
         linewidth = 0.35,
         alpha = 1.0,
+        key_glyph = ggplot2::draw_key_rect,
         show.legend = c(color = TRUE)
       ) +
         ggplot2::scale_color_manual(values = c_colors, name = "Category")
     }
   }
+
+  p <- p + ggplot2::guides(
+    color = ggplot2::guide_legend(
+      title = "Category",
+      override.aes = list(fill = c_colors, alpha = 0.5)
+    ),
+    fill = "none"
+  )
 
   # 3. Center Mean Point (size = 1.8)
   centers_df <- .make_category_centers_df(reps, cues)
@@ -1150,9 +1282,8 @@ NULL
     show.legend = FALSE
   )
 
-  # 4. Exemplar Points (size = 1.0)
-  ex_df <- .make_exemplar_sample_df(reps, cues, n_exemplars = n_exemplars)
-  if (!is.null(ex_df)) {
+  # 4. Exemplar Points (size = 1.0, alpha = 1 / length(reps))
+  if (!is.null(ex_df) && nrow(ex_df) > 0L) {
     p <- p + ggplot2::geom_point(
       data = ex_df,
       ggplot2::aes(
@@ -1160,7 +1291,7 @@ NULL
         y = .data[[cues[2L]]],
         color = .data$Category
       ),
-      alpha = 0.35,
+      alpha = 1 / length(reps),
       size = 1.0,
       shape = 16,
       show.legend = FALSE
@@ -1170,7 +1301,14 @@ NULL
   if (!is.null(lim_spec)) {
     p <- p + ggplot2::coord_cartesian(
       xlim = lim_spec[[cues[1L]]],
-      ylim = lim_spec[[cues[2L]]]
+      ylim = lim_spec[[cues[2L]]],
+      expand = FALSE
+    )
+  } else if ("fill-gradient" %in% aes && !is.null(dens_df)) {
+    p <- p + ggplot2::coord_cartesian(
+      xlim = range(dens_df[[cues[1L]]]),
+      ylim = range(dens_df[[cues[2L]]]),
+      expand = FALSE
     )
   }
 
@@ -1181,7 +1319,7 @@ NULL
 # plot_categories methods
 # -----------------------------------------------------------------------------
 
-#' @rdname plot_mvbu
+#' @rdname plot_categories
 #' @export
 S7::method(plot_categories, MVBU_CategoryRepresentation) <- function(
   x,
@@ -1190,13 +1328,20 @@ S7::method(plot_categories, MVBU_CategoryRepresentation) <- function(
   aes = NULL,
   levels = NULL,
   limits = NULL,
-  n_exemplars = 100,
+  n_exemplars = 0L,
   resolution = 100,
   ...
 ) {
   obj_cues <- get_cue_labels(x)
   if (is.null(cues)) {
-    cues <- if (length(obj_cues) > 2L) obj_cues[1:2] else obj_cues
+    cues <- if (length(obj_cues) > 3L) obj_cues[1:3] else obj_cues
+  }
+  if (length(cues) > 3L) {
+    .stop(
+      "Cannot plot more than 3 cue dimensions simultaneously (received ",
+      length(cues), " cues: ", paste(cues, collapse = ", "),
+      "). Please specify 1, 2, or 3 cues; non-plotted cues will be analytically marginalized out."
+    )
   }
   if (!all(cues %in% obj_cues)) {
     .stop(
@@ -1207,7 +1352,11 @@ S7::method(plot_categories, MVBU_CategoryRepresentation) <- function(
     )
   }
 
-  x_proj <- .marginalize_representation_to_cues(x, cues)
+  x_proj <- if (length(cues) < length(obj_cues)) {
+    .marginalize_representation_to_cues(x, cues)
+  } else {
+    x
+  }
   cats <- get_category_labels(x_proj)
   cat_name <- if (length(cats) > 0L) cats[1L] else "Category"
   reps <- list()
@@ -1226,12 +1375,26 @@ S7::method(plot_categories, MVBU_CategoryRepresentation) <- function(
       aes = aes,
       levels = levels,
       limits = limits,
+      n_exemplars = n_exemplars,
       resolution = resolution,
       t_sub = t_sub
     ))
   }
 
   if (length(cues) == 2L) {
+    if (isTRUE(list(...)$interactive) || "interactive" %in% aes) {
+      return(.render_2D_interactive_category_plot(
+        reps = reps,
+        cues = cues,
+        aes = aes,
+        levels = levels,
+        limits = limits,
+        n_exemplars = n_exemplars,
+        resolution = resolution,
+        t_sub = t_sub,
+        ...
+      ))
+    }
     return(.render_2D_category_plot(
       reps = reps,
       cues = cues,
@@ -1244,10 +1407,34 @@ S7::method(plot_categories, MVBU_CategoryRepresentation) <- function(
     ))
   }
 
-  stop("Plotting categories is currently supported for 1 or 2 cues.")
+  if (length(cues) == 3L) {
+    if (isTRUE(list(...)$interactive) || "interactive" %in% aes) {
+      return(.render_3D_interactive_category_plot(
+        reps = reps,
+        cues = cues,
+        levels = levels,
+        n_exemplars = n_exemplars,
+        resolution = resolution,
+        t_sub = t_sub,
+        ...
+      ))
+    }
+    return(.render_3D_sliced_category_plot(
+      reps = reps,
+      cues = cues,
+      aes = aes,
+      levels = levels,
+      limits = limits,
+      resolution = resolution,
+      t_sub = t_sub,
+      ...
+    ))
+  }
+
+  stop("Plotting categories is currently supported for 1, 2, or 3 cues.")
 }
 
-#' @rdname plot_mvbu
+#' @rdname plot_categories
 #' @export
 S7::method(plot_categories, MVBU_CategoryRepresentationTemplate) <- function(
   x,
@@ -1256,13 +1443,20 @@ S7::method(plot_categories, MVBU_CategoryRepresentationTemplate) <- function(
   aes = NULL,
   levels = NULL,
   limits = NULL,
-  n_exemplars = 100,
+  n_exemplars = 0L,
   resolution = 100,
   ...
 ) {
   obj_cues <- get_cue_labels(x)
   if (is.null(cues)) {
-    cues <- if (length(obj_cues) > 2L) obj_cues[1:2] else obj_cues
+    cues <- if (length(obj_cues) > 3L) obj_cues[1:3] else obj_cues
+  }
+  if (length(cues) > 3L) {
+    .stop(
+      "Cannot plot more than 3 cue dimensions simultaneously (received ",
+      length(cues), " cues: ", paste(cues, collapse = ", "),
+      "). Please specify 1, 2, or 3 cues; non-plotted cues will be analytically marginalized out."
+    )
   }
   if (!all(cues %in% obj_cues)) {
     .stop(
@@ -1281,11 +1475,39 @@ S7::method(plot_categories, MVBU_CategoryRepresentationTemplate) <- function(
     stop("No category representations match the specified categories.")
   }
 
-  reps_proj <- lapply(reps, function(r) {
-    .marginalize_representation_to_cues(r, cues)
-  })
+  reps_proj <- if (length(cues) < length(obj_cues)) {
+    lapply(reps, function(r) {
+      .marginalize_representation_to_cues(r, cues)
+    })
+  } else {
+    reps
+  }
 
   t_sub <- .make_plot_title_and_subtitle(x, "categories", cues = cues)
+
+  if (length(cues) == 3L) {
+    if (isTRUE(list(...)$interactive) || "interactive" %in% aes) {
+      return(.render_3D_interactive_category_plot(
+        reps = reps_proj,
+        cues = cues,
+        levels = levels,
+        n_exemplars = n_exemplars,
+        resolution = resolution,
+        t_sub = t_sub,
+        ...
+      ))
+    }
+    return(.render_3D_sliced_category_plot(
+      reps = reps_proj,
+      cues = cues,
+      aes = aes,
+      levels = levels,
+      limits = limits,
+      resolution = resolution,
+      t_sub = t_sub,
+      ...
+    ))
+  }
 
   if (length(cues) == 1L) {
     return(.render_1D_category_plot(
@@ -1294,12 +1516,26 @@ S7::method(plot_categories, MVBU_CategoryRepresentationTemplate) <- function(
       aes = aes,
       levels = levels,
       limits = limits,
+      n_exemplars = n_exemplars,
       resolution = resolution,
       t_sub = t_sub
     ))
   }
 
   if (length(cues) == 2L) {
+    if (isTRUE(list(...)$interactive) || "interactive" %in% aes) {
+      return(.render_2D_interactive_category_plot(
+        reps = reps_proj,
+        cues = cues,
+        aes = aes,
+        levels = levels,
+        limits = limits,
+        n_exemplars = n_exemplars,
+        resolution = resolution,
+        t_sub = t_sub,
+        ...
+      ))
+    }
     return(.render_2D_category_plot(
       reps = reps_proj,
       cues = cues,
@@ -1312,10 +1548,10 @@ S7::method(plot_categories, MVBU_CategoryRepresentationTemplate) <- function(
     ))
   }
 
-  stop("Plotting categories is currently supported for 1 or 2 cues.")
+  stop("Plotting categories is currently supported for 1, 2, or 3 cues.")
 }
 
-#' @rdname plot_mvbu
+#' @rdname plot_categories
 #' @export
 S7::method(plot_categories, MVBU_CognitiveModel) <- function(
   x,
@@ -1324,13 +1560,20 @@ S7::method(plot_categories, MVBU_CognitiveModel) <- function(
   aes = NULL,
   levels = NULL,
   limits = NULL,
-  n_exemplars = 100,
+  n_exemplars = 0L,
   resolution = 100,
   ...
 ) {
   obj_cues <- get_cue_labels(x)
   if (is.null(cues)) {
-    cues <- if (length(obj_cues) > 2L) obj_cues[1:2] else obj_cues
+    cues <- if (length(obj_cues) > 3L) obj_cues[1:3] else obj_cues
+  }
+  if (length(cues) > 3L) {
+    .stop(
+      "Cannot plot more than 3 cue dimensions simultaneously (received ",
+      length(cues), " cues: ", paste(cues, collapse = ", "),
+      "). Please specify 1, 2, or 3 cues; non-plotted cues will be analytically marginalized out."
+    )
   }
   if (!all(cues %in% obj_cues)) {
     .stop(
@@ -1353,10 +1596,13 @@ S7::method(plot_categories, MVBU_CognitiveModel) <- function(
     ...
   )
   t_sub <- .make_plot_title_and_subtitle(x, "categories", cues = cues)
-  p + labs(title = t_sub$title, subtitle = t_sub$subtitle)
+  if (inherits(p, "plotly")) {
+    return(p)
+  }
+  p + ggplot2::labs(title = t_sub$title, subtitle = t_sub$subtitle)
 }
 
-#' @rdname plot_mvbu
+#' @rdname plot_categories
 #' @export
 S7::method(plot_categories, MVBU_Stanfit) <- function(
   x,
@@ -1366,8 +1612,9 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
   aes = NULL,
   levels = NULL,
   limits = NULL,
+  sample = FALSE,
   ndraws = 100,
-  n_exemplars = 100,
+  n_exemplars = 0L,
   resolution = 100,
   show_exposure_data = FALSE,
   show_test_data = FALSE,
@@ -1375,7 +1622,14 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
 ) {
   obj_cues <- get_cue_labels(x)
   if (is.null(cues)) {
-    cues <- if (length(obj_cues) > 2L) obj_cues[1:2] else obj_cues
+    cues <- if (length(obj_cues) > 3L) obj_cues[1:3] else obj_cues
+  }
+  if (length(cues) > 3L) {
+    .stop(
+      "Cannot plot more than 3 cue dimensions simultaneously (received ",
+      length(cues), " cues: ", paste(cues, collapse = ", "),
+      "). Please specify 1, 2, or 3 cues; non-plotted cues will be analytically marginalized out."
+    )
   }
   if (!all(cues %in% obj_cues)) {
     .stop(
@@ -1395,7 +1649,7 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
     groups <- avail_grps
   }
 
-  d_sum <- get_draws(
+  d_raw <- get_draws(
     x,
     categories = categories,
     groups = groups,
@@ -1405,16 +1659,16 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
     ...
   )
 
-  if (!"Sigma" %in% names(d_sum) &&
-      "S" %in% names(d_sum) &&
-      "nu" %in% names(d_sum)) {
-    d_sum <- dplyr::mutate(
-      d_sum,
+  if (!"Sigma" %in% names(d_raw) &&
+    "S" %in% names(d_raw) &&
+    "nu" %in% names(d_raw)) {
+    d_raw <- dplyr::mutate(
+      d_raw,
       Sigma = get_expected_Sigma_from_S(.data$S, .data$nu)
     )
   }
 
-  d_sum <- d_sum %>%
+  d_sum <- d_raw %>%
     dplyr::group_by(.data$group, .data$category) %>%
     dplyr::summarise(
       mu.mean = list(purrr::reduce(.data$m, `+`) / length(.data$m)),
@@ -1482,7 +1736,43 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       ) +
       .mvbu_theme()
 
-    if ("fill" %in% aes) {
+    if (isTRUE(sample)) {
+      dfs_samples <- list()
+      for (i in seq_len(nrow(d_raw))) {
+        grp <- d_raw$group[i]
+        cat_name <- d_raw$category[i]
+        mu_sub <- d_raw$m[[i]][cue_idx]
+        sigma_mat <- as.matrix(d_raw$Sigma[[i]])
+        sigma_sub <- sqrt(max(sigma_mat[cue_idx, cue_idx], 1e-6))
+        min_x <- min(df_all[[cues[1]]])
+        max_x <- max(df_all[[cues[1]]])
+        grid_x <- seq(min_x, max_x, length.out = resolution)
+        df_s <- tibble::tibble(
+          cue = grid_x,
+          density = stats::dnorm(grid_x, mean = mu_sub, sd = sigma_sub),
+          Category = cat_name,
+          Group = grp,
+          .draw = d_raw$.draw[i]
+        )
+        names(df_s)[1] <- cues[1]
+        dfs_samples[[length(dfs_samples) + 1]] <- df_s
+      }
+      df_samples_all <- dplyr::bind_rows(dfs_samples)
+      p <- p + geom_line(
+        data = df_samples_all,
+        aes(
+          x = .data[[cues[1]]],
+          y = .data$density,
+          color = .data$Category,
+          group = interaction(.data$Category, .data$Group, .data$.draw)
+        ),
+        alpha = 0.20,
+        linewidth = 0.35,
+        show.legend = FALSE
+      )
+    }
+
+    if ("fill" %in% aes && !isTRUE(sample)) {
       p <- p + geom_ribbon(
         aes(ymin = 0, ymax = .data$density),
         alpha = 0.2
@@ -1493,7 +1783,7 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
     }
 
     if (length(unique(df_all$Group)) > 1L) {
-      p <- p + facet_wrap(~ Group)
+      p <- p + facet_wrap(~Group)
     }
 
     if (!is.null(lim_spec[[cues[1L]]])) {
@@ -1564,7 +1854,38 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       ) +
       .mvbu_theme()
 
-    if ("fill" %in% aes && length(dfs_fill) > 0L) {
+    if (isTRUE(sample)) {
+      dfs_sample_ellipses <- list()
+      top_lvl <- lvl_spec$contour[1L]
+      for (i in seq_len(nrow(d_raw))) {
+        grp <- d_raw$group[i]
+        cat_name <- d_raw$category[i]
+        mu_sub <- d_raw$m[[i]][cue_idx]
+        sigma_mat <- as.matrix(d_raw$Sigma[[i]])[cue_idx, cue_idx]
+        el <- ellipse::ellipse(sigma_mat, centre = mu_sub, level = top_lvl)
+        df_s <- tibble::as_tibble(el)
+        names(df_s) <- cues[1:2]
+        df_s$Category <- cat_name
+        df_s$Group <- grp
+        df_s$.draw <- d_raw$.draw[i]
+        dfs_sample_ellipses[[length(dfs_sample_ellipses) + 1]] <- df_s
+      }
+      df_sample_ell_all <- dplyr::bind_rows(dfs_sample_ellipses)
+      p <- p + geom_path(
+        data = df_sample_ell_all,
+        aes(
+          x = .data[[cues[1]]],
+          y = .data[[cues[2]]],
+          color = .data$Category,
+          group = interaction(.data$Group, .data$Category, .data$.draw)
+        ),
+        alpha = 0.20,
+        linewidth = 0.35,
+        show.legend = FALSE
+      )
+    }
+
+    if ("fill" %in% aes && length(dfs_fill) > 0L && !isTRUE(sample)) {
       df_fill <- dplyr::bind_rows(dfs_fill)
       p <- p + geom_polygon(
         data = df_fill,
@@ -1596,7 +1917,7 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
     }
 
     if (("fill" %in% aes && length(dfs_fill) > 0L) ||
-        ("contour" %in% aes && length(dfs_cont) > 0L)) {
+      ("contour" %in% aes && length(dfs_cont) > 0L)) {
       p <- p + scale_alpha_identity()
     }
 
@@ -1617,7 +1938,7 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
     }
 
     if (length(unique(d_sum$group)) > 1L) {
-      p <- p + facet_wrap(~ Group)
+      p <- p + facet_wrap(~Group)
     }
 
     if (!is.null(lim_spec)) {
@@ -1647,7 +1968,8 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
 #' Create a projected cognitive model on a subset of cues
 #' @noRd
 #' @keywords internal
-.make_projected_cognitive_model <- function(x, cues, decision_rule) {
+.make_projected_cognitive_model <- function(x, cues, decision_rule = NULL, noise_treatment = NULL, lapse_treatment = NULL) {
+  decision_rule <- decision_rule %||% tryCatch(x@decision_rule, error = function(e) "proportional")
   tpl <- x@category_template
   reps_proj <- lapply(tpl@representations, function(r) {
     .marginalize_representation_to_cues(r, cues)
@@ -1659,6 +1981,9 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
 
   noise_beh <- tryCatch(x@noise_behavior, error = function(e) list())
   lapse_beh <- tryCatch(x@lapse_behavior, error = function(e) list())
+
+  noise_trt <- noise_treatment %||% noise_beh$noise_treatment %||% "no_noise"
+  lapse_trt <- lapse_treatment %||% lapse_beh$lapse_treatment %||% "no_lapses"
 
   sig_noise <- noise_beh$Sigma_noise
   if (!is.null(sig_noise) && is.matrix(sig_noise)) {
@@ -1674,9 +1999,9 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       decision_rule = decision_rule,
       lapse_rate = lapse_beh$lapse_rate %||% 0,
       lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
-      lapse_treatment = lapse_beh$lapse_treatment %||% "no_lapses",
+      lapse_treatment = lapse_trt,
       Sigma_noise = sig_noise,
-      noise_treatment = noise_beh$noise_treatment %||% "no_noise"
+      noise_treatment = noise_trt
     ))
   }
   if (S7::S7_inherits(first_rep, MVG_CategoryRepresentation)) {
@@ -1686,9 +2011,9 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       decision_rule = decision_rule,
       lapse_rate = lapse_beh$lapse_rate %||% 0,
       lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
-      lapse_treatment = lapse_beh$lapse_treatment %||% "no_lapses",
+      lapse_treatment = lapse_trt,
       Sigma_noise = sig_noise,
-      noise_treatment = noise_beh$noise_treatment %||% "no_noise"
+      noise_treatment = noise_trt
     ))
   }
   if (S7::S7_inherits(first_rep, NIX_CategoryRepresentation)) {
@@ -1698,9 +2023,9 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       decision_rule = decision_rule,
       lapse_rate = lapse_beh$lapse_rate %||% 0,
       lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
-      lapse_treatment = lapse_beh$lapse_treatment %||% "no_lapses",
+      lapse_treatment = lapse_trt,
       Sigma_noise = sig_noise,
-      noise_treatment = noise_beh$noise_treatment %||% "no_noise"
+      noise_treatment = noise_trt
     ))
   }
   if (S7::S7_inherits(first_rep, MNIX_CategoryRepresentation)) {
@@ -1710,9 +2035,9 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       decision_rule = decision_rule,
       lapse_rate = lapse_beh$lapse_rate %||% 0,
       lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
-      lapse_treatment = lapse_beh$lapse_treatment %||% "no_lapses",
+      lapse_treatment = lapse_trt,
       Sigma_noise = sig_noise,
-      noise_treatment = noise_beh$noise_treatment %||% "no_noise"
+      noise_treatment = noise_trt
     ))
   }
   if (S7::S7_inherits(first_rep, NIW_CategoryRepresentation)) {
@@ -1722,9 +2047,9 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       decision_rule = decision_rule,
       lapse_rate = lapse_beh$lapse_rate %||% 0,
       lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
-      lapse_treatment = lapse_beh$lapse_treatment %||% "no_lapses",
+      lapse_treatment = lapse_trt,
       Sigma_noise = sig_noise,
-      noise_treatment = noise_beh$noise_treatment %||% "no_noise"
+      noise_treatment = noise_trt
     ))
   }
   if (S7::S7_inherits(first_rep, Exemplar_CategoryRepresentation)) {
@@ -1734,13 +2059,13 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       decision_rule = decision_rule,
       lapse_rate = lapse_beh$lapse_rate %||% 0,
       lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
-      lapse_treatment = lapse_beh$lapse_treatment %||% "no_lapses"
+      lapse_treatment = lapse_trt
     ))
   }
   stop("Unsupported representation type for projection.")
 }
 
-#' @rdname plot_mvbu
+#' @rdname plot_categorization_function
 #' @export
 S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
   x,
@@ -1751,11 +2076,20 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
   limits = NULL,
   decision_rule = "proportional",
   resolution = 100,
+  noise_treatment = NULL,
+  lapse_treatment = NULL,
   ...
 ) {
   obj_cues <- get_cue_labels(x)
   if (is.null(cues)) {
-    cues <- if (length(obj_cues) > 2L) obj_cues[1:2] else obj_cues
+    cues <- if (length(obj_cues) > 3L) obj_cues[1:3] else obj_cues
+  }
+  if (length(cues) > 3L) {
+    .stop(
+      "Cannot plot more than 3 cue dimensions simultaneously (received ",
+      length(cues), " cues: ", paste(cues, collapse = ", "),
+      "). Please specify 1, 2, or 3 cues; non-plotted cues will be analytically marginalized out."
+    )
   }
   if (!all(cues %in% obj_cues)) {
     .stop(
@@ -1767,15 +2101,68 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
   }
 
   all_cats <- get_category_labels(x)
+  if (!is.null(categories) && length(categories) > 0L) {
+    if (!all(categories %in% all_cats)) {
+      .stop(
+        "Invalid categories: ",
+        paste(setdiff(categories, all_cats), collapse = ", "),
+        ". Available categories: ",
+        paste(all_cats, collapse = ", ")
+      )
+    }
+  }
+
+  if (length(cues) == 3L) {
+    mod_proj <- if (length(obj_cues) > 3L) {
+      .make_projected_cognitive_model(
+        x, cues,
+        decision_rule = decision_rule,
+        noise_treatment = noise_treatment,
+        lapse_treatment = lapse_treatment
+      )
+    } else {
+      x
+    }
+    t_sub <- .make_plot_title_and_subtitle(
+      mod_proj,
+      "categorization",
+      cues = cues,
+      target_category = if (!is.null(categories)) categories[1L] else NULL,
+      decision_rule = decision_rule
+    )
+    return(.render_3D_sliced_categorization_plot(
+      model = mod_proj,
+      cues = cues,
+      categories = categories,
+      aes = aes,
+      decision_rule = decision_rule,
+      noise_treatment = noise_treatment,
+      lapse_treatment = lapse_treatment,
+      limits = limits,
+      resolution = resolution,
+      t_sub = t_sub,
+      ...
+    ))
+  }
+
+  all_cats <- get_category_labels(x)
   if (is.null(categories) || length(categories) == 0L) {
     categories <- all_cats[1L]
   }
   target_cat <- categories[1L]
 
-  aes <- .normalize_plot_aes(
-    aes,
-    default_aes = if (length(cues) == 1L) "contour" else "contour"
-  )
+  is_interactive <- isTRUE(list(...)$interactive) || (!is.null(aes) && "interactive" %in% aes)
+  default_aes <- if (length(cues) == 1L) {
+    "contour"
+  } else if (length(cues) == 2L && is_interactive) {
+    "fill-discrete"
+  } else {
+    "contour"
+  }
+  aes <- .normalize_plot_aes(aes, default_aes = default_aes)
+  if (is_interactive && !any(c("fill", "fill-discrete", "fill-gradient", "contour") %in% aes)) {
+    aes <- c(aes, default_aes)
+  }
   lvl_spec <- .parse_categorization_levels(levels, aes)
   lim_spec <- .parse_cue_limits(limits, cues)
   t_sub <- .make_plot_title_and_subtitle(
@@ -1790,7 +2177,12 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
   names(cat_colors) <- all_cats
 
   if (length(cues) == 1L) {
-    mod_proj <- .make_projected_cognitive_model(x, cues, decision_rule)
+    mod_proj <- .make_projected_cognitive_model(
+      x, cues,
+      decision_rule = decision_rule,
+      noise_treatment = noise_treatment,
+      lapse_treatment = lapse_treatment
+    )
     reps_proj <- mod_proj@category_template@representations
 
     dens_df <- .make_1D_category_density_df(
@@ -1811,9 +2203,23 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
     test_mat <- matrix(grid_vals, ncol = 1L)
     colnames(test_mat) <- cues[1L]
 
-    post_mat <- as.data.frame(
-      posterior(mod_proj, test_mat, categories = all_cats)
+    pf <- get_category_posterior_function(
+      mod_proj,
+      noise_treatment = noise_treatment %||% mod_proj@noise_behavior$noise_treatment,
+      lapse_treatment = lapse_treatment %||% mod_proj@lapse_behavior$lapse_treatment
     )
+    post_raw <- pf(test_mat, categories = all_cats)
+
+    eff_l_trt <- lapse_treatment %||% mod_proj@lapse_behavior$lapse_treatment
+    resp_mat <- .apply_decision_rule_to_posteriors(
+      post_raw,
+      decision_rule = decision_rule,
+      lapse_rate = if (identical(eff_l_trt, "no_lapses")) 0 else mod_proj@lapse_behavior$lapse_rate,
+      lapse_bias = if (identical(eff_l_trt, "no_lapses")) NULL else mod_proj@lapse_behavior$lapse_bias
+    )
+    colnames(resp_mat) <- all_cats
+
+    post_mat <- as.data.frame(resp_mat)
     post_mat[[cues[1L]]] <- grid_vals
 
     long_df <- tidyr::pivot_longer(
@@ -1863,7 +2269,12 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
   }
 
   if (length(cues) == 2L) {
-    mod_proj <- .make_projected_cognitive_model(x, cues, decision_rule)
+    mod_proj <- .make_projected_cognitive_model(
+      x, cues,
+      decision_rule = decision_rule,
+      noise_treatment = noise_treatment,
+      lapse_treatment = lapse_treatment
+    )
     reps_proj <- mod_proj@category_template@representations
 
     has_ex <- any(sapply(reps_proj, function(r) {
@@ -1908,12 +2319,40 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
     names(test_grid) <- cues[1:2]
     test_mat <- as.matrix(test_grid)
 
-    post_mat <- posterior(mod_proj, test_mat, categories = all_cats)
+    pf <- get_category_posterior_function(
+      mod_proj,
+      noise_treatment = noise_treatment %||% mod_proj@noise_behavior$noise_treatment,
+      lapse_treatment = lapse_treatment %||% mod_proj@lapse_behavior$lapse_treatment
+    )
+    post_raw <- pf(test_mat, categories = all_cats)
+
+    eff_l_trt <- lapse_treatment %||% mod_proj@lapse_behavior$lapse_treatment
+    resp_mat <- .apply_decision_rule_to_posteriors(
+      post_raw,
+      decision_rule = decision_rule,
+      lapse_rate = if (identical(eff_l_trt, "no_lapses")) 0 else mod_proj@lapse_behavior$lapse_rate,
+      lapse_bias = if (identical(eff_l_trt, "no_lapses")) NULL else mod_proj@lapse_behavior$lapse_bias
+    )
+    colnames(resp_mat) <- all_cats
+
+    if (isTRUE(list(...)$interactive) || "interactive" %in% aes) {
+      return(.render_2D_interactive_categorization_plot(
+        resp_mat = resp_mat,
+        gx = gx,
+        gy = gy,
+        cues = cues,
+        categories = categories,
+        cat_colors = cat_colors,
+        aes = aes,
+        t_sub = t_sub,
+        ...
+      ))
+    }
 
     dfs_cats <- list()
     for (cat_name in categories) {
       df_c <- test_grid
-      df_c$Probability <- post_mat[, cat_name]
+      df_c$Probability <- resp_mat[, cat_name]
       df_c$Category <- cat_name
       dfs_cats[[length(dfs_cats) + 1L]] <- df_c
     }
@@ -1991,6 +2430,8 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
       )
       fmt_str <- paste0("%.", n_dec, "f")
 
+      contour_alpha <- if (length(categories) >= 2L) 0.5 else 1.0
+
       if (has_fill) {
         df_first <- df_all_cats[df_all_cats$Category == target_cat, ]
         p <- p + geomtextpath::geom_textcontour(
@@ -2004,7 +2445,7 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
           breaks = lvl_spec$contour,
           color = "darkgray",
           linewidth = 0.35,
-          alpha = 1.0,
+          alpha = contour_alpha,
           size = 2.8,
           vjust = 0.5,
           show.legend = FALSE
@@ -2022,6 +2463,7 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
           ),
           breaks = lvl_spec$contour,
           linewidth = 0.35,
+          alpha = contour_alpha,
           size = 2.8,
           vjust = 0.5,
           show.legend = show_leg
@@ -2043,15 +2485,15 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
     return(p)
   }
 
-  stop("Plotting categorization function is supported for 1 or 2 cues.")
+  stop("Plotting categorization function is supported for 1, 2, or 3 cues.")
 }
 
-#' @rdname plot_mvbu
+#' @rdname plot_categorization_function
 #' @export
 S7::method(plot_categorization_function, MVBU_Stanfit) <- function(
   x,
   cues = NULL,
-  categories = get_category_labels(x)[1L],
+  categories = NULL,
   groups = NULL,
   aes = NULL,
   levels = NULL,
@@ -2066,6 +2508,16 @@ S7::method(plot_categorization_function, MVBU_Stanfit) <- function(
   if (is.null(cues)) {
     cues <- if (length(obj_cues) > 2L) obj_cues[1:2] else obj_cues
   }
+  if (length(cues) > 3L) {
+    .stop(
+      "Cannot plot more than 3 cue dimensions simultaneously (received ",
+      length(cues), " cues: ", paste(cues, collapse = ", "),
+      "). Please specify 1, 2, or 3 cues; non-plotted cues will be analytically marginalized out."
+    )
+  }
+  if (length(cues) == 3L) {
+    .stop("Plotting categorization function for MVBU_Stanfit is currently supported for 1 or 2 cues.")
+  }
   if (!all(cues %in% obj_cues)) {
     .stop(
       "Invalid cues: ",
@@ -2079,41 +2531,230 @@ S7::method(plot_categorization_function, MVBU_Stanfit) <- function(
   if (is.null(categories) || length(categories) == 0L) {
     categories <- all_cats[1L]
   }
+  target_cat <- categories[1L]
 
-  p_cat <- plot_categories(
+  avail_grps <- get_group_labels(x, include_prior = FALSE)
+  if (is.null(groups)) {
+    groups <- avail_grps
+  }
+
+  aes <- .normalize_plot_aes(
+    aes,
+    default_aes = if (length(cues) == 1L) "contour" else c("fill-gradient", "contour")
+  )
+  lvl_spec <- .parse_categorization_levels(levels, aes)
+
+  # Get parameter draws
+  d_sum <- get_draws(
     x,
-    categories = categories,
+    categories = all_cats,
     groups = groups,
-    cues = cues,
-    aes = aes,
-    levels = levels,
-    limits = limits,
     ndraws = ndraws,
-    resolution = resolution,
-    show_exposure_data = show_exposure_data,
-    show_test_data = show_test_data,
+    summarize = FALSE,
+    wide = FALSE,
     ...
   )
+
+  if (!"Sigma" %in% names(d_sum) && "S" %in% names(d_sum) && "nu" %in% names(d_sum)) {
+    d_sum <- dplyr::mutate(
+      d_sum,
+      Sigma = get_expected_Sigma_from_S(.data$S, .data$nu)
+    )
+  }
+
+  # Build limits
+  if (is.null(limits)) {
+    limits <- list()
+    for (cn in cues) {
+      min_v <- Inf
+      max_v <- -Inf
+      for (i in seq_len(nrow(d_sum))) {
+        idx <- match(cn, cues)
+        mu_val <- d_sum$m[[i]][idx]
+        sig_i <- as.matrix(d_sum$Sigma[[i]])
+        sd_val <- sqrt(max(sig_i[idx, idx], 1e-4))
+        min_v <- min(min_v, mu_val - 3 * sd_val)
+        max_v <- max(max_v, mu_val + 3 * sd_val)
+      }
+      limits[[cn]] <- c(min_v, max_v)
+    }
+  }
+
+  if (length(cues) == 1L) {
+    gx <- seq(limits[[cues[1L]]][1L], limits[[cues[1L]]][2L], length.out = resolution)
+    grid_df <- data.frame(gx)
+    names(grid_df) <- cues[1L]
+
+    res_list <- list()
+    for (grp in groups) {
+      grp_draws <- d_sum[d_sum$group == grp, ]
+      draw_ids <- unique(grp_draws$.draw)
+      for (d_id in draw_ids) {
+        sub_d <- grp_draws[grp_draws$.draw == d_id, ]
+        lik_mat <- matrix(0, nrow = nrow(grid_df), ncol = length(all_cats))
+        colnames(lik_mat) <- all_cats
+        for (j in seq_along(all_cats)) {
+          cat_row <- sub_d[sub_d$category == all_cats[j], ]
+          if (nrow(cat_row) > 0L) {
+            mu_val <- cat_row$m[[1L]][1L]
+            sig_1d <- as.matrix(cat_row$Sigma[[1L]])
+            sd_val <- sqrt(max(sig_1d[1L, 1L], 1e-6))
+            lik_mat[, j] <- stats::dnorm(grid_df[[cues[1L]]], mean = mu_val, sd = sd_val)
+          }
+        }
+        tot_lik <- rowSums(lik_mat)
+        post_cat <- ifelse(tot_lik > 0, lik_mat[, target_cat] / tot_lik, 1 / length(all_cats))
+        res_list[[length(res_list) + 1L]] <- data.frame(
+          group = grp,
+          draw = d_id,
+          x = grid_df[[cues[1L]]],
+          posterior = post_cat
+        )
+      }
+    }
+    all_res <- dplyr::bind_rows(res_list)
+    names(all_res)[3L] <- cues[1L]
+
+    sum_res <- all_res %>%
+      dplyr::group_by(.data$group, .data[[cues[1L]]]) %>%
+      dplyr::summarise(
+        mean_post = mean(.data$posterior, na.rm = TRUE),
+        q025 = stats::quantile(.data$posterior, 0.025, na.rm = TRUE),
+        q975 = stats::quantile(.data$posterior, 0.975, na.rm = TRUE),
+        .groups = "drop"
+      )
+
+    p <- ggplot2::ggplot(sum_res, ggplot2::aes(x = .data[[cues[1L]]])) +
+      ggplot2::geom_ribbon(ggplot2::aes(ymin = .data$q025, ymax = .data$q975), alpha = 0.25, fill = scales::hue_pal()(1)[1]) +
+      ggplot2::geom_line(ggplot2::aes(y = .data$mean_post), color = scales::hue_pal()(1)[1], linewidth = 0.8) +
+      ggplot2::facet_wrap(~group) +
+      ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
+      .mvbu_theme()
+  } else if (length(cues) == 2L) {
+    gx <- seq(limits[[cues[1L]]][1L], limits[[cues[1L]]][2L], length.out = resolution)
+    gy <- seq(limits[[cues[2L]]][1L], limits[[cues[2L]]][2L], length.out = resolution)
+    grid_mat <- expand.grid(x = gx, y = gy)
+    names(grid_mat) <- cues[1:2]
+    eval_pts <- as.matrix(grid_mat)
+
+    res_list <- list()
+    for (grp in groups) {
+      grp_draws <- d_sum[d_sum$group == grp, ]
+      draw_ids <- unique(grp_draws$.draw)
+      post_sum <- rep(0, nrow(grid_mat))
+      for (d_id in draw_ids) {
+        sub_d <- grp_draws[grp_draws$.draw == d_id, ]
+        lik_mat <- matrix(0, nrow = nrow(grid_mat), ncol = length(all_cats))
+        colnames(lik_mat) <- all_cats
+        for (j in seq_along(all_cats)) {
+          cat_row <- sub_d[sub_d$category == all_cats[j], ]
+          if (nrow(cat_row) > 0L) {
+            mu_vec <- cat_row$m[[1L]][1:2]
+            sig_mat <- as.matrix(cat_row$Sigma[[1L]][1:2, 1:2])
+            lik_mat[, j] <- mvtnorm::dmvnorm(eval_pts, mean = mu_vec, sigma = sig_mat)
+          }
+        }
+        tot_lik <- rowSums(lik_mat)
+        post_cat <- ifelse(tot_lik > 0, lik_mat[, target_cat] / tot_lik, 1 / length(all_cats))
+        post_sum <- post_sum + post_cat
+      }
+      grid_grp <- grid_mat
+      grid_grp$group <- grp
+      grid_grp$posterior <- post_sum / length(draw_ids)
+      grid_grp$Category <- target_cat
+      res_list[[length(res_list) + 1L]] <- grid_grp
+    }
+    all_res <- dplyr::bind_rows(res_list)
+
+    p <- ggplot2::ggplot(all_res, ggplot2::aes(x = .data[[cues[1L]]], y = .data[[cues[2L]]])) +
+      ggplot2::scale_x_continuous(expand = c(0, 0)) +
+      ggplot2::scale_y_continuous(expand = c(0, 0)) +
+      ggplot2::coord_cartesian(expand = FALSE)
+
+    if ("fill-gradient" %in% aes) {
+      p <- p + ggplot2::geom_tile(
+        data = all_res,
+        ggplot2::aes(fill = .data$posterior),
+        show.legend = TRUE
+      ) +
+        ggplot2::scale_fill_gradient(
+          low = "white",
+          high = scales::hue_pal()(1)[1],
+          limits = c(0, 1),
+          name = sprintf("P(%s)", target_cat)
+        )
+    }
+
+    if ("contour" %in% aes) {
+      contour_alpha <- if (length(all_cats) >= 2L) 0.5 else 1.0
+      if (requireNamespace("metR", quietly = TRUE)) {
+        p <- p + metR::geom_text_contour(
+          data = all_res,
+          ggplot2::aes(z = .data$posterior),
+          breaks = c(0.25, 0.5, 0.75),
+          stroke = 0.15,
+          rotate = FALSE,
+          size = 3,
+          alpha = contour_alpha
+        ) +
+          ggplot2::geom_contour(
+            data = all_res,
+            ggplot2::aes(z = .data$posterior),
+            breaks = c(0.25, 0.5, 0.75),
+            linewidth = 0.5,
+            color = "gray30",
+            alpha = contour_alpha
+          )
+      } else if (requireNamespace("geomtextpath", quietly = TRUE)) {
+        p <- p + geomtextpath::geom_textcontour(
+          data = all_res,
+          ggplot2::aes(z = .data$posterior),
+          breaks = c(0.25, 0.5, 0.75),
+          size = 3,
+          linewidth = 0.5,
+          color = "gray30",
+          alpha = contour_alpha
+        )
+      } else {
+        p <- p + ggplot2::geom_contour(
+          data = all_res,
+          ggplot2::aes(z = .data$posterior),
+          breaks = c(0.25, 0.5, 0.75),
+          linewidth = 0.5,
+          color = "gray30",
+          alpha = contour_alpha
+        )
+      }
+    }
+
+    p <- p +
+      ggplot2::facet_wrap(~group) +
+      .mvbu_theme()
+  }
+
   t_sub <- .make_plot_title_and_subtitle(
     x,
     "categorization",
     cues = cues,
     ndraws = ndraws,
-    target_category = categories[1L]
+    target_category = target_cat
   )
-  p_cat <- p_cat +
-    scale_x_continuous(expand = c(0, 0)) +
-    scale_y_continuous(expand = c(0, 0)) +
-    coord_cartesian(expand = FALSE) +
-    labs(title = t_sub$title, subtitle = t_sub$subtitle)
-  p_cat
+
+  p <- p + ggplot2::labs(
+    title = t_sub$title,
+    subtitle = t_sub$subtitle,
+    x = cues[1L],
+    y = if (length(cues) == 1L) sprintf("P(%s)", target_cat) else cues[2L]
+  )
+
+  p
 }
 
 # -----------------------------------------------------------------------------
 # plot_parameters methods
 # -----------------------------------------------------------------------------
 
-#' @rdname plot_mvbu
+#' @rdname plot_parameters
 #' @export
 S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
   x,
@@ -2174,8 +2815,8 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
   sigma_n <- noise_beh$Sigma_noise
   noise_rows <- list()
   if (!is.null(sigma_n) &&
-      !identical(noise_beh$noise_treatment, "no_noise") &&
-      !identical(noise_beh$noise_treatment, "none")) {
+    !identical(noise_beh$noise_treatment, "no_noise") &&
+    !identical(noise_beh$noise_treatment, "none")) {
     sd_n <- sqrt(pmax(diag(as.matrix(sigma_n)), 1e-6))
     for (k in seq_along(cues)) {
       noise_rows[[length(noise_rows) + 1]] <- data.frame(
@@ -2477,7 +3118,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
     theme(legend.position = "right")
 }
 
-#' @rdname plot_mvbu
+#' @rdname plot_parameters
 #' @export
 S7::method(plot_parameters, MVBU_Stanfit) <- function(
   x,
@@ -2549,6 +3190,9 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
     )
     m_df$Category <- factor(m_df$Category, levels = categories)
 
+    cat_cols <- scales::hue_pal()(length(categories))
+    names(cat_cols) <- categories
+
     panels$location <- ggplot(
       m_df,
       aes(
@@ -2559,18 +3203,33 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
     ) +
       geom_density(
         alpha = 0.5,
-        linewidth = 0.30,
-        show.legend = c(color = TRUE, fill = FALSE)
+        linewidth = 0.30
       ) +
-      scale_fill_discrete(guide = "none") +
-      guides(fill = "none") +
+      scale_fill_manual(values = cat_cols, name = "Category") +
+      scale_color_manual(values = cat_cols, name = "Category") +
+      guides(
+        color = guide_legend(
+          title = "Category",
+          override.aes = list(
+            fill = cat_cols,
+            alpha = 0.5
+          )
+        ),
+        fill = "none"
+      ) +
       facet_grid(Group ~ Cue, scales = "free", labeller = label_parsed) +
+      scale_x_continuous(breaks = scales::breaks_pretty(n = 3)) +
+      scale_y_continuous(breaks = scales::breaks_pretty(n = 3)) +
       labs(
         title = "Category location",
         x = "Location (\u03bc)",
         y = "Density"
       ) +
-      .mvbu_theme()
+      .mvbu_theme() +
+      ggplot2::theme(
+        axis.text = ggplot2::element_text(size = 8),
+        axis.text.x = ggplot2::element_text(size = 8)
+      )
   }
 
   # 2. Scale (Tau) with parsed facet expressions: tau[cue]
@@ -2605,19 +3264,33 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
     ) +
       geom_density(
         alpha = 0.5,
-        linewidth = 0.30,
-        show.legend = c(color = TRUE, fill = FALSE)
+        linewidth = 0.30
       ) +
-      scale_fill_discrete(guide = "none") +
-      guides(fill = "none") +
-      scale_x_log10() +
+      scale_fill_manual(values = cat_cols, name = "Category") +
+      scale_color_manual(values = cat_cols, name = "Category") +
+      guides(
+        color = guide_legend(
+          title = "Category",
+          override.aes = list(
+            fill = cat_cols,
+            alpha = 0.5
+          )
+        ),
+        fill = "none"
+      ) +
+      scale_x_log10(breaks = scales::breaks_log(n = 3)) +
+      scale_y_continuous(breaks = scales::breaks_pretty(n = 3)) +
       facet_grid(Group ~ Cue, scales = "free", labeller = label_parsed) +
       labs(
         title = "Category scale",
         x = "Scale (\u03c4)",
         y = "Density"
       ) +
-      .mvbu_theme()
+      .mvbu_theme() +
+      ggplot2::theme(
+        axis.text = ggplot2::element_text(size = 8),
+        axis.text.x = ggplot2::element_text(size = 8)
+      )
   }
 
   # 3. Confidence (Kappa, Nu) with parsed expressions: kappa, nu
@@ -2646,19 +3319,33 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
     ) +
       geom_density(
         alpha = 0.5,
-        linewidth = 0.30,
-        show.legend = c(color = TRUE, fill = FALSE)
+        linewidth = 0.30
       ) +
-      scale_fill_discrete(guide = "none") +
-      guides(fill = "none") +
-      scale_x_log10() +
+      scale_fill_manual(values = cat_cols, name = "Category") +
+      scale_color_manual(values = cat_cols, name = "Category") +
+      guides(
+        color = guide_legend(
+          title = "Category",
+          override.aes = list(
+            fill = cat_cols,
+            alpha = 0.5
+          )
+        ),
+        fill = "none"
+      ) +
+      scale_x_log10(breaks = scales::breaks_log(n = 3)) +
+      scale_y_continuous(breaks = scales::breaks_pretty(n = 3)) +
       facet_grid(Group ~ Parameter, scales = "free", labeller = label_parsed) +
       labs(
         title = "Category confidence",
         x = "Count",
         y = "Density"
       ) +
-      .mvbu_theme()
+      .mvbu_theme() +
+      ggplot2::theme(
+        axis.text = ggplot2::element_text(size = 8),
+        axis.text.x = ggplot2::element_text(size = 8)
+      )
   }
 
   # 4. Decision-making (Lapse rate: lambda)
@@ -2675,13 +3362,19 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
       ) +
       scale_fill_discrete(guide = "none") +
       guides(fill = "none", color = "none") +
-      facet_wrap(~ group) +
+      scale_x_continuous(breaks = scales::breaks_pretty(n = 3)) +
+      scale_y_continuous(breaks = scales::breaks_pretty(n = 3)) +
+      facet_wrap(~group) +
       labs(
         title = "Decision-making",
         x = "Lapse rate (\u03bb)",
         y = "Density"
       ) +
-      .mvbu_theme()
+      .mvbu_theme() +
+      ggplot2::theme(
+        axis.text = ggplot2::element_text(size = 8),
+        axis.text.x = ggplot2::element_text(size = 8)
+      )
   }
 
   if (length(panels) == 0L) {
@@ -2701,7 +3394,6 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
       title = t_sub$title,
       subtitle = t_sub$subtitle
     ) &
-    guides(fill = "none") &
     theme(legend.position = "right")
 }
 
@@ -2709,7 +3401,7 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
 # plot_parameter_correlations methods
 # -----------------------------------------------------------------------------
 
-#' @rdname plot_mvbu
+#' @rdname plot_parameters
 #' @export
 S7::method(plot_parameter_correlations, MVBU_Stanfit) <- function(
   x,
@@ -2873,7 +3565,7 @@ S7::method(plot_parameter_correlations, MVBU_Stanfit) <- function(
     c_clean <- gsub("[^A-Za-z0-9]", "", as.character(cat_name))
     cat_idx <- which(
       grepl(paste0("_", c_clean, "(_|__)"), param_cols) |
-      grepl(paste0("^", c_clean, "_"), param_cols)
+        grepl(paste0("^", c_clean, "_"), param_cols)
     )
     if (length(cat_idx) > 0L) {
       min_idx <- min(cat_idx)
@@ -2938,7 +3630,7 @@ S7::method(plot_parameter_correlations, MVBU_Stanfit) <- function(
 # plot_parameters_pairwise methods
 # -----------------------------------------------------------------------------
 
-#' @rdname plot_mvbu
+#' @rdname plot_parameters
 #' @export
 S7::method(plot_parameters_pairwise, MVBU_Stanfit) <- function(
   x,
@@ -3171,9 +3863,9 @@ S7::method(plot_parameters_pairwise, MVBU_Stanfit) <- function(
     c_clean <- gsub("[^A-Za-z0-9]", "", c_name)
     c_pars <- param_cols[
       grepl(paste0("_(", c_clean, ")_"), param_cols) |
-      grepl(paste0("_(", c_clean, ")$"), param_cols) |
-      grepl(paste0("^(kappa|nu)_", c_clean), param_cols) |
-      grepl(paste0("^(m|tau|rho)_", c_clean, "_"), param_cols)
+        grepl(paste0("_(", c_clean, ")$"), param_cols) |
+        grepl(paste0("^(kappa|nu)_", c_clean), param_cols) |
+        grepl(paste0("^(m|tau|rho)_", c_clean, "_"), param_cols)
     ]
     if (length(c_pars) > 0L) {
       for (p1 in c_pars) {
@@ -3359,7 +4051,7 @@ S7::method(plot_parameters_pairwise, MVBU_Stanfit) <- function(
 # plot_cues methods
 # -----------------------------------------------------------------------------
 
-#' @rdname plot_mvbu
+#' @rdname plot_cues
 #' @export
 S7::method(plot_cues, MVBU_Object) <- function(
   x,
@@ -3438,7 +4130,7 @@ S7::method(plot_cues, MVBU_Object) <- function(
 # plot_diagnostics methods
 # -----------------------------------------------------------------------------
 
-#' @rdname plot_mvbu
+#' @rdname plot_diagnostics
 #' @export
 S7::method(plot_diagnostics, MVBU_Stanfit) <- function(x, ...) {
   fit <- get_stanfit(x)
@@ -3470,4 +4162,16 @@ S7::method(plot, MVBU_CognitiveModel) <- function(x, ...) {
 #' @export
 S7::method(plot, MVBU_Stanfit) <- function(x, ...) {
   plot_categories(x, ...)
+}
+
+# -----------------------------------------------------------------------------
+# Convenience Function Aliases
+# -----------------------------------------------------------------------------
+
+
+
+#' @rdname plot_parameters
+#' @export
+plot_correlations <- function(x, ...) {
+  plot_parameter_correlations(x, ...)
 }

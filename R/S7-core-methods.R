@@ -1119,3 +1119,214 @@ S7::method(evaluate_model, MVBU_CognitiveModel) <- function(
   }
   r
 }
+
+# -----------------------------------------------------------------------------
+# sample_observations methods
+# -----------------------------------------------------------------------------
+
+S7::method(sample_observations, MVBU_CategoryRepresentation) <- function(
+  x,
+  n = 1L,
+  with_replacement = TRUE,
+  randomize_order = TRUE,
+  ...
+) {
+  dots <- list(...)
+  if ("Ns" %in% names(dots)) n <- dots$Ns
+  if ("randomize.order" %in% names(dots)) randomize_order <- dots$randomize.order
+
+  .assert_true(.is_non_NA_scalar_count(n) && n >= 0L, msg = "n must be a non-negative whole number.")
+  cues <- get_cue_labels(x)
+  cat_lbl <- .mvbu_extract_label_metadata(x)$category
+
+  if (n == 0L) {
+    empty_df <- as.data.frame(matrix(numeric(0), nrow = 0, ncol = length(cues), dimnames = list(NULL, cues)))
+    empty_df <- dplyr::mutate(tibble::as_tibble(empty_df), category = factor(character(0), levels = cat_lbl), .before = 1)
+    return(empty_df)
+  }
+
+  family <- .mvbu_family_of_representation(x)
+  mat <- .mvbu_sample_from_representation(x, from = family, n = n, with_replacement = with_replacement)
+  colnames(mat) <- cues
+
+  df <- tibble::as_tibble(mat)
+  df <- dplyr::mutate(df, category = factor(rep(cat_lbl, n), levels = cat_lbl), .before = 1)
+  if (isTRUE(randomize_order) && nrow(df) > 1L) {
+    df <- df[sample.int(nrow(df)), , drop = FALSE]
+  }
+  tibble::as_tibble(df)
+}
+
+S7::method(sample_observations, MVBU_CategoryRepresentationTemplate) <- function(
+  x,
+  n = 1L,
+  with_replacement = TRUE,
+  randomize_order = TRUE,
+  ...
+) {
+  dots <- list(...)
+  if ("Ns" %in% names(dots)) n <- dots$Ns
+  if ("randomize.order" %in% names(dots)) randomize_order <- dots$randomize.order
+
+  reps <- x@representations
+  K <- length(reps)
+  cat_labels <- get_category_labels(x)
+  cue_labels <- get_cue_labels(x)
+
+  .assert_true(
+    .is_non_NA_scalar_count(n) || (is.numeric(n) && length(n) == K),
+    msg = "n must be a non-negative whole number or a vector of counts with one element per category."
+  )
+
+  if (length(n) == 1L) {
+    if (n == 0L) {
+      empty_df <- as.data.frame(matrix(numeric(0), nrow = 0, ncol = length(cue_labels), dimnames = list(NULL, cue_labels)))
+      empty_df <- dplyr::mutate(tibble::as_tibble(empty_df), category = factor(character(0), levels = cat_labels), .before = 1)
+      return(empty_df)
+    }
+
+    # Total available exemplars check if without replacement
+    has_ex <- any(vapply(reps, function(r) S7::S7_inherits(r, Exemplar_CategoryRepresentation), logical(1)))
+    if (!isTRUE(with_replacement) && has_ex) {
+      avail_per_cat <- vapply(reps, function(r) {
+        if (S7::S7_inherits(r, Exemplar_CategoryRepresentation)) nrow(r@exemplars) else Inf
+      }, numeric(1))
+      total_avail <- sum(avail_per_cat)
+      if (n > total_avail) {
+        .stop(sprintf(
+          "Requested %d samples without replacement, but template only contains %d total exemplars across categories.",
+          n, as.integer(total_avail)
+        ))
+      }
+    }
+
+    # Uniform sampling across categories (n total draws)
+    cat_draws <- sample.int(K, size = n, replace = TRUE)
+    n_per_cat <- as.vector(table(factor(cat_draws, levels = seq_len(K))))
+  } else {
+    n_per_cat <- as.integer(n)
+  }
+
+  rows <- lapply(seq_len(K), function(i) {
+    n_i <- n_per_cat[i]
+    if (n_i == 0L) return(NULL)
+    rep_i <- reps[[i]]
+    fam_i <- .mvbu_family_of_representation(rep_i)
+
+    # Check without replacement condition for exemplar
+    if (!isTRUE(with_replacement) && fam_i == "EXEMPLAR") {
+      n_avail_i <- nrow(rep_i@exemplars)
+      if (n_i > n_avail_i) {
+        .stop(sprintf(
+          "Random sampling without replacement allocated %d observations to category '%s', but it only contains %d exemplars. Because category assignment is a random process, re-evoking the function or increasing category exemplars may resolve this.",
+          n_i, cat_labels[i], n_avail_i
+        ))
+      }
+    }
+
+    mat_i <- .mvbu_sample_from_representation(rep_i, from = fam_i, n = n_i, with_replacement = with_replacement)
+    colnames(mat_i) <- cue_labels
+    df_i <- tibble::as_tibble(mat_i)
+    dplyr::mutate(df_i, category = cat_labels[i], .before = 1)
+  })
+
+  out <- dplyr::bind_rows(rows)
+  out$category <- factor(out$category, levels = cat_labels)
+
+  if (isTRUE(randomize_order) && nrow(out) > 1L) {
+    out <- out[sample.int(nrow(out)), , drop = FALSE]
+  }
+
+  tibble::as_tibble(out)
+}
+
+S7::method(sample_observations, MVBU_CognitiveModel) <- function(
+  x,
+  n = 1L,
+  with_replacement = TRUE,
+  randomize_order = TRUE,
+  ...
+) {
+  dots <- list(...)
+  if ("Ns" %in% names(dots)) n <- dots$Ns
+  if ("randomize.order" %in% names(dots)) randomize_order <- dots$randomize.order
+
+  reps <- x@category_template@representations
+  K <- length(reps)
+  cat_labels <- get_category_labels(x)
+  cue_labels <- get_cue_labels(x)
+
+  .assert_true(
+    .is_non_NA_scalar_count(n) || (is.numeric(n) && length(n) == K),
+    msg = "n must be a non-negative whole number or a vector of counts with one element per category."
+  )
+
+  if (length(n) == 1L) {
+    if (n == 0L) {
+      empty_df <- as.data.frame(matrix(numeric(0), nrow = 0, ncol = length(cue_labels), dimnames = list(NULL, cue_labels)))
+      empty_df <- dplyr::mutate(tibble::as_tibble(empty_df), category = factor(character(0), levels = cat_labels), .before = 1)
+      return(empty_df)
+    }
+
+    # Total available exemplars check if without replacement
+    has_ex <- any(vapply(reps, function(r) S7::S7_inherits(r, Exemplar_CategoryRepresentation), logical(1)))
+    if (!isTRUE(with_replacement) && has_ex) {
+      avail_per_cat <- vapply(reps, function(r) {
+        if (S7::S7_inherits(r, Exemplar_CategoryRepresentation)) nrow(r@exemplars) else Inf
+      }, numeric(1))
+      total_avail <- sum(avail_per_cat)
+      if (n > total_avail) {
+        .stop(sprintf(
+          "Requested %d samples without replacement, but model template only contains %d total exemplars across categories.",
+          n, as.integer(total_avail)
+        ))
+      }
+    }
+
+    # Proportional sampling to category_prior
+    cp <- x@category_prior
+    if (is.null(cp) || length(cp) != K || any(is.na(cp)) || sum(cp) <= 0) {
+      cp <- rep(1 / K, K)
+    } else {
+      cp <- cp / sum(cp)
+    }
+
+    cat_draws <- sample.int(K, size = n, replace = TRUE, prob = as.numeric(cp))
+    n_per_cat <- as.vector(table(factor(cat_draws, levels = seq_len(K))))
+  } else {
+    n_per_cat <- as.integer(n)
+  }
+
+  rows <- lapply(seq_len(K), function(i) {
+    n_i <- n_per_cat[i]
+    if (n_i == 0L) return(NULL)
+    rep_i <- reps[[i]]
+    fam_i <- .mvbu_family_of_representation(rep_i)
+
+    # Check without replacement condition for exemplar
+    if (!isTRUE(with_replacement) && fam_i == "EXEMPLAR") {
+      n_avail_i <- nrow(rep_i@exemplars)
+      if (n_i > n_avail_i) {
+        .stop(sprintf(
+          "Random sampling without replacement allocated %d observations to category '%s', but it only contains %d exemplars. Because category assignment is proportional to category priors and involves a random process, re-evoking the function or increasing category exemplars may resolve this.",
+          n_i, cat_labels[i], n_avail_i
+        ))
+      }
+    }
+
+    mat_i <- .mvbu_sample_from_representation(rep_i, from = fam_i, n = n_i, with_replacement = with_replacement)
+    colnames(mat_i) <- cue_labels
+    df_i <- tibble::as_tibble(mat_i)
+    dplyr::mutate(df_i, category = cat_labels[i], .before = 1)
+  })
+
+  out <- dplyr::bind_rows(rows)
+  out$category <- factor(out$category, levels = cat_labels)
+
+  if (isTRUE(randomize_order) && nrow(out) > 1L) {
+    out <- out[sample.int(nrow(out)), , drop = FALSE]
+  }
+
+  tibble::as_tibble(out)
+}
+

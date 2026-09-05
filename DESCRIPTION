@@ -19,7 +19,12 @@ Roxygen: list(markdown = TRUE)
 RdMacros: Rdpack
 Suggests:
     testthat (>= 2.1.0),
-    covr
+    covr,
+    knitr,
+    rmarkdown,
+    plotly,
+    patchwork
+VignetteBuilder: knitr
 Biarch: true
 Depends:
     R (>= 3.5.0)
@@ -95,6 +100,7 @@ Collate:
     'S7-make-objects.R'
     'S7-example-objects.R'
     'S7-phase2-migration.R'
+    'S7-plot-engine.R'
     'S7-transform-information.R'
     'S7-staninput.R'
     'S7-stanfit-input.R'

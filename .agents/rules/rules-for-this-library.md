@@ -14,6 +14,7 @@ trigger: always_on
 
 1e. Documentation of class objects should be marked following roxygen recommendations (which might differ for S7 and S3 classes).
 
+1f. All functions/methods/classes should have roxygen documentation for all of their params/slots/etc. Defaults (explicit in the argument statements of the function or implicit in the code) should always be stated as part of the param description.
 
 
 2. Aim for transparency. Code should be human readable to make it easier to maintain. Avoid unnecessary complexity or convoluted code.

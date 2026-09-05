@@ -470,55 +470,149 @@ get_number_of_draws <- S7::new_generic("get_number_of_draws", "fit")
 get_random_draw_indices <- S7::new_generic("get_random_draw_indices", "fit")
 
 
-#' Plot functions for MVBU objects
+#' Plot category representations and distributions
 #'
-#' Generic plotting functions for MVBU objects, including cognitive models,
-#' category representations, templates, stanfits, and staninput objects.
+#' Generic plotting function for visualizing category representations (densities,
+#' contour lines, confidence ellipses, exemplar clouds, and 3D density surfaces/ellipsoids)
+#' across single category representations, multi-category templates, cognitive decision models,
+#' and fitted Stan models.
 #'
 #' @param x An MVBU object (\code{\link{MVBU_CategoryRepresentation}},
 #'   \code{\link{MVBU_CategoryRepresentationTemplate}},
 #'   \code{\link{MVBU_CognitiveModel}}, or \code{\link{MVBU_Stanfit}}).
-#' @param cues Character vector of cue names to plot (1D or 2D).
-#' @param categories Character vector of category names. For
-#'   \code{plot_categories}, defaults to \code{NULL} (all categories). For
-#'   \code{plot_categorization_function}, defaults to the first category
-#'   (\code{get_category_labels(x)[1L]}).
-#' @param aes Plot aesthetic: \code{"contour"}, \code{"fill-gradient"},
-#'   \code{"fill-discrete"}, or combinations like
-#'   \code{c("fill-gradient", "contour")}. Defaults to \code{"contour"} for 2D
-#'   plots. \code{"fill"} defaults to \code{"fill-gradient"} in all cases.
-#'   \code{"fill-discrete"} is only available for parametric representations.
-#' @param levels Numeric vector or list specifying density / probability
-#'   levels. For \code{plot_categories}, defaults to two-tailed central
-#'   probabilities corresponding to 1, 2, 3, 4 sigma
-#'   (\code{2 * stats::pnorm(1:4) - 1}). For
-#'   \code{plot_categorization_function}, defaults to
-#'   \code{c(0.01, 0.10, 0.25, 0.50, 0.75, 0.90, 0.99)}.
+#' @param cues Character vector of cue names to plot (1, 2, or 3 cues). Defaults
+#'   to all cues of the model up to 3 (or the first 3 cues if the model has more
+#'   than 3 cues, analytically marginalizing out all remaining dimensions). At most
+#'   3 cue dimensions can be plotted simultaneously.
+#' @param categories Character vector of category names to include. Defaults to
+#'   \code{NULL} (all categories).
+#' @param aes Plot aesthetic: \code{"contour"}, \code{"fill"},
+#'   \code{"fill-gradient"}, \code{"fill-discrete"}, \code{"scatter"}, or
+#'   combinations like \code{c("fill-gradient", "contour")}. For 1D and 2D
+#'   categories, defaults to \code{c("fill-gradient", "contour")}. For 3D slices,
+#'   defaults to \code{"contour"}. For 3D interactive parametric representations,
+#'   defaults to \code{"fill-discrete"}. For exemplar representations, defaults to
+#'   \code{"scatter"}.
+#' @param levels Numeric vector or list specifying density / probability levels.
+#'   Defaults to two-tailed central probabilities corresponding to 1, 2, 3 sigma
+#'   (\code{2 * stats::pnorm(1:3) - 1}) for 1D/2D and sliced plots, and 2 sigma
+#'   (\code{2 * stats::pnorm(2) - 1}) for 3D interactive ellipsoids. For a
+#'   bivariate normal distribution \eqn{\mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})},
+#'   the squared Mahalanobis distance follows \eqn{\chi^2_2}, meaning the ellipse
+#'   enclosing mass \eqn{p \in (0, 1)} has radius
+#'   \eqn{r = \sqrt{F_{\chi^2_2}^{-1}(p)} = \sqrt{-2 \ln(1 - p)}}.
 #' @param limits Optional named list or numeric vector specifying axis / cue
 #'   limits (e.g. \code{list(F1 = c(200, 800), F2 = c(800, 2500))}). Defaults to
-#'   \code{NULL} (computed from category statistics or exemplars).
-#' @param groups Character vector of group names to plot for
-#'   \code{\link{MVBU_Stanfit}} objects. For \code{plot_parameters_pairwise}
-#'   and \code{plot_parameter_correlations}, defaults to \code{"prior"}
-#'   (available groups include \code{"prior"} and all exposure groups).
-#'   For \code{plot_parameters}, defaults to all groups, including the prior.
-#' @param pars Character vector of parameter names to filter in
-#'   \code{plot_parameters}, \code{plot_parameter_correlations}, and
-#'   \code{plot_parameters_pairwise}. Defaults to \code{NULL} (all
-#'   parameters).
-#' @param combine_into_single_plot Logical; if \code{TRUE} (default), combines
-#'   multi-panel parameter subplots into a single plot via \pkg{patchwork}.
+#'   \code{NULL} (automatically computed from category distributions or
+#'   exemplars).
+#' @param resolution Integer specifying the grid resolution along continuous cue
+#'   dimensions. Defaults to \code{100L} for 1D/2D category plots and \code{60L}
+#'   for 3D sliced category plots.
 #' @param n_exemplars Integer specifying max number of exemplars to randomly
-#'   sample and plot for exemplar representations. Defaults to 100 (\code{NULL}
-#'   plots all exemplars).
-#' @param ndraws Number of posterior draws to use when plotting from
-#'   \code{\link{MVBU_Stanfit}}. Defaults to 100 (\code{NULL} uses all draws).
-#' @param ... Additional arguments passed to specific plotting methods.
+#'   sample and plot for exemplar representations. Defaults to \code{0L} for 1D/2D
+#'   (no exemplars plotted) and \code{100L} for 3D interactive scatter plots.
+#' @param slices Optional numeric vector of values along the third cue to slice
+#'   at for 3D sliced plots. Defaults to \code{NULL} (automatically generates 5
+#'   slices at -2, -1, 0, 1, and 2 standard deviations from the pooled mean).
+#' @param slice_cue Optional character string naming the third cue along which to
+#'   slice for 3D sliced plots. Defaults to \code{NULL} (the 3rd cue in \code{cues}).
+#' @param sample Logical; if \code{TRUE}, evaluates and displays individual
+#'   MCMC posterior sample draws (as thin translucent curves or ellipses)
+#'   overlaid on the posterior mean distribution for \code{\link{MVBU_Stanfit}}.
+#'   Defaults to \code{FALSE}.
+#' @param groups Character vector of group names to plot for
+#'   \code{\link{MVBU_Stanfit}} objects. Defaults to all exposure groups.
+#' @param ndraws Integer specifying the number of posterior MCMC draws to use
+#'   when extracting parameters or plotting from \code{\link{MVBU_Stanfit}}.
+#'   Defaults to \code{100L} (\code{NULL} uses all draws).
+#' @param show_exposure_data Logical; if \code{TRUE}, overlays observed exposure
+#'   data points on \code{\link{MVBU_Stanfit}} category plots. Defaults to
+#'   \code{FALSE}.
+#' @param show_test_data Logical; if \code{TRUE}, overlays observed test data
+#'   points on \code{\link{MVBU_Stanfit}} category plots. Defaults to
+#'   \code{FALSE}.
+#' @param parallel Logical; if \code{TRUE}, parallelizes grid evaluations over
+#'   multiple CPU chunks using \pkg{parallel}. Defaults to \code{FALSE}.
+#' @param n_cores Integer specifying the number of CPU cores to use when
+#'   \code{parallel = TRUE}. Defaults to \code{NULL} (which automatically uses
+#'   \code{max(1L, parallel::detectCores() - 1L)}).
+#' @param noise_treatment Optional character string specifying treatment of
+#'   perceptual noise (\code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}).
+#'   Defaults to \code{NULL} (uses the model's configured noise treatment).
+#' @param lapse_treatment Optional character string specifying treatment of lapses
+#'   (\code{"no_lapses"} or \code{"lapses"}). Defaults to \code{NULL} (uses the
+#'   model's configured lapse treatment).
+#' @param ... Additional arguments passed to specific plotting methods (e.g.,
+#'   \code{interactive = TRUE} for interactive 3D WebGL scenes via Plotly).
+#' @return A \code{ggplot} object (or a \code{plotly} htmlwidget if
+#'   \code{interactive = TRUE}). Because ggplot output is a standard \code{ggplot}
+#'   / \pkg{patchwork} object, it can be further customized with additional layers,
+#'   scales, themes, or facets.
+#' @details
+#' In 3D interactive category plots (\code{plot_categories} with \code{interactive = TRUE}),
+#' large diamond markers represent category means. For exemplar representations, the
+#' mean is computed across all stored exemplars.
+#' @seealso \code{\link{plot_categorization_function}}, \code{\link{plot_parameters}},
+#'   \code{\link{likelihood}}, \code{\link{posterior}}
+#' @rdname plot_categories
+#' @export
+plot_categories <- S7::new_generic("plot_categories", "x")
+
+#' Plot categorization decision functions and response boundaries
+#'
+#' Visualizes predicted categorization response probabilities and decision boundaries
+#' across cue dimensions for cognitive models and fitted Stan models. Supports
+#' proportional probability matching, deterministic criterion/MAP classification, and
+#' stochastic sampling decision rules, fully accounting for perceptual noise and lapses.
+#'
+#' @inheritParams plot_categories
+#' @param categories Character vector of category names to evaluate and plot.
+#'   Defaults to the first category (\code{get_category_labels(x)[1L]}).
+#' @param decision_rule Character string specifying the decision rule to use
+#'   for categorization predictions (\code{"proportional"}, \code{"criterion"},
+#'   or \code{"sampling"}). Defaults to \code{"proportional"}.
+#' @param aes Plot aesthetic: \code{"contour"}, \code{"fill"}, \code{"fill-gradient"},
+#'   or \code{"fill-discrete"}. Defaults to \code{"contour"} for 1D/2D static plots,
+#'   and \code{"fill-discrete"} for 2D interactive plots (\code{interactive = TRUE}).
+#'   When \code{interactive = TRUE} (or \code{aes = "interactive"}), renders a 3D
+#'   response probability surface via Plotly.
+#' @param levels Numeric vector specifying response probability contour levels.
+#'   Defaults to \code{c(0.01, 0.10, 0.25, 0.50, 0.75, 0.90, 0.99)}.
+#' @param resolution Integer specifying grid resolution along continuous cue dimensions.
+#'   Defaults to \code{100L} for 1D and \code{60L} for 2D/3D.
+#' @return A \code{ggplot} object (or a \code{plotly} htmlwidget if \code{interactive = TRUE}).
+#' @seealso \code{\link{plot_categories}}, \code{\link{plot_parameters}},
+#'   \code{\link{categorize}}, \code{\link{posterior}}
+#' @rdname plot_categorization_function
+#' @export
+plot_categorization_function <- S7::new_generic(
+  "plot_categorization_function",
+  "x"
+)
+
+#' Plot model parameter estimates, correlations, and pairwise posterior distributions
+#'
+#' Visualizes category parameter estimates (means, covariance ellipses, SDs, correlations),
+#' parameter correlation matrices across MCMC draws, and pairwise posterior parameter
+#' scatter/contour matrices for category representations, templates, cognitive models,
+#' and fitted Stan models.
+#'
+#' @inheritParams plot_categories
+#' @param pars Character vector of parameter names to filter in \code{plot_parameters},
+#'   \code{plot_parameter_correlations}, and \code{plot_parameters_pairwise}. Defaults
+#'   to \code{NULL} (all parameters).
+#' @param groups Character vector of group names to plot for \code{\link{MVBU_Stanfit}}
+#'   objects. For \code{plot_parameters}, defaults to all groups including the prior.
+#'   For \code{plot_parameters_pairwise} and \code{plot_parameter_correlations}, defaults
+#'   to \code{"prior"}.
+#' @param combine_into_single_plot Logical; if \code{TRUE} (default), combines
+#'   multi-panel parameter subplots into a single unified figure via \pkg{patchwork}.
+#'   If \code{FALSE}, returns a named list of individual \code{ggplot} panel objects.
+#' @param ci_level Numeric credibility interval level (e.g. \code{0.95}). Defaults to
+#'   \code{0.95}.
+#' @param ... Additional arguments passed to specific parameter plotting methods.
 #' @return A \code{ggplot} object (or list of \code{ggplot} objects if
-#'   \code{combine_into_single_plot = FALSE}). Because output is a standard
-#'   \code{ggplot} / \pkg{patchwork} object, it can be further customized with
-#'   additional layers, scales, themes, or facets (e.g.
-#'   \code{+ facet_wrap(~ Category)}).
+#'   \code{combine_into_single_plot = FALSE}).
 #' @details
 #' In parameter plots, scale is displayed as standard deviation
 #' \eqn{\tau = \text{SD} = \sqrt{\text{diag}(\boldsymbol{\Sigma})}} (or the
@@ -541,42 +635,38 @@ get_random_draw_indices <- S7::new_generic("get_random_draw_indices", "fit")
 #' posterior auto-densities scaled to panel height; and the upper triangle
 #' displays 2D posterior density contour lines (\code{geom_density_2d} with
 #' normalized density contours). Points and curves are colored by group.
-#' @seealso \code{\link{categorize}}, \code{\link{posterior}},
+#' @aliases plot_correlations plot_parameter_correlations plot_parameters_pairwise
+#' @seealso \code{\link{plot_categories}}, \code{\link{plot_categorization_function}},
 #'   \code{\link{get_parameters}}, \code{\link{get_draws}}
-#' @rdname plot_mvbu
-#' @export
-plot_categories <- S7::new_generic("plot_categories", "x")
-
-#' @rdname plot_mvbu
-#' @export
-plot_categorization_function <- S7::new_generic(
-  "plot_categorization_function",
-  "x"
-)
-
-#' @rdname plot_mvbu
+#' @rdname plot_parameters
 #' @export
 plot_parameters <- S7::new_generic("plot_parameters", "x")
 
-#' @rdname plot_mvbu
+#' @rdname plot_parameters
 #' @export
 plot_parameter_correlations <- S7::new_generic(
   "plot_parameter_correlations",
   "x"
 )
 
-#' @rdname plot_mvbu
+#' @rdname plot_parameters
 #' @export
 plot_parameters_pairwise <- S7::new_generic(
   "plot_parameters_pairwise",
   "x"
 )
 
-#' @rdname plot_mvbu
+#' Plot cue distributions
+#'
+#' @inheritParams plot_categories
+#' @rdname plot_cues
 #' @export
 plot_cues <- S7::new_generic("plot_cues", "x")
 
-#' @rdname plot_mvbu
+#' Plot Stan MCMC diagnostics
+#'
+#' @inheritParams plot_categories
+#' @rdname plot_diagnostics
 #' @export
 plot_diagnostics <- S7::new_generic("plot_diagnostics", "x")
 
@@ -629,3 +719,35 @@ evaluate_model <- S7::new_generic("evaluate_model", "model", function(
 ) {
   S7::S7_dispatch()
 })
+
+#' Sample observations from category representations, templates, or cognitive models
+#'
+#' Generates simulated cue observations by sampling from an individual category representation,
+#' a multi-category template, or a complete cognitive model.
+#' \itemize{
+#'   \item For single representations (\code{\link{MVBU_CategoryRepresentation}}), samples \eqn{n} observations from the representation's distribution.
+#'   \item For templates (\code{\link{MVBU_CategoryRepresentationTemplate}}), samples \eqn{n} total observations distributed uniformly across categories.
+#'   \item For cognitive models (\code{\link{MVBU_CognitiveModel}}), samples \eqn{n} total observations distributed across categories proportionally to the model's \code{category_prior}.
+#' }
+#'
+#' @param x An \code{\link{MVBU_CategoryRepresentation}}, \code{\link{MVBU_CategoryRepresentationTemplate}}, or \code{\link{MVBU_CognitiveModel}} object.
+#' @param n Non-negative integer specifying the total number of observations to sample. Defaults to \code{1L}.
+#' @param with_replacement Logical; for exemplar representations, specifies whether to sample exemplars with replacement (\code{TRUE}, default) or without replacement (\code{FALSE}). Ignored for parametric families.
+#' @param randomize_order Logical; whether to randomize the row order of the returned observations. Defaults to \code{TRUE}.
+#' @param ... Additional arguments passed to methods (e.g., \code{Ns} or \code{randomize.order} for backwards compatibility).
+#' @return A tibble with \eqn{n} rows containing a \code{category} factor column (with levels matching category labels) and one numeric column per cue.
+#' @seealso \code{\link{plot_categories}}, \code{\link{likelihood}}, \code{\link{posterior}}
+#' @rdname sample_observations
+#' @export
+sample_observations <- S7::new_generic(
+  "sample_observations",
+  "x",
+  function(x, n = 1L, with_replacement = TRUE, randomize_order = TRUE, ...) {
+    S7::S7_dispatch()
+  }
+)
+
+#' @rdname sample_observations
+#' @export
+sample_observation <- sample_observations
+

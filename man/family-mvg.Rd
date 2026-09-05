@@ -208,6 +208,9 @@ The multivariate Gaussian (\code{MVG}) family models category structure over
 \deqn{p(\mathbf{x} \mid c) = \mathcal{N}(\mathbf{x}; \boldsymbol{\mu}_c,
 \mathbf{\Sigma}_c)}
 }
+\references{
+\insertRef{xie2023}{MVBeliefUpdatr}
+}
 \seealso{
 \link{family-niw}, \link{family-uvg}, \link{family-exemplar}
 }

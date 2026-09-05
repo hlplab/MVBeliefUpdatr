@@ -39,6 +39,9 @@ NULL
 #' @param metadata Optional list of metadata.
 #' @param ... Additional arguments passed to methods.
 #'
+#' @references
+#' \insertRef{xie2023}{MVBeliefUpdatr}
+#'
 #' @details
 #' The multivariate Gaussian (`MVG`) family models category structure over
 #' \eqn{D}-dimensional continuous cue spaces with correlated cue dimensions:

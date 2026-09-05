@@ -25,22 +25,61 @@
 + DONE: verified NIX example models (1-cue shifted prior) are fitted and tested in `test-05-fit-ideal-adaptor-minimal-examples.R`.
 + DONE: `get_sufficient_category_statistics` cleaned up (univariate legacy comments removed, `verbose = FALSE` added to formal args), `make_named_vector` and `make_named_square_matrix` deprecated in `deprecated-nest-model.R`, `make_vector_column` retained for data wrangling.
 
++ DONE: comprehensive plotting vignette `vignettes/visualizing-models-and-categories.Rmd` created with clickable table of contents (TOC), interactive and static 1D/2D/3D visualizations, marginal projections, and Stanfit diagnostic plots; renders cleanly with 0 errors to `vignettes/visualizing-models-and-categories.html`.
++ DONE: `plot_categories` aesthetic default aligned to line-only (`aes = "contour"`) for both single representations and multi-category templates.
++ DONE: exemplar plotting rug alpha set to `1 / length(reps)`, rug tick height halved to `0.015`, default exemplar points plotted set to 0 (`n_exemplars = 0L`), and subtitle dynamically indicating `(sampling XXX exemplars)`.
++ DONE: `sample_observations` (and alias `sample_observation`) turned into S7 generic and methods in `R/S7-core-methods.R` with uniform sampling across template categories, prior-weighted sampling across model categories, `with_replacement = TRUE/FALSE` support on exemplar objects with informative error messages, and full roxygen documentation.
++ DONE: category representation template plot subtitle simplified to state representation type without category count; categorization function subtitle concisely lists `all = {1 / K}` when all category priors or lapse biases are identical.
++ DONE: vectorized exemplar likelihood evaluation via Cholesky factor precomputation and `tcrossprod`, accelerating KDE evaluation across all plotting functions.
++ DONE: comprehensive plotting vignette `vignettes/visualizing-models-and-categories.Rmd` updated with single automatic top TOC, embedded interactive 3D WebGL Plotly scene with custom matte lighting/camera controls, mathematical exposition of `levels` and $\chi^2_2$ central density regions, and comprehensive exploration of arguments (`levels`, `limits`, `resolution`, `categories`, `decision_rule`, `combine_plots`, `parameters`, `ndraws`, `aes`). Renders cleanly with 0 errors to `vignettes/visualizing-models-and-categories.html`.
++ DONE: unit tests added for `sample_observations` and plotting defaults; verified full test suite passes cleanly with 0 failures across 1,392 tests.
+
++ DONE: linked Xie et al. (2023) reference to journal article URL in vignette.
++ DONE: simplified category plot titles to remove redundant "representation" ("1D multivariate Gaussian categories").
++ DONE: clarified argument defaults across documentation and vignette (single unambiguous default per parameter).
++ DONE: added 2D interactive `plot_categories()` with `aes = "fill-discrete"`, `"fill-gradient"`, and `"contour"`, removing mode marker and boosting surface opacity.
++ DONE: added 3D interactive `plot_categories()` with `aes = "fill-discrete"`, `"fill-gradient"`, and `"contour"`, setting default opacity to 0.65.
++ DONE: standardized `levels` default across all `plot_categories` (1:4 sigmas) except 3D ellipsoids (2 sigma); default slices at pooled mean $\pm \sigma$ intervals.
++ DONE: added text labels on 3D slice contour lines displaying enclosed probability mass percentages, with line widths scaling inversely with enclosed mass.
++ DONE: added `aes = "scatter"` for 3D interactive exemplar category plots, deduplicated category legends, and documented category mean diamond markers.
++ DONE: fixed vignette function calls to avoid passing explicit default arguments, stating defaults in the text descriptions.
++ DONE: added dedicated parallelization and performance optimization section in vignette.
++ DONE: unified 1D and 2D category legends using `key_glyph = draw_key_rect` and matching `override.aes` so `patchwork::plot_layout(guides = "collect")` produces a single collected legend.
++ DONE: resolved empty 3D sliced category plots by defaulting `aes` to `"contour"`.
++ DONE: updated `plot_categorization_function()` to apply `decision_rule` ("criterion" vs "proportional"), `noise_treatment`, and `lapse_treatment` through cached S7 posterior closures.
++ DONE: verified all markdown bulleted lists across `vignettes/visualizing-models-and-categories.Rmd` are preceded by a blank line for clean HTML rendering.
++ DONE: removed alias `plot_categorization` across code, documentation, and tests in favor of `plot_categorization_function()`.
++ DONE: updated default `levels` from 1:4 sigmas to 1:3 sigmas (`2 * stats::pnorm(1:3) - 1`) across all category and sliced plots.
++ DONE: set default aesthetic for 2D interactive `plot_categorization_function()` to `"fill-discrete"`, rendering a solid 3D response surface with opacity 0.85.
++ DONE: corrected 3D exemplar sliced contour plot in vignette by setting slices along `vowel_duration` (50, 100, 150 ms) to resolve empty panels.
+
 # To do in Phase 3
+
+
 
 ## Next steps
 
++ define get_noise_treatment and get_lapse_treatment generics and replace code that extract lapse/noise treatment from model with those methods.
 
-+ there is quite a bit of overlap between the different plotting methods for different object types. if it does not make the code to opaque, try to streamline this through shared helper functions. consider whether some compute-intensive tasks during plotting could take advantage of parallelization (e.g. when working with samples from stanfit models; or when calculating grids for densities). keep in mind that we eventually also want to plot 3d plots. 
++ both sample_observation and sample_observations seem to exist. keep only the latter.
 
++ is the wide = T option ever used in get_draws()? if not, let's retire it.
 
-+ make 3d plot functions, too
++ check which tests are still needed. make sure they all follow the rules laid out for test naming. all tests of deprecated functions should be run AFTER tests for non-deprecated functions.
 
-WAIT, do not go beyond this point: 
+WAIT, do not go beyond this point:
+
++ make a vignette that introduces the S7 class structure of the library. in it we can also show how to go from the bare constructors to the from_data constructors, and also to print, summarize, and coerce objects (e.g. as_tibble). link to the plotting vignette. then introduce the stanfit, and stanfit input classes. let's also point out the example_* functions that can be used to quickly inspect the different types of objects. the final section should talk about functionality (not yet introduced that allows to coerce the new S7 structures into the legacy tibble structure.)
+
++ expand stan programs to allow users to specify prior m, S for each category (not fixed point estimates). and is that really different from what can already be done by handing mu, Sigma and inferring kappa, nu?
+
  + legacy workflows outside of this package often assume that the relevant model objects are tibbles. They might thus use mutate, filter, and other dplyr methods on those objects. Let's add (and deprecated) dplyr method for the new S7 objects. for this, let's first write as_tibble methods that convert the S7 objects to tibbles that follow the legacy format (while throwing a deprecation message that also warns that the old legacy tibbles do not capture all information from the new S7 objects + points to a vignette that will illustrate the new workflow). we can then define mutate, transmute, filte, etc. methods for the S7 objects that first call as_tibble().
 
 + Known remaining failures (pre-existing, not caused by the above): MNIX representation validator (test-01, test-07), NIX stanfit validator (test-05), rstan/TBB toolchain dlopen (test-04-stanfit-input-compatibility), and `tests/functions-to-make-or-load-models.R` still calling `mutate()` on S7 models (test-14-get-info-stanfit, test-19-plot-stanfit).
 
 + for the aggregate_models function, provide more documentation how the aggregation takes place, i.e., how exemplars, means, sigmas, m, S, etc. aggregated? for each model parameter, list the function used to create the aggregate. this might become clearner if we defined an aggregate S7 method that can aggregate category representations, templates, and models (Described in detail on a shared help page)
+
++ the 2d example stanfit doesn't seem to be a great example since the categories overlap too much. this makes the categorization surface not particularly informative. perhaps change the example so that it has less category overlap and refit that model. 
 
 # General cleanup at end of Phase 3
 + check which utils are needed. 
@@ -62,6 +101,8 @@ also check whether we can switch to one warning per session and ensure that warn
 ## Validity checks
 +  for categorize(), demonstrate the output of the three different decision rules to me with an example
 
+### Extensions
++ implement mixture inference starting with predefined models that are handed to the stan code.
 
 ### Stan-related
 

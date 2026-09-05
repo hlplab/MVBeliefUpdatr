@@ -254,12 +254,27 @@ new_exemplar_category_representation <- function(
         } else {
           Sigma_eff <- Sigma0
         }
-        log_dens_by_exemplar <- sapply(seq_len(n0), function(i) {
-          .dmvnorm_density(x, mean = ex0[i, ], Sigma = Sigma_eff, log = TRUE)
-        })
-        if (is.vector(log_dens_by_exemplar)) {
-          log_dens_by_exemplar <- matrix(log_dens_by_exemplar, ncol = n0)
+
+        # Vectorized evaluation across all exemplars:
+        # Pre-factorize Sigma_eff via Cholesky decomposition once rather than N*M times.
+        # Compute squared Mahalanobis distances using BLAS matrix multiplication.
+        chol_sigma <- tryCatch(chol(Sigma_eff), error = function(e) NULL)
+        if (is.null(chol_sigma)) {
+          chol_sigma <- chol(Sigma_eff + diag(MVBU_PROB_TOL, d0))
         }
+        log_det <- 2 * sum(log(diag(chol_sigma)))
+
+        # Transform observations and exemplars into standardized coordinate space
+        x_std <- t(backsolve(chol_sigma, t(x), transpose = TRUE))
+        ex_std <- t(backsolve(chol_sigma, t(ex0), transpose = TRUE))
+
+        sq_x <- rowSums(x_std^2)
+        sq_ex <- rowSums(ex_std^2)
+        # ||x_std - ex_std||^2 = ||x_std||^2 + ||ex_std||^2 - 2 * x_std %*% ex_std^T
+        dist_mat <- outer(sq_x, sq_ex, "+") - 2 * tcrossprod(x_std, ex_std)
+        dist_mat[dist_mat < 0] <- 0
+
+        log_dens_by_exemplar <- -0.5 * (d0 * log(2 * pi) + log_det + dist_mat)
         weighted_logdens <- sweep(log_dens_by_exemplar, 2, log(w0), "+")
         log_mix <- .logsumexp_rows(weighted_logdens)
         if (isTRUE(log)) {
