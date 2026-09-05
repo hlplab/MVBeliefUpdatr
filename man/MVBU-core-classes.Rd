@@ -197,5 +197,10 @@ posterior functions.
 
 \references{
 \insertAllCited{}
+
+\insertRef{xie2023}{MVBeliefUpdatr}
+
+Xie, X., Jaeger, T. F., & Kurumada, C. (2021). What we do (not) know about
+the mechanisms underlying adaptive speech perception: A computational review.
 }
 \keyword{internal}

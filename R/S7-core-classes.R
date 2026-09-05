@@ -163,6 +163,12 @@ MVBU_CategoryRepresentationTemplate <- S7::new_class(
 #'   `Sigma_noise` is stored as a square matrix and may be supplied as a vector
 #'   (which is converted to a diagonal matrix) or as a matrix.
 #' - `metadata`: optional model metadata.
+#'
+#' @references
+#' \insertRef{xie2023}{MVBeliefUpdatr}
+#'
+#' Xie, X., Jaeger, T. F., & Kurumada, C. (2021). What we do (not) know about
+#' the mechanisms underlying adaptive speech perception: A computational review.
 MVBU_CognitiveModel <- S7::new_class(
   "MVBU_CognitiveModel",
   package = NULL,
@@ -1060,6 +1066,15 @@ add_category_representation <- function(
   )
 }
 
+#' Construct an MVBU Category Representation Template
+#'
+#' @param representations A named or unnamed list of
+#'   \code{MVBU_CategoryRepresentation} objects.
+#' @param metadata Optional metadata list for template-level properties.
+#'   Defaults to \code{list()}.
+#'
+#' @return An object of class \code{MVBU_CategoryRepresentationTemplate}.
+#' @export
 new_category_representation_template <- function(
   representations,
   metadata = list()

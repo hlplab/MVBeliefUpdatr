@@ -335,3 +335,174 @@ test_that("deprecated plotting functions throw lifecycle warnings", {
   expect_s3_class(p_dep2, "ggplot")
 })
 
+test_that("plot_categories defaults to line-only contour and handles exemplar sampling subtitle", {
+  repA <- new_uvg_category_representation("A", "F1", mu = 300, sigma2 = 50^2)
+  tpl1d <- new_category_representation_template(list(A = repA))
+
+  # Single rep and template both default to line-only (no ribbon layer)
+  p_rep <- plot_categories(repA)
+  expect_s3_class(p_rep, "ggplot")
+  layer_types_rep <- vapply(p_rep$layers, function(l) class(l$geom)[1], character(1))
+  expect_true("GeomLine" %in% layer_types_rep)
+  expect_false("GeomRibbon" %in% layer_types_rep)
+
+  p_tpl <- plot_categories(tpl1d)
+  expect_s3_class(p_tpl, "ggplot")
+  layer_types_tpl <- vapply(p_tpl$layers, function(l) class(l$geom)[1], character(1))
+  expect_true("GeomLine" %in% layer_types_tpl)
+  expect_false("GeomRibbon" %in% layer_types_tpl)
+
+  # Template subtitle formatting states representation type without category count
+  expect_match(p_tpl$labels$subtitle, "1D univariate Gaussian category template")
+  expect_no_match(p_tpl$labels$subtitle, "1 categories")
+
+  # Exemplar model with n_exemplars = 0 (default) vs n_exemplars > 0
+  ex_df <- data.frame(F1 = seq(100, 500, length.out = 30), category = "A")
+  ex_rep <- new_exemplar_category_representation_from_data(ex_df, cues = "F1", category = "category")
+  ex_tpl <- new_category_representation_template(list(A = ex_rep))
+
+  p_ex_default <- plot_categories(ex_tpl)
+  expect_no_match(p_ex_default$labels$subtitle, "sampling .* exemplars")
+
+  p_ex_sampled <- plot_categories(ex_tpl, n_exemplars = 15L)
+  expect_match(p_ex_sampled$labels$subtitle, "sampling 15 exemplars")
+})
+
+test_that("3D interactive category plots work with plotly and various aes options", {
+  skip_if_not_installed("plotly")
+
+  # Parametric 3D model
+  tpl3d <- example_mvg_category_representation_template(n_cues = 3)
+  p3d_param <- plot_categories(tpl3d, interactive = TRUE)
+  expect_s3_class(p3d_param, "plotly")
+
+  # Parametric with contour aes
+  p3d_cont <- plot_categories(tpl3d, interactive = TRUE, aes = "contour")
+  expect_s3_class(p3d_cont, "plotly")
+
+  # Parametric with fill-gradient aes
+  p3d_grad <- plot_categories(tpl3d, interactive = TRUE, aes = "fill-gradient")
+  expect_s3_class(p3d_grad, "plotly")
+
+  # Exemplar 3D model with scatter
+  ex3d <- example_exemplar_category_representation_template(n_cues = 3)
+  p3d_ex <- plot_categories(ex3d, aes = "scatter", interactive = TRUE, n_exemplars = 50L)
+  expect_s3_class(p3d_ex, "plotly")
+
+  # Exemplar 3D model with isosurface fill
+  p3d_ex_iso <- plot_categories(ex3d, aes = "fill-discrete", interactive = TRUE)
+  expect_s3_class(p3d_ex_iso, "plotly")
+})
+
+test_that("2D interactive category plots render 3D density surfaces via plotly", {
+  skip_if_not_installed("plotly")
+
+  tpl2d <- example_mvg_category_representation_template(n_cues = 2)
+  p2d_disc <- plot_categories(tpl2d, interactive = TRUE, aes = "fill-discrete")
+  expect_s3_class(p2d_disc, "plotly")
+
+  p2d_grad <- plot_categories(tpl2d, interactive = TRUE, aes = "fill-gradient")
+  expect_s3_class(p2d_grad, "plotly")
+
+  p2d_cont <- plot_categories(tpl2d, interactive = TRUE, aes = "contour")
+  expect_s3_class(p2d_cont, "plotly")
+})
+
+test_that("2D exemplar models support fill-discrete aesthetic", {
+  ex_df <- data.frame(
+    F1 = rnorm(50, 300, 30),
+    F2 = rnorm(50, 1000, 80),
+    category = "A"
+  )
+  ex_rep <- new_exemplar_category_representation_from_data(
+    ex_df,
+    cues = c("F1", "F2"),
+    category = "category"
+  )
+  ex_tpl <- new_category_representation_template(list(A = ex_rep))
+
+  p_disc <- plot_categories(ex_tpl, aes = "fill-discrete")
+  expect_s3_class(p_disc, "ggplot")
+  layer_types <- vapply(p_disc$layers, function(l) class(l$geom)[1], character(1))
+  expect_true("GeomPolygon" %in% layer_types)
+})
+
+test_that("3D sliced category plots accept levels and slices aliases and default to 5 slices", {
+  tpl3d <- example_mvg_category_representation_template(n_cues = 3)
+  cues3 <- get_cue_labels(tpl3d)[1:3]
+
+  # Default slices (-2, -1, 0, 1, 2 sigma) and default levels (1:3 sigma)
+  p_def <- plot_categories(tpl3d, cues = cues3, aes = c("fill-gradient", "contour"))
+  expect_s3_class(p_def, "ggplot")
+  layer_types <- vapply(p_def$layers, function(l) class(l$geom)[1], character(1))
+  expect_true("GeomPath" %in% layer_types || "GeomText" %in% layer_types)
+
+  # Custom slices
+  p_sliced <- plot_categories(
+    tpl3d,
+    cues = cues3,
+    slices = c(0, 10, 20),
+    levels = c(0.68, 0.95),
+    aes = c("fill-gradient", "contour")
+  )
+  expect_s3_class(p_sliced, "ggplot")
+})
+
+test_that("cue defaulting selects up to 3 cues and error triggers when > 3 cues", {
+  # 4D MVG model
+  rep4d_A <- new_mvg_category_representation(
+    category_labels = "A",
+    cue_labels = c("c1", "c2", "c3", "c4"),
+    mu = c(0, 1, 2, 3),
+    Sigma = diag(4)
+  )
+  rep4d_B <- new_mvg_category_representation(
+    category_labels = "B",
+    cue_labels = c("c1", "c2", "c3", "c4"),
+    mu = c(1, 2, 3, 4),
+    Sigma = diag(4)
+  )
+  tpl4d <- new_category_representation_template(list(A = rep4d_A, B = rep4d_B))
+  m4d <- new_mvg_ideal_observer(
+    category_template = tpl4d,
+    category_prior = c(A = 0.5, B = 0.5)
+  )
+
+  # plot_categories defaults to first 3 cues (sliced plot)
+  p_cat_def <- plot_categories(m4d)
+  expect_s3_class(p_cat_def, "ggplot")
+
+  # plot_categorization_function defaults to first 3 cues (sliced plot)
+  p_func_def <- plot_categorization_function(m4d, categories = "A", resolution = 15)
+  expect_s3_class(p_func_def, "ggplot")
+
+  # Error when > 3 cues passed explicitly
+  expect_error(
+    plot_categories(m4d, cues = c("c1", "c2", "c3", "c4")),
+    "Cannot plot more than 3"
+  )
+  expect_error(
+    plot_categorization_function(m4d, cues = c("c1", "c2", "c3", "c4")),
+    "Cannot plot more than 3"
+  )
+})
+
+test_that("2D interactive categorization plot returns plotly widget", {
+  tpl2d <- example_mvg_category_representation_template(n_cues = 2)
+  cats <- get_category_labels(tpl2d)
+  cues <- get_cue_labels(tpl2d)
+  m2d <- new_mvg_ideal_observer(
+    category_template = tpl2d,
+    category_prior = stats::setNames(rep(1 / length(cats), length(cats)), cats)
+  )
+
+  p_inter <- plot_categorization_function(
+    m2d,
+    cues = cues,
+    categories = cats[1L],
+    interactive = TRUE,
+    resolution = 15
+  )
+  expect_s3_class(p_inter, "plotly")
+})
+

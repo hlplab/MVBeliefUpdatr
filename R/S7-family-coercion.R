@@ -26,7 +26,7 @@ NULL
 }
 
 # Draw n cue observations (a matrix with one column per cue) from a single category representation.
-.mvbu_sample_from_representation <- function(x, from, n) {
+.mvbu_sample_from_representation <- function(x, from, n, with_replacement = TRUE) {
   switch(
     from,
     UVG = matrix(stats::rnorm(n, mean = x@mu, sd = sqrt(x@sigma2)), ncol = 1),
@@ -55,7 +55,19 @@ NULL
       matrix(out, nrow = n, ncol = k)
     },
     EXEMPLAR = {
-      idx <- sample.int(nrow(x@exemplars), size = n, replace = TRUE, prob = x@exemplar_weights)
+      n_avail <- nrow(x@exemplars)
+      if (isTRUE(with_replacement)) {
+        idx <- sample.int(n_avail, size = n, replace = TRUE, prob = x@exemplar_weights)
+      } else {
+        if (n > n_avail) {
+          cat_lbl <- .mvbu_extract_label_metadata(x)$category
+          .stop(sprintf(
+            "Cannot sample %d observations without replacement from category '%s' which contains only %d exemplars.",
+            n, cat_lbl, n_avail
+          ))
+        }
+        idx <- sample.int(n_avail, size = n, replace = FALSE, prob = x@exemplar_weights)
+      }
       x@exemplars[idx, , drop = FALSE]
     },
     .stop("Unsupported source family for exemplar sampling.")
@@ -290,50 +302,3 @@ as_niw_ideal_adaptor <- function(x, kappa, nu) .mvbu_coerce_cognitive_model(x, t
 #' @export
 as_exemplar_model <- function(x, n) .mvbu_coerce_cognitive_model(x, to = "EXEMPLAR", n = n)
 
-#' Sample observations from an S7 category representation, template, or cognitive model
-#'
-#' @param x An MVBU_CategoryRepresentation, MVBU_CategoryRepresentationTemplate, or MVBU_CognitiveModel object.
-#' @param Ns Number of observations to sample. Either a single whole number (recycled across categories) or
-#'   a vector with one element per category represented in `x`.
-#' @param randomize.order Should the order of the sampled rows be randomized? (default: `TRUE`)
-#' @return A tibble with one row per sampled observation, containing a `category` column and one column per cue.
-#' @export
-sample_observations <- function(x, Ns, randomize.order = TRUE) {
-  if (S7::S7_inherits(x, MVBU_CategoryRepresentation)) {
-    representations <- list(x)
-    names(representations) <- .mvbu_extract_label_metadata(x)$category
-    cue_labels <- .mvbu_extract_label_metadata(x)$cue
-  } else if (S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
-    representations <- x@representations
-    cue_labels <- get_cue_labels(x)
-  } else if (S7::S7_inherits(x, MVBU_CognitiveModel)) {
-    representations <- x@category_template@representations
-    cue_labels <- get_cue_labels(x@category_template)
-  } else {
-    .stop("x must be an MVBU_CategoryRepresentation, MVBU_CategoryRepresentationTemplate, or MVBU_CognitiveModel.")
-  }
-
-  category_labels <- names(representations)
-  if (is.null(category_labels)) category_labels <- as.character(seq_along(representations))
-
-  .assert_true(
-    .is_non_NA_scalar_count(Ns) || (is.numeric(Ns) && length(Ns) == length(representations)),
-    msg = "Ns must be a single non-NA whole number or a vector with one element per category."
-  )
-  if (length(Ns) == 1) Ns <- rep(Ns, length(representations))
-
-  rows <- lapply(seq_along(representations), function(i) {
-    rep_i <- representations[[i]]
-    family_i <- .mvbu_family_of_representation(rep_i)
-    cues <- .mvbu_sample_from_representation(rep_i, from = family_i, n = Ns[i])
-    colnames(cues) <- cue_labels
-    dplyr::mutate(tibble::as_tibble(cues), category = category_labels[i], .before = 1)
-  })
-
-  out <- dplyr::bind_rows(rows)
-  out$category <- factor(out$category, levels = category_labels)
-
-  if (isTRUE(randomize.order)) out <- out[sample.int(nrow(out)), , drop = FALSE]
-
-  tibble::as_tibble(out)
-}

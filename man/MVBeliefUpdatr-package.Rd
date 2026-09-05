@@ -79,7 +79,9 @@ Belief-updating formulations build upon conjugate Bayesian theory
 \insertCite{kleinschmidt-jaeger2015}{MVBeliefUpdatr},
 \insertCite{kleinschmidt-jaeger2016cogsci}{MVBeliefUpdatr},
 and unsupervised adaptation modeling
-\insertCite{yan:jaeger2018}{MVBeliefUpdatr}. Contributions and feedback from
+\insertCite{yan:jaeger2018}{MVBeliefUpdatr}.
+
+Contributions and feedback from
 Zach Burchill, Anna Persson, and Xin Xie are gratefully acknowledged.
 }
 
