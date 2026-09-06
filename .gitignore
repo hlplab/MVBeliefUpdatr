@@ -3,6 +3,9 @@
 .DS_Store
 *.png
 *.rds
+*.aux
+*.log
+*.toc
 TEMP/
 tests/example-stanfit1--42-TRUE-TRUE.rds
 tests/example-stanfit1-mvg_conj_sufficient_stats_lapse_cholesky-42-TRUE-FALSE.rds
@@ -12,3 +15,5 @@ tests/example-stanfit2-mvg_conj_sufficient_stats_lapse_cholesky-42-TRUE-FALSE.rd
 tests/example-stanfit2-mvg_conj_sufficient_stats_lapse_cholesky-42-TRUE-TRUE.rds
 tests/example-stanfit3-mvg_conj_sufficient_stats_lapse_cholesky-42-TRUE-FALSE.rds
 tests/example-stanfit3-mvg_conj_sufficient_stats_lapse_cholesky-42-TRUE-TRUE.rds
+/doc/
+/Meta/

@@ -202,11 +202,11 @@ new_mnix_category_representation_from_data <- function(
   kappa = nu,
   nu = 3
 ) {
-  .assert_non_NA_scalar_numeric(
+  .assert_numeric_scalar(
     kappa,
     msg = "kappa must be a non-NA scalar numeric value."
   )
-  .assert_non_NA_scalar_numeric(
+  .assert_numeric_scalar(
     nu,
     msg = "nu must be a non-NA scalar numeric value."
   )

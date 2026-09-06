@@ -109,6 +109,7 @@ Collate:
     'S7-stanfit-utils.R'
     'S7-stanfit-fitting.R'
     'S7-stanfit-input-methods.R'
+    'S7-stanfit-postprocess.R'
     'S7-to-legacy-tibble-compatibility.R'
     'S7-update-model.R'
     'add_noise.R'

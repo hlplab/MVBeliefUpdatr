@@ -53,7 +53,7 @@ get_NIW_categorization_function <- function(
   .assert_that(all(between(priors, 0, 1), between(sum(priors), 1 - tolerance, 1 + tolerance)),
     msg = "priors must sum to 1."
   )
-  .assert_that(.is_non_NA_scalar_double(lapse_rate),
+  .assert_that(.is_scalar_double(lapse_rate),
     msg = "lapse_rate must be a scalar."
   )
   .assert_that(between(lapse_rate, 0, 1))

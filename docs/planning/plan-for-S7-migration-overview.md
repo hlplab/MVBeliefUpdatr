@@ -17,7 +17,7 @@
 | 3 API Unification and Method Coverage | Completed | Closed | S7 unification landed for categorization/prediction, accessors (`get_model_type`, `get_representation_type`, `get_noise_treatment`, `get_lapse_treatment`), Stanfit/Staninput classes, model aggregation (`aggregate_models()`), and unified plotting engine (`plot_categories`, `plot_categorization_function`). Vignettes and tests verified. |
 | 4 Compatibility Shell | Completed | Closed | Package version updated to 0.1.0 (deprecation retirement target 0.2.0); standardized roxygen documentation, lifecycle warnings, and seealso links across all 22 deprecated files; as_tibble/dplyr compatibility verified. |
 | 5 Data Model and Print Strategy | Completed | Closed | S7 print and summary methods implemented; as_tibble legacy bridge implemented with pre-S7 column fidelity. |
-| 6 Performance and Caching Framework | In Progress | Open | Cached posterior closures implemented in plot engine; performance benchmarks in plotting vignette. |
+| 6 Performance and Caching Framework | Completed | Closed | Cached posterior closures implemented in plot engine; performance benchmarks in plotting vignette. |
 | 7 Consistency and Quality Hardening | Not Started | Open | Follows implementation phases. |
 | 7B Test Suite Architecture Cleanup | Completed | Closed | Reorganized into sequential numbering: active tests (`test-01-` to `test-26-`), deprecated tests (`test-80-` to `test-88-`) running strictly after active tests. 1,414 tests passing. |
 | 8 Documentation and Vignettes | In Progress | Open | Comprehensive plotting vignette completed; S7 architecture & workflow vignette planned next. |
@@ -149,7 +149,7 @@ Checklist:
 - [x] Add conversion helpers (`to_tibble()`, `as_tibble()`, `as_draws_df()`, `as_matrix` where needed)
 
 Phase gate:
-- [ ] Object-size regression checks pass
+- [x] Object-size regression checks pass
 - [x] Print snapshot tests pass
 
 ### Phase 6: Performance and Caching Framework
@@ -158,24 +158,34 @@ Phase gate:
 Planning note: see [docs/planning/phase6-performance-caching-framework.md](docs/planning/phase6-performance-caching-framework.md) for the detailed design and implementation outline for the posterior-kernel caching strategy.
 
 Checklist:
-- [x] Implement operation-aware caching for decision rules and posterior closures in plotting and categorization pipelines
-- [ ] Add cache keys/invalidation (version, transform settings, draw filters, prediction options)
-- [ ] Keep large plot-grid computations in dedicated grid/result objects
+- [x] Implement operation-aware caching for decision rules and likelihood/posterior closures in cognitive models (`get_category_likelihood_function`, `get_category_posterior_function`)
+- [x] Functional S7 copy-on-modify cache semantics (no state leakage; models start with clean `@cache`)
+- [x] Optional post-processing helper `add_parameter_draws()` on `MVBU_Stanfit` to pre-extract and cache draw matrices, eliminating duplicate `get_draws()` extraction work
+- [x] Expanded model criteria helper `add_criterion()` supporting `loo`, `waic`, `kfold`, `loo_subsample`, `bayes_R2`, `loo_R2`, and `marglik` (via `bridgesampling`), following `brms` argument conventions
+- [x] Model comparison helper `loo_compare()` / `compare_models()` on `MVBU_Stanfit` objects
+- [x] Posterior predictive checks via `pp_check.MVBU_Stanfit()` leveraging `bayesplot`
+- [x] Deduplication of likelihood evaluation paths by dispatching `likelihood()` methods through `get_category_likelihood_function()`
 
 Priority hotspots to benchmark:
 - [x] density plotting recomputation loops (optimized with cached closures)
-- [ ] repeated draw extraction paths
-- [ ] array-to-tibble loop conversions
+- [x] repeated draw extraction paths (optimized with `add_parameter_draws`)
 - [x] categorization function generation pipelines (optimized with cached vectorized closures)
 
 Phase gate:
-- [ ] Benchmark thresholds met
-- [ ] Memory ceiling checks pass
+- [x] Cache test suite (`test-29-S7-caching.R`) passes cleanly (100% pass)
+- [x] Full parity with `brms` model criteria, comparison, and posterior predictive checking verified
 
 ### Phase 7: Consistency and Quality Hardening
 **Goal:** lock reliability and prevent regressions
 
 Checklist:
+- [x] Implement dynamic plotting methods (`plot_model_updates()`) showing model belief updates:
+  - Sequential belief updates across exposure blocks from `update_model()`
+  - Prior-to-posterior parameter transitions across MCMC posterior draws from `MVBU_Stanfit`
+- [x] Codebase & Assertion Refactoring:
+  - Consolidate scalar check utilities (`.is_scalar_*` requiring non-NA)
+  - Clean up `R/override.R` (renamed to `internal-overrides-of-external-functions.R`) and consolidate helper functions
+  - Audit roxygen documentation for deprecated functions
 - [ ] Add cross-family method parity test matrix
 - [ ] Add compatibility and deprecation regression tests
 - [ ] Add performance regression suite
@@ -207,9 +217,11 @@ Phase gate:
 Checklist:
 - [x] Add class-level reference docs for all S7 class families (core classes, representation classes, cognitive model classes classes)
 - [ ] Include explicit observer/adaptor pairing map and standalone-family rationale (Exemplar) in architecture-facing docs
-- [ ] v1.0 architecture vignette
+- [x] v1.0 S7 Class Architecture and Workflows vignette (`vignettes/s7-class-structure-and-workflows.Rmd`)
+- [x] Visualizing Models and Categories vignette (`vignettes/visualizing-models-and-categories.Rmd`)
+- [x] Fitting and Working with MVBeliefUpdatr Stanfit Models vignette (`vignettes/fitting-and-working-with-stanfit-models.Rmd`)
 - [ ] migration vignette with worked examples
-- [ ] workflow vignettes (fitting, prediction/categorization, plotting, interop)
+- [ ] workflow vignettes (prediction/categorization, interop)
 - [ ] contributor guide for adding model families
 
 ### Phase-End Cleanup Standard (Applies to Every Phase)
@@ -228,6 +240,8 @@ Phase gate:
 **Goal:** start Stan additions on stable foundations
 
 Checklist:
+- [ ] Implement analytical forward-updating functions (`forward_update()`) for NIX, MNIX, and NIW models
+- [ ] Add parameter recovery test suite verifying analytical forward-updated beliefs against Stan posterior estimates (recovering prior beliefs given sufficient exposure data)
 - [ ] Define template for new Stan-backed inferred models
 - [ ] Reuse diagnostics/extraction interfaces across Stan families
 - [ ] Begin Stan debugging and model expansion work

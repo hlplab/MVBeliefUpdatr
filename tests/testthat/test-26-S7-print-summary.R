@@ -125,3 +125,21 @@ test_that("print and summary work on MVBU_Stanfit", {
   out_sum <- capture.output(print(sum_obj))
   expect_true(any(grepl("Fitted parameters", out_sum)))
 })
+
+test_that("object-size regression check: S7 objects store canonical fields compactly", {
+  mvg_rep <- example_mvg_category_representation()
+  mvg_model <- example_mvg_ideal_observer()
+  niw_model <- example_niw_ideal_adaptor()
+
+  # Confirm S7 objects are lightweight in memory (under 500KB for rep, under 5MB for models with package environment closures)
+  expect_lt(as.numeric(object.size(mvg_rep)), 500000)
+  expect_lt(as.numeric(object.size(mvg_model)), 5000000)
+  expect_lt(as.numeric(object.size(niw_model)), 5000000)
+
+  # Confirm coercion to tibble expands data representation without altering S7 source object
+  tbl <- suppressWarnings(as_tibble(mvg_model))
+  expect_s3_class(tbl, "tbl_df")
+  expect_true(all(c("category", "mu", "Sigma", "prior") %in% names(tbl)))
+})
+
+

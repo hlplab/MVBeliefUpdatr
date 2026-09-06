@@ -160,8 +160,8 @@ update_model_decision_bias_incrementally <- function(
   if (lapse_treatment == "marginalize")
     .warning("Using lapse_treatment == 'marginalize' can result in updating by *fractions* of observations, which might not be wellformed.\n")
 
-  .assert_non_NA_scalar_logical(keep.update_history)
-  .assert_non_NA_scalar_logical(keep.exposure_data)
+  .assert_logical_scalar(keep.update_history)
+  .assert_logical_scalar(keep.exposure_data)
   .assert_data_frame_like(exposure)
   .assert_that(exposure.category %in% names(exposure),
               msg = paste0("exposure.category variable not found: ", exposure.category, " must be a column in the exposure data."))

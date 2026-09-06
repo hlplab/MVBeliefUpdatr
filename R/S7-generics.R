@@ -786,3 +786,27 @@ sample_observations <- S7::new_generic(
   }
 )
 
+#' Plot model belief updates across sequence steps or prior-to-posterior transitions
+#'
+#' Visualizes how category representations or decision surfaces evolve across update
+#' steps (for sequential model lists / `update_template()` outputs) or across MCMC
+#' prior-to-posterior transitions (for `MVBU_Stanfit` objects).
+#'
+#' @name plot_model_updates
+#' @param x A list of S7 cognitive models/templates or an `MVBU_Stanfit` object.
+#' @param what Character string indicating what to plot: `"categories"` (default)
+#'   or `"categorization_function"`.
+#' @param step_labels Optional character vector of names or labels for each update step.
+#' @param ... Additional arguments passed to methods.
+#' @return A `ggplot2` plot object faceted across update steps/stages.
+#' @export
+plot_model_updates <- S7::new_generic("plot_model_updates", "x", function(
+  x,
+  what = c("categories", "categorization_function"),
+  step_labels = NULL,
+  ...
+) {
+  S7::S7_dispatch()
+})
+
+

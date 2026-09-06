@@ -1,0 +1,913 @@
+\documentclass[11pt]{report}
+\usepackage{geometry}
+\geometry{a4paper, margin=0.5in}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usepackage{url}
+\usetikzlibrary{bayesnet, positioning, calc}
+
+\tikzset{
+  param/.style={draw=none, fill=none, inner sep=2pt, font=\small},
+  factor/.append style={font=\small}
+}
+
+\title{\textbf{Graphical Model Visualizations of MVBeliefUpdatr Model Families}\\
+\large Directed Plate Notation and Factor Graphs for Category Representations, Cognitive Models, and Hierarchical Stanfit Objects}
+\author{MVBeliefUpdatr Development Team}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\chapter{Introduction and Notation Guide}
+
+This document provides formal probabilistic graphical model visualizations for all representation classes, cognitive decision models, and hierarchical Stanfit objects in \texttt{MVBeliefUpdatr}.
+
+For each architecture, figures are presented in two complementary forms:
+\begin{enumerate}
+  \item \textbf{Boilerplate Plate Notation}: standard directed graphical DAGs illustrating conditional dependencies between latent variables, observed data, sensory percepts, and parameters.
+  \item \textbf{Directed Factor Graph Notation}: explicit factor graphs distinguishing probability density factors from variable nodes, following Laura Dietz's framework \cite{Dietz:2010}.
+\end{enumerate}
+
+\section{Distinction Between Objects}
+
+\begin{itemize}
+  \item \textbf{Category Representations / Templates}: Pure generative models where category parameters ($\mu_c, \sigma^2_c$, $\boldsymbol{\mu}_c, \boldsymbol{\Sigma}_c$, or stored exemplars $y_{j,c}$) are fixed inputs (no circles). Stimulus values $x_n$ are predicted latent outputs (unshaded circle \texttt{latent}), and category labels $c_n$ are observed inputs (shaded circle \texttt{obs}).
+  \item \textbf{Cognitive Models (\texttt{MVBU\_CognitiveModel})}: Combine category templates with observer decision behavior, aligned along a single vertical axis from physical stimulus $x_i$ (bottom, \texttt{obs}) through perceptual noise $\sigma_{perc} \to s_i$ (sensory percept, \texttt{latent}), through target multinomial $M$ (weighted by category prior $\pi_c$) and lapse multinomial $M$ (weighted by category lapse prior $\pi_{lapse,c}$ inside the category plate), combined at mixture factor $\mathcal{M}$ (weighted by fixed lapse rate $\lambda$ outside category plate) to generate categorical choice $r_i$ (top, \texttt{obs}). In conjugate models (NIX/NIW), hyperprior parameters ($m_{0,c}, S_{0,c}, \kappa_{0,c}, \nu_{0,c}$) govern the belief distributions over $\mu_c$ and $\sigma^2_c$ ($\boldsymbol{\mu}_c$ and $\boldsymbol{\Sigma}_c$).
+  \item \textbf{Stanfit Models (\texttt{MVBU\_Stanfit})}: Hierarchical Bayesian MCMC models with explicit priors over adaptor hyperparameters ($m_{0,c,g}, S_{0,c,g}, \kappa_0, \nu_0$), perceptual noise, latent lapse rate $\lambda$, and category prior $\pi_c$. Belief parameter updating is handled by separate staggered update nodes $\text{Update}_\kappa, \text{Update}_\nu, \text{Update}_m, \text{Update}_S$, outputting four belief parameter circles ($\kappa_{n,c,g}, \nu_{n,c,g}, m_{n,c,g}, S_{n,c,g}$). Test responses are denoted $r_{j,g}$ (\texttt{obs}).
+\end{itemize}
+
+\section{Factor Node Conventions}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lll}
+\hline
+\textbf{Distribution / Rule} & \textbf{Factor Label} & \textbf{Description} \\
+\hline
+Gaussian (1D or Multi-D) & $\mathcal{N}$ & Normal density (univariate or multivariate) \\
+Half-Normal Prior & $\mathcal{N}^+$ & Prior density over pseudocounts $\kappa_0, \nu_0$ \\
+Half-Cauchy Prior & $\text{Cauchy}^+$ & Prior density over scale parameters / variances \\
+LKJ Cholesky Prior & $\text{LKJ}$ & Prior correlation density over covariance matrices \\
+Normal-Inverse-$\chi^2$ Factor & $\text{NIX}$ & Density over 1D mean $\mu_c$ and variance $\sigma^2_c$ \\
+Normal-Inverse-Wishart Factor & $\text{NIW}$ & Density over vector mean $\boldsymbol{\mu}_c$ and covariance $\boldsymbol{\Sigma}_c$ \\
+KDE Mixture & $\text{KDE}$ & Exemplar kernel density mixture \\
+Categorical/Multinomial & $M$ & Multinomial category probability vector \\
+Mixture Factor Node & $\mathcal{M}$ & Mixture factor combining target and lapse multinomials \\
+Update Factors & $\text{Update}_\kappa, \text{Update}_\nu, \text{Update}_m, \text{Update}_S$ & Staggered conjugate Bayesian update factors \\
+\hline
+\end{tabular}
+\caption{Factor node label conventions.}
+\label{tab:factor_labels}
+\end{table}
+
+\newpage
+
+\chapter{Univariate Gaussian (UVG) and Normal-Inverse-$\chi^2$ (NIX) Models}
+
+\section{UVG Category Representation and Template}
+
+The UVG representation models each category $c$ by fixed mean parameter $\mu_c$ and variance parameter $\sigma^2_c$. Category label $c_n$ is observed (\texttt{obs}) and stimulus $x_n$ is predicted (\texttt{latent}).
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    \node[obs] (c) {$c_n$} ; %
+    \node[latent, right=3.5cm of c] (x) {$x_n$} ; %
+    \node[param, above=2.5cm of c] (mu) {$\mu_c$} ; %
+    \node[param, right=3.5cm of mu] (sigma2) {$\sigma^2_c$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (c)} {$n = 1 \dots N$}; %
+    \plate[inner sep=0.5cm] {plate_cat} {(mu) (sigma2)} {$c = 1 \dots M$}; %
+
+    \edge {mu, sigma2, c} {x} ; %
+  }
+  \caption{\texttt{UVG} Category Representation in boilerplate plate notation.}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    \node[obs] (c) {$c_n$} ; %
+    \node[latent, right=3.5cm of c] (x) {$x_n$} ; %
+    \factor[above=2cm of x] {f_x} {right=0.25cm:$\mathcal{N}$} {} {}; %
+
+    \node[param, above left=2.5cm and 1.5cm of f_x] (mu) {$\mu_c$} ; %
+    \node[param, right=2.5cm of mu] (sigma2) {$\sigma^2_c$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (c) (f_x)} {$n = 1 \dots N$}; %
+    \plate[inner sep=0.5cm] {plate_cat} {(mu) (sigma2)} {$c = 1 \dots M$}; %
+
+    \edge {f_x} {x} ; %
+    \edge {mu, sigma2, c} {f_x} ; %
+  }
+  \caption{\texttt{UVG} Category Representation in directed factor graph notation.}
+\end{figure}
+
+\newpage
+\section{UVG Cognitive Observer Model}
+
+In the UVG cognitive observer model, category parameters $\mu_c$ and $\sigma^2_c$ are fixed inputs (no circles).
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    % Vertical Axis
+    \node[obs] (x) {$x_i$} ; %
+    \node[latent, above=2.2cm of x] (s) {$s_i$} ; %
+    \node[obs, above=5.5cm of s] (r) {$r_i$} ; %
+
+    % Category parameters (fixed, no circles)
+    \node[param, above left=2.2cm and 2.5cm of s] (pi) {$\pi_c$} ; %
+    \node[param, left=1.5cm of pi] (mu) {$\mu_c$} ; %
+    \node[param, left=1.2cm of mu] (sigma2) {$\sigma^2_c$} ; %
+    \node[param, above right=2.2cm and 2.5cm of s] (pi_lapse) {$\pi_{lapse,c}$} ; %
+
+    % Observer global parameters (fixed, no circles)
+    \node[param, left=2.5cm of s] (sigma_perc) {$\sigma_{perc}$} ; %
+    \node[param, right=3cm of r] (lambda) {$\lambda$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (s) (r)} {$i = 1 \dots N_{trials}$}; %
+    \plate[inner sep=0.5cm] {plate_cat} {(mu) (sigma2) (pi) (pi_lapse)} {$c = 1 \dots M$}; %
+
+    \edge {x, sigma_perc} {s} ; %
+    \edge {s, mu, sigma2, pi, pi_lapse, lambda} {r} ; %
+  }
+  \caption{\texttt{UVG} Cognitive Observer Model in directed plate notation.}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    % Single vertical axis
+    \node[obs] (x) {$x_i$} ; %
+    \factor[above=1.5cm of x] {f_s} {above left=0.2cm:$\mathcal{N}$} {} {}; %
+    \node[latent, above=1.5cm of f_s] (s) {$s_i$} ; %
+
+    % Target likelihood factor inside plate_cat
+    \factor[above=2.2cm of s] {f_target} {above left=0.2cm:$M$} {} {}; %
+
+    % Category level nodes (fixed parameters, no circles)
+    \node[param, left=2.8cm of f_target] (pi) {$\pi_c$} ; %
+    \node[param, left=1.5cm of pi] (mu) {$\mu_c$} ; %
+    \node[param, left=1.2cm of mu] (sigma2) {$\sigma^2_c$} ; %
+
+    % Lapse factor & lapse prior inside plate_cat
+    \factor[right=2.8cm of f_target] {f_lapse} {above right=0.2cm:$M$} {} {}; %
+    \node[param, above=1.5cm of f_lapse] (pi_lapse) {$\pi_{lapse,c}$} ; %
+
+    % Mixture factor & response outside plate_cat
+    \factor[above=2.5cm of f_target] {f_mix} {left=0.25cm:$\mathcal{M}$} {} {}; %
+    \node[obs, above=1.5cm of f_mix] (r) {$r_i$} ; %
+
+    % Observer parameters (fixed)
+    \node[param, left=2.5cm of f_s] (sigma_perc) {$\sigma_{perc}$} ; %
+    \node[param, right=3cm of f_mix] (lambda) {$\lambda$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (f_s) (s) (f_mix) (r)} {$i = 1 \dots N_{trials}$}; %
+    \plate[inner sep=0.5cm] {plate_cat} {(mu) (sigma2) (pi) (pi_lapse) (f_target) (f_lapse)} {$c = 1 \dots M$}; %
+
+    \edge {x, sigma_perc} {f_s} ; %
+    \edge {f_s} {s} ; %
+    \edge {s, mu, sigma2, pi} {f_target} ; %
+    \edge {pi_lapse} {f_lapse} ; %
+    \edge {f_target, f_lapse, lambda} {f_mix} ; %
+    \edge {f_mix} {r} ; %
+  }
+  \caption{\texttt{UVG} Cognitive Observer Model in directed factor graph notation.}
+\end{figure}
+
+\newpage
+\section{NIX Cognitive Observer Model}
+
+In contrast to UVG, the NIX model explicitly represents belief distributions over category parameters. Hyperpriors ($m_{0,c}, S_{0,c}, \kappa_{0,c}, \nu_{0,c}$) govern latent category parameters $\mu_c$ and $\sigma^2_c$.
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    % Vertical Axis
+    \node[obs] (x) {$x_i$} ; %
+    \node[latent, above=2.2cm of x] (s) {$s_i$} ; %
+    \node[obs, above=5.5cm of s] (r) {$r_i$} ; %
+
+    % Category hyperparameters governing latent mu_c and sigma2_c
+    \node[param, above left=2.2cm and 3.8cm of s] (m0) {$m_{0,c}$} ; %
+    \node[param, left=1.0cm of m0] (S0) {$S_{0,c}$} ; %
+    \node[param, left=1.0cm of S0] (k0) {$\kappa_{0,c}$} ; %
+    \node[param, left=1.0cm of k0] (nu0) {$\nu_{0,c}$} ; %
+
+    \node[latent, above right=1.2cm and 0.5cm of S0] (mu) {$\mu_c$} ; %
+    \node[latent, right=1.2cm of mu] (sigma2) {$\sigma^2_c$} ; %
+
+    \node[param, above left=2.2cm and 1.8cm of s] (pi) {$\pi_c$} ; %
+    \node[param, above right=2.2cm and 2.5cm of s] (pi_lapse) {$\pi_{lapse,c}$} ; %
+
+    % Observer global parameters (fixed)
+    \node[param, left=2.5cm of s] (sigma_perc) {$\sigma_{perc}$} ; %
+    \node[param, right=3cm of r] (lambda) {$\lambda$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (s) (r)} {$i = 1 \dots N_{trials}$}; %
+    \plate[inner sep=0.5cm] {plate_cat} {(m0) (S0) (k0) (nu0) (mu) (sigma2) (pi) (pi_lapse)} {$c = 1 \dots M$}; %
+
+    \edge {m0, S0, k0, nu0} {mu, sigma2} ; %
+    \edge {x, sigma_perc} {s} ; %
+    \edge {s, mu, sigma2, pi, pi_lapse, lambda} {r} ; %
+  }
+  \caption{\texttt{NIX} Cognitive Observer Model in directed plate notation. Hyperpriors $(m_{0,c}, S_{0,c}, \kappa_{0,c}, \nu_{0,c})$ govern category latent parameters $\mu_c, \sigma^2_c$.}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    % Single vertical axis
+    \node[obs] (x) {$x_i$} ; %
+    \factor[above=1.5cm of x] {f_s} {above left=0.2cm:$\mathcal{N}$} {} {}; %
+    \node[latent, above=1.5cm of f_s] (s) {$s_i$} ; %
+
+    % Target likelihood factor inside plate_cat
+    \factor[above=2.5cm of s] {f_target} {above left=0.2cm:$M$} {} {}; %
+
+    % Category latent parameters & NIX factor
+    \node[latent, left=1.8cm of f_target] (mu) {$\mu_c$} ; %
+    \node[latent, left=1.2cm of mu] (sigma2) {$\sigma^2_c$} ; %
+    \factor[above=1.5cm of mu] {f_nix} {above:$\text{NIX}$} {} {}; %
+
+    % Hyperpriors
+    \node[param, above left=1.2cm and 1.5cm of f_nix] (m0) {$m_{0,c}$} ; %
+    \node[param, left=1.0cm of m0] (S0) {$S_{0,c}$} ; %
+    \node[param, left=1.0cm of S0] (k0) {$\kappa_{0,c}$} ; %
+    \node[param, left=1.0cm of k0] (nu0) {$\nu_{0,c}$} ; %
+
+    \node[param, right=1.5cm of f_target] (pi) {$\pi_c$} ; %
+    \factor[right=2.8cm of f_target] {f_lapse} {above right=0.2cm:$M$} {} {}; %
+    \node[param, above=1.5cm of f_lapse] (pi_lapse) {$\pi_{lapse,c}$} ; %
+
+    % Mixture factor & response outside plate_cat
+    \factor[above=2.5cm of f_target] {f_mix} {left=0.25cm:$\mathcal{M}$} {} {}; %
+    \node[obs, above=1.5cm of f_mix] (r) {$r_i$} ; %
+
+    % Observer parameters
+    \node[param, left=2.5cm of f_s] (sigma_perc) {$\sigma_{perc}$} ; %
+    \node[param, right=3cm of f_mix] (lambda) {$\lambda$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (f_s) (s) (f_mix) (r)} {$i = 1 \dots N_{trials}$}; %
+    \plate[inner sep=0.5cm] {plate_cat} {(m0) (S0) (k0) (nu0) (f_nix) (mu) (sigma2) (pi) (pi_lapse) (f_target) (f_lapse)} {$c = 1 \dots M$}; %
+
+    \edge {m0, S0, k0, nu0} {f_nix} ; %
+    \edge {f_nix} {mu, sigma2} ; %
+    \edge {x, sigma_perc} {f_s} ; \edge {f_s} {s} ; %
+    \edge {s, mu, sigma2, pi} {f_target} ; %
+    \edge {pi_lapse} {f_lapse} ; %
+    \edge {f_target, f_lapse, lambda} {f_mix} ; %
+    \edge {f_mix} {r} ; %
+  }
+  \caption{\texttt{NIX} Cognitive Observer Model in directed factor graph notation. $\text{NIX}$ density factor joins hyperpriors to latent category parameters $\mu_c, \sigma^2_c$.}
+\end{figure}
+
+\newpage
+\section{NIX Stanfit Hierarchical Bayesian Model}
+
+In the \texttt{NIX\_ideal\_adaptor} Stanfit model, exposure updating uses observed sample statistics ($N_{c,g}, \hat{\mu}_{c,g}, \hat{\sigma}^2_{c,g}$) positioned slightly above the horizontal baseline of prior nodes to avoid arrow collisions. Updating is handled by staggered factor nodes $\text{Update}_\kappa, \text{Update}_\nu, \text{Update}_m, \text{Update}_S$.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \tikz{ %
+    % Hyperparameter Priors (Far Left - Row ordered: S0 (top), m0, k0, nu0 (bottom))
+    \node[latent] (S0) {$S_{0,c,g}$} ; %
+    \node[latent, below=1.2cm of S0] (m0) {$m_{0,c,g}$} ; %
+    \node[latent, below=1.2cm of m0] (k0) {$\kappa_0$} ; %
+    \node[latent, below=1.2cm of k0] (nu0) {$\nu_0$} ; %
+
+    % Observed Exposure Statistics (Positioned slightly above horizontal baseline)
+    \node[obs, above right=0.3cm and 2.0cm of S0] (S_exp) {$\hat{\sigma}^2_{c,g}$} ; %
+    \node[obs, above right=0.3cm and 2.0cm of m0] (mu_exp) {$\hat{\mu}_{c,g}$} ; %
+    \node[obs, above right=0.3cm and 2.0cm of k0] (N_exp) {$N_{c,g}$} ; %
+
+    % Staggered Update Factors
+    \factor[right=2.2cm of S0] {Update_S} {above:$\text{Update}_S$} {} {}; %
+    \factor[right=2.2cm of m0] {Update_m} {above:$\text{Update}_m$} {} {}; %
+    \factor[right=2.2cm of k0] {Update_k} {above:$\text{Update}_\kappa$} {} {}; %
+    \factor[right=1.8cm of nu0] {Update_nu} {below:$\text{Update}_\nu$} {} {}; %
+
+    % Updated Belief Parameters (Circle Nodes)
+    \node[latent, right=2.0cm of Update_S] (Sn) {$S_{n,c,g}$} ; %
+    \node[latent, right=2.0cm of Update_m] (mn) {$m_{n,c,g}$} ; %
+    \node[latent, right=2.0cm of Update_k] (kn) {$\kappa_{n,c,g}$} ; %
+    \node[latent, right=2.0cm of Update_nu] (nun) {$\nu_{n,c,g}$} ; %
+
+    % Test Plate (Far Right)
+    \node[obs, right=6.2cm of kn] (x_test) {$x_{j,g}$} ; %
+    \node[latent, above=1.5cm of x_test] (s_test) {$s_{j,g}$} ; %
+    \node[latent, left=1.8cm of s_test] (pi) {$\pi_{c,g}$} ; %
+    \node[obs, above=4.5cm of s_test] (r_test) {$r_{j,g}$} ; %
+
+    % Global/Group parameters
+    \node[latent, right=1.8cm of r_test] (lambda) {$\lambda$} ; %
+    \node[param, below=0.8cm of s_test] (sigma_perc) {$\sigma_{perc}$} ; %
+
+    % Plates
+    \plate[inner sep=0.4cm] {plate_exp} {(S_exp) (mu_exp) (N_exp) (Update_S) (Update_m) (Update_k) (Update_nu) (Sn) (mn) (kn) (nun)} {$c = 1 \dots M$}; %
+    \plate[inner sep=0.4cm] {plate_test} {(x_test) (s_test) (r_test) (sigma_perc)} {$j = 1 \dots N_{test}$}; %
+    \plate[inner sep=0.6cm] {plate_group} {(plate_exp) (plate_test) (S0) (m0) (pi)} {$g = 1 \dots G$}; %
+
+    % Edges from Priors & Exposure to Update
+    \edge {k0, N_exp} {Update_k} ; %
+    \edge {nu0, N_exp} {Update_nu} ; %
+    \edge {m0, k0, N_exp, mu_exp} {Update_m} ; %
+    \edge {S0, m0, k0, N_exp, mu_exp, S_exp} {Update_S} ; %
+
+    % Edges from Update to Belief Latents
+    \edge {Update_k} {kn} ; %
+    \edge {Update_nu} {nun} ; %
+    \edge {Update_m} {mn} ; %
+    \edge {Update_S} {Sn} ; %
+
+    % Test edges
+    \edge {x_test, sigma_perc} {s_test} ; %
+    \edge {kn, nun, mn, Sn, s_test, pi, lambda} {r_test} ; %
+  }}
+  \caption{\texttt{NIX Stanfit} model in boilerplate plate notation. Staggered update nodes $\text{Update}_\kappa, \text{Update}_\nu, \text{Update}_m, \text{Update}_S$ produce belief parameters $(\kappa_{n,c,g}, \nu_{n,c,g}, m_{n,c,g}, S_{n,c,g})$.}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \tikz{ %
+    % Hyperparameter Priors (Far Left - Row ordered: S0, m0, k0, nu0)
+    \node[latent] (S0) {$S_{0,c,g}$} ; %
+    \factor[left=0.9cm of S0] {f_S0} {left=0.15cm:$\text{Cauchy}^+$} {} {}; %
+
+    \node[latent, below=1.2cm of S0] (m0) {$m_{0,c,g}$} ; %
+    \factor[left=0.9cm of m0] {f_m0} {left=0.15cm:$\mathcal{N}$} {} {}; %
+
+    \node[latent, below=1.2cm of m0] (k0) {$\kappa_0$} ; %
+    \factor[left=0.9cm of k0] {f_k0} {left=0.15cm:$\mathcal{N}^+$} {} {}; %
+
+    \node[latent, below=1.2cm of k0] (nu0) {$\nu_0$} ; %
+    \factor[left=0.9cm of nu0] {f_nu0} {left=0.15cm:$\mathcal{N}^+$} {} {}; %
+
+    % Observed Exposure Statistics (Positioned slightly above horizontal baseline)
+    \node[obs, above right=0.3cm and 2.0cm of S0] (S_exp) {$\hat{\sigma}^2_{c,g}$} ; %
+    \node[obs, above right=0.3cm and 2.0cm of m0] (mu_exp) {$\hat{\mu}_{c,g}$} ; %
+    \node[obs, above right=0.3cm and 2.0cm of k0] (N_exp) {$N_{c,g}$} ; %
+
+    % Staggered Update Factors
+    \factor[right=2.2cm of S0] {Update_S} {above:$\text{Update}_S$} {} {}; %
+    \factor[right=2.2cm of m0] {Update_m} {above:$\text{Update}_m$} {} {}; %
+    \factor[right=2.2cm of k0] {Update_k} {above:$\text{Update}_\kappa$} {} {}; %
+    \factor[right=1.8cm of nu0] {Update_nu} {below:$\text{Update}_\nu$} {} {}; %
+
+    % Updated Belief Parameters (Circle Nodes)
+    \node[latent, right=2.0cm of Update_S] (Sn) {$S_{n,c,g}$} ; %
+    \node[latent, right=2.0cm of Update_m] (mn) {$m_{n,c,g}$} ; %
+    \node[latent, right=2.0cm of Update_k] (kn) {$\kappa_{n,c,g}$} ; %
+    \node[latent, right=2.0cm of Update_nu] (nun) {$\nu_{n,c,g}$} ; %
+
+    % Test Plate (Far Right)
+    \node[obs, right=6.2cm of kn] (x_test) {$x_{j,g}$} ; %
+    \factor[above=1.5cm of x_test] {f_s} {right=0.2cm:$\mathcal{N}$} {} {}; %
+    \node[latent, above=1.5cm of f_s] (s_test) {$s_{j,g}$} ; %
+
+    \factor[above=2.2cm of s_test] {f_target} {above left=0.2cm:$M$} {} {}; %
+    \node[latent, left=1.8cm of f_target] (pi) {$\pi_{c,g}$} ; %
+
+    \factor[right=2.2cm of f_target] {f_lapse} {above right=0.2cm:$M$} {} {}; %
+
+    \factor[above=2.2cm of f_target] {f_mix} {left=0.25cm:$\mathcal{M}$} {} {}; %
+    \node[obs, above=1.5cm of f_mix] (r_test) {$r_{j,g}$} ; %
+
+    % Global/Group parameters
+    \node[latent, right=1.8cm of f_mix] (lambda) {$\lambda$} ; %
+    \node[param, right=0.8cm of f_s] (sigma_perc) {$\sigma_{perc}$} ; %
+
+    % Plates
+    \plate[inner sep=0.4cm] {plate_exp} {(S_exp) (mu_exp) (N_exp) (Update_S) (Update_m) (Update_k) (Update_nu) (Sn) (mn) (kn) (nun)} {$c = 1 \dots M$}; %
+    \plate[inner sep=0.4cm] {plate_test} {(x_test) (f_s) (s_test) (f_target) (f_lapse) (f_mix) (r_test)} {$j = 1 \dots N_{test}$}; %
+    \plate[inner sep=0.6cm] {plate_group} {(plate_exp) (plate_test) (S0) (m0) (pi)} {$g = 1 \dots G$}; %
+
+    % Prior edges
+    \edge {f_k0} {k0} ; \edge {f_nu0} {nu0} ; \edge {f_m0} {m0} ; \edge {f_S0} {S0} ; %
+
+    % Edges from Priors & Exposure to Update
+    \edge {k0, N_exp} {Update_k} ; %
+    \edge {nu0, N_exp} {Update_nu} ; %
+    \edge {m0, k0, N_exp, mu_exp} {Update_m} ; %
+    \edge {S0, m0, k0, N_exp, mu_exp, S_exp} {Update_S} ; %
+
+    % Edges from Update to Belief Latents
+    \edge {Update_k} {kn} ; %
+    \edge {Update_nu} {nun} ; %
+    \edge {Update_m} {mn} ; %
+    \edge {Update_S} {Sn} ; %
+
+    % Test edges
+    \edge {x_test, sigma_perc} {f_s} ; \edge {f_s} {s_test} ; %
+    \edge {s_test, kn, nun, mn, Sn, pi} {f_target} ; %
+    \edge {pi} {f_lapse} ; %
+    \edge {f_target, f_lapse, lambda} {f_mix} ; %
+    \edge {f_mix} {r_test} ; %
+  }}
+  \caption{\texttt{NIX Stanfit} model in directed factor graph notation. Staggered update factors $\text{Update}_\kappa, \text{Update}_\nu, \text{Update}_m, \text{Update}_S$ feed updated belief circles.}
+\end{figure}
+
+\newpage
+
+\chapter{Multivariate Gaussian (MVG) and Normal-Inverse-Wishart (NIW) Models}
+
+\section{MVG Category Representation and Template}
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    \node[obs] (c) {$c_n$} ; %
+    \node[latent, right=3.5cm of c] (x) {$\mathbf{x}_n$} ; %
+    \node[param, above=2.5cm of c] (mu) {$\boldsymbol{\mu}_c$} ; %
+    \node[param, right=3.5cm of mu] (sigma) {$\boldsymbol{\Sigma}_c$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (c)} {$n = 1 \dots N$}; %
+    \plate[inner sep=0.5cm] {plate_cat} {(mu) (sigma)} {$c = 1 \dots M$}; %
+
+    \edge {mu, sigma, c} {x} ; %
+  }
+  \caption{\texttt{MVG} Category Representation in boilerplate plate notation.}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    \node[obs] (c) {$c_n$} ; %
+    \node[latent, right=3.5cm of c] (x) {$\mathbf{x}_n$} ; %
+    \factor[above=2cm of x] {f_x} {right=0.25cm:$\mathcal{N}$} {} {}; %
+
+    \node[param, above left=2.5cm and 1.5cm of f_x] (mu) {$\boldsymbol{\mu}_c$} ; %
+    \node[param, right=2.5cm of mu] (sigma) {$\boldsymbol{\Sigma}_c$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (c) (f_x)} {$n = 1 \dots N$}; %
+    \plate[inner sep=0.5cm] {plate_cat} {(mu) (sigma)} {$c = 1 \dots M$}; %
+
+    \edge {f_x} {x} ; %
+    \edge {mu, sigma, c} {f_x} ; %
+  }
+  \caption{\texttt{MVG} Category Representation in directed factor graph notation.}
+\end{figure}
+
+\newpage
+\section{MVG Cognitive Observer Model}
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    % Single vertical axis
+    \node[obs] (x) {$\mathbf{x}_i$} ; %
+    \node[latent, above=2.2cm of x] (s) {$\mathbf{s}_i$} ; %
+    \node[obs, above=5cm of s] (r) {$r_i$} ; %
+
+    % Category parameters (fixed, no circles)
+    \node[param, above left=2.2cm and 2.5cm of s] (pi) {$\pi_c$} ; %
+    \node[param, left=1.5cm of pi] (mu) {$\boldsymbol{\mu}_c$} ; %
+    \node[param, left=1.2cm of mu] (sigma) {$\boldsymbol{\Sigma}_c$} ; %
+    \node[param, above right=2.2cm and 2.5cm of s] (pi_lapse) {$\pi_{lapse,c}$} ; %
+
+    % Observer global parameters (fixed, no circles)
+    \node[param, left=2.5cm of s] (sigma_perc) {$\boldsymbol{\Sigma}_{perc}$} ; %
+    \node[param, right=3cm of r] (lambda) {$\lambda$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (s) (r)} {$i = 1 \dots N_{trials}$}; %
+    \plate[inner sep=0.5cm] {plate_cat} {(mu) (sigma) (pi) (pi_lapse)} {$c = 1 \dots M$}; %
+
+    \edge {x, sigma_perc} {s} ; %
+    \edge {s, mu, sigma, pi, pi_lapse, lambda} {r} ; %
+  }
+  \caption{\texttt{MVG} Cognitive Observer Model in directed plate notation.}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    % Single vertical axis
+    \node[obs] (x) {$\mathbf{x}_i$} ; %
+    \factor[above=1.5cm of x] {f_s} {above left=0.2cm:$\mathcal{N}$} {} {}; %
+    \node[latent, above=1.5cm of f_s] (s) {$\mathbf{s}_i$} ; %
+
+    % Target factor inside plate_cat
+    \factor[above=2.2cm of s] {f_target} {above left=0.2cm:$M$} {} {}; %
+
+    % Category nodes (fixed parameters, no circles)
+    \node[param, left=2.8cm of f_target] (pi) {$\pi_c$} ; %
+    \node[param, left=1.5cm of pi] (mu) {$\boldsymbol{\mu}_c$} ; %
+    \node[param, left=1.2cm of mu] (sigma) {$\boldsymbol{\Sigma}_c$} ; %
+
+    % Lapse factor & lapse prior inside plate_cat
+    \factor[right=2.8cm of f_target] {f_lapse} {above right=0.2cm:$M$} {} {}; %
+    \node[param, above=1.5cm of f_lapse] (pi_lapse) {$\pi_{lapse,c}$} ; %
+
+    % Mixture factor & response outside plate_cat
+    \factor[above=2.5cm of f_target] {f_mix} {left=0.25cm:$\mathcal{M}$} {} {}; %
+    \node[obs, above=1.5cm of f_mix] (r) {$r_i$} ; %
+
+    % Observer parameters (fixed)
+    \node[param, left=2.5cm of f_s] (sigma_perc) {$\boldsymbol{\Sigma}_{perc}$} ; %
+    \node[param, right=3cm of f_mix] (lambda) {$\lambda$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (f_s) (s) (f_mix) (r)} {$i = 1 \dots N_{trials}$}; %
+    \plate[inner sep=0.5cm] {plate_cat} {(mu) (sigma) (pi) (pi_lapse) (f_target) (f_lapse)} {$c = 1 \dots M$}; %
+
+    \edge {x, sigma_perc} {f_s} ; %
+    \edge {f_s} {s} ; %
+    \edge {s, mu, sigma, pi} {f_target} ; %
+    \edge {pi_lapse} {f_lapse} ; %
+    \edge {f_target, f_lapse, lambda} {f_mix} ; %
+    \edge {f_mix} {r} ; %
+  }
+  \caption{\texttt{MVG} Cognitive Observer Model in directed factor graph notation.}
+\end{figure}
+
+\newpage
+\section{NIW Cognitive Observer Model}
+
+In contrast to MVG, the NIW model represents belief distributions over multivariate parameters $\boldsymbol{\mu}_c$ and $\boldsymbol{\Sigma}_c$. Hyperpriors ($\mathbf{m}_{0,c}, \mathbf{S}_{0,c}, \kappa_{0,c}, \nu_{0,c}$) govern latent parameters $\boldsymbol{\mu}_c$ and $\boldsymbol{\Sigma}_c$.
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    % Vertical Axis
+    \node[obs] (x) {$\mathbf{x}_i$} ; %
+    \node[latent, above=2.2cm of x] (s) {$\mathbf{s}_i$} ; %
+    \node[obs, above=5.5cm of s] (r) {$r_i$} ; %
+
+    % Category hyperparameter nodes
+    \node[param, above left=2.2cm and 3.8cm of s] (m0) {$\mathbf{m}_{0,c}$} ; %
+    \node[param, left=1.0cm of m0] (S0) {$\mathbf{S}_{0,c}$} ; %
+    \node[param, left=1.0cm of S0] (k0) {$\kappa_{0,c}$} ; %
+    \node[param, left=1.0cm of k0] (nu0) {$\nu_{0,c}$} ; %
+
+    \node[latent, above right=1.2cm and 0.5cm of S0] (mu) {$\boldsymbol{\mu}_c$} ; %
+    \node[latent, right=1.2cm of mu] (sigma) {$\boldsymbol{\Sigma}_c$} ; %
+
+    \node[param, above left=2.2cm and 1.8cm of s] (pi) {$\pi_c$} ; %
+    \node[param, above right=2.2cm and 2.5cm of s] (pi_lapse) {$\pi_{lapse,c}$} ; %
+
+    % Observer global parameters (fixed)
+    \node[param, left=2.5cm of s] (sigma_perc) {$\boldsymbol{\Sigma}_{perc}$} ; %
+    \node[param, right=3cm of r] (lambda) {$\lambda$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (s) (r)} {$i = 1 \dots N_{trials}$}; %
+    \plate[inner sep=0.5cm] {plate_cat} {(m0) (S0) (k0) (nu0) (mu) (sigma) (pi) (pi_lapse)} {$c = 1 \dots M$}; %
+
+    \edge {m0, S0, k0, nu0} {mu, sigma} ; %
+    \edge {x, sigma_perc} {s} ; %
+    \edge {s, mu, sigma, pi, pi_lapse, lambda} {r} ; %
+  }
+  \caption{\texttt{NIW} Cognitive Observer Model in directed plate notation. Hyperpriors $(\mathbf{m}_{0,c}, \mathbf{S}_{0,c}, \kappa_{0,c}, \nu_{0,c})$ govern category latent parameters $\boldsymbol{\mu}_c, \boldsymbol{\Sigma}_c$.}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    % Single vertical axis
+    \node[obs] (x) {$\mathbf{x}_i$} ; %
+    \factor[above=1.5cm of x] {f_s} {above left=0.2cm:$\mathcal{N}$} {} {}; %
+    \node[latent, above=1.5cm of f_s] (s) {$\mathbf{s}_i$} ; %
+
+    % Target likelihood factor inside plate_cat
+    \factor[above=2.5cm of s] {f_target} {above left=0.2cm:$M$} {} {}; %
+
+    % Category latent parameters & NIW factor
+    \node[latent, left=1.8cm of f_target] (mu) {$\boldsymbol{\mu}_c$} ; %
+    \node[latent, left=1.2cm of mu] (sigma) {$\boldsymbol{\Sigma}_c$} ; %
+    \factor[above=1.5cm of mu] {f_niw} {above:$\text{NIW}$} {} {}; %
+
+    % Hyperpriors
+    \node[param, above left=1.2cm and 1.5cm of f_niw] (m0) {$\mathbf{m}_{0,c}$} ; %
+    \node[param, left=1.0cm of m0] (S0) {$\mathbf{S}_{0,c}$} ; %
+    \node[param, left=1.0cm of S0] (k0) {$\kappa_{0,c}$} ; %
+    \node[param, left=1.0cm of k0] (nu0) {$\nu_{0,c}$} ; %
+
+    \node[param, right=1.5cm of f_target] (pi) {$\pi_c$} ; %
+    \factor[right=2.8cm of f_target] {f_lapse} {above right=0.2cm:$M$} {} {}; %
+    \node[param, above=1.5cm of f_lapse] (pi_lapse) {$\pi_{lapse,c}$} ; %
+
+    % Mixture factor & response outside plate_cat
+    \factor[above=2.5cm of f_target] {f_mix} {left=0.25cm:$\mathcal{M}$} {} {}; %
+    \node[obs, above=1.5cm of f_mix] (r) {$r_i$} ; %
+
+    % Observer parameters
+    \node[param, left=2.5cm of f_s] (sigma_perc) {$\boldsymbol{\Sigma}_{perc}$} ; %
+    \node[param, right=3cm of f_mix] (lambda) {$\lambda$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (f_s) (s) (f_mix) (r)} {$i = 1 \dots N_{trials}$}; %
+    \plate[inner sep=0.5cm] {plate_cat} {(m0) (S0) (k0) (nu0) (f_niw) (mu) (sigma) (pi) (pi_lapse) (f_target) (f_lapse)} {$c = 1 \dots M$}; %
+
+    \edge {m0, S0, k0, nu0} {f_niw} ; %
+    \edge {f_niw} {mu, sigma} ; %
+    \edge {x, sigma_perc} {f_s} ; \edge {f_s} {s} ; %
+    \edge {s, mu, sigma, pi} {f_target} ; %
+    \edge {pi_lapse} {f_lapse} ; %
+    \edge {f_target, f_lapse, lambda} {f_mix} ; %
+    \edge {f_mix} {r} ; %
+  }
+  \caption{\texttt{NIW} Cognitive Observer Model in directed factor graph notation. $\text{NIW}$ density factor joins hyperpriors to latent category parameters $\boldsymbol{\mu}_c, \boldsymbol{\Sigma}_c$.}
+\end{figure}
+
+\newpage
+\section{NIW Stanfit Hierarchical Bayesian Model}
+
+In the \texttt{NIW\_ideal\_adaptor} Stanfit model, separation priors on prior scale matrix $\mathbf{S}_{0,c,g}$ are parameterized by scale vector $\boldsymbol{\tau}_{0,c,g}$ and Cholesky correlation matrix $\mathbf{L}_{\Omega,0,c,g}$. Both feed into node $\mathbf{S}_{0,c,g}$, which feeds into $\text{Update}_S$. Observed sample statistics ($N_{c,g}, \mathbf{\hat{\mu}}_{c,g}, \mathbf{\hat{\Sigma}}_{c,g}$) are positioned slightly above the horizontal baseline to ensure clean, non-intersecting dependency paths. Updating is handled by staggered factor nodes $\text{Update}_\kappa, \text{Update}_\nu, \text{Update}_m, \text{Update}_S$.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \tikz{ %
+    % Separation Priors & Hyperparameters (Far Left)
+    \node[latent] (tau0) {$\boldsymbol{\tau}_{0,c,g}$} ; %
+    \node[latent, below=1.0cm of tau0] (L_omega) {$\mathbf{L}_{\Omega,0,c,g}$} ; %
+    \node[latent, right=1.6cm of tau0] (S0) {$\mathbf{S}_{0,c,g}$} ; %
+
+    \node[latent, below=1.0cm of L_omega] (m0) {$\mathbf{m}_{0,c,g}$} ; %
+    \node[latent, below=1.2cm of m0] (k0) {$\kappa_0$} ; %
+    \node[latent, below=1.2cm of k0] (nu0) {$\nu_0$} ; %
+
+    % Observed Exposure Statistics (Positioned slightly above horizontal baseline)
+    \node[obs, above right=0.3cm and 2.0cm of S0] (S_exp) {$\mathbf{\hat{\Sigma}}_{c,g}$} ; %
+    \node[obs, above right=0.3cm and 2.0cm of m0] (mu_exp) {$\mathbf{\hat{\mu}}_{c,g}$} ; %
+    \node[obs, above right=0.3cm and 2.0cm of k0] (N_exp) {$N_{c,g}$} ; %
+
+    % Staggered Update Factors
+    \factor[right=2.2cm of S0] {Update_S} {above:$\text{Update}_S$} {} {}; %
+    \factor[right=2.2cm of m0] {Update_m} {above:$\text{Update}_m$} {} {}; %
+    \factor[right=2.2cm of k0] {Update_k} {above:$\text{Update}_\kappa$} {} {}; %
+    \factor[right=1.8cm of nu0] {Update_nu} {below:$\text{Update}_\nu$} {} {}; %
+
+    % Updated Belief Parameters (Circle Nodes)
+    \node[latent, right=2.0cm of Update_S] (Sn) {$\mathbf{S}_{n,c,g}$} ; %
+    \node[latent, right=2.0cm of Update_m] (mn) {$\mathbf{m}_{n,c,g}$} ; %
+    \node[latent, right=2.0cm of Update_k] (kn) {$\kappa_{n,c,g}$} ; %
+    \node[latent, right=2.0cm of Update_nu] (nun) {$\nu_{n,c,g}$} ; %
+
+    % Test Plate (Far Right)
+    \node[obs, right=6.2cm of kn] (x_test) {$\mathbf{x}_{j,g}$} ; %
+    \node[latent, above=1.5cm of x_test] (s_test) {$\mathbf{s}_{j,g}$} ; %
+    \node[latent, left=1.8cm of s_test] (pi) {$\pi_{c,g}$} ; %
+    \node[obs, above=4.5cm of s_test] (r_test) {$r_{j,g}$} ; %
+
+    % Global/Group parameters
+    \node[latent, right=1.8cm of r_test] (lambda) {$\lambda$} ; %
+    \node[param, below=0.8cm of s_test] (sigma_perc) {$\boldsymbol{\Sigma}_{perc}$} ; %
+
+    % Plates
+    \plate[inner sep=0.4cm] {plate_exp} {(S_exp) (mu_exp) (N_exp) (Update_S) (Update_m) (Update_k) (Update_nu) (Sn) (mn) (kn) (nun)} {$c = 1 \dots M$}; %
+    \plate[inner sep=0.4cm] {plate_test} {(x_test) (s_test) (r_test) (sigma_perc)} {$j = 1 \dots N_{test}$}; %
+    \plate[inner sep=0.6cm] {plate_group} {(plate_exp) (plate_test) (tau0) (L_omega) (S0) (m0) (pi)} {$g = 1 \dots G$}; %
+
+    % Edges from separation priors to S0
+    \edge {tau0, L_omega} {S0} ; %
+
+    % Edges from Priors & Exposure to Update
+    \edge {k0, N_exp} {Update_k} ; %
+    \edge {nu0, N_exp} {Update_nu} ; %
+    \edge {m0, k0, N_exp, mu_exp} {Update_m} ; %
+    \edge {S0, m0, k0, N_exp, mu_exp, S_exp} {Update_S} ; %
+
+    % Edges from Update to Belief Latents
+    \edge {Update_k} {kn} ; %
+    \edge {Update_nu} {nun} ; %
+    \edge {Update_m} {mn} ; %
+    \edge {Update_S} {Sn} ; %
+
+    % Test edges
+    \edge {x_test, sigma_perc} {s_test} ; %
+    \edge {kn, nun, mn, Sn, s_test, pi, lambda} {r_test} ; %
+  }}
+  \caption{\texttt{NIW Stanfit} model in boilerplate plate notation. Separation priors $\boldsymbol{\tau}_{0,c,g}$ and $\mathbf{L}_{\Omega,0,c,g}$ feed into $\mathbf{S}_{0,c,g}$, which feeds into $\text{Update}_S$. Staggered update nodes produce vector and matrix belief parameters ($\kappa_{n,c,g}, \nu_{n,c,g}, \mathbf{m}_{n,c,g}, \mathbf{S}_{n,c,g}$).}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \tikz{ %
+    % Separation Priors & Hyperparameters (Far Left)
+    \node[latent] (tau0) {$\boldsymbol{\tau}_{0,c,g}$} ; %
+    \factor[left=0.8cm of tau0] {f_tau0} {left=0.12cm:$\text{Cauchy}^+$} {} {}; %
+
+    \node[latent, below=1.0cm of tau0] (L_omega) {$\mathbf{L}_{\Omega,0,c,g}$} ; %
+    \factor[left=0.8cm of L_omega] {f_L} {left=0.12cm:$\text{LKJ}$} {} {}; %
+
+    \factor[right=0.8cm of tau0] {f_S0} {above:$\text{prior}$} {} {}; %
+    \node[latent, right=0.8cm of f_S0] (S0) {$\mathbf{S}_{0,c,g}$} ; %
+
+    \node[latent, below=1.0cm of L_omega] (m0) {$\mathbf{m}_{0,c,g}$} ; %
+    \factor[left=0.8cm of m0] {f_m0} {left=0.12cm:$\mathcal{N}$} {} {}; %
+
+    \node[latent, below=1.2cm of m0] (k0) {$\kappa_0$} ; %
+    \factor[left=0.8cm of k0] {f_k0} {left=0.12cm:$\mathcal{N}^+$} {} {}; %
+
+    \node[latent, below=1.2cm of k0] (nu0) {$\nu_0$} ; %
+    \factor[left=0.8cm of nu0] {f_nu0} {left=0.12cm:$\mathcal{N}^+$} {} {}; %
+
+    % Observed Exposure Statistics (Positioned slightly above horizontal baseline)
+    \node[obs, above right=0.3cm and 2.0cm of S0] (S_exp) {$\mathbf{\hat{\Sigma}}_{c,g}$} ; %
+    \node[obs, above right=0.3cm and 2.0cm of m0] (mu_exp) {$\mathbf{\hat{\mu}}_{c,g}$} ; %
+    \node[obs, above right=0.3cm and 2.0cm of k0] (N_exp) {$N_{c,g}$} ; %
+
+    % Staggered Update Factors
+    \factor[right=2.2cm of S0] {Update_S} {above:$\text{Update}_S$} {} {}; %
+    \factor[right=2.2cm of m0] {Update_m} {above:$\text{Update}_m$} {} {}; %
+    \factor[right=2.2cm of k0] {Update_k} {above:$\text{Update}_\kappa$} {} {}; %
+    \factor[right=1.8cm of nu0] {Update_nu} {below:$\text{Update}_\nu$} {} {}; %
+
+    % Updated Belief Parameters (Circle Nodes)
+    \node[latent, right=2.0cm of Update_S] (Sn) {$\mathbf{S}_{n,c,g}$} ; %
+    \node[latent, right=2.0cm of Update_m] (mn) {$\mathbf{m}_{n,c,g}$} ; %
+    \node[latent, right=2.0cm of Update_k] (kn) {$\kappa_{n,c,g}$} ; %
+    \node[latent, right=2.0cm of Update_nu] (nun) {$\nu_{n,c,g}$} ; %
+
+    % Test Plate (Far Right)
+    \node[obs, right=6.2cm of kn] (x_test) {$\mathbf{x}_{j,g}$} ; %
+    \factor[above=1.5cm of x_test] {f_s} {right=0.2cm:$\mathcal{N}$} {} {}; %
+    \node[latent, above=1.5cm of f_s] (s_test) {$\mathbf{s}_{j,g}$} ; %
+
+    \factor[above=2.2cm of s_test] {f_target} {above left=0.2cm:$M$} {} {}; %
+    \node[latent, left=1.8cm of f_target] (pi) {$\pi_{c,g}$} ; %
+
+    \factor[right=2.2cm of f_target] {f_lapse} {above right=0.2cm:$M$} {} {}; %
+
+    \factor[above=2.2cm of f_target] {f_mix} {left=0.25cm:$\mathcal{M}$} {} {}; %
+    \node[obs, above=1.5cm of f_mix] (r_test) {$r_{j,g}$} ; %
+
+    % Global/Group parameters
+    \node[latent, right=1.8cm of f_mix] (lambda) {$\lambda$} ; %
+    \node[param, right=0.8cm of f_s] (sigma_perc) {$\boldsymbol{\Sigma}_{perc}$} ; %
+
+    % Plates
+    \plate[inner sep=0.4cm] {plate_exp} {(S_exp) (mu_exp) (N_exp) (Update_S) (Update_m) (Update_k) (Update_nu) (Sn) (mn) (kn) (nun)} {$c = 1 \dots M$}; %
+    \plate[inner sep=0.4cm] {plate_test} {(x_test) (f_s) (s_test) (f_target) (f_lapse) (f_mix) (r_test)} {$j = 1 \dots N_{test}$}; %
+    \plate[inner sep=0.6cm] {plate_group} {(plate_exp) (plate_test) (tau0) (L_omega) (S0) (m0) (pi)} {$g = 1 \dots G$}; %
+
+    % Prior edges
+    \edge {f_tau0} {tau0} ; \edge {f_L} {L_omega} ; \edge {f_m0} {m0} ; \edge {f_k0} {k0} ; \edge {f_nu0} {nu0} ; %
+    \edge {tau0, L_omega} {f_S0} ; \edge {f_S0} {S0} ; %
+
+    % Edges from Priors & Exposure to Update
+    \edge {k0, N_exp} {Update_k} ; %
+    \edge {nu0, N_exp} {Update_nu} ; %
+    \edge {m0, k0, N_exp, mu_exp} {Update_m} ; %
+    \edge {S0, m0, k0, N_exp, mu_exp, S_exp} {Update_S} ; %
+
+    % Edges from Update to Belief Latents
+    \edge {Update_k} {kn} ; %
+    \edge {Update_nu} {nun} ; %
+    \edge {Update_m} {mn} ; %
+    \edge {Update_S} {Sn} ; %
+
+    % Test edges
+    \edge {x_test, sigma_perc} {f_s} ; \edge {f_s} {s_test} ; %
+    \edge {s_test, kn, nun, mn, Sn, pi} {f_target} ; %
+    \edge {pi} {f_lapse} ; %
+    \edge {f_target, f_lapse, lambda} {f_mix} ; %
+    \edge {f_mix} {r_test} ; %
+  }}
+  \caption{\texttt{NIW Stanfit} model in directed factor graph notation. Separation prior components $\boldsymbol{\tau}_{0,c,g}$ and $\mathbf{L}_{\Omega,0,c,g}$ feed $\mathbf{S}_{0,c,g}$, which feeds $\text{Update}_S$. Staggered update factors produce vector and matrix belief parameters.}
+\end{figure}
+
+\newpage
+
+\chapter{MUVG, MNIX, and Exemplar Models}
+
+\section{MUVG / MNIX Mixture Category Models}
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    % Single vertical axis
+    \node[obs] (x) {$x_i$} ; %
+    \node[latent, above=2.2cm of x] (s) {$s_i$} ; %
+    \node[obs, above=5cm of s] (r) {$r_i$} ; %
+
+    % Category parameters (fixed, no circles)
+    \node[param, above left=2.2cm and 2.5cm of s] (pi) {$\pi_c$} ; %
+    \node[param, left=1.5cm of pi] (mu) {$\mu_{c,k}$} ; %
+    \node[param, left=1.2cm of mu] (sigma2) {$\sigma^2_{c,k}$} ; %
+    \node[param, above right=2.2cm and 2.5cm of s] (pi_lapse) {$\pi_{lapse,c}$} ; %
+
+    % Observer global parameters (fixed, no circles)
+    \node[param, left=2.5cm of s] (sigma_perc) {$\sigma_{perc}$} ; %
+    \node[param, right=3cm of r] (lambda) {$\lambda$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (s) (r)} {$i = 1 \dots N_{trials}$}; %
+    \plate[inner sep=0.5cm] {plate_comp} {(mu) (sigma2)} {$k = 1 \dots K_c$}; %
+    \plate[inner sep=0.7cm] {plate_cat} {(plate_comp) (pi) (pi_lapse)} {$c = 1 \dots M$}; %
+
+    \edge {x, sigma_perc} {s} ; %
+    \edge {s, mu, sigma2, pi, pi_lapse, lambda} {r} ; %
+  }
+  \caption{\texttt{MUVG / MNIX} Cognitive Observer Model in directed plate notation.}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    % Single vertical axis
+    \node[obs] (x) {$x_i$} ; %
+    \factor[above=1.5cm of x] {f_s} {above left=0.2cm:$\mathcal{N}$} {} {}; %
+    \node[latent, above=1.5cm of f_s] (s) {$s_i$} ; %
+
+    % Target factor inside plate_cat
+    \factor[above=2.2cm of s] {f_target} {above left=0.2cm:$M$} {} {}; %
+
+    % Category level nodes (fixed parameters, no circles)
+    \node[param, left=2.8cm of f_target] (pi) {$\pi_c$} ; %
+    \node[param, left=1.5cm of pi] (mu) {$\mu_{c,k}$} ; %
+    \node[param, left=1.2cm of mu] (sigma2) {$\sigma^2_{c,k}$} ; %
+
+    % Lapse factor & lapse prior inside plate_cat
+    \factor[right=2.8cm of f_target] {f_lapse} {above right=0.2cm:$M$} {} {}; %
+    \node[param, above=1.5cm of f_lapse] (pi_lapse) {$\pi_{lapse,c}$} ; %
+
+    % Mixture factor & response outside plate_cat
+    \factor[above=2.5cm of f_target] {f_mix} {left=0.25cm:$\mathcal{M}$} {} {}; %
+    \node[obs, above=1.5cm of f_mix] (r) {$r_i$} ; %
+
+    % Observer parameters (fixed)
+    \node[param, left=2.5cm of f_s] (sigma_perc) {$\sigma_{perc}$} ; %
+    \node[param, right=3cm of f_mix] (lambda) {$\lambda$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (f_s) (s) (f_mix) (r)} {$i = 1 \dots N_{trials}$}; %
+    \plate[inner sep=0.5cm] {plate_comp} {(mu) (sigma2)} {$k = 1 \dots K_c$}; %
+    \plate[inner sep=0.7cm] {plate_cat} {(plate_comp) (pi) (pi_lapse) (f_target) (f_lapse)} {$c = 1 \dots M$}; %
+
+    \edge {x, sigma_perc} {f_s} ; %
+    \edge {f_s} {s} ; %
+    \edge {s, mu, sigma2, pi} {f_target} ; %
+    \edge {pi_lapse} {f_lapse} ; %
+    \edge {f_target, f_lapse, lambda} {f_mix} ; %
+    \edge {f_mix} {r} ; %
+  }
+  \caption{\texttt{MUVG / MNIX} Cognitive Observer Model in directed factor graph notation.}
+\end{figure}
+
+\newpage
+\section{EXEMPLAR Exemplar-Based Model}
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    \node[obs] (c) {$c_n$} ; %
+    \node[latent, right=3.5cm of c] (x) {$\mathbf{x}_n$} ; %
+    \node[param, above=2.5cm of c] (y) {$\mathbf{y}_{j,c}$} ; %
+    \node[param, right=3.5cm of y] (h) {$h_c$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (c)} {$n = 1 \dots N$}; %
+    \plate[inner sep=0.5cm] {plate_ex} {(y)} {$j = 1 \dots J_c$}; %
+    \plate[inner sep=0.7cm] {plate_cat} {(plate_ex) (h)} {$c = 1 \dots M$}; %
+
+    \edge {y, h, c} {x} ; %
+  }
+  \caption{\texttt{EXEMPLAR} Representation in boilerplate plate notation.}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \tikz{ %
+    % Single vertical axis
+    \node[obs] (x) {$\mathbf{x}_i$} ; %
+    \factor[above=1.5cm of x] {f_s} {above left=0.2cm:$\mathcal{N}$} {} {}; %
+    \node[latent, above=1.5cm of f_s] (s) {$\mathbf{s}_i$} ; %
+
+    % Target KDE factor inside plate_cat
+    \factor[above=2.5cm of s] {f_target} {above left=0.2cm:$\text{KDE}$} {} {}; %
+
+    % Exemplar nodes (fixed parameters, no circles)
+    \node[param, left=2.8cm of f_target] (pi) {$\pi_c$} ; %
+    \node[param, left=1.5cm of pi] (y) {$\mathbf{y}_{j,c}$} ; %
+    \node[param, left=1.2cm of y] (h) {$h_c$} ; %
+
+    % Lapse factor & lapse prior inside plate_cat
+    \factor[right=2.8cm of f_target] {f_lapse} {above right=0.2cm:$M$} {} {}; %
+    \node[param, above=1.5cm of f_lapse] (pi_lapse) {$\pi_{lapse,c}$} ; %
+
+    % Mixture factor & response outside plate_cat
+    \factor[above=2.5cm of f_target] {f_mix} {left=0.25cm:$\mathcal{M}$} {} {}; %
+    \node[obs, above=1.5cm of f_mix] (r) {$r_i$} ; %
+
+    % Observer parameters (fixed)
+    \node[param, left=2.5cm of f_s] (sigma_perc) {$\boldsymbol{\Sigma}_{perc}$} ; %
+    \node[param, right=3cm of f_mix] (lambda) {$\lambda$} ; %
+
+    \plate[inner sep=0.5cm] {plate_obs} {(x) (f_s) (f_mix) (r)} {$i = 1 \dots N_{trials}$}; %
+    \plate[inner sep=0.5cm] {plate_ex} {(y)} {$j = 1 \dots J_c$}; %
+    \plate[inner sep=0.7cm] {plate_cat} {(plate_ex) (h) (pi) (pi_lapse) (f_target) (f_lapse)} {$c = 1 \dots M$}; %
+
+    \edge {x, sigma_perc} {f_s} ; %
+    \edge {f_s} {s} ; %
+    \edge {s, y, h, pi} {f_target} ; %
+    \edge {pi_lapse} {f_lapse} ; %
+    \edge {f_target, f_lapse, lambda} {f_mix} ; %
+    \edge {f_mix} {r} ; %
+  }
+  \caption{\texttt{EXEMPLAR} Cognitive Observer Model in directed factor graph notation.}
+\end{figure}
+
+\end{document}

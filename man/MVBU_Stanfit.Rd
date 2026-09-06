@@ -19,7 +19,8 @@ MVBU_Stanfit(
   criteria = list(),
   file = NULL,
   version = NULL,
-  metadata = list()
+  metadata = list(),
+  cache = list()
 )
 
 IdealAdaptorStanfit(
@@ -35,7 +36,8 @@ IdealAdaptorStanfit(
   criteria = list(),
   file = NULL,
   version = NULL,
-  metadata = list()
+  metadata = list(),
+  cache = list()
 )
 }
 \description{

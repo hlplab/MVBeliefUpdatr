@@ -21,8 +21,10 @@ knitr::opts_chunk$set(
   message = FALSE
 )
 
-if (requireNamespace("pkgload", quietly = TRUE)) {
-  pkgload::load_all("..", quiet = TRUE)
+if (!"MVBeliefUpdatr" %in% loadedNamespaces()) {
+  if (requireNamespace("pkgload", quietly = TRUE)) {
+    tryCatch(pkgload::load_all("..", quiet = TRUE), error = function(e) NULL)
+  }
 }
 ```
 

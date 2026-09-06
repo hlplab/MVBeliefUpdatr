@@ -57,7 +57,8 @@ MVBU_Stanfit <- S7::new_class(
     criteria = S7::class_list,
     file = S7::class_character,
     version = S7::class_any,
-    metadata = S7::class_list
+    metadata = S7::class_list,
+    cache = S7::class_list
   ),
   constructor = function(
     data = data.frame(),
@@ -72,7 +73,8 @@ MVBU_Stanfit <- S7::new_class(
     criteria = list(),
     file = NULL,
     version = NULL,
-    metadata = list()
+    metadata = list(),
+    cache = list()
   ) {
     if (is.null(transform_information)) {
       transform_information <- MVBU_TransformInformation()
@@ -91,6 +93,9 @@ MVBU_Stanfit <- S7::new_class(
 
     if (!is.list(metadata)) {
       metadata <- list()
+    }
+    if (!is.list(cache)) {
+      cache <- list()
     }
 
     label_info <- if (!is.null(metadata$label_information) &&
@@ -120,7 +125,8 @@ MVBU_Stanfit <- S7::new_class(
       criteria = as.list(criteria),
       file = as.character(file),
       version = version,
-      metadata = metadata
+      metadata = metadata,
+      cache = as.list(cache)
     )
   },
   validator = function(self) {
@@ -189,7 +195,8 @@ IdealAdaptorStanfit <- S7::new_class(
     criteria = list(),
     file = NULL,
     version = NULL,
-    metadata = list()
+    metadata = list(),
+    cache = list()
   ) {
     ti <- if (is.null(transform_information)) {
       MVBU_TransformInformation()
@@ -210,7 +217,8 @@ IdealAdaptorStanfit <- S7::new_class(
         criteria = as.list(criteria),
         file = as.character(file),
         version = if (is.null(version)) get_current_versions() else version,
-        metadata = as.list(metadata)
+        metadata = as.list(metadata),
+        cache = as.list(cache)
       )
     )
   }
@@ -233,7 +241,8 @@ NIX_IdealAdaptorStanfit <- S7::new_class(
     criteria = list(),
     file = NULL,
     version = NULL,
-    metadata = list()
+    metadata = list(),
+    cache = list()
   ) {
     ti <- if (is.null(transform_information)) {
       MVBU_TransformInformation()
@@ -254,7 +263,8 @@ NIX_IdealAdaptorStanfit <- S7::new_class(
         criteria = as.list(criteria),
         file = as.character(file),
         version = if (is.null(version)) get_current_versions() else version,
-        metadata = as.list(metadata)
+        metadata = as.list(metadata),
+        cache = as.list(cache)
       )
     )
   }
@@ -277,7 +287,8 @@ MNIX_IdealAdaptorStanfit <- S7::new_class(
     criteria = list(),
     file = NULL,
     version = NULL,
-    metadata = list()
+    metadata = list(),
+    cache = list()
   ) {
     ti <- if (is.null(transform_information)) {
       MVBU_TransformInformation()
@@ -298,7 +309,8 @@ MNIX_IdealAdaptorStanfit <- S7::new_class(
         criteria = as.list(criteria),
         file = as.character(file),
         version = if (is.null(version)) get_current_versions() else version,
-        metadata = as.list(metadata)
+        metadata = as.list(metadata),
+        cache = as.list(cache)
       )
     )
   }
@@ -321,7 +333,8 @@ NIW_IdealAdaptorStanfit <- S7::new_class(
     criteria = list(),
     file = NULL,
     version = NULL,
-    metadata = list()
+    metadata = list(),
+    cache = list()
   ) {
     ti <- if (is.null(transform_information)) {
       MVBU_TransformInformation()
@@ -342,7 +355,8 @@ NIW_IdealAdaptorStanfit <- S7::new_class(
         criteria = as.list(criteria),
         file = as.character(file),
         version = if (is.null(version)) get_current_versions() else version,
-        metadata = as.list(metadata)
+        metadata = as.list(metadata),
+        cache = as.list(cache)
       )
     )
   }

@@ -1,13 +1,11 @@
 
-## Next steps (Phase 4 / Extensions)
+## Next steps 
 
-+ develop plotting methods that dynamically show model updates, both based on stanfits (from prior to posterior) or from update_model() outputs. 
+# General cleanup as part of phase 7
++  in vignette that covers categorize(), demonstrate the output of the three different decision rules with an example
 
-# General cleanup at end of Phase 3
-+ check which utils are needed. 
-++ if almost all checks of scalars are actually for non-NA scalars change the .is_X to include requirement for non-NA, remove .is_non_NA_x, and also adjust .assert functions accordingly.
-++ for overridden functions check whether they are still necessary.
-
++ check whether there are repeated code chunks that should be consolidated into internal helper functions.
++ check whether singular / plural naming of functions and function arguments is consistent. list all exceptions.
 + see whether the helper functions for testing can be simplified/reduced. e.g., make_vowel_test_data might be replaced by other test data by adjusting the tests, while yielding the same coverage?
 
 + check how deprecated functions are marked in terms of their roxygen documentation. is it consistent? ideally, they should not be listed in the table of content of help files, but should have help files. the structure of those help files and the way that deprecation warnings are given should be consistent across deprecated functions.
@@ -16,12 +14,9 @@ also check whether we can switch to one warning per session and ensure that warn
 
 ## Testing
 
-# To do after Phase 3
-+ check whether we can get rid of the functions in override.R 
-+ check whether there are repeated code chunks that should be consolidated into internal helper functions.
+# To do after Phase 9
++ think about whether evaluate_model should be renamed. it's job is similar to the add information criteria (IC) functions in brms, just that it's frequentist log-likelihood or accuracy vs. Bayesian ICs. perhaps this could be unified by changing the evaluate_models function into several separate add_* functions that add the IC to the model (similar to brms), allowing also a common compare models function that would extend that compare_models function from non-stanfit to stanfit model (allowing comparison on any IC)?
 
-## Validity checks
-+  for categorize(), demonstrate the output of the three different decision rules to me with an example
 
 ### Extensions
 + implement mixture inference starting with predefined models that are handed to the stan code.

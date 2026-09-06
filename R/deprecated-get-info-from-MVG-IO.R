@@ -38,13 +38,13 @@ get_MVG_likelihood <- function(
     with = "likelihood()"
   )
 
-  .assert_that(is.vector(mu) || is.matrix(mu) || .is_non_NA_scalar_double(mu))
+  .assert_that(is.vector(mu) || is.matrix(mu) || .is_scalar_double(mu))
   .assert_that(.is_sigma(Sigma))
   if (is.matrix(mu)) mu <- as.vector(mu)
 
   d <- length(mu)
   x <- .as_observation_matrix(x, d = d, arg_name = "x")
-  .assert_that(.is_non_NA_scalar_logical(log))
+  .assert_that(.is_scalar_logical(log))
   .assert_that(any(noise_treatment %in% c("no_noise", "marginalize", "sample")),
     msg = "noise_treatment must be one of 'no_noise', 'marginalize', or 'sample'."
   )

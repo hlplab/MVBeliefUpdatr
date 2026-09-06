@@ -21,8 +21,10 @@ knitr::opts_chunk$set(
   message = FALSE
 )
 
-if (requireNamespace("pkgload", quietly = TRUE)) {
-  pkgload::load_all("..", quiet = TRUE)
+if (!"MVBeliefUpdatr" %in% loadedNamespaces()) {
+  if (requireNamespace("pkgload", quietly = TRUE)) {
+    tryCatch(pkgload::load_all("..", quiet = TRUE), error = function(e) NULL)
+  }
 }
 ```
 
@@ -64,6 +66,9 @@ The **S7 class architecture** replaces this with strongly typed, validated, and 
 2. **Category Representation Templates** (`MVBU_CategoryRepresentationTemplate`): Sets of category representations sharing a common cue space and coordinate system.
 3. **Cognitive Decision Models** (`MVBU_CognitiveModel`): Complete observer or adaptor models composing a category template with category priors $P(c)$, decision rules (e.g., criterion, proportional, sampling), internal perceptual noise, and lapse behaviors.
 4. **Stan Input & Fit Objects** (`MVBU_Staninput`, `MVBU_Stanfit`): Typed data bundles and Bayesian posterior fits for incremental belief-updating models.
+
+For detailed Bayesian model fitting, post-processing, and model comparison workflows, see:
+[Fitting and Working with MVBeliefUpdatr Stanfit Models](fitting-and-working-with-stanfit-models.html).
 
 For visualization workflows corresponding to these objects, see the companion vignette:
 [Visualizing Categories, Categorization Functions, and Belief Updating](visualizing-models-and-categories.html).
@@ -345,6 +350,52 @@ model_from_data <- new_mvg_ideal_observer_from_data(
 model_from_data
 ```
 
+### Model Factor Graphs {#cognitive-model-factor-graphs}
+
+Each cognitive decision model family in **MVBeliefUpdatr** can be formally represented as a directed probabilistic factor graph detailing the interactions between category parameters, perceptual noise, lapse rates, category priors, and decision rules.
+
+#### Univariate Cognitive Observer Models (UVG & NIX)
+
+In the **UVG** cognitive observer model, category mean $\mu_c$ and variance $\sigma^2_c$ are fixed inputs (unshaded parameters, no circles).
+
+```{r uvg_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center", fig.cap = "UVG Cognitive Observer Model (Factor Graph)"}
+knitr::include_graphics("figures/uvg_observer_factor.png")
+```
+
+In the **NIX** cognitive observer model, belief distributions over $\mu_c$ and $\sigma^2_c$ are explicitly governed by hyperpriors ($m_{0,c}, S_{0,c}, \kappa_{0,c}, \nu_{0,c}$) through a NIX density factor node.
+
+```{r nix_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center", fig.cap = "NIX Cognitive Observer Model (Factor Graph)"}
+knitr::include_graphics("figures/nix_observer_factor.png")
+```
+
+#### Multivariate Cognitive Observer Models (MVG & NIW)
+
+In the **MVG** cognitive observer model, multidimensional cue distributions use fixed mean vector $\boldsymbol{\mu}_c$ and covariance matrix $\boldsymbol{\Sigma}_c$.
+
+```{r mvg_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center", fig.cap = "MVG Cognitive Observer Model (Factor Graph)"}
+knitr::include_graphics("figures/mvg_observer_factor.png")
+```
+
+In the **NIW** cognitive observer model, belief distributions over mean vector $\boldsymbol{\mu}_c$ and covariance matrix $\boldsymbol{\Sigma}_c$ are governed by NIW hyperpriors ($\mathbf{m}_{0,c}, \mathbf{S}_{0,c}, \kappa_{0,c}, \nu_{0,c}$) through a NIW density factor node.
+
+```{r niw_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center", fig.cap = "NIW Cognitive Observer Model (Factor Graph)"}
+knitr::include_graphics("figures/niw_observer_factor.png")
+```
+
+#### Mixture and Non-Parametric Observer Models (MUVG / MNIX & EXEMPLAR)
+
+In **MUVG** and **MNIX** mixture models, category representations contain $K$ Gaussian components per category with component weights $\boldsymbol{\pi}_{c,k}$.
+
+```{r muvg_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center", fig.cap = "MUVG / MNIX Observer Model (Factor Graph)"}
+knitr::include_graphics("figures/muvg_observer_factor.png")
+```
+
+In the **EXEMPLAR** non-parametric observer model, category likelihoods are evaluated over stored exemplars $\mathbf{y}_{j,c}$ using kernel density estimation with category bandwidth $h_c$.
+
+```{r exemplar_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center", fig.cap = "EXEMPLAR Observer Model (Factor Graph)"}
+knitr::include_graphics("figures/exemplar_observer_factor.png")
+```
+
 ---
 
 # 4. Standard Generics: Inspection, Evaluation, and Sampling {#standard-generics}
@@ -454,6 +505,9 @@ sample_observations(observer_model, n = 6)
 
 # 5. Bayesian Fitting Architecture: `Staninput` and `Stanfit` {#bayesian-fitting-architecture}
 
+> **Dedicated Vignette:** For a complete step-by-step guide on model fitting, pre-extracting parameter draws with `add_parameter_draws()`, adding information criteria (`add_criterion()`), LOO model comparisons (`loo_compare()`), and posterior predictive checks (`pp_check()`), see:
+> [Fitting and Working with MVBeliefUpdatr Stanfit Models](fitting-and-working-with-stanfit-models.html).
+
 Fitting ideal adaptor models with incremental belief updating (IBBU) follows a clean two-tier pipeline.
 
 ```
@@ -519,6 +573,22 @@ head(neff_ratio(fit_1cue))
 
 # Model summary
 summary(fit_1cue)
+```
+
+## Stanfit Model Factor Graphs {#stanfit-model-factor-graphs}
+
+Hierarchical Bayesian belief-updating models (`MVBU_Stanfit`) combine prior hyperpriors with exposure sample statistics ($N_{c,g}, \hat{\mu}_{c,g}, \hat{\sigma}^2_{c,g}$ / $\mathbf{\hat{\Sigma}}_{c,g}$) via dedicated update factor nodes ($\text{Update}_\kappa, \text{Update}_\nu, \text{Update}_m, \text{Update}_S$) to yield group-updated belief parameters ($\kappa_{n,c,g}, \nu_{n,c,g}, m_{n,c,g}, S_{n,c,g}$).
+
+#### NIX Stanfit Model
+
+```{r nix_stanfit_factor_fig, echo = FALSE, out.width = "90%", fig.align = "center", fig.cap = "NIX Stanfit Model (Factor Graph)"}
+knitr::include_graphics("figures/nix_stanfit_factor.png")
+```
+
+#### NIW Stanfit Model
+
+```{r niw_stanfit_factor_fig, echo = FALSE, out.width = "90%", fig.align = "center", fig.cap = "NIW Stanfit Model (Factor Graph)"}
+knitr::include_graphics("figures/niw_stanfit_factor.png")
 ```
 
 ---

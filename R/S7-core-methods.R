@@ -941,13 +941,30 @@ S7::method(likelihood, list(MVBU_CognitiveModel, S7::class_list, S7::class_any))
 
 S7::method(likelihood, list(MVBU_CognitiveModel, S7::class_any, S7::class_any)) <- function(x, new_data, categories) {
   if (missing(categories)) categories <- NULL
-  .mvbu_likelihood_matrix(
-    x, new_data,
-    categories = categories,
-    log = FALSE,
-    noise_treatment = get_noise_treatment(x),
-    Sigma_noise = x@noise_behavior$Sigma_noise
-  )
+  lik_fn <- S7::method(get_category_likelihood_function, MVBU_CognitiveModel)(x)
+  lik_fn(new_data, categories = categories)
+}
+
+S7::method(get_category_likelihood_function, MVBU_CognitiveModel) <- function(x, noise_treatment) {
+  if (missing(noise_treatment) || is.null(noise_treatment)) {
+    noise_treatment <- get_noise_treatment(x)
+  } else {
+    noise_treatment <- as.character(noise_treatment)
+  }
+  key <- noise_treatment
+
+  c_list <- .get_cache(x)
+  lik_funcs <- c_list$category_likelihood_functions
+  if (is.null(lik_funcs[[key]])) {
+    if (is.null(lik_funcs)) lik_funcs <- list()
+    lik_funcs[[key]] <- function(new_data, categories = NULL) {
+      .mvbu_likelihood_matrix(x, new_data, categories = categories, log = FALSE, noise_treatment = noise_treatment, Sigma_noise = x@noise_behavior$Sigma_noise)
+    }
+    c_list$category_likelihood_functions <- lik_funcs
+    .set_cache(x, c_list)
+  }
+
+  lik_funcs[[key]]
 }
 
 S7::method(get_category_posterior_function, list(MVBU_CognitiveModel, S7::class_any, S7::class_any)) <- function(x, noise_treatment, lapse_treatment) {
@@ -960,13 +977,18 @@ S7::method(get_category_posterior_function, list(MVBU_CognitiveModel, S7::class_
   }
   key <- paste(noise_treatment, lapse_treatment, sep = "__")
 
-  if (is.null(x@category_posterior_functions[[key]])) {
-    x@category_posterior_functions[[key]] <- function(new_data, categories = NULL) {
+  c_list <- .get_cache(x)
+  post_funcs <- c_list$category_posterior_functions
+  if (is.null(post_funcs[[key]])) {
+    if (is.null(post_funcs)) post_funcs <- list()
+    post_funcs[[key]] <- function(new_data, categories = NULL) {
       .mvbu_posterior_matrix(x, new_data, categories = categories, noise_treatment = noise_treatment, lapse_treatment = lapse_treatment)
     }
+    c_list$category_posterior_functions <- post_funcs
+    .set_cache(x, c_list)
   }
 
-  x@category_posterior_functions[[key]]
+  post_funcs[[key]]
 }
 
 S7::method(posterior, list(MVBU_CognitiveModel, S7::class_list, S7::class_any)) <- function(x, new_data, categories) {
@@ -1170,7 +1192,7 @@ S7::method(sample_observations, MVBU_CategoryRepresentation) <- function(
   if ("Ns" %in% names(dots)) n <- dots$Ns
   if ("randomize.order" %in% names(dots)) randomize_order <- dots$randomize.order
 
-  .assert_true(.is_non_NA_scalar_count(n) && n >= 0L, msg = "n must be a non-negative whole number.")
+  .assert_true(.is_scalar_count(n) && n >= 0L, msg = "n must be a non-negative whole number.")
   cues <- get_cue_labels(x)
   cat_lbl <- .mvbu_extract_label_metadata(x)$category
 
@@ -1209,7 +1231,7 @@ S7::method(sample_observations, MVBU_CategoryRepresentationTemplate) <- function
   cue_labels <- get_cue_labels(x)
 
   .assert_true(
-    .is_non_NA_scalar_count(n) || (is.numeric(n) && length(n) == K),
+    .is_scalar_count(n) || (is.numeric(n) && length(n) == K),
     msg = "n must be a non-negative whole number or a vector of counts with one element per category."
   )
 
@@ -1292,7 +1314,7 @@ S7::method(sample_observations, MVBU_CognitiveModel) <- function(
   cue_labels <- get_cue_labels(x)
 
   .assert_true(
-    .is_non_NA_scalar_count(n) || (is.numeric(n) && length(n) == K),
+    .is_scalar_count(n) || (is.numeric(n) && length(n) == K),
     msg = "n must be a non-negative whole number or a vector of counts with one element per category."
   )
 

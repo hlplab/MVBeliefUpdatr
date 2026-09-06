@@ -121,7 +121,7 @@ NULL
   cue_labels <- labels$cue
 
   if (to == "EXEMPLAR") {
-    .assert_true(.is_non_NA_scalar_count(n) && n >= 1, msg = "n must be a non-NA, positive whole number giving the number of exemplars to sample.")
+    .assert_true(.is_scalar_count(n) && n >= 1, msg = "n must be a non-NA, positive whole number giving the number of exemplars to sample.")
     exemplars <- .mvbu_sample_from_representation(x, from = from, n = n)
     return(new_exemplar_category_representation(category_labels = category_labels, cue_labels = cue_labels, exemplars = exemplars))
   }
@@ -150,14 +150,14 @@ NULL
       component_weights = component_weights
     ),
     NIX = {
-      .assert_non_NA_scalar_numeric(kappa, msg = "kappa must be a non-NA scalar numeric value.")
-      .assert_non_NA_scalar_numeric(nu, msg = "nu must be a non-NA scalar numeric value greater than 2.")
+      .assert_numeric_scalar(kappa, msg = "kappa must be a non-NA scalar numeric value.")
+      .assert_numeric_scalar(nu, msg = "nu must be a non-NA scalar numeric value greater than 2.")
       .assert_true(nu > 2, msg = "nu must be greater than 2 for a univariate NIX representation.")
       new_nix_category_representation(category_labels, cue_labels, m = mu[1], kappa = kappa, nu = nu, sigma2 = Sigma[1, 1] * (nu - 2))
     },
     NIW = {
-      .assert_non_NA_scalar_numeric(kappa, msg = "kappa must be a non-NA scalar numeric value.")
-      .assert_non_NA_scalar_numeric(nu, msg = "nu must be a non-NA scalar numeric value.")
+      .assert_numeric_scalar(kappa, msg = "kappa must be a non-NA scalar numeric value.")
+      .assert_numeric_scalar(nu, msg = "nu must be a non-NA scalar numeric value.")
       .assert_true(nu > length(cue_labels) + 1, msg = paste0("nu must be larger than dimensionality of cues + 1 (>", length(cue_labels) + 1, ")."))
       new_niw_category_representation(category_labels, cue_labels, m = mu, kappa = kappa, nu = nu, S = get_S_from_expected_Sigma(Sigma, nu))
     },

@@ -125,7 +125,8 @@ MUVG_IdealObserver(
   category_prior = integer(0),
   lapse_behavior = list(),
   noise_behavior = list(),
-  metadata = list()
+  metadata = list(),
+  cache = list()
 )
 
 new_muvg_ideal_observer(

@@ -130,15 +130,15 @@ get_NIW_posterior_predictive <- function(
   noise_treatment = .infer_noise_treatment(Sigma_noise),
   log = TRUE
 ) {
-  .assert_that(is.vector(m) || is.matrix(m) || .is_non_NA_scalar_double(m))
-  .assert_that(is.matrix(S) || .is_non_NA_scalar_numeric(S))
+  .assert_that(is.vector(m) || is.matrix(m) || .is_scalar_double(m))
+  .assert_that(is.matrix(S) || .is_scalar_numeric(S))
   if (is.matrix(m)) m <- as.vector(m)
 
   d <- length(m)
   x <- .as_observation_matrix(x, d = d, arg_name = "x")
 
-  .assert_that(all(.is_non_NA_scalar_numeric(kappa), .is_non_NA_scalar_numeric(nu)))
-  .assert_that(.is_non_NA_scalar_logical(log))
+  .assert_that(all(.is_scalar_numeric(kappa), .is_scalar_numeric(nu)))
+  .assert_that(.is_scalar_logical(log))
   .assert_that(any(noise_treatment %in% c("no_noise", "sample", "marginalize")),
     msg = "noise_treatment must be one of 'no_noise', 'sample' or 'marginalize'."
   )
@@ -196,11 +196,11 @@ get_NIX_posterior_predictive <- function(
   noise_treatment = .infer_noise_treatment(Sigma_noise),
   log = TRUE
 ) {
-  .assert_that(.is_non_NA_scalar_numeric(m))
-  .assert_that(.is_non_NA_scalar_numeric(sigma2))
-  .assert_that(.is_non_NA_scalar_numeric(kappa))
-  .assert_that(.is_non_NA_scalar_numeric(nu))
-  .assert_that(.is_non_NA_scalar_logical(log))
+  .assert_that(.is_scalar_numeric(m))
+  .assert_that(.is_scalar_numeric(sigma2))
+  .assert_that(.is_scalar_numeric(kappa))
+  .assert_that(.is_scalar_numeric(nu))
+  .assert_that(.is_scalar_logical(log))
 
   x <- .as_observation_matrix(x, d = 1, arg_name = "x")
 
