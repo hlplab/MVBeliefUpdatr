@@ -29,7 +29,9 @@ get_expected_columns_for_NIW_ideal_adaptor <- function() {
 
 #' Deprecated: is.NIW_ideal_adaptor
 #'
-#' Check whether \code{x} is an ideal adaptor with \link[=is.NIW_belief]{Normal-Inverse-Wishart (NIW) beliefs}.
+#' @description `r lifecycle::badge("deprecated")`
+#' `is.NIW_ideal_adaptor()` was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+#' Please use S7 validators and [NIW_IdealAdaptor] instead.
 #'
 #' @param x Object to check.
 #' @param group Name of one or more group variables. (default: NULL)
@@ -42,11 +44,12 @@ get_expected_columns_for_NIW_ideal_adaptor <- function() {
 #' @param tolerance Tolerance for sum-to-one probability checks. (default: MVBU_PROB_TOL)
 #' @param ... Additional arguments.
 #' @return Logical indicating whether `x` is a valid NIW ideal adaptor.
-#' @rdname deprecated-functions
+#' @seealso [NIW_IdealAdaptor]
+#' @keywords internal
 #' @export
 is.NIW_ideal_adaptor <- function(x, group = NULL, category = "category", is.long = T, with.prior = T, with.lapse = if (with.lapse_bias) T else F, with.lapse_bias = F, verbose = F, tolerance = MVBU_PROB_TOL, ...) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
+    when = "0.1.0",
     what = "is.NIW_ideal_adaptor()",
     details = "Use S7::S7_inherits(x, NIW_IdealAdaptor) instead."
   )

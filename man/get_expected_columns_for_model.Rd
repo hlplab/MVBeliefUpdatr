@@ -7,6 +7,7 @@
 get_expected_columns_for_model()
 }
 \description{
-Deprecated. Use the S7-based predicates and constructors instead.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{get_expected_columns_for_model()} was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
 }
 \keyword{internal}

@@ -2,25 +2,27 @@ get_expected_columns_for_MVG <- function() c("category", "mu", "Sigma")
 
 #' Deprecated: is.MVG
 #'
-#' Check whether \code{x} is a set of multivariate Gaussian (MVG) categories.
+#' @description `r lifecycle::badge("deprecated")`
+#' `is.MVG()` was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+#' Please use S7 validators and [MVG_IdealObserver] instead.
 #'
 #' @param x Object to be checked.
 #' @param group Name of one or more group variables, each unique combination of which describes an MVG. (default: NULL)
 #' @param category DEPRECATED Name of the category variable. (default: "category")
 #' @param is.long Is this check assessing whether the ideal observer is in long format (`TRUE`) or wide format (`FALSE`)?
 #' (default: `TRUE`)
+#' @param verbose Logical. If `TRUE`, emits diagnostics.
 #'
 #' @return A logical.
 #'
-#' @seealso TBD
-#' @description Deprecated. Use the S7-based validators and constructors for multivariate Gaussian (MVG) categories instead.
+#' @seealso [MVG_IdealObserver]
 #' @keywords internal
 #' @export
 is.MVG <- function(x, group = NULL, category = "category", is.long = T, verbose = F) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "is.MVG()",
-    details = "Use the S7-based validators and constructors for multivariate Gaussian (MVG) categories."
+    details = "Use S7 validators and MVG_IdealObserver instead."
   )
   name_of_x <- deparse(substitute(x))
   .assert_that(.is_non_NA_scalar_logical(is.long))

@@ -7,8 +7,11 @@
 get_staninput_from_stanfit(...)
 }
 \description{
-Deprecated. Use \code{\link{get_staninput}} instead.
-
-Deprecated. Use get_staninput() instead.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{get_staninput_from_stanfit()} was deprecated in MVBeliefUpdatr 0.1.0
+and will be removed in 0.2.0. Please use \code{\link[=get_staninput]{get_staninput()}} instead.
+}
+\seealso{
+\code{\link[=get_staninput]{get_staninput()}}
 }
 \keyword{internal}

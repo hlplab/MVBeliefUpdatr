@@ -7,8 +7,11 @@
 get_transform_information_from_stanfit(...)
 }
 \description{
-Deprecated. Use \code{\link{get_transform_information}} instead.
-
-Deprecated. Use get_transform_information() instead.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{get_transform_information_from_stanfit()} was deprecated in MVBeliefUpdatr 0.1.0
+and will be removed in 0.2.0. Please use \code{\link[=get_transform_information]{get_transform_information()}} instead.
+}
+\seealso{
+\code{\link[=get_transform_information]{get_transform_information()}}
 }
 \keyword{internal}

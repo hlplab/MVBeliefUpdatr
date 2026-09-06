@@ -7,8 +7,11 @@
 get_untransform_function_from_stanfit(...)
 }
 \description{
-Deprecated. Use \code{\link{get_untransform_function}} instead.
-
-Deprecated. Use get_untransform_function() instead.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{get_untransform_function_from_stanfit()} was deprecated in MVBeliefUpdatr 0.1.0
+and will be removed in 0.2.0. Please use \code{\link[=get_untransform_function]{get_untransform_function()}} instead.
+}
+\seealso{
+\code{\link[=get_untransform_function]{get_untransform_function()}}
 }
 \keyword{internal}

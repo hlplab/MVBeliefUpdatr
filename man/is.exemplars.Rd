@@ -11,18 +11,17 @@ is.exemplars(x, group = NULL, verbose = F)
 
 \item{group}{Name of one or more group variables, each unique combination of which describes a set of exemplars. (default: NULL)}
 
-\item{category}{Name of the category variable. (default: "category")}
+\item{verbose}{Logical. If \code{TRUE}, emits diagnostics.}
 }
 \value{
 A logical.
 }
 \description{
-Deprecated. Use the S7-based validators and constructors for exemplar categories instead.
-}
-\details{
-Check whether \code{x} is a set of exemplar categories.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{is.exemplars()} was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+Please use S7 validators and \link{Exemplar_Model} instead.
 }
 \seealso{
-TBD
+\link{Exemplar_Model}
 }
 \keyword{internal}

@@ -94,10 +94,10 @@ test_that("plot_categorization_function on Stanfit objects", {
 test_that("plot_expected_categories deprecated wrapper works", {
   expect_warning(
     plot_expected_categories(fit1, type = "density", ndraws = 5),
-    "was deprecated in MVBeliefUpdatr 0.2.0"
+    "was deprecated in MVBeliefUpdatr 0.1.0"
   )
   expect_warning(
     plot_expected_categories(fit2, type = "contour"),
-    "was deprecated in MVBeliefUpdatr 0.2.0"
+    "was deprecated in MVBeliefUpdatr 0.1.0"
   )
 })

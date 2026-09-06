@@ -15,18 +15,18 @@ is.NIW_belief(x, group = NULL, category = "category", is.long = T, verbose = F)
 
 \item{is.long}{Is this check assessing whether the belief is in long format (\code{TRUE}) or wide format (\code{FALSE})?
 (default: \code{TRUE})}
+
+\item{verbose}{Logical. If \code{TRUE}, emits diagnostics.}
 }
 \value{
 A logical.
 }
 \description{
-Deprecated. Use the S7-based validators and constructors for Normal-Inverse-Wishart (NIW) beliefs instead.
-}
-\details{
-Check whether \code{x} is a Normal-Inverse-Wishard (NIW) belief/set of NIW beliefs. An NIW belief describes a distribution of
-\link[=is.MVG]{multivariate Gaussian categories}.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{is.NIW_belief()} was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+Please use S7 validators and \link{NIW_IdealAdaptor} instead.
 }
 \seealso{
-TBD
+\link{NIW_IdealAdaptor}
 }
 \keyword{internal}

@@ -7,15 +7,19 @@ NULL
 
 # deprecated ------------------------------------------------------------------
 
+# deprecated ------------------------------------------------------------------
+
 #' Deprecated: make_named_vector
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `make_named_vector()` is deprecated.
+#' @description `r lifecycle::badge("deprecated")`
+#' `make_named_vector()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0.
 #'
 #' @param x A vector.
 #' @param names Character vector of names.
 #' @return A named vector.
+#' @seealso [stats::setNames()]
+#' @keywords internal
 #' @export
 make_named_vector <- function(x, names) {
   lifecycle::deprecate_warn(
@@ -29,13 +33,14 @@ make_named_vector <- function(x, names) {
 
 #' Deprecated: make_named_square_matrix
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `make_named_square_matrix()` is deprecated.
+#' @description `r lifecycle::badge("deprecated")`
+#' `make_named_square_matrix()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0.
 #'
 #' @param x Values for the matrix.
 #' @param names Character vector of row and column names.
 #' @return A named square matrix.
+#' @keywords internal
 #' @export
 make_named_square_matrix <- function(x, names) {
   lifecycle::deprecate_warn(
@@ -48,14 +53,14 @@ make_named_square_matrix <- function(x, names) {
 
 #' Deprecated: nest_cue_information_in_model
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `nest_cue_information_in_model()` and `unnest_cue_information_in_model()` are deprecated.
-#' S7 cognitive models store native parameters (vectors and matrices) directly within their
-#' category representations.
+#' @description `r lifecycle::badge("deprecated")`
+#' `nest_cue_information_in_model()` and `unnest_cue_information_in_model()` were deprecated
+#' in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0. S7 cognitive models store native
+#' parameters directly within category representations.
 #'
 #' @param model A model object or tibble.
 #'
+#' @keywords internal
 #' @rdname nest_model
 #' @export
 nest_cue_information_in_model <- function(model) {
@@ -95,6 +100,12 @@ nest_cue_information_in_model <- function(model) {
 }
 
 #' Deprecated: unnest_cue_information_in_model
+#'
+#' @description `r lifecycle::badge("deprecated")`
+#' `unnest_cue_information_in_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0.
+#'
+#' @keywords internal
 #' @rdname nest_model
 #' @export
 unnest_cue_information_in_model <- function(model) {
@@ -152,3 +163,4 @@ unnest_cue_information_in_model <- function(model) {
     dplyr::ungroup() %>%
     dplyr::relocate(dplyr::all_of(c("cue", "cue2")), .after = dplyr::any_of("nu"))
 }
+

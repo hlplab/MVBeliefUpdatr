@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-asserts.R
 \name{assert_NIW_belief}
 \alias{assert_NIW_belief}
-\title{Deprecated assertion helper for NIW belief objects}
+\title{Deprecated: assert_NIW_belief}
 \usage{
 assert_NIW_belief(x, category = "category", verbose = F, strict = F)
 }
@@ -19,6 +19,11 @@ assert_NIW_belief(x, category = "category", verbose = F, strict = F)
 Invisibly TRUE if the assertion passes.
 }
 \description{
-Deprecated. Use \code{\link{assert_IdealAdaptorStanfit}} for Stanfit objects, \code{\link{assert_staninput}} for Staninput objects, or \code{\link{assert_stanfit_input}} for Stanfit input containers instead. This compatibility helper is deprecated and will be removed in a future release.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{assert_NIW_belief()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \link{NIW_IdealAdaptor} or S7 assertions instead.
+}
+\seealso{
+\link{NIW_IdealAdaptor}
 }
 \keyword{internal}

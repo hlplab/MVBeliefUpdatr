@@ -30,18 +30,18 @@ is.MVG_ideal_observer(
 \item{with.lapse_bias}{Does this ideal observer have a lapse bias? (default: \code{FALSE})}
 
 \item{verbose}{Should verbose output be provided? (default: \code{TRUE})}
+
+\item{tolerance}{Probability tolerance.}
 }
 \value{
 A logical.
 }
 \description{
-Deprecated. Use the S7-based validators and constructors for ideal observers with MVG categories instead.
-}
-\details{
-Check whether \code{x} is an ideal observer with \link[=is.MVG]{multivariate Gaussian (MVG) categories}. Optionally, one can also check whether a lapse rate
-and lapse bias is part of the ideal observer.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{is.MVG_ideal_observer()} was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+Please use S7 validators and \link{MVG_IdealObserver} instead.
 }
 \seealso{
-TBD
+\link{MVG_IdealObserver}
 }
 \keyword{internal}

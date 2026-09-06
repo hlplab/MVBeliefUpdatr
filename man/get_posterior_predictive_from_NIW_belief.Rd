@@ -48,8 +48,14 @@ Posterior predictive data frame.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_posterior_predictive_from_NIW_belief()} is deprecated. Use \code{\link{likelihood}} instead.
+\code{get_posterior_predictive_from_NIW_belief()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=likelihood]{likelihood()}} instead.
 
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_posterior_predictives_from_NIW_beliefs()} is deprecated. Use \code{\link{likelihood}} instead.
+\code{get_posterior_predictives_from_NIW_beliefs()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=likelihood]{likelihood()}} instead.
 }
+\seealso{
+\code{\link[=likelihood]{likelihood()}}
+}
+\keyword{internal}

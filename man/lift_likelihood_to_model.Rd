@@ -75,7 +75,36 @@ lift_MVG_ideal_observer_to_NIW_ideal_adaptor(
 An S7 cognitive-model object of the family matching \code{x}.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{\link{new_mvg_ideal_observer}}, \code{\link{new_niw_ideal_adaptor}},
-or \code{\link{new_exemplar_model}} with an S7 \code{category_template} instead.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{lift_likelihood_to_model()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=new_mvg_ideal_observer]{new_mvg_ideal_observer()}}, \code{\link[=new_niw_ideal_adaptor]{new_niw_ideal_adaptor()}},
+or \code{\link[=new_exemplar_model]{new_exemplar_model()}} with an S7 \code{category_template} instead.
+
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{lift_exemplars_to_exemplar_model()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=new_exemplar_model]{new_exemplar_model()}} instead.
+
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{lift_MVG_to_MVG_ideal_observer()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=new_mvg_ideal_observer]{new_mvg_ideal_observer()}} instead.
+
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{lift_NIW_belief_to_NIW_ideal_adaptor()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=new_niw_ideal_adaptor]{new_niw_ideal_adaptor()}} instead.
+
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{lift_MVG_ideal_observer_to_NIW_ideal_adaptor()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=as_niw_ideal_adaptor]{as_niw_ideal_adaptor()}} instead.
+}
+\seealso{
+\code{\link[=new_mvg_ideal_observer]{new_mvg_ideal_observer()}}, \code{\link[=new_niw_ideal_adaptor]{new_niw_ideal_adaptor()}}, \code{\link[=new_exemplar_model]{new_exemplar_model()}}
+
+\code{\link[=new_exemplar_model]{new_exemplar_model()}}
+
+\code{\link[=new_mvg_ideal_observer]{new_mvg_ideal_observer()}}
+
+\code{\link[=new_niw_ideal_adaptor]{new_niw_ideal_adaptor()}}
+
+\code{\link[=as_niw_ideal_adaptor]{as_niw_ideal_adaptor()}}
 }
 \keyword{internal}

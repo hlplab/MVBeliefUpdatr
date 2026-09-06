@@ -2,25 +2,25 @@ get_expected_columns_for_exemplar_model <- function() append(get_expected_column
 
 #' Deprecated: is.exemplar_model
 #'
-#' Check whether \code{x} is an exemplar model. Optionally, one can also check whether a lapse rate
-#' and lapse bias is part of the model.
+#' @description `r lifecycle::badge("deprecated")`
+#' `is.exemplar_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+#' Please use S7 validators and [Exemplar_Model] instead.
 #'
 #' @param x Object to be checked.
 #' @param group Name of one or more group variables, each unique combination of which describes an exemplar model. (default: NULL)
-#' @param category Name of the category variable. (default: "category")
 #' @param verbose Should verbose output be provided? (default: `TRUE`)
+#' @param tolerance Probability tolerance.
 #'
 #' @return A logical.
 #'
-#' @seealso TBD
-#' @description Deprecated. Use the S7-based predicates and constructors instead.
+#' @seealso [Exemplar_Model]
 #' @keywords internal
 #' @export
 is.exemplar_model <- function(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "is.exemplar_model()",
-    details = "Use the S7-based validators and constructors for exemplar models."
+    details = "Use S7 validators and Exemplar_Model instead."
   )
   name_of_x <- deparse(substitute(x))
 

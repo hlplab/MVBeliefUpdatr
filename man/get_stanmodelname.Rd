@@ -16,5 +16,10 @@ A character string.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_stanmodelname()} is deprecated; use \code{\link{get_model_type}} instead.
+\code{get_stanmodelname()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=get_model_type]{get_model_type()}} instead.
 }
+\seealso{
+\code{\link[=get_model_type]{get_model_type()}}
+}
+\keyword{internal}

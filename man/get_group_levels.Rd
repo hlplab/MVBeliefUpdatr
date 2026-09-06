@@ -17,6 +17,10 @@ get_group_levels(x, indices = NULL, include_prior = FALSE, ...)
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_group_levels()} is deprecated in favor of
-\code{\link{get_group_labels}}.
+\code{get_group_levels()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=get_group_labels]{get_group_labels()}} instead.
 }
+\seealso{
+\code{\link[=get_group_labels]{get_group_labels()}}
+}
+\keyword{internal}

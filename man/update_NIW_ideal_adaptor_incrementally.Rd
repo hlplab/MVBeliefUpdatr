@@ -58,9 +58,19 @@ update_NIW_beliefs_incrementally(prior_model, exposure, ...)
 An updated S7 model or model history.
 }
 \description{
-Deprecated: update_NIW_ideal_adaptor_incrementally
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{update_NIW_ideal_adaptor_incrementally()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=update_template]{update_template()}} instead.
 
-Deprecated: update_NIW_ideal_adaptor_batch
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{update_NIW_ideal_adaptor_batch()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=update_template]{update_template()}} instead.
 
-Deprecated: update_NIW_beliefs_incrementally
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{update_NIW_beliefs_incrementally()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=update_template]{update_template()}} instead.
 }
+\seealso{
+\code{\link[=update_template]{update_template()}}
+}
+\keyword{internal}

@@ -53,5 +53,11 @@ components necessary to explain at least the pca.cutoff of the total variance. (
 \code{pca.observation = FALSE}. (default: 1)}
 }
 \description{
-Deprecated. Use \code{\link{fit_ideal_adaptor}} or \code{\link{new_ideal_adaptor_staninput}} instead.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{make_staninput_deprecated()} was deprecated in MVBeliefUpdatr 0.1.0
+and will be removed in 0.2.0. Please use \code{\link[=fit_ideal_adaptor]{fit_ideal_adaptor()}} instead.
 }
+\seealso{
+\code{\link[=fit_ideal_adaptor]{fit_ideal_adaptor()}}
+}
+\keyword{internal}

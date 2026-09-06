@@ -9,9 +9,9 @@ NULL
 
 #' Deprecated: get_MVG_likelihood
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_MVG_likelihood()` is deprecated. Use \code{\link{likelihood}} instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_MVG_likelihood()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [likelihood()] instead.
 #'
 #' @param x Observations.
 #' @param mu Mean vector.
@@ -20,6 +20,8 @@ NULL
 #' @param noise_treatment Noise treatment (`"no_noise"`, `"sample"`, or `"marginalize"`).
 #' @param log Logical; whether log likelihood is returned.
 #' @return Numeric vector of likelihoods.
+#' @seealso [likelihood()]
+#' @keywords internal
 #' @rdname get_MVG_likelihood
 #' @export
 get_MVG_likelihood <- function(
@@ -66,9 +68,9 @@ get_MVG_likelihood <- function(
 
 #' Deprecated: get_likelihood_from_MVG
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_likelihood_from_MVG()` is deprecated. Use \code{\link{likelihood}} instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_likelihood_from_MVG()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [likelihood()] instead.
 #'
 #' @param x Observations.
 #' @param model An MVG model.
@@ -78,6 +80,8 @@ get_MVG_likelihood <- function(
 #' @param category.label Category labels.
 #' @param wide Logical; whether wide format is returned.
 #' @return Likelihood data frame.
+#' @seealso [likelihood()]
+#' @keywords internal
 #' @rdname get_MVG_likelihood
 #' @export
 get_likelihood_from_MVG <- function(
@@ -119,9 +123,9 @@ get_likelihood_from_MVG <- function(
 
 #' Deprecated: get_posterior_from_MVG_ideal_observer
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_posterior_from_MVG_ideal_observer()` is deprecated. Use \code{\link{posterior}} instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_posterior_from_MVG_ideal_observer()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [posterior()] instead.
 #'
 #' @param x Observations.
 #' @param model Model object.
@@ -129,9 +133,10 @@ get_likelihood_from_MVG <- function(
 #' @param noise_treatment Noise treatment.
 #' @param lapse_treatment Lapse treatment.
 #' @return Posterior data frame.
+#' @seealso [posterior()]
+#' @keywords internal
 #' @rdname get_posterior_from_model
 #' @export
-#' @keywords internal
 get_posterior_from_MVG_ideal_observer <- function(
   x,
   model,
@@ -140,7 +145,7 @@ get_posterior_from_MVG_ideal_observer <- function(
   lapse_treatment = if (decision_rule == "sampling") "sample" else "marginalize"
 ) {
   lifecycle::deprecate_warn(
-    "0.0.3",
+    "0.1.0",
     "get_posterior_from_MVG_ideal_observer()",
     with = "posterior()"
   )
@@ -150,9 +155,9 @@ get_posterior_from_MVG_ideal_observer <- function(
 
 #' Deprecated: get_categorization_from_MVG_ideal_observer
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_categorization_from_MVG_ideal_observer()` is deprecated. Use \code{\link{categorize}} instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_categorization_from_MVG_ideal_observer()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [categorize()] instead.
 #'
 #' @param x Observations.
 #' @param model Model object.
@@ -161,9 +166,10 @@ get_posterior_from_MVG_ideal_observer <- function(
 #' @param lapse_treatment Lapse treatment.
 #' @param simplify Logical; whether to simplify to category vector.
 #' @return Categorization data frame or vector.
+#' @seealso [categorize()]
+#' @keywords internal
 #' @rdname get_categorization_from_model
 #' @export
-#' @keywords internal
 get_categorization_from_MVG_ideal_observer <- function(
   x,
   model,
@@ -173,7 +179,7 @@ get_categorization_from_MVG_ideal_observer <- function(
   simplify = FALSE
 ) {
   lifecycle::deprecate_warn(
-    "0.0.3",
+    "0.1.0",
     "get_categorization_from_MVG_ideal_observer()",
     with = "categorize()"
   )
@@ -184,3 +190,4 @@ get_categorization_from_MVG_ideal_observer <- function(
 
   if (simplify) .legacy_simplify_categorization(d.response, decision_rule) else d.response
 }
+

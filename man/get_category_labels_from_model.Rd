@@ -16,6 +16,10 @@ Character vector of category labels.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_category_labels_from_model()} is deprecated. Use \code{get_category_labels()} instead.
+\code{get_category_labels_from_model()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=get_category_labels]{get_category_labels()}} instead.
+}
+\seealso{
+\code{\link[=get_category_labels]{get_category_labels()}}
 }
 \keyword{internal}

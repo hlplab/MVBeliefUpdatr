@@ -66,15 +66,22 @@ Categorization data frame or vector.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_categorization_from_MVG_ideal_observer()} is deprecated. Use \code{\link{categorize}} instead.
+\code{get_categorization_from_MVG_ideal_observer()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=categorize]{categorize()}} instead.
 
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_categorization_from_NIW_ideal_adaptor()} is deprecated. Use \code{\link{categorize}} instead.
+\code{get_categorization_from_NIW_ideal_adaptor()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=categorize]{categorize()}} instead.
 
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_categorization_from_exemplar_model()} is deprecated. Use \code{\link{categorize}} instead.
+\code{get_categorization_from_exemplar_model()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=categorize]{categorize()}} instead.
 
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_categorization_from_model()} is deprecated. Use \code{categorize()} instead.
+\code{get_categorization_from_model()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=categorize]{categorize()}} instead.
+}
+\seealso{
+\code{\link[=categorize]{categorize()}}
 }
 \keyword{internal}

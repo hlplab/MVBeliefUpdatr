@@ -65,14 +65,15 @@ NULL
 
 #' Deprecated: get_cue_dimensionality_from_model
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_cue_dimensionality_from_model()` is deprecated. Use `length(get_cue_labels(x))` instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_cue_dimensionality_from_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [get_cue_labels()] instead.
 #'
 #' @param x A likelihood or model object.
 #' @param indices Optional indices (deprecated and ignored).
 #'
 #' @return A numeric integer.
+#' @seealso [get_cue_labels()]
 #' @keywords internal
 #' @export
 get_cue_dimensionality_from_model <- function(x, indices = NULL) {
@@ -86,41 +87,42 @@ get_cue_dimensionality_from_model <- function(x, indices = NULL) {
 
 #' Deprecated: get_perceptual_noise_from_model
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_perceptual_noise_from_model()` is deprecated. Use `get_noise()` instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_perceptual_noise_from_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [get_noise()] instead.
 #'
 #' @param model A model object.
 #' @return Perceptual noise covariance matrix.
+#' @seealso [get_noise()]
 #' @keywords internal
 #' @export
 get_perceptual_noise_from_model <- function(model) {
   lifecycle::deprecate_warn(
     "0.1.0",
     "get_perceptual_noise_from_model()",
-    "get_noise()"
+    with = "get_noise()"
   )
   get_noise(model)
 }
 
 #' Deprecated: get_posterior_from_model
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_posterior_from_model()` is deprecated. Use `posterior()` instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_posterior_from_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [posterior()] instead.
 #'
 #' @param model A model object.
 #' @param ... Arguments passed to \code{\link{posterior}}.
 #'
+#' @seealso [posterior()]
+#' @keywords internal
 #' @rdname get_posterior_from_model
 #' @export
-#' @keywords internal
 get_posterior_from_model <- function(model, ...) {
   lifecycle::deprecate_warn(
-    when = "0.1.0",
-    what = "get_posterior_from_model()",
-    with = "posterior()",
-    always = TRUE
+    "0.1.0",
+    "get_posterior_from_model()",
+    with = "posterior()"
   )
   dots <- list(...)
   if (!is.null(dots$x) && is.null(dots$new_data)) {
@@ -132,23 +134,23 @@ get_posterior_from_model <- function(model, ...) {
 
 #' Deprecated: get_categorization_from_model
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_categorization_from_model()` is deprecated. Use `categorize()` instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_categorization_from_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [categorize()] instead.
 #'
 #' @param model A model object.
 #' @param decision_rule Decision rule to use.
 #' @param ... Arguments passed to \code{\link{categorize}}.
 #'
+#' @seealso [categorize()]
+#' @keywords internal
 #' @rdname get_categorization_from_model
 #' @export
-#' @keywords internal
 get_categorization_from_model <- function(model, decision_rule = "sampling", ...) {
   lifecycle::deprecate_warn(
-    when = "0.1.0",
-    what = "get_categorization_from_model()",
-    with = "categorize()",
-    always = TRUE
+    "0.1.0",
+    "get_categorization_from_model()",
+    with = "categorize()"
   )
   dots <- list(...)
   if (!is.null(dots$x) && is.null(dots$new_data)) {
@@ -160,52 +162,55 @@ get_categorization_from_model <- function(model, decision_rule = "sampling", ...
 
 #' Deprecated: get_cue_labels_from_model
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_cue_labels_from_model()` is deprecated. Use `get_cue_labels()` instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_cue_labels_from_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [get_cue_labels()] instead.
 #'
 #' @param x A model, template, or representation.
 #' @param indices Optional integer indices of cue labels to return.
 #' @return Character vector of cue labels.
+#' @seealso [get_cue_labels()]
 #' @keywords internal
 #' @export
 get_cue_labels_from_model <- function(x, indices = NULL) {
   lifecycle::deprecate_warn(
     "0.1.0",
     "get_cue_labels_from_model()",
-    "get_cue_labels()"
+    with = "get_cue_labels()"
   )
   get_cue_labels(x, indices = indices)
 }
 
 #' Deprecated: get_category_labels_from_model
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_category_labels_from_model()` is deprecated. Use `get_category_labels()` instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_category_labels_from_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [get_category_labels()] instead.
 #'
 #' @param x A model, template, or representation.
 #' @param indices Optional integer indices of category labels to return.
 #' @return Character vector of category labels.
+#' @seealso [get_category_labels()]
 #' @keywords internal
 #' @export
 get_category_labels_from_model <- function(x, indices = NULL) {
   lifecycle::deprecate_warn(
     "0.1.0",
     "get_category_labels_from_model()",
-    "get_category_labels()"
+    with = "get_category_labels()"
   )
   get_category_labels(x, indices = indices)
 }
 
 #' Deprecated: get_nlevels_of_category_labels_from_model
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_nlevels_of_category_labels_from_model()` is deprecated. Use `length(get_category_labels())` instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_nlevels_of_category_labels_from_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [get_category_labels()] instead.
 #'
 #' @param x A model, template, or representation.
 #' @return Number of categories as an integer.
+#' @seealso [get_category_labels()]
 #' @keywords internal
 #' @export
 get_nlevels_of_category_labels_from_model <- function(x) {
@@ -219,20 +224,21 @@ get_nlevels_of_category_labels_from_model <- function(x) {
 
 #' Deprecated: get_priors_from_model
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_priors_from_model()` is deprecated. Use `get_category_prior()` instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_priors_from_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [get_category_prior()] instead.
 #'
 #' @param model A model object.
 #' @param categories Optional vector of category labels to subset.
 #' @return Numeric vector of prior probabilities.
+#' @seealso [get_category_prior()]
 #' @keywords internal
 #' @export
 get_priors_from_model <- function(model, categories = NULL) {
   lifecycle::deprecate_warn(
     "0.1.0",
     "get_priors_from_model()",
-    "get_category_prior()"
+    with = "get_category_prior()"
   )
   prior <- get_category_prior(model)
   if (!is.null(categories)) {
@@ -243,39 +249,41 @@ get_priors_from_model <- function(model, categories = NULL) {
 
 #' Deprecated: get_lapse_rate_from_model
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_lapse_rate_from_model()` is deprecated. Use `get_lapse_rate()` instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_lapse_rate_from_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [get_lapse_rate()] instead.
 #'
 #' @param model A model object.
 #' @return Numeric lapse rate.
+#' @seealso [get_lapse_rate()]
 #' @keywords internal
 #' @export
 get_lapse_rate_from_model <- function(model) {
   lifecycle::deprecate_warn(
     "0.1.0",
     "get_lapse_rate_from_model()",
-    "get_lapse_rate()"
+    with = "get_lapse_rate()"
   )
   as.numeric(get_lapse_rate(model))
 }
 
 #' Deprecated: get_lapse_biases_from_model
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_lapse_biases_from_model()` is deprecated. Use `get_lapse_bias()` instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_lapse_biases_from_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [get_lapse_bias()] instead.
 #'
 #' @param model A model object.
 #' @param categories Optional vector of category labels to subset.
 #' @return Numeric vector of lapse biases.
+#' @seealso [get_lapse_bias()]
 #' @keywords internal
 #' @export
 get_lapse_biases_from_model <- function(model, categories = NULL) {
   lifecycle::deprecate_warn(
     "0.1.0",
     "get_lapse_biases_from_model()",
-    "get_lapse_bias()"
+    with = "get_lapse_bias()"
   )
   bias <- get_lapse_bias(model)
   if (!is.null(categories)) {
@@ -283,3 +291,26 @@ get_lapse_biases_from_model <- function(model, categories = NULL) {
   }
   as.numeric(bias)
 }
+
+#' Deprecated: sample_observation
+#'
+#' @description `r lifecycle::badge("deprecated")`
+#' `sample_observation()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [sample_observations()] instead.
+#'
+#' @param x A representation, template, or cognitive model object.
+#' @param ... Arguments passed to \code{\link{sample_observations}}.
+#' @return A tibble of sampled observations.
+#' @seealso [sample_observations()]
+#' @keywords internal
+#' @export
+sample_observation <- function(x, ...) {
+  lifecycle::deprecate_warn(
+    "0.1.0",
+    "sample_observation()",
+    with = "sample_observations()"
+  )
+  sample_observations(x, ...)
+}
+
+

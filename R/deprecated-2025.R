@@ -1,12 +1,14 @@
 #' Deprecated: get_transform_information_from_stanfit
 #'
-#' @description Deprecated. Use \code{\link{get_transform_information}} instead.
-#' @export
-#' @description Deprecated. Use get_transform_information() instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_transform_information_from_stanfit()` was deprecated in MVBeliefUpdatr 0.1.0
+#' and will be removed in 0.2.0. Please use [get_transform_information()] instead.
+#' @seealso [get_transform_information()]
 #' @keywords internal
+#' @export
 get_transform_information_from_stanfit <- function(...) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "get_transform_information_from_stanfit()",
     with = "get_transform_information()"
   )
@@ -15,13 +17,15 @@ get_transform_information_from_stanfit <- function(...) {
 
 #' Deprecated: get_transform_function_from_stanfit
 #'
-#' @description Deprecated. Use \code{\link{get_transform_function}} instead.
-#' @export
-#' @description Deprecated. Use get_transform_function() instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_transform_function_from_stanfit()` was deprecated in MVBeliefUpdatr 0.1.0
+#' and will be removed in 0.2.0. Please use [get_transform_function()] instead.
+#' @seealso [get_transform_function()]
 #' @keywords internal
+#' @export
 get_transform_function_from_stanfit <- function(...) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "get_transform_function_from_stanfit()",
     with = "get_transform_function()"
   )
@@ -30,13 +34,15 @@ get_transform_function_from_stanfit <- function(...) {
 
 #' Deprecated: get_untransform_function_from_stanfit
 #'
-#' @description Deprecated. Use \code{\link{get_untransform_function}} instead.
-#' @export
-#' @description Deprecated. Use get_untransform_function() instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_untransform_function_from_stanfit()` was deprecated in MVBeliefUpdatr 0.1.0
+#' and will be removed in 0.2.0. Please use [get_untransform_function()] instead.
+#' @seealso [get_untransform_function()]
 #' @keywords internal
+#' @export
 get_untransform_function_from_stanfit <- function(...) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "get_untransform_function_from_stanfit()",
     with = "get_untransform_function()"
   )
@@ -45,13 +51,15 @@ get_untransform_function_from_stanfit <- function(...) {
 
 #' Deprecated: get_staninput_from_stanfit
 #'
-#' @description Deprecated. Use \code{\link{get_staninput}} instead.
-#' @export
-#' @description Deprecated. Use get_staninput() instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_staninput_from_stanfit()` was deprecated in MVBeliefUpdatr 0.1.0
+#' and will be removed in 0.2.0. Please use [get_staninput()] instead.
+#' @seealso [get_staninput()]
 #' @keywords internal
+#' @export
 get_staninput_from_stanfit <- function(...) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "get_staninput_from_stanfit()",
     with = "get_staninput()"
   )
@@ -66,13 +74,15 @@ get_staninput_from_stanfit <- function(...) {
 
 #' Deprecated: get_test_data_from_stanfit
 #'
-#' @description Deprecated. Use \code{\link{get_test_data}} instead.
-#' @export
-#' @description Deprecated. Use get_test_data() instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_test_data_from_stanfit()` was deprecated in MVBeliefUpdatr 0.1.0
+#' and will be removed in 0.2.0. Please use [get_test_data()] instead.
+#' @seealso [get_test_data()]
 #' @keywords internal
+#' @export
 get_test_data_from_stanfit <- function(...) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "get_test_data_from_stanfit()",
     with = "get_test_data()"
   )
@@ -90,13 +100,15 @@ get_test_data_from_stanfit <- function(...) {
 
 #' Deprecated: add_ibbu_stanfit_draw
 #'
-#' @description Deprecated. Use \code{\link{get_draws}} instead.
-#' @export
-#' @description Deprecated. Use get_draws() instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `add_ibbu_stanfit_draw()` was deprecated in MVBeliefUpdatr 0.1.0
+#' and will be removed in 0.2.0. Please use [get_draws()] instead.
+#' @seealso [get_draws()]
 #' @keywords internal
+#' @export
 add_ibbu_stanfit_draw <- function(...) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "add_ibbu_stanfit_draw()",
     with = "get_draws()"
   )
@@ -105,12 +117,14 @@ add_ibbu_stanfit_draw <- function(...) {
 
 #' Deprecated: infer_prior_beliefs
 #'
-#' @description Deprecated. Use \code{\link{infer_NIW_ideal_adaptor}} together with \code{\link{make_staninput_for_NIW_ideal_adaptor}} instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `infer_prior_beliefs()` was deprecated in MVBeliefUpdatr 0.1.0
+#' and will be removed in 0.2.0. Please use [fit_ideal_adaptor()] instead.
 #' @inheritParams make_staninput
 #' @inheritParams fit_ideal_adaptor
-#' @export
-#' @description Deprecated. Use infer_NIW_ideal_adaptor() instead.
+#' @seealso [fit_ideal_adaptor()]
 #' @keywords internal
+#' @export
 infer_prior_beliefs <- function(
   # arguments for make_staninput
   exposure, test,
@@ -126,9 +140,9 @@ infer_prior_beliefs <- function(
   ...
 ) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "infer_prior_beliefs()",
-    with = "infer_NIW_ideal_adaptor()"
+    with = "fit_ideal_adaptor()"
   )
   if (verbose) message("Entering verbose mode.")
 
@@ -186,7 +200,9 @@ infer_prior_beliefs <- function(
 
 #' Deprecated: make_staninput_deprecated
 #'
-#' @description Deprecated. Use \code{\link{fit_ideal_adaptor}} or \code{\link{new_ideal_adaptor_staninput}} instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `make_staninput_deprecated()` was deprecated in MVBeliefUpdatr 0.1.0
+#' and will be removed in 0.2.0. Please use [fit_ideal_adaptor()] instead.
 #' @param center.observations Should the data be centered based on cues' means during exposure? Note that the cues' means
 #' used for centering are calculated after aggregating the data to all unique combinations specified by \code{group.unique}.
 #' These means are only expected to be the same as the standard deviations over the entire exposure data if the exposure data
@@ -208,6 +224,9 @@ infer_prior_beliefs <- function(
 #' @param pca.cutoff Determines which principal components are handed to the MVBeliefUpdatr Stan program: all
 #' components necessary to explain at least the pca.cutoff of the total variance. (default: .95) Ignored if
 #' \code{pca.observation = FALSE}. (default: 1)
+#' @seealso [fit_ideal_adaptor()]
+#' @keywords internal
+#' @export
 make_staninput_deprecated <- function(
     exposure, test,
     cues, category = "category", response = "response",
@@ -221,7 +240,7 @@ make_staninput_deprecated <- function(
     verbose = F
 ) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "make_staninput_deprecated()",
     with = "fit_ideal_adaptor()"
   )

@@ -31,5 +31,10 @@ Likelihood data frame.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_likelihood_from_exemplars()} is deprecated. Use \code{\link{likelihood}} instead.
+\code{get_likelihood_from_exemplars()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=likelihood]{likelihood()}} instead.
 }
+\seealso{
+\code{\link[=likelihood]{likelihood()}}
+}
+\keyword{internal}

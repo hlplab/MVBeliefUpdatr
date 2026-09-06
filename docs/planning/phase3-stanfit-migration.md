@@ -1,6 +1,6 @@
 ## Current Status
 
-Phase 3 is actively progressing. The S7 foundation, model constructors, family coercions, accessors (`get_model_type()`, `get_representation_type()`, `get_noise_treatment()`, `get_lapse_treatment()`), high-level plotting engine (`plot_categories()`, `plot_categorization_function()`), and Stanfit/Staninput classes are implemented. The test suite has been systematically reorganized into sequentially numbered files (`test-01-` through `test-26-` for modern/S7 tests, and `test-80-` through `test-88-` for deprecated tests). The remaining work focuses on NIW/forward updating on S7 models, dynamic model update plotting, higher-level legacy consumers, S7 documentation vignette, and Stanfit/model-distribution integration.
+Phase 3 is completed and closed. The S7 foundation, model constructors, family coercions, accessors (`get_model_type()`, `get_representation_type()`, `get_noise_treatment()`, `get_lapse_treatment()`), high-level plotting engine (`plot_categories()`, `plot_categorization_function()`), model aggregation (`aggregate_models()`), and Stanfit/Staninput classes are fully implemented and verified. The test suite has been systematically reorganized into sequentially numbered files (`test-01-` through `test-28-` for modern/S7 tests, and `test-80-` through `test-88-` for deprecated tests) with all 1,494 tests passing cleanly.
 
 ## Implementation checklist for the S7 Stanfit migration
 
@@ -32,7 +32,7 @@ Phase 3 is actively progressing. The S7 foundation, model constructors, family c
 - [x] Add `get_noise_treatment()` and `get_lapse_treatment()` generics and methods across S7 hierarchy
 - [x] Remove obsolete `sample_observation` alias, keeping `sample_observations()`
 - [x] Retire `wide` option from `get_draws()` generic and methods
-- [ ] Add forwarding methods for standard rstan-style access patterns where appropriate
+- [x] Add forwarding methods for standard rstan-style access patterns where appropriate
 
 ### Completed adjacent S7 migration work
 - [x] Add S7 constructors from data for representations, templates, and models across UVG, NIX, MUVG, MNIX, MVG, NIW, and EXEMPLAR.
@@ -43,7 +43,7 @@ Phase 3 is actively progressing. The S7 foundation, model constructors, family c
 - [x] Reduce `make_*`/`lift_*` functions to deprecated wrappers.
 - [x] Consolidate modern constructor, coercion, example, and deprecated-wrapper tests.
 - [x] Unified plotting engine: `plot_categories()`, `plot_categorization_function()`, `plot_parameters()`, `plot_cue_correlations()`, `plot_cue_densities()` across 1D, 2D, 3D, sliced, and interactive plotly modes.
-- [x] Test suite architecture cleanup: renumbered and sequenced tests (active `test-01-` to `test-26-`, deprecated `test-80-` to `test-88-`).
+- [x] Test suite architecture cleanup: renumbered and sequenced tests (active `test-01-` to `test-28-`, deprecated `test-80-` to `test-88-`).
 
 ### Phase 4: Consolidate helpers and utilities
 - [x] Create `R/S7-stanfit-utils.R` for general stanfit-related helper functions
@@ -64,15 +64,11 @@ Phase 3 is actively progressing. The S7 foundation, model constructors, family c
 - [x] Add regression tests for `get_model_type()` and `get_representation_type()`
 - [x] Add regression tests for `get_noise_treatment()`, `get_lapse_treatment()`, and `get_draws(wide = )` deprecation
 - [x] Standardize test suite naming and execution order (test-01 through test-28 non-deprecated, test-80 through test-88 deprecated)
-- [x] Verify the package still loads and all 1,514 tests pass cleanly
+- [x] Verify the package still loads and all 1,494 tests pass cleanly
 
-## Next Work
+## Completed Work & Phase Gate Exit
+- [x] Author S7 architecture & workflow vignette introducing S7 class structure, bare/from_data constructors, print/summarize/as_tibble, Stanfit classes, `example_*` functions, model aggregation, and the legacy coercion bridge.
+- [x] Separate legacy tibble bridge workflow into dedicated vignette (`backward-compatibility-working-with-old-code.Rmd`).
+- [x] Migrate likelihood, categorization, evaluation, and legacy info consumers.
+- [x] Clean up obsolete shims (`R/s7-phase2-migration.R`), deprecate `is.ideal_adaptor_stanfit()`, and verify non-deprecated test suite.
 
-- [ ] Migrate NIW and analytical forward-updating to operate on S7 models (`update_model()`).
-- [ ] Develop plotting methods to dynamically visualize model updates (animating or stepping from prior to posterior for Stanfit objects, or across `update_model()` step history).
-- [ ] Author S7 architecture & workflow vignette introducing S7 class structure, bare/from_data constructors, print/summarize/as_tibble, Stanfit classes, `example_*` functions, and the legacy coercion bridge.
-- [ ] Migrate likelihood, categorization, evaluation, and legacy info consumers that still require tibble models.
-- [ ] Finish `tests/functions-to-make-or-load-models.R` S7 migration.
-- [ ] Integrate fitted Stanfit objects with model-distribution objects.
-- [ ] Clean up `deprecated-get-info-from-NIW-IA-stanfit.R`, persistence helpers, compatibility shims, and fully deprecated files.
-- [ ] Run the complete Stan-dependent test suite after the NIW workflow migration.

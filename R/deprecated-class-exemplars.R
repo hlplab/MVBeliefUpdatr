@@ -3,23 +3,24 @@ get_expected_columns_for_exemplars <- function()
 
 #' Deprecated: is.exemplars
 #'
-#' Check whether \code{x} is a set of exemplar categories.
+#' @description `r lifecycle::badge("deprecated")`
+#' `is.exemplars()` was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+#' Please use S7 validators and [Exemplar_Model] instead.
 #'
 #' @param x Object to be checked.
 #' @param group Name of one or more group variables, each unique combination of which describes a set of exemplars. (default: NULL)
-#' @param category Name of the category variable. (default: "category")
+#' @param verbose Logical. If `TRUE`, emits diagnostics.
 #'
 #' @return A logical.
 #'
-#' @seealso TBD
-#' @description Deprecated. Use the S7-based validators and constructors for exemplar categories instead.
+#' @seealso [Exemplar_Model]
 #' @keywords internal
 #' @export
 is.exemplars <- function(x, group = NULL, verbose = F) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "is.exemplars()",
-    details = "the S7-based validators and constructors for exemplar categories"
+    details = "Use S7 validators and Exemplar_Model instead."
   )
   name_of_x <- deparse(substitute(x))
 

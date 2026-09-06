@@ -11,12 +11,14 @@ NULL
 
 #' Deprecated: get_NIW_posterior_predictive.pmap
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_NIW_posterior_predictive.pmap()` is deprecated. Use \code{\link{get_NIW_posterior_predictive}} or \code{\link{likelihood}} instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_NIW_posterior_predictive.pmap()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [get_NIW_posterior_predictive()] instead.
 #'
 #' @inheritParams get_NIW_posterior_predictive
 #' @param ... Additional arguments.
+#' @seealso [get_NIW_posterior_predictive()], [likelihood()]
+#' @keywords internal
 #' @export
 get_NIW_posterior_predictive.pmap <- function(x, m, S, kappa, nu, ...) {
   lifecycle::deprecate_warn(
@@ -29,9 +31,9 @@ get_NIW_posterior_predictive.pmap <- function(x, m, S, kappa, nu, ...) {
 
 #' Deprecated: get_posterior_predictive_from_NIW_belief
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_posterior_predictive_from_NIW_belief()` is deprecated. Use \code{\link{likelihood}} instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_posterior_predictive_from_NIW_belief()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [likelihood()] instead.
 #'
 #' @param x Observations.
 #' @param model An NIW belief or adaptor model.
@@ -41,6 +43,8 @@ get_NIW_posterior_predictive.pmap <- function(x, m, S, kappa, nu, ...) {
 #' @param category.label Category labels.
 #' @param wide Logical; whether wide format is returned.
 #' @return Posterior predictive data frame.
+#' @seealso [likelihood()]
+#' @keywords internal
 #' @rdname get_posterior_predictive_from_NIW_belief
 #' @export
 get_posterior_predictive_from_NIW_belief <- function(
@@ -120,11 +124,13 @@ get_posterior_predictive_from_NIW_belief <- function(
 
 #' Deprecated: get_posterior_predictives_from_NIW_beliefs
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_posterior_predictives_from_NIW_beliefs()` is deprecated. Use \code{\link{likelihood}} instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_posterior_predictives_from_NIW_beliefs()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [likelihood()] instead.
 #'
 #' @param grouping.var Grouping variable name.
+#' @seealso [likelihood()]
+#' @keywords internal
 #' @rdname get_posterior_predictive_from_NIW_belief
 #' @export
 get_posterior_predictives_from_NIW_beliefs <- function(
@@ -171,3 +177,4 @@ get_posterior_predictives_from_NIW_beliefs <- function(
       purrr::reduce(rbind)
   }
 }
+

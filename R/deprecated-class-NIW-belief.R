@@ -3,26 +3,27 @@ get_expected_columns_for_NIW_belief <- function()
 
 #' Deprecated: is.NIW_belief
 #'
-#' Check whether \code{x} is a Normal-Inverse-Wishard (NIW) belief/set of NIW beliefs. An NIW belief describes a distribution of
-#' \link[=is.MVG]{multivariate Gaussian categories}.
+#' @description `r lifecycle::badge("deprecated")`
+#' `is.NIW_belief()` was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+#' Please use S7 validators and [NIW_IdealAdaptor] instead.
 #'
 #' @param x Object to be checked.
 #' @param group Name of one or more group variables, each unique combination of which describes an NIW_belief. (default: NULL)
 #' @param category Name of the category variable. (default: "category")
 #' @param is.long Is this check assessing whether the belief is in long format (`TRUE`) or wide format (`FALSE`)?
 #' (default: `TRUE`)
+#' @param verbose Logical. If `TRUE`, emits diagnostics.
 #'
 #' @return A logical.
 #'
-#' @seealso TBD
-#' @description Deprecated. Use the S7-based validators and constructors for Normal-Inverse-Wishart (NIW) beliefs instead.
+#' @seealso [NIW_IdealAdaptor]
 #' @keywords internal
 #' @export
 is.NIW_belief <- function(x, group = NULL, category = "category", is.long = T, verbose = F) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "is.NIW_belief()",
-    details = "Use the S7-based validators and constructors for Normal-Inverse-Wishart (NIW) beliefs."
+    details = "Use S7 validators and NIW_IdealAdaptor instead."
   )
   name_of_x <- deparse(substitute(x))
   .assert_that(.is_non_NA_scalar_logical(is.long))
