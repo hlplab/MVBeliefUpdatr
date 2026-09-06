@@ -28,8 +28,8 @@ is.MVG_ideal_observer <- function(x, group = NULL, category = "category", is.lon
     details = "Use S7 validators and MVG_IdealObserver instead."
   )
   name_of_x <- deparse(substitute(x))
-  .assert_non_NA_scalar_logical(with.lapse)
-  .assert_non_NA_scalar_logical(with.lapse_bias)
+  .assert_logical_scalar(with.lapse)
+  .assert_logical_scalar(with.lapse_bias)
 
   if (S7::S7_inherits(x, MVBU_Object)) {
     return(S7::S7_inherits(x, MVG_IdealObserver))

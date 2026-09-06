@@ -25,6 +25,19 @@ estimation, categorization prediction, and visualization of speech
 perception and perceptual adaptation experiments.
 }
 
+\section{Package Vignettes}{
+
+For detailed guides and worked examples, see the package vignettes:
+\describe{
+\item{\code{vignette("s7-class-structure-and-workflows")}}{S7 Class Architecture,
+Constructors, and Workflows}
+\item{\code{vignette("visualizing-models-and-categories")}}{Visualizing Models and
+Categories}
+\item{\code{vignette("fitting-and-working-with-stanfit-models")}}{Fitting and
+Working with MVBeliefUpdatr Stanfit Models}
+}
+}
+
 \section{S7 Core Class Architecture}{
 
 All model objects are organized under an explicit, compositional S7 class

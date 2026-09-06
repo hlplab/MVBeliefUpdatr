@@ -452,71 +452,7 @@ NULL
 }
 
 
-# Helper to describe a required non-NA scalar value of a given type.
-.assert_non_NA_scalar_type <- function(x, predicate, expectation, msg = NULL) {
-  .assert_true(
-    predicate(x) && length(x) == 1L && !is.na(x[1]),
-    msg = if (is.null(msg)) .default_assert_msg(x, expectation) else msg
-  )
-}
 
-#' Internal assertion helper
-#'
-#' @param x Object to test.
-#' @param msg Optional error message.
-#' @return Invisibly TRUE if the object is a non-NA, non-empty character scalar.
-#' @noRd
-.assert_non_NA_scalar_character <- function(x, msg = NULL) {
-  .assert_true(
-    .is_non_empty_scalar_character(x),
-    msg = if (is.null(msg)) .default_assert_msg(x, "a non-NA, non-empty character scalar") else msg
-  )
-}
-
-#' Internal assertion helper
-#'
-#' @param x Object to test.
-#' @param msg Optional error message.
-#' @return Invisibly TRUE if the object is a non-NA numeric scalar.
-#' @noRd
-.assert_non_NA_scalar_numeric <- function(x, msg = NULL) {
-  .assert_non_NA_scalar_type(
-    x,
-    predicate = .is_non_NA_scalar_numeric,
-    expectation = "a non-NA numeric scalar",
-    msg = msg
-  )
-}
-
-#' Internal assertion helper
-#'
-#' @param x Object to test.
-#' @param msg Optional error message.
-#' @return Invisibly TRUE if the object is a non-NA logical scalar.
-#' @noRd
-.assert_non_NA_scalar_logical <- function(x, msg = NULL) {
-  .assert_non_NA_scalar_type(
-    x,
-    predicate = .is_non_NA_scalar_logical,
-    expectation = "a non-NA logical scalar",
-    msg = msg
-  )
-}
-
-#' Internal assertion helper
-#'
-#' @param x Object to test.
-#' @param msg Optional error message.
-#' @return Invisibly TRUE if the object is a non-NA scalar factor.
-#' @noRd
-.assert_non_NA_scalar_factor <- function(x, msg = NULL) {
-  .assert_non_NA_scalar_type(
-    x,
-    predicate = .is_non_NA_scalar_factor,
-    expectation = "a non-NA scalar factor",
-    msg = msg
-  )
-}
 
 # Helper to describe an optional value that may be missing, NULL, or a non-NA value of a given type.
 .assert_missing_null_or_non_NA_type <- function(x, predicate, expectation, msg = NULL) {

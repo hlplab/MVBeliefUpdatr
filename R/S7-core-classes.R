@@ -5,6 +5,21 @@ NULL
 # S7 foundation: base classes and core generic scaffolding.
 # This file is intentionally minimal and non-breaking.
 
+.get_cache <- function(x) {
+  res <- tryCatch(x@cache, error = function(e) attr(x, "cache"))
+  if (is.null(res)) list() else res
+}
+
+.set_cache <- function(x, val) {
+  tryCatch({
+    x@cache <- val
+    x
+  }, error = function(e) {
+    attr(x, "cache") <- val
+    x
+  })
+}
+
 # -------------------------
 # Base class hierarchy
 # -------------------------
@@ -180,7 +195,8 @@ MVBU_CognitiveModel <- S7::new_class(
     category_prior = S7::class_numeric,
     lapse_behavior = S7::class_list,
     noise_behavior = S7::class_list,
-    metadata = S7::class_list
+    metadata = S7::class_list,
+    cache = S7::class_list
   ),
   validator = function(self) {
     n_repr <- length(self@category_template@representations)
@@ -383,7 +399,7 @@ MVBU_CognitiveModel <- S7::new_class(
 #' @keywords internal
 #' @noRd
 .normalize_family_name <- function(family) {
-  .assert_non_NA_scalar_character(family)
+  .assert_character_scalar(family)
   toupper(trimws(family))
 }
 
@@ -403,8 +419,8 @@ MVBU_CognitiveModel <- S7::new_class(
 ) {
   family <- .normalize_family_name(family)
 
-  .assert_non_NA_scalar_character(category_representation_class)
-  .assert_non_NA_scalar_character(cognitive_model_class)
+  .assert_character_scalar(category_representation_class)
+  .assert_character_scalar(cognitive_model_class)
 
   .mvbu_family_registry$families[[family]] <- list(
     category_representation = category_representation_class,
@@ -453,11 +469,11 @@ MVBU_CognitiveModel <- S7::new_class(
   family <- .normalize_family_name(family)
 
   .assert_true(
-    is.null(stanfit_class) || .is_non_NA_scalar_character(stanfit_class),
+    is.null(stanfit_class) || .is_scalar_character(stanfit_class),
     msg = "stanfit_class must be NULL or a non-NA scalar character value."
   )
   .assert_true(
-    is.null(staninput_class) || .is_non_NA_scalar_character(staninput_class),
+    is.null(staninput_class) || .is_scalar_character(staninput_class),
     msg = "staninput_class must be NULL or a non-NA scalar character value."
   )
   .assert_non_NA_character(bridge_methods)
@@ -670,7 +686,7 @@ get_stan_family_hooks <- function(family = NULL) {
   n_repr <- length(category_template@representations)
   repr_names <- names(category_template@representations)
 
-  .assert_non_NA_scalar_character(decision_rule)
+  .assert_character_scalar(decision_rule)
   .assert_true(
     noise_treatment %in% c("no_noise", "sample", "marginalize"),
     msg = paste0(
@@ -694,7 +710,7 @@ get_stan_family_hooks <- function(family = NULL) {
   }
   .assert_non_NA_numeric(category_prior)
 
-  .assert_non_NA_scalar_numeric(lapse_rate)
+  .assert_numeric_scalar(lapse_rate)
   .assert_true(
     lapse_rate >= 0 && lapse_rate <= 1,
     msg = "lapse_rate must be a scalar in [0, 1]."

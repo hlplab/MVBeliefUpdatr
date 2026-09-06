@@ -9,7 +9,7 @@ NULL
 NULL
 
 .example_data <- function(n_cues, categories = NULL) {
-  .assert_true(.is_non_NA_scalar_count(n_cues), msg = "n_cues must be a positive whole number.")
+  .assert_true(.is_scalar_count(n_cues), msg = "n_cues must be a positive whole number.")
   .assert_true(n_cues %in% 1:3, msg = "n_cues must be one of 1, 2, or 3.")
   data("ChodroffWilson2018", package = "MVBeliefUpdatr", envir = environment())
   if (is.null(categories)) categories <- levels(ChodroffWilson2018$category)

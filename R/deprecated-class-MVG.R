@@ -25,7 +25,7 @@ is.MVG <- function(x, group = NULL, category = "category", is.long = T, verbose 
     details = "Use S7 validators and MVG_IdealObserver instead."
   )
   name_of_x <- deparse(substitute(x))
-  .assert_that(.is_non_NA_scalar_logical(is.long))
+  .assert_that(.is_scalar_logical(is.long))
 
   if (!is.data.frame(x)) {
     if (verbose) message("Object is not a data frame-like object.")

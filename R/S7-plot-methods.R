@@ -4160,6 +4160,197 @@ S7::method(plot, MVBU_Stanfit) <- function(x, ...) {
 }
 
 # -----------------------------------------------------------------------------
+# plot_model_updates methods
+# -----------------------------------------------------------------------------
+
+#' @rdname plot_model_updates
+#' @export
+S7::method(plot_model_updates, S7::class_list) <- function(
+  x,
+  what = c("categories", "categorization_function"),
+  step_labels = NULL,
+  cues = NULL,
+  categories = NULL,
+  aes = NULL,
+  levels = NULL,
+  limits = NULL,
+  resolution = 100,
+  ncol = NULL,
+  ...
+) {
+  what <- match.arg(what)
+  .assert_true(length(x) >= 1L, msg = "x must contain at least one model or template object.")
+
+  if (is.null(step_labels)) {
+    if (!is.null(names(x)) && any(nzchar(names(x)))) {
+      step_labels <- names(x)
+      empty_idx <- which(!nzchar(step_labels))
+      if (length(empty_idx) > 0) {
+        step_labels[empty_idx] <- sprintf("Step %d", empty_idx - 1L)
+      }
+    } else {
+      step_labels <- sprintf("Step %d", seq_along(x) - 1L)
+    }
+  } else {
+    .assert_true(length(step_labels) == length(x),
+      msg = "length of step_labels must match length of model list."
+    )
+  }
+
+  step_factors <- factor(step_labels, levels = unique(step_labels))
+
+  plots_list <- list()
+  dfs <- list()
+
+  for (i in seq_along(x)) {
+    mod <- x[[i]]
+    st_name <- as.character(step_factors[i])
+
+    if (what == "categories") {
+      p_i <- plot_categories(
+        mod, cues = cues, categories = categories, aes = aes,
+        levels = levels, limits = limits, resolution = resolution, ...
+      )
+      df_i <- p_i$data
+      if (!is.null(df_i) && nrow(df_i) > 0) {
+        df_i$.update_step <- st_name
+        dfs[[length(dfs) + 1L]] <- df_i
+      }
+      plots_list[[i]] <- p_i
+    } else {
+      p_i <- plot_categorization_function(
+        mod, cues = cues, categories = categories, aes = aes,
+        levels = levels, limits = limits, resolution = resolution, ...
+      )
+      df_i <- p_i$data
+      if (!is.null(df_i) && nrow(df_i) > 0) {
+        df_i$.update_step <- st_name
+        dfs[[length(dfs) + 1L]] <- df_i
+      }
+      plots_list[[i]] <- p_i
+    }
+  }
+
+  if (length(dfs) == 0L) {
+    stop("No plot data could be constructed for the provided model list.")
+  }
+
+  combined_df <- dplyr::bind_rows(dfs)
+  combined_df$.update_step <- factor(combined_df$.update_step, levels = levels(step_factors))
+
+  base_plot <- plots_list[[1L]]
+  base_plot$data <- combined_df
+
+  p_faceted <- base_plot + ggplot2::facet_wrap(~.update_step, ncol = ncol) +
+    ggplot2::labs(
+      title = "Model Belief Updates Across Stages",
+      subtitle = sprintf("Comparison of %d update steps", length(x))
+    )
+
+  p_faceted
+}
+
+#' @rdname plot_model_updates
+#' @export
+S7::method(plot_model_updates, MVBU_Stanfit) <- function(
+  x,
+  what = c("categories", "categorization_function"),
+  groups = NULL,
+  step_labels = NULL,
+  cues = NULL,
+  categories = NULL,
+  aes = NULL,
+  levels = NULL,
+  limits = NULL,
+  resolution = 100,
+  ncol = NULL,
+  ...
+) {
+  what <- match.arg(what)
+  avail_grps <- get_group_labels(x, include_prior = FALSE)
+  if (is.null(groups)) {
+    groups <- if (length(avail_grps) > 0) avail_grps[1L] else "group1"
+  }
+  if (is.null(categories)) {
+    categories <- get_category_labels(x)
+  }
+
+  d_prior <- get_draws(x, categories = categories, groups = "prior", summarize = TRUE, ...)
+  d_post <- get_draws(x, categories = categories, groups = groups[1L], summarize = TRUE, ...)
+
+  cats <- get_category_labels(x)
+  if (!is.null(categories)) cats <- intersect(cats, categories)
+  cues_list <- get_cue_labels(x)
+  if (is.null(cues)) cues <- cues_list
+
+  prior_reps <- list()
+  post_reps <- list()
+
+  for (cat_name in cats) {
+    pr_sub <- d_prior[d_prior$category == cat_name, ]
+    if (nrow(pr_sub) > 0) {
+      m_vec <- pr_sub$m[[1L]]
+      Sigma_mat <- pr_sub$S[[1L]]
+      if (length(m_vec) == 1L) {
+        prior_reps[[cat_name]] <- new_uvg_category_representation(
+          category_labels = cat_name, cue_labels = cues_list,
+          mu = as.numeric(m_vec), sigma2 = as.numeric(Sigma_mat)
+        )
+      } else {
+        prior_reps[[cat_name]] <- new_mvg_category_representation(
+          category_labels = cat_name, cue_labels = cues_list,
+          mu = as.vector(m_vec), Sigma = as.matrix(Sigma_mat)
+        )
+      }
+    }
+
+    po_sub <- d_post[d_post$category == cat_name, ]
+    if (nrow(po_sub) > 0) {
+      m_vec <- po_sub$m[[1L]]
+      Sigma_mat <- po_sub$S[[1L]]
+      if (length(m_vec) == 1L) {
+        post_reps[[cat_name]] <- new_uvg_category_representation(
+          category_labels = cat_name, cue_labels = cues_list,
+          mu = as.numeric(m_vec), sigma2 = as.numeric(Sigma_mat)
+        )
+      } else {
+        post_reps[[cat_name]] <- new_mvg_category_representation(
+          category_labels = cat_name, cue_labels = cues_list,
+          mu = as.vector(m_vec), Sigma = as.matrix(Sigma_mat)
+        )
+      }
+    }
+  }
+
+  prior_tpl <- new_category_representation_template(prior_reps)
+  post_tpl <- new_category_representation_template(post_reps)
+
+  is_uvg <- S7::S7_inherits(prior_reps[[1L]], UVG_CategoryRepresentation)
+  if (is_uvg) {
+    prior_mod <- new_uvg_ideal_observer(prior_tpl)
+    post_mod <- new_uvg_ideal_observer(post_tpl)
+  } else {
+    prior_mod <- new_mvg_ideal_observer(prior_tpl)
+    post_mod <- new_mvg_ideal_observer(post_tpl)
+  }
+
+  mod_list <- list(
+    "Prior (Expected)" = prior_mod,
+    "Posterior (Expected)" = post_mod
+  )
+
+  if (!is.null(step_labels)) {
+    names(mod_list) <- step_labels[seq_along(mod_list)]
+  }
+
+  plot_model_updates(
+    mod_list, what = what, cues = cues, categories = categories,
+    aes = aes, levels = levels, limits = limits, resolution = resolution,
+    ncol = ncol, ...
+  )
+}
+
+# -----------------------------------------------------------------------------
 # Convenience Function Aliases
 # -----------------------------------------------------------------------------
 

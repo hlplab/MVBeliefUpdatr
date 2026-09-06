@@ -135,7 +135,8 @@ NIX_IdealAdaptor(
   category_prior = integer(0),
   lapse_behavior = list(),
   noise_behavior = list(),
-  metadata = list()
+  metadata = list(),
+  cache = list()
 )
 
 new_nix_ideal_adaptor(

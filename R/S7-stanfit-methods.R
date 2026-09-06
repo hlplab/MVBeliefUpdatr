@@ -712,14 +712,14 @@ S7::method(get_draws, MVBU_Stanfit) <- function(
     msg = "which must be one of 'prior', 'posterior', or 'both'."
   )
   .assert_that(
-    any(is.null(ndraws), .is_non_NA_scalar_count(ndraws)),
+    any(is.null(ndraws), .is_scalar_count(ndraws)),
     msg = "If not NULL, ndraw must be a count."
   )
   .assert_that(
     any(is.null(ndraws), !is.null(seed)),
     msg = "If ndraws is not NULL, seed must be specified."
   )
-  .assert_that(.is_non_NA_scalar_logical(summarize))
+  .assert_that(.is_scalar_logical(summarize))
 
   if ("prior" %in% groups && length(groups) > 1) {
     d.prior <- get_draws(
@@ -1519,4 +1519,19 @@ S7::method(evaluate_model, MVBU_Stanfit) <- function(
     return_by_x = return_by_x
   )
 }
+
+#' @rdname sample_observations
+#' @export
+S7::method(sample_observations, MVBU_Stanfit) <- function(x, n = 1L, with_replacement = TRUE, randomize_order = TRUE, ...) {
+  .assert_true(S7::S7_inherits(x, MVBU_Stanfit), msg = "x must be an MVBU_Stanfit object.")
+  data_df <- x@data
+  .assert_true(!is.null(data_df) && nrow(data_df) > 0L, msg = "Stanfit model object contains no data.")
+  
+  idx <- sample(seq_len(nrow(data_df)), size = as.integer(n), replace = isTRUE(with_replacement))
+  if (isFALSE(randomize_order)) idx <- sort(idx)
+  sampled_df <- data_df[idx, , drop = FALSE]
+  rownames(sampled_df) <- NULL
+  sampled_df
+}
+
 

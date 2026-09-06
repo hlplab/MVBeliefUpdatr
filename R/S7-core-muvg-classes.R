@@ -179,7 +179,7 @@ new_muvg_category_representation_from_data <- function(
   cues
 ) {
   .assert_data_frame_like(data)
-  .assert_non_NA_scalar_character(
+  .assert_character_scalar(
     category,
     msg = "category must be a non-empty scalar character value."
   )

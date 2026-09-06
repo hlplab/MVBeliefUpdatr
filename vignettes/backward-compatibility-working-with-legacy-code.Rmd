@@ -1,11 +1,11 @@
 ---
-title: "Backward Compatibility: Working with Old Code"
+title: "Backward Compatibility: Working with Legacy Code"
 output: 
   rmarkdown::html_vignette:
     toc: true
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{Backward Compatibility: Working with Old Code}
+  %\VignetteIndexEntry{Backward Compatibility: Working with Legacy Code}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -21,8 +21,10 @@ knitr::opts_chunk$set(
   message = FALSE
 )
 
-if (requireNamespace("pkgload", quietly = TRUE)) {
-  pkgload::load_all("..", quiet = TRUE)
+if (!"MVBeliefUpdatr" %in% loadedNamespaces()) {
+  if (requireNamespace("pkgload", quietly = TRUE)) {
+    tryCatch(pkgload::load_all("..", quiet = TRUE), error = function(e) NULL)
+  }
 }
 ```
 

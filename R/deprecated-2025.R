@@ -252,7 +252,7 @@ make_staninput_deprecated <- function(
   if (pca.observations)
     .assert_that(between(pca.cutoff, 0, 1), msg = "pca.cutoff must be between 0 and 1.")
   if (!is.null(lapse_rate)) {
-    .assert_that(.is_non_NA_scalar_numeric(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
+    .assert_that(.is_scalar_numeric(lapse_rate), msg = "If not NULL, lapse_rate must be a number.")
     .assert_that(between(lapse_rate, 0, 1), msg = "If not NULL, lapse rate must be a number between 0 and 1.")
   }
 

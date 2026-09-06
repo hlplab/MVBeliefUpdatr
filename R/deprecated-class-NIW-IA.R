@@ -54,8 +54,8 @@ is.NIW_ideal_adaptor <- function(x, group = NULL, category = "category", is.long
     details = "Use S7::S7_inherits(x, NIW_IdealAdaptor) instead."
   )
   name_of_x <- deparse(substitute(x))
-  .assert_non_NA_scalar_logical(with.lapse)
-  .assert_non_NA_scalar_logical(with.lapse_bias)
+  .assert_logical_scalar(with.lapse)
+  .assert_logical_scalar(with.lapse_bias)
 
   if (S7::S7_inherits(x, MVBU_Object)) {
     return(S7::S7_inherits(x, NIW_IdealAdaptor))

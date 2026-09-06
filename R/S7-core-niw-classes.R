@@ -158,11 +158,11 @@ new_niw_category_representation_from_data <- function(
   kappa = nu,
   nu = length(cues) + 2
 ) {
-  .assert_non_NA_scalar_numeric(
+  .assert_numeric_scalar(
     kappa,
     msg = "kappa must be a non-NA scalar numeric value."
   )
-  .assert_non_NA_scalar_numeric(
+  .assert_numeric_scalar(
     nu,
     msg = "nu must be a non-NA scalar numeric value."
   )
@@ -192,11 +192,11 @@ new_niw_category_representation_template_from_data <- function(
   nu = length(cues) + 2,
   verbose = FALSE
 ) {
-  .assert_non_NA_scalar_numeric(
+  .assert_numeric_scalar(
     kappa,
     msg = "kappa must be a non-NA scalar numeric value."
   )
-  .assert_non_NA_scalar_numeric(
+  .assert_numeric_scalar(
     nu,
     msg = "nu must be a non-NA scalar numeric value."
   )

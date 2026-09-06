@@ -130,7 +130,8 @@ Exemplar_Model(
   category_prior = integer(0),
   lapse_behavior = list(),
   noise_behavior = list(),
-  metadata = list()
+  metadata = list(),
+  cache = list()
 )
 
 new_exemplar_model(

@@ -1,0 +1,263 @@
+---
+title: "Fitting and Working with MVBeliefUpdatr Stanfit Models"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Fitting and Working with MVBeliefUpdatr Stanfit Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+
+if (!"MVBeliefUpdatr" %in% loadedNamespaces()) {
+  if (requireNamespace("pkgload", quietly = TRUE)) {
+    tryCatch(pkgload::load_all("..", quiet = TRUE), error = function(e) NULL)
+  }
+}
+```
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var tocLinks = document.querySelectorAll('#TOC a[href^="#"]');
+  tocLinks.forEach(function(anchor) {
+    anchor.addEventListener('click', function(e) {
+      var href = this.getAttribute('href');
+      var targetId = href.substring(1);
+      var targetEl = document.getElementById(targetId) || 
+                     document.getElementById('id_' + targetId) || 
+                     document.querySelector('[name="' + targetId + '"]');
+      if (targetEl) {
+        e.preventDefault();
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (history.pushState) {
+          history.pushState(null, null, href);
+        }
+      }
+    });
+  });
+});
+</script>
+
+# 1. Introduction and Overview {#introduction-and-overview}
+
+The **MVBeliefUpdatr** package provides Bayesian hierarchical Stan models for incremental cognitive belief-updating during speech perception and multidimensional categorization experiments. These models fit observer and adaptor beliefs (e.g., Normal-Inverse-Wishart [NIW] and Normal-Inverse-$\chi^2$ [NIX]) across exposure blocks or participant groups using MCMC sampling via **rstan**.
+
+Fitted models are returned as typed S7 objects inheriting from `MVBU_Stanfit` (e.g., `NIW_IdealAdaptorStanfit` or `NIX_IdealAdaptorStanfit`). This vignette details:
+
+1. **Preparing Data and Inputs**: Structuring exposure data and bundling priors with `new_ideal_adaptor_stanfit_input()`.
+2. **Model Fitting**: Executing Bayesian estimation via `fit_ideal_adaptor()` or `fit_ideal_observer()`.
+3. **Model Summaries & Diagnostics**: Printing, summarizing, and evaluating convergence (`rhat`, `neff_ratio`, `get_draws`).
+4. **Accelerated Post-Processing**: Pre-extracting parameter draws with `add_parameter_draws()` for fast visualization.
+5. **Model Comparison & Criteria**: Storing information criteria with `add_criterion()`, comparing models with `loo_compare()`, and generating posterior predictive checks with `pp_check()`.
+
+### Companion Vignettes
+- [S7 Class Architecture, Constructors, and Workflows](s7-class-structure-and-workflows.html)
+- [Visualizing Categories, Categorization Functions, and Belief Updating](visualizing-models-and-categories.html)
+- [Backward Compatibility: Working with Old Code](backward-compatibility-working-with-old-code.html)
+
+```{r setup}
+library(MVBeliefUpdatr)
+library(tibble)
+library(dplyr)
+```
+
+---
+
+# 2. Preparing Data and Input Bundles (`MVBU_Staninput`) {#preparing-data-and-inputs}
+
+Before fitting a model in Stan, raw participant observations (containing continuous cue dimensions such as Formant frequencies $F_1, F_2$ or Voice Onset Time [VOT]) are packaged alongside prior hyperparameters using `new_ideal_adaptor_stanfit_input()`.
+
+The input pipeline:
+1. Standardizes or scales continuous cue dimensions (e.g., z-scoring relative to exposure distribution).
+2. Sets up conjugate prior distributions over category parameters (e.g., mean $m_0$, scatter matrix $S_0$, prior sample size $\kappa_0$, and degrees of freedom $\nu_0$).
+3. Creates a strongly typed `IdealAdaptorStanfitInput` or `IdealObserverStanfitInput` S7 object.
+
+```{r prepare_staninput_example, eval = FALSE}
+# Create simulated 2-cue exposure data for two vowel categories (/i/ and /e/)
+exposure_data <- tibble::tibble(
+  F1 = c(rnorm(20, mean = 300, sd = 30), rnorm(20, mean = 500, sd = 40)),
+  F2 = c(rnorm(20, mean = 2200, sd = 100), rnorm(20, mean = 1800, sd = 120)),
+  category = factor(rep(c("cat_A", "cat_B"), each = 20)),
+  group = "exposure",
+  subject = 1L
+)
+
+# Bundle data and priors into an S7 Staninput object
+stan_input <- new_ideal_adaptor_stanfit_input(
+  exposure = exposure_data,
+  test = exposure_data,
+  cues = c("F1", "F2"),
+  category = "category",
+  stanmodel = "NIW_ideal_adaptor"
+)
+```
+
+---
+
+# 3. Fitting Bayesian Models (`fit_ideal_adaptor`) {#fitting-bayesian-models}
+
+To fit the model, `fit_ideal_adaptor()` passes the `stan_input` object to Stan's MCMC sampler via **rstan**.
+
+```r
+# Executing MCMC sampling (interactive fitting call)
+fit <- fit_ideal_adaptor(
+  stan_input,
+  chains = 4,
+  iter = 2000,
+  warmup = 1000,
+  seed = 42
+)
+```
+
+For reproducible vignette compilation without long MCMC sampling delays, pre-compiled model fits can be accessed via package fixtures or helpers:
+
+```{r load_example_fit}
+# Load pre-computed 2-cue NIW fit fixture
+fit_file <- system.file("extdata", "example-stanfit-NIW_ideal_adaptor-1-standardize-42.rds", package = "MVBeliefUpdatr")
+if (!file.exists(fit_file)) {
+  fit_file <- file.path("..", "tests", "testthat", "models", "example-stanfit-NIW_ideal_adaptor-1-standardize-42.rds")
+}
+fit <- readRDS(fit_file)
+
+# Inspect class hierarchy
+class(fit)
+get_model_type(fit)
+```
+
+---
+
+# 4. Printing, Summarizing, and Diagnostics {#printing-summarizing-diagnostics}
+
+`MVBU_Stanfit` objects provide clear, structured S7 `print()` and `summary()` outputs.
+
+## Printing
+Printing an `MVBU_Stanfit` object displays its S7 class, model type, cue labels, category labels, transformation status, and MCMC sampling specifications:
+
+```{r print_fit}
+print(fit)
+```
+
+## Summarizing
+`summary()` computes posterior summary statistics for prior hyperparameters ($\kappa, \nu, m, S$) and category posterior distributions across groups:
+
+```{r summary_fit}
+summary(fit)
+```
+
+## Extracting Draws & MCMC Diagnostics
+Posterior draws can be extracted in tidy format using `get_draws()`. Standard MCMC convergence diagnostics ($\widehat{R}$ and effective sample size ratio $n_{eff}/N$) are accessible via `rhat()` and `neff_ratio()`:
+
+```{r diagnostics}
+# Tidy posterior draws
+draws_df <- get_draws(fit, summarize = FALSE)
+head(draws_df)
+
+# Convergence diagnostics across parameters
+head(rhat(fit))
+head(neff_ratio(fit))
+```
+
+---
+
+# 5. Pre-extracting Parameter Draws (`add_parameter_draws`) {#pre-extracting-draws}
+
+When producing complex multi-panel category plots, categorization decision boundaries, or posterior density curves across multiple exposure trials, downstream plotting routines frequently need to access parameter draw matrices ($\mu, \Sigma, m, S$).
+
+By default, extracting draws repeatedly from an `MVBU_Stanfit` object requires untransforming cue coordinates and pivoting wide tables into matrix formats on every call.
+
+Calling **`add_parameter_draws()`** pre-extracts and indexes parameter matrices once and stores them in the object's `@cache` slot using functional copy-on-modify semantics:
+
+```{r add_parameter_draws_demo}
+# Pre-extract draw matrices into the model's @cache slot
+fit <- add_parameter_draws(fit)
+
+# Inspect cached draw matrices
+cache_contents <- .get_cache(fit)$draw_matrices
+names(cache_contents)
+cache_contents$n_draws
+```
+
+### Why Precomputed Parameters are Advantageous
+1. **Performance**: Eliminates repeated data-wrangling loops during high-resolution contour or grid evaluations.
+2. **Seamless Visualization**: Plotting functions such as `plot_categories()` and `plot_categorization_by_cue()` automatically leverage cached draw matrices when present.
+
+For comprehensive examples of plotting category distributions and decision boundaries, see the companion vignette:
+[Visualizing Categories, Categorization Functions, and Belief Updating](visualizing-models-and-categories.html).
+
+---
+
+# 6. Model Comparison and Information Criteria {#model-comparison-and-criteria}
+
+`MVBU_Stanfit` objects integrate with **loo** and **bayesplot** for Bayesian model comparison, cross-validation, and posterior predictive checking, following the argument conventions of **brms**.
+
+## Adding Fit Criteria (`add_criterion`)
+
+Model fit criteria (such as `"loo"`, `"waic"`, `"bayes_R2"`, `"loo_R2"`, `"kfold"`, `"loo_subsample"`, or `"marglik"`) are computed and stored in the model's `@criteria` slot using `add_criterion()`:
+
+```{r add_criterion_demo}
+# Compute and store LOO and WAIC criteria
+fit <- add_criterion(fit, criterion = c("loo", "waic", "bayes_R2"), model_name = "NIW_2Cue_Model")
+
+# Inspect stored criteria
+names(fit@criteria)
+fit@criteria$loo
+fit@criteria$bayes_R2
+```
+
+## Model Comparison (`loo_compare`)
+
+When evaluating alternative model specifications (e.g., comparing different prior specifications or model formulations), `loo_compare()` performs Leave-One-Out Cross-Validation model comparison via `loo::loo_compare()`:
+
+```{r loo_compare_demo}
+# Duplicate model for demonstration of loo_compare signature
+fit2 <- fit
+fit2@metadata$model_name <- "NIW_Alternative_Model"
+
+# Compare models using LOO-CV
+comp <- loo_compare(fit, fit2, criterion = "loo")
+comp
+```
+
+> **Tip:** Leave-One-Out Cross-Validation (`loo`) is recommended over `waic` for robust model comparison, as `waic` can be sensitive to influential observations.
+
+## Posterior Predictive Checking (`pp_check`)
+
+Graphical posterior predictive checks compare observed exposure data $y$ with synthetic observations $y_{rep}$ drawn from the model's posterior predictive distribution:
+
+```{r pp_check_demo}
+if (requireNamespace("bayesplot", quietly = TRUE)) {
+  # Overlay observed response density with posterior predictive replicates
+  pp_check(fit, type = "dens_overlay", ndraws = 30)
+}
+```
+
+---
+
+# 7. Summary and Related Documentation {#summary}
+
+In summary, the `MVBU_Stanfit` workflow provides an integrated pipeline for Bayesian belief updating:
+
+```
+new_ideal_adaptor_stanfit_input() ──► fit_ideal_adaptor() ──► print() / summary()
+                                                                      │
+                                                                      ├──► add_parameter_draws() (Fast Plotting)
+                                                                      ├──► add_criterion() & loo_compare() (Model Selection)
+                                                                      └──► pp_check() (Predictive Checks)
+```
+
+### Links to Related Vignettes
+- [S7 Class Architecture, Constructors, and Workflows](s7-class-structure-and-workflows.html): Detailed technical reference for S7 classes, generics, and model construction.
+- [Visualizing Categories, Categorization Functions, and Belief Updating](visualizing-models-and-categories.html): Comprehensive plotting guide for 1D, 2D, and 3D category distributions and decision boundaries.
+- [Backward Compatibility: Working with Old Code](backward-compatibility-working-with-old-code.html): Transition guide from legacy list-column models to S7 architecture.
