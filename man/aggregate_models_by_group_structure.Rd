@@ -15,7 +15,11 @@ aggregate_models_by_group_structure(x, group_structure = NULL)
 The aggregated object.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Deprecated in MVBeliefUpdatr 0.0.9.
-Use \code{purrr::map()} to create lists of models and \code{\link{aggregate_models}} instead.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{aggregate_models_by_group_structure()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=aggregate_models]{aggregate_models()}} instead.
+}
+\seealso{
+\code{\link[=aggregate_models]{aggregate_models()}}
 }
 \keyword{internal}

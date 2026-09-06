@@ -13,19 +13,20 @@ NULL
 
 #' Deprecated: symlog
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `symlog()` is deprecated. Use [scales::pseudo_log_trans()] instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `symlog()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [scales::pseudo_log_trans()] instead.
 #'
 #' @param x Numeric vector to transform.
 #' @param C Scaling constant determining resolution around zero. Defaults to 0.
 #' @return Transformed numeric vector.
-#' @rdname deprecated-functions
+#' @seealso [scales::pseudo_log_trans()]
+#' @keywords internal
 #' @export
 symlog <- function(x, C = 0) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "symlog()",
+    "0.1.0",
+    "symlog()",
     details = "Use scales::pseudo_log_trans() instead."
   )
   sign(x) * log10(1 + abs(x) / 10^C)
@@ -33,19 +34,20 @@ symlog <- function(x, C = 0) {
 
 #' Deprecated: inv_symlog
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `inv_symlog()` is deprecated.
+#' @description `r lifecycle::badge("deprecated")`
+#' `inv_symlog()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [scales::pseudo_log_trans()] instead.
 #'
 #' @param x Numeric vector to invert.
 #' @param C Scaling constant. Defaults to 0.
 #' @return Inverse transformed numeric vector.
-#' @rdname deprecated-functions
+#' @seealso [scales::pseudo_log_trans()]
+#' @keywords internal
 #' @export
 inv_symlog <- function(x, C = 0) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "inv_symlog()",
+    "0.1.0",
+    "inv_symlog()",
     details = "Use scales::pseudo_log_trans() instead."
   )
   sign(x) * (10^abs(x) * 10^C - 10^C)
@@ -53,17 +55,18 @@ inv_symlog <- function(x, C = 0) {
 
 #' Deprecated: symlog_trans
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `symlog_trans()` is deprecated. Use [scales::pseudo_log_trans()] instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `symlog_trans()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [scales::pseudo_log_trans()] instead.
 #'
 #' @return A `scales` transformation object.
-#' @rdname deprecated-functions
+#' @seealso [scales::pseudo_log_trans()]
+#' @keywords internal
 #' @export
 symlog_trans <- function() {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "symlog_trans()",
+    "0.1.0",
+    "symlog_trans()",
     with = "scales::pseudo_log_trans()"
   )
   scales::trans_new(
@@ -75,19 +78,19 @@ symlog_trans <- function() {
 
 #' Deprecated: get_default_colors
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_default_colors()` is deprecated.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_default_colors()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0.
 #'
 #' @param var Variable name (`"category"` or `"group"`).
 #' @param levels Character vector of factor levels.
 #' @return Character vector of color values.
-#' @rdname deprecated-functions
+#' @keywords internal
 #' @export
 get_default_colors <- function(var, levels) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "get_default_colors()"
+    "0.1.0",
+    "get_default_colors()"
   )
   .assert_that(all(var %in% c("category", "group")))
   .assert_that(is.character(levels))
@@ -124,19 +127,19 @@ get_default_colors <- function(var, levels) {
 
 #' Deprecated: get_default_shapes
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_default_shapes()` is deprecated.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_default_shapes()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0.
 #'
 #' @param var Variable name.
 #' @param levels Character vector of factor levels.
 #' @return Integer vector of shapes.
-#' @rdname deprecated-functions
+#' @keywords internal
 #' @export
 get_default_shapes <- function(var, levels) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "get_default_shapes()"
+    "0.1.0",
+    "get_default_shapes()"
   )
   .assert_that(all(var %in% c("category", "group")))
   .assert_that(is.character(levels))
@@ -145,19 +148,19 @@ get_default_shapes <- function(var, levels) {
 
 #' Deprecated: get_default_linetypes
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_default_linetypes()` is deprecated.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_default_linetypes()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0.
 #'
 #' @param var Variable name.
 #' @param levels Character vector of factor levels.
 #' @return Integer vector of linetypes.
-#' @rdname deprecated-functions
+#' @keywords internal
 #' @export
 get_default_linetypes <- function(var, levels) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "get_default_linetypes()"
+    "0.1.0",
+    "get_default_linetypes()"
   )
   .assert_that(all(var %in% c("category", "group")))
   .assert_that(is.character(levels))
@@ -166,18 +169,18 @@ get_default_linetypes <- function(var, levels) {
 
 #' Deprecated: get_plot_limits
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_plot_limits()` is deprecated.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_plot_limits()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0.
 #'
 #' @param plot A `ggplot` object.
 #' @return List with elements `x` and `y`.
-#' @rdname deprecated-functions
+#' @keywords internal
 #' @export
 get_plot_limits <- function(plot) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "get_plot_limits()"
+    "0.1.0",
+    "get_plot_limits()"
   )
   built <- ggplot2::ggplot_build(plot)
   list(
@@ -188,9 +191,9 @@ get_plot_limits <- function(plot) {
 
 #' Deprecated: get_limits
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_limits()` is deprecated.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_limits()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0.
 #'
 #' @param data A `tibble` or `data.frame`.
 #' @param measure Variable name.
@@ -199,7 +202,7 @@ get_plot_limits <- function(plot) {
 #' @param min Optional minimum.
 #' @param max Optional maximum.
 #' @return Numeric vector of length 2.
-#' @rdname deprecated-functions
+#' @keywords internal
 #' @export
 get_limits <- function(
   data,
@@ -210,8 +213,8 @@ get_limits <- function(
   max = NULL
 ) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "get_limits()"
+    "0.1.0",
+    "get_limits()"
   )
   data %>%
     tidybayes::mean_hdi(!!rlang::sym(measure), .width = hdi.prob) %>%
@@ -228,31 +231,30 @@ get_limits <- function(
 
 #' Deprecated: ellipse.pmap
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `ellipse.pmap()` is deprecated.
+#' @description `r lifecycle::badge("deprecated")`
+#' `ellipse.pmap()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0.
 #'
 #' @param x Covariance matrix.
 #' @param centre Center vector.
 #' @param level Probability level.
 #' @param ... Additional arguments.
 #' @return Ellipse coordinates matrix.
-#' @rdname deprecated-functions
+#' @keywords internal
 #' @export
 ellipse.pmap <- function(x, centre, level, ...) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "ellipse.pmap()"
+    "0.1.0",
+    "ellipse.pmap()"
   )
   ellipse::ellipse(x = x, centre = centre, level = level, ...)
 }
 
 #' Deprecated: add_exposure_data_to_1D_plot
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `add_exposure_data_to_1D_plot()` is deprecated. Use [plot_categories()]
-#' instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `add_exposure_data_to_1D_plot()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_categories()] instead.
 #'
 #' @param data Data frame.
 #' @param cue.labels Cue column names.
@@ -260,7 +262,8 @@ ellipse.pmap <- function(x, centre, level, ...) {
 #' @param category.labels Category labels.
 #' @param category.colors Category colors.
 #' @return A list of ggplot layers.
-#' @rdname deprecated-functions
+#' @seealso [plot_categories()]
+#' @keywords internal
 #' @export
 add_exposure_data_to_1D_plot <- function(
   data,
@@ -270,8 +273,8 @@ add_exposure_data_to_1D_plot <- function(
   category.colors
 ) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "add_exposure_data_to_1D_plot()",
+    "0.1.0",
+    "add_exposure_data_to_1D_plot()",
     with = "plot_categories()"
   )
   cue.labels[2] <- "cue2"
@@ -287,20 +290,20 @@ add_exposure_data_to_1D_plot <- function(
 
 #' Deprecated: add_test_data_to_1D_plot
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `add_test_data_to_1D_plot()` is deprecated. Use [plot_categories()]
-#' instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `add_test_data_to_1D_plot()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_categories()] instead.
 #'
 #' @param data Data frame.
 #' @param cue.labels Cue column names.
 #' @return A list of ggplot layers.
-#' @rdname deprecated-functions
+#' @seealso [plot_categories()]
+#' @keywords internal
 #' @export
 add_test_data_to_1D_plot <- function(data, cue.labels) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "add_test_data_to_1D_plot()",
+    "0.1.0",
+    "add_test_data_to_1D_plot()",
     with = "plot_categories()"
   )
   cue.labels[2] <- "cue2"
@@ -310,10 +313,9 @@ add_test_data_to_1D_plot <- function(data, cue.labels) {
 
 #' Deprecated: add_exposure_data_to_2D_plot
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `add_exposure_data_to_2D_plot()` is deprecated. Use [plot_categories()]
-#' instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `add_exposure_data_to_2D_plot()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_categories()] instead.
 #'
 #' @param data Data frame.
 #' @param cue.labels Cue column names.
@@ -321,7 +323,8 @@ add_test_data_to_1D_plot <- function(data, cue.labels) {
 #' @param category.labels Category labels.
 #' @param category.colors Category colors.
 #' @return A list of ggplot layers.
-#' @rdname deprecated-functions
+#' @seealso [plot_categories()]
+#' @keywords internal
 #' @export
 add_exposure_data_to_2D_plot <- function(
   data,
@@ -331,8 +334,8 @@ add_exposure_data_to_2D_plot <- function(
   category.colors
 ) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "add_exposure_data_to_2D_plot()",
+    "0.1.0",
+    "add_exposure_data_to_2D_plot()",
     with = "plot_categories()"
   )
   list(
@@ -363,20 +366,20 @@ add_exposure_data_to_2D_plot <- function(
 
 #' Deprecated: add_test_data_to_2D_plot
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `add_test_data_to_2D_plot()` is deprecated. Use [plot_categories()]
-#' instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `add_test_data_to_2D_plot()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_categories()] instead.
 #'
 #' @param data Data frame.
 #' @param cue.labels Cue column names.
 #' @return A list of ggplot layers.
-#' @rdname deprecated-functions
+#' @seealso [plot_categories()]
+#' @keywords internal
 #' @export
 add_test_data_to_2D_plot <- function(data, cue.labels) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "add_test_data_to_2D_plot()",
+    "0.1.0",
+    "add_test_data_to_2D_plot()",
     with = "plot_categories()"
   )
   list(
@@ -396,19 +399,19 @@ add_test_data_to_2D_plot <- function(data, cue.labels) {
 
 #' Deprecated: add_exposure_summary_to_1D_plot
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `add_exposure_summary_to_1D_plot()` is deprecated. Use [plot_categories()]
-#' instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `add_exposure_summary_to_1D_plot()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_categories()] instead.
 #'
 #' @param data Data frame.
 #' @return A list of ggplot layers.
-#' @rdname deprecated-functions
+#' @seealso [plot_categories()]
+#' @keywords internal
 #' @export
 add_exposure_summary_to_1D_plot <- function(data) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "add_exposure_summary_to_1D_plot()",
+    "0.1.0",
+    "add_exposure_summary_to_1D_plot()",
     with = "plot_categories()"
   )
   data %>%
@@ -432,20 +435,20 @@ add_exposure_summary_to_1D_plot <- function(data) {
 
 #' Deprecated: add_exposure_summary_to_2D_plot
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `add_exposure_summary_to_2D_plot()` is deprecated. Use [plot_categories()]
-#' instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `add_exposure_summary_to_2D_plot()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_categories()] instead.
 #'
 #' @param data Data frame.
 #' @param level Probability level.
 #' @return A list of ggplot layers.
-#' @rdname deprecated-functions
+#' @seealso [plot_categories()]
+#' @keywords internal
 #' @export
 add_exposure_summary_to_2D_plot <- function(data, level = 0.95) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "add_exposure_summary_to_2D_plot()",
+    "0.1.0",
+    "add_exposure_summary_to_2D_plot()",
     with = "plot_categories()"
   )
   list(
@@ -491,9 +494,9 @@ add_exposure_summary_to_2D_plot <- function(data, level = 0.95) {
 
 #' Deprecated: facet_or_animate
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `facet_or_animate()` is deprecated.
+#' @description `r lifecycle::badge("deprecated")`
+#' `facet_or_animate()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0.
 #'
 #' @param p A `ggplot` object.
 #' @param facet_rows_by Row facet variable.
@@ -502,7 +505,7 @@ add_exposure_summary_to_2D_plot <- function(data, level = 0.95) {
 #' @param animate_by Animation variable.
 #' @param animation_follow Logical whether animation follows data.
 #' @return A `ggplot` or animated object.
-#' @rdname deprecated-functions
+#' @keywords internal
 #' @export
 facet_or_animate <- function(
   p,
@@ -513,8 +516,8 @@ facet_or_animate <- function(
   animation_follow
 ) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "facet_or_animate()"
+    "0.1.0",
+    "facet_or_animate()"
   )
   facet_rows_by <- rlang::enquo(facet_rows_by)
   facet_cols_by <- rlang::enquo(facet_cols_by)
@@ -558,17 +561,17 @@ facet_or_animate <- function(
 
 #' Deprecated: plot_pairwise_cue_correlation_matrix
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `plot_pairwise_cue_correlation_matrix()` is deprecated. Use
-#' `plot_parameters(model, type = "correlation")` instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `plot_pairwise_cue_correlation_matrix()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_parameters()] instead.
 #'
 #' @param data Data frame.
 #' @param cues Cue columns.
 #' @param category Category column.
 #' @param category.colors Category colors.
 #' @return A `ggplot` object.
-#' @rdname deprecated-functions
+#' @seealso [plot_parameters()]
+#' @keywords internal
 #' @export
 plot_pairwise_cue_correlation_matrix <- function(
   data,
@@ -577,8 +580,8 @@ plot_pairwise_cue_correlation_matrix <- function(
   category.colors = seq_along(unique(data$category))
 ) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "plot_pairwise_cue_correlation_matrix()",
+    "0.1.0",
+    "plot_pairwise_cue_correlation_matrix()",
     with = "plot_parameters()"
   )
   .panel_x <- .panel_y <- NULL
@@ -606,3 +609,4 @@ plot_pairwise_cue_correlation_matrix <- function(
       grid.y.diag = FALSE
     )
 }
+

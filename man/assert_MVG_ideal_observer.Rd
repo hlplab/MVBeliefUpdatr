@@ -2,7 +2,7 @@
 % Please edit documentation in R/deprecated-asserts.R
 \name{assert_MVG_ideal_observer}
 \alias{assert_MVG_ideal_observer}
-\title{Deprecated assertion helper for MVG ideal observer objects}
+\title{Deprecated: assert_MVG_ideal_observer}
 \usage{
 assert_MVG_ideal_observer(x, category = "category", verbose = F)
 }
@@ -17,6 +17,11 @@ assert_MVG_ideal_observer(x, category = "category", verbose = F)
 Invisibly TRUE if the assertion passes.
 }
 \description{
-Deprecated. This compatibility helper is deprecated and will be removed in a future release.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{assert_MVG_ideal_observer()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use S7 assertions or \link{MVG_IdealObserver} instead.
+}
+\seealso{
+\link{MVG_IdealObserver}
 }
 \keyword{internal}

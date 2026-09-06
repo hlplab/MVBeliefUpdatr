@@ -14,8 +14,8 @@
 | 0 Architecture Contract and Freeze | Completed | Closed | Contract approved; interop bridge expansion continues in Phases 1-3 via watchlist (not a blocker). |
 | 1 S7 Hierarchy Foundation | Completed | Closed | Base classes, validators, core generic aliases, extension hooks, and baseline dispatch tests are in place. |
 | 2 Concrete Class Migration | Completed | Closed | Legacy->S7 adapters implemented for NIW/MVG/Exemplar and prototype MUVG/MNIX families; constructor/default normalization and S7-only adapter-output gates are covered in migration tests. |
-| 3 API Unification and Method Coverage | In Progress | Open | S7 unification landed for categorization/prediction, accessors (`get_model_type`, `get_representation_type`, `get_noise_treatment`, `get_lapse_treatment`), Stanfit/Staninput classes, and unified plotting engine (`plot_categories`, `plot_categorization_function`). Remaining: model updating (`update_model`) and legacy info/evaluation consumers. |
-| 4 Compatibility Shell | In Progress | Open | `as_tibble()` and `dplyr` forwarding compatibility landed in `R/S7-to-legacy-tibble-compatibility.R`; wrapper consolidation remaining. |
+| 3 API Unification and Method Coverage | Completed | Closed | S7 unification landed for categorization/prediction, accessors (`get_model_type`, `get_representation_type`, `get_noise_treatment`, `get_lapse_treatment`), Stanfit/Staninput classes, model aggregation (`aggregate_models()`), and unified plotting engine (`plot_categories`, `plot_categorization_function`). Vignettes and tests verified. |
+| 4 Compatibility Shell | Completed | Closed | Package version updated to 0.1.0 (deprecation retirement target 0.2.0); standardized roxygen documentation, lifecycle warnings, and seealso links across all 22 deprecated files; as_tibble/dplyr compatibility verified. |
 | 5 Data Model and Print Strategy | Completed | Closed | S7 print and summary methods implemented; as_tibble legacy bridge implemented with pre-S7 column fidelity. |
 | 6 Performance and Caching Framework | In Progress | Open | Cached posterior closures implemented in plot engine; performance benchmarks in plotting vignette. |
 | 7 Consistency and Quality Hardening | Not Started | Open | Follows implementation phases. |
@@ -119,7 +119,7 @@ Checklist:
 - [x] Unify high-level plotting entry points with internal dimension specialization (`plot_categories()`, `plot_categorization_function()`, `plot_parameters()`, `plot_cue_correlations()`, `plot_cue_densities()`)
 - [x] Add family-agnostic accessors: `get_model_type()`, `get_representation_type()`, `get_noise_treatment()`, `get_lapse_treatment()`
 - [x] Clean up obsolete aliases and arguments (`sample_observation` -> `sample_observations()`, retired `wide` from `get_draws()`)
-- [ ] Fill method coverage gaps: forward model updating (`update_model()` on S7 objects), dynamic update plotting, and legacy info/evaluation consumers
+- [x] Fill method coverage gaps: S7 likelihood, categorization, evaluation, model aggregation (`aggregate_models()`), and legacy info consumers unified.
 - [x] Ensure generic signatures remain family-agnostic for Gaussian and non-Gaussian model families
 - [x] Close interop bridge watchlist items based on workflow tests and dependency budget (see `docs/planning/interop-bridge-watchlist.md`)
 
@@ -131,16 +131,14 @@ Phase gate:
 **Goal:** keep old API available but isolated
 
 Checklist:
-- [ ] Create deprecated-2026.R and move all wrappers there
-- [ ] Keep deprecated-2025.R untouched except for archival maintenance
-- [ ] Add deprecation warnings and migration hints
-- [ ] Ensure wrappers are thin adapters only
-- [ ] Add migration mapping table old -> new API
+- [x] Consistency Check: Standardize all deprecated functions in `deprecated-*.R` to use `lifecycle::deprecate_warn("0.1.0", ...)` (retiring in `0.2.0`), uniform Title format `Deprecated: <func>`, Description format with lifecycle badge, `@keywords internal`, `@export`, and `@seealso` pointing to exported public functions.
+- [x] Ensure wrappers are thin adapters only (all deprecated functions issue lifecycle warnings and delegate directly to S7 constructors, generics, or helper methods).
+- [x] Add migration mapping table old -> new API to the vignette for backward compatibility (documented in `vignettes/backward-compatibility-working-with-old-code.Rmd` Section 3).
 - [x] Implement `as_tibble()` and deprecated `dplyr` methods (`mutate`, `filter`, etc.) for S7 objects to provide smooth backward compatibility for legacy tibble workflows (implemented in `R/S7-to-legacy-tibble-compatibility.R` and tested in `test-27`)
 
 Phase gate:
-- [ ] Wrapper output-equivalence tests pass
-- [ ] Deprecation warnings fire as expected
+- [x] Wrapper output-equivalence tests pass
+- [x] Deprecation warnings fire as expected
 
 ### Phase 5: Data Model and Print Strategy
 **Goal:** remove tibble-as-object while preserving readable printing
@@ -207,7 +205,7 @@ Phase gate:
 **Goal:** explain architecture and workflows clearly
 
 Checklist:
-- [ ] Add class-level reference docs for all S7 class families (core classes, representation classes, cognitive model classes, and model distribution classes)
+- [x] Add class-level reference docs for all S7 class families (core classes, representation classes, cognitive model classes classes)
 - [ ] Include explicit observer/adaptor pairing map and standalone-family rationale (Exemplar) in architecture-facing docs
 - [ ] v1.0 architecture vignette
 - [ ] migration vignette with worked examples
@@ -286,7 +284,9 @@ Phase gate:
 + Write forward-updating functions for NIX, MNIX, NIW, revising existing NIW forward-updating.
   + Include equivalence checks verifying that 1-cue NIX and 1-cue NIW forward updating yield identical analytical belief parameters given identical prior beliefs and exposure data.
 + Add specification of category prior and lapse bias via `fixed_parameters` and extend Stan program to include category prior.
-+ For stanfit fitting, allow specification of fixed parameters"
++ Expand Stan programs to allow users to specify prior $m, S$ for each category (not fixed point estimates; evaluate if/how this differs from handing $\mu, \Sigma$ and inferring $\kappa, \nu$).
++ Refine the pre-compiled 2D example `stanfit` object so category distributions have less overlap, creating a clearer categorization surface.
++ For stanfit fitting, allow specification of fixed parameters
   + for *some* mu and some sigma. that will require changes to the stan code (and might require making multiple versions of each stan model to maintain efficiency for the most common case in which none or all of the mu, sigma's are fixed.)
   + category priors and lapse bias 
 + make extensions of plot_categories and plot_categorization_functions functions that animate model updates (both for histories of update_model or for stanfit ideal adaptors by stepping from prior to posterior for a number of equally-spaced draws)

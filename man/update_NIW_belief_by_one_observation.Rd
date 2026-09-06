@@ -33,5 +33,11 @@ update_NIW_belief_by_one_observation(
 An updated S7 representation or model.
 }
 \description{
-Deprecated: update_NIW_belief_by_one_observation
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{update_NIW_belief_by_one_observation()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=update_category_representation]{update_category_representation()}} or \code{\link[=update_template]{update_template()}} instead.
 }
+\seealso{
+\code{\link[=update_category_representation]{update_category_representation()}}, \code{\link[=update_template]{update_template()}}
+}
+\keyword{internal}

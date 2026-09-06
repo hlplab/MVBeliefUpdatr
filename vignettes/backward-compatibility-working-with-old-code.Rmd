@@ -77,7 +77,30 @@ selected_df
 
 ---
 
-# 3. Migration Recommendations {#migration-recommendations}
+# 3. API Migration Mapping Table {#migration-mapping-table}
+
+The table below maps legacy (pre-v0.1.0) functions to their modern v0.1.0+ S7 API replacements. All legacy functions issue deprecation warnings in v0.1.0 and are scheduled for removal in v0.2.0.
+
+| Legacy API Function (pre-v0.1.0) | Modern S7 API Replacement (v0.1.0+) | Description / Category |
+| :--- | :--- | :--- |
+| `make_MVG_from_data()` | `new_mvg_category_representation_template_from_data()` | Estimate MVG category template from data |
+| `make_MVG_ideal_observer_from_data()` | `new_mvg_ideal_observer_from_data()` | Construct MVG cognitive model directly from data |
+| `make_NIW_belief_from_data()` | `new_niw_category_representation_template_from_data()` | Estimate NIW belief template from data |
+| `make_NIW_ideal_adaptor_from_data()` | `new_niw_ideal_adaptor_from_data()` | Construct NIW ideal adaptor model from data |
+| `make_exemplars_from_data()` | `new_exemplar_category_representation_template_from_data()` | Estimate Exemplar category template from data |
+| `make_exemplar_model_from_data()` | `new_exemplar_model_from_data()` | Construct Exemplar model from data |
+| `lift_MVG_to_MVG_ideal_observer()` | `lift_representation_to_model()` / `new_mvg_ideal_observer()` | Wrap MVG category template in cognitive model |
+| `lift_NIW_belief_to_NIW_ideal_adaptor()` | `lift_representation_to_model()` / `new_niw_ideal_adaptor()` | Wrap NIW template in ideal adaptor model |
+| `lift_exemplars_to_exemplar_model()` | `lift_representation_to_model()` / `new_exemplar_model()` | Wrap Exemplar template in cognitive model |
+| `is.ideal_adaptor_stanfit()` | `S7::S7_inherits(x, IdealAdaptorStanfit)` | Type check for S7 Stanfit objects |
+| `read_ideal_adaptor_stanfit()` | `read_stanfit()` | Read saved Stanfit object from RDS |
+| `write_ideal_adaptor_stanfit()` | `write_stanfit()` | Write Stanfit object to RDS |
+| `get_info_from_model()` | `get_parameters()`, `summary()`, or `as_tibble()` | Extract model parameters / metadata |
+| `sample_observation()` | `sample_observations()` | Draw random samples from category representations |
+
+---
+
+# 4. Migration Recommendations {#migration-recommendations}
 
 When modernizing legacy code to the S7 architecture:
 
@@ -86,3 +109,4 @@ When modernizing legacy code to the S7 architecture:
 2. **Use S7 constructors directly:** Replace legacy `make_*` and `lift_*` functions with `new_*_category_representation()` and `new_*_ideal_observer()`.
 
 3. **Dispatch evaluation directly:** Call `categorize(model, data)` and `posterior(model, data)` directly on S7 objects rather than passing tibbles to legacy wrappers.
+

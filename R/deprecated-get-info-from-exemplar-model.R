@@ -11,7 +11,8 @@ NULL
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
-#' `get_likelihood_from_exemplars()` is deprecated. Use \code{\link{likelihood}} instead.
+#' `get_likelihood_from_exemplars()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [likelihood()] instead.
 #'
 #' @param x Observations.
 #' @param model Exemplar model.
@@ -20,6 +21,8 @@ NULL
 #' @param category Category column name.
 #' @param category.label Category labels.
 #' @return Likelihood data frame.
+#' @seealso [likelihood()]
+#' @keywords internal
 #' @rdname get_likelihood_from_exemplars
 #' @export
 get_likelihood_from_exemplars <- function(
@@ -56,7 +59,8 @@ get_likelihood_from_exemplars <- function(
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
-#' `get_categorization_from_exemplar_model()` is deprecated. Use \code{\link{categorize}} instead.
+#' `get_categorization_from_exemplar_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [categorize()] instead.
 #'
 #' @param x Observations.
 #' @param model Model object.
@@ -65,9 +69,10 @@ get_likelihood_from_exemplars <- function(
 #' @param lapse_treatment Lapse treatment.
 #' @param simplify Logical; whether to simplify output.
 #' @return Categorization data frame or vector.
+#' @seealso [categorize()]
+#' @keywords internal
 #' @rdname get_categorization_from_model
 #' @export
-#' @keywords internal
 get_categorization_from_exemplar_model <- function(
   x,
   model,
@@ -77,7 +82,7 @@ get_categorization_from_exemplar_model <- function(
   simplify = FALSE
 ) {
   lifecycle::deprecate_warn(
-    "0.0.3",
+    "0.1.0",
     "get_categorization_from_exemplar_model()",
     with = "categorize()"
   )

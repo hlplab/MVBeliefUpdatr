@@ -7,8 +7,11 @@
 add_ibbu_stanfit_draw(...)
 }
 \description{
-Deprecated. Use \code{\link{get_draws}} instead.
-
-Deprecated. Use get_draws() instead.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{add_ibbu_stanfit_draw()} was deprecated in MVBeliefUpdatr 0.1.0
+and will be removed in 0.2.0. Please use \code{\link[=get_draws]{get_draws()}} instead.
+}
+\seealso{
+\code{\link[=get_draws]{get_draws()}}
 }
 \keyword{internal}

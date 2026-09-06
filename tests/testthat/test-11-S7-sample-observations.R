@@ -64,3 +64,14 @@ test_that("sample_observations handles with_replacement FALSE and error guards o
     "Cannot sample 5 observations without replacement"
   )
 })
+
+test_that("deprecated sample_observation issues lifecycle warning and delegates to sample_observations", {
+  rep <- new_uvg_category_representation("A", "F1", mu = 100, sigma2 = 25)
+  expect_warning(
+    draws <- sample_observation(rep, n = 10L),
+    "deprecated"
+  )
+  expect_s3_class(draws, "data.frame")
+  expect_equal(nrow(draws), 10L)
+})
+

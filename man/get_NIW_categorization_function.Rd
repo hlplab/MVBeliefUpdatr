@@ -52,9 +52,14 @@ A categorization function.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_NIW_categorization_function()} is deprecated. Use \code{\link{get_category_posterior_function}} instead.
+\code{get_NIW_categorization_function()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=get_category_posterior_function]{get_category_posterior_function()}} instead.
 
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_categorization_function_from_NIW_ideal_adaptor()} is deprecated. Use \code{\link{get_category_posterior_function}} instead.
+\code{get_categorization_function_from_NIW_ideal_adaptor()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=get_category_posterior_function]{get_category_posterior_function()}} instead.
+}
+\seealso{
+\code{\link[=get_category_posterior_function]{get_category_posterior_function()}}
 }
 \keyword{internal}

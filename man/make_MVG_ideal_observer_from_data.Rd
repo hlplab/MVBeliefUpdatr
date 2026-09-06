@@ -39,6 +39,11 @@ make_MVG_ideal_observer_from_data(
 An \code{MVG_IdealObserver} object.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{\link{new_mvg_ideal_observer_from_data}} instead.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{make_MVG_ideal_observer_from_data()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=new_mvg_ideal_observer_from_data]{new_mvg_ideal_observer_from_data()}} instead.
+}
+\seealso{
+\code{\link[=new_mvg_ideal_observer_from_data]{new_mvg_ideal_observer_from_data()}}
 }
 \keyword{internal}

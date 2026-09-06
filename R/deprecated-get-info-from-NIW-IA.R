@@ -7,9 +7,9 @@ NULL
 
 #' Deprecated: get_NIW_categorization_function
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_NIW_categorization_function()` is deprecated. Use \code{\link{get_category_posterior_function}} instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_NIW_categorization_function()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [get_category_posterior_function()] instead.
 #'
 #' @param ms Means of the multivariate normal distributions over category means.
 #' @param Ss Scatter matrices of the inverse Wishart distribution over category covariance matrices.
@@ -22,6 +22,8 @@ NULL
 #' @param noise_treatment Noise treatment.
 #' @param lapse_treatment Lapse treatment.
 #' @return A categorization function.
+#' @seealso [get_category_posterior_function()]
+#' @keywords internal
 #' @rdname get_NIW_categorization_function
 #' @export
 get_NIW_categorization_function <- function(
@@ -106,19 +108,20 @@ get_NIW_categorization_function <- function(
 
 #' Deprecated: get_categorization_function_from_NIW_ideal_adaptor
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_categorization_function_from_NIW_ideal_adaptor()` is deprecated. Use \code{\link{get_category_posterior_function}} instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_categorization_function_from_NIW_ideal_adaptor()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [get_category_posterior_function()] instead.
 #'
 #' @param model A model object.
 #' @param ... Additional arguments.
 #' @return A categorization function.
+#' @seealso [get_category_posterior_function()]
+#' @keywords internal
 #' @rdname get_NIW_categorization_function
 #' @export
-#' @keywords internal
 get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
   lifecycle::deprecate_warn(
-    "0.0.3",
+    "0.1.0",
     "get_categorization_function_from_NIW_ideal_adaptor()",
     with = "get_category_posterior_function()"
   )
@@ -142,9 +145,9 @@ get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
 
 #' Deprecated: get_categorization_from_NIW_ideal_adaptor
 #'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `get_categorization_from_NIW_ideal_adaptor()` is deprecated. Use \code{\link{categorize}} instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_categorization_from_NIW_ideal_adaptor()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [categorize()] instead.
 #'
 #' @param x Observations.
 #' @param model Model object.
@@ -154,9 +157,10 @@ get_categorization_function_from_NIW_ideal_adaptor <- function(model, ...) {
 #' @param simplify Logical; whether to simplify output.
 #' @param verbose Logical; verbosity.
 #' @return Categorization data frame or vector.
+#' @seealso [categorize()]
+#' @keywords internal
 #' @rdname get_categorization_from_model
 #' @export
-#' @keywords internal
 get_categorization_from_NIW_ideal_adaptor <- function(
   x,
   model,
@@ -167,7 +171,7 @@ get_categorization_from_NIW_ideal_adaptor <- function(
   verbose = FALSE
 ) {
   lifecycle::deprecate_warn(
-    "0.0.3",
+    "0.1.0",
     "get_categorization_from_NIW_ideal_adaptor()",
     with = "categorize()"
   )
@@ -178,3 +182,4 @@ get_categorization_from_NIW_ideal_adaptor <- function(
 
   if (simplify) .legacy_simplify_categorization(d.response, decision_rule) else d.response
 }
+

@@ -13,19 +13,17 @@ is.exemplar_model(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL)
 
 \item{verbose}{Should verbose output be provided? (default: \code{TRUE})}
 
-\item{category}{Name of the category variable. (default: "category")}
+\item{tolerance}{Probability tolerance.}
 }
 \value{
 A logical.
 }
 \description{
-Deprecated. Use the S7-based predicates and constructors instead.
-}
-\details{
-Check whether \code{x} is an exemplar model. Optionally, one can also check whether a lapse rate
-and lapse bias is part of the model.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{is.exemplar_model()} was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+Please use S7 validators and \link{Exemplar_Model} instead.
 }
 \seealso{
-TBD
+\link{Exemplar_Model}
 }
 \keyword{internal}

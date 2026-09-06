@@ -64,11 +64,15 @@ A list with components \code{staninput}, \code{data}, and \code{transform_inform
 A list with components \code{staninput}, \code{data}, and \code{transform_information}.
 }
 \description{
-Deprecated. Use \code{\link{new_ideal_adaptor_stanfit_input}} instead.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{make_staninput()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=new_ideal_adaptor_stanfit_input]{new_ideal_adaptor_stanfit_input()}} instead.
 
-Deprecated. Use \code{\link{new_ideal_adaptor_stanfit_input}} instead.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{make_ideal_adaptor_stanfit_input()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=new_ideal_adaptor_stanfit_input]{new_ideal_adaptor_stanfit_input()}} instead.
 }
 \seealso{
-\code{\link{new_ideal_adaptor_stanfit_input}}
+\code{\link[=new_ideal_adaptor_stanfit_input]{new_ideal_adaptor_stanfit_input()}}
 }
 \keyword{internal}

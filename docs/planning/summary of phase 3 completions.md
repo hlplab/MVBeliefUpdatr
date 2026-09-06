@@ -57,52 +57,9 @@
 + DONE: retired `wide` argument from `get_draws()` generic and method (issuing `lifecycle::deprecate_warn("0.0.9", "get_draws(wide = )")` if supplied), and removed redundant `wide = FALSE` calls across plotting and stanfit methods.
 + DONE: reorganized and standardized test suite naming and execution order: all 26 non-deprecated tests are sequentially numbered `test-01-` through `test-26-` (with `S7-` prefix for S7 tests), and all 9 deprecated test files are numbered `test-80-` through `test-88-` (`test-80-deprecated-...` through `test-88-deprecated-...`) to run strictly after all non-deprecated tests; verified all 1,414 tests pass cleanly with 0 failures.
 
++ DONE: Phase 3 is COMPLETED and CLOSED. S7 class structure, bare/from_data constructors, print/summary/as_tibble, Stanfit classes, model aggregation (`aggregate_models()`), and vignettes (`s7-class-structure-and-workflows.Rmd`, `backward-compatibility-working-with-old-code.Rmd`) are fully implemented and verified with 1,494 passing tests.
+
 # To do in Phase 3
-
-
-
-## Next steps
-
-WAIT, do not go beyond this point:
-
-
-+ develop plotting methods that dynamically show model updates, both based on stanfits (from prior to posterior) or from update_model() outputs.
-
-+ expand stan programs to allow users to specify prior m, S for each category (not fixed point estimates). and is that really different from what can already be done by handing mu, Sigma and inferring kappa, nu?
-
-+ Known remaining failures (pre-existing, not caused by the above): MNIX representation validator (test-01, test-07)/
-
-+ the 2d example stanfit doesn't seem to be a great example since the categories overlap too much. this makes the categorization surface not particularly informative. perhaps change the example so that it has less category overlap and refit that model. 
-
-+ consider moving all deprecated functions and all bridging to lecacy objects into a separate library MVBeliefUpdatrLecacyBridge that imports the new S7 MVBeliefUpdatr library. at that point the legacy.R file will no longer be needed. 
-
-# General cleanup at end of Phase 3
-+ check which utils are needed. 
-++ if almost all checks of scalars are actually for non-NA scalars change the .is_X to include requirement for non-NA, remove .is_non_NA_x, and also adjust .assert functions accordingly.
-++ for overridden functions check whether they are still necessary.
-
-+ see whether the helper functions for testing can be simplified/reduced. e.g., make_vowel_test_data might be replaced by other test data by adjusting the tests, while yielding the same coverage?
-
-+ check how deprecated functions are marked in terms of their roxygen documentation. is it consistent? ideally, they should not be listed in the table of content of help files, but should have help files. the structure of those help files and the way that deprecation warnings are given should be consistent across deprecated functions.
-
-also check whether we can switch to one warning per session and ensure that warnings are only given "always" during testing?
-
-## Testing
-
-# To do after Phase 3
-+ check whether we can get rid of the functions in override.R 
-+ check whether there are repeated code chunks that should be consolidated into internal helper functions.
-
-## Validity checks
-+  for categorize(), demonstrate the output of the three different decision rules to me with an example
-
-### Extensions
-+ implement mixture inference starting with predefined models that are handed to the stan code.
-
-### Stan-related
-
-+ temporarily change stan programs to echo inputs so that the correct structure of inputs can get verified. at that point revisit for broad range of inputs (1d-3d, nix/mnix/niw, w/ or w/o zero exposure) whether a simpler alternative to to_array can be found.
-
-+ Ultimately, we need tests that generate test responses based on posterior (post-exposure) NIX/MNIX/NIW beliefs that were obtained by updating prior (pre-exposure) NIX/MNIX/NIW beliefs with the exposure data. That will let us check whether the 'forward updating' and the inferences of the prior beliefs are aligned---i.e., whether we can recover the prior beliefs provided there are sufficiently information exposure-test combinations in the data used to fit the stanfit model.
+Phase 3 is closed.
 
 

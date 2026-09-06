@@ -19,7 +19,10 @@ get_staninput_variable_levels(
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_staninput_variable_levels()} is deprecated in favor of
-\code{\link{get_category_labels}}, \code{\link{get_group_labels}}, and
-\code{\link{get_cue_labels}}.
+\code{get_staninput_variable_levels()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=get_category_labels]{get_category_labels()}}, \code{\link[=get_group_labels]{get_group_labels()}}, or \code{\link[=get_cue_labels]{get_cue_labels()}} instead.
 }
+\seealso{
+\code{\link[=get_category_labels]{get_category_labels()}}, \code{\link[=get_group_labels]{get_group_labels()}}, \code{\link[=get_cue_labels]{get_cue_labels()}}
+}
+\keyword{internal}

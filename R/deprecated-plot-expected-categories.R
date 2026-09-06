@@ -10,87 +10,138 @@ NULL
 # deprecated
 # -----------------------------------------------------------------------------
 
-#' Deprecated: Plot functions
-#'
-#' @name deprecated-expected-categories-plots
-#' @rdname deprecated-functions
-#' @keywords internal
-NULL
-
 #' Deprecated: plot_expected_categories
-#' @rdname deprecated-functions
+#'
+#' @description `r lifecycle::badge("deprecated")`
+#' `plot_expected_categories()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_categories()] instead.
+#'
+#' @param model Model object.
+#' @param ... Arguments passed to [plot_categories()].
+#' @seealso [plot_categories()]
+#' @keywords internal
 #' @export
 plot_expected_categories <- function(model, ...) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "plot_expected_categories()",
+    "0.1.0",
+    "plot_expected_categories()",
     with = "plot_categories()"
   )
   plot_categories(model, ...)
 }
 
 #' Deprecated: plot_expected_categories_contour
-#' @rdname deprecated-functions
+#'
+#' @description `r lifecycle::badge("deprecated")`
+#' `plot_expected_categories_contour()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_categories()] instead.
+#'
+#' @param model Model object.
+#' @param ... Arguments passed to [plot_categories()].
+#' @seealso [plot_categories()]
+#' @keywords internal
 #' @export
 plot_expected_categories_contour <- function(model, ...) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "plot_expected_categories_contour()",
+    "0.1.0",
+    "plot_expected_categories_contour()",
     with = "plot_categories()"
   )
   plot_categories(model, aes = "contour", ...)
 }
 
 #' Deprecated: plot_expected_categories_density
-#' @rdname deprecated-functions
+#'
+#' @description `r lifecycle::badge("deprecated")`
+#' `plot_expected_categories_density()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_categories()] instead.
+#'
+#' @param model Model object.
+#' @param ... Arguments passed to [plot_categories()].
+#' @seealso [plot_categories()]
+#' @keywords internal
 #' @export
 plot_expected_categories_density <- function(model, ...) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "plot_expected_categories_density()",
+    "0.1.0",
+    "plot_expected_categories_density()",
     with = "plot_categories()"
   )
   plot_categories(model, aes = "fill", ...)
 }
 
 #' Deprecated: plot_expected_categories_contour2D
-#' @rdname deprecated-functions
+#'
+#' @description `r lifecycle::badge("deprecated")`
+#' `plot_expected_categories_contour2D()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_categories()] instead.
+#'
+#' @param model Model object.
+#' @param ... Arguments passed to [plot_categories()].
+#' @seealso [plot_categories()]
+#' @keywords internal
 #' @export
 plot_expected_categories_contour2D <- function(model, ...) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "plot_expected_categories_contour2D()",
+    "0.1.0",
+    "plot_expected_categories_contour2D()",
     with = "plot_categories()"
   )
   plot_categories(model, aes = "contour", ...)
 }
 
 #' Deprecated: plot_expected_categories_density1D
-#' @rdname deprecated-functions
+#'
+#' @description `r lifecycle::badge("deprecated")`
+#' `plot_expected_categories_density1D()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_categories()] instead.
+#'
+#' @param model Model object.
+#' @param ... Arguments passed to [plot_categories()].
+#' @seealso [plot_categories()]
+#' @keywords internal
 #' @export
 plot_expected_categories_density1D <- function(model, ...) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "plot_expected_categories_density1D()",
+    "0.1.0",
+    "plot_expected_categories_density1D()",
     with = "plot_categories()"
   )
   plot_categories(model, aes = "fill", ...)
 }
 
 #' Deprecated: plot_expected_categories_density2D
-#' @rdname deprecated-functions
+#'
+#' @description `r lifecycle::badge("deprecated")`
+#' `plot_expected_categories_density2D()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_categories()] instead.
+#'
+#' @param model Model object.
+#' @param ... Arguments passed to [plot_categories()].
+#' @seealso [plot_categories()]
+#' @keywords internal
 #' @export
 plot_expected_categories_density2D <- function(model, ...) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "plot_expected_categories_density2D()",
+    "0.1.0",
+    "plot_expected_categories_density2D()",
     with = "plot_categories()"
   )
   plot_categories(model, aes = "fill", ...)
 }
 
 #' Deprecated: plot_expected_categories.ideal_adaptor_stanfit
-#' @rdname deprecated-functions
+#'
+#' @description `r lifecycle::badge("deprecated")`
+#' `plot_expected_categories.ideal_adaptor_stanfit()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0. Please use [plot_categories()] instead.
+#'
+#' @param model Model object.
+#' @param type Plot type ("density" or "contour").
+#' @param cues Cue names to plot.
+#' @param ... Arguments passed to [plot_categories()].
+#' @seealso [plot_categories()]
+#' @keywords internal
 #' @export
 plot_expected_categories.ideal_adaptor_stanfit <- function(
   model,
@@ -99,8 +150,8 @@ plot_expected_categories.ideal_adaptor_stanfit <- function(
   ...
 ) {
   lifecycle::deprecate_warn(
-    when = "0.2.0",
-    what = "plot_expected_categories.ideal_adaptor_stanfit()",
+    "0.1.0",
+    "plot_expected_categories.ideal_adaptor_stanfit()",
     with = "plot_categories()"
   )
   if (type == "contour") {
@@ -124,3 +175,4 @@ plot_expected_categories.ideal_adaptor_stanfit <- function(
     return(plot_categories(model, cues = cues, aes = "fill", ...))
   }
 }
+

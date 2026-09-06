@@ -22,5 +22,10 @@ or a list of numeric vectors.}
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{get_NIW_posterior_predictive.pmap()} is deprecated. Use \code{\link{get_NIW_posterior_predictive}} or \code{\link{likelihood}} instead.
+\code{get_NIW_posterior_predictive.pmap()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0. Please use \code{\link[=get_NIW_posterior_predictive]{get_NIW_posterior_predictive()}} instead.
 }
+\seealso{
+\code{\link[=get_NIW_posterior_predictive]{get_NIW_posterior_predictive()}}, \code{\link[=likelihood]{likelihood()}}
+}
+\keyword{internal}

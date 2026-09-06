@@ -1,15 +1,18 @@
 NULL
 
-#' @name get_class
-#' @title Deprecated: get_class
-#' @description Deprecated. Use the S7-based validators and constructors instead.
+#' Deprecated: get_class
+#'
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_class()` was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+#' Please use [get_representation_type()] or S7 classes instead.
+#' @seealso [get_representation_type()]
 #' @keywords internal
 #' @export
 get_class <- function(x) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "get_class()",
-    details = "Use the S7-based validators and constructors."
+    details = "Use get_representation_type() or S7 classes instead."
   )
   if (is.NIW_ideal_adaptor(x)) {
     return("NIW_ideal_adaptor")
@@ -36,9 +39,10 @@ get_class <- function(x) {
   "Unrecognized class"
 }
 
-#' @name get_expected_columns_for_model
-#' @title Deprecated: get_expected_columns_for_model
-#' @description Deprecated. Use the S7-based predicates and constructors instead.
+#' Deprecated: get_expected_columns_for_model
+#'
+#' @description `r lifecycle::badge("deprecated")`
+#' `get_expected_columns_for_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
 #' @keywords internal
 get_expected_columns_for_model <- function() {
   c("prior", "lapse_rate", "lapse_bias", "Sigma_noise")
@@ -59,23 +63,25 @@ get_expected_columns_for_model <- function() {
 
 #' Deprecated: is.MVBU_representation
 #'
-#' Check whether \code{x} is recognized as an MVBeliefUpdatr category representation.
+#' @description `r lifecycle::badge("deprecated")`
+#' `is.MVBU_representation()` was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+#' Please use S7 predicates and classes instead.
 #'
 #' @param x Object to be checked.
 #' @param group Name of one or more group variables, each unique combination of which describes a model. (default: NULL)
 #' @param verbose Should verbose output be provided? (default: `TRUE`)
+#' @param tolerance Probability tolerance.
 #'
 #' @return A logical.
 #'
-#' @seealso TBD
-#' @description Deprecated. Use the S7-based predicates and constructors instead.
+#' @seealso [MVBU_CategoryRepresentationTemplate]
 #' @keywords internal
 #' @export
 is.MVBU_representation <- function(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "is.MVBU_representation()",
-    details = "Use the S7-based predicates and constructors."
+    details = "Use S7 predicates and classes instead."
   )
   name_of_x <- deparse(substitute(x))
 
@@ -108,23 +114,25 @@ is.MVBU_representation <- function(x, group = NULL, verbose = F, tolerance = MVB
 
 #' Deprecated: is.MVBU_model
 #'
-#' Check whether \code{x} is a model with lapse rates, biases, priors, and perceptual noise.
+#' @description `r lifecycle::badge("deprecated")`
+#' `is.MVBU_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+#' Please use S7 predicates and classes instead.
 #'
 #' @param x Object to be checked.
 #' @param group Name of one or more group variables, each unique combination of which describes a model. (default: NULL)
 #' @param verbose Should verbose output be provided? (default: `TRUE`)
+#' @param tolerance Probability tolerance.
 #'
 #' @return A logical.
 #'
-#' @seealso TBD
-#' @description Deprecated. Use the S7-based predicates and constructors instead.
+#' @seealso [MVBU_CognitiveModel]
 #' @keywords internal
 #' @export
 is.MVBU_model <- function(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "is.MVBU_model()",
-    details = "Use the S7-based validators and constructors."
+    details = "Use S7 predicates and classes instead."
   )
   name_of_x <- deparse(substitute(x))
 
@@ -207,18 +215,19 @@ is.MVBU_model <- function(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TO
 
 #' Deprecated: print.MVBU_model
 #'
-#' Specifies reasonable defaults for the parameters to be summarized for the MVBeliefUpdatr_model object.
-#'
-#' @param x An \code{\link{MVBeliefUpdatr_model}} object.
-#'
-#' @description Deprecated. Use the S7-based predicates and constructors instead.
+#' @description `r lifecycle::badge("deprecated")`
+#' `print.MVBU_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+#' Please use S7 print methods instead.
+#' @param x An `MVBeliefUpdatr_model` object.
+#' @param ... Additional arguments.
+#' @seealso [MVBU_CognitiveModel]
 #' @keywords internal
 #' @export
 print.MVBU_model <- function(x, ...) {
   lifecycle::deprecate_warn(
-    when = "0.0.3",
+    when = "0.1.0",
     what = "print.MVBU_model()",
-    details = "Use the S7-based validators and constructors."
+    details = "Use S7 print methods instead."
   )
   .assert_that(is.MVBU_model(x), msg = "Expected an MVBU model.")
 
@@ -230,3 +239,4 @@ print.MVBU_model <- function(x, ...) {
 
   print(x)
 }
+

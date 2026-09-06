@@ -12,17 +12,18 @@ is.MVBU_model(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TOL)
 \item{group}{Name of one or more group variables, each unique combination of which describes a model. (default: NULL)}
 
 \item{verbose}{Should verbose output be provided? (default: \code{TRUE})}
+
+\item{tolerance}{Probability tolerance.}
 }
 \value{
 A logical.
 }
 \description{
-Deprecated. Use the S7-based predicates and constructors instead.
-}
-\details{
-Check whether \code{x} is a model with lapse rates, biases, priors, and perceptual noise.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{is.MVBU_model()} was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+Please use S7 predicates and classes instead.
 }
 \seealso{
-TBD
+\link{MVBU_CognitiveModel}
 }
 \keyword{internal}

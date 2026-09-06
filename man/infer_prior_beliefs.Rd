@@ -59,8 +59,11 @@ as well. If using \code{backend = "rstan"} you can also set
 \item{...}{Additional parameters are passed to \link[rstan:sampling]{rstan::sampling}.}
 }
 \description{
-Deprecated. Use \code{\link{infer_NIW_ideal_adaptor}} together with \code{\link{make_staninput_for_NIW_ideal_adaptor}} instead.
-
-Deprecated. Use infer_NIW_ideal_adaptor() instead.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+\code{infer_prior_beliefs()} was deprecated in MVBeliefUpdatr 0.1.0
+and will be removed in 0.2.0. Please use \code{\link[=fit_ideal_adaptor]{fit_ideal_adaptor()}} instead.
+}
+\seealso{
+\code{\link[=fit_ideal_adaptor]{fit_ideal_adaptor()}}
 }
 \keyword{internal}
