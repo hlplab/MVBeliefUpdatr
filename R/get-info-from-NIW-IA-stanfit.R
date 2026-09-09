@@ -919,8 +919,6 @@ get_categorization_function.ideal_adaptor_stanfit <- function(
     get_draws(
       x,
       groups = groups,
-      summarize = F,
-      wide = F,
       ...)
 
   d.pars %<>%
