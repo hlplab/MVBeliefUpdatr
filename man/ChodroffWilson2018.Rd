@@ -4,21 +4,24 @@
 \name{ChodroffWilson2018}
 \alias{ChodroffWilson2018}
 \title{Chodroff & Wilson (2018) data on word-initial stop-voicing in native US English}
+\format{
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 65800 rows and 12 columns.
+}
 \usage{
 data(ChodroffWilson2018)
 }
 \description{
-A subset of the data collected and annotated by Chodroff & Wilson (2018) of word-initial stop-voicing in native US English.
-Six stop categories ("b", "p", "d", "t", "g", "k") were recorded in two types of tasks that are known to elicit different
-speech styles: connected speech with faster speech rates, and isolated word productions with slower speech rates. The data
-contain annotations for three phonetic cues to stop-voicing: voice onset time (VOT), f0 (in either Hz or semitones), and
-vowel duration. For details, please see Chodroff & Wilson (2018), which should be cited if these data are used.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
 }
 \details{
-Note that the present data are a \emph{subset} of the data collected by Chodroff & Wilson (2018), and are not cleaned for issues
-like pitch doubling or halving. The full data are available on Eleanor Chodroff's OSF repo at \url{https://osf.io/jt5mc/}.
+\code{ChodroffWilson2018} is deprecated. Please use \link{mixer6} instead, which provides
+the full Mixer 6 connected speech dataset with standardized column names and
+Unicode IPA notation.
 }
 \references{
 \insertRef{chodroff-wilson2018}{MVBeliefUpdatr}
+}
+\seealso{
+\code{\link{mixer6}}
 }
 \keyword{data}
