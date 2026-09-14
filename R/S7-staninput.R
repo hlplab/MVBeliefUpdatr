@@ -108,15 +108,16 @@ NIW_IdealAdaptorStaninput <- S7::new_class(
 }
 
 
-#' Build the typed Stan input object for the NIX ideal-adaptor model
+#' Build the typed Stan input object for ideal-adaptor models
 #'
 #' Internal helper that summarizes exposure and test data and assembles the
-#' model-specific list expected by the NIX Stan program, then wraps it in an
-#' S7 staninput object.
+#' model-specific list expected by the NIX, NIW, or MNIX Stan programs, then
+#' wraps it in the appropriate S7 staninput object.
 #'
 #' @keywords internal
 #' @noRd
-new_nix_staninput <- function(
+.new_ideal_adaptor_staninput <- function(
+  model = c("NIW", "NIX", "MNIX"),
   exposure,
   test,
   cues,
@@ -136,6 +137,7 @@ new_nix_staninput <- function(
   n_categories,
   n_groups
 ) {
+  model <- match.arg(model)
   exposure_summary <- .summarize_exposure(
     exposure,
     cues,
@@ -143,7 +145,7 @@ new_nix_staninput <- function(
     group,
     category_levels,
     group_levels,
-    model = "NIX"
+    model = model
   )
   test_summary <- .summarize_test(
     test,
@@ -152,126 +154,26 @@ new_nix_staninput <- function(
     group,
     category_levels,
     group_levels,
-    model = "NIX"
+    model = model
   )
+
+  is_nix <- (model == "NIX")
+  shift_param <- transform$transform.parameters[["shift"]]
+  inv_scale_param <- transform$transform.parameters[["INV_SCALE"]]
 
   staninput <- list(
     K = n_cues,
     M = n_categories,
     L = n_groups,
-    tau_scale = if (n_cues == 1) {
+    tau_scale = if (is_nix && n_cues == 1) {
       as.numeric(tau_scale[1])
     } else {
       .make_stan_tauscale(tau_scale, n_cues)
     },
     L_omega_eta = as.numeric(L_omega_eta),
     split_loglik_per_observation = as.numeric(split_loglik_per_observation),
-    lapse_rate_known = if (is.null(lapse_rate)) 0 else 1,
-    N_exposure = exposure_summary$N_exposure,
-    x_mean_exposure = exposure_summary$x_mean_exposure,
-    x_sd_exposure = exposure_summary$x_sd_exposure,
-    x_test = test_summary$x_test,
-    y_test = test_summary$y_test,
-    z_test_counts = test_summary$z_test_counts,
-    N_test = test_summary$N_test,
-    mu_0_known = if (is.null(mu_0)) 0 else 1,
-    Sigma_0_known = if (is.null(Sigma_0)) 0 else 1,
-    shift = if (n_cues == 1) {
-      as.numeric(transform$transform.parameters[["shift"]][1])
-    } else {
-      .make_stan_shift(transform$transform.parameters[["shift"]], n_cues)
-    },
-    INV_SCALE = if (n_cues == 1) {
-      as.numeric(transform$transform.parameters[["INV_SCALE"]])
-    } else {
-      .make_stan_inv_scale(transform$transform.parameters[["INV_SCALE"]], n_cues)
-    }
-  )
-
-  if (!is.null(lapse_rate)) {
-    staninput$lapse_rate_data <- as.numeric(lapse_rate)
-  } else {
-    staninput$lapse_rate_data <- numeric(0)
-  }
-  if (!is.null(mu_0)) {
-    staninput$mu_0_data <- to_array(
-      vapply(mu_0, function(x) as.numeric(x[1]), numeric(1)),
-      inner_dims = length(mu_0),
-      outer_dims = NULL,
-      simplify = FALSE
-    )
-  } else {
-    staninput$mu_0_data <- numeric(0)
-  }
-  if (!is.null(Sigma_0)) {
-    staninput$Sigma_0_data <- to_array(
-      vapply(Sigma_0, function(x) as.numeric(x[1, 1]), numeric(1)),
-      inner_dims = length(Sigma_0),
-      outer_dims = NULL,
-      simplify = FALSE
-    )
-  } else {
-    staninput$Sigma_0_data <- numeric(0)
-  }
-
-  NIX_IdealAdaptorStaninput(values = staninput)
-}
-
-#' Build the typed Stan input object for the NIW ideal-adaptor model
-#'
-#' Internal helper that summarizes exposure and test data and assembles the
-#' model-specific list expected by the NIW Stan program, then wraps it in an
-#' S7 staninput object.
-#'
-#' @keywords internal
-#' @noRd
-new_niw_staninput <- function(
-  exposure,
-  test,
-  cues,
-  category,
-  response,
-  group,
-  category_levels,
-  group_levels,
-  tau_scale,
-  L_omega_eta,
-  split_loglik_per_observation,
-  lapse_rate,
-  mu_0,
-  Sigma_0,
-  transform,
-  n_cues,
-  n_categories,
-  n_groups
-) {
-  exposure_summary <- .summarize_exposure(
-    exposure,
-    cues,
-    category,
-    group,
-    category_levels,
-    group_levels,
-    model = "NIW"
-  )
-  test_summary <- .summarize_test(
-    test,
-    cues,
-    response,
-    group,
-    category_levels,
-    group_levels,
-    model = "NIW"
-  )
-
-  staninput <- list(
-    K = n_cues,
-    M = n_categories,
-    L = n_groups,
-    tau_scale = .make_stan_tauscale(tau_scale, n_cues),
-    L_omega_eta = as.numeric(L_omega_eta),
-    split_loglik_per_observation = as.numeric(split_loglik_per_observation),
-    lapse_rate_known = if (is.null(lapse_rate)) 0 else 1,
+    lapse_rate_known = as.integer(!is.null(lapse_rate)),
+    lapse_rate_data = if (!is.null(lapse_rate)) as.numeric(lapse_rate) else numeric(0),
     N_exposure = exposure_summary$N_exposure,
     x_mean_exposure = exposure_summary$x_mean_exposure,
     x_ss_exposure = exposure_summary$x_ss_exposure,
@@ -279,147 +181,86 @@ new_niw_staninput <- function(
     y_test = test_summary$y_test,
     z_test_counts = test_summary$z_test_counts,
     N_test = test_summary$N_test,
-    mu_0_known = if (is.null(mu_0)) 0 else 1,
-    Sigma_0_known = if (is.null(Sigma_0)) 0 else 1,
-    shift = .make_stan_shift(transform$transform.parameters[["shift"]], n_cues),
-    INV_SCALE = .make_stan_inv_scale(
-      transform$transform.parameters[["INV_SCALE"]],
-      n_cues
-    )
+    mu_0_known = as.integer(!is.null(mu_0)),
+    Sigma_0_known = as.integer(!is.null(Sigma_0)),
+    shift = if (is_nix && n_cues == 1) {
+      as.numeric(shift_param[1])
+    } else {
+      .make_stan_shift(shift_param, n_cues)
+    },
+    INV_SCALE = if (is_nix && n_cues == 1) {
+      as.numeric(inv_scale_param)
+    } else {
+      .make_stan_inv_scale(inv_scale_param, n_cues)
+    }
   )
 
-  if (!is.null(lapse_rate)) {
-    staninput$lapse_rate_data <- as.numeric(lapse_rate)
-  } else {
-    staninput$lapse_rate_data <- numeric(0)
+  if (model == "MNIX") {
+    staninput$p_cat <- array(rep(1 / n_categories, n_categories), dim = c(n_categories))
   }
-  if (!is.null(mu_0)) {
-    mu_0_data <- to_array(
-      lapply(mu_0, function(x) as.numeric(x)),
+
+  if (is_nix) {
+    staninput$mu_0_data <- if (!is.null(mu_0)) {
+      to_array(
+        vapply(mu_0, function(x) as.numeric(x[1]), numeric(1)),
+        inner_dims = length(mu_0),
+        outer_dims = NULL,
+        simplify = FALSE
+      )
+    } else {
+      numeric(0)
+    }
+    staninput$Sigma_0_data <- if (!is.null(Sigma_0)) {
+      to_array(
+        vapply(Sigma_0, function(x) as.numeric(x[1, 1]), numeric(1)),
+        inner_dims = length(Sigma_0),
+        outer_dims = NULL,
+        simplify = FALSE
+      )
+    } else {
+      numeric(0)
+    }
+    return(NIX_IdealAdaptorStaninput(values = staninput))
+  }
+
+  # NIW and MNIX share multivariate mu_0_data structure
+  staninput$mu_0_data <- if (!is.null(mu_0)) {
+    to_array(
+      lapply(mu_0, as.numeric),
       inner_dims = c(n_cues),
       outer_dims = c(length(mu_0)),
       simplify = FALSE
     )
-    staninput$mu_0_data <- mu_0_data
   } else {
-    staninput$mu_0_data <- array(0, dim = c(0, 0))
+    array(0, dim = c(0, 0))
   }
-  if (!is.null(Sigma_0)) {
-    Sigma_0_data <- to_array(
-      lapply(Sigma_0, function(x) as.matrix(x)),
+
+  if (model == "MNIX") {
+    staninput$Sigma_0_data <- if (!is.null(Sigma_0)) {
+      to_array(
+        lapply(Sigma_0, as.matrix),
+        inner_dims = c(n_cues),
+        outer_dims = c(length(Sigma_0)),
+        simplify = FALSE
+      )
+    } else {
+      array(0, dim = c(0, 0))
+    }
+    return(MNIX_IdealAdaptorStaninput(values = staninput))
+  }
+
+  # NIW model
+  staninput$Sigma_0_data <- if (!is.null(Sigma_0)) {
+    to_array(
+      lapply(Sigma_0, as.matrix),
       inner_dims = c(n_cues, n_cues),
       outer_dims = c(length(Sigma_0)),
       simplify = FALSE
     )
-    staninput$Sigma_0_data <- Sigma_0_data
   } else {
-    staninput$Sigma_0_data <- array(0, dim = c(0, 0, 0))
+    array(0, dim = c(0, 0, 0))
   }
-
   NIW_IdealAdaptorStaninput(values = staninput)
-}
-
-#' Build the typed Stan input object for the MNIX ideal-adaptor model
-#'
-#' Internal helper that summarizes exposure and test data and assembles the
-#' model-specific list expected by the MNIX Stan program, then wraps it in an
-#' S7 staninput object.
-#'
-#' @keywords internal
-#' @noRd
-new_mnix_staninput <- function(
-  exposure,
-  test,
-  cues,
-  category,
-  response,
-  group,
-  category_levels,
-  group_levels,
-  tau_scale,
-  L_omega_eta,
-  split_loglik_per_observation,
-  lapse_rate,
-  mu_0,
-  Sigma_0,
-  transform,
-  n_cues,
-  n_categories,
-  n_groups
-) {
-  exposure_summary <- .summarize_exposure(
-    exposure,
-    cues,
-    category,
-    group,
-    category_levels,
-    group_levels,
-    model = "MNIX"
-  )
-  test_summary <- .summarize_test(
-    test,
-    cues,
-    response,
-    group,
-    category_levels,
-    group_levels,
-    model = "MNIX"
-  )
-
-  staninput <- list(
-    K = n_cues,
-    M = n_categories,
-    L = n_groups,
-    tau_scale = .make_stan_tauscale(tau_scale, n_cues),
-    L_omega_eta = as.numeric(L_omega_eta),
-    split_loglik_per_observation = as.numeric(split_loglik_per_observation),
-    lapse_rate_known = if (is.null(lapse_rate)) 0 else 1,
-    p_cat = array(rep(1 / n_categories, n_categories), dim = c(n_categories)),
-    N_exposure = exposure_summary$N_exposure,
-    x_mean_exposure = exposure_summary$x_mean_exposure,
-    x_ss_exposure = exposure_summary$x_ss_exposure,
-    x_test = test_summary$x_test,
-    y_test = test_summary$y_test,
-    z_test_counts = test_summary$z_test_counts,
-    N_test = test_summary$N_test,
-    mu_0_known = if (is.null(mu_0)) 0 else 1,
-    Sigma_0_known = if (is.null(Sigma_0)) 0 else 1,
-    shift = .make_stan_shift(transform$transform.parameters[["shift"]], n_cues),
-    INV_SCALE = .make_stan_inv_scale(
-      transform$transform.parameters[["INV_SCALE"]],
-      n_cues
-    )
-  )
-
-  if (!is.null(lapse_rate)) {
-    staninput$lapse_rate_data <- as.numeric(lapse_rate)
-  } else {
-    staninput$lapse_rate_data <- numeric(0)
-  }
-  if (!is.null(mu_0)) {
-    mu_0_data <- to_array(
-      lapply(mu_0, function(x) as.numeric(x)),
-      inner_dims = c(n_cues),
-      outer_dims = c(length(mu_0)),
-      simplify = FALSE
-    )
-    staninput$mu_0_data <- mu_0_data
-  } else {
-    staninput$mu_0_data <- array(0, dim = c(0, 0))
-  }
-  if (!is.null(Sigma_0)) {
-    Sigma_0_data <- to_array(
-      lapply(Sigma_0, function(x) as.matrix(x)),
-      inner_dims = c(n_cues),
-      outer_dims = c(length(Sigma_0)),
-      simplify = FALSE
-    )
-    staninput$Sigma_0_data <- Sigma_0_data
-  } else {
-    staninput$Sigma_0_data <- array(0, dim = c(0, 0))
-  }
-
-  MNIX_IdealAdaptorStaninput(values = staninput)
 }
 
 #' Summarize exposure data for Stanfit input construction
@@ -437,7 +278,7 @@ new_mnix_staninput <- function(
   N_exposure <- matrix(0L, nrow = n_categories, ncol = n_groups)
   if (model == "NIX") {
     x_mean_exposure <- matrix(0, nrow = n_categories, ncol = n_groups)
-    x_sd_exposure <- matrix(0, nrow = n_categories, ncol = n_groups)
+    x_ss_exposure <- matrix(0, nrow = n_categories, ncol = n_groups)
   } else if (model == "MNIX") {
     x_mean_exposure <- array(0, dim = c(n_categories, n_groups, n_cues))
     x_ss_exposure <- array(0, dim = c(n_categories, n_groups, n_cues))
@@ -459,50 +300,30 @@ new_mnix_staninput <- function(
         cue_values <- as.matrix(subset[, cues, drop = FALSE])
         if (model == "NIX") {
           x_mean_exposure[i, j] <- mean(cue_values[, 1])
-          x_sd_exposure[i, j] <- if (n_obs > 1) stats::sd(cue_values[, 1]) else 0
-        } else if (model == "MNIX")  {
-          x_mean_exposure[i, j, ] <- .colMeans(cue_values)
           if (n_obs > 1) {
-            centered <- sweep(cue_values, 2, .colMeans(cue_values), "-")
-            x_ss_exposure[i, j, ] <- colSums(centered^2)
-          } else {
-            x_ss_exposure[i, j, ] <- rep(0, n_cues)
+            x_ss_exposure[i, j] <- sum((cue_values[, 1] - x_mean_exposure[i, j])^2)
           }
-        } else if (model == "NIW") {
-          x_mean_exposure[i, j, ] <- .colMeans(cue_values)
+        } else {
+          col_means <- .colMeans(cue_values)
+          x_mean_exposure[i, j, ] <- col_means
           if (n_obs > 1) {
-            x_ss_exposure[i, j, , ] <- crossprod(cue_values)
-          } else {
-            # The Stan update of S handles n_obs == 1 as (different) special cases, so any positive-definite placeholder is harmless.
-            x_ss_exposure[i, j, , ] <- diag(n_cues)
+            centered <- sweep(cue_values, 2, col_means, "-")
+            if (model == "MNIX") {
+              x_ss_exposure[i, j, ] <- colSums(centered^2)
+            } else {
+              x_ss_exposure[i, j, , ] <- crossprod(centered)
+            }
           }
-        } 
-      } else {
-        if (model == "NIX") {
-          x_mean_exposure[i, j] <- 0
-          x_sd_exposure[i, j] <- 1
-        } else if (model == "MNIX")  {
-          x_mean_exposure[i, j, ] <- rep(0, n_cues)
-          # For n_obs == 0, no update occurs in Stan, so a zero placeholder is harmless.
-          x_ss_exposure[i, j, ] <- rep(0, n_cues)
-        } else if (model == "NIW") {
-          x_mean_exposure[i, j, ] <- rep(0, n_cues)
-          # For n_obs == 0, no update occurs in Stan, so a positive-definite placeholder is harmless.
-          x_ss_exposure[i, j, , ] <- diag(n_cues)
-        } 
+        }
       }
     }
   }
 
-  if (model == "NIX") {
-    list(N_exposure = N_exposure, x_mean_exposure = x_mean_exposure, x_sd_exposure = x_sd_exposure)
-  } else if (model == "MNIX") {
-    list(N_exposure = N_exposure, x_mean_exposure = x_mean_exposure, x_ss_exposure = x_ss_exposure)
-  } else if (model == "NIW") {
-    list(N_exposure = N_exposure, x_mean_exposure = x_mean_exposure, x_ss_exposure = x_ss_exposure)
-  } else {
-    stop("Unknown model type: ", model)
-  }
+  list(
+    N_exposure = N_exposure,
+    x_mean_exposure = x_mean_exposure,
+    x_ss_exposure = x_ss_exposure
+  )
 }
 
 #' Summarize test data for Stanfit input construction
@@ -528,23 +349,6 @@ new_mnix_staninput <- function(
   unique_cols <- unique(c(group, cues))
   unique_rows <- unique(test[, unique_cols, drop = FALSE])
   n_test <- nrow(unique_rows)
-  if (n_test == 0) {
-    x_test <- if (model == "NIX") {
-      array(0, dim = c(0))
-    } else {
-      matrix(0, nrow = 0, ncol = n_cues)
-    }
-    y_test <- array(integer(0), dim = c(0))
-    z_test_counts <- matrix(0L, nrow = 0, ncol = n_categories)
-    return(
-      list(
-        x_test = x_test,
-        y_test = y_test,
-        z_test_counts = z_test_counts,
-        N_test = 0
-      )
-    )
-  }
 
   x_test <- if (model == "NIX") {
     array(0, dim = c(n_test))
@@ -584,4 +388,3 @@ new_mnix_staninput <- function(
     N_test = n_test
   )
 }
-

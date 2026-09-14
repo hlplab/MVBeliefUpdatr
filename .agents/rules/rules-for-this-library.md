@@ -43,6 +43,12 @@ trigger: always_on
 
 4. Avoid redundancy. In particular, check what functions are already available and think about whether they could be reused---if necessary, with small changes or extensions---to achieve your goal before you create additional functions. 
 
+4a. Whenever starting a new topic in a conversation, make sure that you read in existing functionality, including internal .is_, .assert_* and util functions. Use these functions if it keeps code lean. If changes to those functions would allow more elegant code, alert me to it.
+
+4b. Do not silently introduce aliases without my explicit instruction. You can propose aliases to be reviewed by me. 
+
+4c. When you note that highly similar code has been created in multiple places in the library, alert me to it and propose a unification of that functionality, as long as it does not conflict with rule 2 (transparency).
+
 
 
 5. Aim for *relevant* computational efficiency. It is not important that functions that are typically applied once (e.g., print, summary, aping and transforming draws from a stanfit object, or updating models, should be kept efficient. 
@@ -59,4 +65,4 @@ trigger: always_on
 
 6c. Remove tests that refer to functions/methods/objects that do no longer exist.
 
-6d. Unless there is a good reason, try to avoid duplicating existing functionality from the package in helper functions for the tests. E.g., don't write new read/write or fit functions for stanfit objects, when those already exist in the code---unless there is a good reason for it. In that case, include that reason on the comments in the test code, and make me aware of those reasons.
+6d. Unless there is a good reason, try to avoid duplicating existing functionality from the package in helper functions for the tests (see rule 5). E.g., don't write new read/write or fit functions for stanfit objects, when those already exist in the code---unless there is a good reason for it. In that case, include that reason on the comments in the test code, and make me aware of those reasons.

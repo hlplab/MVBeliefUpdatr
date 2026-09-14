@@ -176,24 +176,50 @@ Phase gate:
 - [x] Full parity with `brms` model criteria, comparison, and posterior predictive checking verified
 
 ### Phase 7: Consistency and Quality Hardening
-**Goal:** lock reliability and prevent regressions
+**Goal:** lock reliability, unify interfaces, and eliminate redundancy across the codebase
 
 Checklist:
-- [x] Implement dynamic plotting methods (`plot_model_updates()`) showing model belief updates:
-  - Sequential belief updates across exposure blocks from `update_model()`
+- [x] Dynamic & unified plotting framework:
+  - Sequential belief updates across exposure blocks (`plot_model_updates()`)
   - Prior-to-posterior parameter transitions across MCMC posterior draws from `MVBU_Stanfit`
-- [x] Codebase & Assertion Refactoring:
-  - Consolidate scalar check utilities (`.is_scalar_*` requiring non-NA)
-  - Clean up `R/override.R` (renamed to `internal-overrides-of-external-functions.R`) and consolidate helper functions
-  - Audit roxygen documentation for deprecated functions
-- [ ] Add cross-family method parity test matrix
-- [ ] Add compatibility and deprecation regression tests
-- [ ] Add performance regression suite
-- [ ] Add cache/memory bloat safeguards
+  - Unified `plot_sample()`, `plot_exposure_sample()`, and `plot_test_sample()` supporting 1D, 2D, and 3D observations with analytical slicing/marginalization
+- [x] Data extraction & schema consistency:
+  - Unified `get_data()`, `get_exposure_data()`, and `get_test_data()` with filtering, subsampling, and column name mapping
+  - Standardized internal `group_unique` column tracking across inputs and fits
+  - Consolidated roxygen documentation under `man/get_data.Rd`
+- [x] Plotting deduplication:
+  - Audit and consolidate overlapping grid evaluation, contour, and mesh rendering pipelines across `plot_categories()`, `plot_categorization_functions()`, and `plot_sample()`
+  - Renamed generic and methods from `plot_categorization_function` to `plot_categorization_functions` following plural convention without keeping singular wrapper
+  - Deduplicated cue limit computation (`.compute_default_cue_limits()`) and Plotly surface traces (`.add_2d_surface_trace()`) in `R/S7-plot-engine.R`
+- [x] Phonetic datasets integration and standardization:
+  - Ingested and compressed datasets in `data/`: `h95.rda`, `pb52.rda`, `swehvd.rda`, `mixer6.rda` via reproducible script `data-raw/import_phonetic_datasets.R`
+  - Standardized schema across all datasets: consistent column ordering (`speaker` → demographics → category → context/sub-features → trial/task → acoustic cues → duration/rate → quality flags), `sex` column (`"female"`, `"male"`), standardized IPA notation in phonemic slashes (`/.../`), and `stop_poa`
+  - Full roxygen documentation in `R/data.R`, BibTeX entries in `inst/REFERENCES.bib` (`hillenbrand1995`, `peterson-barney1952`, `barreda2015`, `persson2021`)
+  - Deprecated `ChodroffWilson2018` in favor of `mixer6`
+  - Added dedicated test suite `tests/testthat/test-00-datasets.R` (45 assertions) and updated `.example_data()` and `test-15-S7-from-data.R`
+- [x] Codebase repeated chunk consolidation:
+  - Undeprecated conjugate conversions (`get_expected_Sigma_from_S`, `get_S_from_expected_Sigma`, `get_expected_mu_from_m`, `get_m_from_expected_mu`) and moved to `R/S7-niw-nix-conversions.R`
+  - Moved legacy posterior predictive and `get_D` to `R/deprecated-NIX-NIW-basics.R` with `@keywords internal`
+  - Consolidated sufficient statistics computation into `get_sufficient_category_statistics()` and integrated into batch `update_template()` across NIW, NIX, and MNIX models
+  - Deprecated single-table SS functions (`get_sum_of_squares_from_df`, aliases) and `make_vector_column` with `@keywords internal`
+  - Added `.summarise_category_parameter_draws()` in `R/internal-utils-imported.R` and centralized default cue limits in `R/S7-plot-engine.R`
+- [ ] Singular / plural naming audit:
+  - Systematically review all exported functions and argument names for consistent singular vs. plural conventions (e.g., column selectors vs. vector inputs) and document all intentional exceptions
+- [ ] Test helper simplification:
+  - Reduce and simplify test helpers (e.g. evaluating whether `helper-vowel-data.R` / `make_vowel_test_data` can be replaced by standard fixtures while maintaining full coverage)
+- [ ] Deprecation documentation & warning standardization:
+  - Ensure all deprecated functions have consistent roxygen documentation (using `@description \lifecycle{deprecated}`, `@keywords internal`, and exclusion from the main TOC index)
+  - Ensure deprecation warnings consistently use `lifecycle::deprecate_warn("0.1.0", ...)` with standard session-level warning frequency (and active warning signaling during tests)
+- [ ] Vignette enhancement:
+  - Add explicit worked example demonstrating the output of the 3 decision rules (`"criterion"`, `"proportional"`, `"sampling"`) in the vignette covering `categorize()`
+- [ ] Cross-family method parity test matrix
+- [ ] Performance regression checks and cache/memory bloat safeguards
 
 Phase gate:
-- [ ] CI matrix green
-- [ ] No critical regressions vs baseline
+- [ ] All functions and arguments adhere to documented singular/plural rules
+- [ ] Deprecated functions cleanly documented with `@keywords internal` and standard lifecycle warnings
+- [ ] All unit tests (1,680+) pass with 0 failures and 0 unexpected warnings
+- [ ] Vignette examples run end-to-end without warnings
 
 ### Phase 7B: Test Suite Architecture Cleanup
 **Goal:** systematically clean and modernize tests folder structure and test code quality
@@ -204,7 +230,7 @@ Checklist:
 - [x] Remove obsolete tests and dead aliases (e.g. `sample_observation`)
 - [x] Verify all 1,414 tests across the entire suite pass cleanly with 0 failures
 - [ ] Introduce a systematic `tests/testthat/data/` layout for reusable fixtures and generated test inputs
-- [ ] Replace remaining ad hoc test setups in legacy helpers with shared fixtures
+- [ ] Replace remaining ad hoc test setups in legacy helpers with shared fixtures; reduce ad-hoc code (use code from package instead)
 - [ ] Add explicit parity snapshots/checks across NIW/MVG/exemplar families
 
 Phase gate:
@@ -294,6 +320,7 @@ Phase gate:
   > "The root cause is visible now: the MNIX Stan program expects a covariance-style summary array, but the current builder is providing a sum-of-squares vector array instead. I’m aligning that data structure with the model’s declared interface before I verify again."
 
 ### Extensions
++ handling of tau_scale and hyper-priors more generally is really non-transparent atm. rather than handing known mu, sigma, switch to allowing specification of informative priors for all parameters. for m, S, etc. create tools that translate the prior from an intuitive space (mu, Sigma) to the relevant underlying parameter space (m, S, nu, kappa).
 + Inverse MUVG/MNIX models (both as Stanfit model and S7 representation/template/model): a model that accepts multiple cues as input but maintains and updates representations/templates/models over the single integrated cue dimension (e.g. UVG-I / NIX-I).
 + Write forward-updating functions for NIX, MNIX, NIW, revising existing NIW forward-updating.
   + Include equivalence checks verifying that 1-cue NIX and 1-cue NIW forward updating yield identical analytical belief parameters given identical prior beliefs and exposure data.

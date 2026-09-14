@@ -19,7 +19,7 @@ data {
 
   matrix[M,L] N_exposure;             // number of training observations
   matrix[M,L] x_mean_exposure;        // mean of training observations
-  matrix[M,L] x_sd_exposure;          // sample standard deviation of training obs
+  matrix[M,L] x_ss_exposure;          // sum of centered squares of training observations
 
   int N_test;                         // number of test trials
   array[N_test] real x_test;          // locations of test trials
@@ -51,10 +51,8 @@ data {
 }
 
 transformed data {
-  matrix[M,L] x_ss_exposure = (N_exposure - 1) .* x_sd_exposure;
-
-  real<lower=0> sigma_kappanu = max(to_array_1d(N_exposure .* 4)); // scale for the prior of kappa/nu_0 (at least 10)
-  real m_0_mu = 0;                                                 // center of prior of m_0
+  real<lower=0> sigma_kappanu = fmax(max(to_array_1d(N_exposure .* 4.0)), 10.0); // scale for the prior of kappa/nu_0 (at least 10)
+  real m_0_mu = 0;                                                              // center of prior of m_0
 }
 
 parameters {
@@ -65,13 +63,13 @@ parameters {
      (overall frequency of the category) or because differences in e.g., the cross-talker variability in the
      realization of the category.
   */
-  real<lower=0> kappa_0;             // prior pseudocount for mean
+  real<lower=1> kappa_0;             // prior pseudocount for mean
   real<lower=2> nu_0;                // prior pseudocount for sd
 
   array[lapse_rate_known ? 0 : 1] real<lower=0, upper=1> lapse_rate_param;
-  array[mu_0_known ? 0 : M] real m_0_param;     // prior expected means
-  array[mu_0_known ? 0 : M] real m_0_tau;       // prior variances of expected means (m_0)
-  array[Sigma_0_known ? 0 : M] real S_0_param;  // prior
+  array[mu_0_known ? 0 : M] real m_0_param;                  // prior expected means
+  array[mu_0_known ? 0 : 1] real<lower=0> m_0_tau;           // prior sd of expected means (m_0)
+  array[Sigma_0_known ? 0 : M] real<lower=0> tau_0_param;    // prior sd of scatter S_0
 }
 
 transformed parameters {
@@ -85,32 +83,32 @@ transformed parameters {
   vector[M] lapsing_probs = rep_vector(lapse_rate / M, M);
 
   // updated beliefs depend on input/group
-  array[M,L] real<lower=0> kappa_n;    // updated mean pseudocount
-  array[M,L] real<lower=0> nu_n;       // updated sd pseudocount
+  array[M,L] real<lower=1> kappa_n;    // updated mean pseudocount
+  array[M,L] real<lower=2> nu_n;       // updated sd pseudocount
   array[M,L] real m_n;                 // updated expected mean
-  array[M,L] real<lower=0> S_n;        // updated expected sd
+  array[M,L] real<lower=0> S_n;        // updated expected scatter
   array[M,L] real<lower=0> t_scale;    // scale parameter of predictive t distribution
 
   array[N_test] simplex[M] p_test_conj;
   array[N_test] vector[M] log_p_test_conj;
 
-  // update NIX2 parameters according to conjuate updating rules are taken from
-  // Murphy (2007, p. 136). NOTE: Murphy reports E[sigma^2 | D] = nu / (nu - 2) * S,
-  // but both comparison to the NIW and Google searches suggest that the * nu factor is an error (and so it is omitted here)
-  // alternative, we would use S_0[cat] = Sigma_0_known ? Sigma_0_data[cat] * (nu_0 - 2) / nu_0: S_0_param[cat];
+  // update NIX2 parameters according to conjugate updating rules. Note that we're using the 
+  // scatter parameterization (S_0, S_n) rather than the variance/scale parameterization of 
+  // Murphy (2012). This keeps things parallel to the NIW model, and also means that post-
+  // processing functions like get_expected_sigma_from_S have the same meaning for both 
+  // types of models (rather than double transforming the NIX scale parameter when the goal 
+  // is to extract the expected category variance).
   for (cat in 1:M) {
-    S_0[cat] = Sigma_0_known ? Sigma_0_data[cat] * (nu_0 - 2) : S_0_param[cat];
+    S_0[cat] = Sigma_0_known ? Sigma_0_data[cat] * (nu_0 - 2) : tau_0_param[cat]^2;
     for (group in 1:L) {
       if (N_exposure[cat,group] > 0 ) {
         kappa_n[cat,group] = kappa_0 + N_exposure[cat,group];
         nu_n[cat,group] = nu_0 + N_exposure[cat,group];
         m_n[cat,group] = (m_0[cat] * kappa_0 + x_mean_exposure[cat,group] * N_exposure[cat,group]) / kappa_n[cat,group];
-        S_n[cat,group] = sqrt((nu_0*S_0[cat]^2 +
-                                 x_ss_exposure[cat,group] +
-                                 (N_exposure[cat,group] * kappa_0) / (kappa_n[cat,group]) *
-                                   (m_0[cat] - x_mean_exposure[cat,group])^2
-                                 ) /
-                                nu_n[cat,group]);
+        S_n[cat,group] = S_0[cat] +
+                         x_ss_exposure[cat,group] +
+                         ((kappa_0 * N_exposure[cat,group]) / kappa_n[cat,group]) *
+                           (m_0[cat] - x_mean_exposure[cat,group])^2;
       } else {
         kappa_n[cat,group] = kappa_0;
         nu_n[cat,group] = nu_0;
@@ -118,7 +116,8 @@ transformed parameters {
         S_n[cat,group] = S_0[cat];
       }
 
-      t_scale[cat,group] = S_n[cat,group] * sqrt((kappa_n[cat,group] + 1) / kappa_n[cat,group]);
+      t_scale[cat,group] = sqrt((S_n[cat,group] * (kappa_n[cat,group] + 1)) /
+                                (kappa_n[cat,group] * nu_n[cat,group]));
     }
   }
 
@@ -144,11 +143,13 @@ model {
 
   if (!mu_0_known) {
       m_0_tau ~ cauchy(0, tau_scale);
-      m_0_param ~ normal(m_0_mu, m_0_tau);
+      m_0_param ~ normal(m_0_mu, m_0_tau[1]);
   }
 
   if (!Sigma_0_known) {
-      S_0_param ~ cauchy(0, tau_scale);
+    for (cat in 1:M) {
+      tau_0_param[cat] ~ cauchy(0, tau_scale);
+    }
   }
 
   for (n in 1:N_test) {
