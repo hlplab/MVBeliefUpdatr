@@ -84,6 +84,17 @@ IdealAdaptorStanfitInput <- S7::new_class(
       category = if (!is.null(label_info$category)) as.character(label_info$category) else character(0),
       group = if (!is.null(label_info$group)) as.character(label_info$group) else character(0)
     )
+    if (!is.null(metadata$original_variable_names) && is.list(metadata$original_variable_names)) {
+      orig <- metadata$original_variable_names
+      metadata$original_variable_names <- list(
+        group = if (!is.null(orig$group)) as.character(orig$group) else "group",
+        group_unique = if (!is.null(orig$group_unique)) as.character(orig$group_unique) else if (!is.null(orig$group.unique)) as.character(orig$group.unique) else "group",
+        category = if (!is.null(orig$category)) as.character(orig$category) else "category",
+        response_category = if (!is.null(orig$response_category)) as.character(orig$response_category) else "response_category",
+        cues = if (!is.null(orig$cues)) as.character(orig$cues) else character(0)
+      )
+    }
+
 
     S7::new_object(
       MVBU_Object(),
@@ -138,10 +149,10 @@ IdealAdaptorStanfitInput <- S7::new_class(
 #' @param test A data frame or tibble with test data. Each row is assumed to contain one observation.
 #' @param cues Names of columns with cue values. These columns must be present in both `exposure` and `test`.
 #' @param category Name of the column in `exposure` that stores the category information. (default: "category")
-#' @param response Name of the column in `test` that stores the response information. (default: "response")
+#' @param response Name of the column in `test` that stores the response information. (default: "response_category")
 #' @param group Name of the column in `exposure` and `test` that stores the grouping information. (default: "group")
-#' @param group.unique Optional grouping column used to collapse repeated exposure conditions before constructing the Stan input.
-#' @param check_unique_group_identity Logical indicating whether to verify that all groups mapped to a given `group.unique` level share identical sufficient exposure statistics (sample size, means, covariances). If `TRUE` and a mismatch is found, an informative error is raised. If `FALSE`, the first level of each unique group is taken. (default: `TRUE`)
+#' @param group_unique Optional grouping column used to collapse repeated exposure conditions before constructing the Stan input.
+#' @param check_unique_group_identity Logical indicating whether to verify that all groups mapped to a given `group_unique` level share identical sufficient exposure statistics (sample size, means, covariances). If `TRUE` and a mismatch is found, an informative error is raised. If `FALSE`, the first level of each unique group is taken. (default: `TRUE`)
 #' @param fixed_parameters Optional list of fixed model parameters. Currently
 #'   recognized are the following parameters:
 #'   \itemize{
@@ -155,6 +166,7 @@ IdealAdaptorStanfitInput <- S7::new_class(
 #' @param control A list of control parameters for the constructor, typically produced by `control_staninput()`.
 #' @param stanmodel Character string naming the Stan model. Must be one of `NIX_ideal_adaptor`, `NIW_ideal_adaptor`, or `MNIX_ideal_adaptor`.
 #' @param verbose Should verbose output be provided? (default: `FALSE`)
+#' @param ... Additional arguments passed to methods or deprecated arguments.
 #' @return An object of class `IdealAdaptorStanfitInput` containing the prepared data, typed Stan input, and transform metadata.
 #' @export
 new_ideal_adaptor_stanfit_input <- function(
@@ -162,15 +174,23 @@ new_ideal_adaptor_stanfit_input <- function(
   test,
   cues,
   category = "category",
-  response = "response",
+  response = "response_category",
   group = "group",
-  group.unique = NULL,
+  group_unique = NULL,
   check_unique_group_identity = TRUE,
   fixed_parameters = NULL,
   control = control_staninput(),
   stanmodel = "NIW_ideal_adaptor",
-  verbose = FALSE
+  verbose = FALSE,
+  ...,
+  group.unique = lifecycle::deprecated()
 ) {
+  if (lifecycle::is_present(group.unique)) {
+    lifecycle::deprecate_warn("0.1.0", "new_ideal_adaptor_stanfit_input(group.unique = )", "new_ideal_adaptor_stanfit_input(group_unique = )")
+    if (is.null(group_unique)) {
+      group_unique <- group.unique
+    }
+  }
   .assert_list(control)
 
   expected_control <- c("tau_scale", "L_omega_eta", "split_loglik_per_observation", "transform_type")
@@ -256,7 +276,7 @@ new_ideal_adaptor_stanfit_input <- function(
     category = category,
     response = NULL,
     group = group,
-    group.unique = group.unique,
+    group_unique = group_unique,
     verbose = verbose
   )
   test <- .prepare_staninput_frame(
@@ -265,7 +285,7 @@ new_ideal_adaptor_stanfit_input <- function(
     category = NULL,
     response = response,
     group = group,
-    group.unique = group.unique,
+    group_unique = group_unique,
     verbose = verbose
   )
 
@@ -274,13 +294,13 @@ new_ideal_adaptor_stanfit_input <- function(
   # as to whether any group exists in multiple unique groups. Additional checks (which are
   # only conducted if check_unique_group_identity is requested (TRUE)) are postponed until
   # after all relevant sufficient statistics have been calculated for each group (see below).
-  has_unique_groups <- !is.null(group.unique) && group.unique %in% names(exposure)
+  has_unique_groups <- !is.null(group_unique) && group_unique %in% names(exposure)
   if (has_unique_groups) {
-    .validate_unique_group_mapping(exposure, group, group.unique)
+    .validate_unique_group_mapping(exposure, group, group_unique)
     if (!check_unique_group_identity) {
       first_group_per_unique <- tapply(
         as.character(exposure[[group]]),
-        exposure[[group.unique]],
+        exposure[[group_unique]],
         `[`,
         1
       )
@@ -288,9 +308,9 @@ new_ideal_adaptor_stanfit_input <- function(
         exposure[[group]] %in% first_group_per_unique, ,
         drop = FALSE
       ]
-      exposure[[group]] <- factor(exposure[[group.unique]])
-      if (group.unique %in% names(test)) {
-        test[[group]] <- factor(test[[group.unique]])
+      exposure[[group]] <- factor(exposure[[group_unique]])
+      if (group_unique %in% names(test)) {
+        test[[group]] <- factor(test[[group_unique]])
       }
     }
   }
@@ -352,70 +372,27 @@ new_ideal_adaptor_stanfit_input <- function(
 
   stanmodel_name <- sub("_ideal_adaptor$", "", stanmodel)
 
-  if (stanmodel == "NIX_ideal_adaptor") {
-    staninput <- new_nix_staninput(
-      exposure = exposure,
-      test = test,
-      cues = cues,
-      category = category,
-      response = response,
-      group = group,
-      category_levels = category_levels,
-      group_levels = group_levels,
-      tau_scale = tau_scale,
-      L_omega_eta = control$L_omega_eta,
-      split_loglik_per_observation = control$split_loglik_per_observation,
-      lapse_rate = lapse_rate,
-      mu_0 = mu_0,
-      Sigma_0 = Sigma_0,
-      transform = transform,
-      n_cues = n_cues,
-      n_categories = n_categories,
-      n_groups = n_groups
-    )
-  } else if (stanmodel == "MNIX_ideal_adaptor") {
-    staninput <- new_mnix_staninput(
-      exposure = exposure,
-      test = test,
-      cues = cues,
-      category = category,
-      response = response,
-      group = group,
-      category_levels = category_levels,
-      group_levels = group_levels,
-      tau_scale = tau_scale,
-      L_omega_eta = control$L_omega_eta,
-      split_loglik_per_observation = control$split_loglik_per_observation,
-      lapse_rate = lapse_rate,
-      mu_0 = mu_0,
-      Sigma_0 = Sigma_0,
-      transform = transform,
-      n_cues = n_cues,
-      n_categories = n_categories,
-      n_groups = n_groups
-    )
-  } else if (stanmodel == "NIW_ideal_adaptor") {
-    staninput <- new_niw_staninput(
-      exposure = exposure,
-      test = test,
-      cues = cues,
-      category = category,
-      response = response,
-      group = group,
-      category_levels = category_levels,
-      group_levels = group_levels,
-      tau_scale = tau_scale,
-      L_omega_eta = control$L_omega_eta,
-      split_loglik_per_observation = control$split_loglik_per_observation,
-      lapse_rate = lapse_rate,
-      mu_0 = mu_0,
-      Sigma_0 = Sigma_0,
-      transform = transform,
-      n_cues = n_cues,
-      n_categories = n_categories,
-      n_groups = n_groups
-    )
-  }
+  staninput <- .new_ideal_adaptor_staninput(
+    model = stanmodel_name,
+    exposure = exposure,
+    test = test,
+    cues = cues,
+    category = category,
+    response = response,
+    group = group,
+    category_levels = category_levels,
+    group_levels = group_levels,
+    tau_scale = tau_scale,
+    L_omega_eta = control$L_omega_eta,
+    split_loglik_per_observation = control$split_loglik_per_observation,
+    lapse_rate = lapse_rate,
+    mu_0 = mu_0,
+    Sigma_0 = Sigma_0,
+    transform = transform,
+    n_cues = n_cues,
+    n_categories = n_categories,
+    n_groups = n_groups
+  )
 
   if (has_unique_groups) {
     if (check_unique_group_identity) {
@@ -423,7 +400,7 @@ new_ideal_adaptor_stanfit_input <- function(
         staninput_obj = staninput,
         exposure = exposure,
         group = group,
-        group.unique = group.unique,
+        group_unique = group_unique,
         category_levels = category_levels,
         group_levels = group_levels,
         model = stanmodel_name
@@ -433,11 +410,11 @@ new_ideal_adaptor_stanfit_input <- function(
       staninput_obj = staninput,
       exposure = exposure,
       group = group,
-      group.unique = group.unique,
+      group_unique = group_unique,
       group_levels = group_levels,
       model = stanmodel_name
     )
-    group_levels <- levels(factor(exposure[[group.unique]]))
+    group_levels <- levels(factor(exposure[[group_unique]]))
   }
 
   transform_information <- new_transform_information(transform)
@@ -448,15 +425,18 @@ new_ideal_adaptor_stanfit_input <- function(
     category = category,
     response = response,
     group = group,
-    group.unique = group.unique,
+    group_unique = group_unique,
     cues = cues
   )
 
-  attr(data, "category") <- category
-  attr(data, "group") <- group
-  attr(data, "response") <- response
-  attr(data, "group.unique") <- group.unique
-  attr(data, "cues") <- cues
+  orig_var_names <- list(
+    group = group,
+    group_unique = if (!is.null(group_unique)) group_unique else group,
+    category = category,
+    response_category = response,
+    cues = cues
+  )
+
 
   IdealAdaptorStanfitInput(
     data = data,
@@ -467,7 +447,8 @@ new_ideal_adaptor_stanfit_input <- function(
         cue = cues,
         category = category_levels,
         group = group_levels
-      )
+      ),
+      original_variable_names = orig_var_names
     )
   )
 }
@@ -483,17 +464,17 @@ new_ideal_adaptor_stanfit_input <- function(
 #' @param category Optional category column.
 #' @param response Optional response column.
 #' @param group Grouping column.
-#' @param group.unique Optional grouping column used to collapse repeated exposure conditions.
+#' @param group_unique Optional grouping column used to collapse repeated exposure conditions.
 #' @param verbose Logical flag for verbose output.
 #' @keywords internal
 #' @noRd
-.prepare_staninput_frame <- function(data, cues, category, response, group, group.unique = NULL, verbose = FALSE) {
+.prepare_staninput_frame <- function(data, cues, category, response, group, group_unique = NULL, verbose = FALSE) {
   data <- as.data.frame(data)
   .assert_non_NA_character(cues)
   required_cols <- c(group)
   if (!is.null(category)) required_cols <- c(required_cols, category)
   if (!is.null(response)) required_cols <- c(required_cols, response)
-  if (!is.null(group.unique)) required_cols <- c(required_cols, group.unique)
+  if (!is.null(group_unique)) required_cols <- c(required_cols, group_unique)
   required_cols <- unique(required_cols)
   missing_cols <- setdiff(required_cols, names(data))
   .assert_true(length(missing_cols) == 0, msg = sprintf("Missing columns in data: %s", paste(missing_cols, collapse = ", ")))
@@ -658,32 +639,74 @@ new_ideal_adaptor_stanfit_input <- function(
 #'
 #' @keywords internal
 #' @noRd
-.build_stanfit_input_data <- function(exposure, test, category, response, group, group.unique, cues) {
-  keep_exposure <- c(group, category, cues)
-  keep_test <- c(group, response, cues)
-  if (!is.null(group.unique)) {
-    keep_exposure <- c(group.unique, keep_exposure)
-    keep_test <- c(group.unique, keep_test)
+.build_stanfit_input_data <- function(exposure, test, category, response, group, group_unique, cues) {
+  if (nrow(exposure) > 0L) {
+    exp_grp_unique <- if (!is.null(group_unique) && group_unique %in% names(exposure)) {
+      exposure[[group_unique]]
+    } else {
+      exposure[[group]]
+    }
+    exp_cat <- if (category %in% names(exposure)) exposure[[category]] else rep(NA, nrow(exposure))
+    exp_resp <- if (response %in% names(exposure)) exposure[[response]] else rep(NA, nrow(exposure))
+    exposure_data <- data.frame(
+      group = exposure[[group]],
+      group_unique = exp_grp_unique,
+      category = exp_cat,
+      response_category = exp_resp,
+      stringsAsFactors = FALSE
+    )
+    for (c in cues) {
+      exposure_data[[c]] <- exposure[[c]]
+    }
+    exposure_data$Phase <- "exposure"
+  } else {
+    exposure_data <- data.frame(
+      group = character(0),
+      group_unique = character(0),
+      category = character(0),
+      response_category = character(0),
+      stringsAsFactors = FALSE
+    )
+    for (c in cues) {
+      exposure_data[[c]] <- numeric(0)
+    }
+    exposure_data$Phase <- character(0)
   }
-  keep_exposure <- keep_exposure[keep_exposure %in% names(exposure)]
-  keep_test <- keep_test[keep_test %in% names(test)]
 
-  exposure_data <- exposure[, keep_exposure, drop = FALSE]
-  test_data <- test[, keep_test, drop = FALSE]
-
-  all_cols <- unique(c(names(exposure_data), names(test_data)))
-  for (col_name in setdiff(all_cols, names(exposure_data))) {
-    exposure_data[[col_name]] <- rep(NA, nrow(exposure_data))
+  if (nrow(test) > 0L) {
+    test_grp_unique <- if (!is.null(group_unique) && group_unique %in% names(test)) {
+      test[[group_unique]]
+    } else {
+      test[[group]]
+    }
+    test_cat <- if (category %in% names(test)) test[[category]] else rep(NA, nrow(test))
+    test_resp <- if (response %in% names(test)) test[[response]] else rep(NA, nrow(test))
+    test_data <- data.frame(
+      group = test[[group]],
+      group_unique = test_grp_unique,
+      category = test_cat,
+      response_category = test_resp,
+      stringsAsFactors = FALSE
+    )
+    for (c in cues) {
+      test_data[[c]] <- test[[c]]
+    }
+    test_data$Phase <- "test"
+  } else {
+    test_data <- data.frame(
+      group = character(0),
+      group_unique = character(0),
+      category = character(0),
+      response_category = character(0),
+      stringsAsFactors = FALSE
+    )
+    for (c in cues) {
+      test_data[[c]] <- numeric(0)
+    }
+    test_data$Phase <- character(0)
   }
-  for (col_name in setdiff(all_cols, names(test_data))) {
-    test_data[[col_name]] <- rep(NA, nrow(test_data))
-  }
-
-  exposure_data <- exposure_data[, all_cols, drop = FALSE]
-  test_data <- test_data[, all_cols, drop = FALSE]
 
   data <- rbind(exposure_data, test_data)
-  data$Phase <- c(rep("exposure", nrow(exposure_data)), rep("test", nrow(test_data)))
   data$Phase <- factor(data$Phase, levels = c("exposure", "test"))
   data
 }
@@ -692,13 +715,13 @@ new_ideal_adaptor_stanfit_input <- function(
 #'
 #' @param exposure Exposure data frame.
 #' @param group Grouping column name.
-#' @param group.unique Unique grouping column name.
+#' @param group_unique Unique grouping column name.
 #' @keywords internal
 #' @noRd
-.validate_unique_group_mapping <- function(exposure, group, group.unique) {
-  .assert_data_contains_cols(exposure, group.unique)
+.validate_unique_group_mapping <- function(exposure, group, group_unique) {
+  .assert_data_contains_cols(exposure, group_unique)
   group_to_unique <- tapply(
-    as.character(exposure[[group.unique]]),
+    as.character(exposure[[group_unique]]),
     exposure[[group]],
     function(u) unique(stats::na.omit(u))
   )
@@ -721,7 +744,7 @@ new_ideal_adaptor_stanfit_input <- function(
 #' @param staninput_obj S7 Stan input object.
 #' @param exposure Exposure data frame.
 #' @param group Grouping column name.
-#' @param group.unique Unique grouping column name.
+#' @param group_unique Unique grouping column name.
 #' @param category_levels Character vector of category levels.
 #' @param group_levels Character vector of group levels.
 #' @param model Model family ("NIX", "MNIX", or "NIW").
@@ -732,15 +755,15 @@ new_ideal_adaptor_stanfit_input <- function(
   staninput_obj,
   exposure,
   group,
-  group.unique,
+  group_unique,
   category_levels,
   group_levels,
   model,
   tol = 1e-6
 ) {
-  unique_levels <- levels(factor(exposure[[group.unique]]))
+  unique_levels <- levels(factor(exposure[[group_unique]]))
   group_to_unique <- tapply(
-    as.character(exposure[[group.unique]]),
+    as.character(exposure[[group_unique]]),
     exposure[[group]],
     function(u) unique(stats::na.omit(u))
   )
@@ -748,7 +771,7 @@ new_ideal_adaptor_stanfit_input <- function(
   vals <- staninput_obj@values
   N_exp <- vals$N_exposure
   mean_exp <- vals$x_mean_exposure
-  spread_exp <- if (model == "NIX") vals$x_sd_exposure else vals$x_ss_exposure
+  spread_exp <- vals$x_ss_exposure
 
   mismatched_uniques <- character(0)
   mismatch_details <- list()
@@ -890,7 +913,7 @@ new_ideal_adaptor_stanfit_input <- function(
 #' @param staninput_obj S7 Stan input object.
 #' @param exposure Exposure data frame.
 #' @param group Grouping column name.
-#' @param group.unique Unique grouping column name.
+#' @param group_unique Unique grouping column name.
 #' @param group_levels Character vector of group levels.
 #' @param model Model family ("NIX", "MNIX", or "NIW").
 #' @keywords internal
@@ -899,13 +922,13 @@ new_ideal_adaptor_stanfit_input <- function(
   staninput_obj,
   exposure,
   group,
-  group.unique,
+  group_unique,
   group_levels,
   model
 ) {
-  unique_levels <- levels(factor(exposure[[group.unique]]))
+  unique_levels <- levels(factor(exposure[[group_unique]]))
   group_to_unique <- tapply(
-    as.character(exposure[[group.unique]]),
+    as.character(exposure[[group_unique]]),
     exposure[[group]],
     function(u) unique(stats::na.omit(u))
   )
@@ -926,7 +949,7 @@ new_ideal_adaptor_stanfit_input <- function(
   vals$N_exposure <- vals$N_exposure[, first_indices, drop = FALSE]
   if (model == "NIX") {
     vals$x_mean_exposure <- vals$x_mean_exposure[, first_indices, drop = FALSE]
-    vals$x_sd_exposure <- vals$x_sd_exposure[, first_indices, drop = FALSE]
+    vals$x_ss_exposure <- vals$x_ss_exposure[, first_indices, drop = FALSE]
   } else if (model == "MNIX") {
     vals$x_mean_exposure <- vals$x_mean_exposure[
       ,

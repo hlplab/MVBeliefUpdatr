@@ -165,8 +165,10 @@ MVBU_Stanfit <- S7::new_class(
       return("`file` must be NULL or a character")
     }
     if (!is.null(self@transform_information) &&
-        !S7::S7_inherits(self@transform_information,
-                         MVBU_TransformInformation)) {
+      !S7::S7_inherits(
+        self@transform_information,
+        MVBU_TransformInformation
+      )) {
       return("`transform_information` must inherit from MVBU_TransformInformation")
     }
     if (!is.list(self@metadata)) {
@@ -397,26 +399,6 @@ ideal_adaptor_stanfit <- function(
   )
 }
 
-#' Deprecated: is.ideal_adaptor_stanfit
-#'
-#' @description
-#' `r lifecycle::badge("deprecated")`
-#' `is.ideal_adaptor_stanfit()` is deprecated; use
-#' `S7::S7_inherits(x, IdealAdaptorStanfit)` instead.
-#'
-#' @param x Object to be checked.
-#' @param verbose Currently being ignored.
-#' @return A logical.
-#' @rdname deprecated-functions
-#' @export
-is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
-  lifecycle::deprecate_warn(
-    "0.2.0",
-    "is.ideal_adaptor_stanfit()",
-    details = "Use S7::S7_inherits(x, IdealAdaptorStanfit) instead."
-  )
-  S7::S7_inherits(x, IdealAdaptorStanfit)
-}
 
 # -------------------------
 # Utilities ported from original file
@@ -480,4 +462,3 @@ is.ideal_adaptor_stanfit <- function(x, verbose = FALSE) {
     FALSE
   }
 }
-

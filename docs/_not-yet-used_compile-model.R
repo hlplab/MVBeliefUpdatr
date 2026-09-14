@@ -22,11 +22,11 @@
 #' @return A compiled Stan model object from rstan.
 #' @keywords internal
 .compile_model_rstan <- function(
-    model,
-    threads,
-    # opencl,
-    silent = 1,
-    ...
+  model,
+  threads,
+  # opencl,
+  silent = 1,
+  ...
 ) {
   args <- list(...)
   args$model_code <- model
@@ -39,12 +39,12 @@
   #     on.exit(rstan::rstan_options(threads_per_chain = threads_per_chain_def))
   #     rstan::rstan_options(threads_per_chain = threads$threads)
   #   } else {
-  #     stop2("Threading is not supported by backend 'rstan' version ",
+  #     .stop("Threading is not supported by backend 'rstan' version ",
   #           utils::packageVersion("rstan"), ".")
   #   }
   # }
   # if (use_opencl(opencl)) {
-  #   stop2("OpenCL is not supported by backend 'rstan' version ",
+  #   .stop("OpenCL is not supported by backend 'rstan' version ",
   #         utils::packageVersion("rstan"), ".")
   # }
   eval_silent(
@@ -62,11 +62,11 @@
 #' @return A compiled Stan model object from cmdstanr.
 #' @keywords internal
 .compile_model_cmdstanr <- function(
-    model,
-    threads,
-    # opencl,
-    silent = 1,
-    ...
+  model,
+  threads,
+  # opencl,
+  silent = 1,
+  ...
 ) {
   require_package("cmdstanr")
   args <- list(...)
@@ -100,6 +100,6 @@
   # Remove multi-line comments
   x <- gsub("/\\*([^*]*(\\*[^/])?)*\\*/", " ", x)
   # Standardize whitespace (including newlines)
-  x <- gsub("[[:space:]]+"," ", x)
+  x <- gsub("[[:space:]]+", " ", x)
   trimws(x)
 }
