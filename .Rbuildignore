@@ -3,11 +3,14 @@
 ^\.vscode$
 ^\.Rproj\.user$
 ^doc$
+^doc/.*
 ^docs$
+^docs/.*
 ^Meta$
 ^data-raw$
 ^tests/benchmarking\.R$
 ^tests/testthat/\_problems$
+^tests/testthat/helper-s7-foundation\.R$
 ^MVBeliefUpdatr\.Rproj$
 ^codecov\.yml$
 ^\.travis\.yml$
