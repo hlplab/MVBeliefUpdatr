@@ -1,6 +1,10 @@
 
 ## Next steps 
 
++ rename S7-core-*-classes.R to S7-class-*.R  and rename S7-core-methods to S7-methods
+
++ re: Resolved rhat method masking by removing redundant library(bayesplot) from the setup chunk and qualifying bayesplot::pp_check(). --> pp_check exists in this library. any reason not to use that? and wouldn't it be more elegant to define the S7 rhat method specifically for MVBU_stanfit objects, so that it only fires then?
+
 + check get_sufficient_category_statistics, which currently is a weird hybrid. even the method for data frames. standardize and join documentation with the same method for models. also only allow EITHER a model or data. Throw an error if both are provided. also think about in what format the suff. stats for different categories, cues should be returned (list, matrix, array, etc.)
 
 + for get_sufficient_category_statistics and ALL other functions that prepare, extract, or operate over the sufficient category statistics of stan models, check whether recent changes to what parameters get handed to stan models are correctly considered. ideally, we can standardize the name and the content of the variables we hand to stanfit models. it might be best to store the sufficient statistics in the meta data of the stanfit input (check structure of that) or the stanfit object. so that one can just grab those stats whole and return them to users. that seems to be the case for MVBU_StanfitPosterior already, but not sure whether it's the case for MVBU_Stanfit.
@@ -23,6 +27,101 @@
 in plotting functions. first of all, should expected sigma be cached in objects already? (if not, add it to the cache draws). second, doesn't the posterior density depend on S rather than sigma? it also seems like these plotting functions are still calculating likelihoods and posterior from scratch, rather than using pre-compiled likelihood and categorization functions.
 
 
+
+
+
+
+
+
+# Updated error log
+
+Codoc mismatches from Rd file 'update_category_representation.Rd': update_category_representation Code: function(x, x_N, x_mean, x_SS, ...) Docs: function(x, x_N, x_mean, x_SS) Argument names in code not in docs: ... update_category_representation Code: function(x, x_N, x_mean, x_SS, ...) Docs: function(x, x_N, x_mean, x_SS) Argument names in code not in docs: ... update_category_representation Code: function(x, x_N, x_mean, x_SS, ...) Docs: function(x, x_N, x_mean, x_SS) Argument names in code not in docs: ...
+
+Codoc mismatches from Rd file 'update_template.Rd': update_template Code: function(x, observations, ...) Docs: function(x, observations, updating = c("batch", "incremental"), keep_history = FALSE, lapse_treatment = "no_lapses", noise_treatment = "no_noise", update_method = "label-certain") Argument names in code not in docs: ... Argument names in docs not in code: updating keep_history lapse_treatment noise_treatment update_method Mismatches in argument names: Position: 3 Code: ... Docs: updating update_template Code: function(x, observations, ...) Docs: function(x, observations, updating = c("batch", "incremental"), keep_history = FALSE, lapse_treatment = "no_lapses", noise_treatment = "no_noise", update_method = "label-certain") Argument names in code not in docs: ... Argument names in docs not in code: updating keep_history lapse_treatment noise_treatment update_method Mismatches in argument names: Position: 3 Code: ... Docs: updating update_template Code: function(x, observations, ...) Docs: function(x, observations, updating = c("batch", "incremental"), keep_history = FALSE, lapse_treatment = "no_lapses", noise_treatment = "no_noise", update_method = "label-certain") Argument names in code not in docs: ... Argument names in docs not in code: updating keep_history lapse_treatment noise_treatment update_method Mismatches in argument names: Position: 3 Code: ... Docs: updating
+
+❯ checking Rd \usage sections ... WARNING Undocumented arguments in Rd file 'MVBU-TransformInformation-class.Rd' ‘transform.parameters’ ‘transform.function’ ‘untransform.function’
+
+Undocumented arguments in Rd file 'MVBU_ModelList.Rd' ‘models’ ‘model_labels’ ‘metadata’
+
+Undocumented arguments in Rd file 'MVBU_Stanfit.Rd' ‘data’ ‘staninput’ ‘stanvars’ ‘backend’ ‘save_pars’ ‘stan_args’ ‘stanfit’ ‘basis’ ‘transform_information’ ‘criteria’ ‘file’ ‘version’ ‘metadata’ ‘cache’
+
+Undocumented arguments in Rd file 'MVBU_StanfitInput.Rd' ‘data’ ‘staninput’ ‘transform_information’ ‘metadata’
+
+Undocumented arguments in Rd file 'MVBU_StanfitPosterior.Rd' ‘cues’ ‘categories’ ‘group’ ‘model_name’ ‘draws’ ‘metadata’
+
+Undocumented arguments in Rd file 'MVBU_Staninput.Rd' ‘values’
+
+Undocumented arguments in Rd file 'as_model_coercion.Rd' ‘category_template’
+
+Undocumented arguments in Rd file 'categorize.Rd' ‘...’
+
+Undocumented arguments in Rd file 'example-s7-objects.Rd' ‘n_cues’ ‘category’ ‘kappa’ ‘nu’ ‘type’ ‘...’ ‘categories’
+
+Undocumented arguments in Rd file 'family-exemplar.Rd' ‘category_likelihood_function’ ‘category_posterior_functions’ ‘lapse_behavior’ ‘noise_behavior’ ‘cache’
+
+Undocumented arguments in Rd file 'family-mnix.Rd' ‘category_likelihood_function’ ‘kappa’ ‘nu’ ‘category_posterior_functions’ ‘lapse_behavior’ ‘noise_behavior’ ‘cache’
+
+Undocumented arguments in Rd file 'family-muvg.Rd' ‘category_likelihood_function’ ‘category_posterior_functions’ ‘lapse_behavior’ ‘noise_behavior’ ‘cache’
+
+Undocumented arguments in Rd file 'family-mvg.Rd' ‘category_likelihood_function’ ‘category_posterior_functions’ ‘lapse_behavior’ ‘noise_behavior’ ‘cache’
+
+Undocumented arguments in Rd file 'family-niw.Rd' ‘category_likelihood_function’ ‘category_posterior_functions’ ‘lapse_behavior’ ‘noise_behavior’ ‘cache’
+
+Undocumented arguments in Rd file 'family-nix.Rd' ‘category_likelihood_function’ ‘category_posterior_functions’ ‘lapse_behavior’ ‘noise_behavior’ ‘cache’
+
+Undocumented arguments in Rd file 'family-uvg.Rd' ‘category_likelihood_function’ ‘category_posterior_functions’ ‘lapse_behavior’ ‘noise_behavior’ ‘cache’
+
+Undocumented arguments in Rd file 'fit_ideal_adaptor.Rd' ‘stanvars’ ‘save_pars’ ‘basis’ ‘chains’ ‘iter’ ‘warmup’ ‘init’ ‘control’ ‘verbose’
+
+Undocumented arguments in Rd file 'get_category_likelihood_function.Rd' ‘...’
+
+Undocumented arguments in Rd file 'get_category_posterior_function.Rd' ‘...’
+
+Undocumented arguments in Rd file 'get_expected_category_statistic.Rd' ‘categories’ ‘groups’
+
+Undocumented arguments in Rd file 'get_exposure_category_statistic.Rd' ‘categories’ ‘groups’ ‘statistic’ ‘untransform_cues’
+
+Undocumented arguments in Rd file 'get_group_labels.Rd' ‘include_prior’
+
+Undocumented arguments in Rd file 'get_metadata.Rd' ‘...’
+
+Undocumented arguments in Rd file 'get_model_family.Rd' ‘...’
+
+Undocumented arguments in Rd file 'get_model_type.Rd' ‘...’
+
+Undocumented arguments in Rd file 'get_number_of_draws.Rd' ‘...’
+
+Undocumented arguments in Rd file 'get_parameters.Rd' ‘original_pars’
+
+Undocumented arguments in Rd file 'get_representation_type.Rd' ‘...’
+
+Undocumented arguments in Rd file 'get_stanfit.Rd' ‘...’
+
+Undocumented arguments in Rd file 'get_staninput.Rd' ‘...’
+
+Undocumented arguments in Rd file 'get_sufficient_category_statistics.Rd' ‘untransform_cues’
+
+Undocumented arguments in Rd file 'get_transform_information.Rd' ‘...’
+
+Undocumented arguments in Rd file 'likelihood.Rd' ‘...’
+
+Undocumented arguments in Rd file 'new_category_representation.Rd' ‘category_labels’ ‘cue_labels’ ‘category_likelihood_function’ ‘metadata’
+
+Undocumented arguments in Rd file 'plot_categorization_functions.Rd' ‘lapse_treatment’
+
+Undocumented arguments in Rd file 'posterior.Rd' ‘...’
+
+Undocumented arguments in Rd file 'reconstruct_update_history.Rd' ‘full_posterior’ ‘step_size’
+
+Undocumented arguments in Rd file 'set_staninput.Rd' ‘...’
+
+Undocumented arguments in Rd file 'update_category_representation.Rd' ‘...’
+
+Undocumented arguments in Rd file 'update_model_decision_bias_incrementally.Rd' ‘beta’
+
+Functions with \usage entries need to have the appropriate \alias entries, and all their arguments documented. The \usage entries must correspond to syntactically valid R code. See chapter ‘Writing R documentation files’ in the ‘Writing R Extensions’ manual.
+
+❯ checking R code for possible problems ... NOTE assert_MVBU_StanfitInput: no visible binding for global variable ‘MVBU_StanfitInput’ Undefined global functions or variables: MVBU_StanfitInput
 
 # Current error log
 
