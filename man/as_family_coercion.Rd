@@ -29,9 +29,9 @@ as_uvg_category_representation(x)
 
 as_nix_category_representation(x, kappa, nu)
 
-as_muvg_category_representation(x, component_weights = NULL)
+as_muvg_category_representation(x, weights = NULL)
 
-as_mnix_category_representation(x, kappa, nu, component_weights = NULL)
+as_mnix_category_representation(x, kappa, nu, weights = NULL)
 
 as_mvg_category_representation(x)
 
@@ -43,14 +43,9 @@ as_uvg_category_representation_template(x)
 
 as_nix_category_representation_template(x, kappa, nu)
 
-as_muvg_category_representation_template(x, component_weights = NULL)
+as_muvg_category_representation_template(x, weights = NULL)
 
-as_mnix_category_representation_template(
-  x,
-  kappa,
-  nu,
-  component_weights = NULL
-)
+as_mnix_category_representation_template(x, kappa, nu, weights = NULL)
 
 as_mvg_category_representation_template(x)
 
@@ -62,9 +57,9 @@ as_uvg_ideal_observer(x)
 
 as_nix_ideal_adaptor(x, kappa, nu)
 
-as_muvg_ideal_observer(x, component_weights = NULL)
+as_muvg_ideal_observer(x, weights = NULL)
 
-as_mnix_ideal_adaptor(x, kappa, nu, component_weights = NULL)
+as_mnix_ideal_adaptor(x, kappa, nu, weights = NULL)
 
 as_mvg_ideal_observer(x)
 
@@ -73,19 +68,24 @@ as_niw_ideal_adaptor(x, kappa, nu)
 as_exemplar_model(x, n)
 }
 \arguments{
-\item{x}{An MVBU_CategoryRepresentation, MVBU_CategoryRepresentationTemplate, or MVBU_CognitiveModel object.}
+\item{x}{An \code{MVBU_CategoryRepresentation},
+\code{MVBU_CategoryRepresentationTemplate}, or \code{MVBU_CognitiveModel} object.}
 
-\item{kappa}{Strength of belief (pseudocount) about the category mean.}
+\item{kappa}{Strength of belief (pseudocount) about the category mean
+\eqn{\mu}.}
 
-\item{nu}{Strength of belief (pseudocount) about the category covariance/variance.}
+\item{nu}{Degrees of freedom (pseudocount) for covariance/variance beliefs
+\eqn{\Sigma}.}
 
-\item{component_weights}{Optional per-component/per-cue weights for MUVG/MNIX targets. (default: preserved
-from \code{x} if available, otherwise the family constructor's default.)}
+\item{weights}{Optional per-cue weights for MUVG/MNIX targets.
+(default: preserved from \code{x} if available, otherwise the family
+constructor's default.)}
 
 \item{n}{Number of exemplars to sample when coercing into the EXEMPLAR family.}
 }
 \value{
-An object of the same kind as \code{x} (representation, template, or model), coerced to the target family.
+An object of the same kind as \code{x} (representation, template, or
+model), coerced to the target family.
 }
 \description{
 These functions coerce between the point-estimate families (UVG, MUVG, MVG), the corresponding

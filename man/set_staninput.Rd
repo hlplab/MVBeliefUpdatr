@@ -10,6 +10,8 @@ set_staninput(x, staninput, ...)
 \item{x}{An S7 fit or fit-input object.}
 
 \item{staninput}{An S7 Stan input object.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \value{
 The updated S7 object.

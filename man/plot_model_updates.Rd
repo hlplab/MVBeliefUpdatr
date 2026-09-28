@@ -8,15 +8,24 @@
 \usage{
 plot_model_updates(
   x,
-  what = c("categories", "categorization_function"),
+  what = c("categories", "categorization_functions"),
+  groups = NULL,
   step_labels = NULL,
+  cues = NULL,
+  categories = NULL,
+  aes = NULL,
+  levels = NULL,
+  limits = NULL,
+  resolution = 100,
+  ncol = NULL,
   ...
 )
 
 ## S7 method for class <list>
 plot_model_updates(
   x,
-  what = c("categories", "categorization_function"),
+  what = c("categories", "categorization_functions"),
+  groups = NULL,
   step_labels = NULL,
   cues = NULL,
   categories = NULL,
@@ -31,7 +40,7 @@ plot_model_updates(
 ## S7 method for class <MVBU_Stanfit>
 plot_model_updates(
   x,
-  what = c("categories", "categorization_function"),
+  what = c("categories", "categorization_functions"),
   groups = NULL,
   step_labels = NULL,
   cues = NULL,
@@ -48,9 +57,25 @@ plot_model_updates(
 \item{x}{A list of S7 cognitive models/templates or an \code{MVBU_Stanfit} object.}
 
 \item{what}{Character string indicating what to plot: \code{"categories"} (default)
-or \code{"categorization_function"}.}
+or \code{"categorization_functions"}.}
+
+\item{groups}{Optional character vector of group names to plot for \code{MVBU_Stanfit}.}
 
 \item{step_labels}{Optional character vector of names or labels for each update step.}
+
+\item{cues}{Optional character vector of cue names to plot.}
+
+\item{categories}{Optional character vector of category names to plot.}
+
+\item{aes}{Plot aesthetic (e.g. \code{"contour"}, \code{"fill-gradient"}).}
+
+\item{levels}{Numeric vector of probability / density levels to plot.}
+
+\item{limits}{Optional named list or numeric vector of plot axis limits.}
+
+\item{resolution}{Integer grid resolution for continuous cue dimensions. Defaults to \code{100}.}
+
+\item{ncol}{Integer number of facet columns. Defaults to \code{NULL}.}
 
 \item{...}{Additional arguments passed to methods.}
 }

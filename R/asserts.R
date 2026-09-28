@@ -1,4 +1,7 @@
 #' @include internal-asserts.R
+#' @include S7-class.R
+#' @include S7-staninput.R
+#' @include S7-stanfit-input.R
 NULL
 
 #' Assert That an Object Inherits from an MVBeliefUpdatr S7 Class
@@ -86,18 +89,6 @@ assert_IdealAdaptorStanfit <- function(x, msg = NULL) {
   )
 }
 
-#' @rdname assert_mvbu_s7_classes
-#' @export
-assert_MVBU_StanfitInput <- function(x, msg = NULL) {
-  .assert_true(
-    S7::S7_inherits(x, MVBU_StanfitInput),
-    msg = if (is.null(msg)) {
-      paste(deparse(substitute(x)), "must inherit from MVBU_StanfitInput")
-    } else {
-      msg
-    }
-  )
-}
 
 #' @rdname assert_mvbu_s7_classes
 #' @export

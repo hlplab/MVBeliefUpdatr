@@ -12,16 +12,16 @@ MVBU_TransformInformation(
   untransform.function = function(x) x
 )
 }
+\arguments{
+\item{transform.parameters}{A list of sufficient parameters for the
+transform. Default: \code{list()}.}
+
+\item{transform.function}{Function to transform parameters. Default:
+identity.}
+
+\item{untransform.function}{Function to untransform parameters. Default:
+identity.}
+}
 \description{
 S7 base class for transformation information
 }
-\section{Slots}{
-
-\describe{
-\item{\code{transform.parameters}}{A list of sufficient parameters for the transform.}
-
-\item{\code{transform.function}}{Function to transform parameters.}
-
-\item{\code{untransform.function}}{Function to untransform parameters.}
-}}
-

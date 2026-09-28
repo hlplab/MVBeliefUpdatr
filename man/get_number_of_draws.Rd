@@ -9,16 +9,18 @@
 \usage{
 get_number_of_draws(fit, ...)
 
-get_random_draw_indices(fit, ...)
+get_random_draw_indices(fit, ndraws = NULL, ...)
 
 ## S7 method for class <any>
-get_number_of_draws(fit)
+get_number_of_draws(fit, ...)
 
 ## S7 method for class <any>
-get_random_draw_indices(fit, ndraws)
+get_random_draw_indices(fit, ndraws = NULL, ...)
 }
 \arguments{
-\item{fit}{A \code{\link{stanfit}} object or \code{\link{MVBU_Stanfit}} object.}
+\item{fit}{A \code{\link[rstan:stanfit-class]{stanfit}} object or \code{\link{MVBU_Stanfit}} object.}
+
+\item{...}{Additional arguments passed to methods.}
 
 \item{ndraws}{Number of indices to be returned.}
 }

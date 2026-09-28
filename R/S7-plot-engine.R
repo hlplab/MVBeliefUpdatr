@@ -3,8 +3,9 @@
 # =============================================================================
 
 #' @include S7-generics.R
-#' @include S7-core-classes.R
-#' @include S7-core-methods.R
+#' @include S7-class.R
+#' @include S7-methods.R
+#' @include S7-stanfit.R
 #' @import ggplot2
 #' @importFrom rlang .data !! !!! sym
 NULL
@@ -497,6 +498,91 @@ NULL
 
 #' Render multi-panel 2D slices for 3-cue category plots
 #'
+#' Compute default cue limits from category representations or draws data frame
+#'
+#' @param reps List of category representations or a data frame containing \code{m} and \code{Sigma}.
+#' @param cues Character vector of cue names.
+#' @param n_sds Number of standard deviations to span (default 3.0).
+#' @return A named list of 2-element numeric vectors giving lower and upper limits per cue.
+#' @noRd
+#' @keywords internal
+.compute_default_cue_limits <- function(reps, cues, n_sds = 3.0) {
+  limits <- list()
+
+  # 1. MVBU_Stanfit and MVBU_StanfitPosterior: Use or populate cached marginal moments
+  if (S7::S7_inherits(reps, MVBU_Stanfit) || S7::S7_inherits(reps, MVBU_StanfitPosterior)) {
+    moments <- tryCatch(reps@cache$summary$marginal_moments, error = function(e) NULL)
+    if (is.null(moments)) {
+      moments <- get_marginal_category_statistic(reps, statistic = c("mu", "Sigma"))
+      tryCatch({
+        if (is.null(reps@cache$summary)) reps@cache$summary <- list()
+        reps@cache$summary$marginal_moments <- moments
+      }, error = function(e) NULL)
+    }
+    model_cues <- get_cue_labels(reps)
+    for (c_name in cues) {
+      idx <- match(c_name, model_cues)
+      min_v <- Inf
+      max_v <- -Inf
+      for (i in seq_len(nrow(moments))) {
+        mu_val <- moments$mu.mean[[i]][idx]
+        sig_mat <- as.matrix(moments$Sigma.mean[[i]])
+        sd_val <- sqrt(max(sig_mat[idx, idx], 1e-6))
+        min_v <- min(min_v, mu_val - n_sds * sd_val)
+        max_v <- max(max_v, mu_val + n_sds * sd_val)
+      }
+      limits[[c_name]] <- c(min_v, max_v)
+    }
+    return(limits)
+  }
+
+  # 2. Extract representations from cognitive models or templates
+  if (S7::S7_inherits(reps, MVBU_CognitiveModel)) {
+    reps <- reps@category_template@representations
+  } else if (S7::S7_inherits(reps, MVBU_CategoryRepresentationTemplate)) {
+    reps <- reps@representations
+  }
+
+  # 3. Data frame fallback (with m or mu and Sigma)
+  if (is.data.frame(reps)) {
+    d_sum <- reps
+    mu_col <- if ("m" %in% names(d_sum)) d_sum$m else if ("mu" %in% names(d_sum)) d_sum$mu else NULL
+    for (c_name in cues) {
+      min_v <- Inf
+      max_v <- -Inf
+      idx <- match(c_name, cues)
+      for (i in seq_len(nrow(d_sum))) {
+        mu_val <- if (!is.null(mu_col)) mu_col[[i]][idx] else 0
+        sig_i <- as.matrix(d_sum$Sigma[[i]])
+        sd_val <- sqrt(max(sig_i[idx, idx], 1e-6))
+        min_v <- min(min_v, mu_val - n_sds * sd_val)
+        max_v <- max(max_v, mu_val + n_sds * sd_val)
+      }
+      limits[[c_name]] <- c(min_v, max_v)
+    }
+    return(limits)
+  }
+
+  # 4. List of category representations
+  for (c_name in cues) {
+    min_v <- Inf
+    max_v <- -Inf
+    for (cat_name in names(reps)) {
+      r <- reps[[cat_name]]
+      mc <- .get_rep_mean_and_cov(r)
+      idx <- match(c_name, get_cue_labels(r))
+      mu_val <- mc$mu[idx]
+      sd_val <- sqrt(max(mc$Sigma[idx, idx], 1e-6))
+      min_v <- min(min_v, mu_val - n_sds * sd_val)
+      max_v <- max(max_v, mu_val + n_sds * sd_val)
+    }
+    limits[[c_name]] <- c(min_v, max_v)
+  }
+  limits
+}
+
+#' Render 3D sliced category density plot via ggplot2
+#'
 #' @param reps List of category representations.
 #' @param cues Character vector of length 3.
 #' @param slice_cue Dimension along which to slice (defaults to 3rd cue).
@@ -538,21 +624,7 @@ NULL
   active_cues <- setdiff(cues, slice_cue)
 
   if (is.null(limits)) {
-    limits <- list()
-    for (c_name in cues) {
-      min_v <- Inf
-      max_v <- -Inf
-      for (cat_name in names(reps)) {
-        r <- reps[[cat_name]]
-        mc <- .get_rep_mean_and_cov(r)
-        idx <- match(c_name, get_cue_labels(r))
-        mu_val <- mc$mu[idx]
-        sd_val <- sqrt(max(mc$Sigma[idx, idx], 1e-6))
-        min_v <- min(min_v, mu_val - 3 * sd_val)
-        max_v <- max(max_v, mu_val + 3 * sd_val)
-      }
-      limits[[c_name]] <- c(min_v, max_v)
-    }
+    limits <- .compute_default_cue_limits(reps, cues, n_sds = 3.0)
   }
 
   if (is.null(slice_values)) {
@@ -783,6 +855,90 @@ NULL
   p
 }
 
+.format_plotly_subtitle <- function(sub_title) {
+  if (is.null(sub_title)) return("")
+  if (is.language(sub_title)) {
+    txt <- deparse1(sub_title)
+    txt <- gsub("~", " ", txt, fixed = TRUE)
+    txt <- gsub("*", "", txt, fixed = TRUE)
+    txt <- gsub("chi^-2", "\u03c7\u207b\u00b2", txt, fixed = TRUE)
+    txt <- gsub("Sigma^-1", "\u03a3\u207b\u00b9", txt, fixed = TRUE)
+    txt <- gsub("lambda", "\u03bb", txt, fixed = TRUE)
+    return(txt)
+  }
+  as.character(sub_title)
+}
+
+#' @noRd
+#' @keywords internal
+.add_2d_surface_trace <- function(
+  p,
+  gx,
+  gy,
+  z_surf,
+  cat_name,
+  col,
+  col_rgb,
+  aes,
+  hoverinfo = "name"
+) {
+  if ("contour" %in% aes && !("fill-discrete" %in% aes) && !("fill-gradient" %in% aes)) {
+    p %>% plotly::add_surface(
+      x = gx,
+      y = gy,
+      z = z_surf,
+      name = cat_name,
+      hidesurface = TRUE,
+      contours = list(
+        z = list(
+          show = TRUE,
+          usecolormap = FALSE,
+          color = col,
+          project = list(z = FALSE),
+          width = 3
+        )
+      ),
+      showscale = FALSE,
+      hoverinfo = hoverinfo
+    )
+  } else if ("fill-gradient" %in% aes) {
+    c_start <- sprintf("rgba(%d,%d,%d,0.25)", col_rgb[1], col_rgb[2], col_rgb[3])
+    c_end <- sprintf("rgba(%d,%d,%d,0.95)", col_rgb[1], col_rgb[2], col_rgb[3])
+    p %>% plotly::add_surface(
+      x = gx,
+      y = gy,
+      z = z_surf,
+      name = cat_name,
+      opacity = 0.90,
+      colorscale = list(c(0, c_start), c(1, c_end)),
+      showscale = FALSE,
+      contours = if ("contour" %in% aes) {
+        list(z = list(show = TRUE, color = "#222222", width = 2))
+      } else {
+        list()
+      },
+      hoverinfo = hoverinfo
+    )
+  } else {
+    # "fill-discrete" (default): constant opaqueness per category
+    p %>% plotly::add_surface(
+      x = gx,
+      y = gy,
+      z = z_surf,
+      name = cat_name,
+      opacity = 0.85,
+      colorscale = list(c(0, col), c(1, col)),
+      showscale = FALSE,
+      contours = if ("contour" %in% aes) {
+        list(z = list(show = TRUE, color = "#222222", width = 2))
+      } else {
+        list()
+      },
+      hoverinfo = hoverinfo
+    )
+  }
+}
+
 #' Render interactive 2D density surface WebGL plot via Plotly
 #'
 #' @param reps Named list of category representations.
@@ -877,61 +1033,17 @@ NULL
     z_mat <- matrix(dens, nrow = length(gx), ncol = length(gy))
     z_surf <- t(z_mat)
 
-    if ("contour" %in% aes && !("fill-discrete" %in% aes) && !("fill-gradient" %in% aes)) {
-      p <- p %>% plotly::add_surface(
-        x = gx,
-        y = gy,
-        z = z_surf,
-        name = cat_name,
-        hidesurface = TRUE,
-        contours = list(
-          z = list(
-            show = TRUE,
-            usecolormap = FALSE,
-            color = col,
-            project = list(z = FALSE),
-            width = 3
-          )
-        ),
-        showscale = FALSE,
-        hoverinfo = "name"
-      )
-    } else if ("fill-gradient" %in% aes) {
-      c_start <- sprintf("rgba(%d,%d,%d,0.25)", col_rgb[1], col_rgb[2], col_rgb[3])
-      c_end <- sprintf("rgba(%d,%d,%d,0.95)", col_rgb[1], col_rgb[2], col_rgb[3])
-      p <- p %>% plotly::add_surface(
-        x = gx,
-        y = gy,
-        z = z_surf,
-        name = cat_name,
-        opacity = 0.90,
-        colorscale = list(c(0, c_start), c(1, c_end)),
-        showscale = FALSE,
-        contours = if ("contour" %in% aes) {
-          list(z = list(show = TRUE, color = "#222222", width = 2))
-        } else {
-          list()
-        },
-        hoverinfo = "name"
-      )
-    } else {
-      # "fill-discrete" (default): constant opaqueness per category
-      p <- p %>% plotly::add_surface(
-        x = gx,
-        y = gy,
-        z = z_surf,
-        name = cat_name,
-        opacity = 0.85,
-        colorscale = list(c(0, col), c(1, col)),
-        showscale = FALSE,
-        contours = if ("contour" %in% aes) {
-          list(z = list(show = TRUE, color = "#222222", width = 2))
-        } else {
-          list()
-        },
-        hoverinfo = "name"
-      )
-    }
+    p <- .add_2d_surface_trace(
+      p = p,
+      gx = gx,
+      gy = gy,
+      z_surf = z_surf,
+      cat_name = cat_name,
+      col = col,
+      col_rgb = col_rgb,
+      aes = aes,
+      hoverinfo = "name"
+    )
 
     if (S7::S7_inherits(r, Exemplar_CategoryRepresentation)) {
       if (n_exemplars > 0L) {
@@ -939,7 +1051,7 @@ NULL
         n_pts <- min(as.integer(n_exemplars), nrow(mat))
         idx_pts <- sample.int(nrow(mat), n_pts, replace = FALSE)
         sub_pts <- mat[idx_pts, cues, drop = FALSE]
-        pts_z <- .eval_exemplar_density_grid(r, as.data.frame(sub_pts), cues)
+        pts_z <- likelihood(r, as.matrix(sub_pts))
         p <- p %>% plotly::add_markers(
           x = sub_pts[, 1],
           y = sub_pts[, 2],
@@ -954,7 +1066,7 @@ NULL
   }
 
   main_title <- t_sub$title %||% "2D Category Density Surfaces"
-  sub_title <- t_sub$subtitle %||% ""
+  sub_title <- .format_plotly_subtitle(t_sub$subtitle)
 
   p <- p %>% plotly::layout(
     title = list(
@@ -1022,69 +1134,21 @@ NULL
     z_mat <- matrix(prob_vec, nrow = length(gx), ncol = length(gy))
     z_surf <- t(z_mat)
 
-    if ("contour" %in% aes && !("fill-discrete" %in% aes) && !("fill-gradient" %in% aes)) {
-      p <- p %>% plotly::add_surface(
-        x = gx,
-        y = gy,
-        z = z_surf,
-        name = cat_name,
-        hidesurface = TRUE,
-        contours = list(
-          z = list(
-            show = TRUE,
-            usecolormap = FALSE,
-            color = col,
-            project = list(z = FALSE),
-            width = 3
-          )
-        ),
-        showscale = FALSE,
-        hoverinfo = "name+z"
-      )
-    } else if ("fill-gradient" %in% aes) {
-      c_start <- sprintf("rgba(%d,%d,%d,0.20)", col_rgb[1], col_rgb[2], col_rgb[3])
-      c_end <- sprintf("rgba(%d,%d,%d,0.90)", col_rgb[1], col_rgb[2], col_rgb[3])
-      p <- p %>% plotly::add_surface(
-        x = gx,
-        y = gy,
-        z = z_surf,
-        name = cat_name,
-        opacity = 0.90,
-        colorscale = list(c(0, c_start), c(1, c_end)),
-        cmin = 0,
-        cmax = 1,
-        showscale = FALSE,
-        contours = if ("contour" %in% aes) {
-          list(z = list(show = TRUE, color = "#222222", width = 2))
-        } else {
-          list()
-        },
-        hoverinfo = "name+z"
-      )
-    } else {
-      # "fill-discrete" (default): constant opaqueness per category
-      p <- p %>% plotly::add_surface(
-        x = gx,
-        y = gy,
-        z = z_surf,
-        name = cat_name,
-        opacity = 0.85,
-        colorscale = list(c(0, col), c(1, col)),
-        cmin = 0,
-        cmax = 1,
-        showscale = FALSE,
-        contours = if ("contour" %in% aes) {
-          list(z = list(show = TRUE, color = "#222222", width = 2))
-        } else {
-          list()
-        },
-        hoverinfo = "name+z"
-      )
-    }
+    p <- .add_2d_surface_trace(
+      p = p,
+      gx = gx,
+      gy = gy,
+      z_surf = z_surf,
+      cat_name = cat_name,
+      col = col,
+      col_rgb = col_rgb,
+      aes = aes,
+      hoverinfo = "name+z"
+    )
   }
 
   main_title <- t_sub$title %||% "2D Categorization Function Surface"
-  sub_title <- t_sub$subtitle %||% ""
+  sub_title <- .format_plotly_subtitle(t_sub$subtitle)
 
   p <- p %>% plotly::layout(
     title = list(
@@ -1166,36 +1230,7 @@ NULL
       use_isosurface <- any(c("fill-discrete", "fill-gradient", "contour") %in% aes)
 
       if (use_isosurface) {
-        # 3D KDE Isosurface evaluation (compute intensive)
-        min_c <- apply(mat[, cues, drop = FALSE], 2, min)
-        max_c <- apply(mat[, cues, drop = FALSE], 2, max)
-        span_c <- pmax(max_c - min_c, 1e-3)
-        res_3d <- 18L
-        gx <- seq(min_c[1] - 0.1 * span_c[1], max_c[1] + 0.1 * span_c[1], length.out = res_3d)
-        gy <- seq(min_c[2] - 0.1 * span_c[2], max_c[2] + 0.1 * span_c[2], length.out = res_3d)
-        gz <- seq(min_c[3] - 0.1 * span_c[3], max_c[3] + 0.1 * span_c[3], length.out = res_3d)
-        grid_3d <- expand.grid(x = gx, y = gy, z = gz)
-        names(grid_3d) <- cues
-        dens_3d <- .eval_exemplar_density_grid(r, grid_3d, cues)
-
-        d_vals <- sort(dens_3d, decreasing = TRUE)
-        c_mass <- cumsum(d_vals) / max(sum(d_vals), 1e-12)
-        iso_val <- d_vals[which.min(abs(c_mass - levels[1L]))]
-
-        p <- p %>% plotly::add_isosurface(
-          x = grid_3d[[cues[1L]]],
-          y = grid_3d[[cues[2L]]],
-          z = grid_3d[[cues[3L]]],
-          value = dens_3d,
-          isomin = iso_val,
-          isomax = max(dens_3d),
-          surface = list(count = length(levels), fill = if ("contour" %in% aes) 0.1 else 0.7),
-          opacity = if ("fill-gradient" %in% aes) 0.45 else 0.65,
-          colorscale = list(c(0, col), c(1, col)),
-          showscale = FALSE,
-          name = cat_name,
-          legendgroup = cat_name
-        )
+        .stop("3D interactive plotting with isosurfaces for exemplar models is currently not supported.")
       } else {
         # Scatter mode (default)
         N <- nrow(mat)
@@ -1335,7 +1370,7 @@ NULL
   }
 
   main_title <- t_sub$title %||% "3D Categories"
-  sub_title <- t_sub$subtitle %||% ""
+  sub_title <- .format_plotly_subtitle(t_sub$subtitle)
 
   p <- p %>% plotly::layout(
     title = list(
@@ -1405,21 +1440,7 @@ NULL
   reps <- model@category_template@representations
 
   if (is.null(limits)) {
-    limits <- list()
-    for (c_name in cues) {
-      min_v <- Inf
-      max_v <- -Inf
-      for (cat_name in names(reps)) {
-        r <- reps[[cat_name]]
-        mc <- .get_rep_mean_and_cov(r)
-        idx <- match(c_name, get_cue_labels(r))
-        mu_val <- mc$mu[idx]
-        sd_val <- sqrt(max(mc$Sigma[idx, idx], 1e-6))
-        min_v <- min(min_v, mu_val - 3 * sd_val)
-        max_v <- max(max_v, mu_val + 3 * sd_val)
-      }
-      limits[[c_name]] <- c(min_v, max_v)
-    }
+    limits <- .compute_default_cue_limits(reps, cues, n_sds = 3.0)
   }
 
   if (is.null(slice_values)) {
@@ -1490,30 +1511,7 @@ NULL
   # Contour layer with labels
   if ("contour" %in% aes) {
     contour_alpha <- if (length(unique(post_df$category)) >= 2L) 0.5 else 1.0
-    if (requireNamespace("metR", quietly = TRUE)) {
-      p <- p + metR::geom_text_contour(
-        data = post_df,
-        ggplot2::aes(
-          z = .data$posterior,
-          color = .data$category
-        ),
-        breaks = c(0.25, 0.5, 0.75),
-        stroke = 0.15,
-        rotate = FALSE,
-        size = 3,
-        alpha = contour_alpha
-      ) +
-        ggplot2::geom_contour(
-          data = post_df,
-          ggplot2::aes(
-            z = .data$posterior,
-            color = .data$category
-          ),
-          breaks = c(0.25, 0.5, 0.75),
-          linewidth = 0.4,
-          alpha = contour_alpha
-        )
-    } else if (requireNamespace("geomtextpath", quietly = TRUE)) {
+    if (requireNamespace("geomtextpath", quietly = TRUE)) {
       p <- p + geomtextpath::geom_textcontour(
         data = post_df,
         ggplot2::aes(

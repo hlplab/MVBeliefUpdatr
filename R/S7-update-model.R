@@ -1,4 +1,4 @@
-#' @include S7-core-methods.R S7-generics.R
+#' @include S7-methods.R S7-generics.R
 NULL
 
 # Order of application matters: all update helper functions assume inputs (kappa, nu, m, S)
@@ -13,12 +13,17 @@ NULL
 }
 
 .update_NIW_category_representation_m <- function(kappa_0, m_0, x_N, x_mean) {
-  (kappa_0 / (kappa_0 + x_N)) * m_0 + (x_N / (kappa_0 + x_N)) * x_mean
+  res <- (kappa_0 / (kappa_0 + x_N)) * m_0 + (x_N / (kappa_0 + x_N)) * as.numeric(x_mean)
+  names(res) <- names(m_0)
+  res
 }
 
 .update_NIW_category_representation_S <- function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) {
   # Conjugate updating of scatter matrix S with between-mean scatter contribution
-  S_0 + x_SS + ((kappa_0 * x_N) / (kappa_0 + x_N)) * (x_mean - m_0) %*% t(x_mean - m_0)
+  diff_m <- matrix(as.numeric(x_mean - m_0), ncol = 1)
+  S_update <- S_0 + as.matrix(x_SS) + ((kappa_0 * x_N) / (kappa_0 + x_N)) * tcrossprod(diff_m)
+  dimnames(S_update) <- dimnames(S_0)
+  S_update
 }
 
 .update_NIW_category_representation_by_sufficient_statistics <- function(
@@ -61,8 +66,10 @@ NULL
   probabilities
 }
 
+#' @rdname update_category_representation
+#' @export
 S7::method(update_category_representation, list(NIW_CategoryRepresentation, S7::class_any, S7::class_any, S7::class_any)) <- function(
-  x, x_N, x_mean, x_SS
+  x, x_N, x_mean, x_SS, ...
 ) {
   .assert_true(is.numeric(x_N) && length(x_N) == 1L && !is.na(x_N) && x_N >= 0, msg = "x_N must be a non-negative numeric scalar.")
   .assert_true(is.numeric(x_mean) && length(x_mean) == length(get_cue_labels(x)), msg = "x_mean must contain one value per cue.")
@@ -78,6 +85,7 @@ S7::method(update_category_representation, list(NIW_CategoryRepresentation, S7::
 #' `update_template()` is currently implemented for `NIW_IdealAdaptor` models.
 #' Future methods will support additional model types.
 #'
+#' @rdname update_template
 #' @param x An `NIW_IdealAdaptor` object.
 #' @param observations A data.frame or tibble containing cue columns and, for
 #'   `update_method = "label-certain"`, a `category` column.
@@ -90,19 +98,20 @@ S7::method(update_category_representation, list(NIW_CategoryRepresentation, S7::
 #' @param update_method One of `"no-updating"`, `"label-certain"`,
 #'   `"nolabel-criterion"`, `"nolabel-sampling"`,
 #'   `"nolabel-proportional"`, or `"nolabel-uniform"`.
+#' @param ... Additional arguments passed to methods.
 #' @return The updated model, or a list of intermediate models when
 #'   `updating = "incremental"` and `keep_history = TRUE`.
 #' @export
 S7::method(update_template, list(NIW_IdealAdaptor, S7::class_any)) <- function(
   x, observations, updating = c("batch", "incremental"), keep_history = FALSE,
   lapse_treatment = "no_lapses", noise_treatment = "no_noise",
-  update_method = "label-certain"
+  update_method = "label-certain", ...
 ) {
   updating <- match.arg(updating)
   update_methods <- c("no-updating", "label-certain", "nolabel-criterion", "nolabel-sampling", "nolabel-proportional", "nolabel-uniform")
-  .assert_true(update_method %in% update_methods, msg = "update_method is not an acceptable updating method.")
-  .assert_true(lapse_treatment %in% c("no_lapses", "sample", "marginalize"), msg = "lapse_treatment must be one of no_lapses, sample, or marginalize.")
-  .assert_true(noise_treatment %in% c("no_noise", "sample", "marginalize"), msg = "noise_treatment must be one of no_noise, sample, or marginalize.")
+  .assert_one_of(update_method, update_methods, msg = "update_method is not an acceptable updating method.")
+  .assert_one_of(lapse_treatment, c("no_lapses", "sample", "marginalize"), msg = "lapse_treatment must be one of no_lapses, sample, or marginalize.")
+  .assert_one_of(noise_treatment, c("no_noise", "sample", "marginalize"), msg = "noise_treatment must be one of no_noise, sample, or marginalize.")
   .assert_data_frame_like(observations)
 
   cue_labels <- get_cue_labels(x)
@@ -129,19 +138,27 @@ S7::method(update_template, list(NIW_IdealAdaptor, S7::class_any)) <- function(
     lapse_weight <- if (lapse_treatment == "marginalize") 1 - x@lapse_behavior$lapse_rate else 1
     categories <- get_category_labels(x)
     representations <- x@category_template@representations
+
+    suff_stats <- get_sufficient_category_statistics(
+      observations,
+      cues = cue_labels,
+      category = "category",
+      categories = categories,
+      model_family = "NIW"
+    )
+    suff_by_cat <- split(suff_stats, suff_stats$category)
+
     updated <- lapply(seq_along(representations), function(i) {
-      rows <- observations[as.character(observations$category) == as.character(categories[i]), cue_labels, drop = FALSE]
-      if (nrow(rows) == 0L) {
+      cat_name <- as.character(categories[i])
+      st <- suff_by_cat[[cat_name]]
+      if (is.null(st) || nrow(st) == 0L || st$x_N[[1L]] == 0L) {
         return(representations[[i]])
       }
-      values <- as.matrix(rows)
-      mean_values <- .colMeans(values)
-      centered <- sweep(values, 2, mean_values, "-")
       update_category_representation(
         representations[[i]],
-        x_N = lapse_weight * nrow(values),
-        x_mean = mean_values,
-        x_SS = lapse_weight * crossprod(centered)
+        x_N = lapse_weight * st$x_N[[1L]],
+        x_mean = st$x_mean[[1L]],
+        x_SS = lapse_weight * st$x_css[[1L]]
       )
     })
     names(updated) <- names(representations)
@@ -202,4 +219,185 @@ S7::method(update_template, list(NIW_IdealAdaptor, S7::class_any)) <- function(
     if (keep_history) history[[length(history) + 1L]] <- current
   }
   if (keep_history) history else current
+}
+
+.update_NIX_category_representation_by_sufficient_statistics <- function(
+  representation, x_mean, x_SS, x_N
+) {
+  .assert_true(S7::S7_inherits(representation, NIX_CategoryRepresentation),
+    msg = "representation must be an NIX_CategoryRepresentation."
+  )
+  if (x_N == 0 || anyNA(x_mean)) {
+    return(representation)
+  }
+  k0 <- representation@kappa
+  nu0 <- representation@nu
+  m0 <- representation@m
+  sig0 <- representation@sigma2
+
+  k_n <- k0 + x_N
+  nu_n <- nu0 + x_N
+  m_n <- (k0 / k_n) * m0 + (x_N / k_n) * x_mean[1]
+  sig_n <- (nu0 * sig0 + x_SS[1, 1] + ((k0 * x_N) / k_n) * (x_mean[1] - m0)^2) / nu_n
+
+  new_nix_category_representation(
+    category_labels = get_category_labels(representation)[1],
+    cue_labels = get_cue_labels(representation),
+    m = m_n,
+    sigma2 = sig_n,
+    kappa = k_n,
+    nu = nu_n,
+    metadata = representation@metadata
+  )
+}
+
+.update_MNIX_category_representation_by_sufficient_statistics <- function(
+  representation, x_mean, x_SS, x_N
+) {
+  .assert_true(S7::S7_inherits(representation, MNIX_CategoryRepresentation),
+    msg = "representation must be an MNIX_CategoryRepresentation."
+  )
+  if (x_N == 0 || anyNA(x_mean)) {
+    return(representation)
+  }
+  k0 <- representation@kappa
+  nu0 <- representation@nu
+  m0 <- representation@m
+  sig0 <- representation@sigma2
+
+  k_n <- k0 + x_N
+  nu_n <- nu0 + x_N
+  m_n <- (k0 / k_n) * m0 + (x_N / k_n) * x_mean
+  sig_n <- (nu0 * sig0 + diag(x_SS) + ((k0 * x_N) / k_n) * (x_mean - m0)^2) / nu_n
+
+  new_mnix_category_representation(
+    category_labels = get_category_labels(representation)[1],
+    cue_labels = get_cue_labels(representation),
+    m = m_n,
+    sigma2 = sig_n,
+    kappa = k_n,
+    nu = nu_n,
+    weights = representation@weights,
+    metadata = representation@metadata
+  )
+}
+
+#' @rdname update_category_representation
+#' @export
+S7::method(update_category_representation, list(NIX_CategoryRepresentation, S7::class_any, S7::class_any, S7::class_any)) <- function(
+  x, x_N, x_mean, x_SS, ...
+) {
+  .update_NIX_category_representation_by_sufficient_statistics(x, x_mean = x_mean, x_SS = as.matrix(x_SS), x_N = x_N)
+}
+
+#' @rdname update_category_representation
+#' @export
+S7::method(update_category_representation, list(MNIX_CategoryRepresentation, S7::class_any, S7::class_any, S7::class_any)) <- function(
+  x, x_N, x_mean, x_SS, ...
+) {
+  .update_MNIX_category_representation_by_sufficient_statistics(x, x_mean = x_mean, x_SS = as.matrix(x_SS), x_N = x_N)
+}
+
+#' @rdname update_template
+#' @param x An `NIX_IdealAdaptor` object.
+#' @param observations A data.frame or tibble containing cue columns and category label.
+#' @param ... Additional options.
+#' @return The updated `NIX_IdealAdaptor` model.
+#' @seealso \code{\link{update_category_representation}}
+#' @export
+S7::method(update_template, list(NIX_IdealAdaptor, S7::class_any)) <- function(
+  x, observations, updating = c("batch", "incremental"), keep_history = FALSE,
+  lapse_treatment = "no_lapses", noise_treatment = "no_noise",
+  update_method = "label-certain", ...
+) {
+  cue_labels <- get_cue_labels(x)
+  .assert_data_frame_like(observations)
+  .assert_data_contains_cols(observations, cue_labels)
+  if (update_method == "label-certain") .assert_data_contains_cols(observations, "category")
+
+  categories <- get_category_labels(x)
+  reps <- x@category_template@representations
+
+  suff_stats <- get_sufficient_category_statistics(
+    observations,
+    cues = cue_labels,
+    category = "category",
+    categories = categories,
+    model_family = "NIX"
+  )
+  suff_by_cat <- split(suff_stats, suff_stats$category)
+
+  updated <- lapply(seq_along(reps), function(i) {
+    cat_name <- as.character(categories[i])
+    st <- suff_by_cat[[cat_name]]
+    if (is.null(st) || nrow(st) == 0L || st$x_N[[1L]] == 0L) {
+      return(reps[[i]])
+    }
+    update_category_representation(
+      reps[[i]],
+      x_N = st$x_N[[1L]],
+      x_mean = st$x_mean[[1L]],
+      x_SS = st$x_css[[1L]]
+    )
+  })
+  names(updated) <- names(reps)
+  new_nix_ideal_adaptor(
+    category_template = new_category_representation_template(updated, metadata = x@category_template@metadata),
+    decision_rule = x@decision_rule, category_prior = x@category_prior,
+    lapse_rate = get_lapse_rate(x), lapse_bias = get_lapse_bias(x),
+    Sigma_noise = get_noise(x), noise_treatment = get_noise_treatment(x),
+    lapse_treatment = get_lapse_treatment(x), metadata = x@metadata
+  )
+}
+
+#' @rdname update_template
+#' @param x An `MNIX_IdealAdaptor` object.
+#' @param observations A data.frame or tibble containing cue columns and category label.
+#' @param ... Additional options.
+#' @return The updated `MNIX_IdealAdaptor` model.
+#' @seealso \code{\link{update_category_representation}}
+#' @export
+S7::method(update_template, list(MNIX_IdealAdaptor, S7::class_any)) <- function(
+  x, observations, updating = c("batch", "incremental"), keep_history = FALSE,
+  lapse_treatment = "no_lapses", noise_treatment = "no_noise",
+  update_method = "label-certain", ...
+) {
+  cue_labels <- get_cue_labels(x)
+  .assert_data_frame_like(observations)
+  .assert_data_contains_cols(observations, cue_labels)
+  if (update_method == "label-certain") .assert_data_contains_cols(observations, "category")
+
+  categories <- get_category_labels(x)
+  reps <- x@category_template@representations
+
+  suff_stats <- get_sufficient_category_statistics(
+    observations,
+    cues = cue_labels,
+    category = "category",
+    categories = categories,
+    model_family = "MNIX"
+  )
+  suff_by_cat <- split(suff_stats, suff_stats$category)
+
+  updated <- lapply(seq_along(reps), function(i) {
+    cat_name <- as.character(categories[i])
+    st <- suff_by_cat[[cat_name]]
+    if (is.null(st) || nrow(st) == 0L || st$x_N[[1L]] == 0L) {
+      return(reps[[i]])
+    }
+    update_category_representation(
+      reps[[i]],
+      x_N = st$x_N[[1L]],
+      x_mean = st$x_mean[[1L]],
+      x_SS = st$x_css[[1L]]
+    )
+  })
+  names(updated) <- names(reps)
+  new_mnix_ideal_adaptor(
+    category_template = new_category_representation_template(updated, metadata = x@category_template@metadata),
+    decision_rule = x@decision_rule, category_prior = x@category_prior,
+    lapse_rate = get_lapse_rate(x), lapse_bias = get_lapse_bias(x),
+    Sigma_noise = get_noise(x), noise_treatment = get_noise_treatment(x),
+    lapse_treatment = get_lapse_treatment(x), metadata = x@metadata
+  )
 }

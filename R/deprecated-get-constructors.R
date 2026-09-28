@@ -1,4 +1,4 @@
-#' @include S7-core-classes.R
+#' @include S7-class.R
 #' @include S7-stanfit.R
 #' @importFrom lifecycle deprecate_warn
 NULL
@@ -65,6 +65,7 @@ NULL
 #'   `NULL` then a list of all constructors is returned. (default: `NULL`)
 #'
 #' @return A constructor function, a list of constructor functions, or `NULL`.
+#' @keywords internal
 #' @export
 get_constructor <- function(x, variable = NULL) {
   lifecycle::deprecate_warn(
@@ -77,6 +78,7 @@ get_constructor <- function(x, variable = NULL) {
 
 #' Deprecated: get_category_constructor
 #' @rdname get_constructor
+#' @keywords internal
 #' @export
 get_category_constructor <- function(x) {
   lifecycle::deprecate_warn(
@@ -89,6 +91,7 @@ get_category_constructor <- function(x) {
 
 #' Deprecated: get_group_constructor
 #' @rdname get_constructor
+#' @keywords internal
 #' @export
 get_group_constructor <- function(x) {
   lifecycle::deprecate_warn(
@@ -101,6 +104,7 @@ get_group_constructor <- function(x) {
 
 #' Deprecated: get_cue_constructor
 #' @rdname get_constructor
+#' @keywords internal
 #' @export
 get_cue_constructor <- function(x) {
   lifecycle::deprecate_warn(
@@ -113,6 +117,7 @@ get_cue_constructor <- function(x) {
 
 #' Deprecated: get_cue2_constructor
 #' @rdname get_constructor
+#' @keywords internal
 #' @export
 get_cue2_constructor <- function(x) {
   lifecycle::deprecate_warn(

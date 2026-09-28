@@ -5,7 +5,7 @@
 \alias{control_params,MVBU_Stanfit-method}
 \title{Extract control parameters of the NUTS sampler}
 \usage{
-control_params(x, ...)
+control_params(x, pars = NULL, ...)
 
 ## S7 method for class <MVBU_Stanfit>
 control_params(x, pars = NULL, ...)
@@ -13,9 +13,9 @@ control_params(x, pars = NULL, ...)
 \arguments{
 \item{x}{An S7 fit object or stanfit object.}
 
-\item{...}{Additional arguments.}
-
 \item{pars}{Optional parameter names.}
+
+\item{...}{Additional arguments.}
 }
 \value{
 A named list of control parameters.

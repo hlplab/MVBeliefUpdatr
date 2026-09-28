@@ -3,8 +3,8 @@
 # =============================================================================
 
 #' @include S7-generics.R
-#' @include S7-core-classes.R
-#' @include S7-core-methods.R
+#' @include S7-class.R
+#' @include S7-methods.R
 #' @include S7-stanfit.R
 #' @include S7-stanfit-methods.R
 #' @include S7-plot-engine.R
@@ -34,11 +34,13 @@ NULL
       ),
       strip.text = ggplot2::element_text(face = "bold", color = "black"),
       panel.grid.major = ggplot2::element_line(color = "gray95"),
-      panel.grid.minor = ggplot2::element_blank()
+      panel.grid.minor = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(face = "bold", size = 12, margin = ggplot2::margin(b = 14)),
+      plot.subtitle = ggplot2::element_text(size = 9.5, margin = ggplot2::margin(b = 8), lineheight = 1.15)
     )
 }
 
-#' Format model family name in spelled-out form with math notation
+#' Format model family name using clean, cross-platform mathematical notation
 #' @noRd
 #' @keywords internal
 .format_model_family_name <- function(x) {
@@ -50,28 +52,16 @@ NULL
     return(sprintf("%dD multivariate Gaussian ideal observer", D))
   }
   if (S7::S7_inherits(x, MUVG_IdealObserver)) {
-    return(sprintf(
-      "%dD multivariate independent Gaussian ideal observer",
-      D
-    ))
+    return(sprintf("%dD multivariate independent Gaussian ideal observer", D))
   }
   if (S7::S7_inherits(x, NIX_IdealAdaptor)) {
-    return("1D normal-inverse-chi-squared (N\u03c7\u207b\u00b2) ideal adaptor")
+    return("1D N-Inv-\u03c7\u00b2 (NIX) ideal adaptor")
   }
   if (S7::S7_inherits(x, MNIX_IdealAdaptor)) {
-    return(sprintf(
-      paste0(
-        "%dD independent normal-inverse-chi-squared ",
-        "(MN\u03c7\u207b\u00b2) ideal adaptor"
-      ),
-      D
-    ))
+    return(sprintf("%dD indep. N-Inv-\u03c7\u00b2 (MNIX) ideal adaptor", D))
   }
   if (S7::S7_inherits(x, NIW_IdealAdaptor)) {
-    return(sprintf(
-      "%dD normal-inverse-Wishart (NW\u207b\u00b9) ideal adaptor",
-      D
-    ))
+    return(sprintf("%dD N-Inv-Wishart (NIW) ideal adaptor", D))
   }
   if (S7::S7_inherits(x, Exemplar_Model)) {
     return(sprintf("%dD exemplar model", D))
@@ -83,25 +73,13 @@ NULL
     return(sprintf("%dD multivariate Gaussian category", D))
   }
   if (S7::S7_inherits(x, NIX_CategoryRepresentation)) {
-    return(paste0(
-      "1D normal-inverse-chi-squared ",
-      "(N\u03c7\u207b\u00b2) category"
-    ))
+    return("1D N-Inv-\u03c7\u00b2 (NIX) category")
   }
   if (S7::S7_inherits(x, MNIX_CategoryRepresentation)) {
-    return(sprintf(
-      paste0(
-        "%dD independent normal-inverse-chi-squared ",
-        "(MN\u03c7\u207b\u00b2) category"
-      ),
-      D
-    ))
+    return(sprintf("%dD indep. N-Inv-\u03c7\u00b2 (MNIX) category", D))
   }
   if (S7::S7_inherits(x, NIW_CategoryRepresentation)) {
-    return(sprintf(
-      "%dD normal-inverse-Wishart (NW\u207b\u00b9) category",
-      D
-    ))
+    return(sprintf("%dD N-Inv-Wishart (NIW) category", D))
   }
   if (S7::S7_inherits(x, Exemplar_CategoryRepresentation)) {
     return(sprintf("%dD exemplar category", D))
@@ -111,7 +89,6 @@ NULL
     if (!is.null(first_rep)) {
       fam_rep <- .format_model_family_name(first_rep)
       fam_rep <- sub(" category$", " category template", fam_rep)
-      fam_rep <- sub(" representation$", " template", fam_rep)
       if (!grepl("template$", fam_rep)) fam_rep <- paste0(fam_rep, " template")
       return(fam_rep)
     }
@@ -142,6 +119,7 @@ NULL
     parameter_correlations = "Parameter correlations",
     parameters_pairwise = "Pairwise parameter distributions",
     cues = "Cue distributions",
+    sample = "Sample distributions",
     diagnostics = "MCMC diagnostics"
   )
   main_title <- if (plot_type %in% names(titles)) {
@@ -201,7 +179,8 @@ NULL
     }
 
     if (identical(plot_type, "categories")) {
-      sub_txt <- sprintf("%s\n%s | %s", fam, lapse_trt_txt, noise_txt)
+      line2 <- sprintf("%s | %s", lapse_trt_txt, noise_txt)
+      sub_txt <- sprintf("%s\n%s", fam, line2)
       return(list(title = main_title, subtitle = sub_txt))
     }
 
@@ -219,7 +198,9 @@ NULL
       l_rate <- lapse_beh$lapse_rate %||% 0
 
       .format_prior_vec <- function(vec) {
-        if (is.null(vec) || length(vec) == 0L) return("")
+        if (is.null(vec) || length(vec) == 0L) {
+          return("")
+        }
         if (length(vec) > 1L && length(unique(round(as.numeric(vec), 4))) == 1L) {
           return(sprintf("all = %s", round(vec[1L], 2)))
         }
@@ -525,11 +506,10 @@ NULL
     return(r)
   }
 
+  .validate_requested_labels(cues, rep_cues, label_type = "cue")
+
   if (length(cues) == 1L) {
     idx <- match(cues[1], rep_cues)
-    if (is.na(idx)) {
-      stop("Requested cue not found in representation cue labels.")
-    }
 
     if (S7::S7_inherits(r, UVG_CategoryRepresentation)) {
       return(r)
@@ -563,8 +543,8 @@ NULL
         cue_labels = cues,
         m = r@m[idx],
         kappa = r@kappa,
-        nu = max(nu_sub, 2.01),
-        sigma2 = r@S[idx, idx]
+        nu = max(nu_sub, 3.01),
+        sigma2 = r@S[idx, idx] / max(nu_sub, 3.01)
       ))
     }
     if (S7::S7_inherits(r, Exemplar_CategoryRepresentation)) {
@@ -581,9 +561,6 @@ NULL
 
   if (length(cues) == 2L) {
     idx <- match(cues, rep_cues)
-    if (any(is.na(idx))) {
-      stop("Requested cues not found in representation cue labels.")
-    }
 
     if (S7::S7_inherits(r, MVG_CategoryRepresentation)) {
       return(new_mvg_category_representation(
@@ -629,9 +606,6 @@ NULL
 
   if (length(cues) == 3L) {
     idx <- match(cues, rep_cues)
-    if (any(is.na(idx))) {
-      stop("Requested cues not found in representation cue labels.")
-    }
 
     if (S7::S7_inherits(r, MVG_CategoryRepresentation)) {
       return(new_mvg_category_representation(
@@ -675,18 +649,21 @@ NULL
     }
   }
 
-  stop("Marginalization is currently supported down to 1, 2, or 3 cues.")
+  stop("Subsetting to length(cues) > 3 is not supported.")
 }
 
 #' Extract expected mean and covariance matrix from representation
 #' @noRd
 #' @keywords internal
 .get_rep_mean_and_cov <- function(r) {
+  if (S7::S7_inherits(r, MVG_CategoryRepresentation)) {
+    return(list(mu = r@mu, Sigma = r@Sigma))
+  }
   if (S7::S7_inherits(r, UVG_CategoryRepresentation)) {
     return(list(mu = r@mu, Sigma = matrix(r@sigma2, 1L, 1L)))
   }
-  if (S7::S7_inherits(r, MVG_CategoryRepresentation)) {
-    return(list(mu = r@mu, Sigma = r@Sigma))
+  if (S7::S7_inherits(r, MUVG_CategoryRepresentation)) {
+    return(list(mu = r@mu, Sigma = diag(r@sigma2, nrow = length(r@mu))))
   }
   if (S7::S7_inherits(r, NIX_CategoryRepresentation)) {
     sig2 <- r@sigma2 * (r@nu / max(r@nu - 2, 1))
@@ -953,8 +930,11 @@ NULL
   cues
 ) {
   if (isTRUE(show_exposure_data)) {
-    exp_data <- tryCatch(get_exposure_data(x), error = function(e) NULL)
-    if (!is.null(exp_data) && all(cues %in% names(exp_data))) {
+    exp_data <- tryCatch(
+      suppressMessages(get_exposure_data(x, original_names = FALSE)),
+      error = function(e) NULL
+    )
+    if (!is.null(exp_data) && nrow(exp_data) > 0L && all(cues %in% names(exp_data))) {
       exp_data$Category <- exp_data$category
       if (length(cues) == 1L) {
         p <- p + geom_rug(
@@ -980,8 +960,11 @@ NULL
   }
 
   if (isTRUE(show_test_data)) {
-    test_data <- tryCatch(get_test_data(x), error = function(e) NULL)
-    if (!is.null(test_data) && all(cues %in% names(test_data))) {
+    test_data <- tryCatch(
+      suppressMessages(get_test_data(x, original_names = FALSE)),
+      error = function(e) NULL
+    )
+    if (!is.null(test_data) && nrow(test_data) > 0L && all(cues %in% names(test_data))) {
       if (length(cues) == 1L) {
         p <- p + geom_rug(
           data = test_data,
@@ -1029,7 +1012,12 @@ NULL
 
   ex_df_1d <- .make_exemplar_sample_df(reps, cues[1L], n_exemplars = n_exemplars)
   if (!is.null(ex_df_1d) && nrow(ex_df_1d) > 0L) {
-    t_sub$subtitle <- paste0(t_sub$subtitle, sprintf(" (sampling %d exemplars)", nrow(ex_df_1d)))
+    samp_txt <- sprintf(" (sampling %d exemplars)", nrow(ex_df_1d))
+    t_sub$subtitle <- if (is.language(t_sub$subtitle)) {
+      bquote(.(t_sub$subtitle) ~ .(samp_txt))
+    } else {
+      paste0(t_sub$subtitle, samp_txt)
+    }
   }
 
   df <- .make_1D_category_density_df(
@@ -1040,7 +1028,10 @@ NULL
   )
 
   all_c <- names(reps)
-  c_colors <- scales::hue_pal()(length(all_c))
+  if (is.null(all_c) || length(all_c) == 0L) {
+    all_c <- vapply(reps, get_category_labels, character(1))
+  }
+  c_colors <- if (length(all_c) == 0L) character(0) else scales::hue_pal()(length(all_c))
   names(c_colors) <- all_c
 
   p <- ggplot2::ggplot(
@@ -1123,7 +1114,12 @@ NULL
 
   ex_df <- .make_exemplar_sample_df(reps, cues, n_exemplars = n_exemplars)
   if (!is.null(ex_df) && nrow(ex_df) > 0L) {
-    t_sub$subtitle <- paste0(t_sub$subtitle, sprintf(" (sampling %d exemplars)", nrow(ex_df)))
+    samp_txt <- sprintf(" (sampling %d exemplars)", nrow(ex_df))
+    t_sub$subtitle <- if (is.language(t_sub$subtitle)) {
+      bquote(.(t_sub$subtitle) ~ .(samp_txt))
+    } else {
+      paste0(t_sub$subtitle, samp_txt)
+    }
   }
 
   has_ex <- any(sapply(reps, function(r) {
@@ -1133,7 +1129,10 @@ NULL
   has_contour <- "contour" %in% aes
 
   all_c <- names(reps)
-  c_colors <- scales::hue_pal()(length(all_c))
+  if (is.null(all_c) || length(all_c) == 0L) {
+    all_c <- vapply(reps, get_category_labels, character(1))
+  }
+  c_colors <- if (length(all_c) == 0L) character(0) else scales::hue_pal()(length(all_c))
   names(c_colors) <- all_c
 
   p <- ggplot2::ggplot() +
@@ -1325,11 +1324,12 @@ S7::method(plot_categories, MVBU_CategoryRepresentation) <- function(
   x,
   cues = NULL,
   categories = NULL,
+  groups = NULL,
   aes = NULL,
   levels = NULL,
   limits = NULL,
-  n_exemplars = 0L,
   resolution = 100,
+  n_exemplars = 0L,
   ...
 ) {
   obj_cues <- get_cue_labels(x)
@@ -1440,11 +1440,12 @@ S7::method(plot_categories, MVBU_CategoryRepresentationTemplate) <- function(
   x,
   cues = NULL,
   categories = NULL,
+  groups = NULL,
   aes = NULL,
   levels = NULL,
   limits = NULL,
-  n_exemplars = 0L,
   resolution = 100,
+  n_exemplars = 0L,
   ...
 ) {
   obj_cues <- get_cue_labels(x)
@@ -1557,13 +1558,18 @@ S7::method(plot_categories, MVBU_CognitiveModel) <- function(
   x,
   cues = NULL,
   categories = NULL,
+  groups = NULL,
   aes = NULL,
   levels = NULL,
   limits = NULL,
-  n_exemplars = 0L,
   resolution = 100,
+  n_exemplars = 0L,
   ...
 ) {
+  dots <- list(...)
+  parallel <- if (!is.null(dots$parallel)) isTRUE(dots$parallel) else FALSE
+  n_cores <- dots$n_cores
+  noise_treatment <- dots$noise_treatment
   obj_cues <- get_cue_labels(x)
   if (is.null(cues)) {
     cues <- if (length(obj_cues) > 3L) obj_cues[1:3] else obj_cues
@@ -1584,8 +1590,35 @@ S7::method(plot_categories, MVBU_CognitiveModel) <- function(
     )
   }
 
+  tmpl <- x@category_template
+  eff_noise_trt <- noise_treatment %||% x@noise_behavior$noise_treatment
+  if (identical(eff_noise_trt, "marginalize") && !is.null(x@noise_behavior$Sigma_noise)) {
+    reps <- tmpl@representations
+    sn <- as.matrix(x@noise_behavior$Sigma_noise)
+    reps <- lapply(reps, function(r) {
+      if (S7::S7_inherits(r, UVG_CategoryRepresentation)) {
+        r@sigma2 <- r@sigma2 + sn[1, 1]
+      } else if (S7::S7_inherits(r, MVG_CategoryRepresentation)) {
+        r@Sigma <- r@Sigma + sn
+      } else if (S7::S7_inherits(r, NIX_CategoryRepresentation)) {
+        r@sigma2 <- r@sigma2 + sn[1, 1]
+      } else if (S7::S7_inherits(r, MNIX_CategoryRepresentation)) {
+        r@sigma2 <- r@sigma2 + diag(sn)
+      } else if (S7::S7_inherits(r, NIW_CategoryRepresentation)) {
+        D <- ncol(sn)
+        denom <- r@nu - D - 1
+        if (denom > 0) {
+          exp_Sigma <- r@S / denom
+          r@S <- (exp_Sigma + sn) * denom
+        }
+      }
+      r
+    })
+    tmpl@representations <- reps
+  }
+
   p <- plot_categories(
-    x@category_template,
+    tmpl,
     cues = cues,
     categories = categories,
     aes = aes,
@@ -1593,6 +1626,8 @@ S7::method(plot_categories, MVBU_CognitiveModel) <- function(
     limits = limits,
     n_exemplars = n_exemplars,
     resolution = resolution,
+    parallel = parallel,
+    n_cores = n_cores,
     ...
   )
   t_sub <- .make_plot_title_and_subtitle(x, "categories", cues = cues)
@@ -1612,14 +1647,28 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
   aes = NULL,
   levels = NULL,
   limits = NULL,
-  sample = FALSE,
-  ndraws = 100,
-  n_exemplars = 0L,
   resolution = 100,
-  show_exposure_data = FALSE,
-  show_test_data = FALSE,
+  n_exemplars = 0L,
   ...
 ) {
+  dots <- list(...)
+  uncertainty_treatment <- if ("uncertainty_treatment" %in% names(dots)) {
+    match.arg(dots$uncertainty_treatment, c("marginalize", "sample"))
+  } else {
+    "marginalize"
+  }
+  ndraws <- if ("ndraws" %in% names(dots)) dots$ndraws else 20L
+  show_exposure_data <- if ("show_exposure_data" %in% names(dots)) {
+    dots$show_exposure_data
+  } else {
+    FALSE
+  }
+  show_test_data <- if ("show_test_data" %in% names(dots)) {
+    dots$show_test_data
+  } else {
+    FALSE
+  }
+
   obj_cues <- get_cue_labels(x)
   if (is.null(cues)) {
     cues <- if (length(obj_cues) > 3L) obj_cues[1:3] else obj_cues
@@ -1640,40 +1689,56 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
     )
   }
 
-  avail_cats <- get_category_labels(x)
   if (is.null(categories)) {
-    categories <- avail_cats
+    categories <- get_category_labels(x)
   }
-  avail_grps <- get_group_labels(x, include_prior = FALSE)
   if (is.null(groups)) {
-    groups <- avail_grps
+    groups <- get_group_labels(x, include_prior = FALSE)
   }
 
-  d_raw <- get_draws(
-    x,
-    categories = categories,
-    groups = groups,
-    ndraws = ndraws,
-    summarize = FALSE,
-    ...
+  # In Bayesian category plotting for Stan models, posterior uncertainty is
+  # represented by drawing posterior parameters and calculating draw-wise
+  # summaries and/or draw trajectories
+  draws_args <- dots
+  draws_args[c(
+    "ndraws",
+    "uncertainty_treatment",
+    "show_exposure_data",
+    "show_test_data"
+  )] <- NULL
+  d_raw <- do.call(
+    get_draws,
+    c(
+      list(
+        x,
+        categories = categories,
+        groups = groups,
+        ndraws = ndraws,
+        summarize = FALSE
+      ),
+      draws_args
+    )
   )
-
-  if (!"Sigma" %in% names(d_raw) &&
-    "S" %in% names(d_raw) &&
-    "nu" %in% names(d_raw)) {
-    d_raw <- dplyr::mutate(
-      d_raw,
-      Sigma = get_expected_Sigma_from_S(.data$S, .data$nu)
-    )
+  if ("Sigma_marg" %in% names(d_raw)) {
+    d_raw$Sigma <- d_raw$Sigma_marg
+  } else if (!"Sigma" %in% names(d_raw)) {
+    if ("S" %in% names(d_raw) && "nu" %in% names(d_raw)) {
+      sig_conv <- get_expected_Sigma_from_S(d_raw$S, d_raw$nu)
+      d_raw$Sigma <- if (is.list(sig_conv)) sig_conv else as.list(sig_conv)
+    } else if ("sigma2" %in% names(d_raw)) {
+      # For univariate NIX or MNIX draws
+      d_raw$Sigma <- lapply(d_raw$sigma2, function(s2) {
+        if (is.matrix(s2)) {
+          s2
+        } else if (length(s2) == 1L) {
+          matrix(s2, 1L, 1L)
+        } else {
+          diag(as.numeric(s2), nrow = length(s2))
+        }
+      })
+    }
   }
-
-  d_sum <- d_raw %>%
-    dplyr::group_by(.data$group, .data$category) %>%
-    dplyr::summarise(
-      mu.mean = list(purrr::reduce(.data$m, `+`) / length(.data$m)),
-      Sigma.mean = list(purrr::reduce(.data$Sigma, `+`) / length(.data$Sigma)),
-      .groups = "drop"
-    )
+  d_sum <- .summarise_category_parameter_draws(d_raw)
 
   if (is.null(aes)) {
     aes <- if (length(cues) == 1L) "contour" else c("fill", "contour")
@@ -1735,7 +1800,7 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       ) +
       .mvbu_theme()
 
-    if (isTRUE(sample)) {
+    if (identical(uncertainty_treatment, "sample") && !is.null(d_raw)) {
       dfs_samples <- list()
       for (i in seq_len(nrow(d_raw))) {
         grp <- d_raw$group[i]
@@ -1771,7 +1836,7 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       )
     }
 
-    if ("fill" %in% aes && !isTRUE(sample)) {
+    if ("fill" %in% aes && !identical(uncertainty_treatment, "sample")) {
       p <- p + geom_ribbon(
         aes(ymin = 0, ymax = .data$density),
         alpha = 0.2
@@ -1853,7 +1918,7 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       ) +
       .mvbu_theme()
 
-    if (isTRUE(sample)) {
+    if (identical(uncertainty_treatment, "sample") && !is.null(d_raw)) {
       dfs_sample_ellipses <- list()
       top_lvl <- lvl_spec$contour[1L]
       for (i in seq_len(nrow(d_raw))) {
@@ -1884,7 +1949,7 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       )
     }
 
-    if ("fill" %in% aes && length(dfs_fill) > 0L && !isTRUE(sample)) {
+    if ("fill" %in% aes && length(dfs_fill) > 0L && !identical(uncertainty_treatment, "sample")) {
       df_fill <- dplyr::bind_rows(dfs_fill)
       p <- p + geom_polygon(
         data = df_fill,
@@ -1961,7 +2026,7 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
 }
 
 # -----------------------------------------------------------------------------
-# plot_categorization_function methods
+# plot_categorization_functions methods
 # -----------------------------------------------------------------------------
 
 #' Create a projected cognitive model on a subset of cues
@@ -2005,6 +2070,18 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
   }
   if (S7::S7_inherits(first_rep, MVG_CategoryRepresentation)) {
     return(new_mvg_ideal_observer(
+      category_template = new_tpl,
+      category_prior = x@category_prior,
+      decision_rule = decision_rule,
+      lapse_rate = lapse_beh$lapse_rate %||% 0,
+      lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
+      lapse_treatment = lapse_trt,
+      Sigma_noise = sig_noise,
+      noise_treatment = noise_trt
+    ))
+  }
+  if (S7::S7_inherits(first_rep, MUVG_CategoryRepresentation)) {
+    return(new_muvg_ideal_observer(
       category_template = new_tpl,
       category_prior = x@category_prior,
       decision_rule = decision_rule,
@@ -2064,12 +2141,13 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
   stop("Unsupported representation type for projection.")
 }
 
-#' @rdname plot_categorization_function
+#' @rdname plot_categorization_functions
 #' @export
-S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
+S7::method(plot_categorization_functions, MVBU_CognitiveModel) <- function(
   x,
   cues = NULL,
-  categories = get_category_labels(x)[1L],
+  categories = NULL,
+  groups = NULL,
   aes = NULL,
   levels = NULL,
   limits = NULL,
@@ -2079,6 +2157,10 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
   lapse_treatment = NULL,
   ...
 ) {
+  if (is.null(categories)) {
+    categories <- get_category_labels(x)[1L]
+  }
+
   obj_cues <- get_cue_labels(x)
   if (is.null(cues)) {
     cues <- if (length(obj_cues) > 3L) obj_cues[1:3] else obj_cues
@@ -2487,9 +2569,9 @@ S7::method(plot_categorization_function, MVBU_CognitiveModel) <- function(
   stop("Plotting categorization function is supported for 1, 2, or 3 cues.")
 }
 
-#' @rdname plot_categorization_function
+#' @rdname plot_categorization_functions
 #' @export
-S7::method(plot_categorization_function, MVBU_Stanfit) <- function(
+S7::method(plot_categorization_functions, MVBU_Stanfit) <- function(
   x,
   cues = NULL,
   categories = NULL,
@@ -2497,12 +2579,40 @@ S7::method(plot_categorization_function, MVBU_Stanfit) <- function(
   aes = NULL,
   levels = NULL,
   limits = NULL,
-  ndraws = 100,
+  decision_rule = "proportional",
   resolution = 100,
-  show_exposure_data = FALSE,
-  show_test_data = FALSE,
+  noise_treatment = NULL,
+  lapse_treatment = NULL,
   ...
 ) {
+  dots <- list(...)
+  uncertainty_treatment <- if ("uncertainty_treatment" %in% names(dots)) {
+    match.arg(dots$uncertainty_treatment, c("marginalize", "sample"))
+  } else {
+    "marginalize"
+  }
+  ndraws <- if ("ndraws" %in% names(dots)) dots$ndraws else 20L
+  show_exposure_data <- if ("show_exposure_data" %in% names(dots)) {
+    dots$show_exposure_data
+  } else {
+    FALSE
+  }
+  show_test_data <- if ("show_test_data" %in% names(dots)) {
+    dots$show_test_data
+  } else {
+    FALSE
+  }
+  if (is.null(noise_treatment)) {
+    noise_treatment <- "none"
+  } else {
+    noise_treatment <- match.arg(noise_treatment, c("none", "marginalize"))
+  }
+  if (is.null(lapse_treatment)) {
+    lapse_treatment <- "none"
+  } else {
+    lapse_treatment <- match.arg(lapse_treatment, c("none", "marginalize"))
+  }
+
   obj_cues <- get_cue_labels(x)
   if (is.null(cues)) {
     cues <- if (length(obj_cues) > 2L) obj_cues[1:2] else obj_cues
@@ -2532,9 +2642,8 @@ S7::method(plot_categorization_function, MVBU_Stanfit) <- function(
   }
   target_cat <- categories[1L]
 
-  avail_grps <- get_group_labels(x, include_prior = FALSE)
   if (is.null(groups)) {
-    groups <- avail_grps
+    groups <- get_group_labels(x, include_prior = FALSE)
   }
 
   aes <- .normalize_plot_aes(
@@ -2543,39 +2652,16 @@ S7::method(plot_categorization_function, MVBU_Stanfit) <- function(
   )
   lvl_spec <- .parse_categorization_levels(levels, aes)
 
-  # Get parameter draws
-  d_sum <- get_draws(
-    x,
-    categories = all_cats,
-    groups = groups,
-    ndraws = ndraws,
-    summarize = FALSE,
-    ...
-  )
-
-  if (!"Sigma" %in% names(d_sum) && "S" %in% names(d_sum) && "nu" %in% names(d_sum)) {
-    d_sum <- dplyr::mutate(
-      d_sum,
-      Sigma = get_expected_Sigma_from_S(.data$S, .data$nu)
-    )
-  }
-
   # Build limits
   if (is.null(limits)) {
-    limits <- list()
-    for (cn in cues) {
-      min_v <- Inf
-      max_v <- -Inf
-      for (i in seq_len(nrow(d_sum))) {
-        idx <- match(cn, cues)
-        mu_val <- d_sum$m[[i]][idx]
-        sig_i <- as.matrix(d_sum$Sigma[[i]])
-        sd_val <- sqrt(max(sig_i[idx, idx], 1e-4))
-        min_v <- min(min_v, mu_val - 3 * sd_val)
-        max_v <- max(max_v, mu_val + 3 * sd_val)
-      }
-      limits[[cn]] <- c(min_v, max_v)
-    }
+    limits <- .compute_default_cue_limits(x, cues, n_sds = 3.0)
+  }
+
+  # Ensure posterior latents and closures are cached
+  c_list <- .get_cache(x)
+  if (is.null(c_list$draws) || is.null(c_list$summary)) {
+    x <- add_posterior_latents(x)
+    c_list <- .get_cache(x)
   }
 
   if (length(cues) == 1L) {
@@ -2583,47 +2669,89 @@ S7::method(plot_categorization_function, MVBU_Stanfit) <- function(
     grid_df <- data.frame(gx)
     names(grid_df) <- cues[1L]
 
-    res_list <- list()
-    for (grp in groups) {
-      grp_draws <- d_sum[d_sum$group == grp, ]
-      draw_ids <- unique(grp_draws$.draw)
-      for (d_id in draw_ids) {
-        sub_d <- grp_draws[grp_draws$.draw == d_id, ]
-        lik_mat <- matrix(0, nrow = nrow(grid_df), ncol = length(all_cats))
-        colnames(lik_mat) <- all_cats
-        for (j in seq_along(all_cats)) {
-          cat_row <- sub_d[sub_d$category == all_cats[j], ]
-          if (nrow(cat_row) > 0L) {
-            mu_val <- cat_row$m[[1L]][1L]
-            sig_1d <- as.matrix(cat_row$Sigma[[1L]])
-            sd_val <- sqrt(max(sig_1d[1L, 1L], 1e-6))
-            lik_mat[, j] <- stats::dnorm(grid_df[[cues[1L]]], mean = mu_val, sd = sd_val)
-          }
-        }
-        tot_lik <- rowSums(lik_mat)
-        post_cat <- ifelse(tot_lik > 0, lik_mat[, target_cat] / tot_lik, 1 / length(all_cats))
-        res_list[[length(res_list) + 1L]] <- data.frame(
-          group = grp,
-          draw = d_id,
-          x = grid_df[[cues[1L]]],
-          posterior = post_cat
-        )
-      }
+    # Determine draw IDs to evaluate
+    draw_params <- c_list$draws$parameters
+    draw_col <- if (".draw" %in% names(draw_params)) ".draw" else if ("draw" %in% names(draw_params)) "draw" else ".iteration"
+    all_draw_ids <- sort(unique(draw_params[[draw_col]]))
+    sample_draws <- if (!is.null(ndraws) && ndraws < length(all_draw_ids)) {
+      sample(all_draw_ids, ndraws)
+    } else {
+      all_draw_ids
     }
-    all_res <- dplyr::bind_rows(res_list)
-    names(all_res)[3L] <- cues[1L]
 
-    sum_res <- all_res %>%
-      dplyr::group_by(.data$group, .data[[cues[1L]]]) %>%
-      dplyr::summarise(
-        mean_post = mean(.data$posterior, na.rm = TRUE),
-        q025 = stats::quantile(.data$posterior, 0.025, na.rm = TRUE),
-        q975 = stats::quantile(.data$posterior, 0.975, na.rm = TRUE),
-        .groups = "drop"
+    res_list <- list()
+    sample_res_list <- list()
+
+    for (grp in groups) {
+      post_arr <- c_list$draws$posterior_function(
+        grid_df,
+        categories = all_cats,
+        groups = grp,
+        draws = sample_draws,
+        noise_treatment = noise_treatment,
+        lapse_treatment = lapse_treatment
+      )
+      # post_arr has dim [N_obs, K, S_draws]
+      post_mat <- post_arr[, target_cat, , drop = FALSE]
+      dim(post_mat) <- c(nrow(grid_df), length(sample_draws))
+
+      lvl <- if (!is.null(levels) && length(levels) > 0L) levels[1L] else 0.95
+      p_lower <- (1 - lvl) / 2
+      p_upper <- 1 - p_lower
+
+      mean_vals <- rowMeans(post_mat)
+      q_lower_vals <- apply(post_mat, 1L, stats::quantile, probs = p_lower, na.rm = TRUE)
+      q_upper_vals <- apply(post_mat, 1L, stats::quantile, probs = p_upper, na.rm = TRUE)
+
+      res_list[[length(res_list) + 1L]] <- data.frame(
+        group = grp,
+        x = grid_df[[cues[1L]]],
+        mean_post = mean_vals,
+        q_lower = q_lower_vals,
+        q_upper = q_upper_vals,
+        stringsAsFactors = FALSE
       )
 
-    p <- ggplot2::ggplot(sum_res, ggplot2::aes(x = .data[[cues[1L]]])) +
-      ggplot2::geom_ribbon(ggplot2::aes(ymin = .data$q025, ymax = .data$q975), alpha = 0.25, fill = scales::hue_pal()(1)[1]) +
+      if (identical(uncertainty_treatment, "sample")) {
+        for (s_idx in seq_along(sample_draws)) {
+          sample_res_list[[length(sample_res_list) + 1L]] <- data.frame(
+            group = grp,
+            .draw = sample_draws[s_idx],
+            x = grid_df[[cues[1L]]],
+            posterior = post_mat[, s_idx],
+            stringsAsFactors = FALSE
+          )
+        }
+      }
+    }
+
+    sum_res <- dplyr::bind_rows(res_list)
+    names(sum_res)[2L] <- cues[1L]
+
+    p <- ggplot2::ggplot(sum_res, ggplot2::aes(x = .data[[cues[1L]]]))
+
+    if (identical(uncertainty_treatment, "marginalize")) {
+      p <- p + ggplot2::geom_ribbon(
+        ggplot2::aes(ymin = .data$q_lower, ymax = .data$q_upper),
+        alpha = 0.25,
+        fill = scales::hue_pal()(1)[1]
+      )
+    }
+
+    if (identical(uncertainty_treatment, "sample") && length(sample_res_list) > 0L) {
+      samp_res <- dplyr::bind_rows(sample_res_list)
+      names(samp_res)[3L] <- cues[1L]
+      p <- p + ggplot2::geom_line(
+        data = samp_res,
+        ggplot2::aes(y = .data$posterior, group = .data$.draw),
+        color = scales::hue_pal()(1)[1],
+        alpha = 0.20,
+        linewidth = 0.35,
+        show.legend = FALSE
+      )
+    }
+
+    p <- p +
       ggplot2::geom_line(ggplot2::aes(y = .data$mean_post), color = scales::hue_pal()(1)[1], linewidth = 0.8) +
       ggplot2::facet_wrap(~group) +
       ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
@@ -2633,32 +2761,33 @@ S7::method(plot_categorization_function, MVBU_Stanfit) <- function(
     gy <- seq(limits[[cues[2L]]][1L], limits[[cues[2L]]][2L], length.out = resolution)
     grid_mat <- expand.grid(x = gx, y = gy)
     names(grid_mat) <- cues[1:2]
-    eval_pts <- as.matrix(grid_mat)
+
+    draw_params <- c_list$draws$parameters
+    draw_col <- if (".draw" %in% names(draw_params)) ".draw" else if ("draw" %in% names(draw_params)) "draw" else ".iteration"
+    all_draw_ids <- sort(unique(draw_params[[draw_col]]))
+    sample_draws <- if (!is.null(ndraws) && ndraws < length(all_draw_ids)) {
+      sample(all_draw_ids, ndraws)
+    } else {
+      all_draw_ids
+    }
 
     res_list <- list()
+
     for (grp in groups) {
-      grp_draws <- d_sum[d_sum$group == grp, ]
-      draw_ids <- unique(grp_draws$.draw)
-      post_sum <- rep(0, nrow(grid_mat))
-      for (d_id in draw_ids) {
-        sub_d <- grp_draws[grp_draws$.draw == d_id, ]
-        lik_mat <- matrix(0, nrow = nrow(grid_mat), ncol = length(all_cats))
-        colnames(lik_mat) <- all_cats
-        for (j in seq_along(all_cats)) {
-          cat_row <- sub_d[sub_d$category == all_cats[j], ]
-          if (nrow(cat_row) > 0L) {
-            mu_vec <- cat_row$m[[1L]][1:2]
-            sig_mat <- as.matrix(cat_row$Sigma[[1L]][1:2, 1:2])
-            lik_mat[, j] <- mvtnorm::dmvnorm(eval_pts, mean = mu_vec, sigma = sig_mat)
-          }
-        }
-        tot_lik <- rowSums(lik_mat)
-        post_cat <- ifelse(tot_lik > 0, lik_mat[, target_cat] / tot_lik, 1 / length(all_cats))
-        post_sum <- post_sum + post_cat
-      }
+      post_arr <- c_list$draws$posterior_function(
+        grid_mat,
+        categories = all_cats,
+        groups = grp,
+        draws = sample_draws,
+        noise_treatment = noise_treatment,
+        lapse_treatment = lapse_treatment
+      )
+      post_mat <- post_arr[, target_cat, , drop = FALSE]
+      dim(post_mat) <- c(nrow(grid_mat), length(sample_draws))
+
       grid_grp <- grid_mat
       grid_grp$group <- grp
-      grid_grp$posterior <- post_sum / length(draw_ids)
+      grid_grp$posterior <- rowMeans(post_mat)
       grid_grp$Category <- target_cat
       res_list[[length(res_list) + 1L]] <- grid_grp
     }
@@ -2685,25 +2814,7 @@ S7::method(plot_categorization_function, MVBU_Stanfit) <- function(
 
     if ("contour" %in% aes) {
       contour_alpha <- if (length(all_cats) >= 2L) 0.5 else 1.0
-      if (requireNamespace("metR", quietly = TRUE)) {
-        p <- p + metR::geom_text_contour(
-          data = all_res,
-          ggplot2::aes(z = .data$posterior),
-          breaks = c(0.25, 0.5, 0.75),
-          stroke = 0.15,
-          rotate = FALSE,
-          size = 3,
-          alpha = contour_alpha
-        ) +
-          ggplot2::geom_contour(
-            data = all_res,
-            ggplot2::aes(z = .data$posterior),
-            breaks = c(0.25, 0.5, 0.75),
-            linewidth = 0.5,
-            color = "gray30",
-            alpha = contour_alpha
-          )
-      } else if (requireNamespace("geomtextpath", quietly = TRUE)) {
+      if (requireNamespace("geomtextpath", quietly = TRUE)) {
         p <- p + geomtextpath::geom_textcontour(
           data = all_res,
           ggplot2::aes(z = .data$posterior),
@@ -2734,7 +2845,7 @@ S7::method(plot_categorization_function, MVBU_Stanfit) <- function(
     x,
     "categorization",
     cues = cues,
-    ndraws = ndraws,
+    ndraws = if (identical(uncertainty_treatment, "sample")) ndraws else NULL,
     target_category = target_cat
   )
 
@@ -2757,7 +2868,11 @@ S7::method(plot_categorization_function, MVBU_Stanfit) <- function(
 S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
   x,
   pars = NULL,
+  categories = NULL,
+  groups = NULL,
+  ndraws = 100,
   combine_into_single_plot = TRUE,
+  index_panels = FALSE,
   ...
 ) {
   cues <- get_cue_labels(x)
@@ -3414,29 +3529,20 @@ S7::method(plot_parameter_correlations, MVBU_Stanfit) <- function(
     cues <- obj_cues
   }
   avail_cats <- get_category_labels(x)
-  if (is.null(categories)) {
-    categories <- avail_cats
-  }
-  if (!all(categories %in% avail_cats)) {
-    .stop(
-      "Invalid categories: ",
-      paste(setdiff(categories, avail_cats), collapse = ", "),
-      ". Available categories: ",
-      paste(avail_cats, collapse = ", ")
-    )
-  }
+  categories <- .validate_requested_labels(
+    categories,
+    avail_cats,
+    label_type = "category"
+  )
   avail_grps <- get_group_labels(x, include_prior = TRUE)
   if (is.null(groups)) {
     groups <- if ("prior" %in% avail_grps) "prior" else avail_grps[1L]
   }
-  if (!all(groups %in% avail_grps)) {
-    .stop(
-      "Invalid groups: ",
-      paste(setdiff(groups, avail_grps), collapse = ", "),
-      ". Available groups: ",
-      paste(avail_grps, collapse = ", ")
-    )
-  }
+  groups <- .validate_requested_labels(
+    groups,
+    avail_grps,
+    label_type = "group"
+  )
 
   draws <- get_draws(
     x,
@@ -3642,29 +3748,20 @@ S7::method(plot_parameters_pairwise, MVBU_Stanfit) <- function(
     cues <- obj_cues
   }
   avail_cats <- get_category_labels(x)
-  if (is.null(categories)) {
-    categories <- avail_cats
-  }
-  if (!all(categories %in% avail_cats)) {
-    .stop(
-      "Invalid categories: ",
-      paste(setdiff(categories, avail_cats), collapse = ", "),
-      ". Available categories: ",
-      paste(avail_cats, collapse = ", ")
-    )
-  }
+  categories <- .validate_requested_labels(
+    categories,
+    avail_cats,
+    label_type = "category"
+  )
   avail_grps <- get_group_labels(x, include_prior = TRUE)
   if (is.null(groups)) {
     groups <- if ("prior" %in% avail_grps) "prior" else avail_grps[1L]
   }
-  if (!all(groups %in% avail_grps)) {
-    .stop(
-      "Invalid groups: ",
-      paste(setdiff(groups, avail_grps), collapse = ", "),
-      ". Available groups: ",
-      paste(avail_grps, collapse = ", ")
-    )
-  }
+  groups <- .validate_requested_labels(
+    groups,
+    avail_grps,
+    label_type = "group"
+  )
 
   draws <- get_draws(
     x,
@@ -4043,20 +4140,38 @@ S7::method(plot_parameters_pairwise, MVBU_Stanfit) <- function(
 }
 
 # -----------------------------------------------------------------------------
-# plot_cues methods
+# plot_sample methods
 # -----------------------------------------------------------------------------
 
-#' @rdname plot_cues
+#' @rdname plot_sample
 #' @export
-S7::method(plot_cues, MVBU_Object) <- function(
+S7::method(plot_sample, MVBU_Object) <- function(
   x,
+  sample = c("exposure", "test"),
   cues = NULL,
   categories = NULL,
+  groups = NULL,
+  aes = NULL,
+  densities = c("gaussian", "kernel"),
+  n_samples = NULL,
+  levels = NULL,
+  limits = NULL,
+  resolution = 100,
   ...
 ) {
+  sample <- match.arg(sample, choices = c("exposure", "test"), several.ok = TRUE)
+  densities <- match.arg(densities)
+
   obj_cues <- get_cue_labels(x)
   if (is.null(cues)) {
-    cues <- if (length(obj_cues) > 2L) obj_cues[1:2] else obj_cues
+    cues <- if (length(obj_cues) > 3L) obj_cues[1:3] else obj_cues
+  }
+  if (length(cues) > 3L) {
+    .stop(
+      "Cannot plot more than 3 cue dimensions simultaneously (received ",
+      length(cues), " cues: ", paste(cues, collapse = ", "),
+      "). Please specify 1-3 cues; non-plotted cues will be analytically marginalized out."
+    )
   }
   if (!all(cues %in% obj_cues)) {
     .stop(
@@ -4067,59 +4182,290 @@ S7::method(plot_cues, MVBU_Object) <- function(
     )
   }
 
-  exp_data <- tryCatch(get_exposure_data(x), error = function(e) NULL)
-  test_data <- tryCatch(get_test_data(x), error = function(e) NULL)
-
-  if (is.null(exp_data) && is.null(test_data)) {
-    stop(
-      "Object does not contain empirical exposure or test data to plot cues."
+  exp_data <- if ("exposure" %in% sample) {
+    tryCatch(
+      get_exposure_data(
+        x,
+        groups = groups,
+        categories = categories,
+        n_samples = n_samples,
+        original_names = FALSE
+      ),
+      error = function(e) {
+        # If groups or categories were specified and failed, rethrow
+        if (!is.null(groups) || !is.null(categories)) {
+          stop(e)
+        }
+        NULL
+      }
     )
+  } else {
+    NULL
   }
 
-  df <- if (!is.null(exp_data)) exp_data else test_data
-  if (!is.null(categories) && "category" %in% names(df)) {
-    df <- df[df$category %in% categories, , drop = FALSE]
-  }
-  if ("category" %in% names(df)) {
-    df$Category <- df$category
+  test_data <- if ("test" %in% sample) {
+    tryCatch(
+      get_test_data(
+        x,
+        groups = groups,
+        response_categories = categories,
+        n_samples = n_samples,
+        original_names = FALSE
+      ),
+      error = function(e) {
+        # If groups or categories were specified and failed, rethrow
+        if (!is.null(groups) || !is.null(categories)) {
+          stop(e)
+        }
+        NULL
+      }
+    )
+  } else {
+    NULL
   }
 
-  t_sub <- .make_plot_title_and_subtitle(x, "cues", cues = cues)
+  if ((is.null(exp_data) || nrow(exp_data) == 0L) && (is.null(test_data) || nrow(test_data) == 0L)) {
+    .stop("Object does not contain any exposure or test data to plot.")
+  }
 
-  if (length(cues) == 1L) {
-    p <- ggplot(df, aes(x = .data[[cues[1]]])) +
-      geom_density(alpha = 0.5) +
-      labs(
-        title = t_sub$title,
-        subtitle = t_sub$subtitle,
-        x = cues[1],
-        y = "Density"
-      ) +
-      .mvbu_theme()
-    if ("Category" %in% names(df)) {
-      p <- p + aes(fill = .data$Category, color = .data$Category)
+  # Standardize Category & Group columns
+  if (!is.null(exp_data) && nrow(exp_data) > 0L) {
+    exp_data$Category <- as.factor(exp_data$category)
+    exp_data$Group <- as.factor(exp_data$group_unique)
+  }
+  if (!is.null(test_data) && nrow(test_data) > 0L) {
+    test_data$Category <- as.factor(test_data$response_category)
+    test_data$Group <- as.factor(test_data$group_unique)
+  }
+
+  # Parse aes
+  if (is.list(aes)) {
+    exp_aes <- if (!is.null(aes$exposure)) aes$exposure else c("fill-gradient", "contour")
+    test_aes <- if (!is.null(aes$test)) aes$test else "points"
+  } else if (is.character(aes)) {
+    exp_aes <- aes
+    test_aes <- aes
+  } else {
+    exp_aes <- if (length(cues) == 1L) "fill-discrete" else c("fill-gradient", "contour")
+    test_aes <- "points"
+  }
+
+  t_sub <- .make_plot_title_and_subtitle(x, "sample", cues = cues)
+
+  all_grps <- unique(c(
+    if (!is.null(exp_data) && "Group" %in% names(exp_data)) as.character(exp_data$Group),
+    if (!is.null(test_data) && "Group" %in% names(test_data)) as.character(test_data$Group)
+  ))
+
+  if (length(all_grps) == 0L) {
+    all_grps <- "1"
+  }
+
+  p_list <- lapply(all_grps, function(g) {
+    exp_g <- if (!is.null(exp_data) && "Group" %in% names(exp_data)) {
+      exp_data[exp_data$Group == g, , drop = FALSE]
+    } else {
+      exp_data
+    }
+    test_g <- if (!is.null(test_data) && "Group" %in% names(test_data)) {
+      test_data[test_data$Group == g, , drop = FALSE]
+    } else {
+      test_data
+    }
+
+    # 1. Base category representation plot using plot_categories
+    p_g <- if (!is.null(exp_g) && nrow(exp_g) > 0L && "category" %in% names(exp_g)) {
+      exp_clean <- stats::na.omit(exp_g[, c(cues, "category"), drop = FALSE])
+      tpl <- if (identical(densities, "gaussian")) {
+        new_mvg_category_representation_template_from_data(
+          data = exp_clean,
+          category = "category",
+          cues = cues
+        )
+      } else {
+        new_exemplar_category_representation_template_from_data(
+          data = exp_clean,
+          category = "category",
+          cues = cues
+        )
+      }
+      plot_categories(
+        tpl,
+        cues = cues,
+        categories = categories,
+        aes = exp_aes,
+        levels = levels,
+        limits = limits,
+        resolution = resolution,
+        ...
+      )
+    } else if (!is.null(test_g) && nrow(test_g) > 0L && any(c("contour", "fill-gradient", "fill-discrete") %in% test_aes)) {
+      cat_col <- if ("Category" %in% names(test_g)) "Category" else if ("category" %in% names(test_g)) "category" else NULL
+      test_clean <- if (!is.null(cat_col)) {
+        test_g[, c(cues, cat_col), drop = FALSE]
+      } else {
+        cbind(test_g[, cues, drop = FALSE], category = "test")
+      }
+      names(test_clean)[ncol(test_clean)] <- "category"
+      test_clean <- stats::na.omit(test_clean)
+      tpl <- if (identical(densities, "gaussian")) {
+        new_mvg_category_representation_template_from_data(
+          data = test_clean,
+          category = "category",
+          cues = cues
+        )
+      } else {
+        new_exemplar_category_representation_template_from_data(
+          data = test_clean,
+          category = "category",
+          cues = cues
+        )
+      }
+      plot_categories(
+        tpl,
+        cues = cues,
+        categories = categories,
+        aes = test_aes,
+        levels = levels,
+        limits = limits,
+        resolution = resolution,
+        ...
+      )
+    } else {
+      ggplot2::ggplot() +
+        .mvbu_theme()
+    }
+
+    # 2. Add exposure points if requested in aes and density is not exemplar (exemplar plot_categories already handles exemplars)
+    if (!is.null(exp_g) && nrow(exp_g) > 0L && "points" %in% exp_aes && !identical(densities, "kernel") && inherits(p_g, "ggplot")) {
+      if (length(cues) == 1L) {
+        p_g <- p_g + ggplot2::geom_rug(
+          data = exp_g,
+          ggplot2::aes(x = .data[[cues[1L]]], color = .data$Category),
+          alpha = 0.6,
+          inherit.aes = FALSE
+        )
+      } else if (length(cues) == 2L) {
+        p_g <- p_g + ggplot2::geom_point(
+          data = exp_g,
+          ggplot2::aes(x = .data[[cues[1L]]], y = .data[[cues[2L]]], color = .data$Category),
+          alpha = 0.6,
+          inherit.aes = FALSE
+        )
+      }
+    }
+
+    # 3. Add test points / layers
+    if (!is.null(test_g) && nrow(test_g) > 0L && inherits(p_g, "ggplot")) {
+      if ("points" %in% test_aes) {
+        if (length(cues) == 1L) {
+          p_g <- p_g + ggplot2::geom_rug(
+            data = test_g,
+            ggplot2::aes(x = .data[[cues[1L]]]),
+            color = "black",
+            alpha = 0.7,
+            inherit.aes = FALSE
+          )
+        } else if (length(cues) == 2L) {
+          p_g <- p_g + ggplot2::geom_point(
+            data = test_g,
+            ggplot2::aes(x = .data[[cues[1L]]], y = .data[[cues[2L]]]),
+            color = "black",
+            alpha = 0.7,
+            size = 1.5,
+            inherit.aes = FALSE
+          )
+        }
+      }
+
+      # If both exposure and test are present and test density was requested
+      if (!is.null(exp_g) && nrow(exp_g) > 0L && any(c("contour", "fill-gradient", "fill-discrete") %in% test_aes)) {
+        if (length(cues) == 1L) {
+          vals <- test_g[[cues[1L]]][!is.na(test_g[[cues[1L]]])]
+          if (length(vals) >= 2L) {
+            grid <- seq(min(vals), max(vals), length.out = resolution)
+            df_test_dens <- tibble::tibble(
+              cue = grid,
+              density = stats::dnorm(grid, mean(vals), stats::sd(vals))
+            )
+            names(df_test_dens)[1L] <- cues[1L]
+            p_g <- p_g + ggplot2::geom_line(
+              data = df_test_dens,
+              ggplot2::aes(x = .data[[cues[1L]]], y = .data$density),
+              color = "black",
+              linetype = "dashed",
+              inherit.aes = FALSE
+            )
+          }
+        } else if (length(cues) == 2L) {
+          sub_test <- stats::na.omit(test_g[, cues[1:2], drop = FALSE])
+          if (nrow(sub_test) >= 3L) {
+            X_test <- as.matrix(sub_test)
+            mu_t <- colMeans(X_test)
+            Sigma_t <- stats::cov(X_test)
+            if (all(is.finite(Sigma_t)) && det(Sigma_t) > 1e-9) {
+              dfs_test_cont <- list()
+              lvl_spec <- .parse_category_levels(levels, test_aes)
+              for (lvl in lvl_spec$contour) {
+                el <- ellipse::ellipse(Sigma_t, centre = mu_t, level = lvl)
+                df_el <- tibble::as_tibble(el)
+                names(df_el) <- cues[1:2]
+                df_el$level <- lvl
+                dfs_test_cont[[length(dfs_test_cont) + 1L]] <- df_el
+              }
+              test_cont_data <- dplyr::bind_rows(dfs_test_cont)
+              p_g <- p_g + ggplot2::geom_path(
+                data = test_cont_data,
+                ggplot2::aes(x = .data[[cues[1L]]], y = .data[[cues[2L]]], group = .data$level),
+                color = "black",
+                linetype = "dashed",
+                inherit.aes = FALSE
+              )
+            }
+          }
+        }
+      }
+    }
+
+    # If axis labels are missing (e.g. from empty ggplot), add them
+    if (inherits(p_g, "ggplot") && is.null(p_g$labels$x)) {
+      p_g <- p_g + ggplot2::labs(
+        x = cues[1L],
+        y = if (length(cues) == 1L) "Density" else if (length(cues) >= 2L) cues[2L] else NULL
+      )
+    }
+
+    if (!is.null(limits) && inherits(p_g, "ggplot") && is.null(p_g$coordinates$limits$x)) {
+      lim_spec <- .parse_cue_limits(limits, cues)
+      if (length(cues) == 1L && !is.null(lim_spec[[cues[1L]]])) {
+        p_g <- p_g + ggplot2::coord_cartesian(xlim = lim_spec[[cues[1L]]])
+      } else if (length(cues) >= 2L) {
+        p_g <- p_g + ggplot2::coord_cartesian(
+          xlim = lim_spec[[cues[1L]]],
+          ylim = lim_spec[[cues[2L]]]
+        )
+      }
+    }
+
+    if (length(all_grps) > 1L && inherits(p_g, "ggplot")) {
+      p_g <- p_g + ggplot2::ggtitle(g)
+    }
+
+    p_g
+  })
+
+  if (length(all_grps) == 1L) {
+    p <- p_list[[1L]]
+    if (inherits(p, "ggplot")) {
+      p <- p + ggplot2::labs(title = t_sub$title, subtitle = t_sub$subtitle)
     }
     return(p)
   }
 
-  if (length(cues) == 2L) {
-    p <- ggplot(df, aes(x = .data[[cues[1]]], y = .data[[cues[2]]])) +
-      geom_point(alpha = 0.6) +
-      labs(
-        title = t_sub$title,
-        subtitle = t_sub$subtitle,
-        x = cues[1],
-        y = cues[2]
-      ) +
-      .mvbu_theme()
-    if ("Category" %in% names(df)) {
-      p <- p + aes(color = .data$Category)
-    }
-    return(p)
-  }
-
-  stop("plot_cues currently supports 1 or 2 cues.")
+  patchwork::wrap_plots(p_list, guides = "collect") +
+    patchwork::plot_annotation(title = t_sub$title, subtitle = t_sub$subtitle)
 }
+
 
 # -----------------------------------------------------------------------------
 # plot_diagnostics methods
@@ -4167,7 +4513,8 @@ S7::method(plot, MVBU_Stanfit) <- function(x, ...) {
 #' @export
 S7::method(plot_model_updates, S7::class_list) <- function(
   x,
-  what = c("categories", "categorization_function"),
+  what = c("categories", "categorization_functions"),
+  groups = NULL,
   step_labels = NULL,
   cues = NULL,
   categories = NULL,
@@ -4208,7 +4555,8 @@ S7::method(plot_model_updates, S7::class_list) <- function(
 
     if (what == "categories") {
       p_i <- plot_categories(
-        mod, cues = cues, categories = categories, aes = aes,
+        mod,
+        cues = cues, categories = categories, aes = aes,
         levels = levels, limits = limits, resolution = resolution, ...
       )
       df_i <- p_i$data
@@ -4218,8 +4566,9 @@ S7::method(plot_model_updates, S7::class_list) <- function(
       }
       plots_list[[i]] <- p_i
     } else {
-      p_i <- plot_categorization_function(
-        mod, cues = cues, categories = categories, aes = aes,
+      p_i <- plot_categorization_functions(
+        mod,
+        cues = cues, categories = categories, aes = aes,
         levels = levels, limits = limits, resolution = resolution, ...
       )
       df_i <- p_i$data
@@ -4254,7 +4603,7 @@ S7::method(plot_model_updates, S7::class_list) <- function(
 #' @export
 S7::method(plot_model_updates, MVBU_Stanfit) <- function(
   x,
-  what = c("categories", "categorization_function"),
+  what = c("categories", "categorization_functions"),
   groups = NULL,
   step_labels = NULL,
   cues = NULL,
@@ -4344,20 +4693,936 @@ S7::method(plot_model_updates, MVBU_Stanfit) <- function(
   }
 
   plot_model_updates(
-    mod_list, what = what, cues = cues, categories = categories,
+    mod_list,
+    what = what, cues = cues, categories = categories,
     aes = aes, levels = levels, limits = limits, resolution = resolution,
     ncol = ncol, ...
   )
 }
 
-# -----------------------------------------------------------------------------
-# Convenience Function Aliases
-# -----------------------------------------------------------------------------
 
 
+# Clean Plotly legend so only one legend entry per category group appears
+# @noRd
+.clean_plotly_legend <- function(p) {
+  if (!inherits(p, "plotly")) {
+    return(p)
+  }
+  p_built <- plotly::plotly_build(p)
+  seen_groups <- list()
+  if (!is.null(p_built$x$data)) {
+    for (i in seq_along(p_built$x$data)) {
+      lg <- as.character(p_built$x$data[[i]]$legendgroup %||% p_built$x$data[[i]]$name %||% i)
+      raw_name <- p_built$x$data[[i]]$name %||% lg
+      cat_name <- sub("<br />.*$", "", raw_name)
+      cat_name <- sub("^\\((.*),.*\\)$", "\\1", cat_name)
+      if (is.null(seen_groups[[lg]])) {
+        seen_groups[[lg]] <- TRUE
+        p_built$x$data[[i]]$showlegend <- TRUE
+        p_built$x$data[[i]]$name <- cat_name
+      } else {
+        p_built$x$data[[i]]$showlegend <- FALSE
+      }
+    }
+  }
+  if (!is.null(p_built$x$frames)) {
+    for (f in seq_along(p_built$x$frames)) {
+      if (!is.null(p_built$x$frames[[f]]$data)) {
+        seen_f <- list()
+        for (i in seq_along(p_built$x$frames[[f]]$data)) {
+          lg <- as.character(p_built$x$frames[[f]]$data[[i]]$legendgroup %||% p_built$x$frames[[f]]$data[[i]]$name %||% i)
+          raw_name <- p_built$x$frames[[f]]$data[[i]]$name %||% lg
+          cat_name <- sub("<br />.*$", "", raw_name)
+          cat_name <- sub("^\\((.*),.*\\)$", "\\1", cat_name)
+          if (is.null(seen_f[[lg]])) {
+            seen_f[[lg]] <- TRUE
+            p_built$x$frames[[f]]$data[[i]]$showlegend <- TRUE
+            p_built$x$frames[[f]]$data[[i]]$name <- cat_name
+          } else {
+            p_built$x$frames[[f]]$data[[i]]$showlegend <- FALSE
+          }
+        }
+      }
+    }
+  }
+  p_built
+}
 
-#' @rdname plot_parameters
+.build_3d_model_list_ellipsoids <- function(model_list, cues, categories = NULL, level = 0.95, n_pts = 40L) {
+  models <- model_list@models
+  labels <- model_list@model_labels
+  theta <- seq(0, 2 * pi, length.out = n_pts)
+  r_val <- sqrt(stats::qchisq(level, df = 3))
+  c45 <- cos(pi / 4)
+  s45 <- sin(pi / 4)
+
+  # Coordinate rings on unit sphere
+  r_eq <- rbind(cos(theta), sin(theta), 0)
+  r_m1 <- rbind(cos(theta), 0, sin(theta))
+  r_m2 <- rbind(0, cos(theta), sin(theta))
+  r_p1 <- rbind(c45 * cos(theta), c45 * sin(theta), s45)
+  r_p2 <- rbind(c45 * cos(theta), c45 * sin(theta), -s45)
+  rings <- list(r_eq, r_m1, r_m2, r_p1, r_p2)
+
+  all_rows <- list()
+  for (i in seq_along(models)) {
+    m <- models[[i]]
+    step_lbl <- labels[i]
+    reps <- if (S7::S7_inherits(m, MVBU_CognitiveModel)) {
+      m@category_template@representations
+    } else if (S7::S7_inherits(m, MVBU_CategoryRepresentationTemplate)) {
+      m@representations
+    } else {
+      list()
+    }
+    if (length(reps) == 0L) next
+
+    target_cats <- if (!is.null(categories) && length(categories) > 0L) {
+      intersect(names(reps), categories)
+    } else {
+      names(reps)
+    }
+
+    for (cat_name in target_cats) {
+      r <- reps[[cat_name]]
+      mc <- tryCatch(.get_rep_mean_and_cov(r), error = function(e) NULL)
+      if (is.null(mc)) next
+      idx_c <- match(cues, get_cue_labels(r))
+      mu <- mc$mu[idx_c]
+      Sigma <- mc$Sigma[idx_c, idx_c]
+      chol_S <- tryCatch(t(chol(Sigma)), error = function(e) diag(sqrt(pmax(diag(Sigma), 1e-6))))
+
+      pts_rings <- list()
+      for (rg in rings) {
+        tr <- chol_S %*% (rg * r_val) + mu
+        tr_na <- cbind(tr, c(NA_real_, NA_real_, NA_real_))
+        pts_rings[[length(pts_rings) + 1L]] <- tr_na
+      }
+      cat_pts <- do.call(cbind, pts_rings)
+      df_cat <- data.frame(
+        x = cat_pts[1, ],
+        y = cat_pts[2, ],
+        z = cat_pts[3, ],
+        category = cat_name,
+        step_label = factor(step_lbl, levels = labels)
+      )
+      names(df_cat)[1:3] <- cues
+      all_rows[[length(all_rows) + 1L]] <- df_cat
+    }
+  }
+  if (length(all_rows) == 0L) {
+    return(NULL)
+  }
+  do.call(rbind, all_rows)
+}
+
+.build_3d_model_list_mesh_plot <- function(
+  model_list,
+  cues,
+  categories = NULL,
+  levels = NULL,
+  opacity = 0.6,
+  resolution = 20L,
+  ...
+) {
+  rlang::check_installed("plotly", reason = "for interactive 3D category surface plots.")
+  models <- model_list@models
+  labels <- model_list@model_labels
+  all_cats <- get_category_labels(models[[1L]])
+  if (is.null(categories) || length(categories) == 0L) {
+    categories <- all_cats
+  } else {
+    categories <- intersect(all_cats, categories)
+  }
+  if (length(categories) == 0L) {
+    .stop("None of the requested categories were found in the models.")
+  }
+
+  if (is.null(levels) || length(levels) == 0L) {
+    levels <- 0.95
+  }
+  lvl <- levels[1L]
+  r_val <- sqrt(stats::qchisq(lvl, df = 3))
+
+  n_theta <- as.integer(max(resolution, 18L))
+  n_phi <- as.integer(max(resolution / 2, 9L))
+  theta <- seq(0, 2 * pi, length.out = n_theta)
+  phi <- seq(0, pi, length.out = n_phi)
+  xs <- outer(cos(theta), sin(phi))
+  ys <- outer(sin(theta), sin(phi))
+  zs <- outer(rep(1, n_theta), cos(phi))
+  unit_sphere <- rbind(as.vector(xs), as.vector(ys), as.vector(zs))
+
+  # Triangulate sphere (0-based indices for mesh3d in plotly)
+  i_idx <- integer()
+  j_idx <- integer()
+  k_idx <- integer()
+  for (p_i in 0:(n_phi - 2)) {
+    for (t_i in 0:(n_theta - 2)) {
+      p1 <- p_i * n_theta + t_i
+      p2 <- p_i * n_theta + (t_i + 1)
+      p3 <- (p_i + 1) * n_theta + t_i
+      p4 <- (p_i + 1) * n_theta + (t_i + 1)
+      i_idx <- c(i_idx, p1, p2)
+      j_idx <- c(j_idx, p2, p4)
+      k_idx <- c(k_idx, p3, p3)
+    }
+  }
+
+  c_colors <- scales::hue_pal()(length(categories))
+  names(c_colors) <- categories
+
+  # Helper to compute category trace data for a given model checkpoint
+  get_cat_traces <- function(m) {
+    reps <- if (S7::S7_inherits(m, MVBU_CognitiveModel)) {
+      m@category_template@representations
+    } else if (S7::S7_inherits(m, MVBU_CategoryRepresentationTemplate)) {
+      m@representations
+    } else {
+      list()
+    }
+    tr_list <- list()
+    for (cat_name in categories) {
+      r <- reps[[cat_name]]
+      if (is.null(r)) next
+      mc <- tryCatch(.get_rep_mean_and_cov(r), error = function(e) NULL)
+      if (is.null(mc)) next
+      idx_c <- match(cues, get_cue_labels(r))
+      mu <- mc$mu[idx_c]
+      Sigma <- mc$Sigma[idx_c, idx_c]
+      chol_S <- tryCatch(
+        t(chol(Sigma)),
+        error = function(e) diag(sqrt(pmax(diag(Sigma), 1e-6)))
+      )
+      pts <- chol_S %*% (unit_sphere * r_val) + mu
+      col_k <- c_colors[cat_name]
+
+      # Category center marker trace
+      tr_marker <- list(
+        x = I(mu[1L]),
+        y = I(mu[2L]),
+        z = I(mu[3L]),
+        type = "scatter3d",
+        mode = "markers",
+        marker = list(color = col_k, size = 6),
+        name = cat_name,
+        legendgroup = cat_name,
+        showlegend = TRUE,
+        hoverinfo = "text",
+        text = paste0(cat_name, " (center)")
+      )
+      # Category ellipsoid mesh surface trace
+      tr_mesh <- list(
+        x = as.vector(pts[1, ]),
+        y = as.vector(pts[2, ]),
+        z = as.vector(pts[3, ]),
+        i = i_idx,
+        j = j_idx,
+        k = k_idx,
+        type = "mesh3d",
+        name = cat_name,
+        legendgroup = cat_name,
+        opacity = opacity,
+        colorscale = list(c(0, col_k), c(1, col_k)),
+        intensity = rep(0, ncol(pts)),
+        showscale = FALSE,
+        hoverinfo = "name",
+        showlegend = FALSE
+      )
+      tr_list <- c(tr_list, list(tr_marker, tr_mesh))
+    }
+    tr_list
+  }
+
+  # Build initial base plot from first model checkpoint
+  p <- plotly::plot_ly()
+  base_traces <- get_cat_traces(models[[1L]])
+  for (tr in base_traces) {
+    p <- plotly::add_trace(
+      p,
+      x = tr$x, y = tr$y, z = tr$z,
+      i = tr$i, j = tr$j, k = tr$k,
+      type = tr$type, mode = tr$mode,
+      marker = tr$marker, name = tr$name,
+      legendgroup = tr$legendgroup, showlegend = tr$showlegend,
+      opacity = tr$opacity, colorscale = tr$colorscale,
+      intensity = tr$intensity, showscale = tr$showscale,
+      hoverinfo = tr$hoverinfo, text = tr$text
+    )
+  }
+
+  p <- p %>% plotly::layout(
+    scene = list(
+      xaxis = list(title = cues[1L]),
+      yaxis = list(title = cues[2L]),
+      zaxis = list(title = cues[3L]),
+      aspectmode = "cube"
+    )
+  )
+
+  p <- plotly::plotly_build(p)
+
+  # Explicitly attach animation frames to avoid plotly mesh3d reordering bugs
+  n_traces <- length(base_traces)
+  trace_indices <- as.list(seq(0L, n_traces - 1L))
+
+  frames <- vector("list", length(models))
+  for (m_i in seq_along(models)) {
+    m_traces <- get_cat_traces(models[[m_i]])
+    frames[[m_i]] <- list(
+      name = labels[m_i],
+      data = m_traces,
+      traces = trace_indices
+    )
+  }
+  p$x$frames <- frames
+
+  steps <- lapply(seq_along(labels), function(m_i) {
+    list(
+      label = labels[m_i],
+      value = labels[m_i],
+      method = "animate",
+      args = list(
+        list(labels[m_i]),
+        list(
+          mode = "immediate",
+          frame = list(duration = 500, redraw = TRUE),
+          transition = list(duration = 0)
+        )
+      )
+    )
+  })
+
+  p$x$layout$sliders <- list(
+    structure(
+      list(
+        active = 0,
+        currentvalue = list(prefix = "Model: "),
+        steps = steps,
+        visible = TRUE,
+        pad = list(t = 40)
+      ),
+      class = "aniSlider"
+    )
+  )
+
+  p$x$layout$updatemenus <- list(
+    structure(
+      list(
+        type = "buttons",
+        direction = "right",
+        showactive = FALSE,
+        y = 0, x = 0,
+        yanchor = "top", xanchor = "right",
+        pad = list(t = 60, r = 5),
+        buttons = list(
+          list(
+            label = "Play",
+            method = "animate",
+            args = list(
+              NULL,
+              list(
+                fromcurrent = TRUE,
+                mode = "immediate",
+                transition = list(duration = 0),
+                frame = list(duration = 500, redraw = TRUE)
+              )
+            )
+          )
+        )
+      ),
+      class = "aniButton"
+    )
+  )
+
+  .clean_plotly_legend(p)
+}
+
+#' @rdname plot_categories
 #' @export
-plot_correlations <- function(x, ...) {
-  plot_parameter_correlations(x, ...)
+S7::method(plot_categories, MVBU_ModelList) <- function(
+  x,
+  cues = NULL,
+  categories = NULL,
+  groups = NULL,
+  aes = NULL,
+  levels = NULL,
+  limits = NULL,
+  resolution = 100,
+  n_exemplars = 0L,
+  ...
+) {
+  dots <- list(...)
+  mode <- if ("mode" %in% names(dots)) {
+    match.arg(dots$mode, c("facet", "animate"))
+  } else {
+    "facet"
+  }
+  interactive <- if ("interactive" %in% names(dots)) dots$interactive else FALSE
+  models <- x@models
+  labels <- x@model_labels
+  n_mod <- length(models)
+  if (n_mod == 0L) .stop("Model list is empty.")
+
+  first_cues <- get_cue_labels(models[[1L]])
+  if (is.null(cues)) {
+    cues <- if (length(first_cues) > 3L) first_cues[1:3] else first_cues
+  }
+  d <- length(cues)
+
+  all_cats <- get_category_labels(models[[1L]])
+  if (!is.null(categories)) {
+    categories <- intersect(all_cats, categories)
+    if (length(categories) == 0L) {
+      .stop("None of the requested categories match model category labels.")
+    }
+  }
+
+  if (isFALSE(interactive)) {
+    if (identical(mode, "facet")) {
+      p_list <- lapply(seq_along(models), function(i) {
+        p_i <- plot_categories(models[[i]], interactive = FALSE, cues = cues, categories = categories, groups = groups, aes = aes, levels = levels, ...) + ggplot2::ggtitle(labels[i])
+        if (i > 1L) {
+          p_i <- p_i + ggplot2::labs(subtitle = NULL, x = NULL, y = NULL)
+        }
+        p_i
+      })
+      patchwork::wrap_plots(p_list, guides = "collect")
+    } else {
+      rlang::check_installed("gganimate", reason = "for animating ggplot model updates.")
+      df_list <- lapply(seq_along(models), function(i) {
+        p <- plot_categories(models[[i]], interactive = FALSE, cues = cues, categories = categories, groups = groups, aes = aes, levels = levels, ...)
+        df <- if (!is.null(p$data) && is.data.frame(p$data) && nrow(p$data) > 0L) {
+          p$data
+        } else if (length(p$layers) > 0L && !is.null(p$layers[[1]]$data) && is.data.frame(p$layers[[1]]$data)) {
+          p$layers[[1]]$data
+        } else {
+          NULL
+        }
+        if (!is.null(df) && is.data.frame(df) && nrow(df) > 0L) {
+          df$step_label <- factor(labels[i], levels = labels)
+          grp_base <- if ("group" %in% colnames(df)) df$group else if ("Category" %in% colnames(df)) df$Category else if ("category" %in% colnames(df)) df$category else NULL
+          if (d == 1L) {
+            # In 1D, preserve category grouping across steps for smooth curve transitions
+            df$step_anim_group <- if (!is.null(grp_base)) grp_base else df$step_label
+          } else {
+            df$step_anim_group <- if (!is.null(grp_base)) interaction(grp_base, df$step_label) else df$step_label
+          }
+        }
+        df
+      })
+      combined_df <- do.call(rbind, df_list)
+
+      base_p <- plot_categories(models[[1L]], interactive = FALSE, cues = cues, categories = categories, groups = groups, aes = aes, levels = levels, ...)
+      for (l_i in seq_along(base_p$layers)) {
+        if (!is.null(base_p$layers[[l_i]]$data) && is.data.frame(base_p$layers[[l_i]]$data) && nrow(base_p$layers[[l_i]]$data) > 0L) {
+          base_p$layers[[l_i]]$data <- combined_df
+          base_p$layers[[l_i]]$mapping$group <- quote(step_anim_group)
+        }
+      }
+      if (!is.null(base_p$data) && is.data.frame(base_p$data) && nrow(base_p$data) > 0L) {
+        base_p$data <- combined_df
+        base_p$mapping$group <- quote(step_anim_group)
+      }
+
+      base_title <- base_p$labels$title %||% "Category likelihood"
+      anim_p <- base_p +
+        ggplot2::labs(title = sprintf("%s: {closest_state}", base_title)) +
+        ggplot2::theme(plot.title = ggplot2::element_text(margin = ggplot2::margin(b = 20)))
+
+      if (d == 1L) {
+        # 1D: Smooth curve transitions across exposure steps
+        gganimate::animate(
+          anim_p +
+            gganimate::transition_states(step_label, transition_length = 1, state_length = 2),
+          ...
+        )
+      } else {
+        # 2D+: Whole contour shift across states without vertex morphing
+        gganimate::animate(
+          anim_p +
+            gganimate::transition_states(step_label, transition_length = 0, state_length = 2),
+          ...
+        )
+      }
+    }
+  } else {
+    rlang::check_installed("plotly", reason = "for interactive Plotly plots.")
+    if (identical(mode, "facet")) {
+      if (d > 1L) {
+        .stop(
+          "Interactive multi-panel faceting (`mode = 'facet', interactive = TRUE`) ",
+          "is not supported for ", d, "D representations because Plotly cannot ",
+          "tile multi-dimensional WebGL scenes. To view model updating ",
+          "interactively with a slider bar, use `mode = 'animate', interactive = TRUE`. ",
+          "To generate a multi-panel faceted layout, use `mode = 'facet', interactive = FALSE`."
+        )
+      }
+      p_list <- lapply(seq_along(models), function(i) {
+        p_i <- plot_categories(models[[i]], interactive = TRUE, cues = cues, categories = categories, groups = groups, aes = aes, levels = levels, ...)
+        if (i > 1L) {
+          p_i <- plotly::style(p_i, showlegend = FALSE)
+        }
+        p_i
+      })
+      plotly::subplot(p_list, nrows = ceiling(n_mod / 2), shareX = TRUE, shareY = TRUE)
+    } else {
+      df_list <- lapply(seq_along(models), function(i) {
+        p <- plot_categories(models[[i]], interactive = FALSE, cues = cues, categories = categories, groups = groups, aes = aes, levels = levels, ...)
+        df <- if (!is.null(p$data) && is.data.frame(p$data) && nrow(p$data) > 0) p$data else p$layers[[1]]$data
+        if (!is.null(df) && is.data.frame(df) && nrow(df) > 0L) {
+          df$step_label <- factor(labels[i], levels = labels)
+        }
+        df
+      })
+      combined_df <- do.call(rbind, df_list)
+      cat_col <- if ("Category" %in% colnames(combined_df)) "Category" else if ("category" %in% colnames(combined_df)) "category" else NULL
+
+      if (d == 1L) {
+        plotly::plot_ly(
+          combined_df,
+          x = as.formula(paste0("~", cues[1])),
+          y = ~density,
+          color = if (!is.null(cat_col)) as.formula(paste0("~", cat_col)) else NULL,
+          frame = ~step_label,
+          type = "scatter",
+          mode = "lines"
+        )
+      } else if (d == 2L) {
+        split_formula <- if (!is.null(cat_col) && "level" %in% colnames(combined_df)) {
+          as.formula(paste0("~interaction(", cat_col, ", level)"))
+        } else if (!is.null(cat_col)) {
+          as.formula(paste0("~", cat_col))
+        } else {
+          NULL
+        }
+        p_res <- plotly::plot_ly(
+          combined_df,
+          x = as.formula(paste0("~", cues[1])),
+          y = as.formula(paste0("~", cues[2])),
+          color = if (!is.null(cat_col)) as.formula(paste0("~", cat_col)) else NULL,
+          split = split_formula,
+          legendgroup = if (!is.null(cat_col)) as.formula(paste0("~", cat_col)) else NULL,
+          frame = ~step_label,
+          type = "scatter",
+          mode = "lines"
+        )
+        .clean_plotly_legend(p_res)
+      } else {
+        is_wireframe <- "contour" %in% aes &&
+          !any(c("fill", "fill-discrete", "surface") %in% aes)
+        if (is_wireframe) {
+          ell_df <- .build_3d_model_list_ellipsoids(
+            model_list = x,
+            cues = cues, categories = categories,
+            level = if (!is.null(levels)) levels[1L] else 0.95
+          )
+          if (!is.null(ell_df) && nrow(ell_df) > 0L) {
+            p_res <- plotly::plot_ly(
+              ell_df,
+              x = as.formula(paste0("~", cues[1])),
+              y = as.formula(paste0("~", cues[2])),
+              z = as.formula(paste0("~", cues[3])),
+              color = ~category,
+              frame = ~step_label,
+              type = "scatter3d",
+              mode = "lines",
+              line = list(width = 3)
+            )
+            return(.clean_plotly_legend(p_res))
+          }
+        }
+        # 3D Shaded Surfaces (mesh3d)
+        mesh_dots <- dots
+        mesh_dots[c("mode", "interactive")] <- NULL
+        do.call(
+          .build_3d_model_list_mesh_plot,
+          c(
+            list(
+              model_list = x,
+              cues = cues,
+              categories = categories,
+              levels = levels,
+              aes = aes
+            ),
+            mesh_dots
+          )
+        )
+      }
+    }
+  }
+}
+
+
+#' @rdname plot_categorization_functions
+#' @export
+S7::method(plot_categorization_functions, MVBU_ModelList) <- function(
+  x,
+  cues = NULL,
+  categories = NULL,
+  groups = NULL,
+  aes = NULL,
+  levels = NULL,
+  limits = NULL,
+  decision_rule = "proportional",
+  resolution = 100,
+  noise_treatment = NULL,
+  lapse_treatment = NULL,
+  ...
+) {
+  dots <- list(...)
+  mode <- if ("mode" %in% names(dots)) {
+    match.arg(dots$mode, c("facet", "animate"))
+  } else {
+    "facet"
+  }
+  interactive <- if ("interactive" %in% names(dots)) dots$interactive else FALSE
+  models <- x@models
+  labels <- x@model_labels
+  n_mod <- length(models)
+  if (n_mod == 0L) .stop("Model list is empty.")
+
+  first_cues <- get_cue_labels(models[[1L]])
+  if (is.null(cues)) {
+    cues <- if (length(first_cues) > 3L) first_cues[1:3] else first_cues
+  }
+  d <- length(cues)
+
+  all_cats <- get_category_labels(models[[1L]])
+  if (!is.null(categories)) {
+    categories <- intersect(all_cats, categories)
+    if (length(categories) == 0L) {
+      .stop("None of the requested categories match model category labels.")
+    }
+  }
+
+  if (isFALSE(interactive)) {
+    if (identical(mode, "facet")) {
+      p_list <- lapply(seq_along(models), function(i) {
+        p_i <- plot_categorization_functions(models[[i]], interactive = FALSE, cues = cues, categories = categories, groups = groups, ...) + ggplot2::ggtitle(labels[i])
+        if (i > 1L) {
+          p_i <- p_i + ggplot2::labs(subtitle = NULL, x = NULL, y = NULL)
+        }
+        p_i
+      })
+      patchwork::wrap_plots(p_list, guides = "collect")
+    } else {
+      rlang::check_installed("gganimate", reason = "for animating ggplot model updates.")
+      df_list <- lapply(seq_along(models), function(i) {
+        p <- plot_categorization_functions(models[[i]], interactive = FALSE, cues = cues, categories = categories, groups = groups, ...)
+        df <- if (!is.null(p$data) && is.data.frame(p$data) && nrow(p$data) > 0L) {
+          p$data
+        } else if (length(p$layers) > 0L && !is.null(p$layers[[1]]$data) && is.data.frame(p$layers[[1]]$data)) {
+          p$layers[[1]]$data
+        } else {
+          NULL
+        }
+        if (!is.null(df) && is.data.frame(df) && nrow(df) > 0L) {
+          df$step_label <- factor(labels[i], levels = labels)
+          grp_base <- if ("group" %in% colnames(df)) df$group else if ("Category" %in% colnames(df)) df$Category else if ("category" %in% colnames(df)) df$category else NULL
+          df$step_anim_group <- if (!is.null(grp_base)) interaction(grp_base, df$step_label) else df$step_label
+        }
+        df
+      })
+      combined_df <- do.call(rbind, df_list)
+
+      base_p <- plot_categorization_functions(models[[1L]], interactive = FALSE, cues = cues, categories = categories, groups = groups, ...)
+      for (l_i in seq_along(base_p$layers)) {
+        if (!is.null(base_p$layers[[l_i]]$data) && is.data.frame(base_p$layers[[l_i]]$data) && nrow(base_p$layers[[l_i]]$data) > 0L) {
+          base_p$layers[[l_i]]$data <- combined_df
+          base_p$layers[[l_i]]$mapping$group <- quote(step_anim_group)
+        }
+      }
+      if (!is.null(base_p$data) && is.data.frame(base_p$data) && nrow(base_p$data) > 0L) {
+        base_p$data <- combined_df
+        base_p$mapping$group <- quote(step_anim_group)
+      }
+      base_title <- base_p$labels$title %||% "Categorization function"
+      anim_p <- base_p +
+        ggplot2::labs(title = sprintf("%s: {closest_state}", base_title)) +
+        ggplot2::theme(plot.title = ggplot2::element_text(margin = ggplot2::margin(b = 28)))
+
+      if (d == 1L) {
+        gganimate::animate(
+          anim_p +
+            gganimate::transition_states(step_label, transition_length = 1, state_length = 2),
+          ...
+        )
+      } else {
+        # 2D+: Whole contour shift without individual contour line vertex morphing
+        gganimate::animate(
+          anim_p +
+            gganimate::transition_states(step_label, transition_length = 0, state_length = 2),
+          ...
+        )
+      }
+    }
+  } else {
+    rlang::check_installed("plotly", reason = "for interactive Plotly plots.")
+    if (identical(mode, "facet")) {
+      if (d > 1L) {
+        .stop(
+          "Interactive multi-panel faceting (`mode = 'facet', interactive = TRUE`) ",
+          "is not supported for ", d, "D representations because Plotly cannot ",
+          "tile multi-dimensional WebGL scenes. To view model updating ",
+          "interactively with a slider bar, use `mode = 'animate', interactive = TRUE`. ",
+          "To generate a multi-panel faceted layout, use `mode = 'facet', interactive = FALSE`."
+        )
+      }
+      p_list <- lapply(seq_along(models), function(i) {
+        p_i <- plot_categorization_functions(models[[i]], interactive = TRUE, cues = cues, categories = categories, groups = groups, ...)
+        if (i > 1L) {
+          p_i <- plotly::style(p_i, showlegend = FALSE)
+        }
+        p_i
+      })
+      plotly::subplot(p_list, nrows = ceiling(n_mod / 2), shareX = TRUE, shareY = TRUE)
+    } else {
+      if (d > 2L) {
+        .stop(
+          "Interactive animated response functions (`mode = 'animate', interactive = TRUE`) ",
+          "are supported for 1D and 2D cue spaces. For ", d, "D representations, use ",
+          "`mode = 'facet', interactive = FALSE`."
+        )
+      }
+      p_list <- lapply(seq_along(models), function(i) {
+        plot_categorization_functions(
+          models[[i]],
+          interactive = FALSE,
+          cues = cues,
+          categories = categories,
+          groups = groups,
+          ...
+        )
+      })
+      df1 <- if (!is.null(p_list[[1L]]$data) && is.data.frame(p_list[[1L]]$data) && nrow(p_list[[1L]]$data) > 0L) {
+        p_list[[1L]]$data
+      } else {
+        p_list[[1L]]$layers[[1L]]$data
+      }
+      cat_col <- if ("Category" %in% colnames(df1)) "Category" else if ("category" %in% colnames(df1)) "category" else NULL
+      candidate_prob_cols <- c("Probability", "posterior", "p", "density")
+      prob_col <- candidate_prob_cols[candidate_prob_cols %in% colnames(df1)][1L]
+      if (is.na(prob_col)) {
+        prob_col <- colnames(df1)[sapply(df1, is.numeric)][1L]
+      }
+
+      if (d == 1L) {
+        df_list <- lapply(seq_along(p_list), function(i) {
+          df_i <- if (!is.null(p_list[[i]]$data) && is.data.frame(p_list[[i]]$data) && nrow(p_list[[i]]$data) > 0L) {
+            p_list[[i]]$data
+          } else {
+            p_list[[i]]$layers[[1L]]$data
+          }
+          if (!is.null(df_i) && is.data.frame(df_i) && nrow(df_i) > 0L) {
+            df_i$step_label <- factor(labels[i], levels = labels)
+          }
+          df_i
+        })
+        combined_df <- do.call(rbind, df_list)
+        p_res <- plotly::plot_ly(
+          combined_df,
+          x = as.formula(paste0("~", cues[1L])),
+          y = as.formula(paste0("~", prob_col)),
+          color = if (!is.null(cat_col)) as.formula(paste0("~", cat_col)) else NULL,
+          frame = ~step_label,
+          type = "scatter",
+          mode = "lines"
+        )
+        return(.clean_plotly_legend(p_res))
+      } else {
+        # d == 2L: 3D WebGL Surface animation across steps
+        gx <- sort(unique(df1[[cues[1L]]]))
+        gy <- sort(unique(df1[[cues[2L]]]))
+        cats_present <- if (!is.null(cat_col)) unique(df1[[cat_col]]) else "Model"
+        cat_colors <- scales::hue_pal()(length(cats_present))
+        names(cat_colors) <- cats_present
+
+        p <- plotly::plot_ly()
+        for (cat_name in cats_present) {
+          sub1 <- if (!is.null(cat_col)) df1[df1[[cat_col]] == cat_name, , drop = FALSE] else df1
+          z1 <- t(matrix(sub1[[prob_col]], nrow = length(gx), ncol = length(gy)))
+          col <- cat_colors[cat_name]
+          col_rgb <- grDevices::col2rgb(col)
+          p <- .add_2d_surface_trace(
+            p = p,
+            gx = gx,
+            gy = gy,
+            z_surf = z1,
+            cat_name = cat_name,
+            col = col,
+            col_rgb = col_rgb,
+            aes = "fill-discrete",
+            hoverinfo = "name+z"
+          )
+        }
+
+        trace_indices <- as.list(seq(0L, length(cats_present) - 1L))
+        frames <- lapply(seq_along(models), function(i) {
+          p_dat <- p_list[[i]]$data
+          df_i <- if (!is.null(p_dat) && is.data.frame(p_dat) &&
+                      nrow(p_dat) > 0L) {
+            p_dat
+          } else {
+            p_list[[i]]$layers[[1L]]$data
+          }
+          frame_data <- lapply(cats_present, function(cat_name) {
+            sub_i <- if (!is.null(cat_col)) {
+              df_i[df_i[[cat_col]] == cat_name, , drop = FALSE]
+            } else {
+              df_i
+            }
+            z_i <- t(matrix(
+              sub_i[[prob_col]],
+              nrow = length(gx),
+              ncol = length(gy)
+            ))
+            list(z = z_i)
+          })
+          list(name = labels[i], data = frame_data, traces = trace_indices)
+        })
+
+        p <- p %>% plotly::layout(
+          scene = list(
+            xaxis = list(title = cues[1L]),
+            yaxis = list(title = cues[2L]),
+            zaxis = list(title = "Response Probability", range = c(0, 1)),
+            camera = list(eye = list(x = 1.5, y = 1.5, z = 1.2))
+          ),
+          legend = list(orientation = "h", x = 0.1, y = -0.1)
+        )
+        p <- plotly::plotly_build(p)
+        p$x$frames <- frames
+
+        slider_steps <- lapply(seq_along(labels), function(i) {
+          list(
+            label = labels[i],
+            value = labels[i],
+            method = "animate",
+            args = list(
+              list(labels[i]),
+              list(
+                mode = "immediate",
+                frame = list(duration = 500, redraw = TRUE),
+                transition = list(duration = 0)
+              )
+            )
+          )
+        })
+
+        p$x$layout$sliders <- list(
+          structure(
+            list(
+              active = 0,
+              currentvalue = list(prefix = "Step: "),
+              steps = slider_steps,
+              visible = TRUE,
+              pad = list(t = 40)
+            ),
+            class = "aniSlider"
+          )
+        )
+
+        p$x$layout$updatemenus <- list(
+          structure(
+            list(
+              type = "buttons",
+              direction = "right",
+              showactive = FALSE,
+              y = 0, x = 0,
+              yanchor = "top", xanchor = "right",
+              pad = list(t = 60, r = 5),
+              buttons = list(
+                list(
+                  label = "Play",
+                  method = "animate",
+                  args = list(
+                    NULL,
+                    list(
+                      fromcurrent = TRUE,
+                      mode = "immediate",
+                      transition = list(duration = 0),
+                      frame = list(duration = 500, redraw = TRUE)
+                    )
+                  )
+                )
+              )
+            ),
+            class = "aniButton"
+          )
+        )
+        return(p)
+      }
+    }
+  }
+}
+
+
+#' @rdname plot_categories
+#' @export
+S7::method(plot_categories, MVBU_StanfitPosterior) <- function(
+  x,
+  cues = NULL,
+  categories = NULL,
+  groups = NULL,
+  aes = NULL,
+  levels = NULL,
+  limits = NULL,
+  resolution = 100,
+  n_exemplars = 0L,
+  ...
+) {
+  dots <- list(...)
+  interactive <- if ("interactive" %in% names(dots)) dots$interactive else FALSE
+  # Coerce lightweight posterior to an expected model and plot
+  exp_model <- .as_cognitive_model_from_posterior(x)
+  plot_categories(
+    exp_model,
+    cues = cues,
+    categories = categories,
+    groups = groups,
+    aes = aes,
+    levels = levels,
+    limits = limits,
+    resolution = resolution,
+    n_exemplars = n_exemplars,
+    interactive = interactive,
+    ...
+  )
+}
+
+#' @rdname plot_categorization_functions
+#' @export
+S7::method(plot_categorization_functions, MVBU_StanfitPosterior) <- function(
+  x,
+  cues = NULL,
+  categories = NULL,
+  groups = NULL,
+  aes = NULL,
+  levels = NULL,
+  limits = NULL,
+  decision_rule = "proportional",
+  resolution = 100,
+  noise_treatment = NULL,
+  lapse_treatment = NULL,
+  ...
+) {
+  dots <- list(...)
+  interactive <- if ("interactive" %in% names(dots)) dots$interactive else FALSE
+  exp_model <- .as_cognitive_model_from_posterior(x)
+  plot_categorization_functions(
+    exp_model,
+    cues = cues,
+    categories = categories,
+    groups = groups,
+    aes = aes,
+    levels = levels,
+    limits = limits,
+    decision_rule = decision_rule,
+    resolution = resolution,
+    noise_treatment = noise_treatment,
+    lapse_treatment = lapse_treatment,
+    interactive = interactive,
+    ...
+  )
 }

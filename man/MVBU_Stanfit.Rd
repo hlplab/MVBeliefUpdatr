@@ -40,45 +40,53 @@ IdealAdaptorStanfit(
   cache = list()
 )
 }
+\arguments{
+\item{data}{A \code{data.frame} containing the data used to fit the model.}
+
+\item{staninput}{A Stan input object containing the data handed to rstan
+through \code{\link{make_staninput}}. Contains at least two components:
+\code{transformed} and \code{untransformed}.}
+
+\item{stanvars}{A \code{stanvars} object or \code{NULL}. Default: \code{NULL}.}
+
+\item{backend}{The name of the backend used to fit the model (character).
+Default: \code{"rstan"}.}
+
+\item{save_pars}{Optional storage for saved parameter names. Default:
+\code{NULL}.}
+
+\item{stan_args}{Named list of additional control arguments that were passed
+to the Stan backend directly. Default: \code{list()}.}
+
+\item{stanfit}{An object of class \code{\link[rstan:stanfit-class]{stanfit}}
+containing posterior draws. Default: \code{NULL}.}
+
+\item{basis}{An object that contains a small subset of the Stan data created
+at fitting time, needed to process new data. Default: \code{NULL}.}
+
+\item{transform_information}{An object of type
+\code{\link{MVBU_TransformInformation}} or \code{NULL}. Default: \code{NULL}.}
+
+\item{criteria}{An empty \code{list} for adding model fit criteria after
+estimation of the model. Default: \code{list()}.}
+
+\item{file}{Optional name of a file in which the model object was stored in
+or loaded from. Default: \code{NULL}.}
+
+\item{version}{The versions of \pkg{MVBeliefUpdatr} and \pkg{rstan} with
+which the model was fitted. Default: \code{NULL}.}
+
+\item{metadata}{List containing auxiliary information including
+\code{label_information}. Default: \code{list()}.}
+
+\item{cache}{Internal cache list storing pre-extracted \code{$draws} and
+\code{$summary} objects populated by \code{\link{add_posterior_latents}}.
+Default: \code{list()}.}
+}
 \description{
 An S7 base class for Stan fit objects
 }
-\section{Slots}{
-
-\describe{
-\item{\code{data}}{A \code{data.frame} containing the data used to fit the model.}
-
-\item{\code{staninput}}{A Stan input object containing the data handed to rstan through
-\code{\link{make_staninput}}. The staninput object contains at
-least two components: \code{transformed} and \code{untransformed}.}
-
-\item{\code{stanvars}}{A \code{\link{stanvars}} object or \code{NULL}.}
-
-\item{\code{backend}}{The name of the backend used to fit the model (character).}
-
-\item{\code{save_pars}}{Optional storage for saved parameter names.}
-
-\item{\code{stan_args}}{Named list of additional control arguments that were passed
-to the Stan backend directly. NOT YET USED}
-
-\item{\code{stanfit}}{An object of class
-\code{\link[rstan:stanfit-class]{stanfit}} containing posterior draws.}
-
-\item{\code{basis}}{An object that contains a small subset of the Stan data
-created at fitting time, needed to process new data. NOT YET USED}
-
-\item{\code{transform_information}}{An object of type \code{\link{MVBU_TransformInformation}}.}
-
-\item{\code{criteria}}{An empty \code{list} for adding model fit criteria
-after estimation of the model. NOT YET USED}
-
-\item{\code{file}}{Optional name of a file in which the model object was stored in
-or loaded from.}
-
-\item{\code{version}}{The versions of \pkg{MVBeliefUpdatr} and \pkg{rstan} with
-which the model was fitted.}
-
-\item{\code{metadata}}{List containing auxiliary information including
-\code{label_information}.}
-}}
-
+\seealso{
+\code{\link{add_posterior_latents}}, \code{\link{fit_ideal_adaptor}},
+\code{vignette("fitting-and-working-with-stanfit-models")}
+}

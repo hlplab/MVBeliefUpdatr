@@ -16,6 +16,8 @@
 #' @importFrom tibble tibble is_tibble
 #' @importFrom rstan sampling
 #' @importFrom LaplacesDemon is.positive.definite
+#' @importFrom grDevices palette.colors col2rgb rgb
+#' @importFrom RcppParallel RcppParallelLibs
 #' @useDynLib MVBeliefUpdatr, .registration=TRUE
 NULL
 

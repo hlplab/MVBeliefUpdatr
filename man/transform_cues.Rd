@@ -49,7 +49,7 @@ returned? (default: \code{TRUE})}
 
 \item{transform.parameters}{List of transforms (default: \code{NULL})}
 
-\item{return.transformed.data, return.transformed.data}{Should the (un)transformed data be returned? (default: \code{TRUE})}
+\item{return.transformed.data, return.untransformed.data}{Should the (un)transformed data be returned? (default: \code{TRUE})}
 
 \item{return.transform.parameters}{Should the list of transforms be returned? (default: \code{FALSE})}
 

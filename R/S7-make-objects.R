@@ -1,11 +1,12 @@
 #' @include S7-family-coercion.R
-#' @include S7-core-uvg-classes.R
-#' @include S7-core-nix-classes.R
-#' @include S7-core-muvg-classes.R
-#' @include S7-core-mnix-classes.R
-#' @include S7-core-mvg-classes.R
-#' @include S7-core-niw-classes.R
-#' @include S7-core-exemplar-classes.R
+#' @include S7-class-uvg.R
+#' @include S7-class-nix.R
+#' @include S7-class-muvg.R
+#' @include S7-class-mnix.R
+#' @include S7-class-mvg.R
+#' @include S7-class-niw.R
+#' @include S7-class-exemplar.R
+#' @include S7-model-list.R
 NULL
 
 # -----------------------------------------------------------------------------
@@ -17,8 +18,6 @@ NULL
 #' Dynamic constructors that inspect the input `type` (or `family`) argument
 #' and dispatch to the appropriate family-specific constructor from data.
 #'
-#' @name new-objects-from-data
-#' @rdname new-objects-from-data
 #' @param data A data frame containing observation cues and category labels.
 #'   For individual category representations, data must contain observations
 #'   from exactly one category.
@@ -27,24 +26,20 @@ NULL
 #' @param category Character string giving the category column name in `data`.
 #'   Defaults to `"category"`.
 #' @param cues Character vector of cue column names in `data`.
-#' @param category_prior Optional numeric vector of prior category
-#'   probabilities summing to 1.
-#' @param decision_rule Categorization decision rule: `"sampling"` or
-#'   `"argmax"`. Defaults to `"sampling"`.
-#' @param lapse_rate Numeric scalar lapse probability in `[0, 1]`. Defaults
-#'   to 0.
-#' @param lapse_bias Optional numeric vector of lapse category probabilities.
-#' @param Sigma_noise Optional perceptual noise covariance matrix.
-#' @param noise_treatment Treatment of noise: `"no_noise"`, `"sample"`, or
-#'   `"marginalize"`.
-#' @param lapse_treatment Treatment of lapses: `"no_lapses"`, `"sample"`, or
-#'   `"marginalize"`.
-#' @param ... Additional family-specific parameters (such as `kappa`, `nu`,
-#'   `m_0`, `S_0`, `c`, or `bandwidth`).
+#' @param ... Additional model and family-specific parameters passed to constructors.
+#'   For cognitive models, this includes `category_prior` (prior category probabilities),
+#'   `decision_rule` (`"sampling"` or `"argmax"`), `lapse_rate` (scalar in `[0, 1]`),
+#'   `lapse_bias`, `Sigma_noise` (perceptual noise covariance), `noise_treatment`
+#'   (`"no_noise"`, `"sample"`, or `"marginalize"`), and `lapse_treatment`
+#'   (`"no_lapses"`, `"sample"`, or `"marginalize"`). For specific representation families,
+#'   this includes parameters such as `kappa`, `nu`, `m_0`, `S_0`, `c`, or `bandwidth`.
 #'
 #' @return An S7 representation, template, or cognitive model object.
 #' @seealso [family-uvg], [family-nix], [family-muvg], [family-mnix],
 #'   [family-mvg], [family-niw], [family-exemplar]
+#'
+#' @name new-objects-from-data
+#' @rdname new-objects-from-data
 #' @export
 new_category_representation_from_data <- function(
   data,
@@ -263,9 +258,9 @@ new_model_from_data <- function(
       `+`,
       mapply(function(r, w) r@m * w, reps, weights, SIMPLIFY = FALSE)
     )
-    S_weighted <- Reduce(
+    sigma2_weighted <- Reduce(
       `+`,
-      mapply(function(r, w) r@S * w, reps, weights, SIMPLIFY = FALSE)
+      mapply(function(r, w) r@sigma2 * w, reps, weights, SIMPLIFY = FALSE)
     )
     kappas <- Reduce(
       `+`,
@@ -279,7 +274,7 @@ new_model_from_data <- function(
       category_labels = cat_labels,
       cue_labels = cue_labels,
       m = m_weighted,
-      S = S_weighted,
+      sigma2 = sigma2_weighted,
       kappa = kappas,
       nu = nus
     )
@@ -517,6 +512,10 @@ S7::method(aggregate, S7::class_list) <- function(x, weights = NULL, ...) {
   }
 }
 
+S7::method(aggregate, MVBU_ModelList) <- function(x, weights = NULL, ...) {
+  .aggregate_cognitive_models(x@models, weights = weights)
+}
+
 # -----------------------------------------------------------------------------
 # aggregate_models public function
 # -----------------------------------------------------------------------------
@@ -526,16 +525,10 @@ S7::method(aggregate, S7::class_list) <- function(x, weights = NULL, ...) {
 #' @description
 #' Aggregates multiple S7 category representations, category representation
 #' templates, or cognitive models of the same family by computing weighted
-#' averages of their category distributions and model parameters.
+#' averages of their category distributions and model parameters. Accepts an
+#' [MVBU_ModelList] container object or a list of cognitive models.
 #'
-#' @name aggregate_models
-#' @rdname aggregate_models
-#' @aliases aggregate aggregate_models
-#'
-#' @param x,models An S7 category representation, template, cognitive model, or
-#'   a non-empty list of such objects belonging to the same S7 class. For
-#'   \code{aggregate}, additional objects can also be passed via \code{...}.
-#'   For \code{aggregate_models}, a non-empty list of cognitive models.
+#' @param models An [MVBU_ModelList] container object or non-empty list of cognitive models.
 #' @param weights Optional numeric vector of positive weights with the same
 #'   length as the number of objects being aggregated. If \code{NULL} (default),
 #'   uniform weights \eqn{1/N} are used. Weights are automatically normalized to
@@ -583,7 +576,18 @@ S7::method(aggregate, S7::class_list) <- function(x, weights = NULL, ...) {
 #' @seealso \code{\link{new_mvg_ideal_observer}},
 #'   \code{\link{new_niw_ideal_adaptor}},
 #'   \code{\link{new_exemplar_model}}
+#'
+#' @name aggregate_models
+#' @rdname aggregate_models
+#' @aliases aggregate aggregate_models
 #' @export
 aggregate_models <- function(models, weights = NULL, ...) {
-  .aggregate_cognitive_models(models, weights = weights)
+  if (S7::S7_inherits(models, MVBU_ModelList)) {
+    models_list <- models@models
+  } else if (is.list(models)) {
+    models_list <- models
+  } else {
+    .stop("`models` must be an MVBU_ModelList object or a non-empty list of cognitive models.")
+  }
+  .aggregate_cognitive_models(models_list, weights = weights)
 }

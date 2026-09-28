@@ -1,4 +1,4 @@
-#' @include S7-core-classes.R
+#' @include S7-class.R
 #' @importFrom lifecycle deprecate_warn
 #' @importFrom dplyr group_by across any_of arrange summarise relocate select mutate ungroup all_of starts_with
 #' @importFrom tidyr unnest pivot_longer

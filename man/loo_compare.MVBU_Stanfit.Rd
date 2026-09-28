@@ -16,7 +16,7 @@
 comparison (\code{"loo"} or \code{"waic"}). Default: \code{"loo"}.}
 }
 \value{
-A matrix of class \code{\link[loo]{compare.loo}} containing model comparison metrics.
+A matrix of class \code{compare.loo} (see \code{\link[loo]{loo_compare}}) containing model comparison metrics.
 }
 \description{
 Compare fitted \code{\link{MVBU_Stanfit}} objects using Leave-One-Out Cross-Validation

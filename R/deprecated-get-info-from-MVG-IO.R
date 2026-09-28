@@ -1,4 +1,4 @@
-#' @include S7-core-classes.R
+#' @include S7-class.R
 #' @importFrom lifecycle deprecate_warn
 #' @importFrom rlang := sym
 #' @importFrom tidyr pivot_wider as_tibble

@@ -17,7 +17,7 @@ make_exemplars_from_data <- function(data, group = NULL, category = "category", 
   lifecycle::deprecate_warn("0.1.0", "make_exemplars_from_data()", "new_exemplar_category_representation_template_from_data()")
   if (!is.null(group)) .stop("group is no longer supported. Call this function once per group instead.")
   if (!is.null(sim_function)) .warning("sim_function is no longer supported and will be ignored.")
-  new_exemplar_category_representation_template_from_data(data = data, category = category, cues = cues, verbose = verbose)
+  new_exemplar_category_representation_template_from_data(data = data, category = category, cues = cues)
 }
 
 #' Deprecated: make_exemplar_model_from_data
@@ -40,8 +40,8 @@ make_exemplar_model_from_data <- function(data, group = NULL, category = "catego
   if (!is.null(sim_function)) .warning("sim_function is no longer supported and will be ignored.")
   new_exemplar_model_from_data(
     data = data, category = category, cues = cues,
-    category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise,
-    verbose = verbose)
+    category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise
+  )
 }
 
 
@@ -58,7 +58,7 @@ make_exemplar_model_from_data <- function(data, group = NULL, category = "catego
 make_MVG_from_data <- function(data, group = NULL, category = "category", cues, verbose = F) {
   lifecycle::deprecate_warn("0.1.0", "make_MVG_from_data()", "new_mvg_category_representation_template_from_data()")
   if (!is.null(group)) .stop("group is no longer supported. Call this function once per group instead.")
-  new_mvg_category_representation_template_from_data(data = data, category = category, cues = cues, verbose = verbose)
+  new_mvg_category_representation_template_from_data(data = data, category = category, cues = cues)
 }
 
 #' Deprecated: make_MVG_ideal_observer_from_data
@@ -76,8 +76,8 @@ make_MVG_ideal_observer_from_data <- function(data, group = NULL, category = "ca
   if (!is.null(group)) .stop("group is no longer supported. Call this function once per group instead.")
   new_mvg_ideal_observer_from_data(
     data = data, category = category, cues = cues,
-    category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise,
-    verbose = verbose)
+    category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise
+  )
 }
 
 
@@ -88,7 +88,8 @@ make_MVG_ideal_observer_from_data <- function(data, group = NULL, category = "ca
 #' removed in 0.2.0. Please use [new_niw_category_representation_template_from_data()] instead.
 #' @inheritParams make_exemplars_from_data
 #' @param kappa Strength of belief (pseudocount) about the category mean. (default: same as `nu`)
-#' @param nu Strength of belief (pseudocount) about the category covariance matrix. (default: number of cues + 2)
+#' @param nu Strength of belief (pseudocount) about the category covariance
+#'   matrix. (default: number of cues + 2)
 #' @return An \code{MVBU_CategoryRepresentationTemplate} of NIW category representations.
 #' @seealso [new_niw_category_representation_template_from_data()]
 #' @keywords internal
@@ -96,7 +97,7 @@ make_MVG_ideal_observer_from_data <- function(data, group = NULL, category = "ca
 make_NIW_belief_from_data <- function(data, group = NULL, category = "category", cues, kappa = nu, nu = length(cues) + 2, verbose = F) {
   lifecycle::deprecate_warn("0.1.0", "make_NIW_belief_from_data()", "new_niw_category_representation_template_from_data()")
   if (!is.null(group)) .stop("group is no longer supported. Call this function once per group instead.")
-  new_niw_category_representation_template_from_data(data = data, category = category, cues = cues, kappa = kappa, nu = nu, verbose = verbose)
+  new_niw_category_representation_template_from_data(data = data, category = category, cues = cues, kappa = kappa, nu = nu)
 }
 
 #' @rdname make_NIW_belief_from_data
@@ -123,8 +124,8 @@ make_NIW_ideal_adaptor_from_data <- function(data, group = NULL, category = "cat
   if (!is.null(group)) .stop("group is no longer supported. Call this function once per group instead.")
   new_niw_ideal_adaptor_from_data(
     data = data, category = category, cues = cues, kappa = kappa, nu = nu,
-    category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise,
-    verbose = verbose)
+    category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise
+  )
 }
 
 

@@ -9,14 +9,14 @@ plot_expected_categorization_function_1D(x, ...)
 \arguments{
 \item{x}{Model object.}
 
-\item{...}{Arguments passed to \code{\link[=plot_categorization_function]{plot_categorization_function()}}.}
+\item{...}{Arguments passed to \code{\link[=plot_categorization_functions]{plot_categorization_functions()}}.}
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
 \code{plot_expected_categorization_function_1D()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
-removed in 0.2.0. Please use \code{\link[=plot_categorization_function]{plot_categorization_function()}} instead.
+removed in 0.2.0. Please use \code{\link[=plot_categorization_functions]{plot_categorization_functions()}} instead.
 }
 \seealso{
-\code{\link[=plot_categorization_function]{plot_categorization_function()}}
+\code{\link[=plot_categorization_functions]{plot_categorization_functions()}}
 }
 \keyword{internal}

@@ -9,13 +9,15 @@
 get_transform_information(x, ...)
 
 ## S7 method for class <any>
-get_transform_information(x)
+get_transform_information(x, ...)
 
 ## S7 method for class <MVBU_Stanfit>
-get_transform_information(x)
+get_transform_information(x, ...)
 }
 \arguments{
 \item{x}{An S7 fit or fit-input object.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \value{
 A transform-information object.

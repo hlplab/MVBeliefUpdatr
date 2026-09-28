@@ -1,4 +1,4 @@
-#' @include S7-core-niw-classes.R
+#' @include S7-class-niw.R
 #' @importFrom lifecycle deprecate_warn
 #' @importFrom S7 S7_inherits
 NULL

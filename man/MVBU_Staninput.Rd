@@ -10,12 +10,10 @@ MVBU_Staninput(values = list())
 
 IdealAdaptorStaninput(values = list())
 }
+\arguments{
+\item{values}{A named list containing the Stan input values.
+Default: \code{list()}.}
+}
 \description{
 MVBeliefUpdatr Stan Input Classes and Constructors
 }
-\section{Slots}{
-
-\describe{
-\item{\code{values}}{A named list containing the Stan input values.}
-}}
-

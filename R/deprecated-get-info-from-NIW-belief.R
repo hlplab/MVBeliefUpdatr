@@ -1,4 +1,4 @@
-#' @include S7-core-classes.R
+#' @include S7-class.R
 #' @importFrom lifecycle deprecate_warn
 #' @importFrom foreach foreach %do%
 #' @importFrom dplyr filter rename_with mutate
@@ -163,18 +163,18 @@ get_posterior_predictives_from_NIW_beliefs <- function(
       msg = "Grouping variable not found in the NIW belief object."
     )
 
-    foreach::foreach(i = unique(x[[grouping.var]])) %do% {
+    res_list <- lapply(unique(x[[grouping.var]]), function(grp_val) {
       suppressWarnings(get_posterior_predictive_from_NIW_belief(
         x,
-        model %>% dplyr::filter(!!rlang::sym(grouping.var) == i),
+        model %>% dplyr::filter(!!rlang::sym(grouping.var) == grp_val),
         log = log,
         category = category,
         category.label = category.label,
         wide = wide
       )) %>%
-        dplyr::mutate(!!rlang::sym(grouping.var) := i)
-    } %>%
-      purrr::reduce(rbind)
+        dplyr::mutate(!!rlang::sym(grouping.var) := grp_val)
+    })
+    do.call(rbind, res_list)
   }
 }
 

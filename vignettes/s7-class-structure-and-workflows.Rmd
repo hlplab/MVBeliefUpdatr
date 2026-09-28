@@ -1,5 +1,6 @@
 ---
 title: "S7 Class Architecture, Constructors, and Workflows"
+author: "T. Florian Jaeger"
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -20,12 +21,6 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
-
-if (!"MVBeliefUpdatr" %in% loadedNamespaces()) {
-  if (requireNamespace("pkgload", quietly = TRUE)) {
-    tryCatch(pkgload::load_all("..", quiet = TRUE), error = function(e) NULL)
-  }
-}
 ```
 
 <script>
@@ -67,13 +62,13 @@ The **S7 class architecture** replaces this with strongly typed, validated, and 
 3. **Cognitive Decision Models** (`MVBU_CognitiveModel`): Complete observer or adaptor models composing a category template with category priors $P(c)$, decision rules (e.g., criterion, proportional, sampling), internal perceptual noise, and lapse behaviors.
 4. **Stan Input & Fit Objects** (`MVBU_Staninput`, `MVBU_Stanfit`): Typed data bundles and Bayesian posterior fits for incremental belief-updating models.
 
-For detailed Bayesian model fitting, post-processing, and model comparison workflows, see:
-[Fitting and Working with MVBeliefUpdatr Stanfit Models](fitting-and-working-with-stanfit-models.html).
+### Companion Vignettes
+- For Bayesian model fitting, post-processing, and model comparison workflows, see the vignette [Fitting and Working with MVBeliefUpdatr Stanfit Models](fitting-and-working-with-stanfit-models.html).
 
-For visualization workflows corresponding to these objects, see the companion vignette:
+- For visualization workflows corresponding to these objects, see the vignette:
 [Visualizing Categories, Categorization Functions, and Belief Updating](visualizing-models-and-categories.html).
 
-For legacy code compatibility, see:
+- For legacy code compatibility, see the vignette:
 [Backward Compatibility: Working with Old Code](backward-compatibility-working-with-old-code.html).
 
 ```{r setup}
@@ -156,13 +151,39 @@ mod_exemplar <- example_exemplar_model()
 mod_exemplar
 ```
 
+### Model Summaries
+
+Calling `summary()` on a representation, multi-category template, or complete cognitive model outputs structured tables detailing both the category representations and their distributional moments (see [Section 4.3](#parameter-extraction) for the mathematical definitions of expected vs. marginal moments):
+
+```{r summary_cognitive_models}
+# Summary of an NIW ideal adaptor model
+summary(mod_adaptor)
+```
+
 ## Example Fitted Stan Models
 
-Fitted incremental belief-updating models (`MVBU_Stanfit`) can be accessed through `get_example_stanfit()`:
+Fitted incremental belief-updating models (`MVBU_Stanfit`) can be accessed
+through `example_ideal_adaptor_stanfit()`:
 
 ```{r example_stanfit}
-# Load cached 1-cue NIW ideal adaptor stanfit
-fit_1cue <- get_example_stanfit(1, stanmodel = "NIW_ideal_adaptor", file_refit = "never")
+# Load or fit 1-cue NIW ideal adaptor Stanfit model
+models_dir <- if (dir.exists("../tests/testthat/models")) {
+  "../tests/testthat/models"
+} else if (dir.exists("tests/testthat/models")) {
+  "tests/testthat/models"
+} else {
+  tempdir()
+}
+fit_file <- file.path(
+  models_dir,
+  "example-stanfit-NIW_ideal_adaptor-1-standardize-42.rds"
+)
+fit_1cue <- example_ideal_adaptor_stanfit(
+  model_family = "NIW",
+  n_cues = 1L,
+  file = fit_file,
+  file_refit = "on_change"
+)
 fit_1cue
 ```
 
@@ -208,8 +229,10 @@ When category parameters are already known, representations can be constructed b
 ```{r bare_representation_constructors}
 # Multivariate Gaussian: mean vector mu and covariance matrix Sigma
 mu_b <- c(F1 = 350, F2 = 1100)
-Sigma_b <- matrix(c(2500, 500, 500, 3600), nrow = 2, ncol = 2,
-                  dimnames = list(names(mu_b), names(mu_b)))
+Sigma_b <- matrix(c(2500, 500, 500, 3600),
+  nrow = 2, ncol = 2,
+  dimnames = list(names(mu_b), names(mu_b))
+)
 
 rep_b <- new_mvg_category_representation(
   category_labels = "/b/",
@@ -223,10 +246,18 @@ rep_b
 rep_muvg_custom <- new_muvg_category_representation(
   category_labels = "/b/",
   cue_labels = c("F1", "F2"),
-  component_mu = mu_b,
-  component_sigma2 = c(F1 = 2500, F2 = 3600)
+  mu = mu_b,
+  sigma2 = c(F1 = 2500, F2 = 3600)
 )
 rep_muvg_custom
+```
+
+```{r uvg_factor_fig, echo = FALSE, out.width = "80%", fig.align = "center"}
+knitr::include_graphics("figures/uvg_observer_factor.png")
+```
+
+```{r mvg_factor_fig, echo = FALSE, out.width = "80%", fig.align = "center"}
+knitr::include_graphics("figures/mvg_observer_factor.png")
 ```
 
 For conjugate prior representations like NIW or MNIX, specify prior parameter moments:
@@ -246,12 +277,24 @@ rep_niw_custom
 rep_mnix_custom <- new_mnix_category_representation(
   category_labels = "/b/",
   cue_labels = c("F1", "F2"),
-  component_m = c(F1 = 350, F2 = 1100),
-  component_sigma2 = c(F1 = 2500, F2 = 3600),
-  component_kappa = c(F1 = 10, F2 = 10),
-  component_nu = c(F1 = 12, F2 = 12)
+  m = c(F1 = 350, F2 = 1100),
+  sigma2 = c(F1 = 2500, F2 = 3600),
+  kappa = c(F1 = 10, F2 = 10),
+  nu = c(F1 = 12, F2 = 12)
 )
 rep_mnix_custom
+```
+
+```{r nix_factor_fig, echo = FALSE, out.width = "80%", fig.align = "center"}
+knitr::include_graphics("figures/nix_observer_factor.png")
+```
+
+```{r niw_factor_fig, echo = FALSE, out.width = "80%", fig.align = "center"}
+knitr::include_graphics("figures/niw_observer_factor.png")
+```
+
+```{r muvg_factor_fig, echo = FALSE, out.width = "80%", fig.align = "center"}
+knitr::include_graphics("figures/muvg_observer_factor.png")
 ```
 
 ### Empirical Constructors from Data
@@ -284,8 +327,10 @@ Templates aggregate multiple category representations into a unified inventory.
 
 ```{r manual_template}
 mu_d <- c(F1 = 450, F2 = 1700)
-Sigma_d <- matrix(c(3000, 200, 200, 4000), nrow = 2, ncol = 2,
-                  dimnames = list(names(mu_d), names(mu_d)))
+Sigma_d <- matrix(c(3000, 200, 200, 4000),
+  nrow = 2, ncol = 2,
+  dimnames = list(names(mu_d), names(mu_d))
+)
 rep_d <- new_mvg_category_representation(
   category_labels = "/d/",
   cue_labels = c("F1", "F2"),
@@ -350,50 +395,28 @@ model_from_data <- new_mvg_ideal_observer_from_data(
 model_from_data
 ```
 
-### Model Factor Graphs {#cognitive-model-factor-graphs}
-
-Each cognitive decision model family in **MVBeliefUpdatr** can be formally represented as a directed probabilistic factor graph detailing the interactions between category parameters, perceptual noise, lapse rates, category priors, and decision rules.
-
-#### Univariate Cognitive Observer Models (UVG & NIX)
-
-In the **UVG** cognitive observer model, category mean $\mu_c$ and variance $\sigma^2_c$ are fixed inputs (unshaded parameters, no circles).
-
-```{r uvg_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center", fig.cap = "UVG Cognitive Observer Model (Factor Graph)"}
-knitr::include_graphics("figures/uvg_observer_factor.png")
-```
-
-In the **NIX** cognitive observer model, belief distributions over $\mu_c$ and $\sigma^2_c$ are explicitly governed by hyperpriors ($m_{0,c}, S_{0,c}, \kappa_{0,c}, \nu_{0,c}$) through a NIX density factor node.
-
-```{r nix_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center", fig.cap = "NIX Cognitive Observer Model (Factor Graph)"}
-knitr::include_graphics("figures/nix_observer_factor.png")
-```
-
-#### Multivariate Cognitive Observer Models (MVG & NIW)
-
-In the **MVG** cognitive observer model, multidimensional cue distributions use fixed mean vector $\boldsymbol{\mu}_c$ and covariance matrix $\boldsymbol{\Sigma}_c$.
-
-```{r mvg_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center", fig.cap = "MVG Cognitive Observer Model (Factor Graph)"}
-knitr::include_graphics("figures/mvg_observer_factor.png")
-```
-
-In the **NIW** cognitive observer model, belief distributions over mean vector $\boldsymbol{\mu}_c$ and covariance matrix $\boldsymbol{\Sigma}_c$ are governed by NIW hyperpriors ($\mathbf{m}_{0,c}, \mathbf{S}_{0,c}, \kappa_{0,c}, \nu_{0,c}$) through a NIW density factor node.
-
-```{r niw_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center", fig.cap = "NIW Cognitive Observer Model (Factor Graph)"}
-knitr::include_graphics("figures/niw_observer_factor.png")
-```
-
-#### Mixture and Non-Parametric Observer Models (MUVG / MNIX & EXEMPLAR)
-
-In **MUVG** and **MNIX** mixture models, category representations contain $K$ Gaussian components per category with component weights $\boldsymbol{\pi}_{c,k}$.
-
-```{r muvg_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center", fig.cap = "MUVG / MNIX Observer Model (Factor Graph)"}
-knitr::include_graphics("figures/muvg_observer_factor.png")
-```
-
-In the **EXEMPLAR** non-parametric observer model, category likelihoods are evaluated over stored exemplars $\mathbf{y}_{j,c}$ using kernel density estimation with category bandwidth $h_c$.
-
-```{r exemplar_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center", fig.cap = "EXEMPLAR Observer Model (Factor Graph)"}
+```{r exemplar_factor_fig, echo = FALSE, out.width = "80%", fig.align = "center"}
 knitr::include_graphics("figures/exemplar_observer_factor.png")
+```
+
+## Level 4: Model Collections (`MVBU_ModelList`) {#level-4-model-collections}
+
+An `MVBU_ModelList` object represents an ordered sequence or collection of cognitive models (such as incremental belief-updating histories across exposure trials, or alternative model specifications).
+
+```{r model_list_construction}
+# Create an exposure update sequence
+m1 <- example_nix_ideal_adaptor()
+m2 <- update_template(m1, observations = data.frame(VOT = c(10, 12, 15), category = "A"))
+m3 <- update_template(m2, observations = data.frame(VOT = c(20, 25), category = "A"))
+
+# Wrap models into an S7 MVBU_ModelList container
+model_history <- as_model_list(list(Prior = m1, Block_1 = m2, Block_2 = m3))
+model_history
+
+# Inspect model labels and subsetting
+model_history@model_labels
+sub_history <- model_history[1:2] # Returns subsetted MVBU_ModelList
+sub_history
 ```
 
 ---
@@ -402,7 +425,7 @@ knitr::include_graphics("figures/exemplar_observer_factor.png")
 
 The S7 architecture provides consistent generic functions across all model families.
 
-## Label Accessors
+## Label Accessors and Mutation
 
 ```{r label_accessors}
 # Extract cue names
@@ -411,8 +434,21 @@ get_cue_labels(observer_model)
 # Extract category names
 get_category_labels(observer_model)
 
-# Extract combined label structure
+# Extract response category names
+get_response_category_labels(observer_model)
+
+# Extract group labels
+get_group_labels(observer_model)
+
+# Extract full 4-element label structure
 get_labels(observer_model)
+
+# Update or customize labels with set_labels()
+labeled_model <- set_labels(
+  observer_model,
+  cue = c("First_Formant", "Second_Formant")
+)
+get_cue_labels(labeled_model)
 ```
 
 ## Type and Family Introspection
@@ -425,7 +461,7 @@ get_model_type(observer_model)
 get_representation_type(rep_b)
 ```
 
-## Parameter Extraction
+## Parameter Extraction {#parameter-extraction}
 
 Extract category parameters or expected moments across representations, templates, models, and fitted Bayesian models:
 
@@ -434,22 +470,46 @@ Extract category parameters or expected moments across representations, template
 get_parameters(observer_model)
 
 # For Bayesian belief distributions (like the NIW ideal adaptor),
-# extract expected moments under the prior distribution:
+# extract expected moments under the belief distribution:
 get_expected_mu(mod_adaptor)
 get_expected_sigma(mod_adaptor)
+
+# Extract marginal moments:
+get_marginal_mu(mod_adaptor)
+get_marginal_sigma(mod_adaptor)
 ```
+
+### Expected vs. Marginal Moments
+
+In Bayesian belief-updating models (such as NIW, NIX, and MNIX), category representations encode a joint distribution over the category mean $\boldsymbol{\mu}$ and covariance $\boldsymbol{\Sigma}$. Downstream inferences distinguish between two related but distinct category moments:
+
+1. **Expected Moments (`get_expected_mu`, `get_expected_sigma`)**:
+   Conditional on current hyperparameters, the point expectation of the distribution parameters:
+   $$\mathbb{E}[\boldsymbol{\mu}] = \mathbf{m}, \qquad \mathbb{E}[\boldsymbol{\Sigma}] = \frac{\mathbf{S}}{\nu - D - 1}$$
+   This represents the expected category distribution under the current belief state.
+
+2. **Marginal Moments (`get_marginal_mu`, `get_marginal_sigma`)**:
+   Marginalizing out parameter uncertainty in the category mean $\boldsymbol{\mu}$:
+   $$\boldsymbol{\mu}_{\text{marg}} = \mathbf{m}, \qquad \boldsymbol{\Sigma}_{\text{marg}} = \frac{\kappa + 1}{\kappa} \frac{\mathbf{S}}{\nu - D - 1}$$
+   Because the observer has finite confidence $\kappa$ in the category mean $\boldsymbol{\mu}$, the marginal predictive distribution for new observations $x$ has an increased dispersion scaled by $\frac{\kappa + 1}{\kappa} = 1 + \frac{1}{\kappa}$. As exposure sample size $N \to \infty$ (and $\kappa \to \infty$), the marginal covariance $\boldsymbol{\Sigma}_{\text{marg}}$ converges to the expected covariance $\mathbb{E}[\boldsymbol{\Sigma}]$.
 
 ## Likelihood and Posterior Computation
 
 Evaluate category likelihoods $p(x \mid c)$ and posterior probabilities $P(c \mid x)$ for new observations:
 
 ```{r likelihood_and_posterior}
-# New test observations in cue space
+# New test observations in cue space:
+# Point 1: clearly within /i/
+# Point 2: near the category boundary (F1 = 464.5 Hz, F2 = 1598 Hz)
+# Point 3: clearly within /u/
 test_points <- matrix(
-  c(320, 2100,
-    580, 1150),
-  nrow = 2, byrow = TRUE,
-  dimnames = list(NULL, c("F1", "F2"))
+  c(
+    320, 2100,
+    444.5, 1598,
+    580, 1150
+  ),
+  nrow = 3, byrow = TRUE,
+  dimnames = list(c("clear_i", "boundary", "clear_u"), c("F1", "F2"))
 )
 
 # Compute category likelihoods
@@ -463,31 +523,75 @@ post_mat
 
 ## Categorization Under Decision Rules
 
-First, let's inspect the configured decision rule of our cognitive model:
+The function `categorize()` applies a decision rule to map an observer's posterior belief distribution $P(c \mid x)$ into categorization responses. The package supports three decision rules:
 
-```{r check_decision_rule}
-# Inspect the configured decision rule of the model
-observer_model@decision_rule
+1. **`decision_rule = "criterion"` (Deterministic MAP / Optimal):**
+   Deterministically selects the category that maximizes posterior probability (maximum a posteriori / argmax):
+   $$\hat{c} = \arg\max_c P(c \mid x)$$
+   This optimal rule minimizes expected classification error under 0-1 loss.
+
+2. **`decision_rule = "proportional"` (Luce Choice / Probability Matching):**
+   Response choice probabilities match the posterior probabilities:
+   $$P(\text{Response} = c \mid x) = P(c \mid x)$$
+   When computing categorization probabilities or evaluating model likelihoods in `evaluate_model()`, `"proportional"` represents smooth probability matching across stimulus space.
+
+3. **`decision_rule = "sampling"` (Posterior Sampling):**
+   Generates a discrete category choice sampled stochastically from the categorical distribution defined by $P(c \mid x)$:
+   $$\hat{c} \sim \text{Categorical}(P(c_1 \mid x), \dots, P(c_K \mid x))$$
+   Across repeated trials, the empirical frequency of choices converges to the proportional posterior probabilities.
+
+Let's evaluate our test observations under each decision rule:
+
+```{r categorize_decision_rules}
+# 1. Deterministic MAP classification ("criterion")
+# At the boundary point, the category with max posterior probability is
+# chosen deterministically
+cat_criterion <- categorize(
+  observer_model,
+  test_points,
+  decision_rule = "criterion"
+)
+cat_criterion
+
+# 2. Probability matching ("proportional")
+# Reports the model's posterior probability matching classification
+cat_proportional <- categorize(
+  observer_model,
+  test_points,
+  decision_rule = "proportional"
+)
+cat_proportional
+
+# 3. Stochastic posterior sampling ("sampling")
+# Produces stochastic discrete choices weighted by P(c | x)
+set.seed(42)
+cat_sampling_1 <- categorize(
+  observer_model,
+  test_points,
+  decision_rule = "sampling"
+)
+cat_sampling_1
+
+# A second independent sampling run reflects trial-by-trial stochasticity
+# at the boundary
+set.seed(101)
+cat_sampling_2 <- categorize(
+  observer_model,
+  test_points,
+  decision_rule = "sampling"
+)
+cat_sampling_2
 ```
 
-Now call `categorize()` to apply the model's decision rule to the test observations:
+### Understanding the Return Format of `categorize()`
 
-```{r categorize}
-# Categorize test points using the model's configured decision rule
-cat_results <- categorize(observer_model, test_points)
-cat_results
+By default, `categorize()` uses `simplify = if (identical(decision_rule, "proportional")) FALSE else TRUE`:
+- Under deterministic or sampled discrete decision rules (`"criterion"` or `"sampling"`), `categorize()` simplifies its return value to a character vector containing the selected `response_category`.
+- Under `"proportional"`, or whenever `simplify = FALSE` is explicitly requested, `categorize()` returns a data frame with columns:
+  - `response_category`: The category selected under the decision rule.
+  - `response_probability`: The probability of making that categorization response under the decision rule (equal to $1.0$ for deterministic `"criterion"` or sampled `"sampling"` selections, and equal to the posterior probability $P(c \mid x)$ under `"proportional"` probability matching).
 
-# Override decision rule to deterministic criterion ("winner-take-all")
-categorize(observer_model, test_points, decision_rule = "criterion")
-```
-
-### Understanding the `probability` Column in `categorize()`
-
-The `probability` column in the data frame returned by `categorize()` reports the **posterior category probability** $P(c \mid x)$ of the selected category, calculated directly from the model's posterior belief distribution:
-
-$$P(c \mid x) = \frac{p(x \mid c) \, P(c)}{\sum_{c'} p(x \mid c') \, P(c')}$$
-
-It does **not** represent the *response choice probability* under the decision rule. For example, under a deterministic decision rule like `'criterion'`, the model always selects the MAP category with response probability $1$, but the `probability` column displays $P(c_{\text{MAP}} \mid x) = 0.94$, indicating the observer's degree of posterior certainty in that classification decision.
+To access full posterior category probabilities $P(c \mid x)$ across all categories simultaneously, use `posterior(model, new_data)`.
 
 ## Sampling Observations
 
@@ -523,22 +627,27 @@ prepare_staninput() ───► IdealAdaptorStanfitInput (S7)
                          MVBU_Stanfit (S7)
 ```
 
-## Preparing Typed Stan Input (`prepare_staninput`)
+## Preparing Typed Stan Input (`new_ideal_adaptor_stanfit_input`)
 
-`prepare_staninput()` transforms empirical exposure data, priors, and cue specifications into a typed S7 `IdealAdaptorStanfitInput` object:
+`new_ideal_adaptor_stanfit_input()` transforms empirical exposure data, test data, priors, and cue specifications into a typed S7 `IdealAdaptorStanfitInput` object:
 
 ```{r prepare_staninput, eval = FALSE}
 # (Workflow demonstration; requires model specification)
-stan_input <- prepare_staninput(
-  data = train_data,
+stan_input <- new_ideal_adaptor_stanfit_input(
+  exposure = train_data,
+  test = test_data,
   cues = c("F1", "F2"),
-  category_col = "category",
+  category = "category",
+  response = "response_category",
   stanmodel = "NIW_ideal_adaptor"
 )
 
-# Inspect typed staninput slots
+# Inspect typed staninput slots and standardized labels
 class(stan_input)
 get_cue_labels(stan_input)
+get_category_labels(stan_input)
+get_response_category_labels(stan_input)
+get_group_labels(stan_input)
 get_transform_information(stan_input)
 ```
 
@@ -575,19 +684,13 @@ head(neff_ratio(fit_1cue))
 summary(fit_1cue)
 ```
 
-## Stanfit Model Factor Graphs {#stanfit-model-factor-graphs}
+Hierarchical Bayesian belief-updating models (`MVBU_Stanfit`) combine prior hyperpriors with exposure sample statistics ($N_{c,g}, \hat{\mu}_{c,g}, \hat{\sigma}^2_{c,g}$ / $\mathbf{\hat{\Sigma}}_{c,g}$) via dedicated update factor nodes ($\text{Update}_\kappa, \text{Update}_\nu, \text{Update}_m, \text{Update}_S$) to yield group-updated belief parameters ($\kappa_{n,c,g}, \nu_{n,c,g}, m_{n,c,g}, S_{n,c,g}$):
 
-Hierarchical Bayesian belief-updating models (`MVBU_Stanfit`) combine prior hyperpriors with exposure sample statistics ($N_{c,g}, \hat{\mu}_{c,g}, \hat{\sigma}^2_{c,g}$ / $\mathbf{\hat{\Sigma}}_{c,g}$) via dedicated update factor nodes ($\text{Update}_\kappa, \text{Update}_\nu, \text{Update}_m, \text{Update}_S$) to yield group-updated belief parameters ($\kappa_{n,c,g}, \nu_{n,c,g}, m_{n,c,g}, S_{n,c,g}$).
-
-#### NIX Stanfit Model
-
-```{r nix_stanfit_factor_fig, echo = FALSE, out.width = "90%", fig.align = "center", fig.cap = "NIX Stanfit Model (Factor Graph)"}
+```{r nix_stanfit_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center"}
 knitr::include_graphics("figures/nix_stanfit_factor.png")
 ```
 
-#### NIW Stanfit Model
-
-```{r niw_stanfit_factor_fig, echo = FALSE, out.width = "90%", fig.align = "center", fig.cap = "NIW Stanfit Model (Factor Graph)"}
+```{r niw_stanfit_factor_fig, echo = FALSE, out.width = "85%", fig.align = "center"}
 knitr::include_graphics("figures/niw_stanfit_factor.png")
 ```
 
@@ -638,16 +741,17 @@ mvg3 <- new_mvg_ideal_observer(
   lapse_rate = 0.03
 )
 
-# Inspect individual models before aggregation
-cat("--- Individual Model 1 ---\n")
-mvg1
-cat("\n--- Individual Model 2 ---\n")
-mvg2
-cat("\n--- Individual Model 3 ---\n")
-mvg3
+# Bundle individual models into an MVBU_ModelList container
+mvg_list <- as_model_list(
+  list(Model_1 = mvg1, Model_2 = mvg2, Model_3 = mvg3)
+)
 
-# Aggregate all three models (unweighted mean)
-mvg_aggregated <- aggregate_models(list(mvg1, mvg2, mvg3))
+# Inspect individual models before aggregation
+cat("--- Model List ---\n")
+print(mvg_list)
+
+# Aggregate all three models via MVBU_ModelList (unweighted mean)
+mvg_aggregated <- aggregate_models(mvg_list)
 
 cat("\n--- Aggregated MVG Model ---\n")
 mvg_aggregated
@@ -663,7 +767,7 @@ for (cat_name in c("/i/", "/u/")) {
   cat("Model 2 mu:", mvg2@category_template@representations[[cat_name]]@mu, "\n")
   cat("Model 3 mu:", mvg3@category_template@representations[[cat_name]]@mu, "\n")
   cat("Aggregated mu:", mvg_aggregated@category_template@representations[[cat_name]]@mu, "\n\n")
-  
+
   cat("Model 1 Sigma:\n")
   print(mvg1@category_template@representations[[cat_name]]@Sigma)
   cat("Model 2 Sigma:\n")
@@ -675,15 +779,14 @@ for (cat_name in c("/i/", "/u/")) {
 }
 ```
 
-We can also visualize the category likelihood ellipses of the individual models alongside the aggregated model:
+We can also visualize the category likelihood ellipses of the individual models in the `MVBU_ModelList` alongside the aggregated model:
 
 ```{r mvg_aggregation_plots, fig.width=9, fig.height=7, echo=TRUE}
-p1 <- plot(mvg1) + ggtitle("Model 1 (Pos Corr)")
-p2 <- plot(mvg2) + ggtitle("Model 2 (Neg Corr)")
-p3 <- plot(mvg3) + ggtitle("Model 3 (Uncorrelated)")
+# Faceted plot of all individual models in the ModelList
+p_individuals <- plot_categories(mvg_list, mode = "facet", interactive = FALSE)
 p_agg <- plot(mvg_aggregated) + ggtitle("Aggregated Model (Average)")
 
-(p1 + p2) / (p3 + p_agg)
+p_individuals / (plot_spacer() + p_agg + plot_spacer())
 ```
 
 

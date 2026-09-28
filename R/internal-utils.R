@@ -16,3 +16,15 @@ NULL
   x[is.na(x)] <- fill
   return(x)
 }
+
+#' Project matrix onto positive definite cone
+#' @param sigma Square numeric covariance matrix.
+#' @param tol Small positive number for eigenvalue clamping (default: 1e-6).
+#' @return Symmetric positive definite matrix.
+#' @noRd
+.make_pos_def <- function(sigma, tol = 1e-6) {
+  sigma <- (sigma + t(sigma)) / 2
+  eig <- eigen(sigma, symmetric = TRUE)
+  vals <- pmax(eig$values, tol)
+  eig$vectors %*% diag(vals, nrow = length(vals)) %*% t(eig$vectors)
+}

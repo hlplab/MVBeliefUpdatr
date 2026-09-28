@@ -4,7 +4,13 @@
 \alias{Summary_MVBU_Stanfit}
 \title{An S7 class for MVBU_Stanfit summaries}
 \usage{
-Summary_MVBU_Stanfit(fitted = NULL, fixed = NULL)
+Summary_MVBU_Stanfit(
+  fitted = NULL,
+  fixed = NULL,
+  expected_moments = NULL,
+  marginal_moments = NULL,
+  high_rhats = NULL
+)
 }
 \description{
 An S7 class for MVBU_Stanfit summaries

@@ -1,5 +1,6 @@
 ---
 title: "Backward Compatibility: Working with Legacy Code"
+author: "T. Florian Jaeger"
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -20,12 +21,6 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
-
-if (!"MVBeliefUpdatr" %in% loadedNamespaces()) {
-  if (requireNamespace("pkgload", quietly = TRUE)) {
-    tryCatch(pkgload::load_all("..", quiet = TRUE), error = function(e) NULL)
-  }
-}
 ```
 
 # Introduction and Overview
@@ -99,6 +94,7 @@ The table below maps legacy (pre-v0.1.0) functions to their modern v0.1.0+ S7 AP
 | `write_ideal_adaptor_stanfit()` | `write_stanfit()` | Write Stanfit object to RDS |
 | `get_info_from_model()` | `get_parameters()`, `summary()`, or `as_tibble()` | Extract model parameters / metadata |
 | `sample_observation()` | `sample_observations()` | Draw random samples from category representations |
+| `prepare_staninput()` | `new_ideal_adaptor_stanfit_input()` | Prepare typed input for ideal adaptor Stan models |
 
 ---
 

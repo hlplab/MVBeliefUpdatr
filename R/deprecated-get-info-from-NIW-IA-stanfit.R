@@ -1,4 +1,4 @@
-#' @include S7-core-classes.R
+#' @include S7-class.R
 #' @include S7-generics.R
 #' @include S7-stanfit.R
 #' @include S7-stanfit-methods.R

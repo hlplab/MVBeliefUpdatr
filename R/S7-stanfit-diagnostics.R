@@ -1,5 +1,5 @@
 #' @include asserts.R
-#' @include S7-core-classes.R
+#' @include S7-class.R
 #' @include S7-generics.R
 #' @include S7-stanfit.R
 #' @include S7-stanfit-methods.R
@@ -10,9 +10,6 @@ NULL
 #' Extract quantities that can be used to diagnose sampling behavior
 #' of the algorithms applied by \pkg{Stan} at the back-end of \pkg{MVBeliefUpdatr}.
 #' These diagnostic functions are all copied and modified from \pkg{brms}.
-#'
-#' @name diagnostic-quantities
-#' @aliases log_posterior nuts_params rhat neff_ratio
 #'
 #' @param x An \code{MVBeliefUpdatr} object.
 #' @param pars An optional character vector of parameter names.
@@ -26,6 +23,8 @@ NULL
 #' @details For more details see
 #'   [bayesplot::bayesplot-extractors].
 #'
+#' @name diagnostic-quantities
+#' @aliases log_posterior nuts_params rhat neff_ratio
 #' @export log_posterior
 #' @export nuts_params
 #' @export rhat
@@ -65,8 +64,12 @@ S7::method(rhat, MVBU_Stanfit) <- function(x, pars = NULL, ...) {
   rhat_vals
 }
 
-S7::method(rhat, S7::class_any) <- function(x, ...) {
-  posterior::rhat(x, ...)
+S7::method(rhat, S7::class_any) <- function(x, pars = NULL, ...) {
+  if (is.null(pars)) {
+    posterior::rhat(x, ...)
+  } else {
+    posterior::rhat(x, pars = pars, ...)
+  }
 }
 
 #' @rdname diagnostic-quantities

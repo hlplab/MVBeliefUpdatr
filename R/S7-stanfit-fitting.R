@@ -58,7 +58,15 @@ NULL
 #'   "cmdstanr"}, which allows to change how models are compiled.
 #' @param stanmodel Name of stanmodel that should be used. Overrides any default selection.
 #' @param rename For internal use only.
-#' @param ... Additional parameters are passed to [rstan::sampling].
+#' @param ... Additional parameters are passed to [rstan::sampling], including the following:
+#' @param stanvars Optional \code{stanvars} object. Default: \code{NULL}.
+#' @param save_pars Storage for parameter names to save. Default: \code{NULL}.
+#' @param basis Optional basis data subset. Default: \code{NULL}.
+#' @param chains Number of Markov chains. Default: 4.
+#' @param iter Total number of iterations per chain. Default: 2000.
+#' @param warmup Number of warmup (burnin) iterations per chain. Default: 1000.
+#' @param init Initial values specification. Default: \code{"random"}.
+#' @param control Named list of control parameters passed to Stan sampler. Default: \code{NULL}.
 #'
 #' @return An object of class \code{ideal_adaptor_stanfit} with the fitted stan model.
 #'
@@ -85,7 +93,7 @@ fit_ideal_adaptor <- function(
   stanvars = NULL, backend = "rstan", save_pars = NULL, basis = NULL,
   chains = 4, iter = 2000, warmup = 1000,
   init = "random", control = NULL,
-  silent = 1, verbose = F,
+  silent = 1,
   stan_model_args = list(),
   stanmodel = NULL,
   # Stuff to be deprecated in the future
@@ -110,11 +118,22 @@ fit_ideal_adaptor <- function(
   transform_information <- stanfit_input@transform_information
   staninput <- stanfit_input@staninput
 
-  if (!is.null(stanmodel)) {
-    .assert_that(!is.null(stanmodels[[stanmodel]]),
-      msg = paste("The specified stanmodel does not exist. Allowable models include:", paste(names(MVBeliefUpdatr:::stanmodels), collapse = ", "))
-    )
+  if (is.null(stanmodel)) {
+    stanmodel <- if (S7::S7_inherits(staninput, NIX_IdealAdaptorStaninput)) {
+      "NIX_ideal_adaptor"
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptorStaninput)) {
+      "MNIX_ideal_adaptor"
+    } else if (S7::S7_inherits(staninput, NIW_IdealAdaptorStaninput)) {
+      "NIW_ideal_adaptor"
+    }
   }
+  .assert_that(
+    !is.null(stanmodel) && !is.null(stanmodels[[stanmodel]]),
+    msg = paste(
+      "The specified stanmodel does not exist. Allowable models include:",
+      paste(names(stanmodels), collapse = ", ")
+    )
+  )
 
   # Check whether model actually needs to be refit
   if (!is.null(file) && file_refit == "on_change") {
@@ -125,7 +144,7 @@ fit_ideal_adaptor <- function(
           x_from_file,
           current_version = get_current_versions(),
           data = data, staninput = staninput,
-          silent = silent, verbose = verbose
+          silent = (silent >= 1)
         )
       if (!needs_refit) {
         if (silent == 0) message("No refitting needed. Loading existing model from file.")
@@ -142,8 +161,9 @@ fit_ideal_adaptor <- function(
     list(label_information = get_labels(stanfit_input))
   }
 
+  constructor <- .get_ideal_adaptor_stanfit_constructor(staninput)
   fit <-
-    ideal_adaptor_stanfit(
+    constructor(
       data = data,
       staninput = staninput,
       stanvars = stanvars,
@@ -175,23 +195,10 @@ fit_ideal_adaptor <- function(
         "p_test_conj", "log_p_test_conj"
       )
 
-    if (is.null(stanmodel)) {
-      current_default_modelname <- "NIW_ideal_adaptor"
+    if (stanmodel %in% names(stanmodels)) {
       stanfit <-
         sampling(
-          MVBeliefUpdatr:::stanmodels[[current_default_modelname]],
-          data = get_staninput(fit)@values,
-          check_data = TRUE,
-          pars = exclude_pars, include = FALSE,
-          chains = chains, iter = iter, warmup = warmup,
-          init = init, control = control,
-          show_messages = !silent,
-          ...
-        )
-    } else if (stanmodel %in% names(MVBeliefUpdatr:::stanmodels)) {
-      stanfit <-
-        sampling(
-          MVBeliefUpdatr:::stanmodels[[stanmodel]],
+          stanmodels[[stanmodel]],
           data = get_staninput(fit)@values,
           check_data = TRUE,
           pars = exclude_pars, include = FALSE,

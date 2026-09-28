@@ -13,7 +13,14 @@
 \alias{get_exposure_category_cov,MVBU_Stanfit-method}
 \title{Get exposure category statistics from an S7 stanfit or stanfit-input object}
 \usage{
-get_exposure_category_statistic(x, ...)
+get_exposure_category_statistic(
+  x,
+  categories = NULL,
+  groups = NULL,
+  statistic = c("n", "mean", "css", "uss", "cov"),
+  untransform_cues = FALSE,
+  ...
+)
 
 get_exposure_category_mean(x, ...)
 
@@ -26,8 +33,8 @@ get_exposure_category_cov(x, ...)
 ## S7 method for class <MVBU_Stanfit>
 get_exposure_category_statistic(
   x,
-  categories = get_category_labels(x),
-  groups = get_group_labels(x, include_prior = FALSE),
+  categories = NULL,
+  groups = NULL,
   statistic = c("n", "mean", "css", "uss", "cov"),
   untransform_cues = FALSE,
   ...
@@ -47,6 +54,15 @@ get_exposure_category_cov(x, ...)
 }
 \arguments{
 \item{x}{An S7 stanfit or stanfit-input object.}
+
+\item{categories}{Optional character vector of category names. Default: \code{NULL}.}
+
+\item{groups}{Optional character vector of group names. Default: \code{NULL}.}
+
+\item{statistic}{Character scalar or vector specifying statistic(s) to extract:
+\code{"n"}, \code{"mean"}, \code{"cov"}, \code{"css"}, \code{"uss"}. Default: \code{"mean"}.}
+
+\item{untransform_cues}{Logical; whether to return cues in original space. Default: \code{FALSE}.}
 
 \item{...}{Additional arguments passed to methods.}
 }

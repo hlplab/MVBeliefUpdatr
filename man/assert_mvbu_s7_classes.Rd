@@ -6,7 +6,6 @@
 \alias{assert_MVBU_CognitiveModel}
 \alias{assert_MVBU_Stanfit}
 \alias{assert_IdealAdaptorStanfit}
-\alias{assert_MVBU_StanfitInput}
 \alias{assert_IdealAdaptorStanfitInput}
 \alias{assert_MVBU_Staninput}
 \alias{assert_IdealAdaptorStaninput}
@@ -21,8 +20,6 @@ assert_MVBU_CognitiveModel(x, msg = NULL)
 assert_MVBU_Stanfit(x, msg = NULL)
 
 assert_IdealAdaptorStanfit(x, msg = NULL)
-
-assert_MVBU_StanfitInput(x, msg = NULL)
 
 assert_IdealAdaptorStanfitInput(x, msg = NULL)
 

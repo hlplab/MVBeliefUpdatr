@@ -604,3 +604,46 @@ NULL
   .assert_true(all(cols %in% names(data)), msg = msg)
   invisible(TRUE)
 }
+
+#' Validate requested labels against available labels
+#'
+#' Compares requested labels against available labels. If any requested labels
+#' are not present, an informative error is raised listing the missing labels
+#' and the available options.
+#'
+#' @param requested Character vector (or factor/numeric) of requested label values,
+#'   or `NULL`.
+#' @param available Character vector of available label values.
+#' @param label_type Character scalar name of the label dimension being validated
+#'   (e.g., "group", "category", "cue", "response_category", "phase") for error reporting.
+#' @param caller_name Optional character scalar of the calling function name.
+#' @return Character vector of matched valid requested labels, or `available`
+#'   if `requested` was `NULL`.
+#' @noRd
+.validate_requested_labels <- function(requested,
+                                       available,
+                                       label_type = "label",
+                                       caller_name = NULL) {
+  if (is.null(requested)) {
+    return(available)
+  }
+  requested_chr <- as.character(requested)
+  available_chr <- as.character(available)
+  missing_labels <- setdiff(requested_chr, available_chr)
+  if (length(missing_labels) > 0L) {
+    prefix <- if (!is.null(caller_name) && nzchar(caller_name)) {
+      paste0(caller_name, "(): ")
+    } else {
+      ""
+    }
+    .stop(sprintf(
+      "%sRequested %s(s) not found: %s. Available %s(s): %s.",
+      prefix,
+      label_type,
+      paste(missing_labels, collapse = ", "),
+      label_type,
+      paste(available_chr, collapse = ", ")
+    ))
+  }
+  requested_chr
+}

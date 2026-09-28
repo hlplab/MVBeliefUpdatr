@@ -38,27 +38,13 @@ Defaults to \code{"category"}.}
 
 \item{cues}{Character vector of cue column names in \code{data}.}
 
-\item{...}{Additional family-specific parameters (such as \code{kappa}, \code{nu},
-\code{m_0}, \code{S_0}, \code{c}, or \code{bandwidth}).}
-
-\item{category_prior}{Optional numeric vector of prior category
-probabilities summing to 1.}
-
-\item{decision_rule}{Categorization decision rule: \code{"sampling"} or
-\code{"argmax"}. Defaults to \code{"sampling"}.}
-
-\item{lapse_rate}{Numeric scalar lapse probability in \verb{[0, 1]}. Defaults
-to 0.}
-
-\item{lapse_bias}{Optional numeric vector of lapse category probabilities.}
-
-\item{Sigma_noise}{Optional perceptual noise covariance matrix.}
-
-\item{noise_treatment}{Treatment of noise: \code{"no_noise"}, \code{"sample"}, or
-\code{"marginalize"}.}
-
-\item{lapse_treatment}{Treatment of lapses: \code{"no_lapses"}, \code{"sample"}, or
-\code{"marginalize"}.}
+\item{...}{Additional model and family-specific parameters passed to constructors.
+For cognitive models, this includes \code{category_prior} (prior category probabilities),
+\code{decision_rule} (\code{"sampling"} or \code{"argmax"}), \code{lapse_rate} (scalar in \verb{[0, 1]}),
+\code{lapse_bias}, \code{Sigma_noise} (perceptual noise covariance), \code{noise_treatment}
+(\code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}), and \code{lapse_treatment}
+(\code{"no_lapses"}, \code{"sample"}, or \code{"marginalize"}). For specific representation families,
+this includes parameters such as \code{kappa}, \code{nu}, \code{m_0}, \code{S_0}, \code{c}, or \code{bandwidth}.}
 }
 \value{
 An S7 representation, template, or cognitive model object.

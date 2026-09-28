@@ -29,7 +29,8 @@ make_NIW_ideal_adaptor_from_data(
 
 \item{kappa}{Strength of belief (pseudocount) about the category mean. (default: same as \code{nu})}
 
-\item{nu}{Strength of belief (pseudocount) about the category covariance matrix. (default: number of cues + 2)}
+\item{nu}{Strength of belief (pseudocount) about the category covariance
+matrix. (default: number of cues + 2)}
 
 \item{prior}{Optional category-prior vector, forwarded as \code{category_prior}. (default: uniform over categories)}
 

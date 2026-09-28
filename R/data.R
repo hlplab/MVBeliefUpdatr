@@ -36,6 +36,7 @@ NULL
 #'
 #' \insertRef{barreda2015}{MVBeliefUpdatr}
 #'
+#' @encoding UTF-8
 #' @seealso \code{\link{pb52}}, \code{\link{swehvd}}, \code{\link{mixer6}}
 #' @docType data
 #' @keywords data
@@ -71,6 +72,7 @@ NULL
 #'
 #' \insertRef{barreda2015}{MVBeliefUpdatr}
 #'
+#' @encoding UTF-8
 #' @seealso \code{\link{h95}}, \code{\link{swehvd}}, \code{\link{mixer6}}
 #' @docType data
 #' @keywords data
@@ -114,6 +116,7 @@ NULL
 #' @references
 #' \insertRef{persson2021}{MVBeliefUpdatr}
 #'
+#' @encoding UTF-8
 #' @seealso \code{\link{h95}}, \code{\link{pb52}}, \code{\link{mixer6}}
 #' @docType data
 #' @keywords data
@@ -161,6 +164,7 @@ NULL
 #' @references
 #' \insertRef{chodroff-wilson2018}{MVBeliefUpdatr}
 #'
+#' @encoding UTF-8
 #' @seealso \code{\link{h95}}, \code{\link{pb52}}, \code{\link{swehvd}}
 #' @docType data
 #' @keywords data
@@ -184,5 +188,6 @@ NULL
 #' @keywords data
 #' @references
 #' \insertRef{chodroff-wilson2018}{MVBeliefUpdatr}
+#' @encoding UTF-8
 #' @seealso \code{\link{mixer6}}
 "ChodroffWilson2018"

@@ -1,4 +1,4 @@
-#' @include S7-core-classes.R
+#' @include S7-class.R
 #' @include S7-generics.R
 #' @importFrom tibble as_tibble tibble
 #' @importFrom dplyr mutate filter select transmute arrange slice rename pull relocate
@@ -192,7 +192,7 @@ as_tibble_from_template <- function(tpl) {
 
   if (S7::S7_inherits(first_rep, MUVG_CategoryRepresentation)) {
     mu_list <- lapply(reps, function(r) as.numeric(r@mu))
-    sigma_list <- lapply(reps, function(r) as.numeric(r@sigma))
+    sigma_list <- lapply(reps, function(r) sqrt(as.numeric(r@sigma2)))
     df <- tibble::tibble(
       category = cat_factor,
       mu = mu_list,
@@ -204,7 +204,7 @@ as_tibble_from_template <- function(tpl) {
 
   if (S7::S7_inherits(first_rep, MNIX_CategoryRepresentation)) {
     m_list <- lapply(reps, function(r) as.numeric(r@m))
-    S_list <- lapply(reps, function(r) as.numeric(r@S))
+    S_list <- lapply(reps, function(r) as.numeric(r@sigma2))
     kappa_list <- lapply(reps, function(r) as.numeric(r@kappa))
     nu_list <- lapply(reps, function(r) as.numeric(r@nu))
     df <- tibble::tibble(

@@ -2,7 +2,6 @@
 % Please edit documentation in R/S7-generics.R, R/S7-plot-methods.R
 \name{plot_parameters}
 \alias{plot_parameters}
-\alias{plot_correlations}
 \alias{plot_parameter_correlations}
 \alias{plot_parameters_pairwise}
 \alias{plot_parameters,MVBU_CognitiveModel-method}
@@ -11,14 +10,48 @@
 \alias{plot_parameters_pairwise,MVBU_Stanfit-method}
 \title{Plot model parameter estimates, correlations, and pairwise posterior distributions}
 \usage{
-plot_parameters(x, ...)
+plot_parameters(
+  x,
+  pars = NULL,
+  categories = NULL,
+  groups = NULL,
+  ndraws = 100,
+  combine_into_single_plot = TRUE,
+  index_panels = FALSE,
+  ...
+)
 
-plot_parameter_correlations(x, ...)
+plot_parameter_correlations(
+  x,
+  pars = NULL,
+  categories = NULL,
+  groups = NULL,
+  cues = NULL,
+  ndraws = 100,
+  ...
+)
 
-plot_parameters_pairwise(x, ...)
+plot_parameters_pairwise(
+  x,
+  pars = NULL,
+  categories = NULL,
+  groups = NULL,
+  cues = NULL,
+  ndraws = 100,
+  ...
+)
 
 ## S7 method for class <MVBU_CognitiveModel>
-plot_parameters(x, pars = NULL, combine_into_single_plot = TRUE, ...)
+plot_parameters(
+  x,
+  pars = NULL,
+  categories = NULL,
+  groups = NULL,
+  ndraws = 100,
+  combine_into_single_plot = TRUE,
+  index_panels = FALSE,
+  ...
+)
 
 ## S7 method for class <MVBU_Stanfit>
 plot_parameters(
@@ -53,23 +86,15 @@ plot_parameters_pairwise(
   ndraws = 100,
   ...
 )
-
-plot_correlations(x, ...)
 }
 \arguments{
 \item{x}{An MVBU object (\code{\link{MVBU_CategoryRepresentation}},
 \code{\link{MVBU_CategoryRepresentationTemplate}},
 \code{\link{MVBU_CognitiveModel}}, or \code{\link{MVBU_Stanfit}}).}
 
-\item{...}{Additional arguments passed to specific parameter plotting methods.}
-
 \item{pars}{Character vector of parameter names to filter in \code{plot_parameters},
 \code{plot_parameter_correlations}, and \code{plot_parameters_pairwise}. Defaults
 to \code{NULL} (all parameters).}
-
-\item{combine_into_single_plot}{Logical; if \code{TRUE} (default), combines
-multi-panel parameter subplots into a single unified figure via \pkg{patchwork}.
-If \code{FALSE}, returns a named list of individual \code{ggplot} panel objects.}
 
 \item{categories}{Character vector of category names to include. Defaults to
 \code{NULL} (all categories).}
@@ -81,15 +106,21 @@ to \code{"prior"}.}
 
 \item{ndraws}{Integer specifying the number of posterior MCMC draws to use
 when extracting parameters or plotting from \code{\link{MVBU_Stanfit}}.
-Defaults to \code{100L} (\code{NULL} uses all draws).}
+Defaults to \code{20L} (\code{NULL} uses all draws).}
+
+\item{combine_into_single_plot}{Logical; if \code{TRUE} (default), combines
+multi-panel parameter subplots into a single unified figure via \pkg{patchwork}.
+If \code{FALSE}, returns a named list of individual \code{ggplot} panel objects.}
+
+\item{index_panels}{Logical; if \code{TRUE}, adds panel index labels (A, B, ...)
+to multi-panel figures. Defaults to \code{FALSE}.}
+
+\item{...}{Additional arguments passed to specific parameter plotting methods.}
 
 \item{cues}{Character vector of cue names to plot (1, 2, or 3 cues). Defaults
 to all cues of the model up to 3 (or the first 3 cues if the model has more
 than 3 cues, analytically marginalizing out all remaining dimensions). At most
 3 cue dimensions can be plotted simultaneously.}
-
-\item{ci_level}{Numeric credibility interval level (e.g. \code{0.95}). Defaults to
-\code{0.95}.}
 }
 \value{
 A \code{ggplot} object (or list of \code{ggplot} objects if
@@ -125,6 +156,6 @@ displays 2D posterior density contour lines (\code{geom_density_2d} with
 normalized density contours). Points and curves are colored by group.
 }
 \seealso{
-\code{\link{plot_categories}}, \code{\link{plot_categorization_function}},
+\code{\link{plot_categories}}, \code{\link{plot_categorization_functions}},
 \code{\link{get_parameters}}, \code{\link{get_draws}}
 }
