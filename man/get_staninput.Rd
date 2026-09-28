@@ -9,13 +9,15 @@
 get_staninput(x, ...)
 
 ## S7 method for class <any>
-get_staninput(x)
+get_staninput(x, ...)
 
 ## S7 method for class <MVBU_Stanfit>
-get_staninput(x)
+get_staninput(x, ...)
 }
 \arguments{
 \item{x}{An S7 fit or fit-input object.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \value{
 The stored S7 Stan input object.

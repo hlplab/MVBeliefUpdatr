@@ -1,5 +1,5 @@
 #' @include asserts.R
-#' @include S7-core-classes.R
+#' @include S7-class.R
 #' @include S7-transform-information.R
 #' @include S7-staninput.R
 NULL
@@ -32,17 +32,18 @@ control_staninput <- function(
   )
 }
 
+#' MVBeliefUpdatr Stanfit Input Classes and Constructors
+#'
 #' An S7 Class for Ideal-Adaptor Fit-Input Objects
+#'
+#' @param data A \code{data.frame} containing the input data. Default: \code{data.frame()}.
+#' @param staninput An \code{\link{IdealAdaptorStaninput}} object. Default: \code{NULL}.
+#' @param transform_information An \code{\link{MVBU_TransformInformation}} object. Default: \code{NULL}.
+#' @param metadata A named \code{list} containing \code{label_information}. Default: \code{list()}.
 #'
 #' @name MVBU_StanfitInput
 #' @rdname MVBU_StanfitInput
-#' @title MVBeliefUpdatr Stanfit Input Classes and Constructors
 #' @docType class
-#' @slot data A \code{data.frame} containing the input data.
-#' @slot staninput An \code{\link{IdealAdaptorStaninput}} object.
-#' @slot transform_information An \code{\link{MVBU_TransformInformation}} object.
-#' @slot metadata A named \code{list} containing \code{label_information}
-#'   with character vectors (\code{cue}, \code{category}, and \code{group}).
 #' @export
 IdealAdaptorStanfitInput <- S7::new_class(
   "IdealAdaptorStanfitInput",
@@ -82,6 +83,7 @@ IdealAdaptorStanfitInput <- S7::new_class(
     metadata$label_information <- list(
       cue = if (!is.null(label_info$cue)) as.character(label_info$cue) else character(0),
       category = if (!is.null(label_info$category)) as.character(label_info$category) else character(0),
+      response_category = if (!is.null(label_info$response_category)) as.character(label_info$response_category) else character(0),
       group = if (!is.null(label_info$group)) as.character(label_info$group) else character(0)
     )
     if (!is.null(metadata$original_variable_names) && is.list(metadata$original_variable_names)) {
@@ -165,7 +167,6 @@ IdealAdaptorStanfitInput <- S7::new_class(
 #'   }
 #' @param control A list of control parameters for the constructor, typically produced by `control_staninput()`.
 #' @param stanmodel Character string naming the Stan model. Must be one of `NIX_ideal_adaptor`, `NIW_ideal_adaptor`, or `MNIX_ideal_adaptor`.
-#' @param verbose Should verbose output be provided? (default: `FALSE`)
 #' @param ... Additional arguments passed to methods or deprecated arguments.
 #' @return An object of class `IdealAdaptorStanfitInput` containing the prepared data, typed Stan input, and transform metadata.
 #' @export
@@ -181,16 +182,16 @@ new_ideal_adaptor_stanfit_input <- function(
   fixed_parameters = NULL,
   control = control_staninput(),
   stanmodel = "NIW_ideal_adaptor",
-  verbose = FALSE,
-  ...,
-  group.unique = lifecycle::deprecated()
+  ...
 ) {
-  if (lifecycle::is_present(group.unique)) {
-    lifecycle::deprecate_warn("0.1.0", "new_ideal_adaptor_stanfit_input(group.unique = )", "new_ideal_adaptor_stanfit_input(group_unique = )")
+  dots <- list(...)
+  if ("group.unique" %in% names(dots)) {
+    warning("Argument `group.unique` is deprecated; please use `group_unique` instead.", call. = FALSE)
     if (is.null(group_unique)) {
-      group_unique <- group.unique
+      group_unique <- dots$group.unique
     }
   }
+
   .assert_list(control)
 
   expected_control <- c("tau_scale", "L_omega_eta", "split_loglik_per_observation", "transform_type")
@@ -276,8 +277,7 @@ new_ideal_adaptor_stanfit_input <- function(
     category = category,
     response = NULL,
     group = group,
-    group_unique = group_unique,
-    verbose = verbose
+    group_unique = group_unique
   )
   test <- .prepare_staninput_frame(
     test,
@@ -285,8 +285,7 @@ new_ideal_adaptor_stanfit_input <- function(
     category = NULL,
     response = response,
     group = group,
-    group_unique = group_unique,
-    verbose = verbose
+    group_unique = group_unique
   )
 
   # Handle grouping structure if a unique group column is provided.
@@ -356,19 +355,28 @@ new_ideal_adaptor_stanfit_input <- function(
     )
   }
 
-  n_cues <- length(cues)
-  n_categories <- nlevels(exposure[[category]])
-  n_groups <- nlevels(exposure[[group]])
-  category_levels <- levels(exposure[[category]])
-  group_levels <- levels(exposure[[group]])
+  group_levels <- shared_group_levels
+  n_groups <- length(group_levels)
+  category_levels <- if (!is.null(category) && !is.null(response)) {
+    shared_levels
+  } else if (!is.null(category) && category %in% names(exposure)) {
+    levels(exposure[[category]])
+  } else {
+    character(0)
+  }
+  response_levels <- if (!is.null(test) && !is.null(response) && response %in% names(test)) {
+    levels(test[[response]])
+  } else {
+    category_levels
+  }
+  if (length(category_levels) == 0L) {
+    category_levels <- response_levels
+  }
+  if (length(response_levels) == 0L) {
+    response_levels <- category_levels
+  }
+  n_categories <- length(category_levels)
 
-  # in case exposure is empty (e.g., for pre-exposure tests)
-  if (is.null(category_levels) || length(category_levels) == 0) {
-    category_levels <- levels(test[[response]])
-  }
-  if (is.null(group_levels) || length(group_levels) == 0) {
-    group_levels <- levels(test[[group]])
-  }
 
   stanmodel_name <- sub("_ideal_adaptor$", "", stanmodel)
 
@@ -437,6 +445,16 @@ new_ideal_adaptor_stanfit_input <- function(
     cues = cues
   )
 
+  suff_stats <- tryCatch(
+    get_sufficient_category_statistics(
+      exposure,
+      cues = cues,
+      category = category,
+      group = group,
+      model_family = stanmodel_name
+    ),
+    error = function(e) NULL
+  )
 
   IdealAdaptorStanfitInput(
     data = data,
@@ -446,9 +464,11 @@ new_ideal_adaptor_stanfit_input <- function(
       label_information = list(
         cue = cues,
         category = category_levels,
+        response_category = response_levels,
         group = group_levels
       ),
-      original_variable_names = orig_var_names
+      original_variable_names = orig_var_names,
+      sufficient_statistics = suff_stats
     )
   )
 }
@@ -465,10 +485,9 @@ new_ideal_adaptor_stanfit_input <- function(
 #' @param response Optional response column.
 #' @param group Grouping column.
 #' @param group_unique Optional grouping column used to collapse repeated exposure conditions.
-#' @param verbose Logical flag for verbose output.
 #' @keywords internal
 #' @noRd
-.prepare_staninput_frame <- function(data, cues, category, response, group, group_unique = NULL, verbose = FALSE) {
+.prepare_staninput_frame <- function(data, cues, category, response, group, group_unique = NULL) {
   data <- as.data.frame(data)
   .assert_non_NA_character(cues)
   required_cols <- c(group)

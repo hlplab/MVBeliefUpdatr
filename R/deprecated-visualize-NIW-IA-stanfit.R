@@ -54,11 +54,11 @@ plot_parameter_correlations.ideal_adaptor_stanfit <- function(model, ...) {
 #'
 #' @description `r lifecycle::badge("deprecated")`
 #' `plot_expected_categorization_function_from_stanfit()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
-#' removed in 0.2.0. Please use [plot_categorization_function()] instead.
+#' removed in 0.2.0. Please use [plot_categorization_functions()] instead.
 #'
 #' @param model Model object.
-#' @param ... Arguments passed to [plot_categorization_function()].
-#' @seealso [plot_categorization_function()]
+#' @param ... Arguments passed to [plot_categorization_functions()].
+#' @seealso [plot_categorization_functions()]
 #' @keywords internal
 #' @export
 plot_expected_categorization_function_from_stanfit <- function(
@@ -68,8 +68,8 @@ plot_expected_categorization_function_from_stanfit <- function(
   lifecycle::deprecate_warn(
     "0.1.0",
     "plot_expected_categorization_function_from_stanfit()",
-    with = "plot_categorization_function()"
+    with = "plot_categorization_functions()"
   )
-  plot_categorization_function(model, ...)
+  plot_categorization_functions(model, ...)
 }
 

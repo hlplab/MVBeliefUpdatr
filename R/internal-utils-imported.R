@@ -45,7 +45,7 @@ NULL
 # @param first only return the first match in each string?
 # @return character vector containing matches
 .get_matches <- function(pattern, text, simplify = TRUE,
-                        first = FALSE, ...) {
+                         first = FALSE, ...) {
   x <- regmatches(text, gregexpr(pattern, text, ...))
   if (first) {
     x <- lapply(x, function(t) if (length(t)) t[1] else t)
@@ -134,10 +134,15 @@ NULL
   if (x == "NA" && allow_na) {
     return(x)
   }
-  if (!nzchar(x) || !.is_equal(x, all_vars(x))) {
+  vars <- tryCatch(all.vars(parse(text = x, keep.source = FALSE)), error = function(e) character(0))
+  if (!nzchar(x) || length(vars) != 1L || vars != x) {
     .stop("Cannot coerce '", x, "' to a single variable name.")
   }
   x
+}
+
+.message <- function(...) {
+  message(...)
 }
 
 .warning <- function(...) {
@@ -214,7 +219,7 @@ NULL
 #   not suppress outputs if evaluation fails?
 # @param silent actually evaluate silently?
 .eval_silent <- function(expr, type = "output", try = FALSE,
-                        silent = TRUE, ...) {
+                         silent = TRUE, ...) {
   try <- .as_one_logical(try)
   silent <- .as_one_logical(silent)
   type <- match.arg(type, c("output", "message"))
@@ -223,7 +228,8 @@ NULL
   if (silent) {
     if (try && type == "message") {
       try_out <- try(utils::capture.output(
-        out <- eval(expr, envir), type = type, ...
+        out <- eval(expr, envir),
+        type = type, ...
       ))
       if (.is_try_error(try_out)) {
         # try again without suppressing error messages
@@ -245,5 +251,5 @@ NULL
   if (missing(out)) {
     return(NULL)
   }
-  substr(collapse(deparse(out)), 1, nchar)
+  substr(paste(deparse(out), collapse = ""), 1, nchar)
 }

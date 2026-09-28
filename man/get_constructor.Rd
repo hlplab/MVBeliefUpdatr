@@ -34,3 +34,4 @@ A constructor function, a list of constructor functions, or \code{NULL}.
 \code{\link{get_category_labels}}, \code{\link{get_group_labels}}, and
 \code{\link{get_cue_labels}}.
 }
+\keyword{internal}

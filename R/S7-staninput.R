@@ -1,11 +1,13 @@
-#' @include S7-core-classes.R
+#' @include S7-class.R
 #' @include S7-transform-information.R
 
+#' @title MVBeliefUpdatr Stan Input Classes and Constructors
+#' @param values A named list containing the Stan input values.
+#'   Default: \code{list()}.
+#'
+#' @docType class
 #' @name MVBU_Staninput
 #' @rdname MVBU_Staninput
-#' @title MVBeliefUpdatr Stan Input Classes and Constructors
-#' @docType class
-#' @slot values A named list containing the Stan input values.
 #' @export
 MVBU_Staninput <- S7::new_class(
   "MVBU_Staninput",
@@ -28,6 +30,7 @@ MVBU_Staninput <- S7::new_class(
   }
 )
 
+#' @docType class
 #' @rdname MVBU_Staninput
 #' @export
 IdealAdaptorStaninput <- S7::new_class(
@@ -239,12 +242,12 @@ NIW_IdealAdaptorStaninput <- S7::new_class(
     staninput$Sigma_0_data <- if (!is.null(Sigma_0)) {
       to_array(
         lapply(Sigma_0, as.matrix),
-        inner_dims = c(n_cues),
+        inner_dims = c(n_cues, n_cues),
         outer_dims = c(length(Sigma_0)),
         simplify = FALSE
       )
     } else {
-      array(0, dim = c(0, 0))
+      array(0, dim = c(0, 0, 0))
     }
     return(MNIX_IdealAdaptorStaninput(values = staninput))
   }

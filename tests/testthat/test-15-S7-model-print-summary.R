@@ -1,0 +1,151 @@
+test_that("print and summary work on category representations", {
+  mvg_rep <- new_mvg_category_representation(
+    category_labels = "A",
+    cue_labels = c("F1", "F2"),
+    mu = c(0, 1),
+    Sigma = diag(2)
+  )
+
+  out <- capture.output(print(mvg_rep))
+  expect_true(any(grepl("MVG_CategoryRepresentation", out)))
+  expect_true(any(grepl("Category: A", out)))
+  expect_true(any(grepl("Cues \\(2\\): F1, F2", out)))
+
+  out_sum <- capture.output(summary(mvg_rep))
+  expect_equal(out, out_sum)
+})
+
+test_that("print on NIW displays kappa and nu before m and S", {
+  niw_rep <- new_niw_category_representation(
+    category_labels = "A",
+    cue_labels = c("F1", "F2"),
+    m = c(0, 1),
+    S = diag(2),
+    kappa = 10,
+    nu = 5
+  )
+  out <- capture.output(print(niw_rep))
+  kappa_idx <- grep("kappa:", out)
+  nu_idx <- grep("nu:", out)
+  m_idx <- grep("m:", out)
+  S_idx <- grep("S:", out)
+  expect_true(length(kappa_idx) == 1 && length(nu_idx) == 1 && length(m_idx) == 1 && length(S_idx) == 1)
+  expect_true(kappa_idx < m_idx)
+  expect_true(nu_idx < m_idx)
+  expect_true(m_idx < S_idx)
+})
+
+test_that("print on Exemplar representation displays first 5 exemplars", {
+  ex_mat <- matrix(seq(1, 20), ncol = 2)
+  colnames(ex_mat) <- c("F1", "F2")
+  ex_rep <- new_exemplar_category_representation(
+    category_labels = "A",
+    cue_labels = c("F1", "F2"),
+    exemplars = ex_mat
+  )
+  out <- capture.output(print(ex_rep))
+  expect_true(any(grepl("Exemplars \\(10 points\\):", out)))
+  expect_true(any(grepl("\\[1\\]", out)))
+  expect_true(any(grepl("\\[5\\]", out)))
+  expect_true(any(grepl("\\.\\.\\.", out)))
+})
+
+test_that("print and summary work on category representation templates", {
+  mvg_rep <- new_mvg_category_representation(
+    category_labels = "A",
+    cue_labels = c("F1", "F2"),
+    mu = c(0, 1),
+    Sigma = diag(2)
+  )
+  tpl <- new_category_representation_template(representations = list(A = mvg_rep))
+
+  out <- capture.output(print(tpl))
+  expect_true(any(grepl("CategoryRepresentationTemplate", out)))
+  expect_true(any(grepl("Categories \\(1\\): A", out)))
+  expect_true(any(grepl("A: MVG\\(mu = vector\\(2\\), Sigma = matrix\\(2, 2\\)\\)", out)))
+
+  out_sum <- capture.output(summary(tpl))
+  expect_equal(out, out_sum)
+})
+
+test_that("print and summary work on cognitive models", {
+  mvg_rep <- new_mvg_category_representation(
+    category_labels = "A",
+    cue_labels = c("F1", "F2"),
+    mu = c(0, 1),
+    Sigma = diag(2)
+  )
+  tpl <- new_category_representation_template(representations = list(A = mvg_rep))
+  model <- new_mvg_ideal_observer(
+    category_template = tpl,
+    category_prior = c(A = 1),
+    lapse_rate = 0.05
+  )
+
+  out <- capture.output(print(model))
+  expect_true(any(grepl("MVG_IdealObserver", out)))
+  expect_true(any(grepl("Decision rule: sampling", out)))
+  expect_true(any(grepl("Lapse rate: 0.05 \\(treatment: no_lapses\\)", out)))
+  expect_true(any(grepl("Perceptual noise: none \\(treatment: no_noise\\)", out)))
+  expect_true(any(grepl("A: MVG\\(mu = vector\\(2\\), Sigma = matrix\\(2, 2\\)\\)", out)))
+
+  out_sum <- capture.output(summary(model))
+  expect_equal(out, out_sum)
+})
+
+test_that("summary works on IdealAdaptorStanfitInput", {
+  stan_input <- example_ideal_adaptor_stanfit_input("NIW", n_cues = 1L)
+  sum_inp <- summary(stan_input)
+  expect_true(S7::S7_inherits(sum_inp, Summary_IdealAdaptorStanfitInput))
+  expect_true(is.data.frame(sum_inp@exposure_statistics))
+  expect_true(sum_inp@test_summary$n_observations > 0)
+
+  out <- capture.output(print(sum_inp))
+  expect_true(any(grepl("Exposure sufficient statistics", out)))
+  expect_true(any(grepl("Test data summary", out)))
+})
+
+test_that("print and summary work on MVBU_Stanfit", {
+  fit <- get_example_stanfit(
+    1,
+    stanmodel = "NIW_ideal_adaptor"
+  )
+  out <- capture.output(print(fit))
+  expect_true(
+    any(grepl("MVBU_Stanfit", out) | grepl("IdealAdaptorStanfit", out))
+  )
+  expect_true(any(grepl("Model type: NIW", out)))
+  expect_true(any(grepl("Categories", out)))
+  expect_true(any(grepl("Draws:", out)))
+
+  sum_obj <- summary(fit)
+  expect_true(S7::S7_inherits(sum_obj, Summary_MVBU_Stanfit))
+  sum_df <- as.data.frame(sum_obj)
+  expect_true(is.data.frame(sum_df))
+  expect_true("Parameter" %in% names(sum_df))
+  expect_true("Group" %in% names(sum_df) || "Category" %in% names(sum_df))
+
+  out_sum <- capture.output(print(sum_obj))
+  expect_true(any(grepl("Fitted parameters", out_sum)))
+  if (!is.null(sum_obj@high_rhats) && nrow(sum_obj@high_rhats) > 0) {
+    expect_true(any(grepl("Parameters with Rhats > 1.05:", out_sum)))
+  }
+})
+
+test_that("object-size regression check: S7 objects store canonical fields compactly", {
+  mvg_rep <- example_mvg_category_representation()
+  mvg_model <- example_mvg_ideal_observer()
+  niw_model <- example_niw_ideal_adaptor()
+
+  # Confirm S7 objects are lightweight in memory (under 500KB for rep, under 5MB for models with package environment closures)
+  expect_lt(as.numeric(object.size(mvg_rep)), 500000)
+  expect_lt(as.numeric(object.size(mvg_model)), 5000000)
+  expect_lt(as.numeric(object.size(niw_model)), 5000000)
+
+  # Confirm coercion to tibble expands data representation without altering S7 source object
+  tbl <- suppressWarnings(as_tibble(mvg_model))
+  expect_s3_class(tbl, "tbl_df")
+  expect_true(all(c("category", "mu", "Sigma", "prior") %in% names(tbl)))
+})
+
+

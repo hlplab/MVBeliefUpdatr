@@ -6,20 +6,34 @@
 \alias{plot_categories,MVBU_CategoryRepresentationTemplate-method}
 \alias{plot_categories,MVBU_CognitiveModel-method}
 \alias{plot_categories,MVBU_Stanfit-method}
+\alias{plot_categories,MVBU_ModelList-method}
+\alias{plot_categories,MVBU_StanfitPosterior-method}
 \title{Plot category representations and distributions}
 \usage{
-plot_categories(x, ...)
+plot_categories(
+  x,
+  cues = NULL,
+  categories = NULL,
+  groups = NULL,
+  aes = NULL,
+  levels = NULL,
+  limits = NULL,
+  resolution = 100,
+  n_exemplars = 0L,
+  ...
+)
 
 ## S7 method for class <MVBU_CategoryRepresentation>
 plot_categories(
   x,
   cues = NULL,
   categories = NULL,
+  groups = NULL,
   aes = NULL,
   levels = NULL,
   limits = NULL,
-  n_exemplars = 0L,
   resolution = 100,
+  n_exemplars = 0L,
   ...
 )
 
@@ -28,11 +42,12 @@ plot_categories(
   x,
   cues = NULL,
   categories = NULL,
+  groups = NULL,
   aes = NULL,
   levels = NULL,
   limits = NULL,
-  n_exemplars = 0L,
   resolution = 100,
+  n_exemplars = 0L,
   ...
 )
 
@@ -41,11 +56,12 @@ plot_categories(
   x,
   cues = NULL,
   categories = NULL,
+  groups = NULL,
   aes = NULL,
   levels = NULL,
   limits = NULL,
-  n_exemplars = 0L,
   resolution = 100,
+  n_exemplars = 0L,
   ...
 )
 
@@ -58,12 +74,36 @@ plot_categories(
   aes = NULL,
   levels = NULL,
   limits = NULL,
-  sample = FALSE,
-  ndraws = 100,
-  n_exemplars = 0L,
   resolution = 100,
-  show_exposure_data = FALSE,
-  show_test_data = FALSE,
+  n_exemplars = 0L,
+  ...
+)
+
+## S7 method for class <MVBU_ModelList>
+plot_categories(
+  x,
+  cues = NULL,
+  categories = NULL,
+  groups = NULL,
+  aes = NULL,
+  levels = NULL,
+  limits = NULL,
+  resolution = 100,
+  n_exemplars = 0L,
+  ...
+)
+
+## S7 method for class <MVBU_StanfitPosterior>
+plot_categories(
+  x,
+  cues = NULL,
+  categories = NULL,
+  groups = NULL,
+  aes = NULL,
+  levels = NULL,
+  limits = NULL,
+  resolution = 100,
+  n_exemplars = 0L,
   ...
 )
 }
@@ -72,9 +112,6 @@ plot_categories(
 \code{\link{MVBU_CategoryRepresentationTemplate}},
 \code{\link{MVBU_CognitiveModel}}, or \code{\link{MVBU_Stanfit}}).}
 
-\item{...}{Additional arguments passed to specific plotting methods (e.g.,
-\code{interactive = TRUE} for interactive 3D WebGL scenes via Plotly).}
-
 \item{cues}{Character vector of cue names to plot (1, 2, or 3 cues). Defaults
 to all cues of the model up to 3 (or the first 3 cues if the model has more
 than 3 cues, analytically marginalizing out all remaining dimensions). At most
@@ -82,6 +119,9 @@ than 3 cues, analytically marginalizing out all remaining dimensions). At most
 
 \item{categories}{Character vector of category names to include. Defaults to
 \code{NULL} (all categories).}
+
+\item{groups}{Character vector of group names to plot for
+\code{\link{MVBU_Stanfit}} objects. Defaults to all exposure groups.}
 
 \item{aes}{Plot aesthetic: \code{"contour"}, \code{"fill"},
 \code{"fill-gradient"}, \code{"fill-discrete"}, \code{"scatter"}, or
@@ -105,25 +145,26 @@ limits (e.g. \code{list(F1 = c(200, 800), F2 = c(800, 2500))}). Defaults to
 \code{NULL} (automatically computed from category distributions or
 exemplars).}
 
-\item{n_exemplars}{Integer specifying max number of exemplars to randomly
-sample and plot for exemplar representations. Defaults to \code{0L} for 1D/2D
-(no exemplars plotted) and \code{100L} for 3D interactive scatter plots.}
-
 \item{resolution}{Integer specifying the grid resolution along continuous cue
 dimensions. Defaults to \code{100L} for 1D/2D category plots and \code{60L}
 for 3D sliced category plots.}
 
-\item{groups}{Character vector of group names to plot for
-\code{\link{MVBU_Stanfit}} objects. Defaults to all exposure groups.}
+\item{n_exemplars}{Integer specifying max number of exemplars to randomly
+sample and plot for exemplar representations. Defaults to \code{0L} for 1D/2D
+(no exemplars plotted) and \code{100L} for 3D interactive scatter plots.}
 
-\item{sample}{Logical; if \code{TRUE}, evaluates and displays individual
-MCMC posterior sample draws (as thin translucent curves or ellipses)
-overlaid on the posterior mean distribution for \code{\link{MVBU_Stanfit}}.
-Defaults to \code{FALSE}.}
+\item{...}{Additional arguments passed to specific plotting methods (e.g.,
+\code{interactive = TRUE} for interactive 3D WebGL scenes via Plotly;
+\code{slices} and \code{slice_cue} for 3D sliced category plots).}
+
+\item{uncertainty_treatment}{Character string specifying treatment of posterior parameter
+uncertainty in fitted Stan models: \code{"marginalize"} (default) shows the expected/marginal
+category density/decision function with posterior credible intervals, whereas \code{"sample"}
+overlays individual posterior sample draws.}
 
 \item{ndraws}{Integer specifying the number of posterior MCMC draws to use
 when extracting parameters or plotting from \code{\link{MVBU_Stanfit}}.
-Defaults to \code{100L} (\code{NULL} uses all draws).}
+Defaults to \code{20L} (\code{NULL} uses all draws).}
 
 \item{show_exposure_data}{Logical; if \code{TRUE}, overlays observed exposure
 data points on \code{\link{MVBU_Stanfit}} category plots. Defaults to
@@ -132,13 +173,6 @@ data points on \code{\link{MVBU_Stanfit}} category plots. Defaults to
 \item{show_test_data}{Logical; if \code{TRUE}, overlays observed test data
 points on \code{\link{MVBU_Stanfit}} category plots. Defaults to
 \code{FALSE}.}
-
-\item{slices}{Optional numeric vector of values along the third cue to slice
-at for 3D sliced plots. Defaults to \code{NULL} (automatically generates 5
-slices at -2, -1, 0, 1, and 2 standard deviations from the pooled mean).}
-
-\item{slice_cue}{Optional character string naming the third cue along which to
-slice for 3D sliced plots. Defaults to \code{NULL} (the 3rd cue in \code{cues}).}
 
 \item{parallel}{Logical; if \code{TRUE}, parallelizes grid evaluations over
 multiple CPU chunks using \pkg{parallel}. Defaults to \code{FALSE}.}
@@ -150,10 +184,6 @@ multiple CPU chunks using \pkg{parallel}. Defaults to \code{FALSE}.}
 \item{noise_treatment}{Optional character string specifying treatment of
 perceptual noise (\code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}).
 Defaults to \code{NULL} (uses the model's configured noise treatment).}
-
-\item{lapse_treatment}{Optional character string specifying treatment of lapses
-(\code{"no_lapses"} or \code{"lapses"}). Defaults to \code{NULL} (uses the
-model's configured lapse treatment).}
 }
 \value{
 A \code{ggplot} object (or a \code{plotly} htmlwidget if
@@ -173,6 +203,6 @@ large diamond markers represent category means. For exemplar representations, th
 mean is computed across all stored exemplars.
 }
 \seealso{
-\code{\link{plot_categorization_function}}, \code{\link{plot_parameters}},
+\code{\link{plot_categorization_functions}}, \code{\link{plot_parameters}},
 \code{\link{likelihood}}, \code{\link{posterior}}
 }

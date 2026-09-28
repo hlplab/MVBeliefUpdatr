@@ -19,7 +19,6 @@ fit_ideal_adaptor(
   init = "random",
   control = NULL,
   silent = 1,
-  verbose = F,
   stan_model_args = list(),
   stanmodel = NULL,
   rename = T,
@@ -50,12 +49,28 @@ compression algorithms supported by \code{\link{saveRDS}}. If the
 \code{file} argument is provided, this compression will be used when saving
 the fitted model object.}
 
+\item{stanvars}{Optional \code{stanvars} object. Default: \code{NULL}.}
+
 \item{backend}{Character string naming the package to use as the backend for
 fitting the Stan model. Options are \code{"rstan"} (the default) or
 \code{"cmdstanr"}. Details on the
 \pkg{rstan} and \pkg{cmdstanr} packages are available at
 \url{https://mc-stan.org/rstan/} and \url{https://mc-stan.org/cmdstanr/},
 respectively.}
+
+\item{save_pars}{Storage for parameter names to save. Default: \code{NULL}.}
+
+\item{basis}{Optional basis data subset. Default: \code{NULL}.}
+
+\item{chains}{Number of Markov chains. Default: 4.}
+
+\item{iter}{Total number of iterations per chain. Default: 2000.}
+
+\item{warmup}{Number of warmup (burnin) iterations per chain. Default: 1000.}
+
+\item{init}{Initial values specification. Default: \code{"random"}.}
+
+\item{control}{Named list of control parameters passed to Stan sampler. Default: \code{NULL}.}
 
 \item{silent}{Verbosity level between \code{0} and \code{2}.
 If \code{1} (the default), most of the
@@ -74,7 +89,7 @@ as well. If using \code{backend = "rstan"} you can also set
 
 \item{rename}{For internal use only.}
 
-\item{...}{Additional parameters are passed to \link[rstan:sampling]{rstan::sampling}.}
+\item{...}{Additional parameters are passed to \link[rstan:sampling]{rstan::sampling}, including the following:}
 }
 \value{
 An object of class \code{ideal_adaptor_stanfit} with the fitted stan model.

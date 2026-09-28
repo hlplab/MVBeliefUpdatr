@@ -33,8 +33,8 @@ example_uvg_category_representation(n_cues = 1, category = "/b/")
 example_nix_category_representation(
   n_cues = 1,
   category = "/b/",
-  kappa = 10,
-  nu = 30
+  kappa = 1,
+  nu = n_cues + 2
 )
 
 example_muvg_category_representation(n_cues = 2, category = "/b/")
@@ -42,8 +42,8 @@ example_muvg_category_representation(n_cues = 2, category = "/b/")
 example_mnix_category_representation(
   n_cues = 2,
   category = "/b/",
-  kappa = 10,
-  nu = 30
+  kappa = 1,
+  nu = n_cues + 2
 )
 
 example_mvg_category_representation(n_cues = 1, category = "/b/")
@@ -51,8 +51,8 @@ example_mvg_category_representation(n_cues = 1, category = "/b/")
 example_niw_category_representation(
   n_cues = 1,
   category = "/b/",
-  kappa = 10,
-  nu = NULL
+  kappa = 1,
+  nu = n_cues + 2
 )
 
 example_exemplar_category_representation(n_cues = 1, category = "/b/")
@@ -64,8 +64,8 @@ example_uvg_category_representation_template(n_cues = 1, categories = NULL)
 example_nix_category_representation_template(
   n_cues = 1,
   categories = NULL,
-  kappa = 10,
-  nu = 30
+  kappa = 1,
+  nu = n_cues + 2
 )
 
 example_muvg_category_representation_template(n_cues = 2, categories = NULL)
@@ -73,8 +73,8 @@ example_muvg_category_representation_template(n_cues = 2, categories = NULL)
 example_mnix_category_representation_template(
   n_cues = 2,
   categories = NULL,
-  kappa = 10,
-  nu = 30
+  kappa = 1,
+  nu = n_cues + 2
 )
 
 example_mvg_category_representation_template(n_cues = 1, categories = NULL)
@@ -82,8 +82,8 @@ example_mvg_category_representation_template(n_cues = 1, categories = NULL)
 example_niw_category_representation_template(
   n_cues = 1,
   categories = NULL,
-  kappa = 10,
-  nu = NULL
+  kappa = 1,
+  nu = n_cues + 2
 )
 
 example_exemplar_category_representation_template(
@@ -103,8 +103,8 @@ example_uvg_ideal_observer(n_cues = 1, categories = NULL, ...)
 example_nix_ideal_adaptor(
   n_cues = 1,
   categories = NULL,
-  kappa = 10,
-  nu = 30,
+  kappa = 1,
+  nu = n_cues + 2,
   ...
 )
 
@@ -113,8 +113,8 @@ example_muvg_ideal_observer(n_cues = 2, categories = NULL, ...)
 example_mnix_ideal_adaptor(
   n_cues = 2,
   categories = NULL,
-  kappa = 10,
-  nu = 30,
+  kappa = 1,
+  nu = n_cues + 2,
   ...
 )
 
@@ -123,8 +123,8 @@ example_mvg_ideal_observer(n_cues = 1, categories = NULL, ...)
 example_niw_ideal_adaptor(
   n_cues = 1,
   categories = NULL,
-  kappa = 10,
-  nu = NULL,
+  kappa = 1,
+  nu = n_cues + 2,
   ...
 )
 
@@ -132,7 +132,48 @@ example_exemplar_model(n_cues = 1, categories = NULL, ...)
 
 example_model(type, n_cues = NULL, categories = NULL, ...)
 }
+\arguments{
+\item{n_cues}{Integer number of cues: 1 (\code{"VOT"}), 2 (\code{"VOT"},
+\code{"f0_semitones"}), or 3 (\code{"VOT"}, \code{"f0_semitones"},
+\code{"vowel_duration"}; maximum is 3). Default: 1.}
+
+\item{category}{Character string giving the category label.}
+
+\item{kappa}{Strength of belief (pseudocount) about the category mean
+\eqn{\mu}. Default: 1.}
+
+\item{nu}{Degrees of freedom (pseudocount) for covariance/variance beliefs
+\eqn{\Sigma}. Default: \code{n_cues + 2}.}
+
+\item{type}{Character string indicating the model types. Valid choices are:
+\itemize{
+\item \code{"UVG"}: Univariate Gaussian.
+\item \code{"NIX"}: Normal-Inverse-chi^2.
+\item \code{"MUVG"}: Multivariate Univariate Gaussian.
+\item \code{"MNIX"}: Multivariate Normal-Inverse-chi^2.
+\item \code{"MVG"}: Multivariate Gaussian.
+\item \code{"NIW"}: Normal-Inverse-Wishart.
+\item \code{"EXEMPLAR"}: Exemplar.
+}}
+
+\item{...}{Additional arguments passed to underlying constructors.}
+
+\item{categories}{Character vector of category labels.}
+}
 \description{
-\code{n_cues} selects VOT, VOT plus f0, or all three bundled cues. UVG and NIX
-examples require \code{n_cues = 1}.
+Helper functions to construct example S7 representations, templates,
+and cognitive models from the bundled \code{mixer6} dataset.
+}
+\details{
+The parameter \code{n_cues} specifies the number of acoustic cues to
+include (up to a maximum of 3 cues):
+\itemize{
+\item \code{n_cues = 1}: Voice onset time (\code{"VOT"}). Required for
+univariate models (UVG and NIX).
+\item \code{n_cues = 2}: Voice onset time and fundamental frequency
+(\code{"VOT"} and \code{"f0_semitones"}).
+\item \code{n_cues = 3} (maximum): Voice onset time, fundamental
+frequency, and vowel duration (\code{"VOT"}, \code{"f0_semitones"},
+and \code{"vowel_duration"}).
+}
 }

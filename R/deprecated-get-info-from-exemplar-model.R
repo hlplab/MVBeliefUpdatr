@@ -1,4 +1,4 @@
-#' @include S7-core-classes.R
+#' @include S7-class.R
 #' @importFrom lifecycle deprecate_warn
 #' @importFrom dplyr group_by mutate ungroup select arrange rename pull
 #' @importFrom rlang :=

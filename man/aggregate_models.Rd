@@ -17,15 +17,12 @@ When \code{x} is not an S7 object or list of S7 objects, dispatch falls back to
 \item{...}{Additional S7 objects of the same class (for variadic usage of
 \code{aggregate}) or arguments passed to methods.}
 
+\item{models}{An \link{MVBU_ModelList} container object or non-empty list of cognitive models.}
+
 \item{weights}{Optional numeric vector of positive weights with the same
 length as the number of objects being aggregated. If \code{NULL} (default),
 uniform weights \eqn{1/N} are used. Weights are automatically normalized to
 sum to 1.}
-
-\item{x, models}{An S7 category representation, template, cognitive model, or
-a non-empty list of such objects belonging to the same S7 class. For
-\code{aggregate}, additional objects can also be passed via \code{...}.
-For \code{aggregate_models}, a non-empty list of cognitive models.}
 }
 \value{
 An aggregated S7 object of the same class.
@@ -35,7 +32,8 @@ An S7 object of the same class as the inputs with aggregated parameters.
 \description{
 Aggregates multiple S7 category representations, category representation
 templates, or cognitive models of the same family by computing weighted
-averages of their category distributions and model parameters.
+averages of their category distributions and model parameters. Accepts an
+\link{MVBU_ModelList} container object or a list of cognitive models.
 }
 \details{
 Aggregation operates hierarchically depending on the class of the input:

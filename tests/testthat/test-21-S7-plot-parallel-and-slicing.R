@@ -27,7 +27,7 @@ test_that("plot_categories defaults to 2D slicing for 3-cue representations & mo
   expect_true(inherits(p_cat$facet, "FacetWrap"))
 
   # 3-cue categorization plot defaults to 2D slicing
-  p_categorize <- plot_categorization_function(model3d)
+  p_categorize <- plot_categorization_functions(model3d)
   expect_s3_class(p_categorize, "ggplot")
   expect_true(inherits(p_categorize$facet, "FacetWrap"))
 
@@ -99,7 +99,7 @@ test_that("parallel evaluation produces identical results to sequential evaluati
   expect_equal(post_seq$posterior, post_par$posterior, tolerance = 1e-9)
 })
 
-test_that("plot_categorization and plot_correlations aliases work", {
+test_that("plot_categorization_functions works", {
   uvg_rep <- new_uvg_category_representation(
     category_labels = "A",
     cue_labels = "F1",
@@ -114,6 +114,6 @@ test_that("plot_categorization and plot_correlations aliases work", {
     category_prior = c(A = 1)
   )
 
-  p_cat <- plot_categorization_function(model)
+  p_cat <- plot_categorization_functions(model)
   expect_s3_class(p_cat, "ggplot")
 })

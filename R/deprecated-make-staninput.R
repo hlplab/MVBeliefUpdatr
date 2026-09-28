@@ -38,8 +38,7 @@ make_staninput <- function(
     group.unique = group.unique,
     fixed_parameters = fixed_parameters,
     control = control,
-    stanmodel = stanmodel,
-    verbose = verbose
+    stanmodel = stanmodel
   )
 }
 
@@ -84,8 +83,7 @@ make_ideal_adaptor_stanfit_input <- function(
     group.unique = group.unique,
     fixed_parameters = fixed_parameters,
     control = control,
-    stanmodel = stanmodel,
-    verbose = verbose
+    stanmodel = stanmodel
   )
 }
 

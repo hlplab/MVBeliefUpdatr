@@ -21,6 +21,8 @@ update_model_decision_bias_incrementally(
 \arguments{
 \item{model}{A \code{\link[=is.MVBU_model]{model}} object with decision biases.}
 
+\item{beta}{The learning rate with which decision biases change.}
+
 \item{exposure}{\code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.}
 
 \item{exposure.category}{Name of variable in \code{data} that contains the category information. (default: "category")}

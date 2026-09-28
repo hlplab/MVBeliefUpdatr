@@ -1,4 +1,3 @@
-
 test_that("deprecated wrappers forward to the S7 fit-input constructor", {
   exposure <- data.frame(
     category = factor(c("A", "B")),
@@ -7,7 +6,7 @@ test_that("deprecated wrappers forward to the S7 fit-input constructor", {
     cue2 = c(0.2, 0.3)
   )
   test <- data.frame(
-    response = factor(c("A", "B")),
+    response_category = factor(c("A", "B")),
     group = factor(c("g1", "g1")),
     cue1 = c(0.15, 0.45),
     cue2 = c(0.25, 0.35)
@@ -19,7 +18,7 @@ test_that("deprecated wrappers forward to the S7 fit-input constructor", {
       test = test,
       cues = c("cue1", "cue2"),
       category = "category",
-      response = "response",
+      response = "response_category",
       group = "group",
       stanmodel = "NIW_ideal_adaptor"
     ),
@@ -38,7 +37,7 @@ test_that("legacy wrappers reject invalid fixed parameters", {
     cue2 = c(0, 1)
   )
   test <- data.frame(
-    response = factor(c("A", "B")),
+    response_category = factor(c("A", "B")),
     group = factor(c("g1", "g1")),
     cue1 = c(0.1, 0.9),
     cue2 = c(0.1, 0.9)
@@ -51,7 +50,7 @@ test_that("legacy wrappers reject invalid fixed parameters", {
         test = test,
         cues = c("cue1", "cue2"),
         category = "category",
-        response = "response",
+        response = "response_category",
         group = "group",
         lapse_rate = 1.5,
         control = control_staninput(transform_type = "identity"),

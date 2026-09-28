@@ -20,11 +20,11 @@
 \usage{
 log_posterior(x, ...)
 
-nuts_params(x, ...)
+nuts_params(x, pars = NULL, ...)
 
-rhat(x, ...)
+rhat(x, pars = NULL, ...)
 
-neff_ratio(x, ...)
+neff_ratio(x, pars = NULL, ...)
 
 ## S7 method for class <MVBU_Stanfit>
 log_posterior(x, ...)

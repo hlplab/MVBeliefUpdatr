@@ -1,41 +1,49 @@
 #' @include asserts.R
-#' @include S7-core-classes.R
+#' @include S7-class.R
 #' @include S7-transform-information.R
 #' @include S7-staninput.R
 #' @include S7-stanfit-input.R
 #' @importFrom S7 new_class new_object new_generic method class_name props
 NULL
 
+#' MVBeliefUpdatr Stanfit Classes and Constructors
+#'
 #' An S7 base class for Stan fit objects
+#'
+#' @param data A \code{data.frame} containing the data used to fit the model.
+#' @param staninput A Stan input object containing the data handed to rstan
+#'   through \code{\link{make_staninput}}. Contains at least two components:
+#'   \code{transformed} and \code{untransformed}.
+#' @param stanvars A \code{stanvars} object or \code{NULL}. Default: \code{NULL}.
+#' @param backend The name of the backend used to fit the model (character).
+#'   Default: \code{"rstan"}.
+#' @param save_pars Optional storage for saved parameter names. Default:
+#'   \code{NULL}.
+#' @param stan_args Named list of additional control arguments that were passed
+#'   to the Stan backend directly. Default: \code{list()}.
+#' @param stanfit An object of class \code{\link[rstan:stanfit-class]{stanfit}}
+#'   containing posterior draws. Default: \code{NULL}.
+#' @param basis An object that contains a small subset of the Stan data created
+#'   at fitting time, needed to process new data. Default: \code{NULL}.
+#' @param transform_information An object of type
+#'   \code{\link{MVBU_TransformInformation}} or \code{NULL}. Default: \code{NULL}.
+#' @param criteria An empty \code{list} for adding model fit criteria after
+#'   estimation of the model. Default: \code{list()}.
+#' @param file Optional name of a file in which the model object was stored in
+#'   or loaded from. Default: \code{NULL}.
+#' @param version The versions of \pkg{MVBeliefUpdatr} and \pkg{rstan} with
+#'   which the model was fitted. Default: \code{NULL}.
+#' @param metadata List containing auxiliary information including
+#'   \code{label_information}. Default: \code{list()}.
+#' @param cache Internal cache list storing pre-extracted \code{$draws} and
+#'   \code{$summary} objects populated by \code{\link{add_posterior_latents}}.
+#'   Default: \code{list()}.
+#' @seealso \code{\link{add_posterior_latents}}, \code{\link{fit_ideal_adaptor}},
+#'   \code{vignette("fitting-and-working-with-stanfit-models")}
 #'
 #' @name MVBU_Stanfit
 #' @rdname MVBU_Stanfit
-#' @title MVBeliefUpdatr Stanfit Classes and Constructors
 #' @docType class
-#'
-#' @slot data A \code{data.frame} containing the data used to fit the model.
-#' @slot staninput A Stan input object containing the data handed to rstan through
-#'   \code{\link{make_staninput}}. The staninput object contains at
-#'   least two components: \code{transformed} and \code{untransformed}.
-#' @slot stanvars A \code{\link{stanvars}} object or \code{NULL}.
-#' @slot backend The name of the backend used to fit the model (character).
-#' @slot save_pars Optional storage for saved parameter names.
-#' @slot stan_args Named list of additional control arguments that were passed
-#'   to the Stan backend directly. NOT YET USED
-#' @slot stanfit An object of class
-#'   \code{\link[rstan:stanfit-class]{stanfit}} containing posterior draws.
-#' @slot basis An object that contains a small subset of the Stan data
-#'   created at fitting time, needed to process new data. NOT YET USED
-#' @slot transform_information An object of type \code{\link{MVBU_TransformInformation}}.
-#' @slot criteria An empty \code{list} for adding model fit criteria
-#'   after estimation of the model. NOT YET USED
-#' @slot file Optional name of a file in which the model object was stored in
-#'   or loaded from.
-#' @slot version The versions of \pkg{MVBeliefUpdatr} and \pkg{rstan} with
-#'   which the model was fitted.
-#' @slot metadata List containing auxiliary information including
-#'   \code{label_information}.
-#'
 #' @rawNamespace if (getRversion() < "4.3.0") importFrom(S7, "@")
 #' @importFrom purrr map_lgl map_chr
 #' @importFrom utils packageVersion
@@ -108,6 +116,7 @@ MVBU_Stanfit <- S7::new_class(
     metadata$label_information <- list(
       cue = if (!is.null(label_info$cue)) as.character(label_info$cue) else character(0),
       category = if (!is.null(label_info$category)) as.character(label_info$category) else character(0),
+      response_category = if (!is.null(label_info$response_category)) as.character(label_info$response_category) else character(0),
       group = if (!is.null(label_info$group)) as.character(label_info$group) else character(0)
     )
 
@@ -146,12 +155,12 @@ MVBU_Stanfit <- S7::new_class(
       if (!inherits(self@stanfit, "stanfit")) {
         return("`stanfit` must inherit from stanfit when provided")
       }
-      if (!(self@stanfit@model_name %in% names(MVBeliefUpdatr:::stanmodels))) {
+      if (!(self@stanfit@model_name %in% names(stanmodels))) {
         return(
           paste0(
             "`stanfit` model_name is not recognized. `stanfit` has to be ",
             "created by one of the accepted stanmodels:\n\t",
-            paste(names(MVBeliefUpdatr:::stanmodels), collapse = "\n\t"),
+            paste(names(stanmodels), collapse = "\n\t"),
             "\n(you can get the name of your model from ",
             "your_stanfit@model_name)."
           )
@@ -178,6 +187,7 @@ MVBU_Stanfit <- S7::new_class(
   }
 )
 
+#' @docType class
 #' @rdname MVBU_Stanfit
 #' @export
 IdealAdaptorStanfit <- S7::new_class(
@@ -364,40 +374,6 @@ NIW_IdealAdaptorStanfit <- S7::new_class(
   }
 )
 
-#' @export
-ideal_adaptor_stanfit <- function(
-  data = data.frame(),
-  staninput = NULL,
-  stanvars = NULL,
-  backend = "rstan",
-  save_pars = NULL,
-  stan_args = list(),
-  stanfit = NULL,
-  basis = NULL,
-  transform_information = NULL,
-  criteria = list(),
-  file = NULL,
-  version = NULL,
-  metadata = list()
-) {
-  constructor <- get_ideal_adaptor_stanfit_constructor(staninput)
-
-  constructor(
-    data = data,
-    staninput = staninput,
-    stanvars = stanvars,
-    backend = backend,
-    save_pars = save_pars,
-    stan_args = stan_args,
-    stanfit = stanfit,
-    basis = basis,
-    transform_information = transform_information,
-    criteria = criteria,
-    file = file,
-    version = version,
-    metadata = metadata
-  )
-}
 
 
 # -------------------------

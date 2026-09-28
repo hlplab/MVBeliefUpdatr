@@ -1,7 +1,10 @@
+^.*\.rds$
 ^\.agents$
 ^\.comments$
 ^\.vscode$
 ^\.Rproj\.user$
+^\.travis\.yml$
+^codecov\.yml$
 ^doc$
 ^doc/.*
 ^docs$
@@ -12,5 +15,3 @@
 ^tests/testthat/\_problems$
 ^tests/testthat/helper-s7-foundation\.R$
 ^MVBeliefUpdatr\.Rproj$
-^codecov\.yml$
-^\.travis\.yml$

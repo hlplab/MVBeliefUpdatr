@@ -9,14 +9,14 @@ new_ideal_adaptor_stanfit_input(
   test,
   cues,
   category = "category",
-  response = "response",
+  response = "response_category",
   group = "group",
-  group.unique = NULL,
+  group_unique = NULL,
   check_unique_group_identity = TRUE,
   fixed_parameters = NULL,
   control = control_staninput(),
   stanmodel = "NIW_ideal_adaptor",
-  verbose = FALSE
+  ...
 )
 }
 \arguments{
@@ -28,13 +28,13 @@ new_ideal_adaptor_stanfit_input(
 
 \item{category}{Name of the column in \code{exposure} that stores the category information. (default: "category")}
 
-\item{response}{Name of the column in \code{test} that stores the response information. (default: "response")}
+\item{response}{Name of the column in \code{test} that stores the response information. (default: "response_category")}
 
 \item{group}{Name of the column in \code{exposure} and \code{test} that stores the grouping information. (default: "group")}
 
-\item{group.unique}{Optional grouping column used to collapse repeated exposure conditions before constructing the Stan input.}
+\item{group_unique}{Optional grouping column used to collapse repeated exposure conditions before constructing the Stan input.}
 
-\item{check_unique_group_identity}{Logical indicating whether to verify that all groups mapped to a given \code{group.unique} level share identical sufficient exposure statistics (sample size, means, covariances). If \code{TRUE} and a mismatch is found, an informative error is raised. If \code{FALSE}, the first level of each unique group is taken. (default: \code{TRUE})}
+\item{check_unique_group_identity}{Logical indicating whether to verify that all groups mapped to a given \code{group_unique} level share identical sufficient exposure statistics (sample size, means, covariances). If \code{TRUE} and a mismatch is found, an informative error is raised. If \code{FALSE}, the first level of each unique group is taken. (default: \code{TRUE})}
 
 \item{fixed_parameters}{Optional list of fixed model parameters. Currently
 recognized are the following parameters:
@@ -51,7 +51,7 @@ the category covariance. The shape should match the model requirements.
 
 \item{stanmodel}{Character string naming the Stan model. Must be one of \code{NIX_ideal_adaptor}, \code{NIW_ideal_adaptor}, or \code{MNIX_ideal_adaptor}.}
 
-\item{verbose}{Should verbose output be provided? (default: \code{FALSE})}
+\item{...}{Additional arguments passed to methods or deprecated arguments.}
 }
 \value{
 An object of class \code{IdealAdaptorStanfitInput} containing the prepared data, typed Stan input, and transform metadata.

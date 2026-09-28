@@ -1,11 +1,11 @@
-#' @include S7-core-classes.R
-#' @include S7-core-uvg-classes.R
-#' @include S7-core-nix-classes.R
-#' @include S7-core-muvg-classes.R
-#' @include S7-core-mnix-classes.R
-#' @include S7-core-mvg-classes.R
-#' @include S7-core-niw-classes.R
-#' @include S7-core-exemplar-classes.R
+#' @include S7-class.R
+#' @include S7-class-uvg.R
+#' @include S7-class-nix.R
+#' @include S7-class-muvg.R
+#' @include S7-class-mnix.R
+#' @include S7-class-mvg.R
+#' @include S7-class-niw.R
+#' @include S7-class-exemplar.R
 NULL
 
 # Cross-family coercion between S7 category representations, templates, and cognitive models.
@@ -15,20 +15,33 @@ NULL
 # into point/uncertain parameters, or by sampling exemplars from a parametric representation).
 
 .mvbu_family_of_representation <- function(x) {
-  if (S7::S7_inherits(x, UVG_CategoryRepresentation)) return("UVG")
-  if (S7::S7_inherits(x, NIX_CategoryRepresentation)) return("NIX")
-  if (S7::S7_inherits(x, MUVG_CategoryRepresentation)) return("MUVG")
-  if (S7::S7_inherits(x, MNIX_CategoryRepresentation)) return("MNIX")
-  if (S7::S7_inherits(x, MVG_CategoryRepresentation)) return("MVG")
-  if (S7::S7_inherits(x, NIW_CategoryRepresentation)) return("NIW")
-  if (S7::S7_inherits(x, Exemplar_CategoryRepresentation)) return("EXEMPLAR")
+  if (S7::S7_inherits(x, UVG_CategoryRepresentation)) {
+    return("UVG")
+  }
+  if (S7::S7_inherits(x, NIX_CategoryRepresentation)) {
+    return("NIX")
+  }
+  if (S7::S7_inherits(x, MUVG_CategoryRepresentation)) {
+    return("MUVG")
+  }
+  if (S7::S7_inherits(x, MNIX_CategoryRepresentation)) {
+    return("MNIX")
+  }
+  if (S7::S7_inherits(x, MVG_CategoryRepresentation)) {
+    return("MVG")
+  }
+  if (S7::S7_inherits(x, NIW_CategoryRepresentation)) {
+    return("NIW")
+  }
+  if (S7::S7_inherits(x, Exemplar_CategoryRepresentation)) {
+    return("EXEMPLAR")
+  }
   .stop("x must be an MVBU_CategoryRepresentation of a supported family.")
 }
 
 # Draw n cue observations (a matrix with one column per cue) from a single category representation.
 .mvbu_sample_from_representation <- function(x, from, n, with_replacement = TRUE) {
-  switch(
-    from,
+  switch(from,
     UVG = matrix(stats::rnorm(n, mean = x@mu, sd = sqrt(x@sigma2)), ncol = 1),
     NIX = {
       scale <- sqrt(x@sigma2 * (x@kappa + 1) / x@kappa)
@@ -42,15 +55,15 @@ NULL
       .rmvt(n = n, delta = x@m, sigma = Sigma_pred, df = df)
     },
     MUVG = {
-      k <- length(x@component_mu)
-      out <- vapply(seq_len(k), function(i) stats::rnorm(n, mean = x@component_mu[i], sd = sqrt(x@component_sigma2[i])), numeric(n))
+      k <- length(x@mu)
+      out <- vapply(seq_len(k), function(i) stats::rnorm(n, mean = x@mu[i], sd = sqrt(x@sigma2[i])), numeric(n))
       matrix(out, nrow = n, ncol = k)
     },
     MNIX = {
-      k <- length(x@component_m)
+      k <- length(x@m)
       out <- vapply(seq_len(k), function(i) {
-        scale <- sqrt(x@component_sigma2[i] * (x@component_kappa[i] + 1) / x@component_kappa[i])
-        x@component_m[i] + scale * stats::rt(n, df = x@component_nu[i])
+        scale <- sqrt(x@sigma2[i] * (x@kappa[i] + 1) / x@kappa[i])
+        x@m[i] + scale * stats::rt(n, df = x@nu[i])
       }, numeric(n))
       matrix(out, nrow = n, ncol = k)
     },
@@ -60,7 +73,7 @@ NULL
         idx <- sample.int(n_avail, size = n, replace = TRUE, prob = x@exemplar_weights)
       } else {
         if (n > n_avail) {
-          cat_lbl <- .mvbu_extract_label_metadata(x)$category
+          cat_lbl <- get_category_labels(x)
           .stop(sprintf(
             "Cannot sample %d observations without replacement from category '%s' which contains only %d exemplars.",
             n, cat_lbl, n_avail
@@ -77,15 +90,14 @@ NULL
 # Canonical (mu, Sigma, component weights) summary of a non-exemplar representation, used as the
 # common intermediate for all coercions between parametric families.
 .mvbu_point_summary_from_representation <- function(x, from) {
-  switch(
-    from,
+  switch(from,
     UVG = list(mu = x@mu, Sigma = matrix(x@sigma2, 1, 1), weights = 1),
-    NIX = list(mu = x@m, Sigma = matrix(x@sigma2 / (x@nu - 2), 1, 1), weights = 1),
-    MUVG = list(mu = x@component_mu, Sigma = diag(x@component_sigma2, nrow = length(x@component_sigma2)), weights = x@component_weights),
+    NIX = list(mu = x@m, Sigma = matrix(get_expected_sigma(x), 1, 1), weights = 1),
+    MUVG = list(mu = x@mu, Sigma = diag(x@sigma2, nrow = length(x@sigma2)), weights = x@weights),
     MNIX = list(
-      mu = x@component_m,
-      Sigma = diag(x@component_sigma2 / (x@component_nu - 2), nrow = length(x@component_sigma2)),
-      weights = x@component_weights
+      mu = x@m,
+      Sigma = get_expected_sigma(x),
+      weights = x@weights
     ),
     MVG = list(mu = x@mu, Sigma = x@Sigma, weights = NULL),
     NIW = list(mu = get_expected_mu_from_m(x@m), Sigma = get_expected_Sigma_from_S(x@S, x@nu), weights = NULL),
@@ -93,14 +105,16 @@ NULL
   )
 }
 
-.mvbu_coerce_category_representation <- function(x, to, kappa = NULL, nu = NULL, n = NULL, component_weights = NULL) {
+.mvbu_coerce_category_representation <- function(x, to, kappa = NULL, nu = NULL, n = NULL, weights = NULL) {
   allowed <- c("UVG", "NIX", "MUVG", "MNIX", "MVG", "NIW", "EXEMPLAR")
   to <- toupper(to)
   .assert_true(to %in% allowed, msg = paste0("to must be one of: ", paste(allowed, collapse = ", ")))
   .assert_true(S7::S7_inherits(x, MVBU_CategoryRepresentation), msg = "x must be an MVBU_CategoryRepresentation.")
 
   from <- .mvbu_family_of_representation(x)
-  if (from == to) return(x)
+  if (from == to) {
+    return(x)
+  }
 
   matched_pairs <- c(UVG = "NIX", NIX = "UVG", MUVG = "MNIX", MNIX = "MUVG", MVG = "NIW", NIW = "MVG")
   is_matched_pair <- identical(unname(matched_pairs[from]), to)
@@ -116,7 +130,7 @@ NULL
     )
   }
 
-  labels <- .mvbu_extract_label_metadata(x)
+  labels <- get_labels(x)
   category_labels <- labels$category
   cue_labels <- labels$cue
 
@@ -133,33 +147,33 @@ NULL
     point <- .mvbu_point_summary_from_representation(x, from = from)
     mu <- point$mu
     Sigma <- point$Sigma
-    if (is.null(component_weights)) component_weights <- point$weights
+    if (is.null(weights)) weights <- point$weights
   }
 
   if (to %in% c("UVG", "NIX") && length(mu) != 1) {
     .stop(paste0("Coercion to ", to, " requires a single-cue representation (found ", length(mu), " cues)."))
   }
 
-  switch(
-    to,
+  switch(to,
     UVG = new_uvg_category_representation(category_labels, cue_labels, mu = mu[1], sigma2 = Sigma[1, 1]),
     MVG = new_mvg_category_representation(category_labels, cue_labels, mu = mu, Sigma = Sigma),
     MUVG = new_muvg_category_representation(
       category_labels, cue_labels,
-      component_mu = mu, component_sigma2 = diag(as.matrix(Sigma)),
-      component_weights = component_weights
+      mu = mu, sigma2 = diag(as.matrix(Sigma)),
+      weights = weights
     ),
     NIX = {
       .assert_numeric_scalar(kappa, msg = "kappa must be a non-NA scalar numeric value.")
       .assert_numeric_scalar(nu, msg = "nu must be a non-NA scalar numeric value greater than 2.")
       .assert_true(nu > 2, msg = "nu must be greater than 2 for a univariate NIX representation.")
-      new_nix_category_representation(category_labels, cue_labels, m = mu[1], kappa = kappa, nu = nu, sigma2 = Sigma[1, 1] * (nu - 2))
-    },
-    NIW = {
-      .assert_numeric_scalar(kappa, msg = "kappa must be a non-NA scalar numeric value.")
-      .assert_numeric_scalar(nu, msg = "nu must be a non-NA scalar numeric value.")
-      .assert_true(nu > length(cue_labels) + 1, msg = paste0("nu must be larger than dimensionality of cues + 1 (>", length(cue_labels) + 1, ")."))
-      new_niw_category_representation(category_labels, cue_labels, m = mu, kappa = kappa, nu = nu, S = get_S_from_expected_Sigma(Sigma, nu))
+      new_nix_category_representation(
+        category_labels,
+        cue_labels,
+        m = mu[1],
+        kappa = kappa,
+        nu = nu,
+        sigma2 = Sigma[1, 1] * (nu - 2) / nu
+      )
     },
     MNIX = {
       k <- length(mu)
@@ -167,40 +181,57 @@ NULL
       nu <- rep_len(nu, k)
       .assert_true(all(!is.na(kappa)) && is.numeric(kappa), msg = "kappa must be numeric.")
       .assert_true(all(!is.na(nu)) && is.numeric(nu) && all(nu > 2), msg = "nu must be numeric and greater than 2 for each component.")
-      component_sigma2 <- diag(as.matrix(Sigma))
+      sigma2 <- diag(as.matrix(Sigma))
       new_mnix_category_representation(
+        category_labels,
+        cue_labels,
+        m = mu,
+        kappa = kappa,
+        nu = nu,
+        sigma2 = sigma2 * (nu - 2) / nu,
+        weights = weights
+      )
+    },
+    NIW = {
+      .assert_numeric_scalar(kappa, msg = "kappa must be a non-NA scalar numeric value.")
+      .assert_numeric_scalar(nu, msg = "nu must be a non-NA scalar numeric value.")
+      .assert_true(nu > length(cue_labels) + 1, msg = paste0("nu must be larger than dimensionality of cues + 1 (>", length(cue_labels) + 1, ")."))
+      new_niw_category_representation(
         category_labels, cue_labels,
-        component_m = mu, component_kappa = kappa, component_nu = nu,
-        component_sigma2 = component_sigma2 * (nu - 2),
-        component_weights = component_weights
+        m = mu,
+        kappa = kappa,
+        nu = nu,
+        S = get_S_from_expected_Sigma(Sigma, nu)
       )
     },
     .stop("Unsupported target family.")
   )
 }
 
-.mvbu_coerce_category_representation_template <- function(x, to, kappa = NULL, nu = NULL, n = NULL, component_weights = NULL) {
+.mvbu_coerce_category_representation_template <- function(x, to, kappa = NULL, nu = NULL, n = NULL, weights = NULL) {
   .assert_true(S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate), msg = "x must be an MVBU_CategoryRepresentationTemplate.")
   representations <- lapply(
     x@representations,
     .mvbu_coerce_category_representation,
-    to = to, kappa = kappa, nu = nu, n = n, component_weights = component_weights
+    to = to, kappa = kappa, nu = nu, n = n, weights = weights
   )
   new_category_representation_template(representations)
 }
 
-.mvbu_coerce_cognitive_model <- function(x, to, kappa = NULL, nu = NULL, n = NULL, component_weights = NULL) {
+.mvbu_coerce_cognitive_model <- function(x, to, kappa = NULL, nu = NULL, n = NULL, weights = NULL) {
   .assert_true(S7::S7_inherits(x, MVBU_CognitiveModel), msg = "x must be an MVBU_CognitiveModel.")
   template <- .mvbu_coerce_category_representation_template(
     x@category_template,
-    to = to, kappa = kappa, nu = nu, n = n, component_weights = component_weights
+    to = to, kappa = kappa, nu = nu, n = n, weights = weights
   )
 
-  constructor <- switch(
-    to,
-    UVG = new_uvg_ideal_observer, NIX = new_nix_ideal_adaptor,
-    MUVG = new_muvg_ideal_observer, MNIX = new_mnix_ideal_adaptor,
-    MVG = new_mvg_ideal_observer, NIW = new_niw_ideal_adaptor,
+  constructor <- switch(to,
+    UVG = new_uvg_ideal_observer,
+    NIX = new_nix_ideal_adaptor,
+    MUVG = new_muvg_ideal_observer,
+    MNIX = new_mnix_ideal_adaptor,
+    MVG = new_mvg_ideal_observer,
+    NIW = new_niw_ideal_adaptor,
     EXEMPLAR = new_exemplar_model,
     .stop("Unsupported target family.")
   )
@@ -226,13 +257,18 @@ NULL
 #' family <-> EXEMPLAR. Coercions into NIX/MNIX/NIW require `kappa` and `nu`; coercions into EXEMPLAR
 #' require `n`, the number of exemplars to sample.
 #'
-#' @param x An MVBU_CategoryRepresentation, MVBU_CategoryRepresentationTemplate, or MVBU_CognitiveModel object.
-#' @param kappa Strength of belief (pseudocount) about the category mean.
-#' @param nu Strength of belief (pseudocount) about the category covariance/variance.
+#' @param x An `MVBU_CategoryRepresentation`,
+#'   `MVBU_CategoryRepresentationTemplate`, or `MVBU_CognitiveModel` object.
+#' @param kappa Strength of belief (pseudocount) about the category mean
+#'   \eqn{\mu}.
+#' @param nu Degrees of freedom (pseudocount) for covariance/variance beliefs
+#'   \eqn{\Sigma}.
 #' @param n Number of exemplars to sample when coercing into the EXEMPLAR family.
-#' @param component_weights Optional per-component/per-cue weights for MUVG/MNIX targets. (default: preserved
-#'   from `x` if available, otherwise the family constructor's default.)
-#' @return An object of the same kind as `x` (representation, template, or model), coerced to the target family.
+#' @param weights Optional per-cue weights for MUVG/MNIX targets.
+#'   (default: preserved from `x` if available, otherwise the family
+#'   constructor's default.)
+#' @return An object of the same kind as `x` (representation, template, or
+#'   model), coerced to the target family.
 #' @name as_family_coercion
 NULL
 
@@ -244,10 +280,10 @@ as_uvg_category_representation <- function(x) .mvbu_coerce_category_representati
 as_nix_category_representation <- function(x, kappa, nu) .mvbu_coerce_category_representation(x, to = "NIX", kappa = kappa, nu = nu)
 #' @rdname as_family_coercion
 #' @export
-as_muvg_category_representation <- function(x, component_weights = NULL) .mvbu_coerce_category_representation(x, to = "MUVG", component_weights = component_weights)
+as_muvg_category_representation <- function(x, weights = NULL) .mvbu_coerce_category_representation(x, to = "MUVG", weights = weights)
 #' @rdname as_family_coercion
 #' @export
-as_mnix_category_representation <- function(x, kappa, nu, component_weights = NULL) .mvbu_coerce_category_representation(x, to = "MNIX", kappa = kappa, nu = nu, component_weights = component_weights)
+as_mnix_category_representation <- function(x, kappa, nu, weights = NULL) .mvbu_coerce_category_representation(x, to = "MNIX", kappa = kappa, nu = nu, weights = weights)
 #' @rdname as_family_coercion
 #' @export
 as_mvg_category_representation <- function(x) .mvbu_coerce_category_representation(x, to = "MVG")
@@ -266,10 +302,10 @@ as_uvg_category_representation_template <- function(x) .mvbu_coerce_category_rep
 as_nix_category_representation_template <- function(x, kappa, nu) .mvbu_coerce_category_representation_template(x, to = "NIX", kappa = kappa, nu = nu)
 #' @rdname as_family_coercion
 #' @export
-as_muvg_category_representation_template <- function(x, component_weights = NULL) .mvbu_coerce_category_representation_template(x, to = "MUVG", component_weights = component_weights)
+as_muvg_category_representation_template <- function(x, weights = NULL) .mvbu_coerce_category_representation_template(x, to = "MUVG", weights = weights)
 #' @rdname as_family_coercion
 #' @export
-as_mnix_category_representation_template <- function(x, kappa, nu, component_weights = NULL) .mvbu_coerce_category_representation_template(x, to = "MNIX", kappa = kappa, nu = nu, component_weights = component_weights)
+as_mnix_category_representation_template <- function(x, kappa, nu, weights = NULL) .mvbu_coerce_category_representation_template(x, to = "MNIX", kappa = kappa, nu = nu, weights = weights)
 #' @rdname as_family_coercion
 #' @export
 as_mvg_category_representation_template <- function(x) .mvbu_coerce_category_representation_template(x, to = "MVG")
@@ -288,10 +324,10 @@ as_uvg_ideal_observer <- function(x) .mvbu_coerce_cognitive_model(x, to = "UVG")
 as_nix_ideal_adaptor <- function(x, kappa, nu) .mvbu_coerce_cognitive_model(x, to = "NIX", kappa = kappa, nu = nu)
 #' @rdname as_family_coercion
 #' @export
-as_muvg_ideal_observer <- function(x, component_weights = NULL) .mvbu_coerce_cognitive_model(x, to = "MUVG", component_weights = component_weights)
+as_muvg_ideal_observer <- function(x, weights = NULL) .mvbu_coerce_cognitive_model(x, to = "MUVG", weights = weights)
 #' @rdname as_family_coercion
 #' @export
-as_mnix_ideal_adaptor <- function(x, kappa, nu, component_weights = NULL) .mvbu_coerce_cognitive_model(x, to = "MNIX", kappa = kappa, nu = nu, component_weights = component_weights)
+as_mnix_ideal_adaptor <- function(x, kappa, nu, weights = NULL) .mvbu_coerce_cognitive_model(x, to = "MNIX", kappa = kappa, nu = nu, weights = weights)
 #' @rdname as_family_coercion
 #' @export
 as_mvg_ideal_observer <- function(x) .mvbu_coerce_cognitive_model(x, to = "MVG")
@@ -302,3 +338,87 @@ as_niw_ideal_adaptor <- function(x, kappa, nu) .mvbu_coerce_cognitive_model(x, t
 #' @export
 as_exemplar_model <- function(x, n) .mvbu_coerce_cognitive_model(x, to = "EXEMPLAR", n = n)
 
+.create_ideal_observer_model <- function(model_family, category_template, ...) {
+  fam <- toupper(as.character(model_family))
+  if (grepl("UVG", fam) && !grepl("MUVG", fam)) {
+    new_uvg_ideal_observer(category_template = category_template, ...)
+  } else if (grepl("MUVG", fam)) {
+    new_muvg_ideal_observer(category_template = category_template, ...)
+  } else if (grepl("MVG", fam)) {
+    new_mvg_ideal_observer(category_template = category_template, ...)
+  } else {
+    .stop(sprintf("Unsupported ideal observer model family for dynamic model creation: '%s'.", model_family))
+  }
+}
+
+#' Lift or coerce category templates, representations, or cognitive models to an Ideal Adaptor or Ideal Observer
+#'
+#' Converts category templates, single category representations, or existing
+#' cognitive models into full `MVBU_CognitiveModel` objects of the appropriate
+#' family.
+#'
+#' @param x An `MVBU_CategoryRepresentation`,
+#'   `MVBU_CategoryRepresentationTemplate`, or `MVBU_CognitiveModel`.
+#' @param model_family Optional character string specifying target model
+#'   family ("NIX", "MNIX", "NIW" for adaptors; "UVG", "MUVG", "MVG" for
+#'   observers).
+#' @param ... Additional arguments passed to model constructors or family
+#'   coercion routines.
+#' @return An S7 `MVBU_CognitiveModel` object.
+#' @name as_model_coercion
+#' @export
+as_ideal_adaptor <- function(x, model_family = NULL, ...) {
+  .assert_true(
+    !missing(x) && !is.null(x),
+    msg = "x must be provided to as_ideal_adaptor()."
+  )
+
+  if (S7::S7_inherits(x, MVBU_CategoryRepresentation)) {
+    x <- new_category_representation_template(list(x))
+  }
+  if (S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
+    if (is.null(model_family)) {
+      model_family <- get_representation_type(x)
+    }
+    return(.create_ideal_adaptor_model(model_family, category_template = x, ...))
+  }
+  if (S7::S7_inherits(x, MVBU_CognitiveModel)) {
+    if (!is.null(model_family)) {
+      return(.mvbu_coerce_cognitive_model(x, to = model_family, ...))
+    }
+    return(x)
+  }
+  .stop("x must be an MVBU_CategoryRepresentationTemplate, MVBU_CategoryRepresentation, or MVBU_CognitiveModel.")
+}
+
+#' @rdname as_model_coercion
+#' @export
+as_ideal_observer <- function(x, model_family = NULL, ...) {
+  .assert_true(
+    !missing(x) && !is.null(x),
+    msg = "x must be provided to as_ideal_observer()."
+  )
+
+  if (S7::S7_inherits(x, MVBU_CategoryRepresentation)) {
+    x <- new_category_representation_template(list(x))
+  }
+  if (S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
+    if (is.null(model_family)) {
+      model_family <- get_representation_type(x)
+    }
+    return(.create_ideal_observer_model(model_family, category_template = x, ...))
+  }
+  if (S7::S7_inherits(x, MVBU_CognitiveModel)) {
+    if (!is.null(model_family)) {
+      return(.mvbu_coerce_cognitive_model(x, to = model_family, ...))
+    }
+    target_fam <- switch(get_representation_type(x),
+      NIX = "UVG",
+      MNIX = "MUVG",
+      NIW = "MVG",
+      get_representation_type(x)
+    )
+    return(.mvbu_coerce_cognitive_model(x, to = target_fam, ...))
+  }
+  .stop("x must be an MVBU_CategoryRepresentationTemplate, MVBU_CategoryRepresentation, or MVBU_CognitiveModel.")
+}

@@ -1,12 +1,18 @@
-#' @include S7-core-classes.R
+#' @include S7-class.R
 
-#' @name MVBU-TransformInformation-class
-#' @title S7 base class for transformation information
-#' @docType class
+#' S7 base class for transformation information
 #'
-#' @slot transform.parameters A list of sufficient parameters for the transform.
-#' @slot transform.function Function to transform parameters.
-#' @slot untransform.function Function to untransform parameters.
+#' @title S7 base class for transformation information
+#' @param transform.parameters A list of sufficient parameters for the
+#'   transform. Default: \code{list()}.
+#' @param transform.function Function to transform parameters. Default:
+#'   identity.
+#' @param untransform.function Function to untransform parameters. Default:
+#'   identity.
+#'
+#' @docType class
+#' @name MVBU-TransformInformation-class
+#' @rdname MVBU-TransformInformation-class
 #' @export
 MVBU_TransformInformation <- S7::new_class(
   "MVBU_TransformInformation",

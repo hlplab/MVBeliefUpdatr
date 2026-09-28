@@ -2,6 +2,7 @@
 % Please edit documentation in R/S7-generics.R, R/S7-stanfit-methods.R
 \name{get_stanfit}
 \alias{get_stanfit}
+\alias{set_stanfit}
 \alias{get_stanfit,any-method}
 \alias{get_stanfit,MVBU_Stanfit-method}
 \alias{set_stanfit,any,any-method}
@@ -10,24 +11,34 @@
 \usage{
 get_stanfit(x, ...)
 
+set_stanfit(x, stanfit, ...)
+
 ## S7 method for class <any>
-get_stanfit(x)
+get_stanfit(x, ...)
 
 ## S7 method for class <MVBU_Stanfit>
-get_stanfit(x)
+get_stanfit(x, ...)
 
 ## S7 method for classes <any>, <any>
-set_stanfit(x, stanfit)
+set_stanfit(x, stanfit, ...)
 
 ## S7 method for classes <MVBU_Stanfit>, <any>
-set_stanfit(x, stanfit)
+set_stanfit(x, stanfit, ...)
 }
 \arguments{
 \item{x}{An S7 fit object.}
+
+\item{...}{Additional arguments passed to methods.}
+
+\item{stanfit}{An \link[rstan:stanfit]{rstan::stanfit} object.}
 }
 \value{
 The stored \link[rstan:stanfit]{rstan::stanfit} object when present.
+
+The updated S7 fit object.
 }
 \description{
 Get the stored Stan fit from an S7 fit object
+
+Set the stored Stan fit on an S7 fit object
 }

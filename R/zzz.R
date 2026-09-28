@@ -1,7 +1,7 @@
 # S7 registration hook for MVBeliefUpdatr.
 
 # This file should only register methods; the implementation of the methods
-# lives in R/S7-core-methods.R.
+# lives in R/S7-methods.R.
 .onLoad <- function(libname, pkgname) {
   # 1️⃣ Set package-wide defaults (options, env vars)
   #    e.g. options(myPkg.verbose = FALSE)

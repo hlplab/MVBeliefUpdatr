@@ -36,7 +36,8 @@ make_NIW_prior_from_data(
 
 \item{kappa}{Strength of belief (pseudocount) about the category mean. (default: same as \code{nu})}
 
-\item{nu}{Strength of belief (pseudocount) about the category covariance matrix. (default: number of cues + 2)}
+\item{nu}{Strength of belief (pseudocount) about the category covariance
+matrix. (default: number of cues + 2)}
 
 \item{verbose}{If true provides more information. (default: \code{FALSE})}
 }

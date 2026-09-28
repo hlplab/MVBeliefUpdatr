@@ -30,6 +30,14 @@ standard deviations.}
 \item{split_loglik_per_observation}{Split log likelihood per observation.}
 
 \item{transform_type}{Affine transformation type applied to the data.}
+
+\item{data}{A \code{data.frame} containing the input data. Default: \code{data.frame()}.}
+
+\item{staninput}{An \code{\link{IdealAdaptorStaninput}} object. Default: \code{NULL}.}
+
+\item{transform_information}{An \code{\link{MVBU_TransformInformation}} object. Default: \code{NULL}.}
+
+\item{metadata}{A named \code{list} containing \code{label_information}. Default: \code{list()}.}
 }
 \value{
 A list of control parameters.
@@ -40,16 +48,3 @@ reasonable defaults for any of the unspecified parameters.
 
 An S7 Class for Ideal-Adaptor Fit-Input Objects
 }
-\section{Slots}{
-
-\describe{
-\item{\code{data}}{A \code{data.frame} containing the input data.}
-
-\item{\code{staninput}}{An \code{\link{IdealAdaptorStaninput}} object.}
-
-\item{\code{transform_information}}{An \code{\link{MVBU_TransformInformation}} object.}
-
-\item{\code{metadata}}{A named \code{list} containing \code{label_information}
-with character vectors (\code{cue}, \code{category}, and \code{group}).}
-}}
-

@@ -49,7 +49,6 @@ logit2probability <- function(l, refcat = 1)
 #' If an observation was a lapse no updating occurs. For "marginalize", 1 - lapse_rate is the proportion of observations
 #' that are assumed to be lapsing trials (default: "no_lapses")
 #' @param update_prior Should the prior probability of each category be updated along with the decision bias?
-#' @param verbose Should more informative output be provided?
 #'
 #' @return A model object.
 #'
@@ -64,8 +63,7 @@ update_model_decision_bias_by_one_observation <- function(
     x_category,
     noise_treatment = .infer_noise_treatment(dplyr::first(model$Sigma_noise)),
     lapse_treatment = "no_lapses",
-    update_prior = T,
-    verbose = F
+    update_prior = T
 ) {
   # Binding variables that RMD Check gets confused about otherwise
   # (since they are in non-standard evaluations)
@@ -121,6 +119,7 @@ update_model_decision_bias_by_one_observation <- function(
 #' Returns the model with updated decision biases.
 #'
 #' @param model A \code{\link[=is.MVBU_model]{model}} object with decision biases.
+#' @param beta The learning rate with which decision biases change.
 #' @param exposure \code{data.frame} or \code{tibble} with exposure data. Each row is assumed to contain one observation.
 #' @param exposure.category Name of variable in \code{data} that contains the category information. (default: "category")
 #' @param exposure.cues Name(s) of variables in \code{data} that contain the cue information. By default these cue names are
@@ -189,8 +188,7 @@ update_model_decision_bias_incrementally <- function(
           x = matrix(unlist(exposure[i,][["cues"]]), nrow = 1),
           x_category = exposure[i,][[exposure.category]],
           noise_treatment = noise_treatment,
-          lapse_treatment = lapse_treatment,
-          verbose = verbose))
+          lapse_treatment = lapse_treatment))
 
     if (keep.update_history)
       model <- rbind(model, posterior %>% mutate(observation.n = .env$i))

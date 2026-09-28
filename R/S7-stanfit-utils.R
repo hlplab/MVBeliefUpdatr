@@ -1,5 +1,5 @@
 #' @include asserts.R
-#' @include S7-core-classes.R
+#' @include S7-class.R
 #' @include S7-stanfit.R
 #' @include S7-staninput.R
 #' @include S7-stanfit-input.R
@@ -70,16 +70,33 @@ NULL
   silent <- .as_one_logical(silent)
   verbose <- .as_one_logical(verbose)
 
-  if (!isTRUE(all.equal(x@version, current_version))) {
+  core_pkgs <- intersect(c("MVBeliefUpdatr", "rstan"), names(current_version))
+  if (!isTRUE(all.equal(x@version[core_pkgs], current_version[core_pkgs]))) {
     if (!silent) {
       message(
         "Version of MVBeliefUpdatr or rstan has changed (current version is ",
-        paste(purrr::map_chr(current_version, ~ paste(.x, collapse = ", ")), collapse = "; "),
+        paste(
+          purrr::map_chr(
+            current_version[core_pkgs],
+            ~ paste(.x, collapse = ", ")
+          ),
+          collapse = "; "
+        ),
         ")."
       )
       if (verbose) {
         print(x@version)
       }
+    }
+    return(TRUE)
+  }
+
+  has_orig_names <- !is.null(x@metadata$original_variable_names)
+  required_cols <- c("category", "response_category", "group", "group_unique", "Phase")
+  has_std_cols <- !is.null(x@data) && all(required_cols %in% names(x@data))
+  if (!has_orig_names || !has_std_cols) {
+    if (!silent) {
+      message("Cached model does not have standardized data columns or original variable names metadata.")
     }
     return(TRUE)
   }

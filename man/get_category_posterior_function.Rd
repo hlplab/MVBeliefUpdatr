@@ -12,6 +12,8 @@ get_category_posterior_function(x, noise_treatment, lapse_treatment, ...)
 \item{noise_treatment}{Optional noise-handling mode for the returned function.}
 
 \item{lapse_treatment}{Optional lapse-handling mode for the returned function.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \value{
 A function that computes category posterior probabilities for one or more observations.

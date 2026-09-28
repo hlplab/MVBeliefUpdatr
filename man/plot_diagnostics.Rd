@@ -16,7 +16,8 @@ plot_diagnostics(x, ...)
 \code{\link{MVBU_CognitiveModel}}, or \code{\link{MVBU_Stanfit}}).}
 
 \item{...}{Additional arguments passed to specific plotting methods (e.g.,
-\code{interactive = TRUE} for interactive 3D WebGL scenes via Plotly).}
+\code{interactive = TRUE} for interactive 3D WebGL scenes via Plotly;
+\code{slices} and \code{slice_cue} for 3D sliced category plots).}
 }
 \description{
 Plot Stan MCMC diagnostics

@@ -8,6 +8,8 @@ get_representation_type(x, ...)
 }
 \arguments{
 \item{x}{A representation object.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \value{
 A character scalar identifying the representation family/type.

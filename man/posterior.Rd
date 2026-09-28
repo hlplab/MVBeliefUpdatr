@@ -12,6 +12,8 @@ posterior(x, new_data, categories, ...)
 \item{new_data}{A numeric matrix of observations or a list of matrices.}
 
 \item{categories}{An optional subset of categories to restrict the posterior to.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \value{
 A matrix of posterior category probabilities with one row per observation.

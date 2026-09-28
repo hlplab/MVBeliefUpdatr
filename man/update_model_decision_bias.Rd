@@ -11,8 +11,7 @@ update_model_decision_bias_by_one_observation(
   x_category,
   noise_treatment = .infer_noise_treatment(dplyr::first(model$Sigma_noise)),
   lapse_treatment = "no_lapses",
-  update_prior = T,
-  verbose = F
+  update_prior = T
 )
 }
 \arguments{
@@ -43,8 +42,6 @@ If an observation was a lapse no updating occurs. For "marginalize", 1 - lapse_r
 that are assumed to be lapsing trials (default: "no_lapses")}
 
 \item{update_prior}{Should the prior probability of each category be updated along with the decision bias?}
-
-\item{verbose}{Should more informative output be provided?}
 }
 \value{
 A model object.
