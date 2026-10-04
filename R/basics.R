@@ -285,7 +285,6 @@ S7::method(get_sufficient_category_statistics, S7::new_S3_class("data.frame")) <
     res <- data[, group_cols, drop = FALSE]
     res$x_N <- integer(0)
     res$x_mean <- list()
-    res$x_ss <- list()
     res$x_css <- list()
     if (any(c("NIW", "MVG", "MUVG") %in% model_family)) {
       res$x_uss <- list()
@@ -305,7 +304,6 @@ S7::method(get_sufficient_category_statistics, S7::new_S3_class("data.frame")) <
   n_groups <- length(idx_split)
   x_N <- integer(n_groups)
   x_mean <- vector("list", n_groups)
-  x_ss <- vector("list", n_groups)
   x_css <- vector("list", n_groups)
   x_uss <- vector("list", n_groups)
   x_cov <- vector("list", n_groups)
@@ -331,7 +329,6 @@ S7::method(get_sufficient_category_statistics, S7::new_S3_class("data.frame")) <
       x_uss[[i]] <- ss(sub_mat, center = FALSE)
       css_mat <- ss(sub_mat, center = TRUE)
       x_css[[i]] <- css_mat
-      x_ss[[i]] <- css_mat
       cov_mat <- stats::cov(sub_mat)
       if (length(cues) == 1L) {
         cov_mat <- matrix(cov_mat, 1L, 1L, dimnames = list(cues, cues))
@@ -345,22 +342,18 @@ S7::method(get_sufficient_category_statistics, S7::new_S3_class("data.frame")) <
         vec_ss <- rep(0, length(cues))
       }
       names(vec_ss) <- cues
-      x_ss[[i]] <- vec_ss
       x_css[[i]] <- vec_ss
     } else if (compute_nix_scalar) {
       scal_ss <- if (n_obs > 1L) sum((sub_mat[, 1L] - mean(sub_mat[, 1L]))^2) else 0
-      x_ss[[i]] <- scal_ss
       x_css[[i]] <- scal_ss
     } else {
       # EXEMPLAR or other
-      x_ss[[i]] <- NULL
       x_css[[i]] <- NULL
     }
   }
 
   res$x_N <- x_N
   res$x_mean <- x_mean
-  res$x_ss <- x_ss
   res$x_css <- x_css
   if (compute_full_matrix) {
     res$x_uss <- x_uss

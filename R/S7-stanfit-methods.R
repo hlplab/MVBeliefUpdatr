@@ -317,7 +317,7 @@ S7::method(get_test_data, MVBU_Stanfit) <- function(
 
   need_n <- any(untransform_cues, c("n", "css", "uss", "cov") %in% statistic)
   need_mean <- any(untransform_cues, c("mean", "uss") %in% statistic)
-  need_cov_or_ss <- any(
+  need_cov_or_css <- any(
     untransform_cues,
     c("css", "uss", "cov") %in% statistic
   )
@@ -345,11 +345,12 @@ S7::method(get_test_data, MVBU_Stanfit) <- function(
     }
   }
 
-  if (need_cov_or_ss) {
-    s_raw <- staninput$x_ss_exposure
+  if (need_cov_or_css) {
+    s_raw <- staninput$x_css_exposure
     if (is.null(s_raw)) {
       .stop(
-        "No x_ss_exposure found in staninput. Cannot extract category variance."
+        "No x_css_exposure found in staninput. ",
+        "Cannot extract category variance."
       )
     }
     css_list <- vector("list", n_rows)
@@ -571,7 +572,6 @@ S7::method(get_sufficient_category_statistics, MVBU_Stanfit) <- function(
     category = stats$category,
     x_N = stats$n,
     x_mean = I(stats$mean),
-    x_ss = I(stats$css),
     x_css = I(stats$css),
     x_uss = I(stats$uss),
     x_cov = I(stats$cov),

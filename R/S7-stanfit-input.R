@@ -790,7 +790,7 @@ new_ideal_adaptor_stanfit_input <- function(
   vals <- staninput_obj@values
   N_exp <- vals$N_exposure
   mean_exp <- vals$x_mean_exposure
-  spread_exp <- vals$x_ss_exposure
+  spread_exp <- vals$x_css_exposure
 
   mismatched_uniques <- character(0)
   mismatch_details <- list()
@@ -968,21 +968,21 @@ new_ideal_adaptor_stanfit_input <- function(
   vals$N_exposure <- vals$N_exposure[, first_indices, drop = FALSE]
   if (model == "NIX") {
     vals$x_mean_exposure <- vals$x_mean_exposure[, first_indices, drop = FALSE]
-    vals$x_ss_exposure <- vals$x_ss_exposure[, first_indices, drop = FALSE]
+    vals$x_css_exposure <- vals$x_css_exposure[, first_indices, drop = FALSE]
   } else if (model == "MNIX") {
     vals$x_mean_exposure <- vals$x_mean_exposure[
       ,
       first_indices, ,
       drop = FALSE
     ]
-    vals$x_ss_exposure <- vals$x_ss_exposure[, first_indices, , drop = FALSE]
+    vals$x_css_exposure <- vals$x_css_exposure[, first_indices, , drop = FALSE]
   } else if (model == "NIW") {
     vals$x_mean_exposure <- vals$x_mean_exposure[
       ,
       first_indices, ,
       drop = FALSE
     ]
-    vals$x_ss_exposure <- vals$x_ss_exposure[, first_indices, , , drop = FALSE]
+    vals$x_css_exposure <- vals$x_css_exposure[, first_indices, , , drop = FALSE]
   }
   vals$L <- length(unique_levels)
 

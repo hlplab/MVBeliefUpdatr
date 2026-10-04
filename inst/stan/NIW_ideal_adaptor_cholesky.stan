@@ -23,7 +23,7 @@ data {
 
   array[M,L] int<lower=0> N_exposure;                      // number of observations per category (M) and exposure group (L)
   array[M,L] vector[K] x_mean_exposure;                    // means for each category (M) and exposure group (L)
-  array[M,L] matrix[K,K] x_ss_exposure;                    // sum of centered squares matrix for each category (M) and group (L)
+  array[M,L] matrix[K,K] x_css_exposure;                   // sum of centered squares matrix for each category (M) and group (L)
                                                            // (using matrix, rather than cov_matrix to allow non-positive-definiteness, 
                                                            // necessary for groups without any exposure, which have matrices of 0s)
 
@@ -132,7 +132,7 @@ transformed parameters {
           cholesky_decompose(
             symmetrize_from_lower_tri(
               multiply_lower_tri_self_transpose(L_S_0[cat]) +
-              x_ss_exposure[cat, group] +
+              x_css_exposure[cat, group] +
               ((kappa_0 * N_exposure[cat,group]) / kappa_n[cat,group]) * (diff_m * diff_m')
             )
           );

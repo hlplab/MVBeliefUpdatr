@@ -1311,7 +1311,7 @@ reconstruct_update_history <- S7::new_generic(
 #'   statistics transformed back into original cue space. Default: \code{FALSE}.
 #' @param ... Additional arguments passed to methods.
 #' @return A [data.frame] of sufficient statistics across categories (and groups, if applicable).
-#'   Columns include `category`, `x_N`, `x_mean`, `x_ss`, `x_css`, and optionally
+#'   Columns include `category`, `x_N`, `x_mean`, `x_css`, and optionally
 #'   `group`, `x_uss`, and `x_cov`.
 #' @export
 get_sufficient_category_statistics <- S7::new_generic(

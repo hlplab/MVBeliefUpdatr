@@ -32,8 +32,8 @@ test_that(
 
   # Exposure centered sum of squares equivalence
   expect_equal(
-    as.vector(input_nix@staninput@values$x_ss_exposure[, 1]),
-    as.vector(input_niw@staninput@values$x_ss_exposure[, 1, 1, 1]),
+    as.vector(input_nix@staninput@values$x_css_exposure[, 1]),
+    as.vector(input_niw@staninput@values$x_css_exposure[, 1, 1, 1]),
     tolerance = 1e-6
   )
 

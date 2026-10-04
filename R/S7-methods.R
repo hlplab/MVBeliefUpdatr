@@ -1608,10 +1608,6 @@ S7::method(sample_observations, MVBU_CategoryRepresentation) <- function(
   randomize_order = TRUE,
   ...
 ) {
-  dots <- list(...)
-  if ("Ns" %in% names(dots)) n <- dots$Ns
-  if ("randomize.order" %in% names(dots)) randomize_order <- dots$randomize.order
-
   .assert_true(.is_scalar_count(n) && n >= 0L, msg = "n must be a non-negative whole number.")
   cues <- get_cue_labels(x)
   cat_lbl <- get_category_labels(x)
@@ -1640,10 +1636,6 @@ S7::method(sample_observations, MVBU_CategoryRepresentationTemplate) <- function
   randomize_order = TRUE,
   ...
 ) {
-  dots <- list(...)
-  if ("Ns" %in% names(dots)) n <- dots$Ns
-  if ("randomize.order" %in% names(dots)) randomize_order <- dots$randomize.order
-
   reps <- x@representations
   K <- length(reps)
   cat_labels <- get_category_labels(x)
@@ -1730,10 +1722,6 @@ S7::method(sample_observations, MVBU_CognitiveModel) <- function(
   randomize_order = TRUE,
   ...
 ) {
-  dots <- list(...)
-  if ("Ns" %in% names(dots)) n <- dots$Ns
-  if ("randomize.order" %in% names(dots)) randomize_order <- dots$randomize.order
-
   reps <- x@category_template@representations
   K <- length(reps)
   cat_labels <- get_category_labels(x)
@@ -1793,7 +1781,7 @@ S7::method(sample_observations, MVBU_CognitiveModel) <- function(
       n_avail_i <- nrow(rep_i@exemplars)
       if (n_i > n_avail_i) {
         .stop(sprintf(
-          "Random sampling without replacement allocated %d observations to category '%s', but it only contains %d exemplars. Because category assignment is proportional to category priors and involves a random process, re-evoking the function or increasing category exemplars may resolve this.",
+          "Random sampling without replacement allocated %d observations to category '%s', but it only contains %d exemplars. Because category assignment is proportional to category priors and involves a random process, re-evoking the function or increasing category exemplars may resolve this (but make the process less random).",
           n_i, cat_labels[i], n_avail_i
         ))
       }
@@ -1835,14 +1823,10 @@ S7::method(get_sufficient_category_statistics, MVBU_CognitiveModel) <- function(
 
   out <- list(category = factor(cats, levels = cats))
   out$x_N <- vapply(reps, function(r) {
-    if ("n" %in% names(r)) {
-      as.integer(r$n)
-    } else if ("N" %in% names(r)) {
-      as.integer(r$N)
-    } else if ("x_N" %in% names(r)) {
-      as.integer(r$x_N)
+    if (S7::S7_inherits(r, Exemplar_CategoryRepresentation)) {
+      as.integer(nrow(r@exemplars))
     } else {
-      0L
+      NA_integer_
     }
   }, integer(1L))
 
@@ -1851,17 +1835,16 @@ S7::method(get_sufficient_category_statistics, MVBU_CognitiveModel) <- function(
     mc$mu
   })
 
-  out$x_ss <- lapply(reps, function(r) {
+  out$x_css <- lapply(reps, function(r) {
     mc <- .get_rep_mean_and_cov(r)
     if (fam %in% c("NIX", "UVG")) {
       mc$Sigma[1L, 1L]
-    } else if (fam == "MNIX") {
+    } else if (fam %in% c("MNIX", "MUVG")) {
       diag(mc$Sigma)
     } else {
       mc$Sigma
     }
   })
-  out$x_css <- out$x_ss
   if (fam %in% c("NIW", "MVG", "MUVG")) {
     out$x_cov <- lapply(reps, function(r) {
       .get_rep_mean_and_cov(r)$Sigma

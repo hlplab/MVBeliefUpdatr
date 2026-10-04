@@ -441,7 +441,7 @@ test_that("stanmodel compatibility checks enforce the matching Stan program", {
       nix_input,
       expected_class = NIX_IdealAdaptorStaninput,
       required_names = c(
-        "N_exposure", "N_test", "x_mean_exposure", "x_ss_exposure"
+        "N_exposure", "N_test", "x_mean_exposure", "x_css_exposure"
       ),
       forbidden_names = c("x_sd_exposure")
     )
@@ -487,7 +487,7 @@ test_that("stanmodel compatibility checks enforce the matching Stan program", {
       mnix_input,
       expected_class = MNIX_IdealAdaptorStaninput,
       required_names = c(
-        "N_exposure", "N_test", "x_mean_exposure", "x_ss_exposure", "p_cat"
+        "N_exposure", "N_test", "x_mean_exposure", "x_css_exposure", "p_cat"
       ),
       forbidden_names = c("x_sd_exposure")
     )
@@ -539,7 +539,7 @@ test_that("stanmodel compatibility checks enforce the matching Stan program", {
         niw_input,
         expected_class = NIW_IdealAdaptorStaninput,
         required_names = c(
-          "N_exposure", "N_test", "x_mean_exposure", "x_ss_exposure"
+          "N_exposure", "N_test", "x_mean_exposure", "x_css_exposure"
         ),
         forbidden_names = c("x_sd_exposure")
       )
@@ -584,7 +584,7 @@ test_that(
       input,
       expected_class = NIX_IdealAdaptorStaninput,
       required_names = c(
-        "N_exposure", "N_test", "x_mean_exposure", "x_ss_exposure"
+        "N_exposure", "N_test", "x_mean_exposure", "x_css_exposure"
       ),
       forbidden_names = c("x_sd_exposure")
     )
@@ -644,7 +644,7 @@ test_that(
       input,
       expected_class = MNIX_IdealAdaptorStaninput,
       required_names = c(
-        "N_exposure", "N_test", "x_mean_exposure", "x_ss_exposure", "p_cat"
+        "N_exposure", "N_test", "x_mean_exposure", "x_css_exposure", "p_cat"
       ),
       forbidden_names = c("x_sd_exposure")
     )
@@ -725,7 +725,7 @@ test_that(
         input,
         expected_class = NIW_IdealAdaptorStaninput,
         required_names = c(
-          "N_exposure", "N_test", "x_mean_exposure", "x_ss_exposure"
+          "N_exposure", "N_test", "x_mean_exposure", "x_css_exposure"
         ),
         forbidden_names = c("x_sd_exposure")
       )
@@ -771,7 +771,7 @@ test_that("group.unique correctly checks identity and simplifies staninput", {
   expect_equal(input1@staninput@values$L, 2L)
   expect_equal(dim(input1@staninput@values$N_exposure), c(2L, 2L))
   expect_equal(dim(input1@staninput@values$x_mean_exposure), c(2L, 2L, 2L))
-  expect_equal(dim(input1@staninput@values$x_ss_exposure), c(2L, 2L, 2L, 2L))
+  expect_equal(dim(input1@staninput@values$x_css_exposure), c(2L, 2L, 2L, 2L))
   expect_equal(
     get_labels(input1)$group,
     c("c1", "c2")

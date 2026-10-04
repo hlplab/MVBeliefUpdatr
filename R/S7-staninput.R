@@ -179,7 +179,7 @@ NIW_IdealAdaptorStaninput <- S7::new_class(
     lapse_rate_data = if (!is.null(lapse_rate)) as.numeric(lapse_rate) else numeric(0),
     N_exposure = exposure_summary$N_exposure,
     x_mean_exposure = exposure_summary$x_mean_exposure,
-    x_ss_exposure = exposure_summary$x_ss_exposure,
+    x_css_exposure = exposure_summary$x_css_exposure,
     x_test = test_summary$x_test,
     y_test = test_summary$y_test,
     z_test_counts = test_summary$z_test_counts,
@@ -281,13 +281,13 @@ NIW_IdealAdaptorStaninput <- S7::new_class(
   N_exposure <- matrix(0L, nrow = n_categories, ncol = n_groups)
   if (model == "NIX") {
     x_mean_exposure <- matrix(0, nrow = n_categories, ncol = n_groups)
-    x_ss_exposure <- matrix(0, nrow = n_categories, ncol = n_groups)
+    x_css_exposure <- matrix(0, nrow = n_categories, ncol = n_groups)
   } else if (model == "MNIX") {
     x_mean_exposure <- array(0, dim = c(n_categories, n_groups, n_cues))
-    x_ss_exposure <- array(0, dim = c(n_categories, n_groups, n_cues))
+    x_css_exposure <- array(0, dim = c(n_categories, n_groups, n_cues))
   } else if (model == "NIW") {
     x_mean_exposure <- array(0, dim = c(n_categories, n_groups, n_cues))
-    x_ss_exposure <- array(0, dim = c(n_categories, n_groups, n_cues, n_cues))
+    x_css_exposure <- array(0, dim = c(n_categories, n_groups, n_cues, n_cues))
   } else {
     stop("Unknown model type: ", model)
   }
@@ -304,7 +304,7 @@ NIW_IdealAdaptorStaninput <- S7::new_class(
         if (model == "NIX") {
           x_mean_exposure[i, j] <- mean(cue_values[, 1])
           if (n_obs > 1) {
-            x_ss_exposure[i, j] <- sum((cue_values[, 1] - x_mean_exposure[i, j])^2)
+            x_css_exposure[i, j] <- sum((cue_values[, 1] - x_mean_exposure[i, j])^2)
           }
         } else {
           col_means <- .colMeans(cue_values)
@@ -312,9 +312,9 @@ NIW_IdealAdaptorStaninput <- S7::new_class(
           if (n_obs > 1) {
             centered <- sweep(cue_values, 2, col_means, "-")
             if (model == "MNIX") {
-              x_ss_exposure[i, j, ] <- colSums(centered^2)
+              x_css_exposure[i, j, ] <- colSums(centered^2)
             } else {
-              x_ss_exposure[i, j, , ] <- crossprod(centered)
+              x_css_exposure[i, j, , ] <- crossprod(centered)
             }
           }
         }
@@ -325,7 +325,7 @@ NIW_IdealAdaptorStaninput <- S7::new_class(
   list(
     N_exposure = N_exposure,
     x_mean_exposure = x_mean_exposure,
-    x_ss_exposure = x_ss_exposure
+    x_css_exposure = x_css_exposure
   )
 }
 

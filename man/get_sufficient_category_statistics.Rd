@@ -82,7 +82,7 @@ and \code{model_family} (character vector of model families).}
 }
 \value{
 A \link{data.frame} of sufficient statistics across categories (and groups, if applicable).
-Columns include \code{category}, \code{x_N}, \code{x_mean}, \code{x_ss}, \code{x_css}, and optionally
+Columns include \code{category}, \code{x_N}, \code{x_mean}, \code{x_css}, and optionally
 \code{group}, \code{x_uss}, and \code{x_cov}.
 }
 \description{

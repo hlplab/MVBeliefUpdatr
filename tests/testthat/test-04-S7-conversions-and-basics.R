@@ -43,7 +43,7 @@ test_that("get_expected_Sigma_from_S and get_S_from_expected_Sigma work correctl
 
 .io <- suppressMessages(suppressWarnings(example_mvg_ideal_observer(n_cues = 2)))
 .cues <- get_cue_labels(.io)
-.data <- sample_observations(.io, Ns = 50)
+.data <- sample_observations(.io, n = 50)
 
 test_that("uss2css, css2cov - does sum-of-square to cov conversion work?", {
   stats <- get_sufficient_category_statistics(.data, cues = .cues)
@@ -123,10 +123,11 @@ test_that("get_sufficient_category_statistics computes family statistics", {
     cues = "c1",
     model_family = "NIX"
   )
-  expect_true(is.numeric(res_nix$x_ss[[1]]))
-  expect_equal(length(res_nix$x_ss[[1]]), 1L)
+  expect_true(is.numeric(res_nix$x_css[[1]]))
+  expect_equal(length(res_nix$x_css[[1]]), 1L)
   expect_false("x_cov" %in% names(res_nix))
-  expect_equal(res_nix$x_ss[[1]], sum((c(1, 3) - 2)^2))
+  expect_false("x_ss" %in% names(res_nix))
+  expect_equal(res_nix$x_css[[1]], sum((c(1, 3) - 2)^2))
 
   # MNIX vector sums of squares
   res_mnix <- get_sufficient_category_statistics(
@@ -134,9 +135,10 @@ test_that("get_sufficient_category_statistics computes family statistics", {
     cues = c("c1", "c2"),
     model_family = "MNIX"
   )
-  expect_equal(length(res_mnix$x_ss[[1]]), 2L)
-  expect_equal(names(res_mnix$x_ss[[1]]), c("c1", "c2"))
+  expect_equal(length(res_mnix$x_css[[1]]), 2L)
+  expect_equal(names(res_mnix$x_css[[1]]), c("c1", "c2"))
   expect_false("x_cov" %in% names(res_mnix))
+  expect_false("x_ss" %in% names(res_mnix))
 
   # NIW matrix sums of squares and covariance
   res_niw <- get_sufficient_category_statistics(
@@ -144,9 +146,10 @@ test_that("get_sufficient_category_statistics computes family statistics", {
     cues = c("c1", "c2"),
     model_family = "NIW"
   )
-  expect_true(is.matrix(res_niw$x_ss[[1]]))
+  expect_true(is.matrix(res_niw$x_css[[1]]))
   expect_true(is.matrix(res_niw$x_cov[[1]]))
-  expect_equal(dim(res_niw$x_ss[[1]]), c(2, 2))
+  expect_false("x_ss" %in% names(res_niw))
+  expect_equal(dim(res_niw$x_css[[1]]), c(2, 2))
 })
 
 test_that("get_sufficient_category_statistics dispatches on MVBU_CognitiveModel", {
@@ -157,7 +160,8 @@ test_that("get_sufficient_category_statistics dispatches on MVBU_CognitiveModel"
   expect_true(is.data.frame(suff))
   expect_true("category" %in% names(suff))
   expect_true("x_mean" %in% names(suff))
-  expect_true("x_ss" %in% names(suff))
+  expect_true("x_css" %in% names(suff))
+  expect_false("x_ss" %in% names(suff))
   expect_equal(nrow(suff), length(get_category_labels(io)))
 })
 

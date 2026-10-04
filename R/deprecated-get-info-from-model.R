@@ -310,7 +310,16 @@ sample_observation <- function(x, ...) {
     "sample_observation()",
     with = "sample_observations()"
   )
-  sample_observations(x, ...)
+  dots <- list(...)
+  if ("Ns" %in% names(dots)) {
+    dots$n <- dots$Ns
+    dots$Ns <- NULL
+  }
+  if ("randomize.order" %in% names(dots)) {
+    dots$randomize_order <- dots$randomize.order
+    dots$randomize.order <- NULL
+  }
+  do.call(sample_observations, c(list(x), dots))
 }
 
 

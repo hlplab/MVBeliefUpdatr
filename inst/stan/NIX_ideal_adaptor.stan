@@ -19,7 +19,7 @@ data {
 
   matrix[M,L] N_exposure;             // number of training observations
   matrix[M,L] x_mean_exposure;        // mean of training observations
-  matrix[M,L] x_ss_exposure;          // sum of centered squares of training observations
+  matrix[M,L] x_css_exposure;        // sum of centered squares of training observations
 
   int N_test;                         // number of test trials
   array[N_test] real x_test;          // locations of test trials
@@ -106,7 +106,7 @@ transformed parameters {
         nu_n[cat,group] = nu_0 + N_exposure[cat,group];
         m_n[cat,group] = (m_0[cat] * kappa_0 + x_mean_exposure[cat,group] * N_exposure[cat,group]) / kappa_n[cat,group];
         S_n[cat,group] = S_0[cat] +
-                         x_ss_exposure[cat,group] +
+                         x_css_exposure[cat,group] +
                          ((kappa_0 * N_exposure[cat,group]) / kappa_n[cat,group]) *
                            (m_0[cat] - x_mean_exposure[cat,group])^2;
       } else {

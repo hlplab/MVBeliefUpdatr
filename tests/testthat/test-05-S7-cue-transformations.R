@@ -1,7 +1,7 @@
 
 .io <- suppressMessages(suppressWarnings(example_mvg_ideal_observer(n_cues = 3)))
 .cues <- get_cue_labels(.io)
-.data <- sample_observations(.io, Ns = 50)
+.data <- sample_observations(.io, n = 50)
 
 test_that("transform_cues - input (data)", {
   expect_error(

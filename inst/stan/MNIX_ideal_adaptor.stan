@@ -32,7 +32,7 @@ data {
 
   array[M,L] int<lower=0> N_exposure;                      // number of observations per category (M) and exposure group (L)
   array[M,L] vector[K] x_mean_exposure;                    // means for each category (M) and exposure group (L)
-  array[M,L] vector[K] x_ss_exposure;                      // sum of *centered* squares for each category (M) and group (L)
+  array[M,L] vector[K] x_css_exposure;                     // sum of *centered* squares for each category (M) and group (L)
 
   int N_test;                                              // number of unique combinations of test locations & exposure groups
   array[N_test] vector[K] x_test;                          // locations (in cue space) of test trials
@@ -145,7 +145,7 @@ transformed parameters {
         tau_n[cat,group] =
           sqrt(
              (nu_0 * tau_0[cat]^2 +
-              x_ss_exposure[cat,group] +
+              x_css_exposure[cat,group] +
               (N_exposure[cat,group] * kappa_0) / (kappa_n[cat,group]) * (m_0[cat] - x_mean_exposure[cat,group])^2
           ) / nu_n[cat,group]
         );
