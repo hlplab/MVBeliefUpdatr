@@ -707,30 +707,49 @@ test_that("Stan-family extension hooks can be registered and retrieved", {
   expect_equal(uvg_hooks$bridge_methods, c("get_stanfit", "summary"))
 })
 
-test_that("get_model_type and get_representation_type work across core objects", {
+test_that("get_family and get_family_name work across objects", {
   rep_uvg <- example_category_representation("UVG")
   rep_mvg <- example_category_representation("MVG")
   rep_niw <- example_category_representation("NIW")
   rep_nix <- example_category_representation("NIX")
   rep_ex <- example_category_representation("EXEMPLAR")
 
-  expect_equal(get_representation_type(rep_uvg), "UVG")
-  expect_equal(get_representation_type(rep_mvg), "MVG")
-  expect_equal(get_representation_type(rep_niw), "NIW")
-  expect_equal(get_representation_type(rep_nix), "NIX")
-  expect_equal(get_representation_type(rep_ex), "EXEMPLAR")
+  expect_equal(get_family_name(rep_uvg), "UVG")
+  expect_equal(get_family_name(rep_mvg), "MVG")
+  expect_equal(get_family_name(rep_niw), "NIW")
+  expect_equal(get_family_name(rep_nix), "NIX")
+  expect_equal(get_family_name(rep_ex), "EXEMPLAR")
+
+  expect_true(S7::S7_inherits(get_family(rep_uvg), MVBU_Family))
+  expect_equal(get_family(rep_uvg)@family_names$name_short, "UVG")
+  expect_true(.has_single_family(rep_uvg))
 
   tpl_mvg <- example_category_representation_template("MVG")
   tpl_niw <- example_category_representation_template("NIW")
-  expect_equal(get_representation_type(tpl_mvg), "MVG")
-  expect_equal(get_representation_type(tpl_niw), "NIW")
+  expect_equal(get_family_name(tpl_mvg), "MVG")
+  expect_equal(get_family_name(tpl_niw), "NIW")
+  expect_true(.has_single_family(tpl_mvg))
 
   mod_mvg <- example_mvg_ideal_observer()
   mod_niw <- example_niw_ideal_adaptor()
   mod_ex <- example_exemplar_model()
-  expect_equal(get_model_type(mod_mvg), "MVG")
-  expect_equal(get_model_type(mod_niw), "NIW")
-  expect_equal(get_model_type(mod_ex), "EXEMPLAR")
+  expect_equal(get_family_name(mod_mvg), "MVG")
+  expect_equal(get_family_name(mod_niw), "NIW")
+  expect_equal(get_family_name(mod_ex), "EXEMPLAR")
+  expect_true(.has_single_family(mod_mvg))
+
+  # Homogeneous template returns scalar family name
+  cues_uvg <- get_cue_labels(rep_uvg)
+  rep_cat2 <- new_uvg_category_representation("B", cues_uvg, mu = 1, sigma2 = 1)
+  tpl_same <- new_category_representation_template(list(rep_uvg, rep_cat2))
+  expect_true(.has_single_family(tpl_same))
+  expect_equal(get_family_name(tpl_same), "UVG")
+
+  # Heterogeneous template returns MIXED fallback
+  rep_cat_nix <- new_nix_category_representation("C", cues_uvg, m = 0, kappa = 1, nu = 3, sigma2 = 1)
+  tpl_mixed <- new_category_representation_template(list(rep_uvg, rep_cat_nix))
+  expect_false(.has_single_family(tpl_mixed))
+  expect_equal(get_family_name(tpl_mixed), "MIXED_CategoryRepresentationTemplate")
 })
 
 
@@ -857,3 +876,198 @@ test_that("add_category_representation generic works on templates, cognitive mod
     tolerance = MVBU_PROB_TOL
   )
 })
+
+test_that("metadata$parameters is present across representations, templates, models, and model lists", {
+  # Base category representation
+  base_rep <- new_category_representation(
+    category_labels = "A",
+    cue_labels = "F1",
+    parameters = list(custom_p = 42)
+  )
+  expect_true(!is.null(base_rep@metadata$parameters))
+  expect_equal(base_rep@metadata$parameters, list(custom_p = 42))
+  expect_equal(get_parameters(base_rep), list(custom_p = 42))
+
+  # Default / empty parameters base representation
+  base_rep_default <- new_category_representation(
+    category_labels = "A",
+    cue_labels = "F1"
+  )
+  expect_true(is.list(base_rep_default@metadata$parameters))
+  expect_equal(base_rep_default@metadata$parameters, list())
+  expect_equal(get_parameters(base_rep_default), list())
+
+  # Raw base representation constructor
+  raw_rep <- MVBU_CategoryRepresentation(
+    metadata = list(label_information = list(category = "A", cue = "F1"))
+  )
+  expect_true(is.list(raw_rep@metadata$parameters))
+  expect_equal(raw_rep@metadata$parameters, list())
+
+  # Typed representation constructors
+  uvg <- new_uvg_category_representation(
+    category_labels = "A",
+    cue_labels = "F1",
+    mu = 1,
+    sigma2 = 2
+  )
+  expect_equal(uvg@metadata$parameters, list(mu = 1, sigma2 = 2))
+  expect_equal(get_parameters(uvg), list(mu = 1, sigma2 = 2))
+
+  mvg <- new_mvg_category_representation(
+    category_labels = "A",
+    cue_labels = c("F1", "F2"),
+    mu = c(1, 2),
+    Sigma = diag(2)
+  )
+  expect_equal(mvg@metadata$parameters, list(mu = c(1, 2), Sigma = diag(2)))
+  expect_equal(get_parameters(mvg), list(mu = c(1, 2), Sigma = diag(2)))
+
+  muvg <- new_muvg_category_representation(
+    category_labels = "A",
+    cue_labels = c("F1", "F2"),
+    mu = c(1, 2),
+    sigma2 = c(0.5, 0.5),
+    weights = c(0.5, 0.5)
+  )
+  expect_equal(
+    muvg@metadata$parameters,
+    list(mu = c(1, 2), sigma2 = c(0.5, 0.5), weights = c(0.5, 0.5))
+  )
+  expect_equal(
+    get_parameters(muvg),
+    list(mu = c(1, 2), sigma2 = c(0.5, 0.5), weights = c(0.5, 0.5))
+  )
+
+  nix <- new_nix_category_representation(
+    category_labels = "A",
+    cue_labels = "F1",
+    m = 0,
+    kappa = 1,
+    nu = 3,
+    sigma2 = 1
+  )
+  expect_equal(
+    nix@metadata$parameters,
+    list(m = 0, kappa = 1, nu = 3, sigma2 = 1)
+  )
+  expect_equal(
+    get_parameters(nix),
+    list(m = 0, kappa = 1, nu = 3, sigma2 = 1)
+  )
+
+  mnix <- new_mnix_category_representation(
+    category_labels = "A",
+    cue_labels = c("F1", "F2"),
+    m = c(0, 0),
+    kappa = c(1, 1),
+    nu = c(3, 3),
+    sigma2 = c(1, 1),
+    weights = c(0.5, 0.5)
+  )
+  expect_equal(
+    mnix@metadata$parameters,
+    list(
+      m = c(0, 0),
+      kappa = c(1, 1),
+      nu = c(3, 3),
+      sigma2 = c(1, 1),
+      weights = c(0.5, 0.5)
+    )
+  )
+  expect_equal(
+    get_parameters(mnix),
+    list(
+      m = c(0, 0),
+      kappa = c(1, 1),
+      nu = c(3, 3),
+      sigma2 = c(1, 1),
+      weights = c(0.5, 0.5)
+    )
+  )
+
+  niw <- new_niw_category_representation(
+    category_labels = "A",
+    cue_labels = c("F1", "F2"),
+    m = c(0, 0),
+    kappa = 1,
+    nu = 4,
+    S = diag(2)
+  )
+  expect_equal(
+    niw@metadata$parameters,
+    list(m = c(0, 0), kappa = 1, nu = 4, S = diag(2))
+  )
+  expect_equal(
+    get_parameters(niw),
+    list(m = c(0, 0), kappa = 1, nu = 4, S = diag(2))
+  )
+
+  ex <- new_exemplar_category_representation(
+    category_labels = "A",
+    cue_labels = "F1",
+    exemplars = matrix(c(1, 2), ncol = 1),
+    c = 0.5
+  )
+  expect_true(!is.null(ex@metadata$parameters$exemplars))
+  expect_equal(ex@metadata$parameters$c, 0.5)
+  expect_equal(get_parameters(ex)$c, 0.5)
+
+  # Template
+  rep_b <- new_uvg_category_representation("B", "F1", 3, 4)
+  tmpl <- new_category_representation_template(list(A = uvg, B = rep_b))
+  expect_true(!is.null(tmpl@metadata$parameters))
+  expect_equal(names(tmpl@metadata$parameters), c("A", "B"))
+  expect_equal(tmpl@metadata$parameters$A, list(mu = 1, sigma2 = 2))
+  expect_equal(tmpl@metadata$parameters$B, list(mu = 3, sigma2 = 4))
+  expect_equal(get_parameters(tmpl), tmpl@metadata$parameters)
+
+  # Raw template constructor
+  raw_tmpl <- MVBU_CategoryRepresentationTemplate(
+    representations = list(A = uvg),
+    metadata = list()
+  )
+  expect_true(!is.null(raw_tmpl@metadata$parameters))
+  expect_equal(raw_tmpl@metadata$parameters$A, list(mu = 1, sigma2 = 2))
+
+  # Cognitive Model
+  mod <- new_cognitive_model(category_template = tmpl)
+  expect_true(!is.null(mod@metadata$parameters))
+  expect_equal(mod@metadata$parameters, tmpl@metadata$parameters)
+  expect_equal(get_parameters(mod), tmpl@metadata$parameters)
+
+  # Raw cognitive model constructor
+  raw_mod <- MVBU_CognitiveModel(
+    category_template = tmpl,
+    category_posterior_functions = list(),
+    decision_rule = "sampling",
+    category_prior = c(A = 0.5, B = 0.5),
+    lapse_behavior = list(
+      lapse_rate = 0,
+      lapse_bias = c(A = 0.5, B = 0.5),
+      lapse_treatment = "no_lapses"
+    ),
+    noise_behavior = list(Sigma_noise = NULL, noise_treatment = "no_noise"),
+    metadata = list()
+  )
+  expect_true(!is.null(raw_mod@metadata$parameters))
+  expect_equal(raw_mod@metadata$parameters, tmpl@metadata$parameters)
+
+  # Model List
+  mlist <- as_model_list(list(M1 = mod, M2 = mod))
+  expect_true(!is.null(mlist@metadata$parameters))
+  expect_equal(names(mlist@metadata$parameters), c("M1", "M2"))
+  expect_equal(mlist@metadata$parameters$M1, mod@metadata$parameters)
+  expect_equal(get_parameters(mlist), mlist@metadata$parameters)
+
+  # Raw model list constructor
+  raw_mlist <- MVBU_ModelList(
+    models = list(mod),
+    model_labels = "M1",
+    metadata = list()
+  )
+  expect_true(!is.null(raw_mlist@metadata$parameters))
+  expect_equal(names(raw_mlist@metadata$parameters), "M1")
+  expect_equal(get_parameters(raw_mlist), raw_mlist@metadata$parameters)
+})
+

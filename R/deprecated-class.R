@@ -4,15 +4,15 @@ NULL
 #'
 #' @description `r lifecycle::badge("deprecated")`
 #' `get_class()` was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
-#' Please use [get_representation_type()] or S7 classes instead.
-#' @seealso [get_representation_type()]
+#' Please use [get_family_name()] or S7 classes instead.
+#' @seealso [get_family_name()]
 #' @keywords internal
 #' @export
 get_class <- function(x) {
   lifecycle::deprecate_warn(
     when = "0.1.0",
     what = "get_class()",
-    details = "Use get_representation_type() or S7 classes instead."
+    details = "Use get_family_name() or S7 classes instead."
   )
   if (is.NIW_ideal_adaptor(x)) {
     return("NIW_ideal_adaptor")

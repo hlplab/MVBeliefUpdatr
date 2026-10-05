@@ -7,6 +7,9 @@
 *.log
 *.toc
 *.o
+*.so
+*.dylib
+*.dll
 TEMP/
 /doc/
 /Meta/

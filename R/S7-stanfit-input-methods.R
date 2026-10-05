@@ -453,7 +453,7 @@ S7::method(
       exp_data <- ti@untransform.function(exp_data)
     }
     cues <- get_cue_labels(x)
-    fam <- get_model_type(x)
+    fam <- get_family_name(x)
     stats <- get_sufficient_category_statistics(
       exp_data,
       cues = cues,
@@ -480,7 +480,7 @@ S7::method(
 
   exp_data <- get_exposure_data(x, groups = groups, categories = categories)
   cues <- get_cue_labels(x)
-  fam <- get_model_type(x)
+  fam <- get_family_name(x)
   stats <- get_sufficient_category_statistics(
     exp_data,
     cues = cues,
@@ -715,27 +715,39 @@ S7::method(print, Summary_IdealAdaptorStanfitInput) <- function(x, ...) {
   invisible(x)
 }
 
-#' @rdname get_model_type
+#' @rdname get_family
 #' @export
-S7::method(get_model_type, IdealAdaptorStaninput) <- function(x, ...) {
+S7::method(get_family_name, IdealAdaptorStaninput) <- function(x, ...) {
   cls <- class(x)[1]
   if (grepl("^NIW_", cls)) {
-    "NIW_ideal_adaptor"
+    "NIW"
   } else if (grepl("^NIX_", cls)) {
-    "NIX_ideal_adaptor"
+    "NIX"
   } else if (grepl("^MNIX_", cls)) {
-    "MNIX_ideal_adaptor"
+    "MNIX"
   } else {
-    "ideal_adaptor"
+    "NIW"
   }
 }
 
-#' @rdname get_model_type
+#' @rdname get_family
 #' @export
-S7::method(get_model_type, IdealAdaptorStanfitInput) <- function(x, ...) {
+S7::method(get_family, IdealAdaptorStaninput) <- function(x, ...) {
+  .get_model_family(get_family_name(x, ...))
+}
+
+#' @rdname get_family
+#' @export
+S7::method(get_family_name, IdealAdaptorStanfitInput) <- function(x, ...) {
   if (!is.null(x@staninput)) {
-    get_model_type(x@staninput, ...)
+    get_family_name(x@staninput, ...)
   } else {
-    "ideal_adaptor"
+    .stop("IdealAdaptorStanfitInput has no staninput object populated.")
   }
+}
+
+#' @rdname get_family
+#' @export
+S7::method(get_family, IdealAdaptorStanfitInput) <- function(x, ...) {
+  .get_model_family(get_family_name(x, ...))
 }

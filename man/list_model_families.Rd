@@ -2,13 +2,13 @@
 % Please edit documentation in R/S7-class.R
 \name{list_model_families}
 \alias{list_model_families}
-\title{List registered model families in MVBU}
+\title{List all registered model families}
 \usage{
 list_model_families()
 }
 \value{
-Character vector of registered family names.
+Character vector of registered family short names.
 }
 \description{
-List registered model families in MVBU
+List all registered model families
 }

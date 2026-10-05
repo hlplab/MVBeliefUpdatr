@@ -215,71 +215,20 @@ new_exemplar_category_representation <- function(
     c_val <- 1 / (2 * bandwidth_scale)
   }
 
-  Exemplar_CategoryRepresentation(
-    category_likelihood_function = {
-      ex0 <- exemplars
-      w0 <- as.numeric(exemplar_weights)
-      if (n0 > 1) {
-        Sigma0 <- stats::cov(ex0) * bandwidth_scale
-      } else {
-        Sigma0 <- diag(1, d0) * bandwidth_scale
-      }
-      if (!is.matrix(Sigma0) || any(!is.finite(Sigma0))) {
-        Sigma0 <- diag(1, d0) * bandwidth_scale
-      }
-      Sigma0 <- Sigma0 + diag(MVBU_PROB_TOL, d0)
-
-      function(x,
-               log = FALSE,
-               noise_treatment = "no_noise",
-               Sigma_noise = NULL) {
-        x <- .as_observation_matrix(x, d = d0, arg_name = "x")
-        if (identical(noise_treatment, "sample") && !is.null(Sigma_noise)) {
-          x <- x + mvtnorm::rmvnorm(
-            n = nrow(x),
-            mean = rep(0, ncol(x)),
-            sigma = Sigma_noise
-          )
-        }
-        if (
-          !is.null(Sigma_noise) &&
-            (identical(noise_treatment, "sample") ||
-              identical(noise_treatment, "marginalize"))
-        ) {
-          Sigma_eff <- Sigma0 + Sigma_noise
-        } else {
-          Sigma_eff <- Sigma0
-        }
-
-        # Vectorized evaluation across all exemplars:
-        # Pre-factorize Sigma_eff via Cholesky decomposition once rather than N*M times.
-        # Compute squared Mahalanobis distances using BLAS matrix multiplication.
-        chol_sigma <- tryCatch(chol(Sigma_eff), error = function(e) NULL)
-        if (is.null(chol_sigma)) {
-          chol_sigma <- chol(Sigma_eff + diag(MVBU_PROB_TOL, d0))
-        }
-        log_det <- 2 * sum(log(diag(chol_sigma)))
-
-        # Transform observations and exemplars into standardized coordinate space
-        x_std <- t(backsolve(chol_sigma, t(x), transpose = TRUE))
-        ex_std <- t(backsolve(chol_sigma, t(ex0), transpose = TRUE))
-
-        sq_x <- rowSums(x_std^2)
-        sq_ex <- rowSums(ex_std^2)
-        # ||x_std - ex_std||^2 = ||x_std||^2 + ||ex_std||^2 - 2 * x_std %*% ex_std^T
-        dist_mat <- outer(sq_x, sq_ex, "+") - 2 * tcrossprod(x_std, ex_std)
-        dist_mat[dist_mat < 0] <- 0
-
-        log_dens_by_exemplar <- -0.5 * (d0 * log(2 * pi) + log_det + dist_mat)
-        weighted_logdens <- sweep(log_dens_by_exemplar, 2, log(w0), "+")
-        log_mix <- .logsumexp_rows(weighted_logdens)
-        if (isTRUE(log)) {
-          log_mix
-        } else {
-          exp(log_mix)
-        }
-      }
-    },
+  # Rationale for retaining typed class constructor:
+  # Concrete typed constructors provide strict property validation, IDE tab completion,
+  # and fast S7 method dispatch, while obtaining the likelihood closure uniformly
+  # from the registered model family density function.
+  metadata <- as.list(metadata)
+  if (is.null(metadata$parameters)) {
+    metadata$parameters <- list(
+      exemplars = exemplars,
+      exemplar_weights = as.numeric(exemplar_weights),
+      c = as.numeric(c_val)
+    )
+  }
+  rep <- Exemplar_CategoryRepresentation(
+    category_likelihood_function = NULL,
     metadata = set_labels(
       metadata,
       cue = as.character(cue_labels),
@@ -291,6 +240,8 @@ new_exemplar_category_representation <- function(
     exemplar_weights = as.numeric(exemplar_weights),
     c = as.numeric(c_val)
   )
+  rep@category_likelihood_function <- .make_family_likelihood_function(rep)
+  rep
 }
 
 #' @rdname family-exemplar

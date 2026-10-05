@@ -35,6 +35,19 @@ S7::method(get_stanfit, MVBU_Stanfit) <- function(x, ...) {
   x@stanfit
 }
 
+#' @rdname get_family_name
+#' @export
+S7::method(get_family_name, MVBU_Stanfit) <- function(x, ...) {
+  .get_family_from_class_name(class(x)[1])
+}
+
+#' @rdname get_family
+#' @export
+S7::method(get_family, MVBU_Stanfit) <- function(x, ...) {
+  fam_name <- get_family_name(x, ...)
+  .get_model_family(fam_name)
+}
+
 #' @rdname get_stanfit
 #' @export
 S7::method(set_stanfit, list(S7::class_any, S7::class_any)) <- function(
@@ -167,15 +180,6 @@ S7::method(get_labels, MVBU_Stanfit) <- function(x, ...) {
   )
 }
 
-#' @rdname get_model_type
-#' @export
-S7::method(get_model_type, MVBU_Stanfit) <- function(x, ...) {
-  if (!is.null(x@stanfit) && length(x@stanfit@model_name) > 0) {
-    x@stanfit@model_name
-  } else {
-    "MVBU_Stanfit type not available."
-  }
-}
 
 #' @rdname get_original_variable_names
 #' @export
@@ -301,7 +305,7 @@ S7::method(get_test_data, MVBU_Stanfit) <- function(
 
   cue_names <- get_cue_labels(x)
   n_cues <- length(cue_names)
-  stanmodelname <- get_model_type(x)
+  fam <- get_family_name(x)
   staninput <- get_staninput(x)@values
 
   # Construct grid of requested group and category combinations
@@ -330,7 +334,7 @@ S7::method(get_test_data, MVBU_Stanfit) <- function(
   if (need_mean) {
     m_raw <- staninput$x_mean_exposure
     mean_list <- vector("list", n_rows)
-    if (grepl("^NIX", stanmodelname)) {
+    if (fam == "NIX") {
       for (k in seq_len(n_rows)) {
         val <- m_raw[c_indices[k], g_indices[k]]
         names(val) <- cue_names
@@ -354,7 +358,7 @@ S7::method(get_test_data, MVBU_Stanfit) <- function(
       )
     }
     css_list <- vector("list", n_rows)
-    if (grepl("^NIX", stanmodelname)) {
+    if (fam == "NIX") {
       for (k in seq_len(n_rows)) {
         mat <- matrix(
           s_raw[c_indices[k], g_indices[k]],
@@ -364,7 +368,7 @@ S7::method(get_test_data, MVBU_Stanfit) <- function(
         )
         css_list[[k]] <- mat
       }
-    } else if (grepl("^MNIX", stanmodelname)) {
+    } else if (fam == "MNIX") {
       for (k in seq_len(n_rows)) {
         mat <- diag(
           s_raw[c_indices[k], g_indices[k], ],
@@ -374,7 +378,7 @@ S7::method(get_test_data, MVBU_Stanfit) <- function(
         dimnames(mat) <- list(cue_names, cue_names)
         css_list[[k]] <- mat
       }
-    } else if (grepl("^NIW", stanmodelname)) {
+    } else if (fam == "NIW") {
       for (k in seq_len(n_rows)) {
         mat <- matrix(
           s_raw[c_indices[k], g_indices[k], , ],
@@ -1244,7 +1248,7 @@ get_categorization_function <- function(
 S7::method(print, MVBU_Stanfit) <- function(x, ...) {
   cls <- class(x)[1]
   cat("<", cls, ">\n", sep = "")
-  cat("  Model type: ", get_model_type(x), "\n", sep = "")
+  cat("  Model family: ", get_family_name(x), "\n", sep = "")
   cats <- get_category_labels(x)
   cues <- get_cue_labels(x)
   grps <- get_group_labels(x, include_prior = FALSE)

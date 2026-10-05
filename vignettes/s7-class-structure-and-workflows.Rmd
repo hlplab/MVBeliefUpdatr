@@ -60,7 +60,10 @@ The **S7 class architecture** replaces this with strongly typed, validated, and 
 1. **Category Representations** (`MVBU_CategoryRepresentation`): Distributional beliefs about a single category in continuous multidimensional cue space (e.g., Gaussian [UVG/MVG/MUVG], Normal-Inverse-Wishart [NIW], Normal-Inverse-$\chi^2$ [NIX/MNIX], or exemplar sets).
 2. **Category Representation Templates** (`MVBU_CategoryRepresentationTemplate`): Sets of category representations sharing a common cue space and coordinate system.
 3. **Cognitive Decision Models** (`MVBU_CognitiveModel`): Complete observer or adaptor models composing a category template with category priors $P(c)$, decision rules (e.g., criterion, proportional, sampling), internal perceptual noise, and lapse behaviors.
-4. **Stan Input & Fit Objects** (`MVBU_Staninput`, `MVBU_Stanfit`): Typed data bundles and Bayesian posterior fits for incremental belief-updating models.
+4. **Collections of Cognitive Models** (`MVBU_ModelList`): Strongly typed, ordered collections of cognitive decision models across experimental conditions, exposure blocks, or updating trajectories.
+5. **Stan Input & Fit Objects** (`MVBU_Staninput`, `MVBU_Stanfit`, `MVBU_StanfitPosterior`): Typed data bundles and Bayesian posterior fits for incremental belief-updating models.
+
+Underpinning these classes is the **Model Family System (`MVBU_Family`)**: a registry pattern that decouples the mathematical functions governing category density evaluation, observation sampling, and expected moment calculations from object definitions.
 
 ### Companion Vignettes
 - For Bayesian model fitting, post-processing, and model comparison workflows, see the vignette [Fitting and Working with MVBeliefUpdatr Stanfit Models](fitting-and-working-with-stanfit-models.html).
@@ -68,8 +71,11 @@ The **S7 class architecture** replaces this with strongly typed, validated, and 
 - For visualization workflows corresponding to these objects, see the vignette:
 [Visualizing Categories, Categorization Functions, and Belief Updating](visualizing-models-and-categories.html).
 
+- For extending the package with custom distributional families, see the vignette:
+[Extending MVBeliefUpdatr: Adding Model Families](extending-mvbeliefupdatr-adding-model-families.html).
+
 - For legacy code compatibility, see the vignette:
-[Backward Compatibility: Working with Old Code](backward-compatibility-working-with-old-code.html).
+[Backward Compatibility: Working with Legacy Code](backward-compatibility-working-with-legacy-code.html).
 
 ```{r setup}
 library(MVBeliefUpdatr)
@@ -191,7 +197,8 @@ fit_1cue
 
 # 3. Object Hierarchy and Constructors {#object-hierarchy-and-constructors}
 
-The class system is organized into three hierarchical levels:
+The class system is organized into hierarchical levels alongside the model
+family registry:
 
 ```
 MVBU_Object
@@ -210,21 +217,66 @@ MVBU_Object
   │     ├── NIW_IdealAdaptor
   │     ├── MNIX_IdealAdaptor
   │     └── Exemplar_Model
+  ├── MVBU_ModelList
   ├── MVBU_Staninput
   │     └── IdealAdaptorStaninput
   │           ├── NIX_IdealAdaptorStaninput
+  │           ├── MNIX_IdealAdaptorStaninput
   │           └── NIW_IdealAdaptorStaninput
-  └── MVBU_Stanfit
-        └── IdealAdaptorStanfit
-              ├── NIX_IdealAdaptorStanfit
-              └── NIW_IdealAdaptorStanfit
+  ├── MVBU_Stanfit
+  │     └── IdealAdaptorStanfit
+  │           ├── NIX_IdealAdaptorStanfit
+  │           ├── MNIX_IdealAdaptorStanfit
+  │           └── NIW_IdealAdaptorStanfit
+  └── MVBU_StanfitPosterior
+
+MVBU_Family (Model Family Registry)
+  ├── UVG
+  ├── MVG
+  ├── MUVG
+  ├── NIW
+  ├── NIX
+  ├── MNIX
+  └── Exemplar
 ```
+
+## The Model Family System (`MVBU_Family`) {#the-model-family-system}
+
+A key architectural design in **MVBeliefUpdatr** is the separation between
+the **object structures** (which store parameters, cues, labels, and priors) and
+the **computational algorithms** (which evaluate densities, draw samples, and
+compute moments).
+
+All computational behavior is encapsulated in `MVBU_Family` descriptors
+registered in a central registry:
+
+```{r family_registry_demo}
+# List all registered model families
+list_model_families()
+
+# Inspect a specific model family descriptor
+fam_mvg <- get_family("MVG")
+fam_mvg
+
+# Inspect the mathematical closures encapsulated by the family
+fam_mvg@density_function
+fam_mvg@expected_moments
+```
+
+Each `MVBU_Family` specifies:
+- `family_names`: Canonical short and long names for display and dispatch.
+- `density_function`: Vectorized evaluation of category likelihood $p(x \mid c)$.
+- `sampling_function`: Sampling synthetic observations from the category.
+- `expected_moments`: Calculation of expected mean $\boldsymbol{\mu}$ and covariance $\boldsymbol{\Sigma}$.
+- `default_parameters`: Template list of required parameter names and types.
+- `support`: Supported cue dimensionalities (e.g., 1D only vs. multidimensional).
 
 ## Level 1: Category Representations {#level-1-category-representations}
 
 ### Low-Level Bare Constructors
 
-When category parameters are already known, representations can be constructed by passing numeric vectors and matrices directly:
+When category parameters are already known, representations can be constructed
+by passing numeric vectors and matrices directly:
 
 ```{r bare_representation_constructors}
 # Multivariate Gaussian: mean vector mu and covariance matrix Sigma
@@ -454,20 +506,51 @@ get_cue_labels(labeled_model)
 ## Type and Family Introspection
 
 ```{r introspection}
-# Model family
-get_model_type(observer_model)
+# Model family name
+get_family_name(observer_model)
 
-# Representation family
-get_representation_type(rep_b)
+# Extract underlying MVBU_Family object
+get_family(observer_model)
+
+# Representation family name
+get_family_name(rep_b)
+
+# Model list family name (or "MIXED_ModelList" if heterogeneous)
+get_family_name(model_history)
 ```
 
 ## Parameter Extraction {#parameter-extraction}
 
-Extract category parameters or expected moments across representations, templates, models, and fitted Bayesian models:
+In **MVBeliefUpdatr**, model parameters are standardized across all four
+architectural tiers via the `metadata$parameters` property and the `get_parameters()` generic:
+
+1. **Category Representation (`MVBU_CategoryRepresentation`)**: Contains the
+   named list of parameters defining that specific category (e.g., `mu` and
+   `Sigma` for Gaussian families, or `m`, `S`, `kappa`, `nu` for NIW/NIX).
+2. **Category Representation Template (`MVBU_CategoryRepresentationTemplate`)**:
+   Contains a named list aggregating each category's parameter list, indexed by
+   category label (`lapply(template@representations, get_parameters)`).
+3. **Cognitive Model (`MVBU_CognitiveModel`)**: Contains the parameter list
+   from its underlying category template.
+4. **Model List (`MVBU_ModelList`)**: Contains a named list aggregating the
+   parameter lists of each constituent cognitive model, indexed by model label
+   (`lapply(models, get_parameters)`).
+
+Across all four tiers, `x@metadata$parameters` is guaranteed to be present,
+meaning downstream workflows can rely uniformly on `get_parameters(x)`:
 
 ```{r parameter_extraction}
-# Extract parameters across template categories (mu, Sigma for MVG)
+# Extract parameters from a single representation
+get_parameters(rep_b)
+
+# Extract parameters across a full template
+get_parameters(tpl_custom)
+
+# Extract parameters across a cognitive model
 get_parameters(observer_model)
+
+# Extract parameters across a model collection (ModelList)
+get_parameters(model_history)
 
 # For Bayesian belief distributions (like the NIW ideal adaptor),
 # extract expected moments under the belief distribution:
@@ -495,7 +578,17 @@ In Bayesian belief-updating models (such as NIW, NIX, and MNIX), category repres
 
 ## Likelihood and Posterior Computation
 
-Evaluate category likelihoods $p(x \mid c)$ and posterior probabilities $P(c \mid x)$ for new observations:
+Category representations provide an optional `category_likelihood_function`
+property that defaults to `NULL`. When `NULL`, `get_category_likelihood_function()`
+automatically looks up the registered model family descriptor via
+`get_family(rep)` and wraps its `density_function` directly, incorporating any
+decision noise or log-transformation settings. Consequently, whenever a model
+family is registered in the registry, all downstream operations (`likelihood()`,
+`posterior()`, `categorize()`, and `evaluate_model()`) work immediately out of
+the box.
+
+Evaluate category likelihoods $p(x \mid c)$ and posterior probabilities
+$P(c \mid x)$ for new observations:
 
 ```{r likelihood_and_posterior}
 # New test observations in cue space:
@@ -658,7 +751,7 @@ Fitted models encapsulate the Stan MCMC output, typed Stan input, cue transform 
 ```{r stanfit_inspection}
 # Inspect example fitted model
 fit_1cue
-get_model_type(fit_1cue)
+get_family_name(fit_1cue)
 
 # Extract underlying rstan stanfit object
 raw_stanfit <- get_stanfit(fit_1cue)

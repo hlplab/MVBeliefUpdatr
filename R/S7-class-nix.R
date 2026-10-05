@@ -98,42 +98,21 @@ new_nix_category_representation <- function(
   sigma2,
   metadata = list()
 ) {
-  NIX_CategoryRepresentation(
-    category_likelihood_function = {
-      m0 <- as.numeric(m)
-      kappa0 <- as.numeric(kappa)
-      nu0 <- as.numeric(nu)
-      sigma20 <- as.numeric(sigma2)
-      function(
-        x,
-        log = FALSE,
-        noise_treatment = "no_noise",
-        Sigma_noise = NULL
-      ) {
-        x <- .as_observation_matrix(x, d = 1, arg_name = "x")
-        if (identical(noise_treatment, "sample") && !is.null(Sigma_noise)) {
-          x <- x + mvtnorm::rmvnorm(
-            n = nrow(x),
-            mean = rep(0, ncol(x)),
-            sigma = Sigma_noise
-          )
-        }
-        noise_variance <- if (!is.null(Sigma_noise) &&
-                              (identical(noise_treatment, "sample") ||
-                               identical(noise_treatment, "marginalize"))) {
-          as.numeric(Sigma_noise[1, 1])
-        } else {
-          0
-        }
-        scale_eff <- sqrt((sigma20 * (kappa0 + 1) / kappa0) + noise_variance)
-        z <- (x[, 1] - m0) / scale_eff
-        if (isTRUE(log)) {
-          stats::dt(z, df = nu0, log = TRUE) - log(scale_eff)
-        } else {
-          stats::dt(z, df = nu0) / scale_eff
-        }
-      }
-    },
+  # Rationale for retaining typed class constructor:
+  # Concrete typed constructors provide strict property validation, IDE tab completion,
+  # and fast S7 method dispatch, while obtaining the likelihood closure uniformly
+  # from the registered model family density function.
+  metadata <- as.list(metadata)
+  if (is.null(metadata$parameters)) {
+    metadata$parameters <- list(
+      m = as.numeric(m),
+      kappa = as.numeric(kappa),
+      nu = as.numeric(nu),
+      sigma2 = as.numeric(sigma2)
+    )
+  }
+  rep <- NIX_CategoryRepresentation(
+    category_likelihood_function = NULL,
     metadata = set_labels(
       metadata,
       cue = as.character(cue_labels),
@@ -146,6 +125,8 @@ new_nix_category_representation <- function(
     nu = as.numeric(nu),
     sigma2 = as.numeric(sigma2)
   )
+  rep@category_likelihood_function <- .make_family_likelihood_function(rep)
+  rep
 }
 
 #' @rdname family-nix

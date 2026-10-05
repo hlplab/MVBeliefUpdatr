@@ -23,11 +23,26 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Introduction and Overview
+# Introduction and Architectural Shift
 
-Many existing pipelines and user scripts built against pre-v1.0 versions of **MVBeliefUpdatr** expect models and templates to be formatted as `tibble` data frames with list-columns of parameters (`mu`, `Sigma`, `m`, `S`, etc.).
+Earlier versions (pre-v1.0 / pre-v0.1.0) of **MVBeliefUpdatr** represented
+multidimensional category distributions, category templates, and cognitive
+decision models as nested `tibble` data frames with list-columns of vectors and
+parameter matrices (`mu`, `Sigma`, `m`, `S`, etc.). While convenient for simple
+tabular wrangling, weakly typed tabular models suffered from several limitations:
 
-To provide a non-breaking migration path, **MVBeliefUpdatr** implements a bidirectional compatibility bridge in `R/S7-to-legacy-tibble-compatibility.R`.
+- Lack of parameter dimension and positive-definiteness validation at object
+  creation.
+- Loosely coupled model metadata, cue labels, decision rules, and noise parameters.
+- Dispersed and ad-hoc method dispatch across functions and packages.
+
+Version 1.0 rebuilds **MVBeliefUpdatr** around R's modern **S7** object system,
+providing formal class definitions, robust property validators, unified
+generics, and a decoupled model family registry (`MVBU_Family`).
+
+To provide a smooth, non-breaking transition path for existing analysis pipelines
+and user scripts, **MVBeliefUpdatr** provides an extensive compatibility bridge
+implemented in `R/S7-to-legacy-tibble-compatibility.R` and deprecation mappings.
 
 ```{r setup}
 library(MVBeliefUpdatr)
@@ -39,7 +54,9 @@ library(dplyr)
 
 # 1. Coercing S7 Objects with `as_tibble()` {#as-tibble}
 
-Calling `as_tibble()` on any S7 representation, template, or cognitive model produces a tibble matching the pre-S7 column schema, names, types, and column order:
+Calling `as_tibble()` on any modern S7 category representation, category
+template, or cognitive model produces a tibble matching the pre-S7 column schema,
+variable names, types, and column ordering:
 
 ```{r as_tibble_bridge}
 # Create an S7 cognitive model
@@ -55,13 +72,19 @@ model_tibble$mu
 model_tibble$Sigma
 ```
 
-When called, `as_tibble()` issues an informative deprecation warning noting that S7 objects are the canonical format and that some metadata (such as noise behavior and internal validators) are lost in tabular representations.
+When called, `as_tibble()` issues an informative deprecation warning noting that
+S7 objects are the canonical format and that behavioral metadata (such as
+decision noise parameters, lapses, and internal validators) are not fully
+represented in tabular form.
 
 ---
 
 # 2. Deprecated `dplyr` Verb Forwarding {#dplyr-forwarding}
 
-For workflows that previously called `dplyr` verbs directly on model objects (e.g., `model %>% mutate(...)` or `model %>% filter(...)`), S3 method forwarding intercepts these calls, converts the object to a tibble, applies the requested verb, and informs the user:
+For legacy workflows that previously piped models directly into `dplyr` verbs
+(e.g., `model %>% mutate(...)` or `model %>% filter(...)`), S3 method forwarding
+intercepts these calls, converts the object to a tibble, applies the requested
+verb, and alerts the user:
 
 ```{r dplyr_forwarding}
 # Legacy workflow: calling filter() or select() on an S7 model
@@ -74,37 +97,134 @@ selected_df
 
 ---
 
-# 3. API Migration Mapping Table {#migration-mapping-table}
+# 3. Parameter & Moment Accessors {#parameter-accessors}
 
-The table below maps legacy (pre-v0.1.0) functions to their modern v0.1.0+ S7 API replacements. All legacy functions issue deprecation warnings in v0.1.0 and are scheduled for removal in v0.2.0.
+In pre-v0.1.0 code, parameters were typically extracted by indexing list-columns:
 
-| Legacy API Function (pre-v0.1.0) | Modern S7 API Replacement (v0.1.0+) | Description / Category |
+```r
+# Legacy workflow (pre-v0.1.0):
+mu_cat1 <- model_df$mu[[1]]
+Sigma_cat1 <- model_df$Sigma[[1]]
+```
+
+In the modern S7 architecture, parameters and distributional moments are
+standardized via uniform S7 generics, described next.
+
+### Extracting Model Parameters (`get_parameters`)
+
+The `get_parameters()` generic retrieves the structured named list of parameters
+guaranteed by the `metadata$parameters` property across all four architectural
+tiers:
+
+```{r get_parameters_demo}
+# Extract parameters across a cognitive model
+params_model <- get_parameters(observer_model)
+params_model
+
+# Extract parameters from an individual category representation
+rep_first <- observer_model@category_template@representations[[1]]
+get_parameters(rep_first)
+```
+
+### Accessing Expected and Marginal Moments
+
+For Bayesian belief distributions (such as NIW, NIX, and MNIX ideal adaptors),
+distributional moments are accessed directly through dedicated generics rather
+than manually computed from hyperparameters ($\kappa, \nu, m, S$):
+
+```{r moments_demo}
+# Instantiate an NIW ideal adaptor model
+adaptor_model <- example_niw_ideal_adaptor()
+
+# Expected moments conditional on hyperparameter beliefs:
+get_expected_mu(adaptor_model)
+get_expected_sigma(adaptor_model)
+
+# Marginal moments incorporating estimation uncertainty:
+get_marginal_mu(adaptor_model)
+get_marginal_sigma(adaptor_model)
+```
+
+---
+
+# 4. Transitioning Collections of Models to `MVBU_ModelList` {#model-collections}
+
+In legacy workflows, researchers often tracked model adaptation across trials,
+blocks, or experimental conditions by storing models inside tibbles:
+
+```r
+# Legacy workflow:
+history_tbl <- tibble(
+  step = 1:2,
+  model = list(model_step1, model_step2)
+)
+```
+
+In modern **MVBeliefUpdatr**, collections of models are represented using the
+typed `MVBU_ModelList` class:
+
+```{r model_list_demo}
+# Construct a typed collection of cognitive models
+model_seq <- MVBU_ModelList(
+  models = list(observer_model, adaptor_model),
+  model_labels = c("Initial_Observer", "Adapted_Model")
+)
+model_seq
+
+# Subsetting returns an MVBU_ModelList or individual model:
+model_seq[1]
+model_seq[[1]]
+model_seq[["Adapted_Model"]]
+
+# Batch parameter extraction across all models:
+get_parameters(model_seq)
+```
+
+`MVBU_ModelList` objects integrate directly with `plot_categories()` and
+`plot_categorization_functions()` for visualizing incremental belief updating
+trajectories.
+
+---
+
+# 5. API Migration Mapping Table {#migration-mapping-table}
+
+The table below maps legacy (pre-v0.1.0) functions and naming conventions to
+their modern v0.1.0+ S7 API replacements. All legacy functions issue deprecation
+warnings in v0.1.0 and are scheduled for removal in v0.2.0.
+
+| Legacy API Concept / Function (pre-v0.1.0) | Modern S7 API Replacement (v0.1.0+) | Description / Purpose |
 | :--- | :--- | :--- |
 | `make_MVG_from_data()` | `new_mvg_category_representation_template_from_data()` | Estimate MVG category template from data |
-| `make_MVG_ideal_observer_from_data()` | `new_mvg_ideal_observer_from_data()` | Construct MVG cognitive model directly from data |
+| `make_MVG_ideal_observer_from_data()` | `new_mvg_ideal_observer_from_data()` | Construct MVG cognitive model from data |
 | `make_NIW_belief_from_data()` | `new_niw_category_representation_template_from_data()` | Estimate NIW belief template from data |
 | `make_NIW_ideal_adaptor_from_data()` | `new_niw_ideal_adaptor_from_data()` | Construct NIW ideal adaptor model from data |
+| `make_NIX_belief_from_data()` | `new_nix_category_representation_template_from_data()` | Estimate NIX belief template from data |
+| `make_NIX_ideal_adaptor_from_data()` | `new_nix_ideal_adaptor_from_data()` | Construct NIX ideal adaptor model from data |
+| `make_MNIX_belief_from_data()` | `new_mnix_category_representation_template_from_data()` | Estimate MNIX belief template from data |
+| `make_MNIX_ideal_adaptor_from_data()` | `new_mnix_ideal_adaptor_from_data()` | Construct MNIX ideal adaptor model from data |
 | `make_exemplars_from_data()` | `new_exemplar_category_representation_template_from_data()` | Estimate Exemplar category template from data |
 | `make_exemplar_model_from_data()` | `new_exemplar_model_from_data()` | Construct Exemplar model from data |
 | `lift_MVG_to_MVG_ideal_observer()` | `lift_representation_to_model()` / `new_mvg_ideal_observer()` | Wrap MVG category template in cognitive model |
 | `lift_NIW_belief_to_NIW_ideal_adaptor()` | `lift_representation_to_model()` / `new_niw_ideal_adaptor()` | Wrap NIW template in ideal adaptor model |
+| `lift_NIX_belief_to_NIX_ideal_adaptor()` | `lift_representation_to_model()` / `new_nix_ideal_adaptor()` | Wrap NIX template in ideal adaptor model |
+| `lift_MNIX_belief_to_MNIX_ideal_adaptor()` | `lift_representation_to_model()` / `new_mnix_ideal_adaptor()` | Wrap MNIX template in ideal adaptor model |
 | `lift_exemplars_to_exemplar_model()` | `lift_representation_to_model()` / `new_exemplar_model()` | Wrap Exemplar template in cognitive model |
 | `is.ideal_adaptor_stanfit()` | `S7::S7_inherits(x, IdealAdaptorStanfit)` | Type check for S7 Stanfit objects |
 | `read_ideal_adaptor_stanfit()` | `read_stanfit()` | Read saved Stanfit object from RDS |
 | `write_ideal_adaptor_stanfit()` | `write_stanfit()` | Write Stanfit object to RDS |
 | `get_info_from_model()` | `get_parameters()`, `summary()`, or `as_tibble()` | Extract model parameters / metadata |
+| `get_model_family()` | `get_family_name()` / `get_family()` | Retrieve model family name or `MVBU_Family` |
+| `get_representation_type()` | `get_family_name()` | Retrieve representation family name |
 | `sample_observation()` | `sample_observations()` | Draw random samples from category representations |
 | `prepare_staninput()` | `new_ideal_adaptor_stanfit_input()` | Prepare typed input for ideal adaptor Stan models |
+| `x_ss` / `c_ss` | `x_css` / `c_css` | Centered sum of squares in sufficient statistics |
+| Nested model tibbles | `MVBU_ModelList` | Typed collections of cognitive models |
 
 ---
 
-# 4. Migration Recommendations {#migration-recommendations}
+# 6. Related Documentation {#related-documentation}
 
-When modernizing legacy code to the S7 architecture:
-
-1. **Replace `as_tibble()` calls with direct S7 methods:** Instead of extracting parameters by indexing list-columns (`model_df$mu[[1]]`), use `get_parameters(model, statistic = "mu")` or `get_expected_mu(model)`.
-
-2. **Use S7 constructors directly:** Replace legacy `make_*` and `lift_*` functions with `new_*_category_representation()` and `new_*_ideal_observer()`.
-
-3. **Dispatch evaluation directly:** Call `categorize(model, data)` and `posterior(model, data)` directly on S7 objects rather than passing tibbles to legacy wrappers.
-
+- [S7 Class Architecture, Constructors, and Workflows](s7-class-structure-and-workflows.html): Detailed technical guide to S7 classes, generics, and constructors.
+- [Fitting and Working with MVBeliefUpdatr Stanfit Models](fitting-and-working-with-stanfit-models.html): Fitting, evaluating, and diagnosing Bayesian belief updating models.
+- [Visualizing Categories, Categorization Functions, and Belief Updating](visualizing-models-and-categories.html): Plotting 1D, 2D, and 3D category distributions and decision boundaries.
+- [Extending MVBeliefUpdatr: Adding Model Families](extending-mvbeliefupdatr-adding-model-families.html): Registering custom model families using `MVBU_Family`.

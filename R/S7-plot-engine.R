@@ -569,7 +569,7 @@ NULL
     max_v <- -Inf
     for (cat_name in names(reps)) {
       r <- reps[[cat_name]]
-      mc <- .get_rep_mean_and_cov(r)
+      mc <- get_family(r)@expected_moments(r)
       idx <- match(c_name, get_cue_labels(r))
       mu_val <- mc$mu[idx]
       sd_val <- sqrt(max(mc$Sigma[idx, idx], 1e-6))
@@ -629,12 +629,12 @@ NULL
 
   if (is.null(slice_values)) {
     slice_mus <- sort(vapply(reps, function(r) {
-      mc <- .get_rep_mean_and_cov(r)
+      mc <- get_family(r)@expected_moments(r)
       idx <- match(slice_cue, get_cue_labels(r))
       mc$mu[idx]
     }, numeric(1L)))
     slice_sds <- vapply(reps, function(r) {
-      mc <- .get_rep_mean_and_cov(r)
+      mc <- get_family(r)@expected_moments(r)
       idx <- match(slice_cue, get_cue_labels(r))
       sqrt(max(mc$Sigma[idx, idx], 1e-6))
     }, numeric(1L))
@@ -723,7 +723,7 @@ NULL
       is_ex <- S7::S7_inherits(r, Exemplar_CategoryRepresentation)
 
       if (!is_ex) {
-        mc <- .get_rep_mean_and_cov(r)
+        mc <- get_family(r)@expected_moments(r)
         idx_c <- match(cues, get_cue_labels(r))
         Sigma <- mc$Sigma[idx_c, idx_c]
         det_S <- det(Sigma)
@@ -993,7 +993,7 @@ NULL
       min_y <- min(min_y, min(mat[, cues[2L]]) - 0.25 * rng2)
       max_y <- max(max_y, max(mat[, cues[2L]]) + 0.25 * rng2)
     } else {
-      mc <- .get_rep_mean_and_cov(r)
+      mc <- get_family(r)@expected_moments(r)
       idx_c <- match(cues, get_cue_labels(r))
       mu_vec <- mc$mu[idx_c]
       sd_x <- sqrt(max(mc$Sigma[idx_c[1L], idx_c[1L]], 1e-6))
@@ -1272,7 +1272,7 @@ NULL
         hoverinfo = "name"
       )
     } else {
-      mc <- .get_rep_mean_and_cov(r)
+      mc <- get_family(r)@expected_moments(r)
       idx_c <- match(cues, get_cue_labels(r))
       mu <- mc$mu[idx_c]
       Sigma <- mc$Sigma[idx_c, idx_c]
@@ -1445,7 +1445,7 @@ NULL
 
   if (is.null(slice_values)) {
     slice_mus <- sort(vapply(reps, function(r) {
-      mc <- .get_rep_mean_and_cov(r)
+      mc <- get_family(r)@expected_moments(r)
       idx <- match(slice_cue, get_cue_labels(r))
       mc$mu[idx]
     }, numeric(1L)))

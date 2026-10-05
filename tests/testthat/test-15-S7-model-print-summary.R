@@ -114,7 +114,7 @@ test_that("print and summary work on MVBU_Stanfit", {
   expect_true(
     any(grepl("MVBU_Stanfit", out) | grepl("IdealAdaptorStanfit", out))
   )
-  expect_true(any(grepl("Model type: NIW", out)))
+  expect_true(any(grepl("Model family: NIW", out)))
   expect_true(any(grepl("Categories", out)))
   expect_true(any(grepl("Draws:", out)))
 

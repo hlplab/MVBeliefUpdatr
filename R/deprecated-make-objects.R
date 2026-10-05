@@ -156,12 +156,12 @@ lift_likelihood_to_model <- function(x, group = NULL, prior = NULL, lapse_rate =
   if (!S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
     .stop("x must be an MVBU_CategoryRepresentationTemplate object.")
   }
-  rep_type <- get_representation_type(x)
+  rep_type <- get_family_name(x)
   if (rep_type %in% c("MVG", "UVG")) {
     new_mvg_ideal_observer(category_template = x, category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   } else if (rep_type %in% c("NIW", "NIX")) {
     new_niw_ideal_adaptor(category_template = x, category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
-  } else if (rep_type == "Exemplar") {
+  } else if (toupper(rep_type) == "EXEMPLAR") {
     new_exemplar_model(category_template = x, category_prior = prior, lapse_rate = lapse_rate, lapse_bias = lapse_bias, Sigma_noise = Sigma_noise)
   } else {
     .stop("Unsupported category representation type in template: ", rep_type)

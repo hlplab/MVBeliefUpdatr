@@ -239,6 +239,20 @@ S7::method(get_model_family, MVBU_StanfitPosterior) <- function(x, ...) {
   }
 }
 
+#' @rdname get_family_name
+#' @export
+S7::method(get_family_name, MVBU_StanfitPosterior) <- function(x, ...) {
+  fam_raw <- get_model_family(x, ...)
+  .get_family_from_class_name(fam_raw)
+}
+
+#' @rdname get_family
+#' @export
+S7::method(get_family, MVBU_StanfitPosterior) <- function(x, ...) {
+  fam_name <- get_family_name(x, ...)
+  .get_model_family(fam_name)
+}
+
 #' @rdname get_metadata
 #' @export
 S7::method(get_metadata, MVBU_StanfitPosterior) <- function(x, ...) {

@@ -128,18 +128,24 @@ fit <- example_ideal_adaptor_stanfit(
   file_refit = "on_change"
 )
 
-# Inspect class hierarchy
+# Inspect class hierarchy and model family
 class(fit)
-get_model_type(fit)
+get_family_name(fit)
+get_family(fit)
 ```
 
 ---
 
 # 4. Lightweight Posterior Representations (`MVBU_StanfitPosterior`) {#lightweight-posterior-representations}
 
-While full `MVBU_Stanfit` objects store raw sampling chains, diagnostic metrics, compiled C++ structures, and source matrices, downstream evaluation and plotting workflows often only require parameter draw distributions.
+While full `MVBU_Stanfit` objects store raw sampling chains, diagnostic metrics,
+compiled C++ structures, and source matrices, downstream evaluation and plotting
+workflows often only require parameter draw distributions.
 
-The `MVBU_StanfitPosterior` S7 class provides a lightweight representation of fitted posterior distributions. It strips away heavy Stan compilation structures while retaining parameter draws and metadata, enabling fast serialization, evaluation, and visualization.
+The `MVBU_StanfitPosterior` S7 class provides a lightweight representation of
+fitted posterior distributions. It strips away heavy Stan compilation structures
+while retaining parameter draws and metadata, enabling fast serialization,
+evaluation, and visualization.
 
 ```{r stanfit_posterior_demo}
 # Coerce a full Stanfit model to a lightweight posterior representation
@@ -151,7 +157,18 @@ get_cue_labels(post_model)
 get_category_labels(post_model)
 get_response_category_labels(post_model)
 get_group_labels(post_model, include_prior = TRUE)
-get_model_family(post_model)
+
+# Inspect model family via the modern S7 family system
+get_family_name(post_model)
+get_family(post_model)
+
+# Extract expected moments conditional on parameter draws
+get_expected_mu(post_model)
+get_expected_sigma(post_model)
+
+# Extract marginal moments incorporating parameter uncertainty
+get_marginal_mu(post_model)
+get_marginal_sigma(post_model)
 
 # Evaluate decision likelihoods directly on the lightweight posterior
 eval_res <- evaluate_model(post_model)
@@ -200,7 +217,7 @@ head(neff_ratio(fit))
 
 ---
 
-# 5. Pre-extracting Posterior Latents & Evaluation Closures (`add_posterior_latents`) {#pre-extracting-latents}
+# 6. Pre-extracting Posterior Latents & Evaluation Closures (`add_posterior_latents`) {#pre-extracting-latents}
 
 When producing complex multi-panel category plots, categorization decision boundaries, or posterior density curves across multiple exposure trials, downstream plotting and evaluation routines frequently need to access posterior latent parameter draws ($m, S, \kappa, \nu, \mathbf{\Sigma}_{\text{exp}}, \mathbf{\Sigma}_{\text{marg}}$) and evaluate likelihood or posterior functions across observation grids.
 
@@ -241,7 +258,7 @@ For comprehensive examples of plotting category distributions and decision bound
 
 ---
 
-# 6. Model Comparison and Information Criteria {#model-comparison-and-criteria}
+# 7. Model Comparison and Information Criteria {#model-comparison-and-criteria}
 
 `MVBU_Stanfit` objects integrate with **loo** and **bayesplot** for Bayesian model comparison, cross-validation, and posterior predictive checking, following the argument conventions of **brms**.
 
@@ -288,7 +305,7 @@ if (requireNamespace("bayesplot", quietly = TRUE)) {
 
 ---
 
-# 7. Reconstructing Exposure Update Histories (`reconstruct_update_history`) {#reconstructing-exposure-update-histories}
+# 8. Reconstructing Exposure Update Histories (`reconstruct_update_history`) {#reconstructing-exposure-update-histories}
 
 When fitting an ideal adaptor model in Stan, researchers often wish to inspect how beliefs evolve incrementally across exposure observations.
 
@@ -314,7 +331,7 @@ The list of models that results from `reconstruct_update_history()` can be used 
 
 ---
 
-# 8. Summary and Related Documentation {#summary}
+# 9. Summary and Related Documentation {#summary}
 
 In summary, the `MVBU_Stanfit` workflow provides an integrated pipeline for Bayesian belief updating:
 
@@ -329,4 +346,4 @@ new_ideal_adaptor_stanfit_input() ──► fit_ideal_adaptor() ──► print(
 ### Links to Related Vignettes
 - [S7 Class Architecture, Constructors, and Workflows](s7-class-structure-and-workflows.html): Detailed technical reference for S7 classes, generics, and model construction.
 - [Visualizing Categories, Categorization Functions, and Belief Updating](visualizing-models-and-categories.html): Comprehensive plotting guide for 1D, 2D, and 3D category distributions and decision boundaries.
-- [Backward Compatibility: Working with Old Code](backward-compatibility-working-with-old-code.html): Transition guide from legacy list-column models to S7 architecture.
+- [Backward Compatibility: Working with Legacy Code](backward-compatibility-working-with-legacy-code.html): Transition guide from legacy list-column models to S7 architecture.

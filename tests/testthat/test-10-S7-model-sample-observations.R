@@ -40,6 +40,23 @@ test_that("sample_observations samples proportionally to category prior on MVBU_
   expect_gt(prop_A, 0.80)
 })
 
+test_that("sample_observations works on MVBU_ModelList", {
+  repA <- new_uvg_category_representation("A", "F1", mu = 100, sigma2 = 25)
+  repB <- new_uvg_category_representation("B", "F1", mu = 200, sigma2 = 25)
+  tpl <- new_category_representation_template(list(A = repA, B = repB))
+  m1 <- new_uvg_ideal_observer(tpl)
+  m2 <- new_uvg_ideal_observer(tpl)
+  mlist <- MVBU_ModelList(models = list(mod1 = m1, mod2 = m2))
+
+  draws <- sample_observations(mlist, n = 20L)
+  expect_s3_class(draws, "data.frame")
+  expect_equal(nrow(draws), 40L)
+  expect_true("model_id" %in% names(draws))
+  expect_equal(levels(draws$model_id), c("mod1", "mod2"))
+  expect_equal(sum(draws$model_id == "mod1"), 20L)
+  expect_equal(sum(draws$model_id == "mod2"), 20L)
+})
+
 test_that("sample_observations handles with_replacement FALSE and error guards on exemplar models", {
   # Create exemplar representation with small exemplar set
   exA <- data.frame(F1 = c(10, 11, 12, 13, 14), category = "A")

@@ -11,8 +11,8 @@ test_that("all cognitive model families satisfy the core generic method parity m
     
     # 1. Type and structure introspection
     expect_true(S7::S7_inherits(m, MVBU_CognitiveModel), info = fam)
-    expect_true(is.character(get_model_type(m)), info = fam)
-    expect_true(is.character(get_representation_type(m)), info = fam)
+    expect_true(is.character(get_family_name(m)), info = fam)
+    expect_true(S7::S7_inherits(get_family(m), MVBU_Family), info = fam)
     
     cues <- get_cue_labels(m)
     expect_equal(length(cues), nc, info = fam)
@@ -103,7 +103,8 @@ test_that("cross-family template parity holds across representation families", {
     tpl <- example_category_representation_template(fam, n_cues = nc)
     
     expect_true(S7::S7_inherits(tpl, MVBU_CategoryRepresentationTemplate), info = fam)
-    expect_true(is.character(get_representation_type(tpl)), info = fam)
+    expect_true(is.character(get_family_name(tpl)), info = fam)
+    expect_true(S7::S7_inherits(get_family(tpl), MVBU_Family), info = fam)
     expect_equal(length(get_cue_labels(tpl)), nc, info = fam)
     expect_true(length(get_category_labels(tpl)) >= 2L, info = fam)
     

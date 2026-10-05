@@ -27,7 +27,29 @@ MVBU_ModelList <- S7::new_class(
   properties = list(
     models = S7::class_list,
     model_labels = S7::class_character,
-    metadata = S7::class_list
+    metadata = S7::new_property(
+      class = S7::class_list,
+      default = quote(list(parameters = list())),
+      setter = function(self, value) {
+        val <- as.list(value)
+        if (is.null(val$parameters)) {
+          mods <- tryCatch(self@models, error = function(e) list())
+          if (length(mods) > 0) {
+            val$parameters <- lapply(mods, function(m) {
+              tryCatch(get_parameters(m), error = function(e) list())
+            })
+            lbls <- tryCatch(self@model_labels, error = function(e) NULL)
+            if (!is.null(lbls) && length(lbls) == length(val$parameters)) {
+              names(val$parameters) <- lbls
+            }
+          } else {
+            val$parameters <- list()
+          }
+        }
+        self@metadata <- val
+        self
+      }
+    )
   ),
   validator = function(self) {
     if (length(self@models) == 0L) {
@@ -66,10 +88,21 @@ as_model_list <- function(models, model_labels = NULL, metadata = list()) {
     model_labels <- as.character(model_labels)
   }
 
+  metadata <- as.list(metadata)
+  if (is.null(metadata$parameters)) {
+    params <- lapply(models, function(m) {
+      tryCatch(get_parameters(m), error = function(e) list())
+    })
+    if (!is.null(model_labels) && length(model_labels) == length(params)) {
+      names(params) <- model_labels
+    }
+    metadata$parameters <- params
+  }
+
   MVBU_ModelList(
     models = models,
     model_labels = model_labels,
-    metadata = as.list(metadata)
+    metadata = metadata
   )
 }
 
@@ -197,10 +230,18 @@ S7::method(add_category_representation, MVBU_ModelList) <- function(
       ...
     )
   })
+  metadata <- x@metadata
+  metadata$parameters <- lapply(updated_models, function(m) {
+    tryCatch(get_parameters(m), error = function(e) list())
+  })
+  if (!is.null(x@model_labels) &&
+    length(x@model_labels) == length(metadata$parameters)) {
+    names(metadata$parameters) <- x@model_labels
+  }
   MVBU_ModelList(
     models = updated_models,
     model_labels = x@model_labels,
-    metadata = x@metadata
+    metadata = metadata
   )
 }
 

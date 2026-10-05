@@ -136,52 +136,22 @@ new_mnix_category_representation <- function(
     .stop("weights must be numeric.")
   }
 
-  MNIX_CategoryRepresentation(
-    category_likelihood_function = {
-      m0 <- as.numeric(m)
-      kappa0 <- as.numeric(kappa)
-      sigma20 <- as.numeric(sigma2)
-      nu0 <- as.numeric(nu)
-      pred_var <- sigma20 * (kappa0 + 1) / kappa0
-      w0 <- as.numeric(weights)
-      function(x,
-               log = FALSE,
-               noise_treatment = "no_noise",
-               Sigma_noise = NULL) {
-        x <- .as_observation_matrix(x, d = length(m0), arg_name = "x")
-        if (identical(noise_treatment, "sample") && !is.null(Sigma_noise)) {
-          x <- x + mvtnorm::rmvnorm(
-            n = nrow(x),
-            mean = rep(0, ncol(x)),
-            sigma = Sigma_noise
-          )
-        }
-        noise_variance <- if (!is.null(Sigma_noise) &&
-          (identical(noise_treatment, "sample") ||
-            identical(noise_treatment, "marginalize"))) {
-          diag(Sigma_noise)
-        } else {
-          rep(0, length(m0))
-        }
-        cue_logdens <- sapply(seq_along(m0), function(i) {
-          scale_i <- sqrt(pred_var[i] + noise_variance[i])
-          stats::dt(
-            (x[, i] - m0[i]) / scale_i,
-            df = nu0[i],
-            log = TRUE
-          ) - log(scale_i)
-        })
-        if (is.vector(cue_logdens)) {
-          cue_logdens <- matrix(cue_logdens, ncol = length(m0))
-        }
-        total_logdens <- rowSums(cue_logdens)
-        if (isTRUE(log)) {
-          total_logdens
-        } else {
-          exp(total_logdens)
-        }
-      }
-    },
+  # Rationale for retaining typed class constructor:
+  # Concrete typed constructors provide strict property validation, IDE tab completion,
+  # and fast S7 method dispatch, while obtaining the likelihood closure uniformly
+  # from the registered model family density function.
+  metadata <- as.list(metadata)
+  if (is.null(metadata$parameters)) {
+    metadata$parameters <- list(
+      m = as.numeric(m),
+      kappa = as.numeric(kappa),
+      nu = as.numeric(nu),
+      sigma2 = as.numeric(sigma2),
+      weights = as.numeric(weights)
+    )
+  }
+  rep <- MNIX_CategoryRepresentation(
+    category_likelihood_function = NULL,
     metadata = set_labels(
       metadata,
       cue = as.character(cue_labels),
@@ -195,6 +165,8 @@ new_mnix_category_representation <- function(
     sigma2 = as.numeric(sigma2),
     weights = as.numeric(weights)
   )
+  rep@category_likelihood_function <- .make_family_likelihood_function(rep)
+  rep
 }
 
 #' @rdname family-mnix

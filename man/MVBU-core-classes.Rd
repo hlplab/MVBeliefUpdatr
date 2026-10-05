@@ -52,8 +52,6 @@ Expected properties:
 \item \code{category_labels}: one or more category labels associated with the object.
 \item \code{cue_labels}: one or more cue-dimension labels.
 \item \code{category_likelihood_function}: family-specific likelihood function
-placeholder.
-\item \code{metadata}: optional auxiliary metadata list.
 }
 }
 

@@ -7,6 +7,7 @@
 #' @include S7-class-niw.R
 #' @include S7-class-exemplar.R
 #' @include S7-generics.R
+#' @include S7-model-list.R
 NULL
 
 # S7 methods and method-local helpers for MVBeliefUpdatr.
@@ -111,7 +112,17 @@ S7::method(print, MVBU_Object) <- function(x, ...) {
       }
     }
   } else {
-    class(r)[1]
+    fam_name <- tryCatch(get_family_name(r), error = function(e) class(r)[1])
+    params <- tryCatch(get_parameters(r), error = function(e) list())
+    if (length(params) > 0L) {
+      param_strs <- vapply(names(params), function(nm) {
+        val <- params[[nm]]
+        paste0(nm, " = ", .format_param_inline(val))
+      }, character(1L))
+      sprintf("%s(%s)", fam_name, paste(param_strs, collapse = ", "))
+    } else {
+      class(r)[1]
+    }
   }
 }
 
@@ -180,6 +191,19 @@ S7::method(print, MVBU_CategoryRepresentation) <- function(x, ...) {
       }
       if (n_pts > 5L) {
         cat("    ...\n")
+      }
+    }
+  } else {
+    params <- tryCatch(get_parameters(x), error = function(e) list())
+    for (nm in names(params)) {
+      val <- params[[nm]]
+      if (is.matrix(val) && (nrow(val) > 1L || ncol(val) > 1L)) {
+        cat("  ", nm, ":\n", sep = "")
+        print(val)
+      } else if (length(val) > 1L) {
+        cat("  ", nm, ": c(", paste(format(val, digits = 4), collapse = ", "), ")\n", sep = "")
+      } else {
+        cat("  ", nm, ": ", format(val, digits = 4), "\n", sep = "")
       }
     }
   }
@@ -415,7 +439,15 @@ S7::method(summary, MVBU_CognitiveModel) <- function(object, ...) {
 # -------------------------
 
 S7::method(get_category_likelihood_function, MVBU_CategoryRepresentation) <- function(x) {
-  x@category_likelihood_function
+  fn <- x@category_likelihood_function
+  if (!is.null(fn) && length(formals(fn)) > 0L) {
+    return(fn)
+  }
+  fam <- tryCatch(get_family(x), error = function(e) NULL)
+  if (!is.null(fam) && is.function(fam@density_function)) {
+    return(.make_family_likelihood_function(x, fam))
+  }
+  .stop("category_likelihood not implemented for class '", class(x)[1], "'.")
 }
 
 S7::method(get_category_template, MVBU_CognitiveModel) <- function(x) {
@@ -431,60 +463,164 @@ S7::method(get_category_representations, MVBU_CategoryRepresentationTemplate) <-
   x@representations
 }
 
-# Helper to map S7 class name to model family
-.get_family_from_class_name <- function(class_name) {
-  class_name <- sub("^.*::", "", class_name)
-  families <- list_model_families()
-  for (fam in families) {
-    reg <- .get_model_family_registration(fam)
-    if (class_name %in% c(reg$category_representation, reg$cognitive_model)) {
-      return(fam)
-    }
-  }
-  clean_name <- gsub(
-    paste0(
-      "_(IdealObserver|IdealAdaptor|IdealAdaptorStanfit|IdealAdaptorStaninput|",
-      "CategoryRepresentation|CategoryRepresentationTemplate|Model)$"
-    ),
-    "",
-    class_name
-  )
-  if (toupper(clean_name) == "EXEMPLAR") {
-    return("EXEMPLAR")
-  }
-  toupper(clean_name)
+S7::method(get_family, S7::class_character) <- function(x, ...) {
+  .get_model_family(x)
 }
 
-S7::method(get_model_type, MVBU_Object) <- function(x, ...) {
-  .get_family_from_class_name(class(x)[1])
+S7::method(get_family_name, S7::class_character) <- function(x, ...) {
+  fam <- .get_model_family(x)
+  unname(fam@family_names$name_short)
 }
 
-S7::method(get_representation_type, MVBU_CategoryRepresentation) <- function(
-  x,
-  ...
-) {
-  .get_family_from_class_name(class(x)[1])
+S7::method(get_family, MVBU_Family) <- function(x, ...) {
+  x
+}
+
+S7::method(get_family_name, MVBU_Family) <- function(x, ...) {
+  unname(x@family_names$name_short)
+}
+
+S7::method(get_family, MVBU_CategoryRepresentation) <- function(x, ...) {
+  if (!is.null(x@metadata$family) &&
+    S7::S7_inherits(x@metadata$family, MVBU_Family)) {
+    return(x@metadata$family)
+  }
+  fam_name <- .get_family_from_class_name(class(x)[1])
+  .get_model_family(fam_name)
+}
+
+S7::method(get_family_name, MVBU_CategoryRepresentation) <- function(x, ...) {
+  unname(get_family(x, ...)@family_names$name_short)
 }
 
 S7::method(
-  get_representation_type,
+  get_family,
   MVBU_CategoryRepresentationTemplate
 ) <- function(x, ...) {
-  if (length(x@representations) == 0) {
-    return("")
+  reps <- x@representations
+  if (length(reps) == 0L) {
+    return(list())
   }
-  get_representation_type(x@representations[[1]], ...)
+  fams <- lapply(reps, get_family, ...)
+  fam_names <- vapply(fams, function(f) f@family_names$name_short, character(1L))
+  if (length(unique(fam_names)) == 1L) {
+    fams[[1L]]
+  } else {
+    fams
+  }
 }
 
-S7::method(get_representation_type, MVBU_CognitiveModel) <- function(x, ...) {
-  get_representation_type(x@category_template, ...)
+S7::method(
+  get_family_name,
+  MVBU_CategoryRepresentationTemplate
+) <- function(x, ...) {
+  reps <- x@representations
+  if (length(reps) == 0L) {
+    return(character(0L))
+  }
+  fam_names <- vapply(reps, get_family_name, character(1L), ...)
+  if (length(unique(fam_names)) == 1L) {
+    unname(fam_names[1L])
+  } else {
+    "MIXED_CategoryRepresentationTemplate"
+  }
+}
+
+S7::method(get_family, MVBU_CognitiveModel) <- function(x, ...) {
+  get_family(x@category_template, ...)
+}
+
+S7::method(get_family_name, MVBU_CognitiveModel) <- function(x, ...) {
+  fam_name <- get_family_name(x@category_template, ...)
+  if (fam_name == "MIXED_CategoryRepresentationTemplate") {
+    "MIXED_CognitiveModel"
+  } else {
+    unname(fam_name)
+  }
+}
+
+S7::method(get_family, MVBU_ModelList) <- function(x, ...) {
+  models <- x@models
+  if (length(models) == 0L) {
+    return(list())
+  }
+  fams <- lapply(models, get_family, ...)
+  is_all_single <- all(vapply(fams, function(f) {
+    S7::S7_inherits(f, MVBU_Family)
+  }, logical(1L)))
+  if (is_all_single) {
+    fam_names <- vapply(fams, function(f) f@family_names$name_short, character(1L))
+    if (length(unique(fam_names)) == 1L) {
+      return(fams[[1L]])
+    }
+  }
+  fams
+}
+
+S7::method(get_family_name, MVBU_ModelList) <- function(x, ...) {
+  models <- x@models
+  if (length(models) == 0L) {
+    return(character(0L))
+  }
+  fam_names <- vapply(models, get_family_name, character(1L), ...)
+  if (length(unique(fam_names)) == 1L && fam_names[1L] != "MIXED_CognitiveModel") {
+    unname(fam_names[1L])
+  } else {
+    "MIXED_ModelList"
+  }
+}
+
+.has_single_family <- function(x) {
+  fam_name <- get_family_name(x)
+  !startsWith(fam_name, "MIXED_") && length(fam_name) == 1L && nchar(fam_name) > 0L
+}
+
+.assert_single_family <- function(x, msg = NULL) {
+  if (!.has_single_family(x)) {
+    if (is.null(msg)) {
+      fam_names <- get_family_name(x)
+      if (is.list(fam_names)) {
+        fam_names <- unlist(fam_names)
+      }
+      msg <- paste0(
+        "Expected object with a single family, but found: ",
+        paste(unique(fam_names), collapse = ", ")
+      )
+    }
+    .stop(msg)
+  }
+  invisible(TRUE)
 }
 
 S7::method(get_parameters, MVBU_Object) <- function(x, ...) {
   .mvbu_not_implemented("get_parameters", class(x)[1])
 }
 
+S7::method(get_parameters, MVBU_CategoryRepresentation) <- function(x) {
+  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
+    return(x@metadata$parameters)
+  }
+  # Dynamically extract non-metadata properties for any category representation
+  prop_names <- S7::prop_names(x)
+  ignore <- c("category", "cues", "metadata", "category_likelihood_function")
+  param_names <- setdiff(prop_names, ignore)
+  if (length(param_names) > 0L) {
+    out <- stats::setNames(vector("list", length(param_names)), param_names)
+    for (nm in param_names) {
+      out[[nm]] <- S7::prop(x, nm)
+    }
+    return(out)
+  }
+  if (!is.null(x@metadata$parameters)) {
+    return(x@metadata$parameters)
+  }
+  list()
+}
+
 S7::method(get_parameters, UVG_CategoryRepresentation) <- function(x) {
+  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
+    return(x@metadata$parameters)
+  }
   list(
     mu = x@mu,
     sigma2 = x@sigma2
@@ -492,6 +628,9 @@ S7::method(get_parameters, UVG_CategoryRepresentation) <- function(x) {
 }
 
 S7::method(get_parameters, NIX_CategoryRepresentation) <- function(x) {
+  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
+    return(x@metadata$parameters)
+  }
   list(
     m = x@m,
     kappa = x@kappa,
@@ -501,6 +640,9 @@ S7::method(get_parameters, NIX_CategoryRepresentation) <- function(x) {
 }
 
 S7::method(get_parameters, MUVG_CategoryRepresentation) <- function(x) {
+  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
+    return(x@metadata$parameters)
+  }
   list(
     mu = x@mu,
     sigma2 = x@sigma2,
@@ -509,6 +651,9 @@ S7::method(get_parameters, MUVG_CategoryRepresentation) <- function(x) {
 }
 
 S7::method(get_parameters, MNIX_CategoryRepresentation) <- function(x) {
+  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
+    return(x@metadata$parameters)
+  }
   list(
     m = x@m,
     kappa = x@kappa,
@@ -519,6 +664,9 @@ S7::method(get_parameters, MNIX_CategoryRepresentation) <- function(x) {
 }
 
 S7::method(get_parameters, MVG_CategoryRepresentation) <- function(x) {
+  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
+    return(x@metadata$parameters)
+  }
   list(
     mu = x@mu,
     Sigma = x@Sigma
@@ -526,6 +674,9 @@ S7::method(get_parameters, MVG_CategoryRepresentation) <- function(x) {
 }
 
 S7::method(get_parameters, NIW_CategoryRepresentation) <- function(x) {
+  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
+    return(x@metadata$parameters)
+  }
   list(
     m = x@m,
     kappa = x@kappa,
@@ -535,6 +686,9 @@ S7::method(get_parameters, NIW_CategoryRepresentation) <- function(x) {
 }
 
 S7::method(get_parameters, Exemplar_CategoryRepresentation) <- function(x) {
+  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
+    return(x@metadata$parameters)
+  }
   list(
     exemplars = x@exemplars,
     exemplar_weights = x@exemplar_weights
@@ -542,11 +696,28 @@ S7::method(get_parameters, Exemplar_CategoryRepresentation) <- function(x) {
 }
 
 S7::method(get_parameters, MVBU_CategoryRepresentationTemplate) <- function(x) {
+  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
+    return(x@metadata$parameters)
+  }
   lapply(x@representations, get_parameters)
 }
 
 S7::method(get_parameters, MVBU_CognitiveModel) <- function(x) {
+  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
+    return(x@metadata$parameters)
+  }
   get_parameters(x@category_template)
+}
+
+S7::method(get_parameters, MVBU_ModelList) <- function(x) {
+  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
+    return(x@metadata$parameters)
+  }
+  params <- lapply(x@models, get_parameters)
+  if (!is.null(x@model_labels) && length(x@model_labels) == length(params)) {
+    names(params) <- x@model_labels
+  }
+  params
 }
 
 S7::method(get_parameter_names, MVBU_CategoryRepresentation) <- function(
@@ -1196,7 +1367,7 @@ S7::method(get_group_labels, MVBU_Object) <- function(
     rep_j <- representations[[j]]
     d_j <- length(get_cue_labels(rep_j))
     x_j <- .as_observation_matrix(new_data, d = d_j, arg_name = "new_data")
-    lik_fn <- rep_j@category_likelihood_function
+    lik_fn <- get_category_likelihood_function(rep_j)
     log_lik[, j] <- as.numeric(lik_fn(
       x_j,
       log = TRUE,
@@ -1292,7 +1463,7 @@ S7::method(
   likelihood,
   list(MVBU_CategoryRepresentation, S7::class_any, S7::class_any)
 ) <- function(x, new_data, categories, ...) {
-  lik_fn <- x@category_likelihood_function
+  lik_fn <- get_category_likelihood_function(x)
   d <- length(get_cue_labels(x))
   new_data <- .as_observation_matrix(new_data, d = d, arg_name = "new_data")
   as.numeric(
@@ -1618,8 +1789,8 @@ S7::method(sample_observations, MVBU_CategoryRepresentation) <- function(
     return(tibble::as_tibble(empty_df))
   }
 
-  family <- .mvbu_family_of_representation(x)
-  mat <- .mvbu_sample_from_representation(x, from = family, n = n, with_replacement = with_replacement)
+  fam <- get_family(x)
+  mat <- fam@sampling_function(x, n = n, with_replacement = with_replacement, ...)
   colnames(mat) <- cues
 
   df <- cbind(data.frame(category = factor(rep(cat_lbl, n), levels = cat_lbl)), as.data.frame(mat))
@@ -1681,10 +1852,10 @@ S7::method(sample_observations, MVBU_CategoryRepresentationTemplate) <- function
       return(NULL)
     }
     rep_i <- reps[[i]]
-    fam_i <- .mvbu_family_of_representation(rep_i)
+    fam_i <- get_family(rep_i)
 
     # Check without replacement condition for exemplar
-    if (!isTRUE(with_replacement) && fam_i == "EXEMPLAR") {
+    if (!isTRUE(with_replacement) && S7::S7_inherits(rep_i, Exemplar_CategoryRepresentation)) {
       n_avail_i <- nrow(rep_i@exemplars)
       if (n_i > n_avail_i) {
         .stop(sprintf(
@@ -1694,7 +1865,7 @@ S7::method(sample_observations, MVBU_CategoryRepresentationTemplate) <- function
       }
     }
 
-    mat_i <- .mvbu_sample_from_representation(rep_i, from = fam_i, n = n_i, with_replacement = with_replacement)
+    mat_i <- fam_i@sampling_function(rep_i, n = n_i, with_replacement = with_replacement, ...)
     colnames(mat_i) <- cue_labels
     cbind(data.frame(category = cat_labels[i], stringsAsFactors = FALSE), as.data.frame(mat_i))
   })
@@ -1774,10 +1945,10 @@ S7::method(sample_observations, MVBU_CognitiveModel) <- function(
       return(NULL)
     }
     rep_i <- reps[[i]]
-    fam_i <- .mvbu_family_of_representation(rep_i)
+    fam_i <- get_family(rep_i)
 
     # Check without replacement condition for exemplar
-    if (!isTRUE(with_replacement) && fam_i == "EXEMPLAR") {
+    if (!isTRUE(with_replacement) && S7::S7_inherits(rep_i, Exemplar_CategoryRepresentation)) {
       n_avail_i <- nrow(rep_i@exemplars)
       if (n_i > n_avail_i) {
         .stop(sprintf(
@@ -1787,7 +1958,7 @@ S7::method(sample_observations, MVBU_CognitiveModel) <- function(
       }
     }
 
-    mat_i <- .mvbu_sample_from_representation(rep_i, from = fam_i, n = n_i, with_replacement = with_replacement)
+    mat_i <- fam_i@sampling_function(rep_i, n = n_i, with_replacement = with_replacement, ...)
     colnames(mat_i) <- cue_labels
     cbind(data.frame(category = cat_labels[i], stringsAsFactors = FALSE), as.data.frame(mat_i))
   })
@@ -1806,6 +1977,36 @@ S7::method(sample_observations, MVBU_CognitiveModel) <- function(
   }
 
   tibble::as_tibble(out)
+}
+
+S7::method(sample_observations, MVBU_ModelList) <- function(
+  x,
+  n = 1L,
+  with_replacement = TRUE,
+  randomize_order = TRUE,
+  ...
+) {
+  models <- x@models
+  if (length(models) == 0L) {
+    return(tibble::tibble())
+  }
+  m_names <- names(models)
+  if (is.null(m_names) || any(m_names == "")) {
+    m_names <- paste0("model_", seq_along(models))
+  }
+  res_list <- lapply(seq_along(models), function(i) {
+    df <- sample_observations(
+      models[[i]],
+      n = n,
+      with_replacement = with_replacement,
+      randomize_order = randomize_order,
+      ...
+    )
+    df$model_id <- factor(m_names[i], levels = m_names)
+    df <- df[, c("model_id", setdiff(names(df), "model_id"))]
+    df
+  })
+  dplyr::bind_rows(res_list)
 }
 
 #' @rdname get_sufficient_category_statistics
@@ -1830,25 +2031,21 @@ S7::method(get_sufficient_category_statistics, MVBU_CognitiveModel) <- function(
     }
   }, integer(1L))
 
-  out$x_mean <- lapply(reps, function(r) {
-    mc <- .get_rep_mean_and_cov(r)
-    mc$mu
-  })
+  moms <- lapply(reps, function(r) get_family(r)@expected_moments(r))
 
-  out$x_css <- lapply(reps, function(r) {
-    mc <- .get_rep_mean_and_cov(r)
+  out$x_mean <- lapply(moms, function(m) m$mu)
+
+  out$x_css <- lapply(moms, function(m) {
     if (fam %in% c("NIX", "UVG")) {
-      mc$Sigma[1L, 1L]
+      m$Sigma[1L, 1L]
     } else if (fam %in% c("MNIX", "MUVG")) {
-      diag(mc$Sigma)
+      diag(m$Sigma)
     } else {
-      mc$Sigma
+      m$Sigma
     }
   })
-  if (fam %in% c("NIW", "MVG", "MUVG")) {
-    out$x_cov <- lapply(reps, function(r) {
-      .get_rep_mean_and_cov(r)$Sigma
-    })
+  if (fam %in% c("NIW", "MVG")) {
+    out$x_cov <- lapply(moms, function(m) m$Sigma)
   }
   res <- tibble::as_tibble(out)
   if (!is.null(categories)) {
@@ -2005,6 +2202,10 @@ S7::method(add_category_representation, MVBU_CategoryRepresentationTemplate) <- 
     response_category = c(get_category_labels(x), get_category_labels(representation)),
     group = get_group_labels(x, include_prior = FALSE)
   )
+  metadata$parameters <- lapply(representations, get_parameters)
+  if (!is.null(names(representations))) {
+    names(metadata$parameters) <- names(representations)
+  }
 
   MVBU_CategoryRepresentationTemplate(
     representations = representations,

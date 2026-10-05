@@ -95,8 +95,8 @@ NULL
     return(sprintf("%dD category template", D))
   }
   if (S7::S7_inherits(x, MVBU_Stanfit)) {
-    mtype <- gsub("_", " ", get_model_type(x))
-    return(sprintf("%dD %s (Stanfit)", D, mtype))
+    fam_name <- get_family_name(x)
+    return(sprintf("%dD %s ideal adaptor (Stanfit)", D, fam_name))
   }
   "MVBU object"
 }
@@ -652,45 +652,7 @@ NULL
   stop("Subsetting to length(cues) > 3 is not supported.")
 }
 
-#' Extract expected mean and covariance matrix from representation
-#' @noRd
-#' @keywords internal
-.get_rep_mean_and_cov <- function(r) {
-  if (S7::S7_inherits(r, MVG_CategoryRepresentation)) {
-    return(list(mu = r@mu, Sigma = r@Sigma))
-  }
-  if (S7::S7_inherits(r, UVG_CategoryRepresentation)) {
-    return(list(mu = r@mu, Sigma = matrix(r@sigma2, 1L, 1L)))
-  }
-  if (S7::S7_inherits(r, MUVG_CategoryRepresentation)) {
-    return(list(mu = r@mu, Sigma = diag(r@sigma2, nrow = length(r@mu))))
-  }
-  if (S7::S7_inherits(r, NIX_CategoryRepresentation)) {
-    sig2 <- r@sigma2 * (r@nu / max(r@nu - 2, 1))
-    return(list(mu = r@m, Sigma = matrix(sig2, 1L, 1L)))
-  }
-  if (S7::S7_inherits(r, MNIX_CategoryRepresentation)) {
-    sig2 <- r@sigma2 * (r@nu / max(r@nu - 2, 1))
-    return(list(mu = r@m, Sigma = diag(sig2, nrow = length(r@m))))
-  }
-  if (S7::S7_inherits(r, NIW_CategoryRepresentation)) {
-    d <- length(r@m)
-    sig_mat <- r@S / max(r@nu - d - 1, 1)
-    return(list(mu = r@m, Sigma = sig_mat))
-  }
-  if (S7::S7_inherits(r, Exemplar_CategoryRepresentation)) {
-    mat <- as.matrix(r@exemplars)
-    mu <- colMeans(mat)
-    cov_mat <- stats::cov(mat)
-    if (ncol(mat) == 1L) {
-      cov_mat <- matrix(cov_mat, 1L, 1L)
-    }
-    return(list(mu = mu, Sigma = cov_mat))
-  }
-  stop("Unsupported representation type.")
-}
-
-#' Create 1D density data frame across category representations
+#' Create 1D category density data frame across category representations
 #' @noRd
 #' @keywords internal
 .make_1D_category_density_df <- function(
@@ -705,7 +667,7 @@ NULL
 
   for (cat_name in names(reps)) {
     r <- reps[[cat_name]]
-    mc <- .get_rep_mean_and_cov(r)
+    mc <- get_family(r)@expected_moments(r)
     mu_val <- mc$mu[1]
     sd_val <- sqrt(max(mc$Sigma[1, 1], 1e-6))
     params[[cat_name]] <- list(mu = mu_val, sd = sd_val, rep = r)
@@ -746,7 +708,7 @@ NULL
   rows <- list()
   for (cat_name in names(reps)) {
     r <- reps[[cat_name]]
-    mc <- .get_rep_mean_and_cov(r)
+    mc <- get_family(r)@expected_moments(r)
     df <- data.frame(
       x = mc$mu[1L],
       y = mc$mu[2L],
@@ -831,7 +793,7 @@ NULL
         }
       }
     } else {
-      mc <- .get_rep_mean_and_cov(r)
+      mc <- get_family(r)@expected_moments(r)
       mu_vec <- mc$mu
       sigma_mat <- mc$Sigma
 
@@ -878,7 +840,7 @@ NULL
       min_y <- min(min_y, min(mat[, cues[2]]) - 0.25 * rng2)
       max_y <- max(max_y, max(mat[, cues[2]]) + 0.25 * rng2)
     } else {
-      mc <- .get_rep_mean_and_cov(r)
+      mc <- get_family(r)@expected_moments(r)
       mu_vec <- mc$mu
       sd_x <- sqrt(max(mc$Sigma[1, 1], 1e-6))
       sd_y <- sqrt(max(mc$Sigma[2, 2], 1e-6))
@@ -2884,7 +2846,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
   loc_rows <- list()
   for (cat_name in names(reps)) {
     r <- reps[[cat_name]]
-    mc <- .get_rep_mean_and_cov(r)
+    mc <- get_family(r)@expected_moments(r)
     mu_v <- mc$mu
     for (k in seq_along(cues)) {
       loc_rows[[length(loc_rows) + 1]] <- data.frame(
@@ -2906,7 +2868,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
   scale_rows <- list()
   for (cat_name in names(reps)) {
     r <- reps[[cat_name]]
-    mc <- .get_rep_mean_and_cov(r)
+    mc <- get_family(r)@expected_moments(r)
     sd_v <- sqrt(pmax(diag(as.matrix(mc$Sigma)), 1e-6))
     for (k in seq_along(cues)) {
       scale_rows[[length(scale_rows) + 1]] <- data.frame(
@@ -2946,7 +2908,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
   if (length(cues) >= 2L) {
     for (cat_name in names(reps)) {
       r <- reps[[cat_name]]
-      mc <- .get_rep_mean_and_cov(r)
+      mc <- get_family(r)@expected_moments(r)
       c_mat <- stats::cov2cor(as.matrix(mc$Sigma))
       for (i in 1:(length(cues) - 1L)) {
         for (j in (i + 1L):length(cues)) {
@@ -3636,8 +3598,16 @@ S7::method(plot_parameter_correlations, MVBU_Stanfit) <- function(
     draws_subset <- draws_subset[, param_cols, drop = FALSE]
   }
 
+  # Exclude fixed parameters (zero standard deviation) to prevent undefined correlations
+  sds <- vapply(draws_subset, stats::sd, numeric(1L), na.rm = TRUE)
+  var_cols <- names(sds)[!is.na(sds) & sds > 0]
+  if (length(var_cols) < length(param_cols)) {
+    draws_subset <- draws_subset[, var_cols, drop = FALSE]
+    param_cols <- var_cols
+  }
+
   if (length(param_cols) < 2L) {
-    stop("At least two parameter columns required for correlation plot.")
+    stop("At least two varying parameter columns required for correlation plot.")
   }
 
   c_mat <- stats::cor(draws_subset, use = "pairwise.complete.obs")
@@ -4785,7 +4755,7 @@ S7::method(plot_model_updates, MVBU_Stanfit) <- function(
 
     for (cat_name in target_cats) {
       r <- reps[[cat_name]]
-      mc <- tryCatch(.get_rep_mean_and_cov(r), error = function(e) NULL)
+      mc <- tryCatch(get_family(r)@expected_moments(r), error = function(e) NULL)
       if (is.null(mc)) next
       idx_c <- match(cues, get_cue_labels(r))
       mu <- mc$mu[idx_c]
@@ -4885,7 +4855,7 @@ S7::method(plot_model_updates, MVBU_Stanfit) <- function(
     for (cat_name in categories) {
       r <- reps[[cat_name]]
       if (is.null(r)) next
-      mc <- tryCatch(.get_rep_mean_and_cov(r), error = function(e) NULL)
+      mc <- tryCatch(get_family(r)@expected_moments(r), error = function(e) NULL)
       if (is.null(mc)) next
       idx_c <- match(cues, get_cue_labels(r))
       mu <- mc$mu[idx_c]

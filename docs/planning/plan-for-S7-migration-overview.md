@@ -273,18 +273,49 @@ Phase gate:
 - [x] New test folder structure documented and used consistently
 - [x] All test files pass cleanly (2,314 tests, 0 failures)
 
-### Phase 8: Documentation and Vignettes
-**Goal:** explain architecture and workflows clearly
+### Phase 8A: Documentation, Vignettes, and Extensibility Polish
+**Goal:** explain architecture and workflows clearly, modernize primitives, and enable runtime model extension
 
 Checklist:
-- [x] Add class-level reference docs for all S7 class families (core classes, representation classes, cognitive model classes classes)
+- [x] Add class-level reference docs for all S7 class families (core classes, representation classes, cognitive model classes)
 - [x] v1.0 S7 Class Architecture and Workflows vignette (`vignettes/s7-class-structure-and-workflows.Rmd`)
 - [x] Visualizing Models and Categories vignette (`vignettes/visualizing-models-and-categories.Rmd`)
 - [x] Fitting and Working with MVBeliefUpdatr Stanfit Models vignette (`vignettes/fitting-and-working-with-stanfit-models.Rmd`)
 - [x] Migration vignette with worked examples and API translation table (`vignettes/backward-compatibility-working-with-legacy-code.Rmd`)
 - [x] Workflow vignettes (prediction/categorization, plotting, interop)
 - [x] Include explicit observer/adaptor pairing map and standalone-family rationale (Exemplar) in architecture-facing docs
-- [ ] Contributor guide for adding model families (as a vignette?)
+- [x] Contributor guide for adding model families vignette (`vignettes/extending-mvbeliefupdatr-adding-model-families.Rmd`)
+- [x] Implement `MVBU_Family` descriptor and built-in family registry (density, sampling, moments)
+- [x] Centralize `sample_observations()` on representation-level family dispatch (retiring `.mvbu_sample_from_representation()` switch logic)
+- [x] Eliminate `.mvbu_point_summary_from_representation()` switch logic in favor of family moments dispatch
+- [x] Implement `sample_observations()` for `MVBU_ModelList` allocating total `n` across models and preserving `model`/`group` metadata
+- [x] Relocate legacy argument translation (`Ns`, `randomize.order`) exclusively into deprecated `sample_observation()`
+- [x] Standardize sufficient category statistics on `x_css` and return `NA_integer_` for representations without sample counts
+- [x] Fix uniform likelihood closure bug in extension vignette (`log = log`) restoring 100% response probability plateaus
+- [x] Document distributional assumptions (e.g. Gaussian ellipses in `plot_categories()`) for custom category representations
+- [x] Does the deprecated `dplyr` verb forwarding described in the backward-compatibility-... vignette actually work? If not implement.
+
+Phase gate:
+- [x] Vignette examples run end-to-end (all 5 vignettes render with 0 errors)
+- [x] Targeted tests (`test-01`, `test-10`, `test-11`, `test-17`, `test-23`) pass with 0 failures
+- [x] All 2,314+ package tests pass with 0 failures
+
+### Phase 8B: Contributor Guide & Permanent Extensibility Infrastructure
+**Goal:** author comprehensive guide and infrastructure for adding permanent model families
+
+Checklist:
+- [x] Author Developer Guide for permanent model families (`docs/developer/contributor-guide-adding-permanent-model-families.md`)
+- [x] Document Stanfit ecosystem integration (`inst/stan/`, C++ headers, data builders, parameter translation tables)
+- [x] Document Roxygen Rd standards, `@include` dependencies, and S7 class documentation rules
+- [x] Document test fixtures, parameter recovery tests, and parity snapshots
+- [x] Formalize representation family property/registration hooks (density, sampling, moments)
+- [x] Audit coercion architecture (`.mvbu_coerce_category_representation`) for custom family registration hooks
+- [x] Cross-link Developer Guide from the extension vignette
+
+Phase gate:
+- [x] Developer guide complete, reviewed, and linked from extension vignette
+- [x] Extensibility hooks verified against test fixtures
+- [x] Full package test suite passes cleanly with 0 failures
 
 ### Phase-End Cleanup Standard (Applies to Every Phase)
 Checklist:

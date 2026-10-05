@@ -6,21 +6,24 @@
 \usage{
 register_model_family(
   family,
-  category_representation_class,
-  cognitive_model_class
+  category_representation_class = NULL,
+  cognitive_model_class = NULL,
+  family_obj = NULL
 )
 }
 \arguments{
-\item{family}{Model-family name.}
+\item{family}{Model family name or \link{MVBU_Family} object.}
 
-\item{category_representation_class}{Name of the category-representation
-class.}
+\item{category_representation_class}{Name of category-representation class.}
 
-\item{cognitive_model_class}{Name of the cognitive-model class.}
+\item{cognitive_model_class}{Name of cognitive-model class.}
+
+\item{family_obj}{Optional \link{MVBU_Family} object.}
 }
 \value{
 Invisibly TRUE.
 }
 \description{
-Register a model family in the MVBU family registry
+Registers a model family in the package registry, allowing either an
+\link{MVBU_Family} object or class names.
 }

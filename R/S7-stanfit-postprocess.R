@@ -182,11 +182,10 @@ add_posterior_latents <- function(model, probs = c(0.025, 0.5, 0.975), ...) {
   cues <- get_cue_labels(model)
   D <- length(cues)
 
-  model_type <- tryCatch(get_model_type(model), error = function(e) "")
-  is_niw <- grepl("NIW", model_type, ignore.case = TRUE)
-  is_nix <- grepl("NIX", model_type, ignore.case = TRUE) && !grepl("MNIX", model_type, ignore.case = TRUE)
-  is_mnix <- grepl("MNIX", model_type, ignore.case = TRUE)
-  model_fam <- if (is_niw) "NIW" else if (is_nix) "NIX" else if (is_mnix) "MNIX" else model_type
+  model_fam <- tryCatch(get_family_name(model), error = function(e) "")
+  is_niw <- model_fam == "NIW"
+  is_nix <- model_fam == "NIX"
+  is_mnix <- model_fam == "MNIX"
 
   # Ensure Sigma_exp and Sigma_marg are computed
   if (!"Sigma_exp" %in% names(draws_df) && "S" %in% names(draws_df) && "nu" %in% names(draws_df)) {

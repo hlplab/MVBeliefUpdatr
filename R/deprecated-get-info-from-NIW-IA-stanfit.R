@@ -9,10 +9,6 @@
 #' @importFrom purrr reduce
 #' @importFrom rlang sym syms .data :=
 NULL
-
-# deprecated ------------------------------------------------------------------
-
-
 # deprecated ------------------------------------------------------------------
 
 
@@ -20,21 +16,21 @@ NULL
 #'
 #' @description `r lifecycle::badge("deprecated")`
 #' `get_stanmodelname()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
-#' removed in 0.2.0. Please use [get_model_type()] instead.
+#' removed in 0.2.0. Please use [get_family_name()] instead.
 #'
 #' @param x A model object.
 #' @param ... Additional arguments.
 #' @return A character string.
-#' @seealso [get_model_type()]
+#' @seealso [get_family_name()]
 #' @keywords internal
 #' @export
 get_stanmodelname <- function(x, ...) {
   lifecycle::deprecate_warn(
     "0.1.0",
     "get_stanmodelname()",
-    with = "get_model_type()"
+    with = "get_family_name()"
   )
-  get_model_type(x)
+  get_family_name(x)
 }
 
 #' Deprecated: get_staninput_variable_levels

@@ -96,31 +96,19 @@ new_mvg_category_representation <- function(
   Sigma,
   metadata = list()
 ) {
-  MVG_CategoryRepresentation(
-    category_likelihood_function = {
-      mu0 <- as.numeric(mu)
-      Sigma0 <- as.matrix(Sigma)
-      function(x,
-               log = FALSE,
-               noise_treatment = "no_noise",
-               Sigma_noise = NULL) {
-        if (identical(noise_treatment, "sample") && !is.null(Sigma_noise)) {
-          x <- x + mvtnorm::rmvnorm(
-            n = nrow(x),
-            mean = rep(0, ncol(x)),
-            sigma = Sigma_noise
-          )
-        }
-        if (!is.null(Sigma_noise) &&
-          (identical(noise_treatment, "sample") ||
-            identical(noise_treatment, "marginalize"))) {
-          Sigma_eff <- Sigma0 + Sigma_noise
-        } else {
-          Sigma_eff <- Sigma0
-        }
-        .dmvnorm_density(x, mean = mu0, Sigma = Sigma_eff, log = log)
-      }
-    },
+  # Rationale for retaining typed class constructor:
+  # Concrete typed constructors provide strict property validation, IDE tab completion,
+  # and fast S7 method dispatch, while obtaining the likelihood closure uniformly
+  # from the registered model family density function.
+  metadata <- as.list(metadata)
+  if (is.null(metadata$parameters)) {
+    metadata$parameters <- list(
+      mu = as.numeric(mu),
+      Sigma = as.matrix(Sigma)
+    )
+  }
+  rep <- MVG_CategoryRepresentation(
+    category_likelihood_function = NULL,
     metadata = set_labels(
       metadata,
       cue = as.character(cue_labels),
@@ -131,6 +119,8 @@ new_mvg_category_representation <- function(
     mu = as.numeric(mu),
     Sigma = as.matrix(Sigma)
   )
+  rep@category_likelihood_function <- .make_family_likelihood_function(rep)
+  rep
 }
 
 #' @rdname family-mvg

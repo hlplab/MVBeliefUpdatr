@@ -104,38 +104,21 @@ new_niw_category_representation <- function(
   S,
   metadata = list()
 ) {
-  NIW_CategoryRepresentation(
-    category_likelihood_function = {
-      m0 <- as.numeric(m)
-      kappa0 <- as.numeric(kappa)
-      nu0 <- as.numeric(nu)
-      S0 <- as.matrix(S)
-      d0 <- length(m0)
-      df0 <- nu0 - d0 + 1
-      Sigma0 <- ((kappa0 + 1) / (kappa0 * df0)) * S0
-      function(
-        x,
-        log = FALSE,
-        noise_treatment = "no_noise",
-        Sigma_noise = NULL
-      ) {
-        if (identical(noise_treatment, "sample") && !is.null(Sigma_noise)) {
-          x <- x + mvtnorm::rmvnorm(
-            n = nrow(x),
-            mean = rep(0, ncol(x)),
-            sigma = Sigma_noise
-          )
-        }
-        if (!is.null(Sigma_noise) &&
-            (identical(noise_treatment, "sample") ||
-             identical(noise_treatment, "marginalize"))) {
-          Sigma_eff <- Sigma0 + Sigma_noise
-        } else {
-          Sigma_eff <- Sigma0
-        }
-        .dmvt_density(x, mean = m0, Sigma = Sigma_eff, df = df0, log = log)
-      }
-    },
+  # Rationale for retaining typed class constructor:
+  # Concrete typed constructors provide strict property validation, IDE tab completion,
+  # and fast S7 method dispatch, while obtaining the likelihood closure uniformly
+  # from the registered model family density function.
+  metadata <- as.list(metadata)
+  if (is.null(metadata$parameters)) {
+    metadata$parameters <- list(
+      m = as.numeric(m),
+      kappa = as.numeric(kappa),
+      nu = as.numeric(nu),
+      S = as.matrix(S)
+    )
+  }
+  rep <- NIW_CategoryRepresentation(
+    category_likelihood_function = NULL,
     metadata = set_labels(
       metadata,
       cue = as.character(cue_labels),
@@ -148,6 +131,8 @@ new_niw_category_representation <- function(
     nu = as.numeric(nu),
     S = as.matrix(S)
   )
+  rep@category_likelihood_function <- .make_family_likelihood_function(rep)
+  rep
 }
 
 #' @rdname family-niw

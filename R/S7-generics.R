@@ -494,21 +494,31 @@ update_category_representation <- S7::new_generic("update_category_representatio
 
 get_expected_category <- S7::new_generic("get_expected_category", "x")
 
-#' Get the model type of a cognitive model or model distribution
+#' Get the model family object
 #'
-#' @param x A model object.
+#' Returns the [MVBU_Family] object associated with a category representation,
+#' template, cognitive model, or list of models. For heterogeneous collections,
+#' returns a list of [MVBU_Family] objects.
+#'
+#' @param x An MVBU object (category representation, template, cognitive
+#'   model, or cognitive model list).
 #' @param ... Additional arguments passed to methods.
-#' @return A character scalar identifying the model family/type.
+#' @return An [MVBU_Family] object or a list of [MVBU_Family] objects.
 #' @export
-get_model_type <- S7::new_generic("get_model_type", "x")
+get_family <- S7::new_generic("get_family", "x")
 
-#' Get the representation type of a category representation
+#' Get the model family name(s)
 #'
-#' @param x A representation object.
+#' Returns the canonical short family name string (e.g. \code{"UVG"}) for a
+#' category representation, template, cognitive model, or list of models.
+#' For heterogeneous collections, returns a character vector of family names.
+#'
+#' @param x An MVBU object (category representation, template, cognitive
+#'   model, or cognitive model list).
 #' @param ... Additional arguments passed to methods.
-#' @return A character scalar identifying the representation family/type.
+#' @return A character scalar or vector identifying the family name(s).
 #' @export
-get_representation_type <- S7::new_generic("get_representation_type", "x")
+get_family_name <- S7::new_generic("get_family_name", "x")
 
 #' @rdname get_parameters
 #' @export

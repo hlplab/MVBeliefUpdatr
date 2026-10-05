@@ -14,104 +14,13 @@ NULL
 # (UVG<->NIX, MUVG<->MNIX, MVG<->NIW), and any family <-> EXEMPLAR (by summarizing exemplars
 # into point/uncertain parameters, or by sampling exemplars from a parametric representation).
 
-.mvbu_family_of_representation <- function(x) {
-  if (S7::S7_inherits(x, UVG_CategoryRepresentation)) {
-    return("UVG")
-  }
-  if (S7::S7_inherits(x, NIX_CategoryRepresentation)) {
-    return("NIX")
-  }
-  if (S7::S7_inherits(x, MUVG_CategoryRepresentation)) {
-    return("MUVG")
-  }
-  if (S7::S7_inherits(x, MNIX_CategoryRepresentation)) {
-    return("MNIX")
-  }
-  if (S7::S7_inherits(x, MVG_CategoryRepresentation)) {
-    return("MVG")
-  }
-  if (S7::S7_inherits(x, NIW_CategoryRepresentation)) {
-    return("NIW")
-  }
-  if (S7::S7_inherits(x, Exemplar_CategoryRepresentation)) {
-    return("EXEMPLAR")
-  }
-  .stop("x must be an MVBU_CategoryRepresentation of a supported family.")
-}
-
-# Draw n cue observations (a matrix with one column per cue) from a single category representation.
-.mvbu_sample_from_representation <- function(x, from, n, with_replacement = TRUE) {
-  switch(from,
-    UVG = matrix(stats::rnorm(n, mean = x@mu, sd = sqrt(x@sigma2)), ncol = 1),
-    NIX = {
-      scale <- sqrt(x@sigma2 * (x@kappa + 1) / x@kappa)
-      matrix(x@m + scale * stats::rt(n, df = x@nu), ncol = 1)
-    },
-    MVG = mvtnorm::rmvnorm(n, mean = x@mu, sigma = x@Sigma),
-    NIW = {
-      d <- length(x@m)
-      df <- x@nu - d + 1
-      Sigma_pred <- ((x@kappa + 1) / (x@kappa * df)) * x@S
-      .rmvt(n = n, delta = x@m, sigma = Sigma_pred, df = df)
-    },
-    MUVG = {
-      k <- length(x@mu)
-      out <- vapply(seq_len(k), function(i) stats::rnorm(n, mean = x@mu[i], sd = sqrt(x@sigma2[i])), numeric(n))
-      matrix(out, nrow = n, ncol = k)
-    },
-    MNIX = {
-      k <- length(x@m)
-      out <- vapply(seq_len(k), function(i) {
-        scale <- sqrt(x@sigma2[i] * (x@kappa[i] + 1) / x@kappa[i])
-        x@m[i] + scale * stats::rt(n, df = x@nu[i])
-      }, numeric(n))
-      matrix(out, nrow = n, ncol = k)
-    },
-    EXEMPLAR = {
-      n_avail <- nrow(x@exemplars)
-      if (isTRUE(with_replacement)) {
-        idx <- sample.int(n_avail, size = n, replace = TRUE, prob = x@exemplar_weights)
-      } else {
-        if (n > n_avail) {
-          cat_lbl <- get_category_labels(x)
-          .stop(sprintf(
-            "Cannot sample %d observations without replacement from category '%s' which contains only %d exemplars.",
-            n, cat_lbl, n_avail
-          ))
-        }
-        idx <- sample.int(n_avail, size = n, replace = FALSE, prob = x@exemplar_weights)
-      }
-      x@exemplars[idx, , drop = FALSE]
-    },
-    .stop("Unsupported source family for exemplar sampling.")
-  )
-}
-
-# Canonical (mu, Sigma, component weights) summary of a non-exemplar representation, used as the
-# common intermediate for all coercions between parametric families.
-.mvbu_point_summary_from_representation <- function(x, from) {
-  switch(from,
-    UVG = list(mu = x@mu, Sigma = matrix(x@sigma2, 1, 1), weights = 1),
-    NIX = list(mu = x@m, Sigma = matrix(get_expected_sigma(x), 1, 1), weights = 1),
-    MUVG = list(mu = x@mu, Sigma = diag(x@sigma2, nrow = length(x@sigma2)), weights = x@weights),
-    MNIX = list(
-      mu = x@m,
-      Sigma = get_expected_sigma(x),
-      weights = x@weights
-    ),
-    MVG = list(mu = x@mu, Sigma = x@Sigma, weights = NULL),
-    NIW = list(mu = get_expected_mu_from_m(x@m), Sigma = get_expected_Sigma_from_S(x@S, x@nu), weights = NULL),
-    .stop("Unsupported source family.")
-  )
-}
-
 .mvbu_coerce_category_representation <- function(x, to, kappa = NULL, nu = NULL, n = NULL, weights = NULL) {
   allowed <- c("UVG", "NIX", "MUVG", "MNIX", "MVG", "NIW", "EXEMPLAR")
   to <- toupper(to)
   .assert_true(to %in% allowed, msg = paste0("to must be one of: ", paste(allowed, collapse = ", ")))
   .assert_true(S7::S7_inherits(x, MVBU_CategoryRepresentation), msg = "x must be an MVBU_CategoryRepresentation.")
 
-  from <- .mvbu_family_of_representation(x)
+  from <- get_family_name(x)
   if (from == to) {
     return(x)
   }
@@ -134,21 +43,27 @@ NULL
   category_labels <- labels$category
   cue_labels <- labels$cue
 
+  fam <- get_family(x)
+
   if (to == "EXEMPLAR") {
-    .assert_true(.is_scalar_count(n) && n >= 1, msg = "n must be a non-NA, positive whole number giving the number of exemplars to sample.")
-    exemplars <- .mvbu_sample_from_representation(x, from = from, n = n)
-    return(new_exemplar_category_representation(category_labels = category_labels, cue_labels = cue_labels, exemplars = exemplars))
+    .assert_true(
+      .is_scalar_count(n) && n >= 1,
+      msg = "n must be a non-NA, positive whole number giving the number of exemplars to sample."
+    )
+    exemplars <- fam@sampling_function(x, n = n)
+    return(
+      new_exemplar_category_representation(
+        category_labels = category_labels,
+        cue_labels = cue_labels,
+        exemplars = exemplars
+      )
+    )
   }
 
-  if (from == "EXEMPLAR") {
-    mu <- as.numeric(x@exemplar_weights %*% x@exemplars)
-    Sigma <- stats::cov.wt(x@exemplars, wt = x@exemplar_weights)$cov
-  } else {
-    point <- .mvbu_point_summary_from_representation(x, from = from)
-    mu <- point$mu
-    Sigma <- point$Sigma
-    if (is.null(weights)) weights <- point$weights
-  }
+  point <- fam@expected_moments(x)
+  mu <- point$mu
+  Sigma <- point$Sigma
+  if (is.null(weights)) weights <- point$weights
 
   if (to %in% c("UVG", "NIX") && length(mu) != 1) {
     .stop(paste0("Coercion to ", to, " requires a single-cue representation (found ", length(mu), " cues)."))
@@ -378,7 +293,7 @@ as_ideal_adaptor <- function(x, model_family = NULL, ...) {
   }
   if (S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
     if (is.null(model_family)) {
-      model_family <- get_representation_type(x)
+      model_family <- get_family_name(x)
     }
     return(.create_ideal_adaptor_model(model_family, category_template = x, ...))
   }
@@ -404,7 +319,7 @@ as_ideal_observer <- function(x, model_family = NULL, ...) {
   }
   if (S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
     if (is.null(model_family)) {
-      model_family <- get_representation_type(x)
+      model_family <- get_family_name(x)
     }
     return(.create_ideal_observer_model(model_family, category_template = x, ...))
   }
@@ -412,11 +327,11 @@ as_ideal_observer <- function(x, model_family = NULL, ...) {
     if (!is.null(model_family)) {
       return(.mvbu_coerce_cognitive_model(x, to = model_family, ...))
     }
-    target_fam <- switch(get_representation_type(x),
+    target_fam <- switch(get_family_name(x),
       NIX = "UVG",
       MNIX = "MUVG",
       NIW = "MVG",
-      get_representation_type(x)
+      get_family_name(x)
     )
     return(.mvbu_coerce_cognitive_model(x, to = target_fam, ...))
   }

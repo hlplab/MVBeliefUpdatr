@@ -8,6 +8,7 @@ new_category_representation(
   category_labels,
   cue_labels,
   category_likelihood_function = NULL,
+  parameters = list(),
   metadata = list()
 )
 }
@@ -18,6 +19,9 @@ new_category_representation(
 
 \item{category_likelihood_function}{Optional category likelihood function.
 Default: \code{NULL}.}
+
+\item{parameters}{Optional named list of representation parameters.
+Default: \code{list()}.}
 
 \item{metadata}{Optional list of metadata. Default: \code{list()}.}
 }

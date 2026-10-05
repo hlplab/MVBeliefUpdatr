@@ -5,7 +5,11 @@
 \alias{MVBU_ModelList}
 \title{S7 class for ordered collections of cognitive models}
 \usage{
-MVBU_ModelList(models = list(), model_labels = character(0), metadata = list())
+MVBU_ModelList(
+  models = list(),
+  model_labels = character(0),
+  metadata = list(parameters = list())
+)
 }
 \arguments{
 \item{models}{A list of S7 cognitive model objects or \code{MVBU_StanfitPosterior} objects. Default: \code{list()}.}
