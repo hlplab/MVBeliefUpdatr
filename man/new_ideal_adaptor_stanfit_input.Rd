@@ -49,7 +49,8 @@ the category covariance. The shape should match the model requirements.
 
 \item{control}{A list of control parameters for the constructor, typically produced by \code{control_staninput()}.}
 
-\item{stanmodel}{Character string naming the Stan model. Must be one of \code{NIX_ideal_adaptor}, \code{NIW_ideal_adaptor}, or \code{MNIX_ideal_adaptor}.}
+\item{stanmodel}{Character string naming the Stan model. Must be one of
+the supported model names in \code{stanmodels}.}
 
 \item{...}{Additional arguments passed to methods or deprecated arguments.}
 }

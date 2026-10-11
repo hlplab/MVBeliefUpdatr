@@ -317,31 +317,33 @@ Phase gate:
 - [x] Extensibility hooks verified against test fixtures
 - [x] Full package test suite passes cleanly with 0 failures
 
-### Phase-End Cleanup Standard (Applies to Every Phase)
-Checklist:
-- [x] All newly added functions/classes in phase scope have roxygen documentation.
-- [x] All legacy code integrated into the S7 scaffold in phase scope is brought up to roxygen documentation standards.
-- [x] Roxygen generation runs for the phase branch without introducing new unresolved-link warnings for phase-touched files.
-- [x] Generated Rd output for phase-touched topics is checked for malformed markup/macros.
-- [ ] Remove temporary S7 scaffold-only `package = NULL` overrides once the class registration strategy is finalized for the packaged build.
-
-Phase gate:
-- [x] Vignette examples run end-to-end
-- [x] Migration guide covers all renamed/removed APIs
-
 ### Phase 9: Stan Expansion Readiness
 **Goal:** start Stan additions on stable foundations
 
 Checklist:
-- [ ] Implement analytical forward-updating functions (`forward_update()`) for NIX, MNIX, and NIW models
+- [x] Implement analytical forward-updating functions (`update_template()` / `update_category_representation()`) for NIX, MNIX, and NIW models
+- [x] Add analytical parity unit tests verifying that 1-cue NIX and 1-cue NIW forward updating yield identical belief parameters given identical prior beliefs and exposure data
 - [ ] Add parameter recovery test suite verifying analytical forward-updated beliefs against Stan posterior estimates (recovering prior beliefs given sufficient exposure data)
-- [ ] Define template for new Stan-backed inferred models
-- [ ] Reuse diagnostics/extraction interfaces across Stan families
-- [ ] Begin Stan debugging and model expansion work
-- [ ] Add at least one additional family plan item (e.g., MOG or MNIX ideal observer/adaptor) using the same extension template
+
+- [x] Define template for new Stan-backed inferred models (documented in Developer Guide)
+- [x] Begin Stan debugging and model expansion work (verify MNIX and NIX multi-cue integration architectures in Stan vs R alignment)
+- [x] Add early and late multi-cue integration families (MNIX unweighted/weighted/category-weighted; NIX early precision/weighted/category-weighted)
+- [x] First new Stan-family prototype passes interface contract tests
 
 Phase gate:
-- [ ] First new Stan-family prototype passes interface contract tests
+- [x] First new Stan-family prototype passes interface contract tests
+
+### Phase-End Cleanup Standard (Applies to Every Phase)
+Checklist:
+- [] All newly added functions/classes in phase scope have roxygen documentation.
+- [ ] All legacy code integrated into the S7 scaffold in phase scope is brought up to roxygen documentation standards.
+- [] Roxygen generation runs for the phase branch without introducing new unresolved-link warnings for phase-touched files.
+- [ ] Generated Rd output for phase-touched topics is checked for malformed markup/macros.
+- [ ] Remove temporary S7 scaffold-only `package = NULL` overrides once the class registration strategy is finalized for the packaged build.
+
+Phase gate:
+- [ ] Vignette examples run end-to-end
+- [ ] Migration guide covers all renamed/removed APIs
 
 ## Verification Matrix
 - [ ] Structural validation checks for all classes
@@ -375,18 +377,8 @@ Phase gate:
 - If phase gate fails, resolve blockers before entering next phase
 - Revisit grouped-model containers: group labels currently identify model instances in model combinations; formal grouped-model class/container design should be addressed in later phases.
 
-## Later planned extensions
+# Later planned extensions
 
-### Issues to fix
-+ Check MNIX cue weighting: there are at least two possible implementations:
-  + adapt after integration (single nix sitting on top of integrated cue dimension)
-  + adapt before integration (one nix for each cue; then integration)
-  + make sure that whatever is implemented for Stan is also what is implemented in R
-  + make sure that these choices are documented verbosely in roxygen
-+ MNIX fitting is currently commented out. AI comments for MNIX failure:
-  > "The root cause is visible now: the MNIX Stan program expects a covariance-style summary array, but the current builder is providing a sum-of-squares vector array instead. I’m aligning that data structure with the model’s declared interface before I verify again."
-
-### Extensions
 + expand the vignette on fitting and working with stanfit models with a case that compares an MVBeliefUpdatr stanfit model against e.g., a logistic regression. This is a common use case. This might require thinking about how the log posterior densities are stored for MVBeliefUpdatr stanfit models. we might have to either give observation level log posterior densities or tell users how they'd need to fit their alternative model to have log posterior densities for the same observations.
 
 + handling of tau_scale and hyper-priors more generally is really non-transparent atm. rather than handing known mu, sigma, switch to allowing specification of informative priors for all parameters. for m, S, etc. create tools that translate the prior from an intuitive space (mu, Sigma) to the relevant underlying parameter space (m, S, nu, kappa).
@@ -401,3 +393,23 @@ Phase gate:
   + category priors and lapse bias 
 
 + implement mixture inference starting with predefined models that are handed to the stan code.
+
++ Hybrid / Hierarchical Integration Architectures:
+  + A subset of cues undergoes early perceptual fusion (e.g. spectral cues F1, F2 fused into an intermediate vowel quality percept z), which is then integrated late with remaining cues (e.g. duration, f0).
+  + This family requires additional Stan models merging the early linear projection logic into the NIW or MNIX modeling code.
+
++ Adaptive Cue Weighting Models (`adaptive_weighted` and `adaptive_category_weighted`):
+  + Models where attention weights evolve dynamically across exposure trials rather than being held static.
+  + Theoretical space:
+    + Global dynamic weights: `adaptive_weighted_integrator_NIX_ideal_adaptor` and `MNIX_ideal_adaptor_adaptive_weighted_integrator`.
+    + Category-specific dynamic weights: `category_adaptive_weighted_integrator_NIX_ideal_adaptor` and `MNIX_ideal_adaptor_category_adaptive_weighted_integrator`.
+  + Principled formulation of the adaptive function:
+    + Error-driven attention shifting: delta-rule updating based on prediction error δₜ = yₜ - ŷₜ, where cue weights adjust in the direction reducing prediction error, governed by attention learning rate parameter α_w.
+    + Attention-gated Bayesian updating: cues with higher informativity / lower predictive variance gain attention weight.
+  + Stan Requirements:
+    + Fitting requires trial-by-trial sequence data rather than batch sufficient statistics, and tracks dynamic simplex states across time.
+  + To-dos for extension phase:
+    + Implement Stan samplers and evaluate identification power and MCMC efficiency given the high parameter count.
+    + Provide placeholder R functions/classes and documentation describing the theoretical formulation.
+
+

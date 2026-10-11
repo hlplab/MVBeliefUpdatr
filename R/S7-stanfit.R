@@ -282,6 +282,11 @@ NIX_IdealAdaptorStanfit <- S7::new_class(
   }
 )
 
+# --- Base MNIX Stanfit Class ---
+
+#' @docType class
+#' @rdname MVBU_Stanfit
+#' @export
 MNIX_IdealAdaptorStanfit <- S7::new_class(
   "MNIX_IdealAdaptorStanfit",
   package = NULL,
@@ -323,6 +328,538 @@ MNIX_IdealAdaptorStanfit <- S7::new_class(
         version = if (is.null(version)) get_current_versions() else version,
         metadata = as.list(metadata),
         cache = as.list(cache)
+      )
+    )
+  }
+)
+
+# --- Early Integrator Stanfit Classes ---
+
+#' @docType class
+#' @rdname MVBU_Stanfit
+#' @export
+IdealIntegrator_MNIX_IdealAdaptorStanfit <- S7::new_class(
+  "IdealIntegrator_MNIX_IdealAdaptorStanfit",
+  package = NULL,
+  parent = MNIX_IdealAdaptorStanfit,
+  constructor = function(
+    data = data.frame(),
+    staninput = NULL,
+    stanvars = NULL,
+    backend = "rstan",
+    save_pars = NULL,
+    stan_args = list(),
+    stanfit = NULL,
+    basis = NULL,
+    transform_information = NULL,
+    criteria = list(),
+    file = NULL,
+    version = NULL,
+    metadata = list(),
+    cache = list()
+  ) {
+    S7::new_object(
+      MNIX_IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = backend,
+        save_pars = save_pars,
+        stan_args = stan_args,
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = transform_information,
+        criteria = criteria,
+        file = file,
+        version = version,
+        metadata = metadata,
+        cache = cache
+      )
+    )
+  }
+)
+
+#' @docType class
+#' @rdname MVBU_Stanfit
+#' @export
+WeightedIntegrator_MNIX_IdealAdaptorStanfit <- S7::new_class(
+  "WeightedIntegrator_MNIX_IdealAdaptorStanfit",
+  package = NULL,
+  parent = MNIX_IdealAdaptorStanfit,
+  constructor = function(
+    data = data.frame(),
+    staninput = NULL,
+    stanvars = NULL,
+    backend = "rstan",
+    save_pars = NULL,
+    stan_args = list(),
+    stanfit = NULL,
+    basis = NULL,
+    transform_information = NULL,
+    criteria = list(),
+    file = NULL,
+    version = NULL,
+    metadata = list(),
+    cache = list()
+  ) {
+    S7::new_object(
+      MNIX_IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = backend,
+        save_pars = save_pars,
+        stan_args = stan_args,
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = transform_information,
+        criteria = criteria,
+        file = file,
+        version = version,
+        metadata = metadata,
+        cache = cache
+      )
+    )
+  }
+)
+
+#' @docType class
+#' @rdname MVBU_Stanfit
+#' @export
+CategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit <- S7::new_class(
+  "CategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit",
+  package = NULL,
+  parent = MNIX_IdealAdaptorStanfit,
+  constructor = function(
+    data = data.frame(),
+    staninput = NULL,
+    stanvars = NULL,
+    backend = "rstan",
+    save_pars = NULL,
+    stan_args = list(),
+    stanfit = NULL,
+    basis = NULL,
+    transform_information = NULL,
+    criteria = list(),
+    file = NULL,
+    version = NULL,
+    metadata = list(),
+    cache = list()
+  ) {
+    S7::new_object(
+      MNIX_IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = backend,
+        save_pars = save_pars,
+        stan_args = stan_args,
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = transform_information,
+        criteria = criteria,
+        file = file,
+        version = version,
+        metadata = metadata,
+        cache = cache
+      )
+    )
+  }
+)
+
+#' @docType class
+#' @rdname MVBU_Stanfit
+#' @export
+GroupWeightedIntegrator_MNIX_IdealAdaptorStanfit <- S7::new_class(
+  "GroupWeightedIntegrator_MNIX_IdealAdaptorStanfit",
+  package = NULL,
+  parent = MNIX_IdealAdaptorStanfit,
+  constructor = function(
+    data = data.frame(),
+    staninput = NULL,
+    stanvars = NULL,
+    backend = "rstan",
+    save_pars = NULL,
+    stan_args = list(),
+    stanfit = NULL,
+    basis = NULL,
+    transform_information = NULL,
+    criteria = list(),
+    file = NULL,
+    version = NULL,
+    metadata = list(),
+    cache = list()
+  ) {
+    S7::new_object(
+      MNIX_IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = backend,
+        save_pars = save_pars,
+        stan_args = stan_args,
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = transform_information,
+        criteria = criteria,
+        file = file,
+        version = version,
+        metadata = metadata,
+        cache = cache
+      )
+    )
+  }
+)
+
+#' @docType class
+#' @rdname MVBU_Stanfit
+#' @export
+GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit <- S7::new_class(
+  "GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit",
+  package = NULL,
+  parent = MNIX_IdealAdaptorStanfit,
+  constructor = function(
+    data = data.frame(),
+    staninput = NULL,
+    stanvars = NULL,
+    backend = "rstan",
+    save_pars = NULL,
+    stan_args = list(),
+    stanfit = NULL,
+    basis = NULL,
+    transform_information = NULL,
+    criteria = list(),
+    file = NULL,
+    version = NULL,
+    metadata = list(),
+    cache = list()
+  ) {
+    S7::new_object(
+      MNIX_IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = backend,
+        save_pars = save_pars,
+        stan_args = stan_args,
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = transform_information,
+        criteria = criteria,
+        file = file,
+        version = version,
+        metadata = metadata,
+        cache = cache
+      )
+    )
+  }
+)
+
+#' @docType class
+#' @rdname MVBU_Stanfit
+#' @export
+InformativityWeightedIntegrator_MNIX_IdealAdaptorStanfit <- S7::new_class(
+  "InformativityWeightedIntegrator_MNIX_IdealAdaptorStanfit",
+  package = NULL,
+  parent = MNIX_IdealAdaptorStanfit,
+  constructor = function(
+    data = data.frame(),
+    staninput = NULL,
+    stanvars = NULL,
+    backend = "rstan",
+    save_pars = NULL,
+    stan_args = list(),
+    stanfit = NULL,
+    basis = NULL,
+    transform_information = NULL,
+    criteria = list(),
+    file = NULL,
+    version = NULL,
+    metadata = list(),
+    cache = list()
+  ) {
+    S7::new_object(
+      MNIX_IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = backend,
+        save_pars = save_pars,
+        stan_args = stan_args,
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = transform_information,
+        criteria = criteria,
+        file = file,
+        version = version,
+        metadata = metadata,
+        cache = cache
+      )
+    )
+  }
+)
+
+# --- Late Integrator Stanfit Classes ---
+
+#' @docType class
+#' @rdname MVBU_Stanfit
+#' @export
+MNIX_IdealAdaptor_IdealIntegratorStanfit <- S7::new_class(
+  "MNIX_IdealAdaptor_IdealIntegratorStanfit",
+  package = NULL,
+  parent = MNIX_IdealAdaptorStanfit,
+  constructor = function(
+    data = data.frame(),
+    staninput = NULL,
+    stanvars = NULL,
+    backend = "rstan",
+    save_pars = NULL,
+    stan_args = list(),
+    stanfit = NULL,
+    basis = NULL,
+    transform_information = NULL,
+    criteria = list(),
+    file = NULL,
+    version = NULL,
+    metadata = list(),
+    cache = list()
+  ) {
+    S7::new_object(
+      MNIX_IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = backend,
+        save_pars = save_pars,
+        stan_args = stan_args,
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = transform_information,
+        criteria = criteria,
+        file = file,
+        version = version,
+        metadata = metadata,
+        cache = cache
+      )
+    )
+  }
+)
+
+#' @docType class
+#' @rdname MVBU_Stanfit
+#' @export
+MNIX_IdealAdaptor_WeightedIntegratorStanfit <- S7::new_class(
+  "MNIX_IdealAdaptor_WeightedIntegratorStanfit",
+  package = NULL,
+  parent = MNIX_IdealAdaptorStanfit,
+  constructor = function(
+    data = data.frame(),
+    staninput = NULL,
+    stanvars = NULL,
+    backend = "rstan",
+    save_pars = NULL,
+    stan_args = list(),
+    stanfit = NULL,
+    basis = NULL,
+    transform_information = NULL,
+    criteria = list(),
+    file = NULL,
+    version = NULL,
+    metadata = list(),
+    cache = list()
+  ) {
+    S7::new_object(
+      MNIX_IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = backend,
+        save_pars = save_pars,
+        stan_args = stan_args,
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = transform_information,
+        criteria = criteria,
+        file = file,
+        version = version,
+        metadata = metadata,
+        cache = cache
+      )
+    )
+  }
+)
+
+#' @docType class
+#' @rdname MVBU_Stanfit
+#' @export
+MNIX_IdealAdaptor_CategoryWeightedIntegratorStanfit <- S7::new_class(
+  "MNIX_IdealAdaptor_CategoryWeightedIntegratorStanfit",
+  package = NULL,
+  parent = MNIX_IdealAdaptorStanfit,
+  constructor = function(
+    data = data.frame(),
+    staninput = NULL,
+    stanvars = NULL,
+    backend = "rstan",
+    save_pars = NULL,
+    stan_args = list(),
+    stanfit = NULL,
+    basis = NULL,
+    transform_information = NULL,
+    criteria = list(),
+    file = NULL,
+    version = NULL,
+    metadata = list(),
+    cache = list()
+  ) {
+    S7::new_object(
+      MNIX_IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = backend,
+        save_pars = save_pars,
+        stan_args = stan_args,
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = transform_information,
+        criteria = criteria,
+        file = file,
+        version = version,
+        metadata = metadata,
+        cache = cache
+      )
+    )
+  }
+)
+
+#' @docType class
+#' @rdname MVBU_Stanfit
+#' @export
+MNIX_IdealAdaptor_GroupWeightedIntegratorStanfit <- S7::new_class(
+  "MNIX_IdealAdaptor_GroupWeightedIntegratorStanfit",
+  package = NULL,
+  parent = MNIX_IdealAdaptorStanfit,
+  constructor = function(
+    data = data.frame(),
+    staninput = NULL,
+    stanvars = NULL,
+    backend = "rstan",
+    save_pars = NULL,
+    stan_args = list(),
+    stanfit = NULL,
+    basis = NULL,
+    transform_information = NULL,
+    criteria = list(),
+    file = NULL,
+    version = NULL,
+    metadata = list(),
+    cache = list()
+  ) {
+    S7::new_object(
+      MNIX_IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = backend,
+        save_pars = save_pars,
+        stan_args = stan_args,
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = transform_information,
+        criteria = criteria,
+        file = file,
+        version = version,
+        metadata = metadata,
+        cache = cache
+      )
+    )
+  }
+)
+
+#' @docType class
+#' @rdname MVBU_Stanfit
+#' @export
+MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStanfit <- S7::new_class(
+  "MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStanfit",
+  package = NULL,
+  parent = MNIX_IdealAdaptorStanfit,
+  constructor = function(
+    data = data.frame(),
+    staninput = NULL,
+    stanvars = NULL,
+    backend = "rstan",
+    save_pars = NULL,
+    stan_args = list(),
+    stanfit = NULL,
+    basis = NULL,
+    transform_information = NULL,
+    criteria = list(),
+    file = NULL,
+    version = NULL,
+    metadata = list(),
+    cache = list()
+  ) {
+    S7::new_object(
+      MNIX_IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = backend,
+        save_pars = save_pars,
+        stan_args = stan_args,
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = transform_information,
+        criteria = criteria,
+        file = file,
+        version = version,
+        metadata = metadata,
+        cache = cache
+      )
+    )
+  }
+)
+
+#' @docType class
+#' @rdname MVBU_Stanfit
+#' @export
+MNIX_IdealAdaptor_InformativityWeightedIntegratorStanfit <- S7::new_class(
+  "MNIX_IdealAdaptor_InformativityWeightedIntegratorStanfit",
+  package = NULL,
+  parent = MNIX_IdealAdaptorStanfit,
+  constructor = function(
+    data = data.frame(),
+    staninput = NULL,
+    stanvars = NULL,
+    backend = "rstan",
+    save_pars = NULL,
+    stan_args = list(),
+    stanfit = NULL,
+    basis = NULL,
+    transform_information = NULL,
+    criteria = list(),
+    file = NULL,
+    version = NULL,
+    metadata = list(),
+    cache = list()
+  ) {
+    S7::new_object(
+      MNIX_IdealAdaptorStanfit(
+        data = data,
+        staninput = staninput,
+        stanvars = stanvars,
+        backend = backend,
+        save_pars = save_pars,
+        stan_args = stan_args,
+        stanfit = stanfit,
+        basis = basis,
+        transform_information = transform_information,
+        criteria = criteria,
+        file = file,
+        version = version,
+        metadata = metadata,
+        cache = cache
       )
     )
   }
@@ -375,7 +912,6 @@ NIW_IdealAdaptorStanfit <- S7::new_class(
 )
 
 
-
 # -------------------------
 # Utilities ported from original file
 # -------------------------
@@ -390,35 +926,6 @@ NIW_IdealAdaptorStanfit <- S7::new_class(
 .make_parnames <- function(prefix, ...) {
   combinations <- expand.grid(..., stringsAsFactors = FALSE)
   paste0(prefix, "[", apply(combinations, 1, paste0, collapse = ","), "]")
-}
-
-#' Rename fitted parameter names to their transformed equivalents
-#'
-#' @param x An ideal adaptor Stanfit object.
-#' @param include_original_pars Whether to preserve original parameter names.
-#' @return The updated Stanfit object.
-#' @keywords internal
-#' @noRd
-.rename_pars <- function(x, include_original_pars = FALSE) {
-  assert_IdealAdaptorStanfit(x)
-  stanfit <- get_stanfit(x)
-
-  chains <- length(stanfit@sim$samples)
-
-  .rename <- function(parname) {
-    parname <- gsub("(t_scale)\\[", "\\1_transformed\\[", parname)
-    parname <- gsub("(m|S|tau)(_(0|n))\\[", "\\1\\2_transformed\\[", parname)
-    parname <- gsub("(m|S|tau)(_(0|n))_original\\[", "\\1\\2\\[", parname)
-    parname <- gsub("p_cat\\[", "p_category\\[", parname)
-    parname
-  }
-
-  if (include_original_pars) stanfit@model_pars <- .rename(stanfit@model_pars)
-  stanfit@sim$fnames_oi <- vapply(stanfit@sim$fnames_oi, .rename, FUN.VALUE = character(1))
-
-  for (i in seq_len(chains)) names(stanfit@sim$samples[[i]]) <- vapply(names(stanfit@sim$samples[[i]]), .rename, FUN.VALUE = character(1))
-
-  set_stanfit(x, stanfit)
 }
 
 #' Check whether an IdealAdaptorStanfit or stanfit object contains posterior draws

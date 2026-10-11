@@ -6,10 +6,16 @@
 *.aux
 *.log
 *.toc
-*.o
-*.so
-*.dylib
-*.dll
+
+# Object and temporary object files
+src/*.o
+src/*.o.tmp
+src/*/*.o
+# Compiled shared libraries and dynamic links
+src/*.so
+src/*.dll
+src/*.dylib
+
 TEMP/
 /doc/
 /Meta/

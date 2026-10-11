@@ -116,3 +116,287 @@ test_that("cross-family template parity holds across representation families", {
     }
   }
 })
+
+test_that("early and late multi-cue integration models satisfy core generic method parity", {
+  set.seed(42)
+  cues <- c("cue1", "cue2")
+  d_train <- data.frame(
+    category = factor(rep(c("A", "B"), each = 20)),
+    cue1 = c(rnorm(20, -1, 1), rnorm(20, 1, 1)),
+    cue2 = c(rnorm(20, -0.5, 1), rnorm(20, 0.5, 1))
+  )
+
+  mnix_tpl <- new_mnix_category_representation_template_from_data(
+    d_train, category = "category", cues = cues
+  )
+  d_proj <- d_train
+  d_proj$.comp <- 0.6 * d_train$cue1 + 0.4 * d_train$cue2
+  nix_tpl <- new_nix_category_representation_template_from_data(
+    d_proj, category = "category", cues = ".comp"
+  )
+
+  models <- list(
+    MNIX_IdealIntegrator = new_mnix_ideal_adaptor_ideal_integrator(category_template = mnix_tpl),
+    MNIX_WeightedIntegrator = new_mnix_ideal_adaptor_weighted_integrator(
+      category_template = mnix_tpl, weights = c(0.6, 0.4)
+    ),
+    MNIX_CategoryWeightedIntegrator = new_mnix_ideal_adaptor_category_weighted_integrator(
+      category_template = mnix_tpl, weights = rbind(A = c(0.6, 0.4), B = c(0.3, 0.7))
+    ),
+    IdealIntegrator_MNIX = new_ideal_integrator_mnix_ideal_adaptor(
+      category_template = mnix_tpl, cues = cues
+    ),
+    WeightedIntegrator_MNIX = new_weighted_integrator_mnix_ideal_adaptor(
+      category_template = mnix_tpl, weights = c(0.6, 0.4), cues = cues
+    ),
+    CategoryWeightedIntegrator_MNIX = new_category_weighted_integrator_mnix_ideal_adaptor(
+      category_template = mnix_tpl, weights = rbind(A = c(0.6, 0.4), B = c(0.3, 0.7)), cues = cues
+    )
+  )
+
+  dat <- data.frame(
+    cue1 = c(-1.2, 0.0, 1.1, -0.5),
+    cue2 = c(-0.8, 0.2, 0.9, -0.1)
+  )
+  cats <- c("A", "B")
+
+  for (mod_name in names(models)) {
+    m <- models[[mod_name]]
+    expect_true(S7::S7_inherits(m, MVBU_CognitiveModel), info = mod_name)
+
+    # 1. Likelihood
+    lik <- likelihood(m, dat)
+    expect_true(is.data.frame(lik) || is.matrix(lik), info = mod_name)
+    expect_equal(nrow(lik), 4L, info = mod_name)
+    expect_true(all(lik >= 0, na.rm = TRUE), info = mod_name)
+
+    # 2. Posterior (sums to 1)
+    post <- posterior(m, dat)
+    expect_true(is.data.frame(post) || is.matrix(post), info = mod_name)
+    expect_equal(nrow(post), 4L, info = mod_name)
+    expect_equal(rowSums(post[, cats, drop = FALSE]), rep(1, 4L), tolerance = 1e-6, info = mod_name)
+
+    # 3. Decision rules
+    cat_crit <- categorize(m, dat, decision_rule = "criterion")
+    expect_equal(length(cat_crit), 4L, info = mod_name)
+    expect_true(all(cat_crit %in% cats), info = mod_name)
+
+    cat_prop <- categorize(m, dat, decision_rule = "proportional", simplify = FALSE)
+    expect_s3_class(cat_prop, "data.frame")
+    expect_equal(nrow(cat_prop), 4L, info = mod_name)
+    expect_true(all(cat_prop$response_probability >= 0 & cat_prop$response_probability <= 1), info = mod_name)
+
+    cat_samp <- categorize(m, dat, decision_rule = "sampling")
+    expect_equal(length(cat_samp), 4L, info = mod_name)
+    expect_true(all(cat_samp %in% cats), info = mod_name)
+
+    # 4. Generative sampling
+    samp <- sample_observations(m, n = 6L)
+    expect_s3_class(samp, "data.frame")
+    expect_equal(nrow(samp), 6L, info = mod_name)
+    expect_true("category" %in% names(samp), info = mod_name)
+
+    # 5. Model evaluation
+    resp_vec <- c("A", "A", "B", "B")
+    ev_loglik <- evaluate_model(m, dat, response_category = resp_vec, method = "log_lik")
+    expect_true(is.numeric(ev_loglik) && is.finite(ev_loglik), info = mod_name)
+
+    ev_acc <- evaluate_model(m, dat, response_category = resp_vec, method = "accuracy")
+    expect_true(is.numeric(ev_acc) && ev_acc >= 0 && ev_acc <= 1, info = mod_name)
+  }
+})
+
+test_that("early and late integration models support analytical updating via update_template", {
+  set.seed(123)
+  cues <- c("cue1", "cue2")
+  d_train <- data.frame(
+    category = factor(rep(c("A", "B"), each = 20)),
+    cue1 = c(rnorm(20, -1, 1), rnorm(20, 1, 1)),
+    cue2 = c(rnorm(20, -0.5, 1), rnorm(20, 0.5, 1))
+  )
+
+  mnix_tpl <- new_mnix_category_representation_template_from_data(
+    d_train, category = "category", cues = cues
+  )
+  d_proj <- d_train
+  d_proj$.comp <- 0.5 * d_train$cue1 + 0.5 * d_train$cue2
+  nix_tpl <- new_nix_category_representation_template_from_data(
+    d_proj, category = "category", cues = ".comp"
+  )
+
+  d_new <- data.frame(
+    category = factor(c("A", "A", "B", "B")),
+    cue1 = c(-0.8, -1.2, 1.2, 0.8),
+    cue2 = c(-0.4, -0.6, 0.6, 0.4)
+  )
+
+  models <- list(
+    MNIX_IdealIntegrator = new_mnix_ideal_adaptor_ideal_integrator(category_template = mnix_tpl),
+    MNIX_WeightedIntegrator = new_mnix_ideal_adaptor_weighted_integrator(
+      category_template = mnix_tpl, weights = c(0.5, 0.5)
+    ),
+    MNIX_CategoryWeightedIntegrator = new_mnix_ideal_adaptor_category_weighted_integrator(
+      category_template = mnix_tpl, weights = rbind(A = c(0.5, 0.5), B = c(0.5, 0.5))
+    ),
+    IdealIntegrator_MNIX = new_ideal_integrator_mnix_ideal_adaptor(
+      category_template = mnix_tpl, cues = cues
+    ),
+    WeightedIntegrator_MNIX = new_weighted_integrator_mnix_ideal_adaptor(
+      category_template = mnix_tpl, weights = c(0.5, 0.5), cues = cues
+    ),
+    CategoryWeightedIntegrator_MNIX = new_category_weighted_integrator_mnix_ideal_adaptor(
+      category_template = mnix_tpl, weights = rbind(A = c(0.5, 0.5), B = c(0.5, 0.5)), cues = cues
+    )
+  )
+
+  for (mod_name in names(models)) {
+    m <- models[[mod_name]]
+    m_up <- update_template(m, d_new)
+    expect_true(S7::S7_inherits(m_up, S7::S7_class(m)), info = mod_name)
+    # Ensure kappa increased by exposure observations
+    reps_orig <- get_category_representations(m)
+    reps_up <- get_category_representations(m_up)
+    expect_true(all(reps_up$A@kappa > reps_orig$A@kappa), label = paste(mod_name, "A kappa updated"))
+    expect_true(all(reps_up$B@kappa > reps_orig$B@kappa), label = paste(mod_name, "B kappa updated"))
+  }
+})
+
+test_that("mathematical parity holds across integration variants under matched weights", {
+  set.seed(789)
+  cues <- c("cue1", "cue2")
+  d_train <- data.frame(
+    category = factor(rep(c("A", "B"), each = 25)),
+    cue1 = c(rnorm(25, -1, 1), rnorm(25, 1, 1)),
+    cue2 = c(rnorm(25, -0.5, 1), rnorm(25, 0.5, 1))
+  )
+
+  mnix_tpl <- new_mnix_category_representation_template_from_data(
+    d_train, category = "category", cues = cues
+  )
+  w <- c(0.7, 0.3)
+  d_proj <- d_train
+  d_proj$.comp <- w[1] * d_train$cue1 + w[2] * d_train$cue2
+  nix_tpl <- new_nix_category_representation_template_from_data(
+    d_proj, category = "category", cues = ".comp"
+  )
+
+  dat <- data.frame(
+    cue1 = c(-1.5, 0.0, 1.2, 0.5),
+    cue2 = c(-0.5, 0.1, 0.8, -0.3)
+  )
+
+  # Early integration parity: Ideal vs Weighted vs CategoryWeighted (with matching rows)
+  m_early_ideal <- new_ideal_integrator_mnix_ideal_adaptor(
+    category_template = mnix_tpl, cues = cues
+  )
+  m_early_weighted <- new_weighted_integrator_mnix_ideal_adaptor(
+    category_template = mnix_tpl, weights = w, cues = cues
+  )
+  m_early_cat <- new_category_weighted_integrator_mnix_ideal_adaptor(
+    category_template = mnix_tpl, weights = rbind(A = w, B = w), cues = cues
+  )
+
+  lik_ideal <- likelihood(m_early_ideal, dat)
+  lik_weighted <- likelihood(m_early_weighted, dat)
+  lik_cat <- likelihood(m_early_cat, dat)
+
+  expect_equal(lik_ideal, lik_weighted, tolerance = 1e-10)
+  expect_equal(lik_weighted, lik_cat, tolerance = 1e-10)
+
+  post_ideal <- posterior(m_early_ideal, dat)
+  post_weighted <- posterior(m_early_weighted, dat)
+  post_cat <- posterior(m_early_cat, dat)
+
+  expect_equal(post_ideal, post_weighted, tolerance = 1e-10)
+  expect_equal(post_weighted, post_cat, tolerance = 1e-10)
+
+  # Late integration parity: Weighted vs CategoryWeighted (with matching rows)
+  m_late_weighted <- new_mnix_ideal_adaptor_weighted_integrator(
+    category_template = mnix_tpl, weights = w
+  )
+  m_late_cat <- new_mnix_ideal_adaptor_category_weighted_integrator(
+    category_template = mnix_tpl, weights = rbind(A = w, B = w)
+  )
+
+  lik_lw <- likelihood(m_late_weighted, dat)
+  lik_lc <- likelihood(m_late_cat, dat)
+  expect_equal(lik_lw, lik_lc, tolerance = 1e-10)
+
+  post_lw <- posterior(m_late_weighted, dat)
+  post_lc <- posterior(m_late_cat, dat)
+  expect_equal(post_lw, post_lc, tolerance = 1e-10)
+})
+
+test_that("new_ideal_adaptor_stanfit_input constructs typed Staninput for all 6 integration models", {
+  set.seed(999)
+  cues <- c("cue1", "cue2")
+  exposure <- data.frame(
+    category = factor(rep(c("A", "B"), each = 15)),
+    group = factor(rep("G1", 30)),
+    cue1 = rnorm(30),
+    cue2 = rnorm(30)
+  )
+  test_data <- data.frame(
+    group = factor(rep("G1", 10)),
+    cue1 = rnorm(10),
+    cue2 = rnorm(10),
+    response_category = factor(sample(c("A", "B"), 10, replace = TRUE))
+  )
+
+  # 1. MNIX Ideal Integrator
+  sfi_mnix_ideal <- new_ideal_adaptor_stanfit_input(
+    exposure = exposure, test = test_data, cues = cues,
+    stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
+  )
+  expect_true(S7::S7_inherits(sfi_mnix_ideal@staninput, MNIX_IdealAdaptor_IdealIntegratorStaninput))
+  expect_equal(sfi_mnix_ideal@staninput@values$K, 2L)
+
+  # 2. MNIX Weighted Integrator
+  sfi_mnix_weighted <- new_ideal_adaptor_stanfit_input(
+    exposure = exposure, test = test_data, cues = cues,
+    stanmodel = "MNIX_ideal_adaptor_weighted_integrator"
+  )
+  expect_true(S7::S7_inherits(sfi_mnix_weighted@staninput, MNIX_IdealAdaptor_WeightedIntegratorStaninput))
+
+  # 3. MNIX Category Weighted Integrator
+  sfi_mnix_cat <- new_ideal_adaptor_stanfit_input(
+    exposure = exposure, test = test_data, cues = cues,
+    stanmodel = "MNIX_ideal_adaptor_category_weighted_integrator"
+  )
+  expect_true(S7::S7_inherits(sfi_mnix_cat@staninput, MNIX_IdealAdaptor_CategoryWeightedIntegratorStaninput))
+
+  # 4. Early MNIX Ideal Integrator
+  sfi_early_ideal <- new_ideal_adaptor_stanfit_input(
+    exposure = exposure, test = test_data, cues = cues,
+    stanmodel = "ideal_integrator_MNIX_ideal_adaptor"
+  )
+  expect_true(S7::S7_inherits(sfi_early_ideal@staninput, IdealIntegrator_MNIX_IdealAdaptorStaninput))
+  # Should have 2x2 scatter matrix for NIW summary
+  expect_equal(dim(sfi_early_ideal@staninput@values$x_css_exposure)[3:4], c(2L, 2L))
+
+  # Retired stanmodel name is rejected
+  expect_error(
+    new_ideal_adaptor_stanfit_input(
+      exposure = exposure, test = test_data, cues = cues,
+      stanmodel = "MNIX_ideal_adaptor"
+    )
+  )
+
+  # 5. Early MNIX Weighted Integrator
+  sfi_early_weighted <- new_ideal_adaptor_stanfit_input(
+    exposure = exposure, test = test_data, cues = cues,
+    stanmodel = "weighted_integrator_MNIX_ideal_adaptor",
+    fixed_parameters = list(weights = c(0.7, 0.3))
+  )
+  expect_true(S7::S7_inherits(sfi_early_weighted@staninput, WeightedIntegrator_MNIX_IdealAdaptorStaninput))
+  expect_equal(as.numeric(sfi_early_weighted@staninput@values$weights), c(0.7, 0.3))
+  expect_equal(dim(sfi_early_weighted@staninput@values$x_css_exposure)[3:4], c(2L, 2L))
+
+  # 6. Early MNIX Category Weighted Integrator
+  sfi_early_cat <- new_ideal_adaptor_stanfit_input(
+    exposure = exposure, test = test_data, cues = cues,
+    stanmodel = "category_weighted_integrator_MNIX_ideal_adaptor"
+  )
+  expect_true(S7::S7_inherits(sfi_early_cat@staninput, CategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput))
+  expect_equal(dim(sfi_early_cat@staninput@values$x_css_exposure)[3:4], c(2L, 2L))
+})

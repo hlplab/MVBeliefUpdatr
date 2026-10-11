@@ -4,6 +4,19 @@
 \name{MVBU_Stanfit}
 \alias{MVBU_Stanfit}
 \alias{IdealAdaptorStanfit}
+\alias{MNIX_IdealAdaptorStanfit}
+\alias{IdealIntegrator_MNIX_IdealAdaptorStanfit}
+\alias{WeightedIntegrator_MNIX_IdealAdaptorStanfit}
+\alias{CategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit}
+\alias{GroupWeightedIntegrator_MNIX_IdealAdaptorStanfit}
+\alias{GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit}
+\alias{InformativityWeightedIntegrator_MNIX_IdealAdaptorStanfit}
+\alias{MNIX_IdealAdaptor_IdealIntegratorStanfit}
+\alias{MNIX_IdealAdaptor_WeightedIntegratorStanfit}
+\alias{MNIX_IdealAdaptor_CategoryWeightedIntegratorStanfit}
+\alias{MNIX_IdealAdaptor_GroupWeightedIntegratorStanfit}
+\alias{MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStanfit}
+\alias{MNIX_IdealAdaptor_InformativityWeightedIntegratorStanfit}
 \title{MVBeliefUpdatr Stanfit Classes and Constructors}
 \usage{
 MVBU_Stanfit(
@@ -24,6 +37,227 @@ MVBU_Stanfit(
 )
 
 IdealAdaptorStanfit(
+  data = data.frame(),
+  staninput = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  stan_args = list(),
+  stanfit = NULL,
+  basis = NULL,
+  transform_information = NULL,
+  criteria = list(),
+  file = NULL,
+  version = NULL,
+  metadata = list(),
+  cache = list()
+)
+
+MNIX_IdealAdaptorStanfit(
+  data = data.frame(),
+  staninput = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  stan_args = list(),
+  stanfit = NULL,
+  basis = NULL,
+  transform_information = NULL,
+  criteria = list(),
+  file = NULL,
+  version = NULL,
+  metadata = list(),
+  cache = list()
+)
+
+IdealIntegrator_MNIX_IdealAdaptorStanfit(
+  data = data.frame(),
+  staninput = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  stan_args = list(),
+  stanfit = NULL,
+  basis = NULL,
+  transform_information = NULL,
+  criteria = list(),
+  file = NULL,
+  version = NULL,
+  metadata = list(),
+  cache = list()
+)
+
+WeightedIntegrator_MNIX_IdealAdaptorStanfit(
+  data = data.frame(),
+  staninput = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  stan_args = list(),
+  stanfit = NULL,
+  basis = NULL,
+  transform_information = NULL,
+  criteria = list(),
+  file = NULL,
+  version = NULL,
+  metadata = list(),
+  cache = list()
+)
+
+CategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit(
+  data = data.frame(),
+  staninput = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  stan_args = list(),
+  stanfit = NULL,
+  basis = NULL,
+  transform_information = NULL,
+  criteria = list(),
+  file = NULL,
+  version = NULL,
+  metadata = list(),
+  cache = list()
+)
+
+GroupWeightedIntegrator_MNIX_IdealAdaptorStanfit(
+  data = data.frame(),
+  staninput = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  stan_args = list(),
+  stanfit = NULL,
+  basis = NULL,
+  transform_information = NULL,
+  criteria = list(),
+  file = NULL,
+  version = NULL,
+  metadata = list(),
+  cache = list()
+)
+
+GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit(
+  data = data.frame(),
+  staninput = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  stan_args = list(),
+  stanfit = NULL,
+  basis = NULL,
+  transform_information = NULL,
+  criteria = list(),
+  file = NULL,
+  version = NULL,
+  metadata = list(),
+  cache = list()
+)
+
+InformativityWeightedIntegrator_MNIX_IdealAdaptorStanfit(
+  data = data.frame(),
+  staninput = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  stan_args = list(),
+  stanfit = NULL,
+  basis = NULL,
+  transform_information = NULL,
+  criteria = list(),
+  file = NULL,
+  version = NULL,
+  metadata = list(),
+  cache = list()
+)
+
+MNIX_IdealAdaptor_IdealIntegratorStanfit(
+  data = data.frame(),
+  staninput = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  stan_args = list(),
+  stanfit = NULL,
+  basis = NULL,
+  transform_information = NULL,
+  criteria = list(),
+  file = NULL,
+  version = NULL,
+  metadata = list(),
+  cache = list()
+)
+
+MNIX_IdealAdaptor_WeightedIntegratorStanfit(
+  data = data.frame(),
+  staninput = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  stan_args = list(),
+  stanfit = NULL,
+  basis = NULL,
+  transform_information = NULL,
+  criteria = list(),
+  file = NULL,
+  version = NULL,
+  metadata = list(),
+  cache = list()
+)
+
+MNIX_IdealAdaptor_CategoryWeightedIntegratorStanfit(
+  data = data.frame(),
+  staninput = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  stan_args = list(),
+  stanfit = NULL,
+  basis = NULL,
+  transform_information = NULL,
+  criteria = list(),
+  file = NULL,
+  version = NULL,
+  metadata = list(),
+  cache = list()
+)
+
+MNIX_IdealAdaptor_GroupWeightedIntegratorStanfit(
+  data = data.frame(),
+  staninput = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  stan_args = list(),
+  stanfit = NULL,
+  basis = NULL,
+  transform_information = NULL,
+  criteria = list(),
+  file = NULL,
+  version = NULL,
+  metadata = list(),
+  cache = list()
+)
+
+MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStanfit(
+  data = data.frame(),
+  staninput = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  stan_args = list(),
+  stanfit = NULL,
+  basis = NULL,
+  transform_information = NULL,
+  criteria = list(),
+  file = NULL,
+  version = NULL,
+  metadata = list(),
+  cache = list()
+)
+
+MNIX_IdealAdaptor_InformativityWeightedIntegratorStanfit(
   data = data.frame(),
   staninput = NULL,
   stanvars = NULL,

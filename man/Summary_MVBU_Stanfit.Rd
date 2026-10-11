@@ -9,7 +9,9 @@ Summary_MVBU_Stanfit(
   fixed = NULL,
   expected_moments = NULL,
   marginal_moments = NULL,
-  high_rhats = NULL
+  high_rhats = NULL,
+  header = NULL,
+  warnings = NULL
 )
 }
 \description{

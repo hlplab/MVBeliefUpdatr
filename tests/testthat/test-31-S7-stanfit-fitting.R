@@ -136,3 +136,37 @@ test_that(
   )
   expect_equal(val1, val2)
 })
+
+test_that(
+  "fit_ideal_adaptor throws an error when stanmodel cannot be inferred from abstract staninput",
+  {
+    skip_if_not_installed("rstan")
+    raw_input <- example_ideal_adaptor_stanfit_input("MNIX", n_cues = 2L)
+    # Cast staninput to generic/abstract MNIX_IdealAdaptorStaninput
+    generic_staninput <- MNIX_IdealAdaptorStaninput(values = raw_input@staninput@values)
+    raw_input@staninput <- generic_staninput
+
+    expect_error(
+      fit_ideal_adaptor(raw_input, stanmodel = NULL),
+      regexp = "Could not infer a concrete Stan model"
+    )
+  }
+)
+
+test_that(
+  "new_ideal_adaptor_stanfit_input throws an error on unrecognized model name",
+  {
+    raw_input <- example_ideal_adaptor_stanfit_input("MNIX", n_cues = 2L)
+    expect_error(
+      new_ideal_adaptor_stanfit_input(
+        exposure = raw_input@exposure,
+        test = raw_input@test,
+        cues = c("VOT", "f0_semitones"),
+        category = "category",
+        response = "response_category",
+        group = "group",
+        stanmodel = "unknown_model_xyz"
+      )
+    )
+  }
+)

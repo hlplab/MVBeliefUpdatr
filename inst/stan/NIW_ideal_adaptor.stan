@@ -2,7 +2,7 @@
 * Fit multinomial response data using a belief-updating model to infer prior
 * parameters.  A normal-inverse-Wishart prior is used, and it's assumed
 * that the subject knows the true labels of all the input stimuli (e.g.,
-* doesn't model any uncertainty in classification.
+* doesn't model any uncertainty in classification).
 *
 * Sufficient statistics and (if provided) prior mu_0 and Sigma_0 are assumed
 * to be in the space defined by an affine transformation f(x) = SCALE(x + shift).
@@ -13,6 +13,11 @@
 * Florian Jaeger
 * April 2025
 */
+
+functions {
+#include include/mvbu_functions.stan
+}
+
 
 data {
   int K;                                                   // number of features
@@ -30,10 +35,14 @@ data {
   array[N_test] int y_test;                                // exposure group indicator of test trials
   array[N_test,M] int z_test_counts;                       // responses for test trials (for each category M)
 
+  simplex[M] prior_p;                                      // prior category probabilities
+
   int<lower=0, upper=1> lapse_rate_known;
+  int<lower=0, upper=1> lapse_bias_known;
   int<lower=0, upper=1> mu_0_known;
   int<lower=0, upper=1> Sigma_0_known;
   array[lapse_rate_known ? 1 : 0] real<lower=0, upper=1> lapse_rate_data;       // optional: user provided lapse_rate
+  array[lapse_bias_known ? 1 : 0] simplex[M] lapse_bias_data;                   // optional: user provided lapse bias
   array[mu_0_known ? M : 0] vector[mu_0_known ? K : 0] mu_0_data;               // optional: user provided expected mu_0 (prior category means) in space of affine transformation defined by INV_SCALE^-1 and shift
   array[Sigma_0_known ? M : 0] cov_matrix[Sigma_0_known ? K : 0] Sigma_0_data;  // optional: user provided expected Sigma_0 (prior category covariance matrices) in space of affine transformation defined by INV_SCALE^-1 and shift
 
@@ -56,6 +65,7 @@ data {
 }
 
 transformed data {
+  simplex[M] lapse_bias = lapse_bias_known ? lapse_bias_data[1] : rep_vector(1.0 / M, M);
   real<lower=0> sigma_kappanu = max(max(to_array_1d(N_exposure)) * 4, 10); // scale for the prior of kappa/nu_0 (at least 10)
   vector[K] m_0_mu = rep_vector(0, K);                     // center of prior of m_0
 }
@@ -73,80 +83,57 @@ parameters {
 
   array[lapse_rate_known ? 0 : 1] real<lower=0, upper=1> lapse_rate_param;
 
-  array[mu_0_known ? 0 : M] vector[K] m_0_param;           // prior expected means
-  vector<lower=0>[mu_0_known ? 0 : K] m_0_tau;             // prior variances of expected means (m_0)
-  cholesky_factor_corr[mu_0_known ? 0 : K] m_0_L_omega;    // prior correlations of variances of expected means (in cholesky form)
+  array[mu_0_known ? 0 : M] vector[K] m_0_param_transformed;           // prior expected means (standardized)
+  vector<lower=0>[mu_0_known ? 0 : K] m_0_tau_transformed;             // prior variances of expected means (m_0)
+  cholesky_factor_corr[mu_0_known ? 0 : K] m_0_L_omega_transformed;    // prior correlations of variances of expected means (in cholesky form)
 
-  array[Sigma_0_known ? 0 : M] vector<lower=0>[K] tau_0_param;          // standard deviations of prior scatter matrix S_0
-  array[Sigma_0_known ? 0 : M] cholesky_factor_corr[K] L_omega_0_param; // correlation matrix of prior scatter matrix S_0 (in cholesky form)
+  array[Sigma_0_known ? 0 : M] vector<lower=0>[K] tau_0_param_transformed;          // standard deviations of prior scatter matrix S_0
+  array[Sigma_0_known ? 0 : M] cholesky_factor_corr[K] L_omega_0_param_transformed; // correlation matrix of prior scatter matrix S_0 (in cholesky form)
 }
 
 transformed parameters {
-  array[M] vector[K] m_0 = mu_0_known ? mu_0_data : m_0_param;                    // prior expected means m_0
-  array[M] cov_matrix[K] S_0;                                                     // prior scatter matrix S_0
-  real lapse_rate = lapse_rate_known ? lapse_rate_data[1] : lapse_rate_param[1];  // lapse rate
-
-  /* Assuming unifom bias, so that lapsing_prob = probability of each category prior to
-     taking into account stimulus is 1/M
-  */
-  vector[M] lapsing_probs = rep_vector(lapse_rate / M, M);
+  array[M] vector[K] m_0_transformed = mu_0_known ? mu_0_data : m_0_param_transformed;                    // prior expected means m_0
+  array[M] cov_matrix[K] S_0_transformed;                                                                  // prior scatter matrix S_0
+  real lapse_rate = lapse_rate_known ? lapse_rate_data[1] : lapse_rate_param[1];                          // lapse rate
 
   // updated beliefs depend on input and group
   array[M,L] real<lower=K> kappa_n;          // updated mean pseudocount
   array[M,L] real<lower=K> nu_n;             // updated sd pseudocount
-  array[M,L] vector[K] m_n;                  // updated m_0
-  array[M,L] cov_matrix[K] S_n;              // updated scatter matrix
-  array[M,L] cov_matrix[K] t_scale;          // scale matrix of predictive t distribution
+  array[M,L] vector[K] m_n_transformed;      // updated m_0
+  array[M,L] cov_matrix[K] S_n_transformed;  // updated scatter matrix
+  array[M,L] cov_matrix[K] t_scale_transformed; // scale matrix of predictive t distribution
 
   array[N_test] simplex[M] p_test_conj;
   array[N_test] vector[M] log_p_test_conj;
 
-  /* Update NIW parameters according to conjugate updating rules are taken from
+  /* Update NIW parameters according to conjugate updating rules taken from
      Murphy (2007, p. 134)
   */
   for (cat in 1:M) {
     // Get S_0 from expected Sigma given nu_0
-    S_0[cat] = Sigma_0_known ? Sigma_0_data[cat] * (nu_0 - K - 1) : quad_form_diag(multiply_lower_tri_self_transpose(L_omega_0_param[cat]), tau_0_param[cat]);
+    S_0_transformed[cat] = Sigma_0_known ? Sigma_0_data[cat] * (nu_0 - K - 1) : quad_form_diag(multiply_lower_tri_self_transpose(L_omega_0_param_transformed[cat]), tau_0_param_transformed[cat]);
 
     for (group in 1:L) {
-      if (N_exposure[cat,group] > 0) {
-        vector[K] diff_m = x_mean_exposure[cat,group] - m_0[cat];
-        kappa_n[cat,group] = kappa_0 + N_exposure[cat,group];
-        nu_n[cat,group] = nu_0 + N_exposure[cat,group];
-        m_n[cat,group] =
-          (kappa_0 * m_0[cat] + N_exposure[cat,group] * x_mean_exposure[cat,group]) /
-          kappa_n[cat,group];
-        S_n[cat,group] =
-          S_0[cat] +
-          x_css_exposure[cat,group] +
-          ((kappa_0 * N_exposure[cat,group]) / kappa_n[cat,group]) * (diff_m * diff_m');
-      } else {
-        kappa_n[cat,group] = kappa_0;
-        nu_n[cat,group] = nu_0;
-        m_n[cat,group] = m_0[cat];
-        S_n[cat,group] = S_0[cat];
-      }
-
-      t_scale[cat,group] =
-        S_n[cat,group] * (kappa_n[cat,group] + 1) /
-        (kappa_n[cat,group] * (nu_n[cat,group] - K + 1));
+      kappa_n[cat,group] = kappa_0 + N_exposure[cat,group];
+      nu_n[cat,group] = nu_0 + N_exposure[cat,group];
+      m_n_transformed[cat,group] =
+        nix_update_mean(kappa_0, m_0_transformed[cat], N_exposure[cat,group], x_mean_exposure[cat,group]);
+      S_n_transformed[cat,group] =
+        niw_update_S(kappa_0, S_0_transformed[cat], N_exposure[cat,group], x_mean_exposure[cat,group], x_css_exposure[cat,group], m_0_transformed[cat]);
+      t_scale_transformed[cat,group] =
+        niw_predictive_scale(S_n_transformed[cat,group], kappa_n[cat,group], nu_n[cat,group], K);
     }
   }
 
   // compute posterior probabilities of all categories for each of the test stimuli
   for (j in 1:N_test) {
     int group = y_test[j];
-    /* calculate un-normalized log posterior probability for each category. Under the assumption
-       of uniform prior probabilities for each category, the log probabilities identical to the
-       normalized log likelihoods. If we ever were to change this assumption, we'd have to add
-       the log prior probabilities of categories here.
-    */
     for (cat in 1:M) {
       // log likelihood of the test stimulus given the category
       log_p_test_conj[j,cat] = multi_student_t_lpdf(x_test[j] |
                                                     nu_n[cat,group] - K + 1,
-                                                    m_n[cat,group],
-                                                    t_scale[cat,group]);
+                                                    m_n_transformed[cat,group],
+                                                    t_scale_transformed[cat,group]) + log(prior_p[cat]);
     }
     // normalize to get actual posterior probs in simplex
     p_test_conj[j] = exp(log_p_test_conj[j] - log_sum_exp(log_p_test_conj[j]));
@@ -158,92 +145,40 @@ model {
   nu_0 ~ normal(0, sigma_kappanu);
 
   if (!mu_0_known) {
-      m_0_tau ~ cauchy(0, tau_scale);
-      m_0_L_omega ~ lkj_corr_cholesky(L_omega_eta);
-      m_0_param ~ multi_normal_cholesky(m_0_mu, diag_pre_multiply(m_0_tau, m_0_L_omega));
+      m_0_tau_transformed ~ cauchy(0, tau_scale);
+      m_0_L_omega_transformed ~ lkj_corr_cholesky(L_omega_eta);
+      m_0_param_transformed ~ multi_normal_cholesky(m_0_mu, diag_pre_multiply(m_0_tau_transformed, m_0_L_omega_transformed));
   }
 
   // Specifying prior for components of S_0:
   if (!Sigma_0_known) {
     for (cat in 1:M) {
-      tau_0_param[cat] ~ cauchy(0, tau_scale);
-      L_omega_0_param[cat] ~ lkj_corr_cholesky(L_omega_eta);
+      tau_0_param_transformed[cat] ~ cauchy(0, tau_scale);
+      L_omega_0_param_transformed[cat] ~ lkj_corr_cholesky(L_omega_eta);
     }
   }
 
   for (i in 1:N_test) {
-    z_test_counts[i] ~ multinomial(p_test_conj[i] * (1 - lapse_rate) + lapsing_probs);
+    z_test_counts[i] ~ multinomial(lapse_mixture(p_test_conj[i], lapse_rate, lapse_bias));
   }
 
 }
 
 generated quantities {
-  /* Compute and store pointwise log-likelihood, in order to allow computation of LOOIC. This is
-     done in the generated quantities block, following help(rstan::loo). Note that each unqiue
-     combination of test location and exposure group is treated as an observation in z_test_counts.
-     So calculating pointwise log-likelihoods based on the vectorized z_test_counts, which would be
-     most straightforward, has several downsides:
+#include include/gq_multinomial_loglik.stan
 
-     1) it makes the pointwise log-likelihoods, and differences between the individual pointwise
-        log-likelihoods, hard to interpret (e.g., because test locations and/or groups differ in
-        the number of observations, which affects the log-likelihoods).
-
-      2) it makes it impossible to compare across different models that are fit on the same under-
-         lying data if they differ in the number of unique combinations of test locations and
-         groups (and thus the number of rows of z_test_counts). This can happen, for instance, when
-         one compares models over different transformation of the cues, which can result in different
-         numbers of unique test locations.
-
-     Optionally, users can thus also request log-likelihoods to be calculated for each individual response.
-     This requires reformatting the information z_test_counts. The downside of this revised approach is that
-     it makes the object very large to store, and slow to work with.
-  */
-  real log_lik_sum = 0;
-  vector[N_test] log_lik;
-
-  for (n in 1:N_test) {
-    log_lik[n] = multinomial_lpmf(z_test_counts[n] | p_test_conj[n] * (1-lapse_rate) + lapsing_probs);
-    log_lik_sum += log_lik[n];
-  }
-
-  // If requested by user:
-  vector[split_loglik_per_observation ? sum(to_array_1d(z_test_counts)) : 0] log_lik_split;
-  if (split_loglik_per_observation == 1) {
-    int idx = 1;
-
-    for (n in 1:N_test) {
-      for (m in 1:M) {
-        for (i in 1:z_test_counts[n, m]) {
-          log_lik_split[idx] = log(p_test_conj[n, m] * (1 - lapse_rate) + lapsing_probs[m]);
-          idx += 1;
-        }
-      }
-    }
-  }
-
-  // Inverse transform parameters back into the original space
-  array[M] vector[K] m_0_original;
-  array[M] cov_matrix[K] S_0_original;
-  array[M,L] vector[K] m_n_original;
-  array[M,L] cov_matrix[K] S_n_original;
+  // Backtransformed parameters in natural physical units (clean base names)
+  array[M] vector[K] m_0;
+  array[M] cov_matrix[K] S_0;
+  array[M,L] vector[K] m_n;
+  array[M,L] cov_matrix[K] S_n;
   for (cat in 1:M) {
-    /* The validity of back-transforming a NIW by back-transforming its m and S parameters (kappa and nu
-       remain unchanged) was confirmed via ChatGPT (https://chatgpt.com/c/683b3ed6-4924-800c-8f22-e61680f3360f)
-    */
-    // Since we define the affine transform as f(x) = SCALE(x + shift), rather than f(x) = SCALE * x + shift:
-    m_0_original[cat] = INV_SCALE * m_0[cat] - shift;
-    // Since the inverse-Wishart distribution is affine-invariant under congruence transformations:
-    S_0_original[cat] = INV_SCALE * S_0[cat] * INV_SCALE';
+    m_0[cat] = unscale_mean(INV_SCALE, shift, m_0_transformed[cat]);
+    S_0[cat] = unscale_cov(INV_SCALE, S_0_transformed[cat]);
     for (group in 1:L) {
-      m_n_original[cat,group] = INV_SCALE * m_n[cat,group] - shift;
-      S_n_original[cat,group] = INV_SCALE * S_n[cat,group] * INV_SCALE';
+      m_n[cat,group] = unscale_mean(INV_SCALE, shift, m_n_transformed[cat,group]);
+      S_n[cat,group] = unscale_cov(INV_SCALE, S_n_transformed[cat,group]);
     }
   }
-
-  // For debugging:
-  // matrix[mu_0_known ? 0 : K,mu_0_known ? 0 : K] m_0_cov_original;
-  // if (!mu_0_known) {
-  //   matrix[K,K] m_0_cor = multiply_lower_tri_self_transpose(m_0_L_omega);
-  //   m_0_cov_original = INV_SCALE * quad_form_diag(m_0_cor, m_0_tau) * INV_SCALE';
-  // }
 }
+

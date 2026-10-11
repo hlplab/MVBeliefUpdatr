@@ -215,18 +215,33 @@ MVBU_Object
   │     ├── MVG_IdealObserver
   │     ├── MUVG_IdealObserver
   │     ├── NIW_IdealAdaptor
+  │     ├── NIX_IdealAdaptor
   │     ├── MNIX_IdealAdaptor
+  │     │     ├── Early Integration ({Integrator}_MNIX_IdealAdaptor)
+  │     │     │     ├── IdealIntegrator_MNIX_IdealAdaptor
+  │     │     │     ├── WeightedIntegrator_MNIX_IdealAdaptor
+  │     │     │     ├── CategoryWeightedIntegrator_MNIX_IdealAdaptor
+  │     │     │     ├── GroupWeightedIntegrator_MNIX_IdealAdaptor
+  │     │     │     ├── GroupCategoryWeightedIntegrator_MNIX_IdealAdaptor
+  │     │     │     └── InformativityWeightedIntegrator_MNIX_IdealAdaptor
+  │     │     └── Late Integration (MNIX_IdealAdaptor_{Integrator})
+  │     │           ├── MNIX_IdealAdaptor_IdealIntegrator
+  │     │           ├── MNIX_IdealAdaptor_WeightedIntegrator
+  │     │           ├── MNIX_IdealAdaptor_CategoryWeightedIntegrator
+  │     │           ├── MNIX_IdealAdaptor_GroupWeightedIntegrator
+  │     │           ├── MNIX_IdealAdaptor_GroupCategoryWeightedIntegrator
+  │     │           └── MNIX_IdealAdaptor_InformativityWeightedIntegrator
   │     └── Exemplar_Model
   ├── MVBU_ModelList
   ├── MVBU_Staninput
   │     └── IdealAdaptorStaninput
   │           ├── NIX_IdealAdaptorStaninput
-  │           ├── MNIX_IdealAdaptorStaninput
+  │           ├── MNIX_IdealAdaptorStaninput (12 Symmetrical Early & Late Integrators)
   │           └── NIW_IdealAdaptorStaninput
   ├── MVBU_Stanfit
   │     └── IdealAdaptorStanfit
   │           ├── NIX_IdealAdaptorStanfit
-  │           ├── MNIX_IdealAdaptorStanfit
+  │           ├── MNIX_IdealAdaptorStanfit (12 Symmetrical Early & Late Integrators)
   │           └── NIW_IdealAdaptorStanfit
   └── MVBU_StanfitPosterior
 
@@ -445,6 +460,43 @@ model_from_data <- new_mvg_ideal_observer_from_data(
   decision_rule = "criterion"
 )
 model_from_data
+```
+
+### Multi-Cue Integration Models (Early vs. Late Integration) {#multi-cue-integration-models}
+
+When categorization involves multiple acoustic or perceptual cues (e.g., $F_1$, $F_2$, duration, or VOT), cognitive architectures differ fundamentally in **where** and **how** cue combination occurs relative to category belief representation and adaptation:
+
+1. **Late Cue Integration (MNIX Family)**:
+   In late integration architectures, listeners maintain multi-cue category distributions over continuous input cue dimensions. Individual cue log-likelihoods are computed and then integrated across cues at decision time:
+   - `MNIX_IdealAdaptor_IdealIntegrator`: Unweighted Bayes rule integration across cues:
+     $$\log p(\mathbf{x} \mid c) = \sum_{k=1}^D \log p(x_k \mid c)$$
+   - `MNIX_IdealAdaptor_WeightedIntegrator`: Global attention/precision simplex weights $\mathbf{w}$ ($w_k \ge 0, \sum_k w_k = 1$):
+     $$\log p(\mathbf{x} \mid c) = \sum_{k=1}^D w_k \log p(x_k \mid c)$$
+   - `MNIX_IdealAdaptor_CategoryWeightedIntegrator`: Category-specific attention simplex weights $\mathbf{w}_c$:
+     $$\log p(\mathbf{x} \mid c) = \sum_{k=1}^D w_{c, k} \log p(x_k \mid c)$$
+   - `MNIX_IdealAdaptor`: Dynamic cue weights driven by empirical cue informativity and marginal category overlap.
+
+2. **Early Cue Integration (MNIX Family)**:
+   In early integration architectures, multi-dimensional cues $\mathbf{x}$ are linearly combined prior to category evaluation into a 1-dimensional perceptual decision variable $z$:
+   - `IdealIntegrator_MNIX_IdealAdaptor`: Multi-cue input is projected via fixed weights to $z = \mathbf{w}^T \mathbf{x}$, which is evaluated against univariate 1D category representations.
+   - `WeightedIntegrator_MNIX_IdealAdaptor`: Multi-cue input is projected via subjective simplex weights $\mathbf{w}$ to $z = \mathbf{w}^T \mathbf{x}$.
+   - `CategoryWeightedIntegrator_MNIX_IdealAdaptor`: Category-specific projection weights $\mathbf{w}_c$ map the cues to category-specific 1D decision variables $z_c = \mathbf{w}_c^T \mathbf{x}$.
+
+```{r early_late_integration_example, eval = FALSE}
+# Example: Construct an early integrator MNIX model with 2 cues
+nix_tpl_1d <- example_category_representation_template("NIX")
+mod_early_weighted <- WeightedIntegrator_MNIX_IdealAdaptor(
+  category_template = nix_tpl_1d,
+  weights = c(F1 = 0.6, F2 = 0.4),
+  cues = c("F1", "F2")
+)
+
+# Example: Construct a late integrator MNIX model with category-specific weights
+mnix_tpl_2d <- example_category_representation_template("MNIX")
+mod_late_cat <- MNIX_IdealAdaptor_CategoryWeightedIntegrator(
+  category_template = mnix_tpl_2d,
+  weights = rbind("/b/" = c(0.7, 0.3), "/d/" = c(0.4, 0.6))
+)
 ```
 
 ```{r exemplar_factor_fig, echo = FALSE, out.width = "80%", fig.align = "center"}

@@ -16,7 +16,7 @@ test_that("new_ideal_adaptor_stanfit_input rejects missing or empty cues", {
         group = "group",
         group_unique = "Condition",
         control = control_staninput(transform_type = "identity"),
-        stanmodel = "MNIX_ideal_adaptor"
+        stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
       )
     ),
     regexp = "Expected x to be a non-NA character",
@@ -33,7 +33,7 @@ test_that("new_ideal_adaptor_stanfit_input rejects missing or empty cues", {
       group = "group",
       group_unique = "Condition",
       control = control_staninput(transform_type = "identity"),
-      stanmodel = "MNIX_ideal_adaptor"
+      stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
     ),
     regexp = "Expected x to be a non-NA character",
     fixed = TRUE
@@ -289,7 +289,7 @@ test_that(
       response = "response_category",
       group = "group",
       control = control_staninput(transform_type = "identity"),
-      stanmodel = "MNIX_ideal_adaptor",
+      stanmodel = "MNIX_ideal_adaptor_ideal_integrator",
       fixed_parameters = fixed_parameters
     )
 
@@ -386,7 +386,7 @@ test_that(
       response = "response_category",
       group = "group",
       control = control_staninput(transform_type = "identity"),
-      stanmodel = "MNIX_ideal_adaptor",
+      stanmodel = "MNIX_ideal_adaptor_ideal_integrator",
       fixed_parameters = list(
         mu_0 = list(
           "/d/" = c(0.1, 0.2),
@@ -481,7 +481,7 @@ test_that("stanmodel compatibility checks enforce the matching Stan program", {
       response = "response_category",
       group = "group",
       control = control_staninput(transform_type = "identity"),
-      stanmodel = "MNIX_ideal_adaptor"
+      stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
     )
     expect_staninput_structure(
       mnix_input,
@@ -501,7 +501,7 @@ test_that("stanmodel compatibility checks enforce the matching Stan program", {
         response = "response_category",
         group = "group",
         control = control_staninput(transform_type = "identity"),
-        stanmodel = "MNIX_ideal_adaptor"
+        stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
       ),
       "requires at least two cues"
     )
@@ -633,7 +633,7 @@ test_that(
       response = "response_category",
       group = "group",
       control = control_staninput(transform_type = "identity"),
-      stanmodel = "MNIX_ideal_adaptor"
+      stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
     )
 
     expected_counts <- as.vector(
@@ -661,7 +661,7 @@ test_that(
       response = "response_category",
       group = "group",
       control = control_staninput(transform_type = "identity"),
-      stanmodel = "MNIX_ideal_adaptor"
+      stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
     ),
     "requires at least two cues"
   )
@@ -1175,12 +1175,12 @@ test_that(
           response = "response_category",
           group = "group",
           control = control_staninput(transform_type = "identity"),
-          stanmodel = "MNIX_ideal_adaptor"
+          stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
         )
 
         run_fixed_param_stan_program(
           stan_file = system.file(
-            "stan", "MNIX_ideal_adaptor.stan",
+            "stan", "MNIX_ideal_adaptor_ideal_integrator.stan",
             package = "MVBeliefUpdatr"
           ),
           input = input,

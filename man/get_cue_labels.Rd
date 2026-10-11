@@ -6,6 +6,7 @@
 \alias{get_cue_labels,MVBU_StanfitPosterior-method}
 \alias{get_cue_labels,MVBU_ModelList-method}
 \alias{get_cue_labels,MVBU_Object-method}
+\alias{get_cue_labels,MVBeliefUpdatr::MNIX_EarlyIdealAdaptor-method}
 \alias{get_cue_labels,MVBU_Stanfit-method}
 \title{Get cue labels from a representation, template, or model}
 \usage{
@@ -18,6 +19,9 @@ get_cue_labels(x, indices = NULL, ...)
 get_cue_labels(x, indices = NULL, ...)
 
 ## S7 method for class <MVBU_Object>
+get_cue_labels(x, indices = NULL, ...)
+
+## S7 method for class <MVBeliefUpdatr::MNIX_EarlyIdealAdaptor>
 get_cue_labels(x, indices = NULL, ...)
 
 ## S7 method for class <MVBU_Stanfit>

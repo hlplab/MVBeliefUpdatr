@@ -11,6 +11,7 @@ example_ideal_adaptor_stanfit_input(
   categories = c("/d/", "/t/"),
   control = control_staninput(),
   data = NULL,
+  stanmodel = NULL,
   ...
 )
 
@@ -37,6 +38,11 @@ Default: \code{c("/d/", "/t/")}.}
 \item{data}{Optional list of \code{exposure} and \code{test} tibbles as
 returned by \code{\link{example_exposure_test_data}}. If \code{NULL}
 (default), data are generated via \code{\link{example_exposure_test_data}}.}
+
+\item{stanmodel}{Optional character string naming the Stan model.
+Defaults to \code{"MNIX_ideal_adaptor_ideal_integrator"} when
+\code{model_family == "MNIX"} and \code{"<model_family>_ideal_adaptor"}
+otherwise.}
 
 \item{...}{Additional arguments passed to
 \code{\link{example_exposure_test_data}} when \code{data} is \code{NULL}.}

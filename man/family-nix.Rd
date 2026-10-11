@@ -26,17 +26,19 @@ new_nix_category_representation(
 new_nix_category_representation_from_data(
   data,
   category = "category",
-  cues,
+  cues = "cue",
   kappa = nu,
-  nu = 3
+  nu = 3,
+  ...
 )
 
 new_nix_category_representation_template_from_data(
   data,
   category = "category",
-  cues,
+  cues = "cue",
   kappa = nu,
-  nu = 3
+  nu = 3,
+  ...
 )
 
 new_nix_ideal_adaptor(
@@ -54,7 +56,7 @@ new_nix_ideal_adaptor(
 new_nix_ideal_adaptor_from_data(
   data,
   category = "category",
-  cues,
+  cues = "cue",
   kappa = nu,
   nu = 3,
   decision_rule = "sampling",
@@ -67,7 +69,7 @@ new_nix_ideal_adaptor_from_data(
 )
 }
 \arguments{
-\item{metadata}{Optional list of metadata.}
+\item{metadata}{Optional list of metadata. Defaults to \code{list()}.}
 
 \item{m}{Numeric scalar location hyperparameter.}
 
@@ -88,6 +90,8 @@ cue dimension is allowed.}
 
 \item{cues}{Character string indicating the cue column in \code{data}. Defaults to \code{"cue"}.}
 
+\item{...}{Additional arguments passed to methods or constructors.}
+
 \item{category_template}{An \link{MVBU_CategoryRepresentationTemplate} object
 containing NIX category representations.}
 
@@ -101,16 +105,16 @@ probabilities summing to 1. Defaults to equal priors.}
 to 0.}
 
 \item{lapse_bias}{Optional numeric vector of lapse category probabilities
-summing to 1.}
+summing to 1. Defaults to uniform bias \code{1/M}.}
 
 \item{Sigma_noise}{Optional perceptual/measurement noise covariance matrix
 or scalar variance.}
 
 \item{noise_treatment}{Treatment of noise: \code{"no_noise"}, \code{"sample"}, or
-\code{"marginalize"}.}
+\code{"marginalize"}. Defaults to \code{"no_noise"}.}
 
 \item{lapse_treatment}{Treatment of lapses: \code{"no_lapses"}, \code{"sample"}, or
-\code{"marginalize"}.}
+\code{"marginalize"}. Defaults to \code{"no_lapses"}.}
 }
 \value{
 An S7 object of the respective NIX class.

@@ -70,7 +70,7 @@ update_NIW_belief_m <- function(kappa_0, m_0, x_N, x_mean) {
 #' @export
 update_NIW_belief_S <- function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) {
   lifecycle::deprecate_warn("0.1.0", "update_NIW_belief_S()", with = "update_category_representation()")
-  .update_NIW_category_representation_S(kappa_0, m_0, S_0, x_N, x_mean, x_SS)
+  .update_NIW_category_representation_S(kappa_0, m_0, S_0, x_N, x_mean, x_css = x_SS)
 }
 
 
@@ -93,7 +93,7 @@ update_NIW_belief_S <- function(kappa_0, m_0, S_0, x_N, x_mean, x_SS) {
 update_NIW_belief_by_sufficient_statistics_of_one_category <- function(prior_model, x_category = NULL, x_mean, x_SS, x_N, ...) {
   lifecycle::deprecate_warn("0.1.0", "update_NIW_belief_by_sufficient_statistics_of_one_category()", with = "update_category_representation()")
   .assert_true(S7::S7_inherits(prior_model, NIW_CategoryRepresentation), msg = "prior_model must be an NIW_CategoryRepresentation; legacy tibble inputs are no longer supported.")
-  .update_NIW_category_representation_by_sufficient_statistics(prior_model, x_mean, x_SS, x_N)
+  .update_NIW_category_representation_by_sufficient_statistics(prior_model, x_mean = x_mean, x_css = x_SS, x_N = x_N)
 }
 
 #' Deprecated: update_NIW_belief_by_one_observation
@@ -121,7 +121,7 @@ update_NIW_belief_by_one_observation <- function(prior_model, x_category, x, noi
       prior_model,
       x_N = 1,
       x_mean = observation,
-      x_SS = matrix(0, nrow = length(observation), ncol = length(observation))
+      x_css = matrix(0, nrow = length(observation), ncol = length(observation))
     ))
   }
   .assert_true(S7::S7_inherits(prior_model, NIW_IdealAdaptor), msg = "prior_model must be an NIW S7 representation or ideal-adaptor model; legacy tibble inputs are no longer supported.")

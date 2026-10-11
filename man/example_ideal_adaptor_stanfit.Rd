@@ -12,6 +12,7 @@ example_ideal_adaptor_stanfit(
   staninput_control = MVBeliefUpdatr::control_staninput(),
   file = NULL,
   file_refit = c("on_change", "never", "always"),
+  stanmodel = NULL,
   ...
 )
 }
@@ -40,6 +41,11 @@ created by \code{\link{control_staninput}}. Default:
 \item{file_refit}{Character string controlling cache behavior when
 \code{file} is specified: \code{"on_change"} (default),
 \code{"never"}, or \code{"always"}. See \code{\link{fit_ideal_adaptor}}.}
+
+\item{stanmodel}{Optional character string naming the Stan model.
+Defaults to \code{"MNIX_ideal_adaptor_ideal_integrator"} when
+\code{model_family == "MNIX"} and \code{"<model_family>_ideal_adaptor"}
+otherwise.}
 
 \item{...}{Additional arguments passed to \code{\link{fit_ideal_adaptor}}
 (e.g., sampler arguments such as \code{chains}, \code{iter},

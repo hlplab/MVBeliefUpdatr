@@ -12,16 +12,36 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 
-RcppExport SEXP _rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_category_weighted_integrator_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_group_category_weighted_integrator_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_group_weighted_integrator_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_ideal_integrator_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_informativity_weighted_integrator_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_weighted_integrator_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4NIW_ideal_adaptor_mod();
-RcppExport SEXP _rcpp_module_boot_stan_fit4NIW_ideal_adaptor_cholesky_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4NIX_ideal_adaptor_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4category_weighted_integrator_MNIX_ideal_adaptor_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4group_category_weighted_integrator_MNIX_ideal_adaptor_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4group_weighted_integrator_MNIX_ideal_adaptor_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4ideal_integrator_MNIX_ideal_adaptor_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4informativity_weighted_integrator_MNIX_ideal_adaptor_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4weighted_integrator_MNIX_ideal_adaptor_mod();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_mod, 0},
+    {"_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_category_weighted_integrator_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_category_weighted_integrator_mod, 0},
+    {"_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_group_category_weighted_integrator_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_group_category_weighted_integrator_mod, 0},
+    {"_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_group_weighted_integrator_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_group_weighted_integrator_mod, 0},
+    {"_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_ideal_integrator_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_ideal_integrator_mod, 0},
+    {"_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_informativity_weighted_integrator_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_informativity_weighted_integrator_mod, 0},
+    {"_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_weighted_integrator_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4MNIX_ideal_adaptor_weighted_integrator_mod, 0},
     {"_rcpp_module_boot_stan_fit4NIW_ideal_adaptor_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4NIW_ideal_adaptor_mod, 0},
-    {"_rcpp_module_boot_stan_fit4NIW_ideal_adaptor_cholesky_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4NIW_ideal_adaptor_cholesky_mod, 0},
     {"_rcpp_module_boot_stan_fit4NIX_ideal_adaptor_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4NIX_ideal_adaptor_mod, 0},
+    {"_rcpp_module_boot_stan_fit4category_weighted_integrator_MNIX_ideal_adaptor_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4category_weighted_integrator_MNIX_ideal_adaptor_mod, 0},
+    {"_rcpp_module_boot_stan_fit4group_category_weighted_integrator_MNIX_ideal_adaptor_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4group_category_weighted_integrator_MNIX_ideal_adaptor_mod, 0},
+    {"_rcpp_module_boot_stan_fit4group_weighted_integrator_MNIX_ideal_adaptor_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4group_weighted_integrator_MNIX_ideal_adaptor_mod, 0},
+    {"_rcpp_module_boot_stan_fit4ideal_integrator_MNIX_ideal_adaptor_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4ideal_integrator_MNIX_ideal_adaptor_mod, 0},
+    {"_rcpp_module_boot_stan_fit4informativity_weighted_integrator_MNIX_ideal_adaptor_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4informativity_weighted_integrator_MNIX_ideal_adaptor_mod, 0},
+    {"_rcpp_module_boot_stan_fit4weighted_integrator_MNIX_ideal_adaptor_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4weighted_integrator_MNIX_ideal_adaptor_mod, 0},
     {NULL, NULL, 0}
 };
 

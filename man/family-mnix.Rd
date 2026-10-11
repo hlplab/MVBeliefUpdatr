@@ -8,8 +8,40 @@
 \alias{new_mnix_category_representation_from_data}
 \alias{new_mnix_category_representation_template_from_data}
 \alias{MNIX_IdealAdaptor}
+\alias{MNIX_LateIdealAdaptor}
+\alias{MNIX_EarlyIdealAdaptor}
+\alias{MNIX_IdealAdaptor_IdealIntegrator}
+\alias{MNIX_IdealAdaptor_WeightedIntegrator}
+\alias{MNIX_IdealAdaptor_CategoryWeightedIntegrator}
+\alias{MNIX_IdealAdaptor_GroupWeightedIntegrator}
+\alias{MNIX_IdealAdaptor_GroupCategoryWeightedIntegrator}
+\alias{MNIX_IdealAdaptor_InformativityWeightedIntegrator}
+\alias{IdealIntegrator_MNIX_IdealAdaptor}
+\alias{WeightedIntegrator_MNIX_IdealAdaptor}
+\alias{CategoryWeightedIntegrator_MNIX_IdealAdaptor}
+\alias{GroupWeightedIntegrator_MNIX_IdealAdaptor}
+\alias{GroupCategoryWeightedIntegrator_MNIX_IdealAdaptor}
+\alias{InformativityWeightedIntegrator_MNIX_IdealAdaptor}
+\alias{new_mnix_ideal_adaptor_ideal_integrator}
+\alias{new_mnix_ideal_adaptor_weighted_integrator}
+\alias{new_mnix_ideal_adaptor_category_weighted_integrator}
+\alias{new_mnix_ideal_adaptor_group_weighted_integrator}
+\alias{new_mnix_ideal_adaptor_group_category_weighted_integrator}
+\alias{new_mnix_ideal_adaptor_informativity_weighted_integrator}
 \alias{new_mnix_ideal_adaptor}
 \alias{new_mnix_ideal_adaptor_from_data}
+\alias{new_ideal_integrator_mnix_ideal_adaptor}
+\alias{new_ideal_integrator_mnix_ideal_adaptor_from_data}
+\alias{new_weighted_integrator_mnix_ideal_adaptor}
+\alias{new_weighted_integrator_mnix_ideal_adaptor_from_data}
+\alias{new_category_weighted_integrator_mnix_ideal_adaptor}
+\alias{new_group_weighted_integrator_mnix_ideal_adaptor}
+\alias{new_group_category_weighted_integrator_mnix_ideal_adaptor}
+\alias{new_informativity_weighted_integrator_mnix_ideal_adaptor}
+\alias{MNIX_IdealAdaptor_AdaptiveWeightedIntegrator}
+\alias{MNIX_IdealAdaptor_CategoryAdaptiveWeightedIntegrator}
+\alias{new_mnix_ideal_adaptor_adaptive_weighted_integrator}
+\alias{new_mnix_ideal_adaptor_category_adaptive_weighted_integrator}
 \title{Multi-Cue Normal-Inverse-Chi-Squared (MNIX) Family:
 Representations, Templates, and Models}
 \usage{
@@ -42,8 +74,86 @@ new_mnix_category_representation_template_from_data(
   ...
 )
 
+new_mnix_ideal_adaptor_ideal_integrator(
+  category_template = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  metadata = list()
+)
+
+new_mnix_ideal_adaptor_weighted_integrator(
+  category_template = NULL,
+  weights = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  metadata = list()
+)
+
+new_mnix_ideal_adaptor_category_weighted_integrator(
+  category_template = NULL,
+  weights = NULL,
+  weights_matrix = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  metadata = list()
+)
+
+new_mnix_ideal_adaptor_group_weighted_integrator(
+  category_template = NULL,
+  weights = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  metadata = list()
+)
+
+new_mnix_ideal_adaptor_group_category_weighted_integrator(
+  category_template = NULL,
+  weights = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  metadata = list()
+)
+
+new_mnix_ideal_adaptor_informativity_weighted_integrator(
+  category_template = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  metadata = list()
+)
+
 new_mnix_ideal_adaptor(
   category_template = NULL,
+  weights = NULL,
   decision_rule = "sampling",
   category_prior = NULL,
   lapse_rate = 0,
@@ -60,6 +170,7 @@ new_mnix_ideal_adaptor_from_data(
   cues,
   kappa = nu,
   nu = 3,
+  weights = NULL,
   decision_rule = "sampling",
   category_prior = NULL,
   lapse_rate = 0,
@@ -69,24 +180,386 @@ new_mnix_ideal_adaptor_from_data(
   lapse_treatment = "no_lapses",
   ...
 )
+
+new_ideal_integrator_mnix_ideal_adaptor(
+  category_template = NULL,
+  cues = NULL,
+  input_cues = NULL,
+  weights = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  metadata = list(),
+  ...
+)
+
+new_ideal_integrator_mnix_ideal_adaptor_from_data(
+  data,
+  category = "category",
+  cues,
+  kappa = nu,
+  nu = 3,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses"
+)
+
+new_weighted_integrator_mnix_ideal_adaptor(
+  category_template = NULL,
+  weights = NULL,
+  cues = NULL,
+  input_cues = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  metadata = list()
+)
+
+new_weighted_integrator_mnix_ideal_adaptor_from_data(
+  data,
+  category = "category",
+  cues,
+  weights = NULL,
+  kappa = nu,
+  nu = 3,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses"
+)
+
+new_category_weighted_integrator_mnix_ideal_adaptor(
+  category_template = NULL,
+  weights = NULL,
+  weights_matrix = NULL,
+  cues = NULL,
+  input_cues = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  metadata = list()
+)
+
+new_group_weighted_integrator_mnix_ideal_adaptor(
+  category_template = NULL,
+  weights = NULL,
+  cues = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  metadata = list()
+)
+
+new_group_category_weighted_integrator_mnix_ideal_adaptor(
+  category_template = NULL,
+  weights = NULL,
+  cues = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  metadata = list()
+)
+
+new_informativity_weighted_integrator_mnix_ideal_adaptor(
+  category_template = NULL,
+  cues = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses",
+  metadata = list()
+)
+
+MNIX_IdealAdaptor_AdaptiveWeightedIntegrator(
+  category_template = (structure(function (representations = list(), metadata =
+    list(parameters = list())) 
+ new_object(MVBU_Object(), representations =
+    representations, metadata = metadata), name = "MVBU_CategoryRepresentationTemplate",
+    parent = structure(function () 
+ {
+     S7::new_object(S7::S7_object())
+ }, name =
+    "MVBU_Object", parent = structure(function () 
+ {
+     .Call(S7_object_)
+ }, name =
+    "S7_object", properties = list(), abstract = FALSE, constructor = function () 
+ {
+   
+     .Call(S7_object_)
+ }, validator = function (self) 
+ {
+     if (!is_S7_type(self)) {
+
+            "Underlying data is corrupt"
+     }
+ }, class = c("S7_class", "S7_object")),
+    properties = list(), abstract = FALSE, constructor = function () 
+ {
+    
+    S7::new_object(S7::S7_object())
+ }, class = c("S7_class", "S7_object")), properties =
+    list(representations = structure(list(name = "representations", class =
+    structure(list(class = "list", constructor_name = "list", constructor = function
+    (.data = list()) 
+ .data, validator = function (object) 
+ {
+     if
+    (base_class(object) != name) {
+        
+    sprintf("Underlying data must be <\%s> not <\%s>", name, base_class(object))
+     }
+
+    }), class = "S7_base_class"), getter = NULL, setter = NULL, validator = NULL, default
+    = NULL), class = "S7_property"), metadata = structure(list(name = "metadata", class =
+    structure(list(class = "list", constructor_name = "list", constructor = function
+    (.data = list()) 
+ .data, validator = function (object) 
+ {
+     if
+    (base_class(object) != name) {
+        
+    sprintf("Underlying data must be <\%s> not <\%s>", name, base_class(object))
+     }
+
+    }), class = "S7_base_class"), getter = NULL, setter = function (self, value) 
+ {
+    
+    val <- as.list(value)
+     if (is.null(val$parameters)) {
+         reps <-
+    tryCatch(self@representations, error = function(e) list())
+         if (length(reps)
+    > 0) {
+             val$parameters <- lapply(reps, function(r) {
+                
+    tryCatch(get_parameters(r), error = function(e) list())
+             })
+            
+    if (!is.null(names(reps))) {
+                 names(val$parameters) <- names(reps)
+  
+              }
+         }
+         else {
+             val$parameters <- list()
+        
+    }
+     }
+     self@metadata <- val
+     self
+ }, validator = NULL, default =
+    list(parameters = list())), class = "S7_property")), abstract = FALSE, constructor =
+    function (representations = list(), metadata = list(parameters = list())) 
+
+    new_object(MVBU_Object(), representations = representations, metadata = metadata),
+    validator = function (self) 
+ {
+     if (length(self@representations) < 1) {
+        
+    return(paste0("representations must contain at least one ",
+    "category representation object."))
+     }
+     if (!all(vapply(self@representations,
+    function(r) S7::S7_inherits(r, MVBU_CategoryRepresentation), logical(1)))) {
+        
+    return(paste0("all representations entries must inherit from ",
+    "MVBU_CategoryRepresentation."))
+     }
+     repr_names <-
+    names(self@representations)
+     if (!is.null(repr_names)) {
+         if
+    (length(repr_names) != length(self@representations) || any(repr_names == "") ||
+    anyDuplicated(repr_names) > 0) {
+            
+    return("if representations are named, names must be non-empty and unique.")
+        
+    }
+     }
+     NULL
+ }, class = c("S7_class", "S7_object")))(),
+  category_posterior_functions = list(),
+  decision_rule = character(0),
+  category_prior = integer(0),
+  lapse_behavior = list(),
+  noise_behavior = list(),
+  metadata = list(parameters = list()),
+  cache = list()
+)
+
+MNIX_IdealAdaptor_CategoryAdaptiveWeightedIntegrator(
+  category_template = (structure(function (representations = list(), metadata =
+    list(parameters = list())) 
+ new_object(MVBU_Object(), representations =
+    representations, metadata = metadata), name = "MVBU_CategoryRepresentationTemplate",
+    parent = structure(function () 
+ {
+     S7::new_object(S7::S7_object())
+ }, name =
+    "MVBU_Object", parent = structure(function () 
+ {
+     .Call(S7_object_)
+ }, name =
+    "S7_object", properties = list(), abstract = FALSE, constructor = function () 
+ {
+   
+     .Call(S7_object_)
+ }, validator = function (self) 
+ {
+     if (!is_S7_type(self)) {
+
+            "Underlying data is corrupt"
+     }
+ }, class = c("S7_class", "S7_object")),
+    properties = list(), abstract = FALSE, constructor = function () 
+ {
+    
+    S7::new_object(S7::S7_object())
+ }, class = c("S7_class", "S7_object")), properties =
+    list(representations = structure(list(name = "representations", class =
+    structure(list(class = "list", constructor_name = "list", constructor = function
+    (.data = list()) 
+ .data, validator = function (object) 
+ {
+     if
+    (base_class(object) != name) {
+        
+    sprintf("Underlying data must be <\%s> not <\%s>", name, base_class(object))
+     }
+
+    }), class = "S7_base_class"), getter = NULL, setter = NULL, validator = NULL, default
+    = NULL), class = "S7_property"), metadata = structure(list(name = "metadata", class =
+    structure(list(class = "list", constructor_name = "list", constructor = function
+    (.data = list()) 
+ .data, validator = function (object) 
+ {
+     if
+    (base_class(object) != name) {
+        
+    sprintf("Underlying data must be <\%s> not <\%s>", name, base_class(object))
+     }
+
+    }), class = "S7_base_class"), getter = NULL, setter = function (self, value) 
+ {
+    
+    val <- as.list(value)
+     if (is.null(val$parameters)) {
+         reps <-
+    tryCatch(self@representations, error = function(e) list())
+         if (length(reps)
+    > 0) {
+             val$parameters <- lapply(reps, function(r) {
+                
+    tryCatch(get_parameters(r), error = function(e) list())
+             })
+            
+    if (!is.null(names(reps))) {
+                 names(val$parameters) <- names(reps)
+  
+              }
+         }
+         else {
+             val$parameters <- list()
+        
+    }
+     }
+     self@metadata <- val
+     self
+ }, validator = NULL, default =
+    list(parameters = list())), class = "S7_property")), abstract = FALSE, constructor =
+    function (representations = list(), metadata = list(parameters = list())) 
+
+    new_object(MVBU_Object(), representations = representations, metadata = metadata),
+    validator = function (self) 
+ {
+     if (length(self@representations) < 1) {
+        
+    return(paste0("representations must contain at least one ",
+    "category representation object."))
+     }
+     if (!all(vapply(self@representations,
+    function(r) S7::S7_inherits(r, MVBU_CategoryRepresentation), logical(1)))) {
+        
+    return(paste0("all representations entries must inherit from ",
+    "MVBU_CategoryRepresentation."))
+     }
+     repr_names <-
+    names(self@representations)
+     if (!is.null(repr_names)) {
+         if
+    (length(repr_names) != length(self@representations) || any(repr_names == "") ||
+    anyDuplicated(repr_names) > 0) {
+            
+    return("if representations are named, names must be non-empty and unique.")
+        
+    }
+     }
+     NULL
+ }, class = c("S7_class", "S7_object")))(),
+  category_posterior_functions = list(),
+  decision_rule = character(0),
+  category_prior = integer(0),
+  lapse_behavior = list(),
+  noise_behavior = list(),
+  metadata = list(parameters = list()),
+  cache = list()
+)
+
+new_mnix_ideal_adaptor_adaptive_weighted_integrator(...)
+
+new_mnix_ideal_adaptor_category_adaptive_weighted_integrator(...)
 }
 \arguments{
-\item{metadata}{Optional list of metadata.}
+\item{metadata}{Optional list of metadata. Defaults to \code{list()}.}
 
 \item{m}{Numeric vector of per-cue location hyperparameters.}
 
-\item{kappa}{Positive numeric scalar or vector of per-cue
-precision scalings (\eqn{\kappa > 0}). If a scalar is provided, it is
-recycled across all cue components.}
+\item{kappa}{Positive numeric scalar or vector of precision scalings (\eqn{\kappa > 0}).
+For late integration, a vector of length equal to cues (or scalar recycled across cues).
+For early integration, a scalar reflecting composite dimension belief strength.}
 
-\item{nu}{Positive numeric scalar or vector of per-cue degrees of
-freedom (\eqn{\nu > 2}). If a scalar is provided, it is recycled across
-all cue components.}
+\item{nu}{Positive numeric scalar or vector of degrees of freedom (\eqn{\nu > 2}).
+For late integration, a vector of length equal to cues (or scalar recycled across cues).
+For early integration, a scalar reflecting composite dimension degrees of freedom.}
 
 \item{sigma2}{Numeric vector of per-cue scale parameters.}
 
-\item{weights}{Optional numeric vector of component weights
-summing to 1.}
+\item{weights}{Numeric vector or matrix of integration/attention weights.
+For representations and global weighted models, a numeric simplex vector summing to 1.
+For category-weighted models, an \eqn{M \times K} matrix whose rows each sum to 1.
+For group-weighted models, an \eqn{L \times K} matrix whose rows each sum to 1.
+For group-category-weighted models, a 3D array or list of matrices.}
 
 \item{category_labels}{Character vector of category label(s).}
 
@@ -96,7 +569,7 @@ summing to 1.}
 
 \item{category}{Character string indicating the category column in \code{data}. Defaults to \code{"category"}.}
 
-\item{cues}{Character vector indicating cue columns in \code{data}.}
+\item{cues}{Character vector indicating cue columns in \code{data} (at least 2 cues).}
 
 \item{...}{Additional arguments passed to methods or constructors.}
 
@@ -109,33 +582,42 @@ containing MNIX category representations.}
 \item{category_prior}{Optional numeric vector of prior category
 probabilities summing to 1. Defaults to equal priors.}
 
-\item{lapse_rate}{Numeric scalar lapse probability in \verb{[0, 1]}. Defaults
-to 0.}
+\item{lapse_rate}{Numeric scalar lapse probability in \verb{[0, 1]}. Defaults to 0.}
 
 \item{lapse_bias}{Optional numeric vector of lapse category probabilities
-summing to 1.}
+summing to 1. Defaults to uniform bias \code{1/M}.}
 
-\item{Sigma_noise}{Optional perceptual/measurement noise covariance matrix
-or vector.}
+\item{Sigma_noise}{Optional perceptual/measurement noise covariance matrix or vector.}
 
 \item{noise_treatment}{Treatment of noise: \code{"no_noise"}, \code{"sample"}, or
-\code{"marginalize"}.}
+\code{"marginalize"}. Defaults to \code{"no_noise"}.}
 
 \item{lapse_treatment}{Treatment of lapses: \code{"no_lapses"}, \code{"sample"}, or
-\code{"marginalize"}.}
+\code{"marginalize"}. Defaults to \code{"no_lapses"}.}
+
+\item{weights_matrix}{Deprecated. Use \code{weights} instead.}
+
+\item{input_cues}{Deprecated. Use \code{cues} instead.}
 }
 \value{
 An S7 object of the respective MNIX class.
 }
 \description{
 Constructs and manages multi-cue Normal-Inverse-\eqn{\chi^2} (MNIX) category
-representations, templates, and ideal adaptors.
+representations, templates, and ideal adaptors under early and late cue integration.
 }
 \details{
-Under independent cue integration, the category likelihood is the product
-of marginal Student-\eqn{t} predictive components across cues:
-\deqn{p(\mathbf{x} \mid c) = \prod_{i=1}^D \frac{1}{s_i}
-t_{\nu_i}\!\left(\frac{x_i - m_i}{s_i}\right)}
+The MNIX family unifies multi-cue belief updating under both late and early
+integration regimes:
+\itemize{
+\item \strong{Late Integration}: Categories are represented by independent marginal
+Student-\eqn{t} predictive components along each cue dimension (\eqn{\kappa} and \eqn{\nu}
+have length \eqn{K}). Cue log-likelihoods are combined at decision time via Bayes rule
+or attention weights.
+\item \strong{Early Integration}: Multi-cue observations are projected to a composite
+dimension \eqn{z = \mathbf{w}^\top \mathbf{x}} prior to updating (\eqn{\kappa} and \eqn{\nu}
+are scalar length 1).
+}
 }
 \seealso{
 \link{family-muvg}, \link{family-niw}, \link{family-nix}

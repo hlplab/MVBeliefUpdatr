@@ -52,7 +52,8 @@ make_ideal_adaptor_stanfit_input(
 
 \item{control}{A list of control parameters for the constructor, typically produced by \code{control_staninput()}.}
 
-\item{stanmodel}{Character string naming the Stan model. Must be one of \code{NIX_ideal_adaptor}, \code{NIW_ideal_adaptor}, or \code{MNIX_ideal_adaptor}.}
+\item{stanmodel}{Character string naming the Stan model. Must be one of
+the supported model names in \code{stanmodels}.}
 }
 \value{
 A list with components \code{staninput}, \code{data}, and \code{transform_information}.

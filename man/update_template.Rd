@@ -55,42 +55,39 @@ update_template(
 )
 }
 \arguments{
-\item{x}{An \code{MNIX_IdealAdaptor} object.}
+\item{x}{An \code{NIW_IdealAdaptor}, \code{NIX_IdealAdaptor}, or \code{MNIX_IdealAdaptor} object.}
 
-\item{observations}{A data.frame or tibble containing cue columns and category label.}
+\item{observations}{A data.frame or tibble containing cue columns and, for
+\code{update_method = "label-certain"}, a \code{category} column.}
 
 \item{updating}{Either \code{"batch"} or \code{"incremental"}. Batch updates are
-currently supported only for \code{update_method = "label-certain"}.}
+currently supported only for \code{update_method = "label-certain"}. Default is \code{"batch"}.}
 
 \item{keep_history}{If \code{TRUE} with incremental updating, return a list of
-all intermediate models followed by the final model.}
+all intermediate models followed by the final model. Default is \code{FALSE}.}
 
-\item{lapse_treatment}{Either \code{"no_lapses"}, \code{"sample"}, or \code{"marginalize"}.}
+\item{lapse_treatment}{Either \code{"no_lapses"}, \code{"sample"}, or \code{"marginalize"}. Default is \code{"no_lapses"}.}
 
-\item{noise_treatment}{Either \code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}.}
+\item{noise_treatment}{Either \code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}. Default is \code{"no_noise"}.}
 
 \item{update_method}{One of \code{"no-updating"}, \code{"label-certain"},
 \code{"nolabel-criterion"}, \code{"nolabel-sampling"},
-\code{"nolabel-proportional"}, or \code{"nolabel-uniform"}.}
+\code{"nolabel-proportional"}, or \code{"nolabel-uniform"}. Default is \code{"label-certain"}.}
 
-\item{...}{Additional options.}
+\item{...}{Additional arguments passed to methods.}
 }
 \value{
 An updated model, or a history of updated models when requested by a method.
 
 The updated model, or a list of intermediate models when
 \code{updating = "incremental"} and \code{keep_history = TRUE}.
-
-The updated \code{NIX_IdealAdaptor} model.
-
-The updated \code{MNIX_IdealAdaptor} model.
 }
 \description{
 Currently implemented for \code{NIW_IdealAdaptor}; methods for other model types
 will be added as their update workflows are migrated to S7.
 
-\code{update_template()} is currently implemented for \code{NIW_IdealAdaptor} models.
-Future methods will support additional model types.
+\code{update_template()} updates the category template representations of an ideal adaptor
+model (\code{NIW_IdealAdaptor}, \code{NIX_IdealAdaptor}, or \code{MNIX_IdealAdaptor}) given new observations.
 }
 \seealso{
 \code{\link{update_category_representation}}

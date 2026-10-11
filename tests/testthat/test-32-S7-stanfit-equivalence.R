@@ -42,41 +42,45 @@ test_that(
   mod_nix <- stanmodels$NIX_ideal_adaptor
   mod_niw <- stanmodels$NIW_ideal_adaptor
 
-  fit_nix_init <- rstan::sampling(
-    mod_nix,
-    data = input_nix@staninput@values,
-    iter = 1,
-    chains = 1,
-    warmup = 0,
-    refresh = 0
+  fit_nix_init <- suppressWarnings(
+    rstan::sampling(
+      mod_nix,
+      data = input_nix@staninput@values,
+      iter = 1,
+      chains = 1,
+      warmup = 0,
+      refresh = 0
+    )
   )
-  fit_niw_init <- rstan::sampling(
-    mod_niw,
-    data = input_niw@staninput@values,
-    iter = 1,
-    chains = 1,
-    warmup = 0,
-    refresh = 0
+  fit_niw_init <- suppressWarnings(
+    rstan::sampling(
+      mod_niw,
+      data = input_niw@staninput@values,
+      iter = 1,
+      chains = 1,
+      warmup = 0,
+      refresh = 0
+    )
   )
 
   init_params_nix <- list(
     kappa_0 = 10,
     nu_0 = 15,
     lapse_rate_param = array(0.05, dim = 1),
-    m_0_param = c(-0.5, 0.5),
-    m_0_tau = array(1.5, dim = 1),
-    tau_0_param = c(1.2, 1.8)
+    m_0_param_transformed = c(-0.5, 0.5),
+    m_0_tau_transformed = array(1.5, dim = 1),
+    tau_0_param_transformed = c(1.2, 1.8)
   )
 
   init_params_niw <- list(
     kappa_0 = 10,
     nu_0 = 15,
     lapse_rate_param = array(0.05, dim = 1),
-    m_0_param = array(c(-0.5, 0.5), dim = c(2, 1)),
-    m_0_tau = array(1.5, dim = 1),
-    m_0_L_omega = matrix(1, nrow = 1, ncol = 1),
-    tau_0_param = array(c(1.2, 1.8), dim = c(2, 1)),
-    L_omega_0_param = array(1, dim = c(2, 1, 1))
+    m_0_param_transformed = array(c(-0.5, 0.5), dim = c(2, 1)),
+    m_0_tau_transformed = array(1.5, dim = 1),
+    m_0_L_omega_transformed = matrix(1, nrow = 1, ncol = 1),
+    tau_0_param_transformed = array(c(1.2, 1.8), dim = c(2, 1)),
+    L_omega_0_param_transformed = array(1, dim = c(2, 1, 1))
   )
 
   u_nix <- rstan::unconstrain_pars(fit_nix_init, init_params_nix)

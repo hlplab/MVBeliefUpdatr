@@ -78,7 +78,11 @@ Before fitting a model in Stan, raw participant observations (containing continu
 The input pipeline:
 1. Standardizes or scales continuous cue dimensions (e.g., z-scoring relative to exposure distribution).
 2. Sets up conjugate prior distributions over category parameters (e.g., mean $m_0$, scatter matrix $S_0$, prior sample size $\kappa_0$, and degrees of freedom $\nu_0$).
-3. Creates a strongly typed `IdealAdaptorStanfitInput` or `IdealObserverStanfitInput` S7 object.
+3. Creates a strongly typed S7 input object based on the cognitive model family and integration architecture:
+   - **NIW**: `NIW_IdealAdaptorStaninput` (multivariate full covariance updating)
+   - **NIX**: `NIX_IdealAdaptorStaninput` (single-cue univariate updating)
+   - **Early Integration (MNIX)**: `{Integrator}_MNIX_IdealAdaptorStaninput` (e.g., `IdealIntegrator_MNIX_IdealAdaptorStaninput`, `WeightedIntegrator_MNIX_IdealAdaptorStaninput`, `CategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput`, etc.; early projection $z = \mathbf{w}^T \mathbf{x}$ followed by 1D updating)
+   - **Late Integration (MNIX)**: `MNIX_IdealAdaptor_{Integrator}Staninput` (e.g., `MNIX_IdealAdaptor_IdealIntegratorStaninput`, `MNIX_IdealAdaptor_WeightedIntegratorStaninput`, `MNIX_IdealAdaptor_CategoryWeightedIntegratorStaninput`, etc.; independent per-cue NIX distributions with late decision-level weighting)
 
 ```{r prepare_staninput_example, eval = FALSE}
 # Construct standard 2-cue NIW ideal adaptor Stanfit input

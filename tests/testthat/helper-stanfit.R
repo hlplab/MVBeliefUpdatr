@@ -86,7 +86,15 @@ get_example_stanfit <- function(
     }
   }
 
-  model_family <- sub("_ideal_adaptor$", "", stanmodel)
+  model_family <- if (grepl("MNIX", stanmodel)) {
+    "MNIX"
+  } else if (grepl("NIW", stanmodel)) {
+    "NIW"
+  } else if (grepl("NIX", stanmodel)) {
+    "NIX"
+  } else {
+    sub("_ideal_adaptor.*$", "", stanmodel)
+  }
   example_ideal_adaptor_stanfit(
     model_family = model_family,
     n_cues = example,
@@ -94,6 +102,7 @@ get_example_stanfit <- function(
     staninput_control = control,
     file = filename,
     file_refit = file_refit,
+    stanmodel = stanmodel,
     silent = silent,
     refresh = refresh,
     ...
@@ -106,8 +115,7 @@ get_full_stanfit <- function(
   ...
 ) {
   family <- match.arg(family)
-  switch(
-    family,
+  switch(family,
     NIX = get_example_stanfit(
       example = 1L,
       stanmodel = "NIX_ideal_adaptor",
@@ -116,7 +124,7 @@ get_full_stanfit <- function(
     ),
     MNIX = get_example_stanfit(
       example = 2L,
-      stanmodel = "MNIX_ideal_adaptor",
+      stanmodel = "MNIX_ideal_adaptor_ideal_integrator",
       file_refit = file_refit,
       ...
     ),
@@ -139,8 +147,7 @@ get_minimal_stanfit <- function(
   if (is.null(n_cues)) {
     n_cues <- if (family == "NIX") 1L else 2L
   }
-  filename <- switch(
-    family,
+  filename <- switch(family,
     NIX = "minimal-nix_ideal_adaptor-NIX.rds",
     MNIX = "minimal-mnix_ideal_adaptor-MNIX-2cue.rds",
     NIW = if (n_cues == 1L) {
@@ -198,6 +205,8 @@ run_fixed_param_stan_program <- function(stan_file, input, model_name) {
       model <- pkg_models[[model_key]]
     } else if (!is.null(pkg_models[[paste0(model_key, "_ideal_adaptor")]])) {
       model <- pkg_models[[paste0(model_key, "_ideal_adaptor")]]
+    } else if (model_key == "MNIX" && !is.null(pkg_models[["MNIX_ideal_adaptor_ideal_integrator"]])) {
+      model <- pkg_models[["MNIX_ideal_adaptor_ideal_integrator"]]
     }
   }
 
