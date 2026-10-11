@@ -196,6 +196,21 @@ test_that("deprecated dplyr verbs forward seamlessly on S7 objects", {
   )
   expect_equal(names(res_reloc)[1], "prior")
 
+  # distinct
+  expect_warning(
+    res_dist <- dplyr::distinct(mvg_model, category),
+    "deprecated"
+  )
+  expect_equal(nrow(res_dist), length(get_category_labels(mvg_model)))
+
+  # droplevels
+  expect_warning(
+    res_drop <- droplevels(mvg_model),
+    "deprecated"
+  )
+  expect_s3_class(res_drop, "tbl_df")
+  expect_equal(nrow(res_drop), length(get_category_labels(mvg_model)))
+
   # Pipe chaining: warning is only issued once at the first conversion
   expect_warning(
     piped <- mvg_model %>%
@@ -205,3 +220,4 @@ test_that("deprecated dplyr verbs forward seamlessly on S7 objects", {
   )
   expect_true("test_col" %in% names(piped))
 })
+

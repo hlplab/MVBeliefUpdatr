@@ -14,7 +14,9 @@ NULL
       "Converting an S7 model/template to a legacy tibble. Note that legacy tibbles ",
       "do not capture all information from the new S7 objects (such as decision_rule, ",
       "noise_treatment, lapse_treatment, and structured validation). ",
-      "Please see vignette(\"s7-class-structure-and-workflows\") for the modern S7 workflow."
+      "For modern S7 workflows, use get_parameters() or summary() to inspect values, ",
+      "or use model constructors/indexing instead of manipulating models as tables. ",
+      "See vignette(\"s7-class-structure-and-workflows\") for details."
     )
   )
 }
@@ -350,4 +352,14 @@ pull.MVBU_Object <- function(.data, ...) {
 #' @exportS3Method dplyr::relocate
 relocate.MVBU_Object <- function(.data, ...) {
   dplyr::relocate(tibble::as_tibble(.data), ...)
+}
+
+#' @exportS3Method dplyr::distinct
+distinct.MVBU_Object <- function(.data, ...) {
+  dplyr::distinct(tibble::as_tibble(.data), ...)
+}
+
+#' @exportS3Method base::droplevels
+droplevels.MVBU_Object <- function(x, except = NULL, ...) {
+  base::droplevels(tibble::as_tibble(x), except = except, ...)
 }
