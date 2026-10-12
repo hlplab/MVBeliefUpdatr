@@ -119,12 +119,40 @@ fit_ideal_adaptor <- function(
   staninput <- stanfit_input@staninput
 
   if (is.null(stanmodel)) {
-    stanmodel <- if (S7::S7_inherits(staninput, NIX_IdealAdaptorStaninput)) {
+    stanmodel <- if (S7::S7_inherits(staninput, IdealIntegrator_MNIX_IdealAdaptorStaninput)) {
+      "ideal_integrator_MNIX_ideal_adaptor"
+    } else if (S7::S7_inherits(staninput, WeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
+      "weighted_integrator_MNIX_ideal_adaptor"
+    } else if (S7::S7_inherits(staninput, CategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
+      "category_weighted_integrator_MNIX_ideal_adaptor"
+    } else if (S7::S7_inherits(staninput, GroupWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
+      "group_weighted_integrator_MNIX_ideal_adaptor"
+    } else if (S7::S7_inherits(staninput, GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
+      "group_category_weighted_integrator_MNIX_ideal_adaptor"
+    } else if (S7::S7_inherits(staninput, InformativityWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
+      "informativity_weighted_integrator_MNIX_ideal_adaptor"
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_IdealIntegratorStaninput)) {
+      "MNIX_ideal_adaptor_ideal_integrator"
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_WeightedIntegratorStaninput)) {
+      "MNIX_ideal_adaptor_weighted_integrator"
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_CategoryWeightedIntegratorStaninput)) {
+      "MNIX_ideal_adaptor_category_weighted_integrator"
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_GroupWeightedIntegratorStaninput)) {
+      "MNIX_ideal_adaptor_group_weighted_integrator"
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStaninput)) {
+      "MNIX_ideal_adaptor_group_category_weighted_integrator"
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_InformativityWeightedIntegratorStaninput)) {
+      "MNIX_ideal_adaptor_informativity_weighted_integrator"
+    } else if (S7::S7_inherits(staninput, NIX_IdealAdaptorStaninput)) {
       "NIX_ideal_adaptor"
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptorStaninput)) {
-      "MNIX_ideal_adaptor"
     } else if (S7::S7_inherits(staninput, NIW_IdealAdaptorStaninput)) {
       "NIW_ideal_adaptor"
+    } else {
+      .stop(
+        "Could not infer a concrete Stan model from 'staninput' of class '",
+        class(staninput)[[1]],
+        "'. Please specify 'stanmodel' explicitly or provide an input object with a concrete integrator class."
+      )
     }
   }
   .assert_that(
@@ -192,7 +220,8 @@ fit_ideal_adaptor <- function(
         "lapse_rate_param",
         "m_0_param", "m_0_tau", "m_0_tau_param", "m_0_L_omega", "m_0_L_omega_param",
         "tau_0_param", "L_omega_0_param", "L_S_0", "L_S_n", "L_t_scale",
-        "p_test_conj", "log_p_test_conj"
+        "p_test_conj", "log_p_test_conj",
+        "z_mean_exposure", "z_css_exposure", "z_test", "mu_0_1d_data", "Sigma_0_1d_data"
       )
 
     if (stanmodel %in% names(stanmodels)) {
@@ -225,7 +254,6 @@ fit_ideal_adaptor <- function(
       )
     }
     fit <- set_stanfit(fit, stanfit)
-    if (rename) fit <- .rename_pars(fit)
   } else if (!silent) message("No sampling requested. Returning empty model object.")
 
   if (!is.null(fit) && !is.null(file)) {

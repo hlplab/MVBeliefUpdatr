@@ -37,8 +37,8 @@ new_muvg_ideal_observer(
   lapse_rate = 0,
   lapse_bias = NULL,
   Sigma_noise = NULL,
-  noise_treatment = "no_noise",
-  lapse_treatment = "no_lapses",
+  noise_treatment = .infer_noise_treatment(Sigma_noise),
+  lapse_treatment = .infer_lapse_treatment(lapse_rate),
   metadata = list()
 )
 
@@ -51,8 +51,8 @@ new_muvg_ideal_observer_from_data(
   lapse_rate = 0,
   lapse_bias = NULL,
   Sigma_noise = NULL,
-  noise_treatment = "no_noise",
-  lapse_treatment = "no_lapses"
+  noise_treatment = .infer_noise_treatment(Sigma_noise),
+  lapse_treatment = .infer_lapse_treatment(lapse_rate)
 )
 }
 \arguments{
@@ -96,10 +96,12 @@ summing to 1.}
 or vector.}
 
 \item{noise_treatment}{Treatment of noise: \code{"no_noise"}, \code{"sample"}, or
-\code{"marginalize"}.}
+\code{"marginalize"}. Defaults to \code{.infer_noise_treatment(Sigma_noise)}:
+\code{"marginalize"} if noise is present, \code{"no_noise"} otherwise.}
 
 \item{lapse_treatment}{Treatment of lapses: \code{"no_lapses"}, \code{"sample"}, or
-\code{"marginalize"}.}
+\code{"marginalize"}. Defaults to \code{.infer_lapse_treatment(lapse_rate)}:
+\code{"marginalize"} if \code{lapse_rate > 0}, \code{"no_lapses"} otherwise.}
 }
 \value{
 An S7 object of the respective MUVG class.

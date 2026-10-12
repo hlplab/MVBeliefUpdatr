@@ -85,7 +85,7 @@ test_that("print and summary work on cognitive models", {
   out <- capture.output(print(model))
   expect_true(any(grepl("MVG_IdealObserver", out)))
   expect_true(any(grepl("Decision rule: sampling", out)))
-  expect_true(any(grepl("Lapse rate: 0.05 \\(treatment: no_lapses\\)", out)))
+  expect_true(any(grepl("Lapse rate: 0.05 \\(treatment: marginalize\\)", out)))
   expect_true(any(grepl("Perceptual noise: none \\(treatment: no_noise\\)", out)))
   expect_true(any(grepl("A: MVG\\(mu = vector\\(2\\), Sigma = matrix\\(2, 2\\)\\)", out)))
 

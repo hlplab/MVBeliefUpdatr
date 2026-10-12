@@ -15,8 +15,30 @@ NULL
     if (length(Sigma_noise) == 0L || any(vapply(Sigma_noise, is.null, logical(1)))) {
       return("no_noise")
     }
+    if (all(vapply(Sigma_noise, function(m) is.numeric(m) && (length(m) == 0L || all(m == 0)), logical(1)))) {
+      return("no_noise")
+    }
+  }
+  if (is.numeric(Sigma_noise) && (length(Sigma_noise) == 0L || all(Sigma_noise == 0))) {
+    return("no_noise")
   }
   "marginalize"
+}
+
+#' Infer default lapse treatment from lapse rate
+#'
+#' @param lapse_rate Lapse rate scalar or numeric vector.
+#' @return A character scalar: `"marginalize"` if `lapse_rate > 0`, `"no_lapses"` otherwise.
+#' @keywords internal
+#' @noRd
+.infer_lapse_treatment <- function(lapse_rate) {
+  if (is.null(lapse_rate) || length(lapse_rate) == 0L || !is.numeric(lapse_rate)) {
+    return("no_lapses")
+  }
+  if (any(lapse_rate > 0)) {
+    return("marginalize")
+  }
+  "no_lapses"
 }
 
 

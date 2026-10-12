@@ -9,10 +9,34 @@ NULL
 
 .get_ideal_adaptor_stanfit_constructor <- function(staninput = NULL) {
   if (!is.null(staninput)) {
-    if (S7::S7_inherits(staninput, NIX_IdealAdaptorStaninput)) {
+    if (S7::S7_inherits(staninput, IdealIntegrator_MNIX_IdealAdaptorStaninput)) {
+      IdealIntegrator_MNIX_IdealAdaptorStanfit
+    } else if (S7::S7_inherits(staninput, WeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
+      WeightedIntegrator_MNIX_IdealAdaptorStanfit
+    } else if (S7::S7_inherits(staninput, CategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
+      CategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit
+    } else if (S7::S7_inherits(staninput, GroupWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
+      GroupWeightedIntegrator_MNIX_IdealAdaptorStanfit
+    } else if (S7::S7_inherits(staninput, GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
+      GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit
+    } else if (S7::S7_inherits(staninput, InformativityWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
+      InformativityWeightedIntegrator_MNIX_IdealAdaptorStanfit
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_IdealIntegratorStaninput)) {
+      MNIX_IdealAdaptor_IdealIntegratorStanfit
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_WeightedIntegratorStaninput)) {
+      MNIX_IdealAdaptor_WeightedIntegratorStanfit
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_CategoryWeightedIntegratorStaninput)) {
+      MNIX_IdealAdaptor_CategoryWeightedIntegratorStanfit
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_GroupWeightedIntegratorStaninput)) {
+      MNIX_IdealAdaptor_GroupWeightedIntegratorStanfit
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStaninput)) {
+      MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStanfit
+    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_InformativityWeightedIntegratorStaninput)) {
+      MNIX_IdealAdaptor_InformativityWeightedIntegratorStanfit
+    } else if (S7::S7_inherits(staninput, NIX_IdealAdaptorStaninput)) {
       NIX_IdealAdaptorStanfit
     } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptorStaninput)) {
-      MNIX_IdealAdaptorStanfit
+      MNIX_IdealAdaptor_IdealIntegratorStanfit
     } else if (S7::S7_inherits(staninput, NIW_IdealAdaptorStaninput)) {
       NIW_IdealAdaptorStanfit
     } else {
@@ -758,7 +782,7 @@ S7::method(get_draws, MVBU_Stanfit) <- function(
 
   stanfit <- get_stanfit(fit)
   fam <- get_model_family(fit)
-  is_nix <- grepl("^NIX", fam, ignore.case = TRUE)
+  is_nix <- grepl("NIX", fam, ignore.case = TRUE) && !grepl("MNIX", fam, ignore.case = TRUE)
   is_mnix <- grepl("MNIX", fam, ignore.case = TRUE)
   is_niw <- grepl("NIW", fam, ignore.case = TRUE)
 
@@ -1267,31 +1291,50 @@ Summary_MVBU_Stanfit <- S7::new_class(
   "Summary_MVBU_Stanfit",
   parent = MVBU_Object,
   properties = list(
+    header = S7::class_any,
     fitted = S7::class_any,
     fixed = S7::class_any,
     expected_moments = S7::class_any,
     marginal_moments = S7::class_any,
-    high_rhats = S7::class_any
+    high_rhats = S7::class_any,
+    warnings = S7::class_any
   ),
   constructor = function(
     fitted = NULL,
     fixed = NULL,
     expected_moments = NULL,
     marginal_moments = NULL,
-    high_rhats = NULL
+    high_rhats = NULL,
+    header = NULL,
+    warnings = NULL
   ) {
     S7::new_object(
       MVBU_Object(),
+      header = header,
       fitted = fitted,
       fixed = fixed,
       expected_moments = expected_moments,
       marginal_moments = marginal_moments,
-      high_rhats = high_rhats
+      high_rhats = high_rhats,
+      warnings = warnings
     )
   }
 )
 
 S7::method(print, Summary_MVBU_Stanfit) <- function(x, ...) {
+  if (!is.null(x@header)) {
+    cat(" // MVBeliefUpdatr Stanfit Model Summary\n")
+    if (!is.null(x@header$family)) cat(" Model Family: ", x@header$family, "\n", sep = "")
+    if (!is.null(x@header$cues)) cat(" Cues:         ", x@header$cues, "\n", sep = "")
+    if (!is.null(x@header$categories)) cat(" Categories:   ", x@header$categories, "\n", sep = "")
+    if (!is.null(x@header$observations)) cat(" Observations: ", x@header$observations, "\n", sep = "")
+    if (!is.null(x@header$draws)) {
+      cat(" Draws:        ", x@header$draws$line1, "\n", sep = "")
+      if (!is.null(x@header$draws$line2)) cat("               ", x@header$draws$line2, "\n", sep = "")
+    }
+    cat("\n")
+  }
+
   if (!is.null(x@fixed) && nrow(x@fixed) > 0) {
     cat("Fixed parameters:\n")
     print(
@@ -1356,14 +1399,24 @@ S7::method(print, Summary_MVBU_Stanfit) <- function(x, ...) {
     )
   }
 
-  if (!is.null(x@high_rhats) && nrow(x@high_rhats) > 0) {
-    cat("\nParameters with Rhats > 1.05:\n")
-    print(
-      as.data.frame(x@high_rhats),
-      row.names = FALSE,
-      max = nrow(x@high_rhats) * 100,
-      ...
-    )
+  div_trans <- if (!is.null(x@warnings$divergent)) x@warnings$divergent else 0
+  has_high_rhats <- !is.null(x@high_rhats) && nrow(x@high_rhats) > 0
+  if (div_trans > 0 || has_high_rhats) {
+    cat("\nWarnings:\n")
+    if (div_trans > 0) {
+      cat("  * Warning: There were ", div_trans, " divergent transitions after warmup.\n", sep = "")
+    }
+    if (has_high_rhats) {
+      max_rhat <- round(max(x@high_rhats$Rhat, na.rm = TRUE), 2)
+      cat("  * Warning: The largest R-hat is ", sprintf("%.2f", max_rhat), ", indicating potential convergence issues.\n", sep = "")
+      cat("\nParameters with Rhats > 1.05:\n")
+      print(
+        as.data.frame(x@high_rhats),
+        row.names = FALSE,
+        max = nrow(x@high_rhats) * 100,
+        ...
+      )
+    }
   }
 
   invisible(x)
@@ -1555,12 +1608,133 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
   stanvals <- if (!is.null(staninput)) staninput@values else list()
   category_levels <- get_category_labels(object)
   cue_levels <- get_cue_labels(object)
+  group_levels <- get_group_labels(object, include_prior = FALSE)
   fam <- sub("_.*$", "", get_model_family(object))
   is_nix_or_mnix <- fam %in% c("NIX", "MNIX")
 
   rows <- list()
 
-  # 1. lapse_rate
+  # 1. weights (if weights_known == 1)
+  if (
+    isTRUE(stanvals$weights_known == 1) ||
+      isTRUE(stanvals$weights_known == 1L)
+  ) {
+    w_data <- stanvals$weights_data
+    if (!is.null(w_data)) {
+      if (is.matrix(w_data) && nrow(w_data) == 1) {
+        for (k in seq_len(ncol(w_data))) {
+          cue_k <- if (k <= length(cue_levels)) cue_levels[k] else as.character(k)
+          if (is_nix_or_mnix) {
+            rows[[length(rows) + 1L]] <- tibble::tibble(
+              Parameter = "weights",
+              `Dist.` = "",
+              Group = "",
+              Category = "",
+              Cue = cue_k,
+              Value = as.numeric(w_data[1, k]),
+              Status = "Fixed by user"
+            )
+          } else {
+            rows[[length(rows) + 1L]] <- tibble::tibble(
+              Parameter = "weights",
+              `Dist.` = "",
+              Group = "",
+              Category = "",
+              Cue1 = cue_k,
+              Cue2 = "",
+              Value = as.numeric(w_data[1, k]),
+              Status = "Fixed by user"
+            )
+          }
+        }
+      } else if (is.matrix(w_data) && nrow(w_data) == length(category_levels)) {
+        for (cat_idx in seq_along(category_levels)) {
+          cat_name <- category_levels[cat_idx]
+          for (k in seq_len(ncol(w_data))) {
+            cue_k <- if (k <= length(cue_levels)) cue_levels[k] else as.character(k)
+            rows[[length(rows) + 1L]] <- tibble::tibble(
+              Parameter = "weights",
+              `Dist.` = "",
+              Group = "",
+              Category = cat_name,
+              Cue = cue_k,
+              Value = as.numeric(w_data[cat_idx, k]),
+              Status = "Fixed by user"
+            )
+          }
+        }
+      } else if (is.matrix(w_data) && nrow(w_data) == length(group_levels)) {
+        for (grp_idx in seq_along(group_levels)) {
+          grp_name <- group_levels[grp_idx]
+          for (k in seq_len(ncol(w_data))) {
+            cue_k <- if (k <= length(cue_levels)) cue_levels[k] else as.character(k)
+            rows[[length(rows) + 1L]] <- tibble::tibble(
+              Parameter = "weights",
+              `Dist.` = "",
+              Group = grp_name,
+              Category = "",
+              Cue = cue_k,
+              Value = as.numeric(w_data[grp_idx, k]),
+              Status = "Fixed by user"
+            )
+          }
+        }
+      } else if (is.array(w_data) && length(dim(w_data)) == 3) {
+        for (grp_idx in seq_len(dim(w_data)[1])) {
+          grp_name <- if (grp_idx <= length(group_levels)) group_levels[grp_idx] else as.character(grp_idx)
+          for (cat_idx in seq_len(dim(w_data)[2])) {
+            cat_name <- if (cat_idx <= length(category_levels)) category_levels[cat_idx] else as.character(cat_idx)
+            for (k in seq_len(dim(w_data)[3])) {
+              cue_k <- if (k <= length(cue_levels)) cue_levels[k] else as.character(k)
+              rows[[length(rows) + 1L]] <- tibble::tibble(
+                Parameter = "weights",
+                `Dist.` = "",
+                Group = grp_name,
+                Category = cat_name,
+                Cue = cue_k,
+                Value = as.numeric(w_data[grp_idx, cat_idx, k]),
+                Status = "Fixed by user"
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+
+  # 2. prior_p
+  if (!is.null(stanvals$prior_p) && length(stanvals$prior_p) > 0) {
+    p_vec <- as.numeric(stanvals$prior_p)
+    is_unif_p <- (length(p_vec) <= 1) || (diff(range(p_vec)) < 1e-6)
+    status_p <- if (is_unif_p) "Uniform category prior" else "Fixed by user"
+    for (k in seq_along(p_vec)) {
+      cat_k <- if (k <= length(category_levels)) category_levels[k] else as.character(k)
+      if (is_nix_or_mnix) {
+        rows[[length(rows) + 1L]] <- tibble::tibble(
+          Parameter = "prior_p",
+          `Dist.` = "",
+          Group = "",
+          Category = cat_k,
+          Cue = "",
+          Value = p_vec[k],
+          Status = status_p
+        )
+      } else {
+        rows[[length(rows) + 1L]] <- tibble::tibble(
+          Parameter = "prior_p",
+          `Dist.` = "",
+          Group = "",
+          Category = cat_k,
+          Cue1 = "",
+          Cue2 = "",
+          Value = p_vec[k],
+          Status = status_p
+        )
+      }
+    }
+  }
+
+  # 3. lapse_rate
   if (
     isTRUE(stanvals$lapse_rate_known == 1) ||
       isTRUE(stanvals$lapse_rate_known == 1L)
@@ -1572,7 +1746,8 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
         Group = "",
         Category = "",
         Cue = "",
-        Value = as.numeric(stanvals$lapse_rate_data)
+        Value = as.numeric(stanvals$lapse_rate_data),
+        Status = "Fixed by user"
       )
     } else {
       tibble::tibble(
@@ -1582,13 +1757,46 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
         Category = "",
         Cue1 = "",
         Cue2 = "",
-        Value = as.numeric(stanvals$lapse_rate_data)
+        Value = as.numeric(stanvals$lapse_rate_data),
+        Status = "Fixed by user"
       )
     }
     rows[[length(rows) + 1L]] <- row_lapse
   }
 
-  # 2. mu_0 (indirectly fixing m_0)
+  # 4. lapse_bias
+  if (!is.null(stanvals$lapse_bias) && length(stanvals$lapse_bias) > 0) {
+    lb_vec <- as.numeric(stanvals$lapse_bias)
+    is_unif_lb <- (length(lb_vec) <= 1) || (diff(range(lb_vec)) < 1e-6)
+    status_lb <- if (is_unif_lb) "Uniform lapse bias" else "Fixed by user"
+    for (k in seq_along(lb_vec)) {
+      cat_k <- if (k <= length(category_levels)) category_levels[k] else as.character(k)
+      if (is_nix_or_mnix) {
+        rows[[length(rows) + 1L]] <- tibble::tibble(
+          Parameter = "lapse_bias",
+          `Dist.` = "",
+          Group = "",
+          Category = cat_k,
+          Cue = "",
+          Value = lb_vec[k],
+          Status = status_lb
+        )
+      } else {
+        rows[[length(rows) + 1L]] <- tibble::tibble(
+          Parameter = "lapse_bias",
+          `Dist.` = "",
+          Group = "",
+          Category = cat_k,
+          Cue1 = "",
+          Cue2 = "",
+          Value = lb_vec[k],
+          Status = status_lb
+        )
+      }
+    }
+  }
+
+  # 5. mu_0 (indirectly fixing m_0)
   if (isTRUE(stanvals$mu_0_known == 1) || isTRUE(stanvals$mu_0_known == 1L)) {
     mu_mat <- as.matrix(stanvals$mu_0_data)
     K <- nrow(mu_mat)
@@ -1606,7 +1814,8 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
           Group = "",
           Category = cat_k,
           Cue = cue_levels[1],
-          Value = mu_mat[k, 1]
+          Value = mu_mat[k, 1],
+          Status = "Fixed by user"
         )
       } else if (fam == "MNIX") {
         for (m in seq_len(M)) {
@@ -1621,7 +1830,8 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
             Group = "",
             Category = cat_k,
             Cue = cue_m,
-            Value = mu_mat[k, m]
+            Value = mu_mat[k, m],
+            Status = "Fixed by user"
           )
         }
       } else {
@@ -1638,14 +1848,15 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
             Category = cat_k,
             Cue1 = cue_m,
             Cue2 = "",
-            Value = mu_mat[k, m]
+            Value = mu_mat[k, m],
+            Status = "Fixed by user"
           )
         }
       }
     }
   }
 
-  # 3. Sigma_0 (indirectly fixing S_0)
+  # 6. Sigma_0 (indirectly fixing S_0)
   if (
     isTRUE(stanvals$Sigma_0_known == 1) ||
       isTRUE(stanvals$Sigma_0_known == 1L)
@@ -1665,7 +1876,8 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
           Group = "",
           Category = cat_k,
           Cue = cue_levels[1],
-          Value = sig_vec[k]
+          Value = sig_vec[k],
+          Status = "Fixed by user"
         )
       }
     } else if (fam == "MNIX") {
@@ -1688,7 +1900,8 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
             Group = "",
             Category = cat_k,
             Cue = cue_m,
-            Value = sig_mat[k, m]
+            Value = sig_mat[k, m],
+            Status = "Fixed by user"
           )
         }
       }
@@ -1719,7 +1932,8 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
                 Category = cat_k,
                 Cue1 = cue_1,
                 Cue2 = cue_2,
-                Value = sig_data[k, m1, m2]
+                Value = sig_data[k, m1, m2],
+                Status = "Fixed by user"
               )
             }
           }
@@ -1744,7 +1958,8 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
               Category = cat_k,
               Cue1 = cue_m,
               Cue2 = cue_m,
-              Value = sig_data[k, m]
+              Value = sig_data[k, m],
+              Status = "Fixed by user"
             )
           }
         }
@@ -1761,7 +1976,8 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
       Group = character(0),
       Category = character(0),
       Cue = character(0),
-      Value = numeric(0)
+      Value = numeric(0),
+      Status = character(0)
     )
   } else {
     tibble::tibble(
@@ -1771,7 +1987,8 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
       Category = character(0),
       Cue1 = character(0),
       Cue2 = character(0),
-      Value = numeric(0)
+      Value = numeric(0),
+      Status = character(0)
     )
   }
 }
@@ -1812,9 +2029,9 @@ summary.MVBU_Stanfit <- function(
   .assert_contains_draws(stanfit)
   if (is.null(pars)) {
     pars <- names(stanfit)
-    pars <- grep("^((kappa|nu|m|S|cue_weight)_|lapse_rate|p_category|Sigma_noise)", pars, value = TRUE)
+    pars <- grep("^((kappa|nu|m|S|cue_weight|weights)_|weights\\[|lapse_rate|lapse_bias|p_category|prior_p|Sigma_noise)", pars, value = TRUE)
     pars <- grep("^m_0_(tau|L_omega|cov)", pars, value = TRUE, invert = TRUE)
-    pars <- grep("^((m|S)_0|lapse_rate)_param", pars, value = TRUE, invert = TRUE)
+    pars <- grep("^((m|S)_0|lapse_rate|weights)_param", pars, value = TRUE, invert = TRUE)
     if (!include_transformed_pars) pars <- grep("_transformed", pars, value = TRUE, invert = TRUE)
   }
 
@@ -1831,17 +2048,18 @@ summary.MVBU_Stanfit <- function(
     dplyr::mutate(
       name = factor(
         gsub(
-          "^(kappa|nu|m|S|lapse_rate|p_category|cue_weight|Sigma_noise).*$",
+          "^(kappa|nu|m|S|cue_weight|weights|lapse_rate|lapse_bias|p_category|prior_p|Sigma_noise).*$",
           "\\1",
           .data$Parameter
         ),
         levels = c(
-          "kappa", "nu", "m", "S", "cue_weight", "lapse_rate", "p_category",
-          "Sigma_noise"
+          "weights", "cue_weight", "prior_p", "p_category", "lapse_rate", "lapse_bias",
+          "kappa", "nu", "m", "S", "Sigma_noise"
         )
       ),
       distribution = gsub("^.*_(0|n).*$", "\\1", .data$Parameter),
       index = gsub("^.*_(0|n)?\\[(.*)\\]$", "\\2", .data$Parameter),
+      index = gsub("^(weights|lapse_bias|prior_p)\\[(.*)\\]$", "\\2", .data$index),
       index = ifelse(.data$index == .data$Parameter, 1, .data$index)
     ) %>%
     tidyr::separate(
@@ -1879,7 +2097,7 @@ summary.MVBU_Stanfit <- function(
         Group = dplyr::case_when(
           .data$name %in% c("kappa", "nu", "m", "S") &
             .data$`Dist.` == "posterior" ~ group_levels[.data$i2],
-          .data$name == "cue_weight" ~ group_levels[.data$i1],
+          .data$name %in% c("cue_weight", "weights") & !is.na(.data$i2) ~ group_levels[.data$i1],
           TRUE ~ ""
         ),
         Category = dplyr::case_when(
@@ -1887,7 +2105,7 @@ summary.MVBU_Stanfit <- function(
             .data$`Dist.` == "prior" ~ category_levels[.data$i1],
           .data$name %in% c("kappa", "nu", "m", "S") &
             .data$`Dist.` == "posterior" ~ category_levels[.data$i1],
-          .data$name == "p_category" ~ category_levels[.data$i1],
+          .data$name %in% c("p_category", "prior_p", "lapse_bias") ~ category_levels[.data$i1],
           TRUE ~ ""
         )
       )
@@ -1897,7 +2115,7 @@ summary.MVBU_Stanfit <- function(
         dplyr::mutate(
           Cue = dplyr::case_when(
             .data$name %in% c("m", "S") ~ cue_levels[1],
-            .data$name == "cue_weight" ~ cue_levels[1],
+            .data$name %in% c("cue_weight", "weights") ~ cue_levels[1],
             TRUE ~ ""
           )
         ) %>%
@@ -1915,7 +2133,9 @@ summary.MVBU_Stanfit <- function(
               .data$`Dist.` == "prior" ~ cue_levels[.data$i2],
             .data$name %in% c("m", "S") &
               .data$`Dist.` == "posterior" ~ cue_levels[.data$i3],
-            .data$name == "cue_weight" ~ cue_levels[.data$i2],
+            .data$name %in% c("cue_weight", "weights") & is.na(.data$i2) ~ cue_levels[.data$i1],
+            .data$name %in% c("cue_weight", "weights") & !is.na(.data$i2) & is.na(.data$i3) ~ cue_levels[.data$i2],
+            .data$name %in% c("cue_weight", "weights") & !is.na(.data$i3) ~ cue_levels[.data$i3],
             TRUE ~ ""
           )
         ) %>%
@@ -1933,7 +2153,7 @@ summary.MVBU_Stanfit <- function(
               .data$`Dist.` == "prior" ~ cue_levels[.data$i2],
             .data$name %in% c("m", "S") &
               .data$`Dist.` == "posterior" ~ cue_levels[.data$i3],
-            .data$name == "cue_weight" ~ cue_levels[.data$i2],
+            .data$name %in% c("cue_weight", "weights") ~ cue_levels[.data$i1],
             TRUE ~ ""
           ),
           Cue2 = dplyr::case_when(
@@ -1983,7 +2203,7 @@ summary.MVBU_Stanfit <- function(
       dplyr::filter(
         .data$distribution == "0" |
           .data$name %in% c(
-            "cue_weight", "lapse_rate", "p_category", "Sigma_noise"
+            "cue_weight", "weights", "lapse_rate", "lapse_bias", "p_category", "prior_p", "Sigma_noise"
           )
       )
   }
@@ -2027,7 +2247,9 @@ summary.MVBU_Stanfit <- function(
           (fp$Cue2 == "" | full_summary$Cue2 == fp$Cue2)
       }
       matches <- which(
-        full_summary$Parameter == fp$Parameter &
+        (full_summary$Parameter == fp$Parameter |
+          (fp$Parameter == "weights" & full_summary$Parameter == "cue_weight") |
+          (fp$Parameter == "prior_p" & full_summary$Parameter == "p_category")) &
           (fp$`Dist.` == "" | full_summary$`Dist.` == fp$`Dist.`) &
           (fp$Category == "" | full_summary$Category == fp$Category) &
           cue_match
@@ -2091,12 +2313,57 @@ summary.MVBU_Stanfit <- function(
     }
   }
 
+  # Build header metadata
+  model_cls <- class(object)[1]
+  fam_clean <- gsub("Stanfit$", "", model_cls)
+  fam_clean <- gsub("_", " ", fam_clean)
+  cues <- get_cue_labels(object)
+  cats <- get_category_labels(object)
+  grps <- get_group_labels(object, include_prior = FALSE)
+
+  n_obs <- if (!is.null(object@staninput) && !is.null(object@staninput@values$N_test)) {
+    object@staninput@values$N_test
+  } else if (!is.null(object@data) && nrow(object@data) > 0) {
+    nrow(object@data)
+  } else {
+    0
+  }
+  L_groups <- if (!is.null(object@staninput) && !is.null(object@staninput@values$L)) {
+    object@staninput@values$L
+  } else {
+    max(1L, length(grps))
+  }
+  obs_str <- if (L_groups > 1) {
+    paste0("Total test observations = ", n_obs, " across L = ", L_groups, " exposure groups")
+  } else {
+    paste0("Total test observations = ", n_obs)
+  }
+
+  chains <- tryCatch(stanfit@sim$chains, error = function(e) 1)
+  iter <- tryCatch(stanfit@sim$iter, error = function(e) 0)
+  warmup <- tryCatch(stanfit@sim$warmup, error = function(e) 0)
+  thin <- tryCatch(stanfit@sim$thin, error = function(e) 1)
+  total_draws <- get_number_of_draws(object)
+
+  draws_line1 <- paste0(chains, " chains, each with iter = ", iter, "; warmup = ", warmup, "; thin = ", thin)
+  draws_line2 <- paste0("Total post-warmup draws = ", total_draws)
+
+  header_info <- list(
+    family = fam_clean,
+    cues = paste0(paste(cues, collapse = ", "), " (K = ", length(cues), ")"),
+    categories = paste0(paste(cats, collapse = ", "), " (M = ", length(cats), ")"),
+    observations = obs_str,
+    draws = list(line1 = draws_line1, line2 = draws_line2)
+  )
+
   return(Summary_MVBU_Stanfit(
     fitted = full_summary,
     fixed = fixed_summary,
     expected_moments = exp_moments,
     marginal_moments = marg_moments,
-    high_rhats = high_rhat_df
+    high_rhats = high_rhat_df,
+    header = header_info,
+    warnings = list(divergent = div_trans)
   ))
 }
 S7::method(summary, MVBU_Stanfit) <- summary.MVBU_Stanfit

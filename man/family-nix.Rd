@@ -48,8 +48,8 @@ new_nix_ideal_adaptor(
   lapse_rate = 0,
   lapse_bias = NULL,
   Sigma_noise = NULL,
-  noise_treatment = "no_noise",
-  lapse_treatment = "no_lapses",
+  noise_treatment = .infer_noise_treatment(Sigma_noise),
+  lapse_treatment = .infer_lapse_treatment(lapse_rate),
   metadata = list()
 )
 
@@ -64,8 +64,8 @@ new_nix_ideal_adaptor_from_data(
   lapse_rate = 0,
   lapse_bias = NULL,
   Sigma_noise = NULL,
-  noise_treatment = "no_noise",
-  lapse_treatment = "no_lapses"
+  noise_treatment = .infer_noise_treatment(Sigma_noise),
+  lapse_treatment = .infer_lapse_treatment(lapse_rate)
 )
 }
 \arguments{
@@ -111,10 +111,12 @@ summing to 1. Defaults to uniform bias \code{1/M}.}
 or scalar variance.}
 
 \item{noise_treatment}{Treatment of noise: \code{"no_noise"}, \code{"sample"}, or
-\code{"marginalize"}. Defaults to \code{"no_noise"}.}
+\code{"marginalize"}. Defaults to \code{.infer_noise_treatment(Sigma_noise)}:
+\code{"marginalize"} if noise is present, \code{"no_noise"} otherwise.}
 
 \item{lapse_treatment}{Treatment of lapses: \code{"no_lapses"}, \code{"sample"}, or
-\code{"marginalize"}. Defaults to \code{"no_lapses"}.}
+\code{"marginalize"}. Defaults to \code{.infer_lapse_treatment(lapse_rate)}:
+\code{"marginalize"} if \code{lapse_rate > 0}, \code{"no_lapses"} otherwise.}
 }
 \value{
 An S7 object of the respective NIX class.

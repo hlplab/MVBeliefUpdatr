@@ -421,7 +421,7 @@ new_model_from_data <- function(
   }
 
   # Sigma_noise
-  sigma_noise_list <- lapply(models, function(m) m@noise_behavior$Sigma_noise)
+  sigma_noise_list <- lapply(models, function(m) get_noise(m))
   agg_sigma_noise <- if (!is.null(sigma_noise_list[[1]])) {
     Reduce(
       `+`,

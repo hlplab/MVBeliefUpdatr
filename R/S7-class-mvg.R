@@ -29,9 +29,11 @@ NULL
 #'   summing to 1.
 #' @param Sigma_noise Optional perceptual/measurement noise covariance matrix.
 #' @param noise_treatment Treatment of noise: `"no_noise"`, `"sample"`, or
-#'   `"marginalize"`.
+#'   `"marginalize"`. Defaults to `.infer_noise_treatment(Sigma_noise)`:
+#'   `"marginalize"` if noise is present, `"no_noise"` otherwise.
 #' @param lapse_treatment Treatment of lapses: `"no_lapses"`, `"sample"`, or
-#'   `"marginalize"`.
+#'   `"marginalize"`. Defaults to `.infer_lapse_treatment(lapse_rate)`:
+#'   `"marginalize"` if `lapse_rate > 0`, `"no_lapses"` otherwise.
 #' @param metadata Optional list of metadata.
 #'
 #' @references
@@ -208,8 +210,8 @@ new_mvg_ideal_observer <- function(
   lapse_rate = 0,
   lapse_bias = NULL,
   Sigma_noise = NULL,
-  noise_treatment = "no_noise",
-  lapse_treatment = "no_lapses",
+  noise_treatment = .infer_noise_treatment(Sigma_noise),
+  lapse_treatment = .infer_lapse_treatment(lapse_rate),
   metadata = list()
 ) {
   .new_family_cognitive_model(
@@ -239,8 +241,8 @@ new_mvg_ideal_observer_from_data <- function(
   lapse_rate = 0,
   lapse_bias = NULL,
   Sigma_noise = NULL,
-  noise_treatment = "no_noise",
-  lapse_treatment = "no_lapses"
+  noise_treatment = .infer_noise_treatment(Sigma_noise),
+  lapse_treatment = .infer_lapse_treatment(lapse_rate)
 ) {
   template <- new_mvg_category_representation_template_from_data(
     data,

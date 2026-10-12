@@ -10,7 +10,7 @@ get_lapse_treatment(x, ...)
 get_lapse_treatment(x, ...)
 }
 \arguments{
-\item{x}{A cognitive model or legacy input object.}
+\item{x}{A cognitive model.}
 }
 \value{
 A character string representing the lapse treatment (\code{"no_lapses"}, \code{"sample"}, or \code{"marginalize"}).

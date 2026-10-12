@@ -10,7 +10,7 @@ get_noise_treatment(x, ...)
 get_noise_treatment(x, ...)
 }
 \arguments{
-\item{x}{A cognitive model or legacy input object.}
+\item{x}{A cognitive model.}
 }
 \value{
 A character string representing the noise treatment (\code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}).

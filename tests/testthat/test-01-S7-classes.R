@@ -147,11 +147,11 @@ test_that("models store noise and lapse behavior and expose posterior functions 
     lapse_treatment = "sample"
   )
 
-  expect_equal(model@noise_behavior$Sigma_noise, diag(c(0.1, 0.2)))
-  expect_equal(model@noise_behavior$noise_treatment, "marginalize")
-  expect_equal(model@lapse_behavior$lapse_rate, 0.1)
-  expect_equal(model@lapse_behavior$lapse_bias, c(A = 0.8, B = 0.2))
-  expect_equal(model@lapse_behavior$lapse_treatment, "sample")
+  expect_equal(get_noise(model), diag(c(0.1, 0.2)))
+  expect_equal(get_noise_treatment(model), "marginalize")
+  expect_equal(get_lapse_rate(model), 0.1)
+  expect_equal(get_lapse_bias(model), c(A = 0.8, B = 0.2))
+  expect_equal(get_lapse_treatment(model), "sample")
   expect_true(is.function(get_category_posterior_function(model)))
   expect_true(is.function(get_category_posterior_function(model, noise_treatment = "no_noise", lapse_treatment = "no_lapses")))
   expect_true(is.function(get_category_posterior_function(model, noise_treatment = "marginalize", lapse_treatment = "sample")))
@@ -161,6 +161,35 @@ test_that("models store noise and lapse behavior and expose posterior functions 
   expect_error(
     new_cognitive_model(category_template = rep_set, Sigma_noise = c(0.1)),
     "Sigma_noise length must match"
+  )
+
+  bad_model_noise <- model
+  S7::prop(bad_model_noise, "noise_behavior", check = FALSE) <- list(Sigma_noise = NULL)
+  expect_error(
+    get_noise_treatment(bad_model_noise),
+    "No noise treatment defined for this model."
+  )
+
+  bad_model_lapse <- model
+  S7::prop(bad_model_lapse, "lapse_behavior", check = FALSE) <- list(lapse_rate = 0, lapse_bias = c(A = 0.5, B = 0.5))
+  expect_error(
+    get_lapse_treatment(bad_model_lapse),
+    "No lapse treatment defined for this model."
+  )
+
+  expect_error(
+    get_noise_treatment(rep_set),
+    "not yet implemented"
+  )
+  expect_error(
+    get_lapse_treatment(rep_set),
+    "not yet implemented"
+  )
+  expect_error(
+    get_noise_treatment(data.frame(a = 1))
+  )
+  expect_error(
+    get_lapse_treatment(data.frame(a = 1))
   )
 })
 
@@ -292,7 +321,7 @@ test_that("MNIX representation schema validators and typed model constructor wor
       sigma2 = c(1, 2),
       weights = c(0.5, 0.5)
     ),
-    "MNIX parameter vectors must all have equal length"
+    "MNIX cue_labels length must match number of cue components"
   )
 
   mnix_rep_b <- new_mnix_category_representation(
@@ -1069,5 +1098,106 @@ test_that("metadata$parameters is present across representations, templates, mod
   expect_true(!is.null(raw_mlist@metadata$parameters))
   expect_equal(names(raw_mlist@metadata$parameters), "M1")
   expect_equal(get_parameters(raw_mlist), raw_mlist@metadata$parameters)
+})
+
+test_that("noise_treatment and lapse_treatment defaults are consistently inferred across core models", {
+  # UVG
+  uvg_rep <- new_uvg_category_representation(category_labels = "A", cue_labels = "F1", mu = 0, sigma2 = 1)
+  uvg_tmpl <- new_category_representation_template(representations = list(A = uvg_rep))
+
+  # Defaults: lapse_rate = 0, Sigma_noise = NULL
+  m_default <- new_uvg_ideal_observer(category_template = uvg_tmpl)
+  expect_equal(get_lapse_treatment(m_default), "no_lapses")
+  expect_equal(get_noise_treatment(m_default), "no_noise")
+
+  # Inferred with lapse_rate > 0
+  m_lapse <- new_uvg_ideal_observer(category_template = uvg_tmpl, lapse_rate = 0.05)
+  expect_equal(get_lapse_treatment(m_lapse), "marginalize")
+  expect_equal(get_noise_treatment(m_lapse), "no_noise")
+
+  # Inferred with Sigma_noise > 0
+  m_noise <- new_uvg_ideal_observer(category_template = uvg_tmpl, Sigma_noise = 0.2)
+  expect_equal(get_lapse_treatment(m_noise), "no_lapses")
+  expect_equal(get_noise_treatment(m_noise), "marginalize")
+
+  # Inferred with both
+  m_both <- new_uvg_ideal_observer(category_template = uvg_tmpl, lapse_rate = 0.05, Sigma_noise = 0.2)
+  expect_equal(get_lapse_treatment(m_both), "marginalize")
+  expect_equal(get_noise_treatment(m_both), "marginalize")
+
+  # Explicit override takes precedence
+  m_override <- new_uvg_ideal_observer(
+    category_template = uvg_tmpl,
+    lapse_rate = 0.05,
+    Sigma_noise = 0.2,
+    lapse_treatment = "sample",
+    noise_treatment = "sample"
+  )
+  expect_equal(get_lapse_treatment(m_override), "sample")
+  expect_equal(get_noise_treatment(m_override), "sample")
+
+  # Explicit NULL falls back to inferred default
+  m_null_fb <- new_uvg_ideal_observer(
+    category_template = uvg_tmpl,
+    lapse_rate = 0.05,
+    Sigma_noise = 0.2,
+    lapse_treatment = NULL,
+    noise_treatment = NULL
+  )
+  expect_equal(get_lapse_treatment(m_null_fb), "marginalize")
+  expect_equal(get_noise_treatment(m_null_fb), "marginalize")
+
+  # Check consistency across all other family constructors:
+  # MUVG
+  muvg_rep <- new_muvg_category_representation(category_labels = "A", cue_labels = c("F1", "F2"), mu = c(0, 1), sigma2 = c(1, 1))
+  muvg_tmpl <- new_category_representation_template(representations = list(A = muvg_rep))
+  m_muvg <- new_muvg_ideal_observer(category_template = muvg_tmpl, lapse_rate = 0.1, Sigma_noise = diag(c(0.1, 0.1)))
+  expect_equal(get_lapse_treatment(m_muvg), "marginalize")
+  expect_equal(get_noise_treatment(m_muvg), "marginalize")
+
+  # MVG
+  mvg_rep <- new_mvg_category_representation(category_labels = "A", cue_labels = c("F1", "F2"), mu = c(0, 1), Sigma = diag(2))
+  mvg_tmpl <- new_category_representation_template(representations = list(A = mvg_rep))
+  m_mvg <- new_mvg_ideal_observer(category_template = mvg_tmpl, lapse_rate = 0.1, Sigma_noise = diag(c(0.1, 0.1)))
+  expect_equal(get_lapse_treatment(m_mvg), "marginalize")
+  expect_equal(get_noise_treatment(m_mvg), "marginalize")
+
+  # NIX
+  nix_rep <- new_nix_category_representation(category_labels = "A", cue_labels = "F1", m = 0, kappa = 1, nu = 2, sigma2 = 1)
+  nix_tmpl <- new_category_representation_template(representations = list(A = nix_rep))
+  m_nix <- new_nix_ideal_adaptor(category_template = nix_tmpl, lapse_rate = 0.1, Sigma_noise = 0.1)
+  expect_equal(get_lapse_treatment(m_nix), "marginalize")
+  expect_equal(get_noise_treatment(m_nix), "marginalize")
+
+  # NIW
+  niw_rep <- new_niw_category_representation(category_labels = "A", cue_labels = c("F1", "F2"), m = c(0, 1), kappa = 1, nu = 3, S = diag(2))
+  niw_tmpl <- new_category_representation_template(representations = list(A = niw_rep))
+  m_niw <- new_niw_ideal_adaptor(category_template = niw_tmpl, lapse_rate = 0.1, Sigma_noise = diag(c(0.1, 0.1)))
+  expect_equal(get_lapse_treatment(m_niw), "marginalize")
+  expect_equal(get_noise_treatment(m_niw), "marginalize")
+
+  # Exemplar
+  ex_rep <- new_exemplar_category_representation(category_labels = "A", cue_labels = c("F1", "F2"), exemplars = matrix(c(0, 1, 1, 2), nrow = 2, byrow = TRUE))
+  ex_tmpl <- new_category_representation_template(representations = list(A = ex_rep))
+  m_ex <- new_exemplar_model(category_template = ex_tmpl, lapse_rate = 0.1, Sigma_noise = diag(c(0.1, 0.1)))
+  expect_equal(get_lapse_treatment(m_ex), "marginalize")
+  expect_equal(get_noise_treatment(m_ex), "marginalize")
+
+  # MNIX Late
+  mnix_rep <- new_mnix_category_representation(category_labels = "A", cue_labels = c("F1", "F2"), m = c(0, 1), kappa = c(1, 2), nu = c(3, 4), sigma2 = c(1, 2))
+  mnix_tmpl <- new_category_representation_template(representations = list(A = mnix_rep))
+  m_mnix_late <- new_mnix_ideal_adaptor_ideal_integrator(category_template = mnix_tmpl, lapse_rate = 0.1, Sigma_noise = diag(c(0.1, 0.1)))
+  expect_equal(get_lapse_treatment(m_mnix_late), "marginalize")
+  expect_equal(get_noise_treatment(m_mnix_late), "marginalize")
+
+  # MNIX Early
+  m_mnix_early <- new_ideal_integrator_mnix_ideal_adaptor(category_template = mnix_tmpl, cues = c("F1", "F2"), lapse_rate = 0.1, Sigma_noise = diag(c(0.1, 0.1)))
+  expect_equal(get_lapse_treatment(m_mnix_early), "marginalize")
+  expect_equal(get_noise_treatment(m_mnix_early), "marginalize")
+
+  # Base new_cognitive_model
+  m_base <- new_cognitive_model(category_template = uvg_tmpl, lapse_rate = 0.05, Sigma_noise = 0.1)
+  expect_equal(get_lapse_treatment(m_base), "marginalize")
+  expect_equal(get_noise_treatment(m_base), "marginalize")
 })
 

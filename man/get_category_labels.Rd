@@ -18,9 +18,6 @@ get_category_labels(x, indices = NULL, ...)
 ## S7 method for class <MVBU_ModelList>
 get_category_labels(x, indices = NULL, ...)
 
-## S7 method for class <any>
-get_category_labels(x, indices = NULL, ...)
-
 ## S7 method for class <MVBU_Object>
 get_category_labels(x, indices = NULL, ...)
 
@@ -41,10 +38,5 @@ get_response_category_labels(x, indices = NULL, ...)
 A character vector of category labels.
 }
 \description{
-Compatibility methods also accept older list/data-frame inputs for
-transitional support while the S7 API becomes the canonical interface.
-
-Deprecated. Legacy compatibility method for list/data-frame inputs; remove once
-S7-only representations are required.
+Get category labels from a representation, template, or model
 }
-\keyword{internal}

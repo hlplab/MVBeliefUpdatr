@@ -191,6 +191,11 @@ read_stanfit <- function(file) {
     )
   )
 
+  # Translate legacy model name for backwards compatibility
+  if (tryCatch(identical(x@stanfit@model_name, "MNIX_ideal_adaptor"), error = function(e) FALSE)) {
+    x@stanfit@model_name <- "MNIX_ideal_adaptor_ideal_integrator"
+  }
+
   if (S7::S7_inherits(x, IdealAdaptorStanfit)) {
     label_info <- try(x@metadata$label_information, silent = TRUE)
     .assert_true(

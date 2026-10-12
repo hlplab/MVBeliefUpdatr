@@ -1,4 +1,4 @@
-#' @include S7-class.R
+#' @include S7-class.R S7-class-mnix.R
 NULL
 
 # -------------------------
@@ -31,14 +31,17 @@ NULL
 #' @param lapse_rate Numeric scalar lapse probability in `[0, 1]`. Defaults
 #'   to 0.
 #' @param lapse_bias Optional numeric vector of lapse category probabilities
-#'   summing to 1.
+#'   summing to 1. Defaults to uniform bias `1/M`.
 #' @param Sigma_noise Optional perceptual/measurement noise covariance matrix
 #'   or scalar variance.
 #' @param noise_treatment Treatment of noise: `"no_noise"`, `"sample"`, or
-#'   `"marginalize"`.
+#'   `"marginalize"`. Defaults to `.infer_noise_treatment(Sigma_noise)`:
+#'   `"marginalize"` if noise is present, `"no_noise"` otherwise.
 #' @param lapse_treatment Treatment of lapses: `"no_lapses"`, `"sample"`, or
-#'   `"marginalize"`.
-#' @param metadata Optional list of metadata.
+#'   `"marginalize"`. Defaults to `.infer_lapse_treatment(lapse_rate)`:
+#'   `"marginalize"` if `lapse_rate > 0`, `"no_lapses"` otherwise.
+#' @param metadata Optional list of metadata. Defaults to `list()`.
+#' @param ... Additional arguments passed to methods or constructors.
 #'
 #' @details
 #' The Normal-Inverse-\eqn{\chi^2} (`NIX`) family models adaptor-style
@@ -98,10 +101,6 @@ new_nix_category_representation <- function(
   sigma2,
   metadata = list()
 ) {
-  # Rationale for retaining typed class constructor:
-  # Concrete typed constructors provide strict property validation, IDE tab completion,
-  # and fast S7 method dispatch, while obtaining the likelihood closure uniformly
-  # from the registered model family density function.
   metadata <- as.list(metadata)
   if (is.null(metadata$parameters)) {
     metadata$parameters <- list(
@@ -134,29 +133,34 @@ new_nix_category_representation <- function(
 new_nix_category_representation_from_data <- function(
   data,
   category = "category",
-  cues,
+  cues = "cue",
   kappa = nu,
-  nu = 3
+  nu = 3,
+  ...
 ) {
-  .assert_numeric_scalar(
-    kappa,
-    msg = "kappa must be a non-NA scalar numeric value."
-  )
-  .assert_numeric_scalar(
-    nu,
-    msg = "nu must be a non-NA scalar numeric value."
+  .assert_true(
+    length(cues) == 1L,
+    msg = "NIX representations are strictly 1D and require length(cues) == 1."
   )
   .assert_true(
-    nu > 2,
-    msg = "nu must be greater than 2 for a univariate NIX representation."
+    length(kappa) == 1L && is.numeric(kappa) && !is.na(kappa) && kappa > 0,
+    msg = "kappa must be a single positive numeric value."
+  )
+  .assert_true(
+    length(nu) == 1L && is.numeric(nu) && !is.na(nu) && nu > 2,
+    msg = "nu must be a single numeric value > 2."
   )
 
   uvg <- new_uvg_category_representation_from_data(
     data,
     category = category,
-    cues = cues
+    cue = cues
   )
-  as_nix_category_representation(uvg, kappa = kappa, nu = nu)
+  as_nix_category_representation(
+    uvg,
+    kappa = kappa,
+    nu = nu
+  )
 }
 
 #' @rdname family-nix
@@ -164,14 +168,11 @@ new_nix_category_representation_from_data <- function(
 new_nix_category_representation_template_from_data <- function(
   data,
   category = "category",
-  cues,
+  cues = "cue",
   kappa = nu,
-  nu = 3
+  nu = 3,
+  ...
 ) {
-  .assert_true(
-    length(cues) == 1L,
-    msg = "NIX templates require exactly one cue."
-  )
   category_labels <- sort(unique(as.character(data[[category]])))
   representations <- lapply(category_labels, function(label) {
     new_nix_category_representation_from_data(
@@ -179,7 +180,8 @@ new_nix_category_representation_template_from_data <- function(
       category = category,
       cues = cues,
       kappa = kappa,
-      nu = nu
+      nu = nu,
+      ...
     )
   })
   names(representations) <- category_labels
@@ -204,8 +206,8 @@ new_nix_ideal_adaptor <- function(
   lapse_rate = 0,
   lapse_bias = NULL,
   Sigma_noise = NULL,
-  noise_treatment = "no_noise",
-  lapse_treatment = "no_lapses",
+  noise_treatment = .infer_noise_treatment(Sigma_noise),
+  lapse_treatment = .infer_lapse_treatment(lapse_rate),
   metadata = list()
 ) {
   .new_family_cognitive_model(
@@ -229,7 +231,7 @@ new_nix_ideal_adaptor <- function(
 new_nix_ideal_adaptor_from_data <- function(
   data,
   category = "category",
-  cues,
+  cues = "cue",
   kappa = nu,
   nu = 3,
   decision_rule = "sampling",
@@ -237,8 +239,8 @@ new_nix_ideal_adaptor_from_data <- function(
   lapse_rate = 0,
   lapse_bias = NULL,
   Sigma_noise = NULL,
-  noise_treatment = "no_noise",
-  lapse_treatment = "no_lapses"
+  noise_treatment = .infer_noise_treatment(Sigma_noise),
+  lapse_treatment = .infer_lapse_treatment(lapse_rate)
 ) {
   template <- new_nix_category_representation_template_from_data(
     data,

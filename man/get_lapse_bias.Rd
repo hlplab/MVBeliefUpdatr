@@ -6,11 +6,11 @@
 \usage{
 get_lapse_bias(x, categories, ...)
 
-## S7 method for classes <any>, <any>
+## S7 method for classes <MVBU_CognitiveModel>, <any>
 get_lapse_bias(x, categories, ...)
 }
 \arguments{
-\item{x}{A cognitive model or legacy input object.}
+\item{x}{A cognitive model.}
 
 \item{categories}{Optional category labels used to resolve values.}
 }
@@ -18,10 +18,6 @@ get_lapse_bias(x, categories, ...)
 A numeric vector of lapse-bias values.
 }
 \description{
-Compatibility methods handle older list/data-frame inputs while the S7 API
-becomes the standard interface.
-
-Deprecated. Legacy compatibility method for list/data-frame inputs; remove once
-S7-only representations are required.
+Extract lapse bias values from a cognitive model.
 }
 \keyword{internal}

@@ -154,16 +154,14 @@ NULL
       return(list(title = main_title, subtitle = fam))
     }
 
-    lapse_beh <- tryCatch(x@lapse_behavior, error = function(e) list())
-    lapse_trt <- lapse_beh$lapse_treatment %||% "none"
+    lapse_trt <- get_lapse_treatment(x)
     if (identical(lapse_trt, "no_lapse") || identical(lapse_trt, "no_lapses")) {
       lapse_trt <- "none"
     }
     lapse_trt_txt <- sprintf("Lapses: %s", lapse_trt)
 
-    noise_beh <- tryCatch(x@noise_behavior, error = function(e) list())
-    sigma_n <- noise_beh$Sigma_noise
-    noise_trt <- noise_beh$noise_treatment %||% "no_noise"
+    sigma_n <- get_noise(x)
+    noise_trt <- get_noise_treatment(x)
 
     noise_txt <- if (!is.null(sigma_n) &&
       !identical(noise_trt, "no_noise") &&
@@ -194,8 +192,8 @@ NULL
       )
 
       cp <- x@category_prior
-      lb <- lapse_beh$lapse_bias
-      l_rate <- lapse_beh$lapse_rate %||% 0
+      lb <- get_lapse_bias(x)
+      l_rate <- get_lapse_rate(x)
 
       .format_prior_vec <- function(vec) {
         if (is.null(vec) || length(vec) == 0L) {
@@ -1553,10 +1551,11 @@ S7::method(plot_categories, MVBU_CognitiveModel) <- function(
   }
 
   tmpl <- x@category_template
-  eff_noise_trt <- noise_treatment %||% x@noise_behavior$noise_treatment
-  if (identical(eff_noise_trt, "marginalize") && !is.null(x@noise_behavior$Sigma_noise)) {
+  eff_noise_trt <- noise_treatment %||% get_noise_treatment(x)
+  noise_mat <- get_noise(x)
+  if (identical(eff_noise_trt, "marginalize") && !is.null(noise_mat)) {
     reps <- tmpl@representations
-    sn <- as.matrix(x@noise_behavior$Sigma_noise)
+    sn <- as.matrix(noise_mat)
     reps <- lapply(reps, function(r) {
       if (S7::S7_inherits(r, UVG_CategoryRepresentation)) {
         r@sigma2 <- r@sigma2 + sn[1, 1]
@@ -2005,26 +2004,26 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
     representations = reps_proj
   )
 
-  noise_beh <- tryCatch(x@noise_behavior, error = function(e) list())
-  lapse_beh <- tryCatch(x@lapse_behavior, error = function(e) list())
+  noise_trt <- noise_treatment %||% get_noise_treatment(x)
+  lapse_trt <- lapse_treatment %||% get_lapse_treatment(x)
 
-  noise_trt <- noise_treatment %||% noise_beh$noise_treatment %||% "no_noise"
-  lapse_trt <- lapse_treatment %||% lapse_beh$lapse_treatment %||% "no_lapses"
-
-  sig_noise <- noise_beh$Sigma_noise
+  sig_noise <- get_noise(x)
   if (!is.null(sig_noise) && is.matrix(sig_noise)) {
     orig_cues <- get_cue_labels(x)
     idx <- match(cues, orig_cues)
     sig_noise <- sig_noise[idx, idx, drop = FALSE]
   }
 
+  lapse_rate_val <- get_lapse_rate(x)
+  lapse_bias_val <- get_lapse_bias(x)
+
   if (S7::S7_inherits(first_rep, UVG_CategoryRepresentation)) {
     return(new_uvg_ideal_observer(
       category_template = new_tpl,
       category_prior = x@category_prior,
       decision_rule = decision_rule,
-      lapse_rate = lapse_beh$lapse_rate %||% 0,
-      lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
+      lapse_rate = lapse_rate_val,
+      lapse_bias = lapse_bias_val,
       lapse_treatment = lapse_trt,
       Sigma_noise = sig_noise,
       noise_treatment = noise_trt
@@ -2035,8 +2034,8 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       category_template = new_tpl,
       category_prior = x@category_prior,
       decision_rule = decision_rule,
-      lapse_rate = lapse_beh$lapse_rate %||% 0,
-      lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
+      lapse_rate = lapse_rate_val,
+      lapse_bias = lapse_bias_val,
       lapse_treatment = lapse_trt,
       Sigma_noise = sig_noise,
       noise_treatment = noise_trt
@@ -2047,8 +2046,8 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       category_template = new_tpl,
       category_prior = x@category_prior,
       decision_rule = decision_rule,
-      lapse_rate = lapse_beh$lapse_rate %||% 0,
-      lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
+      lapse_rate = lapse_rate_val,
+      lapse_bias = lapse_bias_val,
       lapse_treatment = lapse_trt,
       Sigma_noise = sig_noise,
       noise_treatment = noise_trt
@@ -2059,8 +2058,8 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       category_template = new_tpl,
       category_prior = x@category_prior,
       decision_rule = decision_rule,
-      lapse_rate = lapse_beh$lapse_rate %||% 0,
-      lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
+      lapse_rate = lapse_rate_val,
+      lapse_bias = lapse_bias_val,
       lapse_treatment = lapse_trt,
       Sigma_noise = sig_noise,
       noise_treatment = noise_trt
@@ -2071,8 +2070,8 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       category_template = new_tpl,
       category_prior = x@category_prior,
       decision_rule = decision_rule,
-      lapse_rate = lapse_beh$lapse_rate %||% 0,
-      lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
+      lapse_rate = lapse_rate_val,
+      lapse_bias = lapse_bias_val,
       lapse_treatment = lapse_trt,
       Sigma_noise = sig_noise,
       noise_treatment = noise_trt
@@ -2083,8 +2082,8 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       category_template = new_tpl,
       category_prior = x@category_prior,
       decision_rule = decision_rule,
-      lapse_rate = lapse_beh$lapse_rate %||% 0,
-      lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
+      lapse_rate = lapse_rate_val,
+      lapse_bias = lapse_bias_val,
       lapse_treatment = lapse_trt,
       Sigma_noise = sig_noise,
       noise_treatment = noise_trt
@@ -2095,8 +2094,8 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       category_template = new_tpl,
       category_prior = x@category_prior,
       decision_rule = decision_rule,
-      lapse_rate = lapse_beh$lapse_rate %||% 0,
-      lapse_bias = lapse_beh$lapse_bias %||% (1 / length(reps_proj)),
+      lapse_rate = lapse_rate_val,
+      lapse_bias = lapse_bias_val,
       lapse_treatment = lapse_trt
     ))
   }
@@ -2257,8 +2256,8 @@ S7::method(plot_categorization_functions, MVBU_CognitiveModel) <- function(
     resp_mat <- .apply_decision_rule_to_posteriors(
       post_raw,
       decision_rule = decision_rule,
-      lapse_rate = if (identical(eff_l_trt, "no_lapses")) 0 else mod_proj@lapse_behavior$lapse_rate,
-      lapse_bias = if (identical(eff_l_trt, "no_lapses")) NULL else mod_proj@lapse_behavior$lapse_bias
+      lapse_rate = if (identical(eff_l_trt, "no_lapses")) 0 else get_lapse_rate(mod_proj),
+      lapse_bias = if (identical(eff_l_trt, "no_lapses")) NULL else get_lapse_bias(mod_proj)
     )
     colnames(resp_mat) <- all_cats
 
@@ -2373,8 +2372,8 @@ S7::method(plot_categorization_functions, MVBU_CognitiveModel) <- function(
     resp_mat <- .apply_decision_rule_to_posteriors(
       post_raw,
       decision_rule = decision_rule,
-      lapse_rate = if (identical(eff_l_trt, "no_lapses")) 0 else mod_proj@lapse_behavior$lapse_rate,
-      lapse_bias = if (identical(eff_l_trt, "no_lapses")) NULL else mod_proj@lapse_behavior$lapse_bias
+      lapse_rate = if (identical(eff_l_trt, "no_lapses")) 0 else get_lapse_rate(mod_proj),
+      lapse_bias = if (identical(eff_l_trt, "no_lapses")) NULL else get_lapse_bias(mod_proj)
     )
     colnames(resp_mat) <- all_cats
 
@@ -2886,12 +2885,12 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
     scale_df$Category <- factor(scale_df$Category, levels = cats)
   }
 
-  noise_beh <- tryCatch(x@noise_behavior, error = function(e) list())
-  sigma_n <- noise_beh$Sigma_noise
+  sigma_n <- get_noise(x)
+  noise_trt <- get_noise_treatment(x)
   noise_rows <- list()
   if (!is.null(sigma_n) &&
-    !identical(noise_beh$noise_treatment, "no_noise") &&
-    !identical(noise_beh$noise_treatment, "none")) {
+    !identical(noise_trt, "no_noise") &&
+    !identical(noise_trt, "none")) {
     sd_n <- sqrt(pmax(diag(as.matrix(sigma_n)), 1e-6))
     for (k in seq_along(cues)) {
       noise_rows[[length(noise_rows) + 1]] <- data.frame(
@@ -2975,8 +2974,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
       )
     }
   }
-  lapse_beh <- tryCatch(x@lapse_behavior, error = function(e) list())
-  lb <- lapse_beh$lapse_bias
+  lb <- get_lapse_bias(x)
   if (!is.null(lb)) {
     for (cat_name in names(lb)) {
       probs_rows[[length(probs_rows) + 1]] <- data.frame(
@@ -2992,7 +2990,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
     probs_df$Category <- factor(probs_df$Category, levels = cats)
   }
 
-  l_rate <- lapse_beh$lapse_rate
+  l_rate <- get_lapse_rate(x)
   lapse_row <- NULL
   if (!is.null(l_rate) && l_rate > 0) {
     lapse_row <- data.frame(

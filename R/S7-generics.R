@@ -236,11 +236,7 @@ get_transform_information <- S7::new_generic("get_transform_information", "x")
 
 #' Get category-prior values from a cognitive model
 #'
-#' Compatibility methods accept older list/data-frame shapes such as scalars,
-#' named vectors, or table-like objects with a category column. These shims are
-#' transitional and will be removed once S7-only representations are the only
-#' supported interface.
-#' @param x A cognitive model or legacy input object.
+#' @param x A cognitive model.
 #' @param categories Optional category labels used to resolve values.
 #' @return A numeric vector of category-prior values.
 #' @export
@@ -248,18 +244,14 @@ get_category_prior <- S7::new_generic("get_category_prior", c("x", "categories")
 
 #' Get lapse-rate values from a cognitive model
 #'
-#' Compatibility methods handle older list/data-frame inputs while the S7 API
-#' becomes the standard interface.
-#' @param x A cognitive model or legacy input object.
+#' @param x A cognitive model.
 #' @return A numeric lapse-rate value.
 #' @export
 get_lapse_rate <- S7::new_generic("get_lapse_rate", "x")
 
 #' Get lapse-bias values from a cognitive model
 #'
-#' Compatibility methods handle older list/data-frame inputs while the S7 API
-#' becomes the standard interface.
-#' @param x A cognitive model or legacy input object.
+#' @param x A cognitive model.
 #' @param categories Optional category labels used to resolve values.
 #' @return A numeric vector of lapse-bias values.
 #' @export
@@ -267,21 +259,21 @@ get_lapse_bias <- S7::new_generic("get_lapse_bias", c("x", "categories"))
 
 #' Get perceptual noise covariance matrix from a cognitive model
 #'
-#' @param x A cognitive model or legacy input object.
+#' @param x A cognitive model.
 #' @return A matrix or numeric value representing perceptual noise covariance (\eqn{\Sigma_{\text{noise}}}), or `NULL` if no noise is specified.
 #' @export
 get_noise <- S7::new_generic("get_noise", "x")
 
 #' Get lapse treatment from a cognitive model
 #'
-#' @param x A cognitive model or legacy input object.
+#' @param x A cognitive model.
 #' @return A character string representing the lapse treatment (`"no_lapses"`, `"sample"`, or `"marginalize"`).
 #' @export
 get_lapse_treatment <- S7::new_generic("get_lapse_treatment", "x")
 
 #' Get perceptual noise treatment from a cognitive model
 #'
-#' @param x A cognitive model or legacy input object.
+#' @param x A cognitive model.
 #' @return A character string representing the noise treatment (`"no_noise"`, `"sample"`, or `"marginalize"`).
 #' @export
 get_noise_treatment <- S7::new_generic("get_noise_treatment", "x")
@@ -297,8 +289,6 @@ get_cue_labels <- S7::new_generic("get_cue_labels", "x", function(x, indices = N
 
 #' Get category labels from a representation, template, or model
 #'
-#' Compatibility methods also accept older list/data-frame inputs for
-#' transitional support while the S7 API becomes the canonical interface.
 #' @param x A representation, representation template, or cognitive model.
 #' @param indices An optional integer vector of indices to subset the returned labels.
 #' @param ... Additional arguments passed to methods.
@@ -486,11 +476,12 @@ update_template <- S7::new_generic(
 #' @param x A category representation object.
 #' @param x_N Number of observations represented by the sufficient statistics.
 #' @param x_mean Mean vector of the represented observations.
-#' @param x_SS Centered sum-of-squares matrix of the represented observations.
+#' @param x_css Centered sum-of-squares matrix or vector of the represented observations.
 #' @param ... Additional arguments passed to methods.
 #' @return An updated category representation.
 #' @export
-update_category_representation <- S7::new_generic("update_category_representation", c("x", "x_N", "x_mean", "x_SS"))
+update_category_representation <- S7::new_generic("update_category_representation", c("x", "x_N", "x_mean", "x_css"))
+
 
 get_expected_category <- S7::new_generic("get_expected_category", "x")
 

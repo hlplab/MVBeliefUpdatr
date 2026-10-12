@@ -6,11 +6,11 @@
 \usage{
 get_category_prior(x, categories, ...)
 
-## S7 method for classes <any>, <any>
+## S7 method for classes <MVBU_CognitiveModel>, <any>
 get_category_prior(x, categories, ...)
 }
 \arguments{
-\item{x}{A cognitive model or legacy input object.}
+\item{x}{A cognitive model.}
 
 \item{categories}{Optional category labels used to resolve values.}
 }
@@ -18,12 +18,6 @@ get_category_prior(x, categories, ...)
 A numeric vector of category-prior values.
 }
 \description{
-Compatibility methods accept older list/data-frame shapes such as scalars,
-named vectors, or table-like objects with a category column. These shims are
-transitional and will be removed once S7-only representations are the only
-supported interface.
-
-Deprecated. Legacy compatibility method for list/data-frame inputs; remove once
-S7-only representations are required.
+Extract category prior values from a cognitive model.
 }
 \keyword{internal}

@@ -10,7 +10,7 @@ get_noise(x, ...)
 get_noise(x, ...)
 }
 \arguments{
-\item{x}{A cognitive model or legacy input object.}
+\item{x}{A cognitive model.}
 }
 \value{
 A matrix or numeric value representing perceptual noise covariance (\eqn{\Sigma_{\text{noise}}}), or \code{NULL} if no noise is specified.

@@ -6,20 +6,16 @@
 \usage{
 get_lapse_rate(x, ...)
 
-## S7 method for class <any>
+## S7 method for class <MVBU_CognitiveModel>
 get_lapse_rate(x, ...)
 }
 \arguments{
-\item{x}{A cognitive model or legacy input object.}
+\item{x}{A cognitive model.}
 }
 \value{
 A numeric lapse-rate value.
 }
 \description{
-Compatibility methods handle older list/data-frame inputs while the S7 API
-becomes the standard interface.
-
-Deprecated. Legacy compatibility method for list/data-frame inputs; remove once
-S7-only representations are required.
+Extract lapse rate from a cognitive model.
 }
 \keyword{internal}

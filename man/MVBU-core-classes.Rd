@@ -7,12 +7,61 @@
 \alias{MVBU_CategoryRepresentation}
 \alias{MVBU_CategoryRepresentationTemplate}
 \alias{MVBU_CognitiveModel}
+\alias{new_cognitive_model}
 \title{MVBU Core S7 Class Architecture}
+\usage{
+new_cognitive_model(
+  category_template = NULL,
+  decision_rule = "sampling",
+  category_prior = NULL,
+  lapse_rate = 0,
+  lapse_bias = NULL,
+  Sigma_noise = NULL,
+  noise_treatment = .infer_noise_treatment(Sigma_noise),
+  lapse_treatment = .infer_lapse_treatment(lapse_rate),
+  metadata = list()
+)
+}
+\arguments{
+\item{metadata}{Optional list of metadata. Defaults to \code{list()}.}
+
+\item{category_template}{An \link{MVBU_CategoryRepresentationTemplate} object
+containing category representations.}
+
+\item{decision_rule}{Categorization decision rule: \code{"sampling"} or
+\code{"argmax"}. Defaults to \code{"sampling"}.}
+
+\item{category_prior}{Optional numeric vector of prior category
+probabilities summing to 1. Defaults to equal priors.}
+
+\item{lapse_rate}{Numeric scalar lapse probability in \verb{[0, 1]}. Defaults
+to 0.}
+
+\item{lapse_bias}{Optional numeric vector of lapse category probabilities
+summing to 1. Defaults to uniform bias across categories.}
+
+\item{Sigma_noise}{Optional perceptual/measurement noise covariance matrix
+or scalar variance. Defaults to \code{NULL}.}
+
+\item{noise_treatment}{Treatment of noise: \code{"no_noise"}, \code{"sample"}, or
+\code{"marginalize"}. Defaults to \code{.infer_noise_treatment(Sigma_noise)}:
+\code{"marginalize"} if noise is present, \code{"no_noise"} otherwise.}
+
+\item{lapse_treatment}{Treatment of lapses: \code{"no_lapses"}, \code{"sample"}, or
+\code{"marginalize"}. Defaults to \code{.infer_lapse_treatment(lapse_rate)}:
+\code{"marginalize"} if \code{lapse_rate > 0}, \code{"no_lapses"} otherwise.}
+}
+\value{
+An \link{MVBU_CognitiveModel} object.
+}
 \description{
 The MVBeliefUpdatr S7 organizes model objects around an explicit
 compositional structure. These classes define the canonical S7 API; any
 older list/data-frame-style inputs are supported only through transitional
 compatibility methods and should be phased out over time.
+
+Constructs a cognitive model binding a category representation template to
+model-level decision and uncertainty parameters.
 }
 \details{
 \itemize{
