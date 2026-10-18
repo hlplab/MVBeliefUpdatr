@@ -21,19 +21,36 @@ get_model_family <- S7::new_generic("get_model_family", "x")
 #' @export
 get_metadata <- S7::new_generic("get_metadata", "x")
 
-#' Extract parameters or expected parameters from representations, templates, models, or model distributions
+#' Extract parameters, parameter names, or priors from objects
 #'
 #' @title Extract parameters from models, templates, or representations
-#' @param x A category representation, template, cognitive model, or stanfit object.
+#' @param x A category representation, template, cognitive model, stanfit, or
+#'   prior object.
+#' @param space Character string indicating which parameter space to return:
+#'   \code{"original"} (default) or \code{"transformed"}.
 #' @param original_pars Logical scalar; if \code{TRUE}, return original
 #'   (unmapped / top-level) Stan model parameter names from the underlying
 #'   Stan program (as stored in \code{stanfit@model_pars}) rather than the
 #'   expanded, indexed, and post-processed/renamed parameter draw names (as
 #'   returned by \code{names(stanfit)}). Default: \code{FALSE}.
 #' @param ... Additional arguments passed to methods.
-#' @return A list, vector, matrix, or data frame of parameters or expected statistics.
+#' @return A list, vector, matrix, data frame, or \code{\link{MVBU_Prior}} object.
+#' @seealso \code{\link{prior}}, \code{\link{get_data}}
+#' @rdname get_parameters
 #' @export
-get_parameters <- S7::new_generic("get_parameters", "x", function(x, ...) S7::S7_dispatch())
+get_parameters <- S7::new_generic(
+  "get_parameters",
+  "x",
+  function(x, space = c("original", "transformed"), ...) S7::S7_dispatch()
+)
+
+#' @rdname get_parameters
+#' @export
+get_stan_priors <- S7::new_generic(
+  "get_stan_priors",
+  "x",
+  function(x, space = c("original", "transformed"), ...) S7::S7_dispatch()
+)
 
 #' @rdname get_parameters
 #' @export
@@ -108,7 +125,9 @@ add_category_representation <- S7::new_generic(
     category_prior = NULL,
     lapse_bias = NULL,
     ...
-  ) S7::S7_dispatch()
+  ) {
+    S7::S7_dispatch()
+  }
 )
 
 
@@ -380,8 +399,36 @@ get_category_likelihood_function <- S7::new_generic("get_category_likelihood_fun
 #' Extract a category-posterior function from a cognitive model
 #'
 #' @param x A cognitive model object.
-#' @param noise_treatment Optional noise-handling mode for the returned function.
-#' @param lapse_treatment Optional lapse-handling mode for the returned function.
+#' @param noise_treatment Optional character string specifying treatment of
+#'   perceptual noise: `"no_noise"`, `"sample"`, or `"marginalize"`.
+#'   \itemize{
+#'     \item \code{"no_noise"}: No perceptual noise is applied to input cues,
+#'       and no noise is assumed during categorization.
+#'     \item \code{"sample"}: Simulates sensory noise on a specific observation.
+#'       Noise drawn from \eqn{\mathcal{N}(0, \Sigma_{\text{noise}})} is added
+#'       to input cues (and projected into composite cue space in early
+#'       integration), and the observer accounts for their own noise
+#'       uncertainty during categorization by adding \eqn{\Sigma_{\text{noise}}}
+#'       to their likelihood scale.
+#'     \item \code{"marginalize"}: Evaluates categorization in the limit across
+#'       infinitely many noisy encounters (expected consequences). No noise is
+#'       sampled onto the input stimulus, but \eqn{\Sigma_{\text{noise}}} is
+#'       added to the category covariance scale.
+#'   }
+#' @param lapse_treatment Optional character string specifying treatment of
+#'   attentional lapses: `"no_lapses"`, `"sample"`, or `"marginalize"`.
+#'   \itemize{
+#'     \item \code{"no_lapses"}: Lapses are ignored; pure normative posterior
+#'       probabilities are returned (even if \code{lapse_rate > 0}).
+#'     \item \code{"sample"}: Simulates stochastic attentional lapses on
+#'       individual observations. With probability \code{lapse_rate}, a lapse
+#'       occurs and the posterior is replaced by \code{lapse_bias}.
+#'     \item \code{"marginalize"}: Evaluates categorization in the limit across
+#'       infinitely many encounters (expected response probabilities),
+#'       mixing normative posteriors with \code{lapse_bias}:
+#'       \eqn{(1 - \lambda) p(c \mid x) + \lambda b_c}.
+#'   }
+#'   Defaults to `NULL` (uses the model's configured lapse treatment).
 #' @param ... Additional arguments passed to methods.
 #' @return A function that computes category posterior probabilities for one or more observations.
 #' @export
@@ -474,13 +521,18 @@ update_template <- S7::new_generic(
 #' Update a category representation from observations
 #'
 #' @param x A category representation object.
-#' @param x_N Number of observations represented by the sufficient statistics.
-#' @param x_mean Mean vector of the represented observations.
-#' @param x_css Centered sum-of-squares matrix or vector of the represented observations.
+#' @param n_exposure Number of observations represented by the sufficient
+#'   statistics.
+#' @param mean_exposure Mean vector of the represented observations.
+#' @param css_exposure Centered sum-of-squares matrix or vector of the
+#'   represented observations.
 #' @param ... Additional arguments passed to methods.
 #' @return An updated category representation.
 #' @export
-update_category_representation <- S7::new_generic("update_category_representation", c("x", "x_N", "x_mean", "x_css"))
+update_category_representation <- S7::new_generic(
+  "update_category_representation",
+  c("x", "n_exposure", "mean_exposure", "css_exposure")
+)
 
 
 get_expected_category <- S7::new_generic("get_expected_category", "x")
@@ -643,13 +695,14 @@ get_original_variable_names <- S7::new_generic(
   function(x, variable = c("group", "group_unique", "category", "response_category", "cues"), ...) S7::S7_dispatch()
 )
 
-#' Get data from an S7 stanfit or stanfit-input object
+#' Get data from an S7 stanfit, stanfit-input, or stanfit-posterior object
 #'
-#' Retrieves underlying experimental data (all observations across phases, exposure
-#' observations only, or test observations only) stored in an S7 \code{\link{MVBU_Stanfit}}
-#' or \code{\link{IdealAdaptorStanfitInput}} object.
+#' Retrieves underlying experimental data (all observations across phases,
+#' exposure observations only, or test observations only) stored in an S7
+#' \code{\link{MVBU_Stanfit}}, \code{\link{IdealAdaptorStanfitInput}}, or
+#' \code{\link{MVBU_StanfitPosterior}} object.
 #'
-#' @param x An S7 stanfit or stanfit-input object.
+#' @param x An S7 stanfit, stanfit-input, or stanfit-posterior object.
 #' @param groups Optional character vector of group labels to filter observations by.
 #'   Defaults to all available groups.
 #' @param categories Optional character vector of category labels to filter exposure
@@ -659,6 +712,8 @@ get_original_variable_names <- S7::new_generic(
 #' @param n_samples Optional integer; subsample up to \code{n_samples} rows. Defaults to \code{NULL} (all observations).
 #' @param original_names Logical; if \code{TRUE}, renames standardized columns back to
 #'   original variable names. Defaults to \code{FALSE}.
+#' @param space Character string indicating which cue space to return:
+#'   \code{"original"} (default) or \code{"transformed"}.
 #' @param ... Additional arguments passed to methods.
 #' @return A \code{\link[tibble]{tibble}} containing the requested data.
 #' @seealso \code{\link{get_original_variable_names}}
@@ -674,6 +729,7 @@ get_data <- S7::new_generic(
     response_categories = NULL,
     n_samples = NULL,
     original_names = FALSE,
+    space = c("original", "transformed"),
     ...
   ) {
     S7::S7_dispatch()
@@ -691,6 +747,7 @@ get_exposure_data <- S7::new_generic(
     categories = NULL,
     n_samples = NULL,
     original_names = FALSE,
+    space = c("original", "transformed"),
     ...
   ) {
     S7::S7_dispatch()
@@ -708,6 +765,7 @@ get_test_data <- S7::new_generic(
     response_categories = NULL,
     n_samples = NULL,
     original_names = FALSE,
+    space = c("original", "transformed"),
     ...
   ) {
     S7::S7_dispatch()
@@ -715,63 +773,44 @@ get_test_data <- S7::new_generic(
 )
 
 
-#' Get exposure category statistics from an S7 stanfit or stanfit-input object
+#' Get exposure category statistics from a Stanfit object or Stanfit input
 #'
-#' @param x An S7 stanfit or stanfit-input object.
-#' @param statistic Character scalar or vector specifying statistic(s) to extract:
-#'   \code{"n"}, \code{"mean"}, \code{"cov"}, \code{"css"}, \code{"uss"}. Default: \code{"mean"}.
-#' @param categories Optional character vector of category names. Default: \code{NULL}.
-#' @param groups Optional character vector of group names. Default: \code{NULL}.
-#' @param untransform_cues Logical; whether to return cues in original space. Default: \code{FALSE}.
+#' Extracts or computes exposure category statistics (n, mean, cov, css, uss)
+#' from an \code{IdealAdaptorStanfitInput}, \code{MVBU_Stanfit}, or
+#' \code{MVBU_StanfitPosterior} object.
+#'
+#' @param x An \code{IdealAdaptorStanfitInput}, \code{MVBU_Stanfit}, or
+#'   \code{MVBU_StanfitPosterior} object.
+#' @param categories Optional character vector of category names.
+#'   Default: \code{NULL}.
+#' @param groups Optional character vector of group names.
+#'   Default: \code{NULL}.
+#' @param stats Character vector of statistics to return. Allowed values are
+#'   \code{"n"}, \code{"mean"}, \code{"cov"}, \code{"css"}, and \code{"uss"}.
+#'   Default: \code{c("n", "mean", "cov", "css", "uss")}.
+#' @param simplify Logical. If \code{TRUE} (default) and the query matches a
+#'   single category, group, and statistic, returns an atomic vector or matrix.
+#'   If \code{FALSE}, always returns a \code{tibble}.
 #' @param ... Additional arguments passed to methods.
-#' @return A tibble, vector, or matrix of exposure category statistics.
-#' @seealso \code{\link{get_exposure_category_mean}}, \code{\link{get_exposure_category_cov}}
+#' @return If \code{simplify = TRUE} and a single statistic is selected for a
+#'   single category and group, the atomic numeric value, vector, or matrix.
+#'   Otherwise, a \code{tibble} with the grouping columns and requested
+#'   statistics.
+#' @seealso \code{\link{get_sufficient_category_statistics}}
 #' @export
-get_exposure_category_statistic <- S7::new_generic(
-  "get_exposure_category_statistic",
+get_exposure_category_statistics <- S7::new_generic(
+  "get_exposure_category_statistics",
   "x",
   function(
     x,
     categories = NULL,
     groups = NULL,
-    statistic = c("n", "mean", "css", "uss", "cov"),
-    untransform_cues = FALSE,
+    stats = c("n", "mean", "cov", "css", "uss"),
+    simplify = TRUE,
     ...
   ) {
     S7::S7_dispatch()
   }
-)
-
-#' @rdname get_exposure_category_statistic
-#' @export
-get_exposure_category_mean <- S7::new_generic(
-  "get_exposure_category_mean",
-  "x",
-  function(x, ...) S7::S7_dispatch()
-)
-
-#' @rdname get_exposure_category_statistic
-#' @export
-get_exposure_category_css <- S7::new_generic(
-  "get_exposure_category_css",
-  "x",
-  function(x, ...) S7::S7_dispatch()
-)
-
-#' @rdname get_exposure_category_statistic
-#' @export
-get_exposure_category_uss <- S7::new_generic(
-  "get_exposure_category_uss",
-  "x",
-  function(x, ...) S7::S7_dispatch()
-)
-
-#' @rdname get_exposure_category_statistic
-#' @export
-get_exposure_category_cov <- S7::new_generic(
-  "get_exposure_category_cov",
-  "x",
-  function(x, ...) S7::S7_dispatch()
 )
 
 #' Get the transform/untransform function from an object
@@ -871,7 +910,22 @@ get_random_draw_indices <- S7::new_generic(
 #'   \code{parallel = TRUE}. Defaults to \code{NULL} (which automatically uses
 #'   \code{max(1L, parallel::detectCores() - 1L)}).
 #' @param noise_treatment Optional character string specifying treatment of
-#'   perceptual noise (\code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}).
+#'   perceptual noise: \code{"no_noise"}, \code{"sample"}, or
+#'   \code{"marginalize"}.
+#'   \itemize{
+#'     \item \code{"no_noise"}: No perceptual noise is applied to input cues,
+#'       and no noise is assumed during categorization.
+#'     \item \code{"sample"}: Simulates sensory noise on a specific observation.
+#'       Noise drawn from \eqn{\mathcal{N}(0, \Sigma_{\text{noise}})} is added
+#'       to input cues (and projected into composite cue space in early
+#'       integration), and the observer accounts for their own noise
+#'       uncertainty during categorization by adding \eqn{\Sigma_{\text{noise}}}
+#'       to their likelihood scale.
+#'     \item \code{"marginalize"}: Evaluates categorization in the limit across
+#'       infinitely many noisy encounters (expected consequences). No noise is
+#'       sampled onto the input stimulus, but \eqn{\Sigma_{\text{noise}}} is
+#'       added to the category covariance scale.
+#'   }
 #'   Defaults to \code{NULL} (uses the model's configured noise treatment).
 #' @param ... Additional arguments passed to specific plotting methods (e.g.,
 #'   \code{interactive = TRUE} for interactive 3D WebGL scenes via Plotly;
@@ -918,7 +972,19 @@ plot_categories <- S7::new_generic(
 #' @param categories Character vector of category names to evaluate and plot.
 #'   Defaults to the first category (\code{get_category_labels(x)[1L]}).
 #' @param lapse_treatment Optional character string specifying treatment of
-#'   lapses (\code{"no_lapses"}, \code{"sample"}, or \code{"marginalize"}).
+#'   attentional lapses: \code{"no_lapses"}, \code{"sample"}, or
+#'   \code{"marginalize"}.
+#'   \itemize{
+#'     \item \code{"no_lapses"}: Lapses are ignored; categorization reflects
+#'       pure normative evidence evaluation (even if \code{lapse_rate > 0}).
+#'     \item \code{"sample"}: Simulates stochastic attentional lapses on
+#'       individual observations. With probability \code{lapse_rate}, a lapse
+#'       occurs and the posterior is replaced by \code{lapse_bias}.
+#'     \item \code{"marginalize"}: Evaluates categorization in the limit across
+#'       infinitely many encounters (expected response probabilities),
+#'       mixing normative posteriors with \code{lapse_bias}:
+#'       \eqn{(1 - \lambda) p(c \mid x) + \lambda b_c}.
+#'   }
 #'   Defaults to \code{NULL} (uses the model's configured lapse treatment).
 #' @param decision_rule Character string specifying the decision rule to use
 #'   for categorization predictions (\code{"proportional"}, \code{"criterion"},
@@ -1293,36 +1359,6 @@ reconstruct_update_history <- S7::new_generic(
     categories = NULL,
     parallel = FALSE,
     seed = 42L,
-    ...
-  ) {
-    S7::S7_dispatch()
-  }
-)
-
-#' Get sufficient category statistics from observations, models, or fit objects
-#'
-#' Computes or extracts summary exposure statistics (sample size, means, and centered
-#' sums of squares / covariance matrices) across categories. Either an object (such as
-#' a cognitive model, Stanfit input, Stanfit, or Stanfit posterior) or a data frame is
-#' passed as `x`, which determines the method variant dispatched.
-#'
-#' @param x An object containing exposure data or category representations: a `data.frame`,
-#'   an [MVBU_CognitiveModel], an `IdealAdaptorStanfitInput`, an [MVBU_Stanfit], or an [MVBU_StanfitPosterior].
-#' @param untransform_cues Logical scalar; if \code{TRUE}, return cue
-#'   statistics transformed back into original cue space. Default: \code{FALSE}.
-#' @param ... Additional arguments passed to methods.
-#' @return A [data.frame] of sufficient statistics across categories (and groups, if applicable).
-#'   Columns include `category`, `x_N`, `x_mean`, `x_css`, and optionally
-#'   `group`, `x_uss`, and `x_cov`.
-#' @export
-get_sufficient_category_statistics <- S7::new_generic(
-  "get_sufficient_category_statistics",
-  "x",
-  function(
-    x,
-    categories = NULL,
-    groups = NULL,
-    untransform_cues = FALSE,
     ...
   ) {
     S7::S7_dispatch()

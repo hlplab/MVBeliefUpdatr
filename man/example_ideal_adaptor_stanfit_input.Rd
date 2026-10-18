@@ -11,7 +11,6 @@ example_ideal_adaptor_stanfit_input(
   categories = c("/d/", "/t/"),
   control = control_staninput(),
   data = NULL,
-  stanmodel = NULL,
   ...
 )
 
@@ -19,6 +18,7 @@ example_ideal_adaptor_staninput(
   model_family = c("NIW", "NIX", "MNIX"),
   n_cues = NULL,
   categories = c("/d/", "/t/"),
+  stanmodel = NULL,
   ...
 )
 }
@@ -39,13 +39,14 @@ Default: \code{c("/d/", "/t/")}.}
 returned by \code{\link{example_exposure_test_data}}. If \code{NULL}
 (default), data are generated via \code{\link{example_exposure_test_data}}.}
 
-\item{stanmodel}{Optional character string naming the Stan model.
-Defaults to \code{"MNIX_ideal_adaptor_ideal_integrator"} when
-\code{model_family == "MNIX"} and \code{"<model_family>_ideal_adaptor"}
-otherwise.}
-
 \item{...}{Additional arguments passed to
 \code{\link{example_exposure_test_data}} when \code{data} is \code{NULL}.}
+
+\item{stanmodel}{Optional character string naming the Stan model for
+\code{example_ideal_adaptor_staninput}. Defaults to
+\code{"MNIX_ideal_adaptor_ideal_integrator"} when
+\code{model_family == "MNIX"} and \code{"<model_family>_ideal_adaptor"}
+otherwise.}
 }
 \value{
 For \code{example_ideal_adaptor_stanfit_input}, an object of class
@@ -61,9 +62,9 @@ Constructs example \code{\link{IdealAdaptorStanfitInput}} and
 \details{
 \code{example_ideal_adaptor_stanfit_input} constructs the complete high-level
 \code{\link{IdealAdaptorStanfitInput}} object (including data, transform
-information, and metadata). \code{example_ideal_adaptor_staninput} extracts
-the underlying typed Stan-ready input (\code{\link{IdealAdaptorStaninput}})
-from its \code{@staninput} property.
+information, and metadata). \code{example_ideal_adaptor_staninput} creates
+a typed Stan-ready input (\code{\link{IdealAdaptorStaninput}}) via
+\code{.new_staninput()}.
 }
 \seealso{
 \code{\link{example_exposure_test_data}},

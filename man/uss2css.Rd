@@ -33,6 +33,6 @@ Convert centered sum-of-square matrices (css), uncentered sum-of-square matrices
 and covariance matrices (cov) into each other.
 }
 \seealso{
-\code{\link{ss}}, \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}, \code{\link{cov2tau}}
+\code{\link{css}}, \code{\link{uss}}, \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}, \code{\link{cov2tau}}
 }
 \keyword{TBD}

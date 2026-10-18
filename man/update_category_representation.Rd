@@ -7,25 +7,27 @@
 \alias{update_category_representation,MVBeliefUpdatr::MNIX_CategoryRepresentation,any,any,any-method}
 \title{Update a category representation from observations}
 \usage{
-update_category_representation(x, x_N, x_mean, x_css, ...)
+update_category_representation(x, n_exposure, mean_exposure, css_exposure, ...)
 
 ## S7 method for classes <MVBeliefUpdatr::NIW_CategoryRepresentation>, <any>, <any>, <any>
-update_category_representation(x, x_N, x_mean, x_css, ...)
+update_category_representation(x, n_exposure, mean_exposure, css_exposure, ...)
 
 ## S7 method for classes <MVBeliefUpdatr::NIX_CategoryRepresentation>, <any>, <any>, <any>
-update_category_representation(x, x_N, x_mean, x_css, ...)
+update_category_representation(x, n_exposure, mean_exposure, css_exposure, ...)
 
 ## S7 method for classes <MVBeliefUpdatr::MNIX_CategoryRepresentation>, <any>, <any>, <any>
-update_category_representation(x, x_N, x_mean, x_css, ...)
+update_category_representation(x, n_exposure, mean_exposure, css_exposure, ...)
 }
 \arguments{
 \item{x}{A category representation object.}
 
-\item{x_N}{Number of observations represented by the sufficient statistics.}
+\item{n_exposure}{Number of observations represented by the sufficient
+statistics.}
 
-\item{x_mean}{Mean vector of the represented observations.}
+\item{mean_exposure}{Mean vector of the represented observations.}
 
-\item{x_css}{Centered sum-of-squares matrix or vector of the represented observations.}
+\item{css_exposure}{Centered sum-of-squares matrix or vector of the
+represented observations.}
 
 \item{...}{Additional arguments passed to methods.}
 }

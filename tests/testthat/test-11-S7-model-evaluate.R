@@ -201,7 +201,12 @@ test_that("evaluate_model on MVBU_Stanfit works", {
   )
 
   fit_no_test <- fit
-  fit_no_test@data <- fit@data[fit@data$Phase != "test", , drop = FALSE]
+  d_orig <- get_data(fit, space = "original")
+  d_trans <- get_data(fit, space = "transformed")
+  fit_no_test@data <- list(
+    original = d_orig[d_orig$Phase != "test", , drop = FALSE],
+    transformed = d_trans[d_trans$Phase != "test", , drop = FALSE]
+  )
   expect_error(evaluate_model(fit_no_test), "No test data found")
 
   eval_default <- evaluate_model(fit)

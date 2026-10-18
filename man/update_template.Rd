@@ -55,24 +55,56 @@ update_template(
 )
 }
 \arguments{
-\item{x}{An \code{NIW_IdealAdaptor}, \code{NIX_IdealAdaptor}, or \code{MNIX_IdealAdaptor} object.}
+\item{x}{An \code{NIW_IdealAdaptor}, \code{NIX_IdealAdaptor}, or \code{MNIX_IdealAdaptor}
+object.}
 
 \item{observations}{A data.frame or tibble containing cue columns and, for
 \code{update_method = "label-certain"}, a \code{category} column.}
 
 \item{updating}{Either \code{"batch"} or \code{"incremental"}. Batch updates are
-currently supported only for \code{update_method = "label-certain"}. Default is \code{"batch"}.}
+currently supported only for \code{update_method = "label-certain"}. Default is
+\code{"batch"}.}
 
 \item{keep_history}{If \code{TRUE} with incremental updating, return a list of
 all intermediate models followed by the final model. Default is \code{FALSE}.}
 
-\item{lapse_treatment}{Either \code{"no_lapses"}, \code{"sample"}, or \code{"marginalize"}. Default is \code{"no_lapses"}.}
+\item{lapse_treatment}{Treatment of attentional lapses during updating for
+label-uncertain models: \code{"no_lapses"}, \code{"sample"}, or \code{"marginalize"}.
+\itemize{
+\item \code{"no_lapses"}: Lapses are ignored; updating reflects pure
+normative evidence evaluation (even if \code{lapse_rate > 0}).
+\item \code{"sample"}: Simulates stochastic attentional lapses on
+individual observations. With probability \code{lapse_rate}, a lapse
+occurs and the observation is treated as uninformative during updating.
+\item \code{"marginalize"}: Evaluates updating in expectation across
+infinitely many encounters; evidence is downweighted by
+\eqn{1 - \lambda}.
+}
+Default is \code{"no_lapses"}.}
 
-\item{noise_treatment}{Either \code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}. Default is \code{"no_noise"}.}
+\item{noise_treatment}{Treatment of perceptual noise during categorization
+for label-uncertain updating: \code{"no_noise"}, \code{"sample"}, or
+\code{"marginalize"}.
+\itemize{
+\item \code{"no_noise"}: No perceptual noise is applied to input cues,
+and no noise is assumed during categorization.
+\item \code{"sample"}: Simulates sensory noise on a specific observation.
+Noise drawn from \eqn{\mathcal{N}(0, \Sigma_{\text{noise}})} is added
+to input cues (and projected into composite cue space in early
+integration), and the observer accounts for their own noise
+uncertainty during categorization by adding \eqn{\Sigma_{\text{noise}}}
+to their likelihood scale.
+\item \code{"marginalize"}: Evaluates categorization in the limit across
+infinitely many noisy encounters (expected consequences). No noise is
+sampled onto the input stimulus, but \eqn{\Sigma_{\text{noise}}} is
+added to the category covariance scale.
+}
+Default is \code{"no_noise"}.}
 
 \item{update_method}{One of \code{"no-updating"}, \code{"label-certain"},
 \code{"nolabel-criterion"}, \code{"nolabel-sampling"},
-\code{"nolabel-proportional"}, or \code{"nolabel-uniform"}. Default is \code{"label-certain"}.}
+\code{"nolabel-proportional"}, or \code{"nolabel-uniform"}. Default is
+\code{"label-certain"}.}
 
 \item{...}{Additional arguments passed to methods.}
 }
@@ -86,8 +118,9 @@ The updated model, or a list of intermediate models when
 Currently implemented for \code{NIW_IdealAdaptor}; methods for other model types
 will be added as their update workflows are migrated to S7.
 
-\code{update_template()} updates the category template representations of an ideal adaptor
-model (\code{NIW_IdealAdaptor}, \code{NIX_IdealAdaptor}, or \code{MNIX_IdealAdaptor}) given new observations.
+\code{update_template()} updates the category template representations of an
+ideal adaptor model (\code{NIW_IdealAdaptor}, \code{NIX_IdealAdaptor}, or
+\code{MNIX_IdealAdaptor}) given new observations.
 }
 \seealso{
 \code{\link{update_category_representation}}

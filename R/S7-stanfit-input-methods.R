@@ -4,18 +4,13 @@
 #' @include S7-staninput.R
 #' @include S7-stanfit-input.R
 #' @include S7-stanfit.R
-#' @include S7-stanfit-methods.R
 NULL
-
-S7::method(get_staninput, IdealAdaptorStanfitInput) <- function(x, ...) {
-  x@staninput
-}
 
 S7::method(
   set_staninput,
   list(S7::class_any, S7::class_any)
 ) <- function(x, staninput, ...) {
-  .stop("x must be an IdealAdaptorStanfit or IdealAdaptorStanfitInput object.")
+  .stop("x must be an IdealAdaptorStanfit object.")
 }
 
 S7::method(
@@ -30,78 +25,6 @@ S7::method(
   x
 }
 
-S7::method(
-  set_staninput,
-  list(IdealAdaptorStanfitInput, S7::class_any)
-) <- function(x, staninput, ...) {
-  if (!S7::S7_inherits(staninput, MVBU_Staninput)) {
-    .stop("staninput must be an MVBU_Staninput object.")
-  }
-
-  x@staninput <- staninput
-  x
-}
-
-S7::method(get_transform_information, IdealAdaptorStanfitInput) <- function(
-  x,
-  ...
-) {
-  x@transform_information
-}
-
-S7::method(get_cue_labels, IdealAdaptorStanfitInput) <- function(
-  x,
-  indices = NULL,
-  ...
-) {
-  cue_labels <- get_labels(x)$cue
-  if (missing(indices) || is.null(indices)) {
-    return(cue_labels)
-  }
-  cue_labels[indices]
-}
-
-S7::method(get_category_labels, IdealAdaptorStanfitInput) <- function(
-  x,
-  indices = NULL,
-  ...
-) {
-  category_labels <- get_labels(x)$category
-  if (missing(indices) || is.null(indices)) {
-    return(category_labels)
-  }
-  category_labels[indices]
-}
-
-#' @rdname get_response_category_labels
-#' @export
-S7::method(get_response_category_labels, IdealAdaptorStanfitInput) <- function(
-  x,
-  indices = NULL,
-  ...
-) {
-  resp_labels <- get_labels(x)$response_category
-  if (missing(indices) || is.null(indices)) {
-    return(resp_labels)
-  }
-  resp_labels[indices]
-}
-
-S7::method(get_group_labels, IdealAdaptorStanfitInput) <- function(
-  x,
-  indices = NULL,
-  include_prior = FALSE,
-  ...
-) {
-  group_labels <- get_labels(x)$group
-  if (include_prior) {
-    group_labels <- append("prior", group_labels)
-  }
-  if (missing(indices) || is.null(indices)) {
-    return(group_labels)
-  }
-  group_labels[indices]
-}
 
 S7::method(get_original_variable_names, IdealAdaptorStanfitInput) <- function(
   x,
@@ -125,6 +48,7 @@ S7::method(get_original_variable_names, IdealAdaptorStanfitInput) <- function(
 #' @noRd
 .get_stanfit_data_impl <- function(
   x,
+  space = c("original", "transformed"),
   groups = NULL,
   categories = NULL,
   response_categories = NULL,
@@ -132,6 +56,7 @@ S7::method(get_original_variable_names, IdealAdaptorStanfitInput) <- function(
   original_names = FALSE,
   phase = NULL
 ) {
+  space <- match.arg(space)
   .assert_logical_scalar(original_names)
   if (!is.null(groups)) .assert_character(groups)
   if (!is.null(categories)) .assert_character(categories)
@@ -142,7 +67,11 @@ S7::method(get_original_variable_names, IdealAdaptorStanfitInput) <- function(
     n_samples <- as.integer(n_samples)
   }
 
-  data <- x@data
+  data <- if (identical(space, "transformed")) {
+    x@data$transformed
+  } else {
+    x@data$original
+  }
   if (is.null(data) || !is.data.frame(data) || nrow(data) == 0L) {
     if (!is.null(groups) || !is.null(categories) || !is.null(response_categories)) {
       .stop("Object does not contain any data to filter.")
@@ -150,10 +79,9 @@ S7::method(get_original_variable_names, IdealAdaptorStanfitInput) <- function(
     return(tibble::tibble())
   }
 
-  orig <- get_original_variable_names(x)
-
   # Renaming if original_names = TRUE
   if (isTRUE(original_names)) {
+    orig <- get_original_variable_names(x)
     rename_map <- character(0)
     if (!is.null(orig$group) && !identical(orig$group, "group") && "group" %in% names(data)) {
       rename_map[orig$group] <- "group"
@@ -306,6 +234,7 @@ S7::method(get_original_variable_names, IdealAdaptorStanfitInput) <- function(
 #' @export
 S7::method(get_data, IdealAdaptorStanfitInput) <- function(
   x,
+  space = c("original", "transformed"),
   groups = NULL,
   categories = NULL,
   response_categories = NULL,
@@ -313,11 +242,16 @@ S7::method(get_data, IdealAdaptorStanfitInput) <- function(
   original_names = FALSE,
   ...
 ) {
+  space <- match.arg(space)
   if (is.null(groups)) {
-    groups <- get_group_labels(x, include_prior = FALSE)
+    lbls <- get_group_labels(x, include_prior = FALSE)
+    if (length(lbls) > 0L) {
+      groups <- lbls
+    }
   }
   .get_stanfit_data_impl(
     x = x,
+    space = space,
     groups = groups,
     categories = categories,
     response_categories = response_categories,
@@ -331,14 +265,17 @@ S7::method(get_data, IdealAdaptorStanfitInput) <- function(
 #' @export
 S7::method(get_exposure_data, IdealAdaptorStanfitInput) <- function(
   x,
+  space = c("original", "transformed"),
   groups = NULL,
   categories = NULL,
   n_samples = NULL,
   original_names = FALSE,
   ...
 ) {
+  space <- match.arg(space)
   .get_stanfit_data_impl(
     x = x,
+    space = space,
     groups = groups,
     categories = categories,
     response_categories = NULL,
@@ -352,14 +289,17 @@ S7::method(get_exposure_data, IdealAdaptorStanfitInput) <- function(
 #' @export
 S7::method(get_test_data, IdealAdaptorStanfitInput) <- function(
   x,
+  space = c("original", "transformed"),
   groups = NULL,
   response_categories = NULL,
   n_samples = NULL,
   original_names = FALSE,
   ...
 ) {
+  space <- match.arg(space)
   .get_stanfit_data_impl(
     x = x,
+    space = space,
     groups = groups,
     categories = NULL,
     response_categories = response_categories,
@@ -368,131 +308,6 @@ S7::method(get_test_data, IdealAdaptorStanfitInput) <- function(
     phase = "test"
   )
 }
-
-
-S7::method(
-  get_exposure_category_statistic,
-  IdealAdaptorStanfitInput
-) <- function(
-  x,
-  categories = NULL,
-  groups = NULL,
-  statistic = c("n", "mean", "css", "uss", "cov"),
-  untransform_cues = FALSE,
-  ...
-) {
-  if (is.null(categories)) categories <- get_category_labels(x)
-  if (is.null(groups)) {
-    groups <- get_group_labels(x, include_prior = FALSE)
-  }
-  .compute_exposure_category_statistic(
-    x,
-    categories = categories,
-    groups = groups,
-    statistic = statistic,
-    untransform_cues = untransform_cues,
-    ...
-  )
-}
-
-S7::method(
-  get_exposure_category_mean,
-  IdealAdaptorStanfitInput
-) <- function(x, ...) {
-  get_exposure_category_statistic(x, ..., statistic = "mean")
-}
-
-S7::method(
-  get_exposure_category_css,
-  IdealAdaptorStanfitInput
-) <- function(x, ...) {
-  get_exposure_category_statistic(x, ..., statistic = "css")
-}
-
-S7::method(
-  get_exposure_category_uss,
-  IdealAdaptorStanfitInput
-) <- function(x, ...) {
-  get_exposure_category_statistic(x, ..., statistic = "uss")
-}
-
-S7::method(
-  get_exposure_category_cov,
-  IdealAdaptorStanfitInput
-) <- function(x, ...) {
-  get_exposure_category_statistic(x, ..., statistic = "cov")
-}
-
-#' @rdname get_sufficient_category_statistics
-#' @export
-S7::method(
-  get_sufficient_category_statistics,
-  IdealAdaptorStanfitInput
-) <- function(
-  x,
-  categories = NULL,
-  groups = NULL,
-  untransform_cues = FALSE,
-  ...
-) {
-  categories <- .validate_requested_labels(
-    categories,
-    get_category_labels(x),
-    label_type = "category"
-  )
-  groups <- .validate_requested_labels(
-    groups,
-    get_group_labels(x, include_prior = FALSE),
-    label_type = "group"
-  )
-
-  if (untransform_cues) {
-    exp_data <- get_exposure_data(x, groups = groups, categories = categories)
-    ti <- get_transform_information(x)
-    if (!is.null(ti@untransform.function) && nrow(exp_data) > 0L) {
-      exp_data <- ti@untransform.function(exp_data)
-    }
-    cues <- get_cue_labels(x)
-    fam <- get_family_name(x)
-    stats <- get_sufficient_category_statistics(
-      exp_data,
-      cues = cues,
-      category = "category",
-      group = if ("group" %in% names(exp_data)) "group" else NULL,
-      categories = categories,
-      groups = groups,
-      model_family = fam
-    )
-    return(stats)
-  }
-
-  meta_stats <- x@metadata$sufficient_statistics
-  if (!is.null(meta_stats) && is.data.frame(meta_stats) && nrow(meta_stats) > 0L) {
-    stats <- meta_stats
-    if (!is.null(categories) && "category" %in% names(stats)) {
-      stats <- stats[stats$category %in% categories, , drop = FALSE]
-    }
-    if (!is.null(groups) && "group" %in% names(stats)) {
-      stats <- stats[stats$group %in% groups, , drop = FALSE]
-    }
-    return(as.data.frame(stats, stringsAsFactors = FALSE))
-  }
-
-  exp_data <- get_exposure_data(x, groups = groups, categories = categories)
-  cues <- get_cue_labels(x)
-  fam <- get_family_name(x)
-  stats <- get_sufficient_category_statistics(
-    exp_data,
-    cues = cues,
-    category = "category",
-    group = if ("group" %in% names(exp_data)) "group" else NULL,
-    categories = categories,
-    groups = groups,
-    model_family = fam
-  )
-  return(stats)
-}
-
 
 S7::method(print, MVBU_Staninput) <- function(x, ...) {
   cls <- class(x)[1]
@@ -515,8 +330,9 @@ S7::method(print, IdealAdaptorStanfitInput) <- function(x, ...) {
   if (length(cats) > 0) cat("  Categories (", length(cats), "): ", paste(cats, collapse = ", "), "\n", sep = "")
   if (length(cues) > 0) cat("  Cues (", length(cues), "): ", paste(cues, collapse = ", "), "\n", sep = "")
   if (length(grps) > 0) cat("  Groups (", length(grps), "): ", paste(grps, collapse = ", "), "\n", sep = "")
-  if (!is.null(x@data) && is.data.frame(x@data)) {
-    cat("  Data: ", nrow(x@data), " rows\n", sep = "")
+  orig_data <- get_data(x, space = "original")
+  if (!is.null(orig_data) && is.data.frame(orig_data)) {
+    cat("  Data: ", nrow(orig_data), " rows\n", sep = "")
   }
   invisible(x)
 }
@@ -572,11 +388,12 @@ summary.IdealAdaptorStanfitInput <- function(
 
   # Exposure sufficient statistics
   exp_stats <- tryCatch(
-    get_exposure_category_statistic(
+    get_exposure_category_statistics(
       object,
       categories = cats,
       groups = grps,
-      statistic = c("n", "mean", "cov")
+      stats = c("n", "mean", "cov"),
+      simplify = FALSE
     ),
     error = function(e) tibble::tibble()
   )
@@ -611,21 +428,8 @@ summary.IdealAdaptorStanfitInput <- function(
     error = function(e) tibble::tibble()
   )
 
-  vals <- if (!is.null(object@staninput)) object@staninput@values else NULL
-
   test_by_group <- NULL
-  if (!is.null(vals$y_test) && length(vals$y_test) > 0) {
-    all_grps <- get_group_labels(object, include_prior = FALSE)
-    grp_vector <- if (is.numeric(vals$y_test)) all_grps[vals$y_test] else vals$y_test
-    if (!is.null(vals$z_test_counts)) {
-      row_counts <- rowSums(vals$z_test_counts)
-      test_by_group <- tapply(row_counts, grp_vector, sum)
-    } else {
-      test_by_group <- table(grp_vector)
-    }
-    test_by_group <- test_by_group[names(test_by_group) %in% grps]
-    n_test_obs <- sum(test_by_group)
-  } else if (nrow(test_data) > 0 && "group" %in% names(test_data)) {
+  if (nrow(test_data) > 0 && "group" %in% names(test_data)) {
     test_by_group <- table(test_data$group)
     test_by_group <- test_by_group[names(test_by_group) %in% grps]
     n_test_obs <- sum(test_by_group)
@@ -634,23 +438,7 @@ summary.IdealAdaptorStanfitInput <- function(
   }
 
   cue_ranges <- list()
-  if (!is.null(vals$x_test) && !is.null(vals$y_test)) {
-    x_mat <- as.matrix(vals$x_test)
-    all_grps <- get_group_labels(object, include_prior = FALSE)
-    grp_vector <- if (is.numeric(vals$y_test)) all_grps[vals$y_test] else vals$y_test
-    for (i in seq_along(cues)) {
-      cue_name <- cues[i]
-      if (i <= ncol(x_mat)) {
-        cue_ranges[[cue_name]] <- list()
-        for (grp in grps) {
-          idx <- which(grp_vector == grp)
-          if (length(idx) > 0) {
-            cue_ranges[[cue_name]][[grp]] <- range(x_mat[idx, i], na.rm = TRUE)
-          }
-        }
-      }
-    }
-  } else if (nrow(test_data) > 0 && "group" %in% names(test_data)) {
+  if (nrow(test_data) > 0 && "group" %in% names(test_data)) {
     for (cue in cues) {
       if (cue %in% names(test_data) && is.numeric(test_data[[cue]])) {
         cue_ranges[[cue]] <- list()
@@ -718,36 +506,11 @@ S7::method(print, Summary_IdealAdaptorStanfitInput) <- function(x, ...) {
 #' @rdname get_family
 #' @export
 S7::method(get_family_name, IdealAdaptorStaninput) <- function(x, ...) {
-  cls <- class(x)[1]
-  if (grepl("^NIW_", cls)) {
-    "NIW"
-  } else if (grepl("^NIX_", cls)) {
-    "NIX"
-  } else if (grepl("^MNIX_", cls)) {
-    "MNIX"
-  } else {
-    "NIW"
-  }
+  x@family
 }
 
 #' @rdname get_family
 #' @export
 S7::method(get_family, IdealAdaptorStaninput) <- function(x, ...) {
-  .get_model_family(get_family_name(x, ...))
-}
-
-#' @rdname get_family
-#' @export
-S7::method(get_family_name, IdealAdaptorStanfitInput) <- function(x, ...) {
-  if (!is.null(x@staninput)) {
-    get_family_name(x@staninput, ...)
-  } else {
-    .stop("IdealAdaptorStanfitInput has no staninput object populated.")
-  }
-}
-
-#' @rdname get_family
-#' @export
-S7::method(get_family, IdealAdaptorStanfitInput) <- function(x, ...) {
-  .get_model_family(get_family_name(x, ...))
+  .get_model_family(x@family)
 }

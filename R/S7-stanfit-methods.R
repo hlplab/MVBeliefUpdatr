@@ -1,50 +1,41 @@
 #' @include asserts.R
+#' @include S7-family.R
 #' @include S7-class.R
 #' @include S7-generics.R
 #' @include S7-transform-information.R
 #' @include S7-staninput.R
 #' @include S7-stanfit-input.R
 #' @include S7-stanfit.R
+#' @include S7-stanfit-posterior.R
+#' @include S7-class-nix.R
+#' @include S7-class-mnix.R
+#' @include S7-class-niw.R
 NULL
 
-.get_ideal_adaptor_stanfit_constructor <- function(staninput = NULL) {
-  if (!is.null(staninput)) {
-    if (S7::S7_inherits(staninput, IdealIntegrator_MNIX_IdealAdaptorStaninput)) {
-      IdealIntegrator_MNIX_IdealAdaptorStanfit
-    } else if (S7::S7_inherits(staninput, WeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
-      WeightedIntegrator_MNIX_IdealAdaptorStanfit
-    } else if (S7::S7_inherits(staninput, CategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
-      CategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit
-    } else if (S7::S7_inherits(staninput, GroupWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
-      GroupWeightedIntegrator_MNIX_IdealAdaptorStanfit
-    } else if (S7::S7_inherits(staninput, GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
-      GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit
-    } else if (S7::S7_inherits(staninput, InformativityWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
-      InformativityWeightedIntegrator_MNIX_IdealAdaptorStanfit
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_IdealIntegratorStaninput)) {
-      MNIX_IdealAdaptor_IdealIntegratorStanfit
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_WeightedIntegratorStaninput)) {
-      MNIX_IdealAdaptor_WeightedIntegratorStanfit
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_CategoryWeightedIntegratorStaninput)) {
-      MNIX_IdealAdaptor_CategoryWeightedIntegratorStanfit
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_GroupWeightedIntegratorStaninput)) {
-      MNIX_IdealAdaptor_GroupWeightedIntegratorStanfit
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStaninput)) {
-      MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStanfit
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_InformativityWeightedIntegratorStaninput)) {
-      MNIX_IdealAdaptor_InformativityWeightedIntegratorStanfit
-    } else if (S7::S7_inherits(staninput, NIX_IdealAdaptorStaninput)) {
-      NIX_IdealAdaptorStanfit
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptorStaninput)) {
-      MNIX_IdealAdaptor_IdealIntegratorStanfit
-    } else if (S7::S7_inherits(staninput, NIW_IdealAdaptorStaninput)) {
-      NIW_IdealAdaptorStanfit
-    } else {
-      IdealAdaptorStanfit
+.get_ideal_adaptor_stanfit_constructor <- function(staninput = NULL,
+                                                   stanmodel = NULL) {
+  if (is.null(stanmodel) && !is.null(staninput)) {
+    fam <- tryCatch(
+      get_family_name(staninput),
+      error = function(e) character(0)
+    )
+    if (length(fam) > 0 && nzchar(fam)) {
+      stanmodel <- .to_stanmodel(fam)
     }
-  } else {
-    IdealAdaptorStanfit
   }
+
+  if (!is.null(stanmodel) && nzchar(stanmodel)) {
+    ctor <- .get_stanfit_constructor(stanmodel)
+    if (!is.null(ctor)) {
+      return(ctor)
+    }
+    .stop(
+      "Unrecognized stanmodel '", stanmodel,
+      "'. Cannot determine concrete IdealAdaptorStanfit constructor."
+    )
+  }
+
+  IdealAdaptorStanfit
 }
 
 #' @rdname get_stanfit
@@ -59,18 +50,41 @@ S7::method(get_stanfit, MVBU_Stanfit) <- function(x, ...) {
   x@stanfit
 }
 
+#' @rdname get_model_family
+S7::method(
+  get_model_family,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(x, ...) {
+  if (!is.null(x@metadata$model_family)) {
+    return(x@metadata$model_family)
+  }
+  if (!is.null(x@metadata$model_name)) {
+    return(x@metadata$model_name)
+  }
+  if (!is.null(x@metadata$stanmodel)) {
+    return(x@metadata$stanmodel)
+  }
+  class(x)[1]
+}
+
 #' @rdname get_family_name
-#' @export
-S7::method(get_family_name, MVBU_Stanfit) <- function(x, ...) {
-  .get_family_from_class_name(class(x)[1])
+S7::method(
+  get_family_name,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(x, ...) {
+  fam_raw <- get_model_family(x, ...)
+  .get_family_from_class_name(fam_raw)
 }
 
 #' @rdname get_family
-#' @export
-S7::method(get_family, MVBU_Stanfit) <- function(x, ...) {
+S7::method(
+  get_family,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(x, ...) {
   fam_name <- get_family_name(x, ...)
   .get_model_family(fam_name)
 }
+
 
 #' @rdname get_stanfit
 #' @export
@@ -120,11 +134,10 @@ S7::method(get_parameter_names, S7::class_any) <- function(x, original_pars = FA
 #' @rdname get_staninput
 #' @export
 S7::method(get_staninput, S7::class_any) <- function(x, ...) {
-  .stop("x must be an IdealAdaptorStanfit or IdealAdaptorStanfitInput object.")
+  .stop("x must be an IdealAdaptorStanfit object.")
 }
 
 #' @rdname get_staninput
-#' @export
 S7::method(get_staninput, MVBU_Stanfit) <- function(x, ...) {
   x@staninput
 }
@@ -132,18 +145,25 @@ S7::method(get_staninput, MVBU_Stanfit) <- function(x, ...) {
 #' @rdname get_transform_information
 #' @export
 S7::method(get_transform_information, S7::class_any) <- function(x, ...) {
-  .stop("x must be an IdealAdaptorStanfit or IdealAdaptorStanfitInput object.")
+  .stop(paste0(
+    "x must be an MVBU_Stanfit, MVBU_StanfitPosterior, or ",
+    "IdealAdaptorStanfitInput object."
+  ))
 }
 
 #' @rdname get_transform_information
-#' @export
-S7::method(get_transform_information, MVBU_Stanfit) <- function(x, ...) {
+S7::method(
+  get_transform_information,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior, IdealAdaptorStanfitInput)
+) <- function(x, ...) {
   x@transform_information
 }
 
 #' @rdname get_cue_labels
-#' @export
-S7::method(get_cue_labels, MVBU_Stanfit) <- function(x, indices = NULL, ...) {
+S7::method(
+  get_cue_labels,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(x, indices = NULL, ...) {
   cues <- if (!is.null(x@metadata$label_information$cue)) {
     x@metadata$label_information$cue
   } else {
@@ -153,8 +173,10 @@ S7::method(get_cue_labels, MVBU_Stanfit) <- function(x, indices = NULL, ...) {
 }
 
 #' @rdname get_category_labels
-#' @export
-S7::method(get_category_labels, MVBU_Stanfit) <- function(x, indices = NULL, ...) {
+S7::method(
+  get_category_labels,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(x, indices = NULL, ...) {
   cats <- if (!is.null(x@metadata$label_information$category)) {
     x@metadata$label_information$category
   } else {
@@ -164,8 +186,10 @@ S7::method(get_category_labels, MVBU_Stanfit) <- function(x, indices = NULL, ...
 }
 
 #' @rdname get_category_labels
-#' @export
-S7::method(get_response_category_labels, MVBU_Stanfit) <- function(
+S7::method(
+  get_response_category_labels,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(
   x,
   indices = NULL,
   ...
@@ -179,10 +203,9 @@ S7::method(get_response_category_labels, MVBU_Stanfit) <- function(
 }
 
 #' @rdname get_group_labels
-#' @export
 S7::method(
   get_group_labels,
-  MVBU_Stanfit
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
 ) <- function(x, indices = NULL, include_prior = FALSE, ...) {
   grps <- if (!is.null(x@metadata$label_information$group)) {
     x@metadata$label_information$group
@@ -194,8 +217,10 @@ S7::method(
 }
 
 #' @rdname get_labels
-#' @export
-S7::method(get_labels, MVBU_Stanfit) <- function(x, ...) {
+S7::method(
+  get_labels,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(x, ...) {
   list(
     cue = get_cue_labels(x, ...),
     category = get_category_labels(x, ...),
@@ -204,22 +229,38 @@ S7::method(get_labels, MVBU_Stanfit) <- function(x, ...) {
   )
 }
 
-
 #' @rdname get_original_variable_names
-#' @export
-S7::method(get_original_variable_names, MVBU_Stanfit) <- function(
+S7::method(
+  get_original_variable_names,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(
   x,
-  variable = c("group", "group_unique", "category", "response_category", "cues"),
+  variable = c(
+    "group", "group_unique", "category", "response_category", "cues"
+  ),
   ...
 ) {
   orig <- x@metadata$original_variable_names
-  if (is.null(orig) && !is.null(get_staninput(x))) {
-    return(get_original_variable_names(get_staninput(x), variable = variable, ...))
+  if (
+    is.null(orig) &&
+      S7::S7_inherits(x, MVBU_Stanfit) &&
+      !is.null(get_staninput(x))
+  ) {
+    return(
+      get_original_variable_names(get_staninput(x), variable = variable, ...)
+    )
+  }
+  if (is.null(orig)) {
+    .stop(
+      "Original variable names are not available in this object's metadata."
+    )
   }
   if (missing(variable)) {
     return(orig)
   }
-  valid_vars <- c("group", "group_unique", "category", "response_category", "cues")
+  valid_vars <- c(
+    "group", "group_unique", "category", "response_category", "cues"
+  )
   selected <- match.arg(variable, valid_vars, several.ok = TRUE)
   if (length(selected) == 1L) {
     orig[[selected]]
@@ -229,9 +270,12 @@ S7::method(get_original_variable_names, MVBU_Stanfit) <- function(
 }
 
 #' @rdname get_data
-#' @export
-S7::method(get_data, MVBU_Stanfit) <- function(
+S7::method(
+  get_data,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(
   x,
+  space = c("original", "transformed"),
   groups = NULL,
   categories = NULL,
   response_categories = NULL,
@@ -239,11 +283,16 @@ S7::method(get_data, MVBU_Stanfit) <- function(
   original_names = FALSE,
   ...
 ) {
+  space <- match.arg(space)
   if (is.null(groups)) {
-    groups <- get_group_labels(x, include_prior = FALSE)
+    lbls <- get_group_labels(x, include_prior = FALSE)
+    if (length(lbls) > 0L) {
+      groups <- lbls
+    }
   }
   .get_stanfit_data_impl(
     x = x,
+    space = space,
     groups = groups,
     categories = categories,
     response_categories = response_categories,
@@ -254,17 +303,22 @@ S7::method(get_data, MVBU_Stanfit) <- function(
 }
 
 #' @rdname get_data
-#' @export
-S7::method(get_exposure_data, MVBU_Stanfit) <- function(
+S7::method(
+  get_exposure_data,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(
   x,
+  space = c("original", "transformed"),
   groups = NULL,
   categories = NULL,
   n_samples = NULL,
   original_names = FALSE,
   ...
 ) {
+  space <- match.arg(space)
   .get_stanfit_data_impl(
     x = x,
+    space = space,
     groups = groups,
     categories = categories,
     response_categories = NULL,
@@ -275,17 +329,22 @@ S7::method(get_exposure_data, MVBU_Stanfit) <- function(
 }
 
 #' @rdname get_data
-#' @export
-S7::method(get_test_data, MVBU_Stanfit) <- function(
+S7::method(
+  get_test_data,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(
   x,
+  space = c("original", "transformed"),
   groups = NULL,
   response_categories = NULL,
   n_samples = NULL,
   original_names = FALSE,
   ...
 ) {
+  space <- match.arg(space)
   .get_stanfit_data_impl(
     x = x,
+    space = space,
     groups = groups,
     categories = NULL,
     response_categories = response_categories,
@@ -296,315 +355,107 @@ S7::method(get_test_data, MVBU_Stanfit) <- function(
 }
 
 
-.compute_exposure_category_statistic <- function(
+#' @rdname get_exposure_category_statistics
+S7::method(
+  get_exposure_category_statistics,
+  S7::new_union(IdealAdaptorStanfitInput, MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(
   x,
-  categories = get_category_labels(x),
-  groups = get_group_labels(x, include_prior = FALSE),
-  statistic = c("n", "mean", "css", "uss", "cov"),
-  untransform_cues = FALSE,
+  categories = NULL,
+  groups = NULL,
+  stats = c("n", "mean", "cov", "css", "uss"),
+  simplify = TRUE,
   ...
 ) {
-  .assert_that(
-    all(statistic %in% c("n", "mean", "css", "uss", "cov")),
-    msg = "statistic must be one of 'n', 'mean', 'css', 'uss', or 'cov'."
-  )
-  .assert_that(
-    any(is.factor(categories), is.character(categories), is.numeric(categories))
-  )
-  .assert_that(
-    any(is.factor(groups), is.character(groups), is.numeric(groups))
-  )
+  valid_stats <- c("n", "mean", "cov", "css", "uss")
+  stats <- match.arg(stats, valid_stats, several.ok = TRUE)
+
   avail_cats <- get_category_labels(x)
-  categories <- .validate_requested_labels(
-    categories,
-    avail_cats,
-    label_type = "category"
-  )
+  if (is.null(categories)) {
+    categories <- avail_cats
+  } else {
+    categories <- .validate_requested_labels(
+      categories,
+      avail_cats,
+      label_type = "category"
+    )
+  }
+
   avail_grps <- get_group_labels(x, include_prior = FALSE)
-  groups <- .validate_requested_labels(
-    groups,
-    avail_grps,
-    label_type = "group"
-  )
-
-  cue_names <- get_cue_labels(x)
-  n_cues <- length(cue_names)
-  fam <- get_family_name(x)
-  staninput <- get_staninput(x)@values
-
-  # Construct grid of requested group and category combinations
-  grid <- expand.grid(
-    group = groups,
-    category = categories,
-    stringsAsFactors = FALSE
-  )[, c("group", "category"), drop = FALSE]
-
-  c_indices <- match(grid$category, avail_cats)
-  g_indices <- match(grid$group, avail_grps)
-  n_rows <- nrow(grid)
-
-  need_n <- any(untransform_cues, c("n", "css", "uss", "cov") %in% statistic)
-  need_mean <- any(untransform_cues, c("mean", "uss") %in% statistic)
-  need_cov_or_css <- any(
-    untransform_cues,
-    c("css", "uss", "cov") %in% statistic
-  )
-
-  if (need_n) {
-    n_mat <- staninput$N_exposure
-    n_vals <- as.integer(n_mat[cbind(c_indices, g_indices)])
-  }
-
-  if (need_mean) {
-    m_raw <- staninput$x_mean_exposure
-    mean_list <- vector("list", n_rows)
-    if (fam == "NIX") {
-      for (k in seq_len(n_rows)) {
-        val <- m_raw[c_indices[k], g_indices[k]]
-        names(val) <- cue_names
-        mean_list[[k]] <- val
-      }
-    } else {
-      for (k in seq_len(n_rows)) {
-        val <- m_raw[c_indices[k], g_indices[k], ]
-        names(val) <- cue_names
-        mean_list[[k]] <- val
-      }
-    }
-  }
-
-  if (need_cov_or_css) {
-    s_raw <- staninput$x_css_exposure
-    if (is.null(s_raw)) {
-      .stop(
-        "No x_css_exposure found in staninput. ",
-        "Cannot extract category variance."
-      )
-    }
-    css_list <- vector("list", n_rows)
-    if (fam == "NIX") {
-      for (k in seq_len(n_rows)) {
-        mat <- matrix(
-          s_raw[c_indices[k], g_indices[k]],
-          nrow = 1L,
-          ncol = 1L,
-          dimnames = list(cue_names, cue_names)
-        )
-        css_list[[k]] <- mat
-      }
-    } else if (fam == "MNIX") {
-      for (k in seq_len(n_rows)) {
-        mat <- diag(
-          s_raw[c_indices[k], g_indices[k], ],
-          nrow = n_cues,
-          ncol = n_cues
-        )
-        dimnames(mat) <- list(cue_names, cue_names)
-        css_list[[k]] <- mat
-      }
-    } else if (fam == "NIW") {
-      for (k in seq_len(n_rows)) {
-        mat <- matrix(
-          s_raw[c_indices[k], g_indices[k], , ],
-          nrow = n_cues,
-          ncol = n_cues,
-          dimnames = list(cue_names, cue_names)
-        )
-        css_list[[k]] <- mat
-      }
-    } else {
-      .stop(
-        "Unrecognized model. No method available to extract category variance."
-      )
-    }
-
-    need_cov <- any(untransform_cues, "cov" %in% statistic)
-    if (need_cov) {
-      cov_list <- vector("list", n_rows)
-      for (k in seq_len(n_rows)) {
-        cov_list[[k]] <- css2cov(css_list[[k]], n_vals[k])
-      }
-    }
-
-    if ("uss" %in% statistic) {
-      uss_list <- vector("list", n_rows)
-      for (k in seq_len(n_rows)) {
-        uss_list[[k]] <- css2uss(css_list[[k]], n_vals[k], mean_list[[k]])
-      }
-    }
-  }
-
-  if (untransform_cues) {
-    trans_info <- get_transform_information(x)
-    if (any(c("cov", "css", "uss") %in% statistic)) {
-      for (k in seq_len(n_rows)) {
-        cov_list[[k]] <- untransform_category_cov(cov_list[[k]], trans_info)
-      }
-    }
-    if (any(c("css", "uss") %in% statistic)) {
-      for (k in seq_len(n_rows)) {
-        css_list[[k]] <- cov2css(cov_list[[k]], n_vals[k])
-      }
-    }
-    if (any(c("mean", "uss") %in% statistic)) {
-      for (k in seq_len(n_rows)) {
-        mean_list[[k]] <- untransform_category_mean(mean_list[[k]], trans_info)
-      }
-    }
-    if ("uss" %in% statistic) {
-      for (k in seq_len(n_rows)) {
-        uss_list[[k]] <- css2uss(css_list[[k]], n_vals[k], mean_list[[k]])
-      }
-    }
-  }
-
-  res_list <- list(
-    group = factor(grid$group, levels = groups),
-    category = factor(grid$category, levels = categories)
-  )
-
-  if ("n" %in% statistic) {
-    res_list$n <- n_vals
-  }
-  if ("mean" %in% statistic) {
-    if (n_cues == 1L) {
-      res_list$mean <- vapply(mean_list, as.numeric, numeric(1))
-    } else {
-      res_list$mean <- mean_list
-    }
-  }
-  if ("css" %in% statistic) {
-    res_list$css <- css_list
-  }
-  if ("uss" %in% statistic) {
-    res_list$uss <- uss_list
-  }
-  if ("cov" %in% statistic) {
-    res_list$cov <- cov_list
-  }
-
-  df <- tibble::as_tibble(res_list)
-
-  if (nrow(df) == 1L && length(statistic) == 1L) {
-    return(df[[statistic]][[1L]])
-  }
-
-  df
-}
-
-#' @rdname get_exposure_category_statistic
-#' @export
-S7::method(get_exposure_category_statistic, MVBU_Stanfit) <- function(
-  x,
-  categories = NULL,
-  groups = NULL,
-  statistic = c("n", "mean", "css", "uss", "cov"),
-  untransform_cues = FALSE,
-  ...
-) {
-  if (is.null(categories)) categories <- get_category_labels(x)
   if (is.null(groups)) {
-    groups <- get_group_labels(x, include_prior = FALSE)
+    groups <- avail_grps
+  } else {
+    groups <- .validate_requested_labels(
+      groups,
+      avail_grps,
+      label_type = "group"
+    )
   }
-  .compute_exposure_category_statistic(
-    x,
-    categories = categories,
-    groups = groups,
-    statistic = statistic,
-    untransform_cues = untransform_cues,
-    ...
-  )
-}
 
-#' @rdname get_exposure_category_statistic
-#' @export
-S7::method(get_exposure_category_mean, MVBU_Stanfit) <- function(x, ...) {
-  get_exposure_category_statistic(x, ..., statistic = "mean")
-}
-
-#' @rdname get_exposure_category_statistic
-#' @export
-S7::method(get_exposure_category_css, MVBU_Stanfit) <- function(x, ...) {
-  get_exposure_category_statistic(x, ..., statistic = "css")
-}
-
-#' @rdname get_exposure_category_statistic
-#' @export
-S7::method(get_exposure_category_uss, MVBU_Stanfit) <- function(x, ...) {
-  get_exposure_category_statistic(x, ..., statistic = "uss")
-}
-
-#' @rdname get_exposure_category_statistic
-#' @export
-S7::method(get_exposure_category_cov, MVBU_Stanfit) <- function(x, ...) {
-  get_exposure_category_statistic(x, ..., statistic = "cov")
-}
-
-#' @rdname get_sufficient_category_statistics
-#' @export
-S7::method(get_sufficient_category_statistics, MVBU_Stanfit) <- function(
-  x,
-  categories = NULL,
-  groups = NULL,
-  untransform_cues = FALSE,
-  ...
-) {
-  if (is.null(categories)) categories <- get_category_labels(x)
-  if (is.null(groups)) groups <- get_group_labels(x, include_prior = FALSE)
   meta <- get_metadata(x)
-  if (!untransform_cues && !is.null(meta$sufficient_statistics)) {
-    res <- meta$sufficient_statistics
-    if ("category" %in% names(res) && !is.null(categories)) {
-      res <- res[res$category %in% categories, , drop = FALSE]
-    }
-    if ("group" %in% names(res) && !is.null(groups)) {
-      res <- res[res$group %in% groups, , drop = FALSE]
-    }
-    return(as.data.frame(res, stringsAsFactors = FALSE))
-  }
-
-  exp_data <- tryCatch(
-    get_exposure_data(x, groups = groups, categories = categories, original_names = FALSE),
-    error = function(e) NULL
+  target_stats <- meta$exposure_category_statistics
+  .assert_that(
+    !is.null(target_stats) && is.data.frame(target_stats),
+    msg = "Exposure category statistics are not available in this object."
   )
-  if (is.data.frame(exp_data) && nrow(exp_data) > 0) {
-    cue_names <- get_cue_labels(x)
-    if (untransform_cues) {
-      ti <- get_transform_information(x)
-      if (!is.null(ti) && !is.null(ti@untransform.function)) {
-        exp_data[cue_names] <- ti@untransform.function(exp_data[cue_names])
+
+  res <- as.data.frame(target_stats)
+  if ("category" %in% names(res) && !is.null(categories)) {
+    res <- res[res$category %in% categories, , drop = FALSE]
+  }
+  if ("group" %in% names(res) && !is.null(groups)) {
+    res <- res[res$group %in% groups, , drop = FALSE]
+  }
+  if ("cov" %in% stats && !"cov" %in% names(res) &&
+    all(c("css", "n") %in% names(res))) {
+    res$cov <- mapply(function(css, n) {
+      if (is.matrix(css)) {
+        css2cov(css, n)
+      } else {
+        k <- length(css)
+        c_mat <- if (n > 1L) {
+          diag(css / (n - 1L), k, k)
+        } else {
+          matrix(NA_real_, k, k)
+        }
+        dimnames(c_mat) <- list(names(css), names(css))
+        c_mat
       }
-    }
-    grp_col <- if ("group" %in% names(exp_data) && length(unique(exp_data$group)) > 1) "group" else if ("group" %in% names(exp_data)) "group" else NULL
-    return(get_sufficient_category_statistics(
-      exp_data,
-      cues = cue_names,
-      category = "category",
-      group = grp_col
-    ))
+    }, res$css, res$n, SIMPLIFY = FALSE)
   }
+  if ("uss" %in% stats && !"uss" %in% names(res) &&
+    all(c("css", "n", "mean") %in% names(res))) {
+    res$uss <- mapply(function(css, n, m) {
+      if (is.matrix(css)) {
+        css2uss(css, n, m)
+      } else {
+        u_vec <- css + n * (m^2)
+        names(u_vec) <- names(css)
+        u_vec
+      }
+    }, res$css, res$n, res$mean, SIMPLIFY = FALSE)
+  }
+  if ("css" %in% stats && !"css" %in% names(res) &&
+    all(c("cov", "n") %in% names(res))) {
+    res$css <- mapply(function(cov, n) {
+      if (is.matrix(cov)) {
+        cov2css(cov, n)
+      } else {
+        cov * (n - 1L)
+      }
+    }, res$cov, res$n, SIMPLIFY = FALSE)
+  }
+  .assert_that(
+    all(stats %in% names(res)),
+    msg = "Exposure category statistics are not available in this object."
+  )
 
-  stats <- get_exposure_category_statistic(
-    x,
-    categories = categories,
-    groups = groups,
-    statistic = c("n", "mean", "css", "uss", "cov"),
-    untransform_cues = untransform_cues,
-    ...
-  )
-  if (!is.data.frame(stats)) {
-    return(stats)
+  cols <- c(intersect(c("group", "category"), names(res)), stats)
+  df <- tibble::as_tibble(res[, cols, drop = FALSE])
+  if (isTRUE(simplify) && nrow(df) == 1L && length(stats) == 1L) {
+    return(df[[stats]][[1L]])
   }
-  data.frame(
-    group = stats$group,
-    category = stats$category,
-    x_N = stats$n,
-    x_mean = I(stats$mean),
-    x_css = I(stats$css),
-    x_uss = I(stats$uss),
-    x_cov = I(stats$cov),
-    stringsAsFactors = FALSE
-  )
+  df
 }
 
 
@@ -1135,28 +986,37 @@ S7::method(get_marginal_category_statistic, MVBU_Stanfit) <- function(
 }
 
 #' @rdname get_parameters
-#' @export
-S7::method(get_expected_mu, MVBU_Stanfit) <- function(x, ...) {
+S7::method(
+  get_expected_mu,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(x, ...) {
   get_expected_category_statistic(x, statistic = "mu", ...)
 }
 
 #' @rdname get_parameters
-#' @export
-S7::method(get_expected_sigma, MVBU_Stanfit) <- function(x, ...) {
+S7::method(
+  get_expected_sigma,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(x, ...) {
   get_expected_category_statistic(x, statistic = "Sigma", ...)
 }
 
 #' @rdname get_parameters
-#' @export
-S7::method(get_marginal_mu, MVBU_Stanfit) <- function(x, ...) {
+S7::method(
+  get_marginal_mu,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(x, ...) {
   get_marginal_category_statistic(x, statistic = "mu", ...)
 }
 
 #' @rdname get_parameters
-#' @export
-S7::method(get_marginal_sigma, MVBU_Stanfit) <- function(x, ...) {
+S7::method(
+  get_marginal_sigma,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(x, ...) {
   get_marginal_category_statistic(x, statistic = "Sigma", ...)
 }
+
 
 # -----------------------------------------------------------------------------
 # Transform and Draw Accessors
@@ -1177,7 +1037,7 @@ S7::method(get_transform_function, S7::class_any) <- function(x, ...) {
 S7::method(get_untransform_function, S7::class_any) <- function(x, ...) {
   info <- get_transform_information(x)
   if (S7::S7_inherits(info, MVBU_TransformInformation)) {
-    return(info@`untransform.function`)
+    return(invert_transform(info)@transform.function)
   }
   identity
 }
@@ -1602,395 +1462,353 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
   }
   dplyr::bind_rows(rows)
 }
-
-.extract_fixed_parameters <- function(object) {
-  staninput <- get_staninput(object)
-  stanvals <- if (!is.null(staninput)) staninput@values else list()
-  category_levels <- get_category_labels(object)
-  cue_levels <- get_cue_labels(object)
-  group_levels <- get_group_labels(object, include_prior = FALSE)
-  fam <- sub("_.*$", "", get_model_family(object))
-  is_nix_or_mnix <- fam %in% c("NIX", "MNIX")
-
-  rows <- list()
-
-  # 1. weights (if weights_known == 1)
-  if (
-    isTRUE(stanvals$weights_known == 1) ||
-      isTRUE(stanvals$weights_known == 1L)
-  ) {
-    w_data <- stanvals$weights_data
-    if (!is.null(w_data)) {
-      if (is.matrix(w_data) && nrow(w_data) == 1) {
-        for (k in seq_len(ncol(w_data))) {
-          cue_k <- if (k <= length(cue_levels)) cue_levels[k] else as.character(k)
-          if (is_nix_or_mnix) {
-            rows[[length(rows) + 1L]] <- tibble::tibble(
-              Parameter = "weights",
-              `Dist.` = "",
-              Group = "",
-              Category = "",
-              Cue = cue_k,
-              Value = as.numeric(w_data[1, k]),
-              Status = "Fixed by user"
-            )
-          } else {
-            rows[[length(rows) + 1L]] <- tibble::tibble(
-              Parameter = "weights",
-              `Dist.` = "",
-              Group = "",
-              Category = "",
-              Cue1 = cue_k,
-              Cue2 = "",
-              Value = as.numeric(w_data[1, k]),
-              Status = "Fixed by user"
-            )
-          }
-        }
-      } else if (is.matrix(w_data) && nrow(w_data) == length(category_levels)) {
-        for (cat_idx in seq_along(category_levels)) {
-          cat_name <- category_levels[cat_idx]
-          for (k in seq_len(ncol(w_data))) {
-            cue_k <- if (k <= length(cue_levels)) cue_levels[k] else as.character(k)
-            rows[[length(rows) + 1L]] <- tibble::tibble(
-              Parameter = "weights",
-              `Dist.` = "",
-              Group = "",
-              Category = cat_name,
-              Cue = cue_k,
-              Value = as.numeric(w_data[cat_idx, k]),
-              Status = "Fixed by user"
-            )
-          }
-        }
-      } else if (is.matrix(w_data) && nrow(w_data) == length(group_levels)) {
-        for (grp_idx in seq_along(group_levels)) {
-          grp_name <- group_levels[grp_idx]
-          for (k in seq_len(ncol(w_data))) {
-            cue_k <- if (k <= length(cue_levels)) cue_levels[k] else as.character(k)
-            rows[[length(rows) + 1L]] <- tibble::tibble(
-              Parameter = "weights",
-              `Dist.` = "",
-              Group = grp_name,
-              Category = "",
-              Cue = cue_k,
-              Value = as.numeric(w_data[grp_idx, k]),
-              Status = "Fixed by user"
-            )
-          }
-        }
-      } else if (is.array(w_data) && length(dim(w_data)) == 3) {
-        for (grp_idx in seq_len(dim(w_data)[1])) {
-          grp_name <- if (grp_idx <= length(group_levels)) group_levels[grp_idx] else as.character(grp_idx)
-          for (cat_idx in seq_len(dim(w_data)[2])) {
-            cat_name <- if (cat_idx <= length(category_levels)) category_levels[cat_idx] else as.character(cat_idx)
-            for (k in seq_len(dim(w_data)[3])) {
-              cue_k <- if (k <= length(cue_levels)) cue_levels[k] else as.character(k)
-              rows[[length(rows) + 1L]] <- tibble::tibble(
-                Parameter = "weights",
-                `Dist.` = "",
-                Group = grp_name,
-                Category = cat_name,
-                Cue = cue_k,
-                Value = as.numeric(w_data[grp_idx, cat_idx, k]),
-                Status = "Fixed by user"
-              )
-            }
-          }
-        }
-      }
-    }
-  }
-
-  # 2. prior_p
-  if (!is.null(stanvals$prior_p) && length(stanvals$prior_p) > 0) {
-    p_vec <- as.numeric(stanvals$prior_p)
-    is_unif_p <- (length(p_vec) <= 1) || (diff(range(p_vec)) < 1e-6)
-    status_p <- if (is_unif_p) "Uniform category prior" else "Fixed by user"
-    for (k in seq_along(p_vec)) {
-      cat_k <- if (k <= length(category_levels)) category_levels[k] else as.character(k)
-      if (is_nix_or_mnix) {
-        rows[[length(rows) + 1L]] <- tibble::tibble(
-          Parameter = "prior_p",
-          `Dist.` = "",
-          Group = "",
-          Category = cat_k,
-          Cue = "",
-          Value = p_vec[k],
-          Status = status_p
-        )
-      } else {
-        rows[[length(rows) + 1L]] <- tibble::tibble(
-          Parameter = "prior_p",
-          `Dist.` = "",
-          Group = "",
-          Category = cat_k,
-          Cue1 = "",
-          Cue2 = "",
-          Value = p_vec[k],
-          Status = status_p
-        )
-      }
-    }
-  }
-
-  # 3. lapse_rate
-  if (
-    isTRUE(stanvals$lapse_rate_known == 1) ||
-      isTRUE(stanvals$lapse_rate_known == 1L)
-  ) {
-    row_lapse <- if (is_nix_or_mnix) {
-      tibble::tibble(
-        Parameter = "lapse_rate",
-        `Dist.` = "",
-        Group = "",
-        Category = "",
-        Cue = "",
-        Value = as.numeric(stanvals$lapse_rate_data),
-        Status = "Fixed by user"
-      )
-    } else {
-      tibble::tibble(
-        Parameter = "lapse_rate",
-        `Dist.` = "",
-        Group = "",
-        Category = "",
-        Cue1 = "",
-        Cue2 = "",
-        Value = as.numeric(stanvals$lapse_rate_data),
-        Status = "Fixed by user"
-      )
-    }
-    rows[[length(rows) + 1L]] <- row_lapse
-  }
-
-  # 4. lapse_bias
-  if (!is.null(stanvals$lapse_bias) && length(stanvals$lapse_bias) > 0) {
-    lb_vec <- as.numeric(stanvals$lapse_bias)
-    is_unif_lb <- (length(lb_vec) <= 1) || (diff(range(lb_vec)) < 1e-6)
-    status_lb <- if (is_unif_lb) "Uniform lapse bias" else "Fixed by user"
-    for (k in seq_along(lb_vec)) {
-      cat_k <- if (k <= length(category_levels)) category_levels[k] else as.character(k)
-      if (is_nix_or_mnix) {
-        rows[[length(rows) + 1L]] <- tibble::tibble(
-          Parameter = "lapse_bias",
-          `Dist.` = "",
-          Group = "",
-          Category = cat_k,
-          Cue = "",
-          Value = lb_vec[k],
-          Status = status_lb
-        )
-      } else {
-        rows[[length(rows) + 1L]] <- tibble::tibble(
-          Parameter = "lapse_bias",
-          `Dist.` = "",
-          Group = "",
-          Category = cat_k,
-          Cue1 = "",
-          Cue2 = "",
-          Value = lb_vec[k],
-          Status = status_lb
-        )
-      }
-    }
-  }
-
-  # 5. mu_0 (indirectly fixing m_0)
-  if (isTRUE(stanvals$mu_0_known == 1) || isTRUE(stanvals$mu_0_known == 1L)) {
-    mu_mat <- as.matrix(stanvals$mu_0_data)
-    K <- nrow(mu_mat)
-    M <- ncol(mu_mat)
-    for (k in seq_len(K)) {
-      cat_k <- if (k <= length(category_levels)) {
-        category_levels[k]
-      } else {
-        as.character(k)
-      }
-      if (fam == "NIX") {
-        rows[[length(rows) + 1L]] <- tibble::tibble(
-          Parameter = "m",
-          `Dist.` = "prior",
-          Group = "",
-          Category = cat_k,
-          Cue = cue_levels[1],
-          Value = mu_mat[k, 1],
-          Status = "Fixed by user"
-        )
-      } else if (fam == "MNIX") {
-        for (m in seq_len(M)) {
-          cue_m <- if (m <= length(cue_levels)) {
-            cue_levels[m]
-          } else {
-            as.character(m)
-          }
-          rows[[length(rows) + 1L]] <- tibble::tibble(
-            Parameter = "m",
-            `Dist.` = "prior",
-            Group = "",
-            Category = cat_k,
-            Cue = cue_m,
-            Value = mu_mat[k, m],
-            Status = "Fixed by user"
-          )
-        }
-      } else {
-        for (m in seq_len(M)) {
-          cue_m <- if (m <= length(cue_levels)) {
-            cue_levels[m]
-          } else {
-            as.character(m)
-          }
-          rows[[length(rows) + 1L]] <- tibble::tibble(
-            Parameter = "m",
-            `Dist.` = "prior",
-            Group = "",
-            Category = cat_k,
-            Cue1 = cue_m,
-            Cue2 = "",
-            Value = mu_mat[k, m],
-            Status = "Fixed by user"
-          )
-        }
-      }
-    }
-  }
-
-  # 6. Sigma_0 (indirectly fixing S_0)
-  if (
-    isTRUE(stanvals$Sigma_0_known == 1) ||
-      isTRUE(stanvals$Sigma_0_known == 1L)
-  ) {
-    sig_data <- stanvals$Sigma_0_data
-    if (fam == "NIX") {
-      sig_vec <- as.numeric(sig_data)
-      for (k in seq_along(sig_vec)) {
-        cat_k <- if (k <= length(category_levels)) {
-          category_levels[k]
-        } else {
-          as.character(k)
-        }
-        rows[[length(rows) + 1L]] <- tibble::tibble(
-          Parameter = "S",
-          `Dist.` = "prior",
-          Group = "",
-          Category = cat_k,
-          Cue = cue_levels[1],
-          Value = sig_vec[k],
-          Status = "Fixed by user"
-        )
-      }
-    } else if (fam == "MNIX") {
-      sig_mat <- as.matrix(sig_data)
-      for (k in seq_len(nrow(sig_mat))) {
-        cat_k <- if (k <= length(category_levels)) {
-          category_levels[k]
-        } else {
-          as.character(k)
-        }
-        for (m in seq_len(ncol(sig_mat))) {
-          cue_m <- if (m <= length(cue_levels)) {
-            cue_levels[m]
-          } else {
-            as.character(m)
-          }
-          rows[[length(rows) + 1L]] <- tibble::tibble(
-            Parameter = "S",
-            `Dist.` = "prior",
-            Group = "",
-            Category = cat_k,
-            Cue = cue_m,
-            Value = sig_mat[k, m],
-            Status = "Fixed by user"
-          )
-        }
-      }
-    } else {
-      if (is.array(sig_data) && length(dim(sig_data)) == 3) {
-        for (k in seq_len(dim(sig_data)[1])) {
-          cat_k <- if (k <= length(category_levels)) {
-            category_levels[k]
-          } else {
-            as.character(k)
-          }
-          for (m1 in seq_len(dim(sig_data)[2])) {
-            cue_1 <- if (m1 <= length(cue_levels)) {
-              cue_levels[m1]
-            } else {
-              as.character(m1)
-            }
-            for (m2 in seq_len(dim(sig_data)[3])) {
-              cue_2 <- if (m2 <= length(cue_levels)) {
-                cue_levels[m2]
-              } else {
-                as.character(m2)
-              }
-              rows[[length(rows) + 1L]] <- tibble::tibble(
-                Parameter = "S",
-                `Dist.` = "prior",
-                Group = "",
-                Category = cat_k,
-                Cue1 = cue_1,
-                Cue2 = cue_2,
-                Value = sig_data[k, m1, m2],
-                Status = "Fixed by user"
-              )
-            }
-          }
-        }
-      } else if (is.matrix(sig_data)) {
-        for (k in seq_len(nrow(sig_data))) {
-          cat_k <- if (k <= length(category_levels)) {
-            category_levels[k]
-          } else {
-            as.character(k)
-          }
-          for (m in seq_len(ncol(sig_data))) {
-            cue_m <- if (m <= length(cue_levels)) {
-              cue_levels[m]
-            } else {
-              as.character(m)
-            }
-            rows[[length(rows) + 1L]] <- tibble::tibble(
-              Parameter = "S",
-              `Dist.` = "prior",
-              Group = "",
-              Category = cat_k,
-              Cue1 = cue_m,
-              Cue2 = cue_m,
-              Value = sig_data[k, m],
-              Status = "Fixed by user"
-            )
-          }
-        }
-      }
-    }
-  }
-
-  if (length(rows) > 0) {
-    dplyr::bind_rows(rows)
-  } else if (is_nix_or_mnix) {
+#' Create a single-row tibble for a fixed parameter
+#'
+#' @param param Parameter name character string.
+#' @param dist Distribution label (\code{"prior"}, \code{"posterior"},
+#'   or \code{""}).
+#' @param group Group label.
+#' @param category Category label.
+#' @param cue Cue label (for NIX/MNIX single cue column).
+#' @param cue1 Primary cue label (for NIW 2D cue matrix).
+#' @param cue2 Secondary cue label (for NIW 2D cue matrix).
+#' @param value Numeric fixed value.
+#' @param is_nix_or_mnix Logical; whether model has a single cue column.
+#' @return A 1-row \code{\link[tibble]{tibble}}.
+#' @keywords internal
+#' @noRd
+.make_fixed_row <- function(
+  param,
+  dist = "",
+  group = "",
+  category = "",
+  cue = "",
+  cue1 = "",
+  cue2 = "",
+  value = NA_real_,
+  is_nix_or_mnix = TRUE
+) {
+  if (is_nix_or_mnix) {
     tibble::tibble(
-      Parameter = character(0),
-      `Dist.` = character(0),
-      Group = character(0),
-      Category = character(0),
-      Cue = character(0),
-      Value = numeric(0),
-      Status = character(0)
+      Parameter = as.character(param),
+      `Dist.` = as.character(dist),
+      Group = as.character(group),
+      Category = as.character(category),
+      Cue = as.character(cue),
+      Value = as.numeric(value),
+      Status = "Fixed by user"
     )
   } else {
     tibble::tibble(
-      Parameter = character(0),
-      `Dist.` = character(0),
-      Group = character(0),
-      Category = character(0),
-      Cue1 = character(0),
-      Cue2 = character(0),
-      Value = numeric(0),
-      Status = character(0)
+      Parameter = as.character(param),
+      `Dist.` = as.character(dist),
+      Group = as.character(group),
+      Category = as.character(category),
+      Cue1 = as.character(cue1),
+      Cue2 = as.character(cue2),
+      Value = as.numeric(value),
+      Status = "Fixed by user"
     )
   }
+}
+
+#' Format fixed parameters as a summary table
+#'
+#' @param fixed_params A named list of fixed parameter values in original
+#'   space.
+#' @param object Optional \code{MVBU_Stanfit} or model object providing label
+#'   context.
+#' @return A \code{\link[tibble]{tibble}} with fixed parameters formatted
+#'   for display.
+#' @keywords internal
+#' @noRd
+.format_fixed_parameters_table <- function(fixed_params, object = NULL) {
+  if (is.null(fixed_params) || length(fixed_params) == 0L) {
+    return(tibble::tibble())
+  }
+  if (is.data.frame(fixed_params)) {
+    return(tibble::as_tibble(fixed_params))
+  }
+
+  cue_labels <- tryCatch(get_cue_labels(object), error = function(e) NULL)
+  category_labels <- tryCatch(
+    get_category_labels(object),
+    error = function(e) NULL
+  )
+  fam <- tryCatch(
+    sub("_.*$", "", get_model_family(object)),
+    error = function(e) ""
+  )
+  is_nix_or_mnix <- fam %in% c("NIX", "MNIX") ||
+    (!is.null(cue_labels) && length(cue_labels) <= 1L) ||
+    (is.null(cue_labels) && fam != "NIW")
+
+  rows <- list()
+
+  # weights
+  if (!is.null(fixed_params$weights)) {
+    w <- fixed_params$weights
+    for (c in seq_along(w)) {
+      c_name <- if (!is.null(cue_labels) && length(cue_labels) >= c) {
+        cue_labels[c]
+      } else if (!is.null(names(w)) && nzchar(names(w)[c])) {
+        names(w)[c]
+      } else {
+        as.character(c)
+      }
+      rows[[length(rows) + 1L]] <- .make_fixed_row(
+        param = "weights",
+        cue = c_name,
+        cue1 = c_name,
+        value = w[c],
+        is_nix_or_mnix = is_nix_or_mnix
+      )
+    }
+  }
+
+  # lapse_rate
+  if (!is.null(fixed_params$lapse_rate)) {
+    rows[[length(rows) + 1L]] <- .make_fixed_row(
+      param = "lapse_rate",
+      value = fixed_params$lapse_rate[1],
+      is_nix_or_mnix = is_nix_or_mnix
+    )
+  }
+
+  # prior_p / p_cat
+  prior_p <- fixed_params$prior_p %||% fixed_params$p_cat
+  if (!is.null(prior_p)) {
+    for (k in seq_along(prior_p)) {
+      cat_name <- if (
+        !is.null(category_labels) && length(category_labels) >= k
+      ) {
+        category_labels[k]
+      } else if (!is.null(names(prior_p)) && nzchar(names(prior_p)[k])) {
+        names(prior_p)[k]
+      } else {
+        as.character(k)
+      }
+      rows[[length(rows) + 1L]] <- .make_fixed_row(
+        param = "prior_p",
+        category = cat_name,
+        value = prior_p[k],
+        is_nix_or_mnix = is_nix_or_mnix
+      )
+    }
+  }
+
+  # lapse_bias
+  if (!is.null(fixed_params$lapse_bias)) {
+    lb <- fixed_params$lapse_bias
+    for (k in seq_along(lb)) {
+      cat_name <- if (
+        !is.null(category_labels) && length(category_labels) >= k
+      ) {
+        category_labels[k]
+      } else if (!is.null(names(lb)) && nzchar(names(lb)[k])) {
+        names(lb)[k]
+      } else {
+        as.character(k)
+      }
+      rows[[length(rows) + 1L]] <- .make_fixed_row(
+        param = "lapse_bias",
+        category = cat_name,
+        value = lb[k],
+        is_nix_or_mnix = is_nix_or_mnix
+      )
+    }
+  }
+
+  # mu_0 / m_0
+  mu_0 <- fixed_params$mu_0 %||% fixed_params$m_0
+  if (!is.null(mu_0)) {
+    if (is.matrix(mu_0)) {
+      for (k in seq_len(nrow(mu_0))) {
+        cat_name <- if (
+          !is.null(category_labels) && length(category_labels) >= k
+        ) {
+          category_labels[k]
+        } else if (!is.null(rownames(mu_0)) && nzchar(rownames(mu_0)[k])) {
+          rownames(mu_0)[k]
+        } else {
+          as.character(k)
+        }
+        for (c in seq_len(ncol(mu_0))) {
+          c_name <- if (!is.null(cue_labels) && length(cue_labels) >= c) {
+            cue_labels[c]
+          } else if (!is.null(colnames(mu_0)) && nzchar(colnames(mu_0)[c])) {
+            colnames(mu_0)[c]
+          } else {
+            as.character(c)
+          }
+          rows[[length(rows) + 1L]] <- .make_fixed_row(
+            param = "m",
+            dist = "prior",
+            category = cat_name,
+            cue = c_name,
+            cue1 = c_name,
+            value = mu_0[k, c],
+            is_nix_or_mnix = is_nix_or_mnix
+          )
+        }
+      }
+    } else if (is.list(mu_0)) {
+      for (k_name in names(mu_0)) {
+        sub_v <- mu_0[[k_name]]
+        for (c in seq_along(sub_v)) {
+          c_name <- if (!is.null(cue_labels) && length(cue_labels) >= c) {
+            cue_labels[c]
+          } else if (!is.null(names(sub_v)) && nzchar(names(sub_v)[c])) {
+            names(sub_v)[c]
+          } else {
+            as.character(c)
+          }
+          rows[[length(rows) + 1L]] <- .make_fixed_row(
+            param = "m",
+            dist = "prior",
+            category = k_name,
+            cue = c_name,
+            cue1 = c_name,
+            value = sub_v[c],
+            is_nix_or_mnix = is_nix_or_mnix
+          )
+        }
+      }
+    } else if (is.numeric(mu_0)) {
+      for (c in seq_along(mu_0)) {
+        c_name <- if (!is.null(cue_labels) && length(cue_labels) >= c) {
+          cue_labels[c]
+        } else {
+          as.character(c)
+        }
+        rows[[length(rows) + 1L]] <- .make_fixed_row(
+          param = "m",
+          dist = "prior",
+          cue = c_name,
+          cue1 = c_name,
+          value = mu_0[c],
+          is_nix_or_mnix = is_nix_or_mnix
+        )
+      }
+    }
+  }
+
+  # Sigma_0 / S_0
+  sig_0 <- fixed_params$Sigma_0 %||% fixed_params$S_0
+  if (!is.null(sig_0)) {
+    if (is.array(sig_0) && length(dim(sig_0)) == 3L) {
+      for (k in seq_len(dim(sig_0)[1])) {
+        cat_name <- if (
+          !is.null(category_labels) && length(category_labels) >= k
+        ) {
+          category_labels[k]
+        } else {
+          as.character(k)
+        }
+        for (i in seq_len(dim(sig_0)[2])) {
+          c1 <- if (!is.null(cue_labels) && length(cue_labels) >= i) {
+            cue_labels[i]
+          } else {
+            as.character(i)
+          }
+          for (j in seq_len(dim(sig_0)[3])) {
+            c2 <- if (!is.null(cue_labels) && length(cue_labels) >= j) {
+              cue_labels[j]
+            } else {
+              as.character(j)
+            }
+            if (is_nix_or_mnix) {
+              if (i == j) {
+                rows[[length(rows) + 1L]] <- .make_fixed_row(
+                  param = "S",
+                  dist = "prior",
+                  category = cat_name,
+                  cue = c1,
+                  value = sig_0[k, i, j],
+                  is_nix_or_mnix = TRUE
+                )
+              }
+            } else {
+              rows[[length(rows) + 1L]] <- .make_fixed_row(
+                param = "S",
+                dist = "prior",
+                category = cat_name,
+                cue1 = c1,
+                cue2 = c2,
+                value = sig_0[k, i, j],
+                is_nix_or_mnix = FALSE
+              )
+            }
+          }
+        }
+      }
+    } else if (is.list(sig_0)) {
+      for (k_name in names(sig_0)) {
+        mat <- sig_0[[k_name]]
+        if (is.matrix(mat)) {
+          for (i in seq_len(nrow(mat))) {
+            c1 <- if (!is.null(cue_labels) && length(cue_labels) >= i) {
+              cue_labels[i]
+            } else {
+              as.character(i)
+            }
+            for (j in seq_len(ncol(mat))) {
+              c2 <- if (!is.null(cue_labels) && length(cue_labels) >= j) {
+                cue_labels[j]
+              } else {
+                as.character(j)
+              }
+              if (is_nix_or_mnix) {
+                if (i == j) {
+                  rows[[length(rows) + 1L]] <- .make_fixed_row(
+                    param = "S",
+                    dist = "prior",
+                    category = k_name,
+                    cue = c1,
+                    value = mat[i, j],
+                    is_nix_or_mnix = TRUE
+                  )
+                }
+              } else {
+                rows[[length(rows) + 1L]] <- .make_fixed_row(
+                  param = "S",
+                  dist = "prior",
+                  category = k_name,
+                  cue1 = c1,
+                  cue2 = c2,
+                  value = mat[i, j],
+                  is_nix_or_mnix = FALSE
+                )
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  # Other generic parameters
+  known_pars <- c(
+    "weights", "lapse_rate", "lapse_bias", "prior_p", "p_cat",
+    "mu_0", "m_0", "Sigma_0", "S_0"
+  )
+  for (p_name in setdiff(names(fixed_params), known_pars)) {
+    val <- fixed_params[[p_name]]
+    if (is.numeric(val)) {
+      for (idx in seq_along(val)) {
+        rows[[length(rows) + 1L]] <- .make_fixed_row(
+          param = p_name,
+          value = val[idx],
+          is_nix_or_mnix = is_nix_or_mnix
+        )
+      }
+    }
+  }
+
+  if (length(rows) == 0L) {
+    return(tibble::tibble())
+  }
+  dplyr::bind_rows(rows)
 }
 
 #' Summarize an MVBU Stanfit object
@@ -2029,15 +1847,44 @@ summary.MVBU_Stanfit <- function(
   .assert_contains_draws(stanfit)
   if (is.null(pars)) {
     pars <- names(stanfit)
-    pars <- grep("^((kappa|nu|m|S|cue_weight|weights)_|weights\\[|lapse_rate|lapse_bias|p_category|prior_p|Sigma_noise)", pars, value = TRUE)
+    pars <- grep(
+      "^((kappa|nu|m|S|weights)_|weights\\[|lapse_rate|lapse_bias|prior_p|Sigma_noise)",
+      pars,
+      value = TRUE
+    )
     pars <- grep("^m_0_(tau|L_omega|cov)", pars, value = TRUE, invert = TRUE)
-    pars <- grep("^((m|S)_0|lapse_rate|weights)_param", pars, value = TRUE, invert = TRUE)
-    if (!include_transformed_pars) pars <- grep("_transformed", pars, value = TRUE, invert = TRUE)
+    pars <- grep(
+      "^((m|S)_0|lapse_rate|weights)_param",
+      pars,
+      value = TRUE,
+      invert = TRUE
+    )
+    if (!include_transformed_pars) {
+      pars <- grep("_transformed", pars, value = TRUE, invert = TRUE)
+    }
+    fixed_names <- names(get_parameters(object, space = "original")$fixed)
+    if (length(fixed_names) > 0) {
+      fixed_pat <- paste0(
+        "^(", paste(fixed_names, collapse = "|"), ")(\\[|_|$)"
+      )
+      pars <- grep(fixed_pat, pars, value = TRUE, invert = TRUE)
+    }
   }
 
   raw_sum <- rstan::summary(stanfit, pars = pars, probs = probs, ...)$summary
+  fixed_params <- get_parameters(object, space = "original")$fixed
+  fixed_summary <- if (!is.null(fixed_params) && length(fixed_params) > 0) {
+    attr(fixed_params, "table") %||%
+      .format_fixed_parameters_table(fixed_params, object = object)
+  } else {
+    tibble::tibble()
+  }
+
   if (is.null(raw_sum) || nrow(raw_sum) == 0) {
-    return(Summary_MVBU_Stanfit(fitted = as.data.frame(raw_sum), fixed = .extract_fixed_parameters(object)))
+    return(Summary_MVBU_Stanfit(
+      fitted = as.data.frame(raw_sum),
+      fixed = fixed_summary
+    ))
   }
 
   # Sort and filter output
@@ -2048,12 +1895,12 @@ summary.MVBU_Stanfit <- function(
     dplyr::mutate(
       name = factor(
         gsub(
-          "^(kappa|nu|m|S|cue_weight|weights|lapse_rate|lapse_bias|p_category|prior_p|Sigma_noise).*$",
+          "^(kappa|nu|m|S|weights|lapse_rate|lapse_bias|prior_p|Sigma_noise).*$",
           "\\1",
           .data$Parameter
         ),
         levels = c(
-          "weights", "cue_weight", "prior_p", "p_category", "lapse_rate", "lapse_bias",
+          "weights", "prior_p", "lapse_rate", "lapse_bias",
           "kappa", "nu", "m", "S", "Sigma_noise"
         )
       ),
@@ -2078,9 +1925,9 @@ summary.MVBU_Stanfit <- function(
       .data$i4
     )
 
-  category_levels <- get_category_labels(object)
-  group_levels <- get_group_labels(object, include_prior = FALSE)
-  cue_levels <- get_cue_labels(object)
+  category_labels <- get_category_labels(object)
+  group_labels <- get_group_labels(object, include_prior = FALSE)
+  cue_labels <- get_cue_labels(object)
   fam <- sub("_.*$", "", get_model_family(object))
   is_nix_or_mnix <- fam %in% c("NIX", "MNIX")
 
@@ -2096,16 +1943,17 @@ summary.MVBU_Stanfit <- function(
         ),
         Group = dplyr::case_when(
           .data$name %in% c("kappa", "nu", "m", "S") &
-            .data$`Dist.` == "posterior" ~ group_levels[.data$i2],
-          .data$name %in% c("cue_weight", "weights") & !is.na(.data$i2) ~ group_levels[.data$i1],
+            .data$`Dist.` == "posterior" ~ group_labels[.data$i2],
+          .data$name == "weights" & !is.na(.data$i2) ~ group_labels[.data$i1],
           TRUE ~ ""
         ),
         Category = dplyr::case_when(
           .data$name %in% c("m", "S") &
-            .data$`Dist.` == "prior" ~ category_levels[.data$i1],
+            .data$`Dist.` == "prior" ~ category_labels[.data$i1],
           .data$name %in% c("kappa", "nu", "m", "S") &
-            .data$`Dist.` == "posterior" ~ category_levels[.data$i1],
-          .data$name %in% c("p_category", "prior_p", "lapse_bias") ~ category_levels[.data$i1],
+            .data$`Dist.` == "posterior" ~ category_labels[.data$i1],
+          .data$name %in% c("prior_p", "lapse_bias") ~
+            category_labels[.data$i1],
           TRUE ~ ""
         )
       )
@@ -2114,8 +1962,8 @@ summary.MVBU_Stanfit <- function(
       full_summary <- full_summary %>%
         dplyr::mutate(
           Cue = dplyr::case_when(
-            .data$name %in% c("m", "S") ~ cue_levels[1],
-            .data$name %in% c("cue_weight", "weights") ~ cue_levels[1],
+            .data$name %in% c("m", "S") ~ cue_labels[1],
+            .data$name == "weights" ~ cue_labels[1],
             TRUE ~ ""
           )
         ) %>%
@@ -2130,12 +1978,16 @@ summary.MVBU_Stanfit <- function(
         dplyr::mutate(
           Cue = dplyr::case_when(
             .data$name %in% c("m", "S") &
-              .data$`Dist.` == "prior" ~ cue_levels[.data$i2],
+              .data$`Dist.` == "prior" ~ cue_labels[.data$i2],
             .data$name %in% c("m", "S") &
-              .data$`Dist.` == "posterior" ~ cue_levels[.data$i3],
-            .data$name %in% c("cue_weight", "weights") & is.na(.data$i2) ~ cue_levels[.data$i1],
-            .data$name %in% c("cue_weight", "weights") & !is.na(.data$i2) & is.na(.data$i3) ~ cue_levels[.data$i2],
-            .data$name %in% c("cue_weight", "weights") & !is.na(.data$i3) ~ cue_levels[.data$i3],
+              .data$`Dist.` == "posterior" ~ cue_labels[.data$i3],
+            .data$name == "weights" & is.na(.data$i2) ~
+              cue_labels[.data$i1],
+            .data$name == "weights" &
+              !is.na(.data$i2) &
+              is.na(.data$i3) ~ cue_labels[.data$i2],
+            .data$name == "weights" & !is.na(.data$i3) ~
+              cue_labels[.data$i3],
             TRUE ~ ""
           )
         ) %>%
@@ -2150,17 +2002,17 @@ summary.MVBU_Stanfit <- function(
         dplyr::mutate(
           Cue1 = dplyr::case_when(
             .data$name %in% c("m", "S") &
-              .data$`Dist.` == "prior" ~ cue_levels[.data$i2],
+              .data$`Dist.` == "prior" ~ cue_labels[.data$i2],
             .data$name %in% c("m", "S") &
-              .data$`Dist.` == "posterior" ~ cue_levels[.data$i3],
-            .data$name %in% c("cue_weight", "weights") ~ cue_levels[.data$i1],
+              .data$`Dist.` == "posterior" ~ cue_labels[.data$i3],
+            .data$name == "weights" ~ cue_labels[.data$i1],
             TRUE ~ ""
           ),
           Cue2 = dplyr::case_when(
             .data$name %in% c("S") &
-              .data$`Dist.` == "prior" ~ cue_levels[.data$i3],
+              .data$`Dist.` == "prior" ~ cue_labels[.data$i3],
             .data$name %in% c("S") &
-              .data$`Dist.` == "posterior" ~ cue_levels[.data$i4],
+              .data$`Dist.` == "posterior" ~ cue_labels[.data$i4],
             TRUE ~ ""
           )
         ) %>%
@@ -2203,7 +2055,7 @@ summary.MVBU_Stanfit <- function(
       dplyr::filter(
         .data$distribution == "0" |
           .data$name %in% c(
-            "cue_weight", "weights", "lapse_rate", "lapse_bias", "p_category", "prior_p", "Sigma_noise"
+            "weights", "lapse_rate", "lapse_bias", "prior_p", "Sigma_noise"
           )
       )
   }
@@ -2234,8 +2086,6 @@ summary.MVBU_Stanfit <- function(
     )
   }
 
-  fixed_summary <- .extract_fixed_parameters(object)
-
   if (nrow(fixed_summary) > 0 && nrow(full_summary) > 0) {
     drop_idx <- integer(0)
     for (i in seq_len(nrow(fixed_summary))) {
@@ -2247,9 +2097,7 @@ summary.MVBU_Stanfit <- function(
           (fp$Cue2 == "" | full_summary$Cue2 == fp$Cue2)
       }
       matches <- which(
-        (full_summary$Parameter == fp$Parameter |
-          (fp$Parameter == "weights" & full_summary$Parameter == "cue_weight") |
-          (fp$Parameter == "prior_p" & full_summary$Parameter == "p_category")) &
+        full_summary$Parameter == fp$Parameter &
           (fp$`Dist.` == "" | full_summary$`Dist.` == fp$`Dist.`) &
           (fp$Category == "" | full_summary$Category == fp$Category) &
           cue_match
@@ -2293,7 +2141,7 @@ summary.MVBU_Stanfit <- function(
     if (!is.null(d_draws) && nrow(d_draws) > 0L) {
       moments <- .summarize_moment_draws(
         d_draws,
-        cue_levels,
+        cue_labels,
         type = c("expected", "marginal"),
         probs = probs,
         model_family = fam
@@ -2321,10 +2169,11 @@ summary.MVBU_Stanfit <- function(
   cats <- get_category_labels(object)
   grps <- get_group_labels(object, include_prior = FALSE)
 
-  n_obs <- if (!is.null(object@staninput) && !is.null(object@staninput@values$N_test)) {
-    object@staninput@values$N_test
-  } else if (!is.null(object@data) && nrow(object@data) > 0) {
-    nrow(object@data)
+  orig_data <- get_data(object, space = "original")
+  n_obs <- if (!is.null(object@staninput) && !is.null(object@staninput@values$n_test)) {
+    object@staninput@values$n_test
+  } else if (!is.null(orig_data) && nrow(orig_data) > 0) {
+    nrow(orig_data)
   } else {
     0
   }
@@ -2408,9 +2257,58 @@ loo.MVBU_Stanfit <- function(
   )
 }
 
+.combine_multigroup_evaluation <- function(res_list, method, return_by_x) {
+  if (isTRUE(return_by_x)) {
+    if (length(method) == 1L) {
+      dfs <- lapply(res_list, function(it) {
+        df <- it$eval
+        df$group <- it$group
+        df[, c("group", setdiff(names(df), "group")), drop = FALSE]
+      })
+      return(dplyr::bind_rows(dfs))
+    }
+    out <- list()
+    for (m in method) {
+      dfs <- lapply(res_list, function(it) {
+        df <- it$eval[[m]]
+        df$group <- it$group
+        df[, c("group", setdiff(names(df), "group")), drop = FALSE]
+      })
+      out[[m]] <- dplyr::bind_rows(dfs)
+    }
+    return(out)
+  }
+
+  total_n <- sum(vapply(res_list, function(it) it$n, integer(1)))
+  calc_method_val <- function(m) {
+    if (identical(m, "accuracy")) {
+      sum(vapply(res_list, function(it) {
+        val <- if (length(method) == 1L) it$eval else it$eval[[m]]
+        val * it$n
+      }, numeric(1))) / total_n
+    } else {
+      sum(vapply(res_list, function(it) {
+        if (length(method) == 1L) it$eval else it$eval[[m]]
+      }, numeric(1)))
+    }
+  }
+
+  if (length(method) == 1L) {
+    return(calc_method_val(method))
+  }
+
+  out <- list()
+  for (m in method) {
+    out[[m]] <- calc_method_val(m)
+  }
+  out
+}
+
 #' @rdname evaluate_model
-#' @export
-S7::method(evaluate_model, MVBU_Stanfit) <- function(
+S7::method(
+  evaluate_model,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(
   model,
   x = NULL,
   response_category = NULL,
@@ -2420,8 +2318,147 @@ S7::method(evaluate_model, MVBU_Stanfit) <- function(
   ...
 ) {
   post_obj <- as_MVBU_stanfit_posterior(model)
+  dots <- list(...)
+  group_arg <- dots$group
+  cues <- get_cue_labels(post_obj)
+
+  if (is.null(x) || is.null(response_category)) {
+    test_df <- get_test_data(post_obj)
+    if (is.null(test_df) || nrow(test_df) == 0L) {
+      .stop(
+        "No test data found in the model object. ",
+        "Please supply x and response_category."
+      )
+    }
+    if (!"response_category" %in% names(test_df)) {
+      .stop("No 'response_category' column found in test data frame.")
+    }
+    if (!is.null(group_arg)) {
+      test_df <- test_df[test_df$group %in% group_arg, , drop = FALSE]
+      if (nrow(test_df) == 0L) {
+        .stop(
+          "No test data found for specified group: ",
+          paste(group_arg, collapse = ", ")
+        )
+      }
+    }
+    has_groups <- "group" %in% names(test_df) && length(unique(test_df$group)) > 1L
+    if (has_groups) {
+      unique_grps <- unique(test_df$group)
+      res_list <- lapply(unique_grps, function(g) {
+        sub_df <- test_df[test_df$group == g, , drop = FALSE]
+        x_mat <- as.matrix(sub_df[, cues, drop = FALSE])
+        resp <- sub_df[["response_category"]]
+        valid_idx <- !is.na(resp)
+        if (any(!valid_idx)) {
+          x_mat <- x_mat[valid_idx, , drop = FALSE]
+          resp <- resp[valid_idx]
+        }
+        cog_model_g <- .as_cognitive_model_from_posterior(post_obj, group = g)
+        ev <- evaluate_model(
+          cog_model_g,
+          x = x_mat,
+          response_category = resp,
+          method = method,
+          decision_rule = decision_rule,
+          return_by_x = return_by_x,
+          ...
+        )
+        list(group = g, n = length(resp), eval = ev)
+      })
+      return(.combine_multigroup_evaluation(
+        res_list,
+        method = method,
+        return_by_x = return_by_x
+      ))
+    }
+
+    grp <- if ("group" %in% names(test_df)) unique(test_df$group)[1] else group_arg
+    cog_model <- .as_cognitive_model_from_posterior(post_obj, group = grp)
+    x_mat <- as.matrix(test_df[, cues, drop = FALSE])
+    response_category <- test_df[["response_category"]]
+    valid_idx <- !is.na(response_category)
+    if (any(!valid_idx)) {
+      x_mat <- x_mat[valid_idx, , drop = FALSE]
+      response_category <- response_category[valid_idx]
+    }
+    x <- x_mat
+    return(evaluate_model(
+      cog_model,
+      x = x,
+      response_category = response_category,
+      method = method,
+      decision_rule = decision_rule,
+      return_by_x = return_by_x,
+      ...
+    ))
+  }
+
+  if (is.null(group_arg)) {
+    model_groups <- setdiff(get_group_labels(post_obj), "prior")
+    if (length(model_groups) == 0L) model_groups <- get_group_labels(post_obj)
+
+    if (is.data.frame(x) &&
+      "group" %in% names(x) &&
+      length(unique(x$group)) > 1L) {
+      unique_grps <- unique(x$group)
+      if (is.data.frame(response_category) &&
+        "response_category" %in% names(response_category)) {
+        response_category <- response_category$response_category
+      }
+      res_list <- lapply(unique_grps, function(g) {
+        g_idx <- which(x$group == g)
+        sub_x <- as.matrix(x[g_idx, cues, drop = FALSE])
+        sub_resp <- response_category[g_idx]
+        cog_model_g <- .as_cognitive_model_from_posterior(post_obj, group = g)
+        ev <- evaluate_model(
+          cog_model_g,
+          x = sub_x,
+          response_category = sub_resp,
+          method = method,
+          decision_rule = decision_rule,
+          return_by_x = return_by_x,
+          ...
+        )
+        list(group = g, n = length(sub_resp), eval = ev)
+      })
+      return(.combine_multigroup_evaluation(
+        res_list,
+        method = method,
+        return_by_x = return_by_x
+      ))
+    }
+
+    if (length(model_groups) > 1L &&
+      (!is.data.frame(x) || !"group" %in% names(x))) {
+      if (is.data.frame(response_category) &&
+        "response_category" %in% names(response_category)) {
+        response_category <- response_category$response_category
+      }
+      res_list <- lapply(model_groups, function(g) {
+        cog_model_g <- .as_cognitive_model_from_posterior(post_obj, group = g)
+        ev <- evaluate_model(
+          cog_model_g,
+          x = x,
+          response_category = response_category,
+          method = method,
+          decision_rule = decision_rule,
+          return_by_x = return_by_x,
+          ...
+        )
+        list(group = g, n = length(response_category), eval = ev)
+      })
+      return(.combine_multigroup_evaluation(
+        res_list,
+        method = method,
+        return_by_x = return_by_x
+      ))
+    }
+  }
+
+  cog_model <- .as_cognitive_model_from_posterior(post_obj, group = group_arg)
   evaluate_model(
-    post_obj,
+    cog_model,
     x = x,
     response_category = response_category,
     method = method,
@@ -2433,12 +2470,28 @@ S7::method(evaluate_model, MVBU_Stanfit) <- function(
 
 #' @rdname sample_observations
 #' @export
-S7::method(sample_observations, MVBU_Stanfit) <- function(x, n = 1L, with_replacement = TRUE, randomize_order = TRUE, ...) {
-  .assert_true(S7::S7_inherits(x, MVBU_Stanfit), msg = "x must be an MVBU_Stanfit object.")
-  data_df <- x@data
-  .assert_true(!is.null(data_df) && nrow(data_df) > 0L, msg = "Stanfit model object contains no data.")
+S7::method(sample_observations, MVBU_Stanfit) <- function(
+  x,
+  n = 1L,
+  with_replacement = TRUE,
+  randomize_order = TRUE,
+  ...
+) {
+  .assert_true(
+    S7::S7_inherits(x, MVBU_Stanfit),
+    msg = "x must be an MVBU_Stanfit object."
+  )
+  data_df <- get_data(x)
+  .assert_true(
+    !is.null(data_df) && nrow(data_df) > 0L,
+    msg = "Stanfit model object contains no data."
+  )
 
-  idx <- sample(seq_len(nrow(data_df)), size = as.integer(n), replace = isTRUE(with_replacement))
+  idx <- sample(
+    seq_len(nrow(data_df)),
+    size = as.integer(n),
+    replace = isTRUE(with_replacement)
+  )
   if (isFALSE(randomize_order)) idx <- sort(idx)
   sampled_df <- data_df[idx, , drop = FALSE]
   rownames(sampled_df) <- NULL
@@ -2457,6 +2510,57 @@ S7::method(sample_observations, MVBU_Stanfit) <- function(x, n = 1L, with_replac
 #' @param categories Categories to reconstruct.
 #' @param parallel Logical; whether to parallelize draw reconstruction.
 #' @param seed Random seed.
+#'
+# Internal helper: Create an ideal adaptor category representation dynamically
+# Factory dispatcher that constructs a category representation (NIX, MNIX, NIW)
+# without hardcoding if/else checks across calling functions.
+.create_ideal_adaptor_representation <- function(
+  model_family,
+  category_labels,
+  cue_labels,
+  m,
+  s,
+  kappa,
+  nu
+) {
+  fam <- toupper(as.character(model_family))
+
+  if (grepl("NIX", fam) && !grepl("MNIX", fam)) {
+    new_nix_category_representation(
+      category_labels = category_labels,
+      cue_labels = cue_labels,
+      m = as.numeric(m)[1],
+      sigma2 = as.numeric(s)[1] / as.numeric(nu),
+      kappa = as.numeric(kappa),
+      nu = as.numeric(nu)
+    )
+  } else if (grepl("MNIX", fam)) {
+    k_comp <- length(as.vector(m))
+    new_mnix_category_representation(
+      category_labels = category_labels,
+      cue_labels = cue_labels,
+      m = as.vector(m),
+      sigma2 = as.vector(s) / as.numeric(nu),
+      kappa = rep_len(as.numeric(kappa), k_comp),
+      nu = rep_len(as.numeric(nu), k_comp)
+    )
+  } else if (grepl("NIW", fam)) {
+    new_niw_category_representation(
+      category_labels = category_labels,
+      cue_labels = cue_labels,
+      m = as.vector(m),
+      S = as.matrix(s),
+      kappa = as.numeric(kappa),
+      nu = as.numeric(nu)
+    )
+  } else {
+    .stop(sprintf(
+      "Unsupported ideal adaptor model family for representation: '%s'.",
+      model_family
+    ))
+  }
+}
+
 #' @export
 S7::method(reconstruct_update_history, MVBU_Stanfit) <- function(
   object,
@@ -2481,17 +2585,7 @@ S7::method(reconstruct_update_history, MVBU_Stanfit) <- function(
   model_fam <- get_model_family(object)
 
   # Extract exposure data from Stanfit object
-  exp_df <- tryCatch(get_exposure_data(object), error = function(e) {
-    df <- tryCatch(get_data(object), error = function(err) object@data)
-    if (!is.null(df) && "Phase" %in% names(df)) {
-      exp_only <- df[df$Phase == "exposure", , drop = FALSE]
-      if (nrow(exp_only) > 0L) return(exp_only)
-    }
-    df
-  })
-  if (is.null(exp_df) || nrow(exp_df) == 0L) {
-    exp_df <- object@data
-  }
+  exp_df <- get_exposure_data(object)
   if (!is.null(groups) && "group" %in% names(exp_df)) {
     exp_df <- exp_df[exp_df$group %in% groups, , drop = FALSE]
   }
@@ -2690,10 +2784,13 @@ S7::method(reconstruct_update_history, MVBU_Stanfit) <- function(
 }
 
 #' @rdname likelihood
-#' @export
 S7::method(
   likelihood,
-  list(MVBU_Stanfit, S7::class_any, S7::class_any)
+  list(
+    S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior),
+    S7::class_any,
+    S7::class_any
+  )
 ) <- function(
   x,
   new_data,
@@ -2701,14 +2798,100 @@ S7::method(
   ...
 ) {
   post_obj <- as_MVBU_stanfit_posterior(x)
-  likelihood(post_obj, new_data, categories, ...)
+  dots <- list(...)
+  group_arg <- dots$group
+
+  if (is.data.frame(new_data) &&
+    "group" %in% names(new_data) &&
+    is.null(group_arg)) {
+    unique_grps <- unique(new_data$group)
+    if (length(unique_grps) > 1L) {
+      if (missing(categories) || is.null(categories)) {
+        categories <- get_category_labels(post_obj)
+      }
+      res <- matrix(
+        NA_real_,
+        nrow = nrow(new_data),
+        ncol = length(categories),
+        dimnames = list(NULL, categories)
+      )
+      cues <- get_cue_labels(post_obj)
+      for (g in unique_grps) {
+        idx <- which(new_data$group == g)
+        cog_model_g <- .as_cognitive_model_from_posterior(post_obj, group = g)
+        sub_data <- as.matrix(new_data[idx, cues, drop = FALSE])
+        res[idx, ] <- likelihood(cog_model_g, sub_data, categories, ...)
+      }
+      return(res)
+    }
+    group_arg <- unique_grps[1]
+  }
+
+  cog_model <- .as_cognitive_model_from_posterior(post_obj, group = group_arg)
+  if (missing(categories)) categories <- NULL
+  likelihood(cog_model, new_data, categories, ...)
+}
+
+#' @rdname posterior
+S7::method(
+  posterior,
+  list(
+    S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior),
+    S7::class_any,
+    S7::class_any
+  )
+) <- function(
+  x,
+  new_data,
+  categories,
+  ...
+) {
+  post_obj <- as_MVBU_stanfit_posterior(x)
+  dots <- list(...)
+  group_arg <- dots$group
+
+  if (is.data.frame(new_data) &&
+    "group" %in% names(new_data) &&
+    is.null(group_arg)) {
+    unique_grps <- unique(new_data$group)
+    if (length(unique_grps) > 1L) {
+      if (missing(categories) || is.null(categories)) {
+        categories <- get_category_labels(post_obj)
+      }
+      res <- matrix(
+        NA_real_,
+        nrow = nrow(new_data),
+        ncol = length(categories),
+        dimnames = list(NULL, categories)
+      )
+      for (g in unique_grps) {
+        idx <- which(new_data$group == g)
+        cog_model_g <- .as_cognitive_model_from_posterior(post_obj, group = g)
+        res[idx, ] <- posterior(
+          cog_model_g,
+          new_data[idx, , drop = FALSE],
+          categories,
+          ...
+        )
+      }
+      return(res)
+    }
+    group_arg <- unique_grps[1]
+  }
+
+  cog_model <- .as_cognitive_model_from_posterior(post_obj, group = group_arg)
+  if (missing(categories)) categories <- NULL
+  posterior(cog_model, new_data, categories, ...)
 }
 
 #' @rdname categorize
-#' @export
 S7::method(
   categorize,
-  list(MVBU_Stanfit, S7::class_any, S7::class_any)
+  list(
+    S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior),
+    S7::class_any,
+    S7::class_any
+  )
 ) <- function(
   x,
   new_data,
@@ -2717,14 +2900,67 @@ S7::method(
   ...
 ) {
   post_obj <- as_MVBU_stanfit_posterior(x)
-  categorize(post_obj, new_data, decision_rule, simplify = simplify, ...)
+  dots <- list(...)
+  group_arg <- dots$group
+
+  if (is.data.frame(new_data) &&
+    "group" %in% names(new_data) &&
+    is.null(group_arg)) {
+    unique_grps <- unique(new_data$group)
+    if (length(unique_grps) > 1L) {
+      if (missing(decision_rule) || is.null(decision_rule)) {
+        decision_rule <- "proportional"
+      }
+      if (is.null(simplify)) {
+        simplify <- !identical(decision_rule, "proportional")
+      }
+      res_list <- vector("list", length(unique_grps))
+      for (i in seq_along(unique_grps)) {
+        g <- unique_grps[i]
+        idx <- which(new_data$group == g)
+        cog_model_g <- .as_cognitive_model_from_posterior(post_obj, group = g)
+        val <- categorize(
+          cog_model_g,
+          new_data[idx, , drop = FALSE],
+          decision_rule = decision_rule,
+          simplify = simplify,
+          ...
+        )
+        res_list[[i]] <- list(idx = idx, val = val)
+      }
+      if (isTRUE(simplify)) {
+        out <- character(nrow(new_data))
+        for (item in res_list) {
+          out[item$idx] <- item$val
+        }
+        return(out)
+      }
+      out <- data.frame(
+        response_category = character(nrow(new_data)),
+        response_probability = numeric(nrow(new_data)),
+        stringsAsFactors = FALSE
+      )
+      for (item in res_list) {
+        out[item$idx, ] <- item$val
+      }
+      return(out)
+    }
+    group_arg <- unique_grps[1]
+  }
+
+  cog_model <- .as_cognitive_model_from_posterior(post_obj, group = group_arg)
+  categorize(cog_model, new_data, decision_rule, simplify = simplify, ...)
 }
 
 #' @rdname get_category_likelihood_function
-#' @export
-S7::method(get_category_likelihood_function, MVBU_Stanfit) <- function(x, ...) {
+S7::method(
+  get_category_likelihood_function,
+  S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
+) <- function(x, ...) {
   post_obj <- as_MVBU_stanfit_posterior(x)
-  get_category_likelihood_function(post_obj, ...)
+  dots <- list(...)
+  cog_model <- .as_cognitive_model_from_posterior(post_obj, group = dots$group)
+  get_category_likelihood_function(cog_model, ...)
 }
 
 

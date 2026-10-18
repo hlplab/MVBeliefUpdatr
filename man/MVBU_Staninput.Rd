@@ -4,57 +4,18 @@
 \name{MVBU_Staninput}
 \alias{MVBU_Staninput}
 \alias{IdealAdaptorStaninput}
-\alias{MNIX_IdealAdaptorStaninput}
-\alias{IdealIntegrator_MNIX_IdealAdaptorStaninput}
-\alias{WeightedIntegrator_MNIX_IdealAdaptorStaninput}
-\alias{CategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput}
-\alias{GroupWeightedIntegrator_MNIX_IdealAdaptorStaninput}
-\alias{GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput}
-\alias{InformativityWeightedIntegrator_MNIX_IdealAdaptorStaninput}
-\alias{MNIX_IdealAdaptor_IdealIntegratorStaninput}
-\alias{MNIX_IdealAdaptor_WeightedIntegratorStaninput}
-\alias{MNIX_IdealAdaptor_CategoryWeightedIntegratorStaninput}
-\alias{MNIX_IdealAdaptor_GroupWeightedIntegratorStaninput}
-\alias{MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStaninput}
-\alias{MNIX_IdealAdaptor_InformativityWeightedIntegratorStaninput}
-\alias{NIW_IdealAdaptorStaninput}
 \title{MVBeliefUpdatr Stan Input Classes and Constructors}
 \usage{
-MVBU_Staninput(values = list())
+MVBU_Staninput(values = list(), family = character(0))
 
-IdealAdaptorStaninput(values = list())
-
-MNIX_IdealAdaptorStaninput(values = list())
-
-IdealIntegrator_MNIX_IdealAdaptorStaninput(values = list())
-
-WeightedIntegrator_MNIX_IdealAdaptorStaninput(values = list())
-
-CategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput(values = list())
-
-GroupWeightedIntegrator_MNIX_IdealAdaptorStaninput(values = list())
-
-GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput(values = list())
-
-InformativityWeightedIntegrator_MNIX_IdealAdaptorStaninput(values = list())
-
-MNIX_IdealAdaptor_IdealIntegratorStaninput(values = list())
-
-MNIX_IdealAdaptor_WeightedIntegratorStaninput(values = list())
-
-MNIX_IdealAdaptor_CategoryWeightedIntegratorStaninput(values = list())
-
-MNIX_IdealAdaptor_GroupWeightedIntegratorStaninput(values = list())
-
-MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStaninput(values = list())
-
-MNIX_IdealAdaptor_InformativityWeightedIntegratorStaninput(values = list())
-
-NIW_IdealAdaptorStaninput(values = list())
+IdealAdaptorStaninput(values = list(), family = character(0))
 }
 \arguments{
 \item{values}{A named list containing the Stan input values.
 Default: \code{list()}.}
+
+\item{family}{Character string indicating the model family name.
+Default: \code{character(0)}.}
 }
 \description{
 MVBeliefUpdatr Stan Input Classes and Constructors

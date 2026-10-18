@@ -34,12 +34,42 @@ NULL
 #'   summing to 1. Defaults to uniform bias `1/M`.
 #' @param Sigma_noise Optional perceptual/measurement noise covariance matrix
 #'   or scalar variance.
-#' @param noise_treatment Treatment of noise: `"no_noise"`, `"sample"`, or
-#'   `"marginalize"`. Defaults to `.infer_noise_treatment(Sigma_noise)`:
-#'   `"marginalize"` if noise is present, `"no_noise"` otherwise.
-#' @param lapse_treatment Treatment of lapses: `"no_lapses"`, `"sample"`, or
-#'   `"marginalize"`. Defaults to `.infer_lapse_treatment(lapse_rate)`:
-#'   `"marginalize"` if `lapse_rate > 0`, `"no_lapses"` otherwise.
+#' @param noise_treatment Treatment of perceptual noise during evaluation and
+#'   updating: `"no_noise"`, `"sample"`, or `"marginalize"`.
+#'   \itemize{
+#'     \item \code{"no_noise"}: No perceptual noise is applied to input cues,
+#'       and no noise is assumed during categorization.
+#'     \item \code{"sample"}: Simulates sensory noise on a specific observation.
+#'       Noise drawn from \eqn{\mathcal{N}(0, \Sigma_{\text{noise}})} is added
+#'       to input cues, and the observer accounts for their own noise
+#'       uncertainty during categorization by adding \eqn{\Sigma_{\text{noise}}}
+#'       to their likelihood scale.
+#'     \item \code{"marginalize"}: Evaluates categorization in the limit across
+#'       infinitely many noisy encounters (expected consequences). No noise is
+#'       sampled onto the input stimulus, but \eqn{\Sigma_{\text{noise}}} is
+#'       added to the category covariance scale.
+#'   }
+#'   Defaults to `.infer_noise_treatment(Sigma_noise)`: `"marginalize"` if
+#'   noise is present, `"no_noise"` otherwise.
+#' @param lapse_treatment Treatment of attentional lapses during evaluation and
+#'   updating: `"no_lapses"`, `"sample"`, or `"marginalize"`.
+#'   \itemize{
+#'     \item \code{"no_lapses"}: Lapses are ignored; categorization and
+#'       updating reflect pure normative evidence evaluation (even if
+#'       \code{lapse_rate > 0}).
+#'     \item \code{"sample"}: Simulates stochastic attentional lapses on
+#'       individual observations. With probability \code{lapse_rate}, a lapse
+#'       occurs: during categorization, the posterior is replaced by
+#'       \code{lapse_bias}; during updating, the lapsing observation is treated
+#'       as uninformative.
+#'     \item \code{"marginalize"}: Evaluates categorization in the limit across
+#'       infinitely many encounters (expected response probabilities). The
+#'       category posterior is the mixture
+#'       \eqn{(1 - \lambda) p(c \mid x) + \lambda b_c}, and evidence during
+#'       updating is downweighted by \eqn{1 - \lambda}.
+#'   }
+#'   Defaults to `.infer_lapse_treatment(lapse_rate)`: `"marginalize"` if
+#'   `lapse_rate > 0`, `"no_lapses"` otherwise.
 #' @param metadata Optional list of metadata. Defaults to `list()`.
 #' @param ... Additional arguments passed to methods or constructors.
 #'

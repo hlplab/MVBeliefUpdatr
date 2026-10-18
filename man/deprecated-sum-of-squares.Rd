@@ -2,6 +2,7 @@
 % Please edit documentation in R/deprecated-basics.R
 \name{get_sum_of_squares_from_df}
 \alias{get_sum_of_squares_from_df}
+\alias{ss}
 \alias{get_sum_of_uncentered_squares_from_df}
 \alias{get_sum_of_centered_squares_from_df}
 \title{Deprecated: Get sum of squares from a data frame or matrix}
@@ -12,6 +13,8 @@ get_sum_of_squares_from_df(
   center = TRUE,
   verbose = FALSE
 )
+
+ss(x, center = TRUE)
 
 get_sum_of_uncentered_squares_from_df(data, variables = NULL, verbose = FALSE)
 

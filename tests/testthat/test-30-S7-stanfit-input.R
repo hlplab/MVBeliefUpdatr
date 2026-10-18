@@ -15,8 +15,7 @@ test_that("new_ideal_adaptor_stanfit_input rejects missing or empty cues", {
         response = "response_category",
         group = "group",
         group_unique = "Condition",
-        control = control_staninput(transform_type = "identity"),
-        stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
+        control = control_staninput(transform_type = "identity")
       )
     ),
     regexp = "Expected x to be a non-NA character",
@@ -32,15 +31,16 @@ test_that("new_ideal_adaptor_stanfit_input rejects missing or empty cues", {
       response = "response_category",
       group = "group",
       group_unique = "Condition",
-      control = control_staninput(transform_type = "identity"),
-      stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
+      control = control_staninput(transform_type = "identity")
     ),
     regexp = "Expected x to be a non-NA character",
     fixed = TRUE
   )
 })
 
-test_that("new_ideal_adaptor_stanfit_input returns a structured fit-input object", {
+test_that(
+  "new_ideal_adaptor_stanfit_input returns a structured fit-input object",
+  {
   exposure <- data.frame(
     category = factor(c("A", "B", "A", "B")),
     group = factor(c("g1", "g1", "g2", "g2")),
@@ -60,14 +60,22 @@ test_that("new_ideal_adaptor_stanfit_input returns a structured fit-input object
     cues = c("cue1", "cue2"),
     category = "category",
     response = "response",
-    group = "group",
-    stanmodel = "NIW_ideal_adaptor"
+    group = "group"
   )
 
   expect_true(S7::S7_inherits(input, IdealAdaptorStanfitInput))
-  expect_s3_class(input@data, "data.frame")
-  expect_true(S7::S7_inherits(input@staninput, IdealAdaptorStaninput))
-  expect_true(S7::S7_inherits(input@transform_information, MVBU_TransformInformation))
+  expect_type(input@data, "list")
+  expect_s3_class(get_data(input, space = "original"), "data.frame")
+  expect_s3_class(get_data(input, space = "transformed"), "data.frame")
+  expect_false("staninput" %in% names(S7::prop_names(input)))
+  staninput <- MVBeliefUpdatr:::.new_staninput(
+    input,
+    stanmodel = "NIW_ideal_adaptor"
+  )
+  expect_true(S7::S7_inherits(staninput, IdealAdaptorStaninput))
+  expect_true(
+    S7::S7_inherits(input@transform_information, MVBU_TransformInformation)
+  )
 })
 
 test_that("new_ideal_adaptor_stanfit_input preserves grouped exposure data", {
@@ -92,21 +100,40 @@ test_that("new_ideal_adaptor_stanfit_input preserves grouped exposure data", {
     response = "response",
     group = "group",
     group_unique = "Condition",
-    control = control_staninput(transform_type = "identity"),
-    stanmodel = "NIW_ideal_adaptor"
+    control = control_staninput(transform_type = "identity")
   )
 
-  expect_true("group_unique" %in% names(res@data))
-  expect_true(all(res@data$group_unique[res@data$Phase == "exposure"] == "baseline"))
+  res_orig <- get_data(res, space = "original")
+  expect_true("group_unique" %in% names(res_orig))
+  expect_true(
+    all(
+      res_orig$group_unique[
+        res_orig$Phase == "exposure"
+      ] == "baseline"
+    )
+  )
   orig_data <- get_data(res, original_names = TRUE)
   expect_true("Condition" %in% names(orig_data))
-  expect_true(all(orig_data$Condition[orig_data$Phase == "exposure"] == "baseline"))
+  expect_true(
+    all(orig_data$Condition[orig_data$Phase == "exposure"] == "baseline")
+  )
 })
 
-test_that("new_ideal_adaptor_stanfit_input handles more than two categories in the input", {
+test_that(
+  paste0(
+    "new_ideal_adaptor_stanfit_input handles more than two categories in ",
+    "the input"
+  ),
+  {
   exposure <- data.frame(
-    category = factor(c("A", "B", "C", "A", "B", "C"), levels = c("A", "B", "C")),
-    group = factor(c("g1", "g1", "g1", "g2", "g2", "g2"), levels = c("g1", "g2")),
+    category = factor(
+      c("A", "B", "C", "A", "B", "C"),
+      levels = c("A", "B", "C")
+    ),
+    group = factor(
+      c("g1", "g1", "g1", "g2", "g2", "g2"),
+      levels = c("g1", "g2")
+    ),
     cue1 = c(0.1, 0.4, 0.7, 0.2, 0.5, 0.8),
     cue2 = c(0.2, 0.3, 0.6, 0.1, 0.4, 0.9)
   )
@@ -124,14 +151,20 @@ test_that("new_ideal_adaptor_stanfit_input handles more than two categories in t
     category = "category",
     response = "response",
     group = "group",
-    control = control_staninput(transform_type = "identity"),
-    stanmodel = "NIW_ideal_adaptor"
+    control = control_staninput(transform_type = "identity")
   )
 
   expect_true(S7::S7_inherits(res, IdealAdaptorStanfitInput))
-  expect_true(S7::S7_inherits(res@staninput, IdealAdaptorStaninput))
-  expect_equal(as.matrix(res@staninput@values$N_exposure), matrix(1L, nrow = 3, ncol = 2))
-  expect_equal(res@staninput@values$N_test, 3L)
+  staninput <- MVBeliefUpdatr:::.new_staninput(
+    res,
+    stanmodel = "NIW_ideal_adaptor"
+  )
+  expect_true(S7::S7_inherits(staninput, IdealAdaptorStaninput))
+  expect_equal(
+    as.matrix(staninput@values$n_exposure),
+    matrix(1L, nrow = 3, ncol = 2)
+  )
+  expect_equal(staninput@values$n_test, 3L)
 })
 
 test_that("new_ideal_adaptor_stanfit_input rejects empty test data", {
@@ -146,8 +179,7 @@ test_that("new_ideal_adaptor_stanfit_input rejects empty test data", {
       category = "category",
       response = "response_category",
       group = "group",
-      control = control_staninput(transform_type = "identity"),
-      stanmodel = "NIW_ideal_adaptor"
+      control = control_staninput(transform_type = "identity")
     ),
     "requires non-empty test data"
   )
@@ -167,20 +199,27 @@ test_that("fixed_parameters are validated against the category labels", {
     cue2 = c(0.1, 0.9)
   )
 
+  input <- new_ideal_adaptor_stanfit_input(
+    exposure = exposure,
+    test = test,
+    cues = c("cue1", "cue2"),
+    category = "category",
+    response = "response_category",
+    group = "group",
+    control = control_staninput(transform_type = "identity")
+  )
+
   expect_error(
-    new_ideal_adaptor_stanfit_input(
-      exposure = exposure,
-      test = test,
+    MVBeliefUpdatr:::.validate_and_transform_model_spec(
+      stanmodel = "NIW_ideal_adaptor",
       cues = c("cue1", "cue2"),
-      category = "category",
-      response = "response_category",
-      group = "group",
+      categories = c("A", "B"),
+      groups = "g1",
       fixed_parameters = list(
         mu_0 = list(B = c(0, 0)),
         Sigma_0 = list(B = diag(2))
       ),
-      control = control_staninput(transform_type = "identity"),
-      stanmodel = "NIW_ideal_adaptor"
+      transform = input@transform_information
     ),
     "named list with names matching the categories"
   )
@@ -252,84 +291,109 @@ test_that(
     )
   )
 
+  nix_input <- new_ideal_adaptor_stanfit_input(
+    exposure = one_cue_data$exposure,
+    test = one_cue_data$test,
+    cues = "VOT",
+    category = "category",
+    response = "response_category",
+    group = "group",
+    control = control_staninput(transform_type = "identity")
+  )
+  expect_true(S7::S7_inherits(nix_input, IdealAdaptorStanfitInput))
+
   for (fixed_parameters in nix_fixed_sets) {
-    nix_res <- new_ideal_adaptor_stanfit_input(
-      exposure = one_cue_data$exposure,
-      test = one_cue_data$test,
-      cues = "VOT",
-      category = "category",
-      response = "response_category",
-      group = "group",
-      control = control_staninput(transform_type = "identity"),
+    spec <- MVBeliefUpdatr:::.validate_and_transform_model_spec(
       stanmodel = "NIX_ideal_adaptor",
-      fixed_parameters = fixed_parameters
+      cues = "VOT",
+      categories = c("/d/", "/t/"),
+      groups = "g1",
+      fixed_parameters = fixed_parameters,
+      transform = nix_input@transform_information
+    )
+    staninput <- MVBeliefUpdatr:::.new_staninput(
+      nix_input,
+      stanmodel = "NIX_ideal_adaptor",
+      fixed_parameters_transformed = spec$fixed_transformed
     )
 
-    expect_true(S7::S7_inherits(nix_res, IdealAdaptorStanfitInput))
     expect_equal(
-      nix_res@staninput@values$lapse_rate_known,
+      staninput@values$lapse_rate_known,
       if (is.null(fixed_parameters$lapse_rate)) 0 else 1
     )
     expect_equal(
-      nix_res@staninput@values$mu_0_known,
+      staninput@values$mu_0_known,
       if (is.null(fixed_parameters$mu_0)) 0 else 1
     )
     expect_equal(
-      nix_res@staninput@values$Sigma_0_known,
+      staninput@values$Sigma_0_known,
       if (is.null(fixed_parameters$Sigma_0)) 0 else 1
     )
   }
 
+  two_cue_input <- new_ideal_adaptor_stanfit_input(
+    exposure = two_cue_data$exposure,
+    test = two_cue_data$test,
+    cues = c("VOT", "f0_semitones"),
+    category = "category",
+    response = "response_category",
+    group = "group",
+    control = control_staninput(transform_type = "identity")
+  )
+  expect_true(S7::S7_inherits(two_cue_input, IdealAdaptorStanfitInput))
+
   for (fixed_parameters in mnix_niw_fixed_sets) {
-    mnix_res <- new_ideal_adaptor_stanfit_input(
-      exposure = two_cue_data$exposure,
-      test = two_cue_data$test,
-      cues = c("VOT", "f0_semitones"),
-      category = "category",
-      response = "response_category",
-      group = "group",
-      control = control_staninput(transform_type = "identity"),
+    mnix_spec <- MVBeliefUpdatr:::.validate_and_transform_model_spec(
       stanmodel = "MNIX_ideal_adaptor_ideal_integrator",
-      fixed_parameters = fixed_parameters
+      cues = c("VOT", "f0_semitones"),
+      categories = c("/d/", "/t/"),
+      groups = "g1",
+      fixed_parameters = fixed_parameters,
+      transform = two_cue_input@transform_information
+    )
+    mnix_staninput <- MVBeliefUpdatr:::.new_staninput(
+      two_cue_input,
+      stanmodel = "MNIX_ideal_adaptor_ideal_integrator",
+      fixed_parameters_transformed = mnix_spec$fixed_transformed
     )
 
-    expect_true(S7::S7_inherits(mnix_res, IdealAdaptorStanfitInput))
     expect_equal(
-      mnix_res@staninput@values$lapse_rate_known,
+      mnix_staninput@values$lapse_rate_known,
       if (is.null(fixed_parameters$lapse_rate)) 0 else 1
     )
     expect_equal(
-      mnix_res@staninput@values$mu_0_known,
+      mnix_staninput@values$mu_0_known,
       if (is.null(fixed_parameters$mu_0)) 0 else 1
     )
     expect_equal(
-      mnix_res@staninput@values$Sigma_0_known,
+      mnix_staninput@values$Sigma_0_known,
       if (is.null(fixed_parameters$Sigma_0)) 0 else 1
     )
 
-    niw_res <- new_ideal_adaptor_stanfit_input(
-      exposure = two_cue_data$exposure,
-      test = two_cue_data$test,
-      cues = c("VOT", "f0_semitones"),
-      category = "category",
-      response = "response_category",
-      group = "group",
-      control = control_staninput(transform_type = "identity"),
+    niw_spec <- MVBeliefUpdatr:::.validate_and_transform_model_spec(
       stanmodel = "NIW_ideal_adaptor",
-      fixed_parameters = fixed_parameters
+      cues = c("VOT", "f0_semitones"),
+      categories = c("/d/", "/t/"),
+      groups = "g1",
+      fixed_parameters = fixed_parameters,
+      transform = two_cue_input@transform_information
+    )
+    niw_staninput <- MVBeliefUpdatr:::.new_staninput(
+      two_cue_input,
+      stanmodel = "NIW_ideal_adaptor",
+      fixed_parameters_transformed = niw_spec$fixed_transformed
     )
 
-    expect_true(S7::S7_inherits(niw_res, IdealAdaptorStanfitInput))
     expect_equal(
-      niw_res@staninput@values$lapse_rate_known,
+      niw_staninput@values$lapse_rate_known,
       if (is.null(fixed_parameters$lapse_rate)) 0 else 1
     )
     expect_equal(
-      niw_res@staninput@values$mu_0_known,
+      niw_staninput@values$mu_0_known,
       if (is.null(fixed_parameters$mu_0)) 0 else 1
     )
     expect_equal(
-      niw_res@staninput@values$Sigma_0_known,
+      niw_staninput@values$Sigma_0_known,
       if (is.null(fixed_parameters$Sigma_0)) 0 else 1
     )
   }
@@ -343,57 +407,58 @@ test_that(
     n_cues = 2L
   )
 
+  input <- new_ideal_adaptor_stanfit_input(
+    exposure = two_cue_data$exposure,
+    test = two_cue_data$test,
+    cues = c("VOT", "f0_semitones"),
+    category = "category",
+    response = "response_category",
+    group = "group",
+    control = control_staninput(transform_type = "identity")
+  )
+
   expect_error(
-    new_ideal_adaptor_stanfit_input(
-      exposure = two_cue_data$exposure,
-      test = two_cue_data$test,
-      cues = c("VOT", "f0_semitones"),
-      category = "category",
-      response = "response_category",
-      group = "group",
-      control = control_staninput(transform_type = "identity"),
+    MVBeliefUpdatr:::.validate_and_transform_model_spec(
       stanmodel = "NIW_ideal_adaptor",
+      cues = c("VOT", "f0_semitones"),
+      categories = c("/d/", "/t/"),
+      groups = "g1",
       fixed_parameters = list(
         mu_0 = list("/d/" = 0.1, "/t/" = c(0.1, 0.2, 0.3))
-      )
+      ),
+      transform = input@transform_information
     ),
     "mu_0 must be a named list with each entry a numeric vector of length 2"
   )
 
   expect_error(
-    new_ideal_adaptor_stanfit_input(
-      exposure = two_cue_data$exposure,
-      test = two_cue_data$test,
-      cues = c("VOT", "f0_semitones"),
-      category = "category",
-      response = "response_category",
-      group = "group",
-      control = control_staninput(transform_type = "identity"),
+    MVBeliefUpdatr:::.validate_and_transform_model_spec(
       stanmodel = "NIW_ideal_adaptor",
+      cues = c("VOT", "f0_semitones"),
+      categories = c("/d/", "/t/"),
+      groups = "g1",
       fixed_parameters = list(
         Sigma_0 = list("/d/" = diag(1), "/t/" = diag(2))
-      )
+      ),
+      transform = input@transform_information
     ),
     "Sigma_0 must be a named list with each entry a square matrix"
   )
 
   expect_error(
-    new_ideal_adaptor_stanfit_input(
-      exposure = two_cue_data$exposure,
-      test = two_cue_data$test,
-      cues = c("VOT", "f0_semitones"),
-      category = "category",
-      response = "response_category",
-      group = "group",
-      control = control_staninput(transform_type = "identity"),
+    MVBeliefUpdatr:::.validate_and_transform_model_spec(
       stanmodel = "MNIX_ideal_adaptor_ideal_integrator",
+      cues = c("VOT", "f0_semitones"),
+      categories = c("/d/", "/t/"),
+      groups = "g1",
       fixed_parameters = list(
         mu_0 = list(
           "/d/" = c(0.1, 0.2),
           "/t/" = c(0.1, 0.2),
           "/b/" = c(0.1, 0.2)
         )
-      )
+      ),
+      transform = input@transform_information
     ),
     "mu_0 must be a named list with names matching the categories"
   )
@@ -434,27 +499,30 @@ test_that("stanmodel compatibility checks enforce the matching Stan program", {
       category = "category",
       response = "response_category",
       group = "group",
-      control = control_staninput(transform_type = "identity"),
-      stanmodel = "NIX_ideal_adaptor"
+      control = control_staninput(transform_type = "identity")
     )
     expect_staninput_structure(
       nix_input,
-      expected_class = NIX_IdealAdaptorStaninput,
+      stanmodel = "NIX_ideal_adaptor",
+      expected_family = "NIX",
       required_names = c(
-        "N_exposure", "N_test", "x_mean_exposure", "x_css_exposure"
+        "n_exposure", "n_test", "mean_exposure", "css_exposure"
       ),
       forbidden_names = c("x_sd_exposure")
     )
 
+    two_cue_input <- new_ideal_adaptor_stanfit_input(
+      exposure = exp_2cue,
+      test = test_2cue,
+      cues = c("VOT", "f0_semitones"),
+      category = "category",
+      response = "response_category",
+      group = "group",
+      control = control_staninput(transform_type = "identity")
+    )
     expect_error(
-      new_ideal_adaptor_stanfit_input(
-        exposure = exp_2cue,
-        test = test_2cue,
-        cues = c("VOT", "f0_semitones"),
-        category = "category",
-        response = "response_category",
-        group = "group",
-        control = control_staninput(transform_type = "identity"),
+      MVBeliefUpdatr:::.new_staninput(
+        two_cue_input,
         stanmodel = "NIX_ideal_adaptor"
       ),
       "requires exactly one cue"
@@ -480,27 +548,30 @@ test_that("stanmodel compatibility checks enforce the matching Stan program", {
       category = "category",
       response = "response_category",
       group = "group",
-      control = control_staninput(transform_type = "identity"),
-      stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
+      control = control_staninput(transform_type = "identity")
     )
     expect_staninput_structure(
       mnix_input,
-      expected_class = MNIX_IdealAdaptorStaninput,
+      stanmodel = "MNIX_ideal_adaptor_ideal_integrator",
+      expected_family = "MNIX_ideal_integrator",
       required_names = c(
-        "N_exposure", "N_test", "x_mean_exposure", "x_css_exposure", "p_cat"
+        "n_exposure", "n_test", "mean_exposure", "css_exposure", "p_cat"
       ),
       forbidden_names = c("x_sd_exposure")
     )
 
+    one_cue_input <- new_ideal_adaptor_stanfit_input(
+      exposure = exp_1cue,
+      test = test_1cue,
+      cues = "VOT",
+      category = "category",
+      response = "response_category",
+      group = "group",
+      control = control_staninput(transform_type = "identity")
+    )
     expect_error(
-      new_ideal_adaptor_stanfit_input(
-        exposure = exp_1cue,
-        test = test_1cue,
-        cues = "VOT",
-        category = "category",
-        response = "response_category",
-        group = "group",
-        control = control_staninput(transform_type = "identity"),
+      MVBeliefUpdatr:::.new_staninput(
+        one_cue_input,
         stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
       ),
       "requires at least two cues"
@@ -532,14 +603,14 @@ test_that("stanmodel compatibility checks enforce the matching Stan program", {
         category = "category",
         response = "response_category",
         group = "group",
-        control = control_staninput(transform_type = "identity"),
-        stanmodel = "NIW_ideal_adaptor"
+        control = control_staninput(transform_type = "identity")
       )
       expect_staninput_structure(
         niw_input,
-        expected_class = NIW_IdealAdaptorStaninput,
+        stanmodel = "NIW_ideal_adaptor",
+        expected_family = "NIW",
         required_names = c(
-          "N_exposure", "N_test", "x_mean_exposure", "x_css_exposure"
+          "n_exposure", "n_test", "mean_exposure", "css_exposure"
         ),
         forbidden_names = c("x_sd_exposure")
       )
@@ -572,8 +643,7 @@ test_that(
       category = "category",
       response = "response_category",
       group = "group",
-      control = control_staninput(transform_type = "identity"),
-      stanmodel = "NIX_ideal_adaptor"
+      control = control_staninput(transform_type = "identity")
     )
 
     expected_counts <- as.vector(
@@ -582,25 +652,33 @@ test_that(
 
     expect_staninput_structure(
       input,
-      expected_class = NIX_IdealAdaptorStaninput,
+      stanmodel = "NIX_ideal_adaptor",
+      expected_family = "NIX",
       required_names = c(
-        "N_exposure", "N_test", "x_mean_exposure", "x_css_exposure"
+        "n_exposure", "n_test", "mean_exposure", "css_exposure"
       ),
       forbidden_names = c("x_sd_exposure")
     )
-    expect_equal(as.vector(input@staninput@values$N_exposure), expected_counts)
-    expect_equal(input@staninput@values$N_test, 2L)
+    staninput <- MVBeliefUpdatr:::.new_staninput(
+      input,
+      stanmodel = "NIX_ideal_adaptor"
+    )
+    expect_equal(as.vector(staninput@values$n_exposure), expected_counts)
+    expect_equal(staninput@values$n_test, 2L)
   }
 
+  two_cue_input <- new_ideal_adaptor_stanfit_input(
+    exposure = base_2cue$exposure[1L, ],
+    test = base_2cue$test[c(1, 41), ],
+    cues = c("VOT", "f0_semitones"),
+    category = "category",
+    response = "response_category",
+    group = "group",
+    control = control_staninput(transform_type = "identity")
+  )
   expect_error(
-    new_ideal_adaptor_stanfit_input(
-      exposure = base_2cue$exposure[1L, ],
-      test = base_2cue$test[c(1, 41), ],
-      cues = c("VOT", "f0_semitones"),
-      category = "category",
-      response = "response_category",
-      group = "group",
-      control = control_staninput(transform_type = "identity"),
+    MVBeliefUpdatr:::.new_staninput(
+      two_cue_input,
       stanmodel = "NIX_ideal_adaptor"
     ),
     "requires exactly one cue"
@@ -632,8 +710,7 @@ test_that(
       category = "category",
       response = "response_category",
       group = "group",
-      control = control_staninput(transform_type = "identity"),
-      stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
+      control = control_staninput(transform_type = "identity")
     )
 
     expected_counts <- as.vector(
@@ -642,25 +719,33 @@ test_that(
 
     expect_staninput_structure(
       input,
-      expected_class = MNIX_IdealAdaptorStaninput,
+      stanmodel = "MNIX_ideal_adaptor_ideal_integrator",
+      expected_family = "MNIX_ideal_integrator",
       required_names = c(
-        "N_exposure", "N_test", "x_mean_exposure", "x_css_exposure", "p_cat"
+        "n_exposure", "n_test", "mean_exposure", "css_exposure", "p_cat"
       ),
       forbidden_names = c("x_sd_exposure")
     )
-    expect_equal(as.vector(input@staninput@values$N_exposure), expected_counts)
-    expect_equal(input@staninput@values$N_test, 2L)
+    staninput <- MVBeliefUpdatr:::.new_staninput(
+      input,
+      stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
+    )
+    expect_equal(as.vector(staninput@values$n_exposure), expected_counts)
+    expect_equal(staninput@values$n_test, 2L)
   }
 
+  one_cue_input <- new_ideal_adaptor_stanfit_input(
+    exposure = base_1cue$exposure[1L, ],
+    test = base_1cue$test[c(1, 41), ],
+    cues = "VOT",
+    category = "category",
+    response = "response_category",
+    group = "group",
+    control = control_staninput(transform_type = "identity")
+  )
   expect_error(
-    new_ideal_adaptor_stanfit_input(
-      exposure = base_1cue$exposure[1L, ],
-      test = base_1cue$test[c(1, 41), ],
-      cues = "VOT",
-      category = "category",
-      response = "response_category",
-      group = "group",
-      control = control_staninput(transform_type = "identity"),
+    MVBeliefUpdatr:::.new_staninput(
+      one_cue_input,
       stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
     ),
     "requires at least two cues"
@@ -713,8 +798,7 @@ test_that(
         category = "category",
         response = "response_category",
         group = "group",
-        control = control_staninput(transform_type = "identity"),
-        stanmodel = "NIW_ideal_adaptor"
+        control = control_staninput(transform_type = "identity")
       )
 
       expected_counts <- as.vector(
@@ -723,17 +807,22 @@ test_that(
 
       expect_staninput_structure(
         input,
-        expected_class = NIW_IdealAdaptorStaninput,
+        stanmodel = "NIW_ideal_adaptor",
+        expected_family = "NIW",
         required_names = c(
-          "N_exposure", "N_test", "x_mean_exposure", "x_css_exposure"
+          "n_exposure", "n_test", "mean_exposure", "css_exposure"
         ),
         forbidden_names = c("x_sd_exposure")
       )
+      staninput <- MVBeliefUpdatr:::.new_staninput(
+        input,
+        stanmodel = "NIW_ideal_adaptor"
+      )
       expect_equal(
-        as.vector(input@staninput@values$N_exposure),
+        as.vector(staninput@values$n_exposure),
         expected_counts
       )
-      expect_equal(input@staninput@values$N_test, 2L)
+      expect_equal(staninput@values$n_test, 2L)
     }
   }
 })
@@ -763,23 +852,26 @@ test_that("group.unique correctly checks identity and simplifies staninput", {
     response = "response_category",
     group = "group",
     group_unique = "Condition",
-    check_unique_group_identity = TRUE,
-    control = control_staninput(transform_type = "identity"),
+    control = control_staninput(transform_type = "identity")
+  )
+
+  staninput1 <- MVBeliefUpdatr:::.new_staninput(
+    input1,
     stanmodel = "NIW_ideal_adaptor"
   )
 
-  expect_equal(input1@staninput@values$L, 2L)
-  expect_equal(dim(input1@staninput@values$N_exposure), c(2L, 2L))
-  expect_equal(dim(input1@staninput@values$x_mean_exposure), c(2L, 2L, 2L))
-  expect_equal(dim(input1@staninput@values$x_css_exposure), c(2L, 2L, 2L, 2L))
+  expect_equal(staninput1@values$L, 2L)
+  expect_equal(dim(staninput1@values$n_exposure), c(2L, 2L))
+  expect_equal(dim(staninput1@values$mean_exposure), c(2L, 2L, 2L))
+  expect_equal(dim(staninput1@values$css_exposure), c(2L, 2L, 2L, 2L))
   expect_equal(
     get_labels(input1)$group,
     c("c1", "c2")
   )
   # Test rows map to c1 (index 1) and c2 (index 2)
-  expect_equal(input1@staninput@values$y_test, c(1L, 1L, 2L))
+  expect_equal(as.vector(staninput1@values$y_test), c(1L, 1L, 2L))
 
-  # Case 2: Mismatching exposure stats with check_unique_group_identity = TRUE
+  # Case 2: Mismatching exposure stats unconditionally errors
   exp_mismatch <- exp1
   exp_mismatch$cue1[3] <- 99 # g2 in c1 now has different mean
 
@@ -792,32 +884,22 @@ test_that("group.unique correctly checks identity and simplifies staninput", {
       response = "response_category",
       group = "group",
       group_unique = "Condition",
-      check_unique_group_identity = TRUE,
-      control = control_staninput(transform_type = "identity"),
-      stanmodel = "NIW_ideal_adaptor"
+      control = control_staninput(transform_type = "identity")
     ),
-    regexp = "Non-identical exposure sufficient statistics found within unique group(s): c1",
+    regexp = paste0(
+      "Non-identical exposure sufficient statistics found within unique ",
+      "group(s): c1"
+    ),
     fixed = TRUE
   )
-
-  # Case 3: Mismatching exposure stats with check_unique_group_identity = FALSE
-  input_no_check <- new_ideal_adaptor_stanfit_input(
-    exposure = exp_mismatch,
-    test = test1,
-    cues = c("cue1", "cue2"),
-    category = "category",
-    response = "response_category",
-    group = "group",
-    group_unique = "Condition",
-    check_unique_group_identity = FALSE,
-    control = control_staninput(transform_type = "identity"),
-    stanmodel = "NIW_ideal_adaptor"
-  )
-  expect_equal(input_no_check@staninput@values$L, 2L)
-  expect_equal(get_labels(input_no_check)$group, c("c1", "c2"))
 })
 
-test_that("IdealAdaptorStanfitInput stores standardized data and provides original variable names", {
+test_that(
+  paste0(
+    "IdealAdaptorStanfitInput stores standardized data and provides ",
+    "original variable names"
+  ),
+  {
   exp <- data.frame(
     MyCondition = factor("condA"),
     Subject = factor("s1"),
@@ -841,15 +923,31 @@ test_that("IdealAdaptorStanfitInput stores standardized data and provides origin
     response = "UserChoice",
     group = "Subject",
     group_unique = "MyCondition",
-    control = control_staninput(transform_type = "identity"),
-    stanmodel = "NIW_ideal_adaptor"
+    control = control_staninput(transform_type = "identity")
   )
 
-  # Standard columns in @data
-  expect_true(all(c("group", "group_unique", "category", "response_category", "f1", "f2", "Phase") %in% names(input@data)))
-  expect_false("TrueVowel" %in% names(input@data))
-  expect_false("UserChoice" %in% names(input@data))
-  expect_false("Subject" %in% names(input@data))
+  # Standard columns in data
+  data_orig <- get_data(input, space = "original")
+  data_trans <- get_data(input, space = "transformed")
+  expect_true(
+    all(
+      c(
+        "group", "group_unique", "category", "response_category",
+        "f1", "f2", "Phase"
+      ) %in% names(data_orig)
+    )
+  )
+  expect_true(
+    all(
+      c(
+        "group", "group_unique", "category", "response_category",
+        "f1", "f2", "Phase"
+      ) %in% names(data_trans)
+    )
+  )
+  expect_false("TrueVowel" %in% names(data_orig))
+  expect_false("UserChoice" %in% names(data_orig))
+  expect_false("Subject" %in% names(data_orig))
 
   # get_original_variable_names
   orig_names <- get_original_variable_names(input)
@@ -860,17 +958,31 @@ test_that("IdealAdaptorStanfitInput stores standardized data and provides origin
   expect_equal(orig_names$cues, c("f1", "f2"))
 
   expect_equal(get_original_variable_names(input, "category"), "TrueVowel")
-  expect_equal(get_original_variable_names(input, "response_category"), "UserChoice")
+  expect_equal(
+    get_original_variable_names(input, "response_category"),
+    "UserChoice"
+  )
   expect_equal(get_original_variable_names(input, "group"), "Subject")
-  expect_equal(get_original_variable_names(input, "group_unique"), "MyCondition")
+  expect_equal(
+    get_original_variable_names(input, "group_unique"),
+    "MyCondition"
+  )
 
   # get_data(original_names = FALSE)
   df_std <- get_data(input, original_names = FALSE)
-  expect_true(all(c("group", "group_unique", "category", "response_category", "f1", "f2", "Phase") %in% names(df_std)))
+  std_cols <- c(
+    "group", "group_unique", "category", "response_category",
+    "f1", "f2", "Phase"
+  )
+  expect_true(all(std_cols %in% names(df_std)))
 
   # get_data(original_names = TRUE)
   df_orig <- get_data(input, original_names = TRUE)
-  expect_true(all(c("Subject", "MyCondition", "TrueVowel", "UserChoice", "f1", "f2", "Phase") %in% names(df_orig)))
+  orig_cols <- c(
+    "Subject", "MyCondition", "TrueVowel", "UserChoice",
+    "f1", "f2", "Phase"
+  )
+  expect_true(all(orig_cols %in% names(df_orig)))
 
   # get_exposure_data
   exp_std <- get_exposure_data(input, original_names = FALSE)
@@ -885,10 +997,18 @@ test_that("IdealAdaptorStanfitInput stores standardized data and provides origin
   expect_true("UserChoice" %in% names(tst_orig))
 })
 
-test_that("new_ideal_adaptor_stanfit_input handles group_unique and group.unique deprecation", {
+test_that(
+  paste0(
+    "new_ideal_adaptor_stanfit_input handles group_unique and ",
+    "group.unique deprecation"
+  ),
+  {
   exp_df <- data.frame(
     Subject = c("s1", "s1", "s2", "s2", "s3", "s3", "s4", "s4"),
-    MyCondition = c("cond1", "cond1", "cond1", "cond1", "cond2", "cond2", "cond2", "cond2"),
+    MyCondition = c(
+      "cond1", "cond1", "cond1", "cond1",
+      "cond2", "cond2", "cond2", "cond2"
+    ),
     TrueVowel = c("b", "d", "b", "d", "b", "d", "b", "d"),
     f1 = c(1, 2, 1, 2, 1, 2, 1, 2),
     f2 = c(3, 4, 3, 4, 3, 4, 3, 4),
@@ -914,7 +1034,10 @@ test_that("new_ideal_adaptor_stanfit_input handles group_unique and group.unique
     group_unique = "MyCondition"
   )
   expect_true(S7::S7_inherits(input1, IdealAdaptorStanfitInput))
-  expect_equal(get_original_variable_names(input1, "group_unique"), "MyCondition")
+  expect_equal(
+    get_original_variable_names(input1, "group_unique"),
+    "MyCondition"
+  )
 
   # Using deprecated group.unique emits warning
   expect_warning(
@@ -929,10 +1052,18 @@ test_that("new_ideal_adaptor_stanfit_input handles group_unique and group.unique
     ),
     "deprecated"
   )
-  expect_equal(get_original_variable_names(input2, "group_unique"), "MyCondition")
+  expect_equal(
+    get_original_variable_names(input2, "group_unique"),
+    "MyCondition"
+  )
 })
 
-test_that("get_data, get_exposure_data, and get_test_data filtering and subsampling work", {
+test_that(
+  paste0(
+    "get_data, get_exposure_data, and get_test_data filtering and ",
+    "subsampling work"
+  ),
+  {
   exp_df <- data.frame(
     Subject = c("s1", "s1", "s2", "s2", "s3", "s3"),
     MyCondition = c("c1", "c1", "c1", "c1", "c2", "c2"),
@@ -966,7 +1097,10 @@ test_that("get_data, get_exposure_data, and get_test_data filtering and subsampl
   expect_true(all(exp_c1$group_unique == "c1"))
 
   # get_exposure_data: filter by invalid group errors
-  expect_error(get_exposure_data(input, groups = "c99"), "Requested group.*not found")
+  expect_error(
+    get_exposure_data(input, groups = "c99"),
+    "Requested group.*not found"
+  )
 
   # get_exposure_data: filter by categories
   exp_b <- get_exposure_data(input, categories = "b")
@@ -974,7 +1108,10 @@ test_that("get_data, get_exposure_data, and get_test_data filtering and subsampl
   expect_true(all(exp_b$category == "b"))
 
   # get_exposure_data: filter by invalid category errors
-  expect_error(get_exposure_data(input, categories = "invalid_cat"), "Requested category.*not found")
+  expect_error(
+    get_exposure_data(input, categories = "invalid_cat"),
+    "Requested category.*not found"
+  )
 
   # get_exposure_data: subsample with n_samples
   exp_sub <- get_exposure_data(input, n_samples = 2)
@@ -987,7 +1124,10 @@ test_that("get_data, get_exposure_data, and get_test_data filtering and subsampl
   expect_equal(test_c2_d$response_category, "d")
 
   # get_test_data: filter by invalid response_categories errors
-  expect_error(get_test_data(input, response_categories = "xyz"), "Requested response_category.*not found")
+  expect_error(
+    get_test_data(input, response_categories = "xyz"),
+    "Requested response_category.*not found"
+  )
 
   # get_test_data: subsample with n_samples
   test_sub <- get_test_data(input, n_samples = 3)
@@ -1013,7 +1153,12 @@ test_that("get_data, get_exposure_data, and get_test_data filtering and subsampl
   expect_equal(nrow(all_sub), 4L)
 })
 
-test_that("get_data filters error on non-existing entities but message on zero-data", {
+test_that(
+  paste0(
+    "get_data filters error on non-existing entities but message on ",
+    "zero-data"
+  ),
+  {
   exp_df <- data.frame(
     group = c("g1", "g1"),
     category = c("b", "d"),
@@ -1092,7 +1237,8 @@ test_that("get_data filters error on non-existing entities but message on zero-d
   )
   expect_equal(nrow(res_rcat), 0L)
 
-  # 7. summary on input with unexposed group summarizes existing data without error
+  # 7. summary on input with unexposed group summarizes existing data
+  # without error
   summ <- summary(input)
   expect_true(S7::S7_inherits(summ, Summary_IdealAdaptorStanfitInput))
   expect_true("g1" %in% summ@exposure_statistics$group)
@@ -1136,8 +1282,7 @@ test_that(
         category = "category",
         response = "response_category",
         group = "group",
-        control = control_staninput(transform_type = "identity"),
-        stanmodel = "NIX_ideal_adaptor"
+        control = control_staninput(transform_type = "identity")
       )
 
       run_fixed_param_stan_program(
@@ -1174,8 +1319,7 @@ test_that(
           category = "category",
           response = "response_category",
           group = "group",
-          control = control_staninput(transform_type = "identity"),
-          stanmodel = "MNIX_ideal_adaptor_ideal_integrator"
+          control = control_staninput(transform_type = "identity")
         )
 
         run_fixed_param_stan_program(
@@ -1214,8 +1358,7 @@ test_that(
           category = "category",
           response = "response_category",
           group = "group",
-          control = control_staninput(transform_type = "identity"),
-          stanmodel = "NIW_ideal_adaptor"
+          control = control_staninput(transform_type = "identity")
         )
 
         run_fixed_param_stan_program(

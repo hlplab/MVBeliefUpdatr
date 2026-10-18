@@ -20,14 +20,13 @@
 \title{MVBeliefUpdatr Stanfit Classes and Constructors}
 \usage{
 MVBU_Stanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -37,14 +36,13 @@ MVBU_Stanfit(
 )
 
 IdealAdaptorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -54,14 +52,13 @@ IdealAdaptorStanfit(
 )
 
 MNIX_IdealAdaptorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -71,14 +68,13 @@ MNIX_IdealAdaptorStanfit(
 )
 
 IdealIntegrator_MNIX_IdealAdaptorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -88,14 +84,13 @@ IdealIntegrator_MNIX_IdealAdaptorStanfit(
 )
 
 WeightedIntegrator_MNIX_IdealAdaptorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -105,14 +100,13 @@ WeightedIntegrator_MNIX_IdealAdaptorStanfit(
 )
 
 CategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -122,14 +116,13 @@ CategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit(
 )
 
 GroupWeightedIntegrator_MNIX_IdealAdaptorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -139,14 +132,13 @@ GroupWeightedIntegrator_MNIX_IdealAdaptorStanfit(
 )
 
 GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -156,14 +148,13 @@ GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit(
 )
 
 InformativityWeightedIntegrator_MNIX_IdealAdaptorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -173,14 +164,13 @@ InformativityWeightedIntegrator_MNIX_IdealAdaptorStanfit(
 )
 
 MNIX_IdealAdaptor_IdealIntegratorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -190,14 +180,13 @@ MNIX_IdealAdaptor_IdealIntegratorStanfit(
 )
 
 MNIX_IdealAdaptor_WeightedIntegratorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -207,14 +196,13 @@ MNIX_IdealAdaptor_WeightedIntegratorStanfit(
 )
 
 MNIX_IdealAdaptor_CategoryWeightedIntegratorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -224,14 +212,13 @@ MNIX_IdealAdaptor_CategoryWeightedIntegratorStanfit(
 )
 
 MNIX_IdealAdaptor_GroupWeightedIntegratorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -241,14 +228,13 @@ MNIX_IdealAdaptor_GroupWeightedIntegratorStanfit(
 )
 
 MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -258,14 +244,13 @@ MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStanfit(
 )
 
 MNIX_IdealAdaptor_InformativityWeightedIntegratorStanfit(
-  data = data.frame(),
+  data = list(),
   staninput = NULL,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -275,11 +260,11 @@ MNIX_IdealAdaptor_InformativityWeightedIntegratorStanfit(
 )
 }
 \arguments{
-\item{data}{A \code{data.frame} containing the data used to fit the model.}
+\item{data}{A named \code{list} containing \code{$original} and
+\code{$transformed} data frames. Default: \code{list()}.}
 
 \item{staninput}{A Stan input object containing the data handed to rstan
-through \code{\link{make_staninput}}. Contains at least two components:
-\code{transformed} and \code{untransformed}.}
+(an \code{\link{IdealAdaptorStaninput}} object). Default: \code{NULL}.}
 
 \item{stanvars}{A \code{stanvars} object or \code{NULL}. Default: \code{NULL}.}
 
@@ -294,9 +279,6 @@ to the Stan backend directly. Default: \code{list()}.}
 
 \item{stanfit}{An object of class \code{\link[rstan:stanfit-class]{stanfit}}
 containing posterior draws. Default: \code{NULL}.}
-
-\item{basis}{An object that contains a small subset of the Stan data created
-at fitting time, needed to process new data. Default: \code{NULL}.}
 
 \item{transform_information}{An object of type
 \code{\link{MVBU_TransformInformation}} or \code{NULL}. Default: \code{NULL}.}
@@ -318,7 +300,7 @@ which the model was fitted. Default: \code{NULL}.}
 Default: \code{list()}.}
 }
 \description{
-An S7 base class for Stan fit objects
+An S7 base class for Stan fit objects.
 }
 \seealso{
 \code{\link{add_posterior_latents}}, \code{\link{fit_ideal_adaptor}},

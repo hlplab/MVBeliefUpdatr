@@ -108,7 +108,7 @@ Default strategy: Wrapper + forwarding (approved direction).
 - get_model_family(x)
 - get_representation(x)
 - get_parameters(x)
-- get_priors(x)
+- get_stan_priors(x)
 - get_cue_labels(x)
 - get_category_labels(x)
 - get_group_labels(x)

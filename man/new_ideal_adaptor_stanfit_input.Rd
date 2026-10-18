@@ -12,63 +12,55 @@ new_ideal_adaptor_stanfit_input(
   response = "response_category",
   group = "group",
   group_unique = NULL,
-  check_unique_group_identity = TRUE,
-  fixed_parameters = NULL,
-  control = control_staninput(),
-  stanmodel = "NIW_ideal_adaptor",
+  control = list(transform_type = "standardize"),
   ...
 )
 }
 \arguments{
-\item{exposure}{A data frame or tibble with exposure data. Each row is assumed to contain one observation.}
+\item{exposure}{A data frame or tibble with exposure data. Each row is
+assumed to contain one observation.}
 
-\item{test}{A data frame or tibble with test data. Each row is assumed to contain one observation.}
+\item{test}{A data frame or tibble with test data. Each row is assumed to
+contain one observation.}
 
-\item{cues}{Names of columns with cue values. These columns must be present in both \code{exposure} and \code{test}.}
+\item{cues}{Names of columns with cue values. These columns must be present
+in both \code{exposure} and \code{test}.}
 
-\item{category}{Name of the column in \code{exposure} that stores the category information. (default: "category")}
+\item{category}{Name of the column in \code{exposure} that stores the category
+information. (default: "category")}
 
-\item{response}{Name of the column in \code{test} that stores the response information. (default: "response_category")}
+\item{response}{Name of the column in \code{test} that stores the response
+information. (default: "response_category")}
 
-\item{group}{Name of the column in \code{exposure} and \code{test} that stores the grouping information. (default: "group")}
+\item{group}{Name of the column in \code{exposure} and \code{test} that stores the
+grouping information. (default: "group")}
 
-\item{group_unique}{Optional grouping column used to collapse repeated exposure conditions before constructing the Stan input.}
+\item{group_unique}{Optional grouping column used to collapse repeated
+exposure conditions.}
 
-\item{check_unique_group_identity}{Logical indicating whether to verify that all groups mapped to a given \code{group_unique} level share identical sufficient exposure statistics (sample size, means, covariances). If \code{TRUE} and a mismatch is found, an informative error is raised. If \code{FALSE}, the first level of each unique group is taken. (default: \code{TRUE})}
-
-\item{fixed_parameters}{Optional list of fixed model parameters. Currently
-recognized are the following parameters:
-\itemize{
-\item \code{lapse_rate}: Optional scalar lapse-rate value. If provided,
-must be between 0 and 1.
-\item \code{mu_0}: Optional prior mean(s) for the category means. The
-shape should match the model requirements.
-\item \code{Sigma_0}: Optional prior covariance matrix or matrices for
-the category covariance. The shape should match the model requirements.
-}}
-
-\item{control}{A list of control parameters for the constructor, typically produced by \code{control_staninput()}.}
-
-\item{stanmodel}{Character string naming the Stan model. Must be one of
-the supported model names in \code{stanmodels}.}
+\item{control}{A list of control parameters for the constructor, such as
+\code{list(transform_type = "standardize")} or produced by
+\code{control_staninput()}.}
 
 \item{...}{Additional arguments passed to methods or deprecated arguments.}
 }
 \value{
-An object of class \code{IdealAdaptorStanfitInput} containing the prepared data, typed Stan input, and transform metadata.
+An object of class \code{IdealAdaptorStanfitInput} containing the
+prepared data (original and transformed) and transform metadata.
 }
 \description{
 This function composes the exposure and test data in a compact form that can
 be used as input to the ideal-adaptor Stan models. It accepts empty exposure
-data as long as test data are present, and returns an S7 fit-input object with
-the prepared data, typed Stan input, and transformation metadata.
+data as long as test data are present, and returns an S7 fit-input object
+with the prepared data (in both original and transformed spaces) and
+transformation metadata.
 }
 \details{
 Exposure and test data are checked for the required cue, group, category,
 and response columns. The exposure and test data are transformed to
-facilitate model-fitting (see \code{\link{control_staninput}}). This
-transformation is undone in in the stanfit object returned by the Stan model,
-so that the model parameters are returned in the original cue space.
+facilitate model-fitting. This transformation is undone in the stanfit object
+returned by the Stan model, so that the model parameters are returned in the
+original cue space.
 
 It is important to use \code{group} to identify individuals that had a specific
 exposure (or no exposure at all) and specific test trials. You should not
@@ -77,7 +69,7 @@ condition results in exposure that concatenates the exposure observations
 from all subjects in that condition. Typically, this is not what users
 intend, as it models exposure to the combination of exposure tokens across
 all subjects, rather than exposure to one set of those exposure tokens. To
-achieve this intended outcome, use \code{group.unique} to identify groups with
+achieve this intended outcome, use \code{group_unique} to identify groups with
 identical exposure. This will correctly use only one unique instance of the
 observations that any level of \code{group} receives during exposure.
 }

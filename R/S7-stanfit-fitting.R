@@ -52,6 +52,8 @@ NULL
 #'   sampling progress is still printed. Set \code{refresh = 0} to turn this off
 #'   as well. If using \code{backend = "rstan"} you can also set
 #'   \code{open_progress = FALSE} to prevent opening additional progress bars.
+#' @param threads Optional number of threads per chain (or list containing \code{threads})
+#'   for multithreading within Stan. Default: \code{NULL}.
 #' @param stan_model_args A \code{list} of further arguments passed to
 #'   [rstan::stan_model] for \code{backend =
 #'   "rstan"} or to \code{cmdstanr::cmdstan_model} for \code{backend =
@@ -61,7 +63,6 @@ NULL
 #' @param ... Additional parameters are passed to [rstan::sampling], including the following:
 #' @param stanvars Optional \code{stanvars} object. Default: \code{NULL}.
 #' @param save_pars Storage for parameter names to save. Default: \code{NULL}.
-#' @param basis Optional basis data subset. Default: \code{NULL}.
 #' @param chains Number of Markov chains. Default: 4.
 #' @param iter Total number of iterations per chain. Default: 2000.
 #' @param warmup Number of warmup (burnin) iterations per chain. Default: 1000.
@@ -90,16 +91,19 @@ fit_ideal_adaptor <- function(
   stanfit_input,
   file = NULL, file_refit = "never", file_compress = T,
   # included for later use
-  stanvars = NULL, backend = "rstan", save_pars = NULL, basis = NULL,
+  stanvars = NULL, backend = "rstan", save_pars = NULL,
   chains = 4, iter = 2000, warmup = 1000,
   init = "random", control = NULL,
   silent = 1,
+  threads = NULL,
   stan_model_args = list(),
   stanmodel = NULL,
   # Stuff to be deprecated in the future
   rename = T,
   ...
 ) {
+  backend <- match.arg(.as_one_character(backend), c("rstan", "cmdstanr"))
+
   # optionally load ideal_adaptor_stanfit from file
   # Loading here only when we should directly load the file.
   # The "on_change" option needs more information
@@ -119,42 +123,18 @@ fit_ideal_adaptor <- function(
   staninput <- stanfit_input@staninput
 
   if (is.null(stanmodel)) {
-    stanmodel <- if (S7::S7_inherits(staninput, IdealIntegrator_MNIX_IdealAdaptorStaninput)) {
-      "ideal_integrator_MNIX_ideal_adaptor"
-    } else if (S7::S7_inherits(staninput, WeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
-      "weighted_integrator_MNIX_ideal_adaptor"
-    } else if (S7::S7_inherits(staninput, CategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
-      "category_weighted_integrator_MNIX_ideal_adaptor"
-    } else if (S7::S7_inherits(staninput, GroupWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
-      "group_weighted_integrator_MNIX_ideal_adaptor"
-    } else if (S7::S7_inherits(staninput, GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
-      "group_category_weighted_integrator_MNIX_ideal_adaptor"
-    } else if (S7::S7_inherits(staninput, InformativityWeightedIntegrator_MNIX_IdealAdaptorStaninput)) {
-      "informativity_weighted_integrator_MNIX_ideal_adaptor"
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_IdealIntegratorStaninput)) {
-      "MNIX_ideal_adaptor_ideal_integrator"
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_WeightedIntegratorStaninput)) {
-      "MNIX_ideal_adaptor_weighted_integrator"
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_CategoryWeightedIntegratorStaninput)) {
-      "MNIX_ideal_adaptor_category_weighted_integrator"
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_GroupWeightedIntegratorStaninput)) {
-      "MNIX_ideal_adaptor_group_weighted_integrator"
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStaninput)) {
-      "MNIX_ideal_adaptor_group_category_weighted_integrator"
-    } else if (S7::S7_inherits(staninput, MNIX_IdealAdaptor_InformativityWeightedIntegratorStaninput)) {
-      "MNIX_ideal_adaptor_informativity_weighted_integrator"
-    } else if (S7::S7_inherits(staninput, NIX_IdealAdaptorStaninput)) {
-      "NIX_ideal_adaptor"
-    } else if (S7::S7_inherits(staninput, NIW_IdealAdaptorStaninput)) {
-      "NIW_ideal_adaptor"
+    fam <- tryCatch(get_family_name(staninput), error = function(e) character(0))
+    if (length(fam) > 0 && nzchar(fam)) {
+      stanmodel <- .to_stanmodel(fam)
     } else {
       .stop(
         "Could not infer a concrete Stan model from 'staninput' of class '",
         class(staninput)[[1]],
-        "'. Please specify 'stanmodel' explicitly or provide an input object with a concrete integrator class."
+        "'. Please update the 'staninput' to specify a 'family' or specify 'stanmodel' explicitly."
       )
     }
   }
+
   .assert_that(
     !is.null(stanmodel) && !is.null(stanmodels[[stanmodel]]),
     msg = paste(
@@ -181,6 +161,12 @@ fit_ideal_adaptor <- function(
     }
   }
 
+  fam <- if (!is.null(stanfit_input@metadata$model_family)) {
+    stanfit_input@metadata$model_family
+  } else {
+    .to_family(stanmodel)
+  }
+
   metadata <- if (
     !is.null(stanfit_input@metadata) && length(stanfit_input@metadata) > 0
   ) {
@@ -188,8 +174,22 @@ fit_ideal_adaptor <- function(
   } else {
     list(label_information = get_labels(stanfit_input))
   }
+  metadata$model_family <- fam
+  fixed_params <- if (!is.null(metadata$fixed_parameters)) {
+    metadata$fixed_parameters
+  } else {
+    list()
+  }
+  metadata$parameters <- list(
+    fixed = fixed_params,
+    fitted = list(),
+    priors = list()
+  )
 
-  constructor <- .get_ideal_adaptor_stanfit_constructor(staninput)
+  constructor <- .get_ideal_adaptor_stanfit_constructor(
+    staninput = staninput,
+    stanmodel = stanmodel
+  )
   fit <-
     constructor(
       data = data,
@@ -197,9 +197,8 @@ fit_ideal_adaptor <- function(
       stanvars = stanvars,
       save_pars = save_pars,
       backend = backend,
-      stan_args = .nlist(init, silent, control, stan_model_args),
+      stan_args = .nlist(init, silent, control, threads, stan_model_args),
       transform_information = transform_information,
-      basis = basis,
       file = file,
       metadata = metadata
     )
@@ -224,19 +223,22 @@ fit_ideal_adaptor <- function(
         "z_mean_exposure", "z_css_exposure", "z_test", "mu_0_1d_data", "Sigma_0_1d_data"
       )
 
-    if (stanmodel %in% names(stanmodels)) {
-      stanfit <-
-        sampling(
-          stanmodels[[stanmodel]],
-          data = get_staninput(fit)@values,
-          check_data = TRUE,
-          pars = exclude_pars, include = FALSE,
-          chains = chains, iter = iter, warmup = warmup,
-          init = init, control = control,
-          show_messages = !silent,
-          ...
-        )
-    }
+    stanfit <- .fit_model(
+      stanmodel = stanmodel,
+      backend = backend,
+      data = get_staninput(fit)@values,
+      pars = exclude_pars,
+      include = FALSE,
+      chains = chains,
+      iter = iter,
+      warmup = warmup,
+      init = init,
+      control = control,
+      threads = threads,
+      silent = silent,
+      stan_model_args = stan_model_args,
+      ...
+    )
 
     .assert_contains_draws(stanfit)
     if (requireNamespace("tidybayes", quietly = TRUE)) {
@@ -254,6 +256,10 @@ fit_ideal_adaptor <- function(
       )
     }
     fit <- set_stanfit(fit, stanfit)
+    sampled_pars <- .extract_fitted_parameter_names_from_stanfit(stanfit)
+    fixed_names <- names(fit@metadata$parameters$fixed)
+    fit@metadata$parameters$fitted <-
+      as.list(setdiff(sampled_pars, fixed_names))
   } else if (!silent) message("No sampling requested. Returning empty model object.")
 
   if (!is.null(fit) && !is.null(file)) {
@@ -262,3 +268,206 @@ fit_ideal_adaptor <- function(
 
   return(fit)
 }
+
+# -------------------------------------------------------------------------
+# Backend Model Fitting Dispatchers
+# -------------------------------------------------------------------------
+
+#' Fit a Stan model using the requested backend
+#'
+#' @param stanmodel Character string naming the Stan model.
+#' @param backend Character string naming the backend: \code{"rstan"} or \code{"cmdstanr"}.
+#' @param data Named list of Stan input data.
+#' @param pars Character vector of parameter names to include/exclude.
+#' @param include Logical; if \code{FALSE}, parameters in \code{pars} are excluded.
+#' @param chains Integer number of chains.
+#' @param iter Total iterations per chain.
+#' @param warmup Warmup iterations per chain.
+#' @param init Initial values specification.
+#' @param control List of sampler control options.
+#' @param threads Thread specification (count or list).
+#' @param silent Verbosity level (0 to 2).
+#' @param stan_model_args List of compilation options.
+#' @param ... Additional arguments passed to the backend sampler.
+#' @return An object of class \code{\link[rstan:stanfit-class]{stanfit}}.
+#' @keywords internal
+#' @noRd
+.fit_model <- function(
+  stanmodel,
+  backend = "rstan",
+  data,
+  pars = character(0),
+  include = FALSE,
+  chains = 4,
+  iter = 2000,
+  warmup = 1000,
+  init = "random",
+  control = NULL,
+  threads = NULL,
+  silent = 1,
+  stan_model_args = list(),
+  ...
+) {
+  fit_fun <- get(paste0(".fit_model_", backend), mode = "function")
+  fit_fun(
+    stanmodel = stanmodel,
+    data = data,
+    pars = pars,
+    include = include,
+    chains = chains,
+    iter = iter,
+    warmup = warmup,
+    init = init,
+    control = control,
+    threads = threads,
+    silent = silent,
+    stan_model_args = stan_model_args,
+    ...
+  )
+}
+
+#' Fit a Stan model using rstan
+#'
+#' @inheritParams .fit_model
+#' @keywords internal
+#' @noRd
+.fit_model_rstan <- function(
+  stanmodel,
+  data,
+  pars = character(0),
+  include = FALSE,
+  chains = 4,
+  iter = 2000,
+  warmup = 1000,
+  init = "random",
+  control = NULL,
+  threads = NULL,
+  silent = 1,
+  stan_model_args = list(),
+  ...
+) {
+  threads_spec <- .validate_threads(threads)
+  use_threading <- isTRUE(threads_spec$threads > 1L)
+  use_precompiled <- (stanmodel %in% names(stanmodels)) &&
+    length(stan_model_args) == 0L &&
+    !use_threading
+
+  if (use_precompiled) {
+    model_obj <- stanmodels[[stanmodel]]
+  } else {
+    stan_file <- .get_stan_file(stanmodel)
+    compile_args <- c(
+      list(
+        model = stan_file, backend = "rstan",
+        threads = threads_spec, silent = silent
+      ),
+      stan_model_args
+    )
+    model_obj <- .do_call(.compile_model, compile_args)
+  }
+
+  if (use_threading) {
+    if (utils::packageVersion("rstan") >= "2.26") {
+      threads_per_chain_def <- rstan::rstan_options("threads_per_chain")
+      on.exit(
+        rstan::rstan_options(threads_per_chain = threads_per_chain_def),
+        add = TRUE
+      )
+      rstan::rstan_options(threads_per_chain = threads_spec$threads)
+    } else {
+      .stop(
+        "Threading is not supported by backend 'rstan' version ",
+        utils::packageVersion("rstan"), "."
+      )
+    }
+  }
+
+  sampling_args <- list(
+    object = model_obj,
+    data = data,
+    check_data = TRUE,
+    pars = pars,
+    include = include,
+    chains = chains,
+    iter = iter,
+    warmup = warmup,
+    init = init,
+    control = control,
+    show_messages = (silent < 1)
+  )
+  dots <- list(...)
+  sampling_args[names(dots)] <- dots
+
+  .do_call(rstan::sampling, sampling_args)
+}
+
+#' Fit a Stan model using cmdstanr
+#'
+#' @inheritParams .fit_model
+#' @keywords internal
+#' @noRd
+.fit_model_cmdstanr <- function(
+  stanmodel,
+  data,
+  pars = character(0),
+  include = FALSE,
+  chains = 4,
+  iter = 2000,
+  warmup = 1000,
+  init = "random",
+  control = NULL,
+  threads = NULL,
+  silent = 1,
+  stan_model_args = list(),
+  ...
+) {
+  if (!requireNamespace("cmdstanr", quietly = TRUE)) {
+    .stop("Package 'cmdstanr' is required to use backend 'cmdstanr'.")
+  }
+
+  stan_file <- .get_stan_file(stanmodel)
+  compile_args <- c(
+    list(model = stan_file, backend = "cmdstanr", threads = threads, silent = silent),
+    stan_model_args
+  )
+  model_obj <- .do_call(.compile_model, compile_args)
+
+  sample_args <- list(
+    data = data,
+    chains = as.integer(chains),
+    iter_sampling = as.integer(iter - warmup),
+    iter_warmup = as.integer(warmup),
+    show_messages = (silent < 2),
+    show_exceptions = (silent == 0)
+  )
+
+  if (identical(init, "random")) {
+    sample_args$init <- NULL
+  } else if (identical(init, "0") || identical(init, 0)) {
+    sample_args$init <- 0
+  } else {
+    sample_args$init <- init
+  }
+
+  if (is.list(control)) {
+    sample_args[names(control)] <- control
+  }
+
+  threads_spec <- .validate_threads(threads)
+  if (isTRUE(threads_spec$threads > 1L)) {
+    sample_args$threads_per_chain <- threads_spec$threads
+  }
+
+  dots <- list(...)
+  sample_args[names(dots)] <- dots
+
+  cs_fit <- .do_call(model_obj$sample, sample_args)
+
+  exclude_pars <- if (!include) pars else character(0)
+  .read_cmdstan_csv_as_stanfit(
+    files = cs_fit$output_files(),
+    exclude_pars = exclude_pars,
+    model_name = stanmodel
+  )
+}
+

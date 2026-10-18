@@ -719,23 +719,6 @@ test_that("model family registry and hooks work", {
   expect_equal(custom_registration$cognitive_model, "CustomMix_Model")
 })
 
-test_that("Stan-family extension hooks can be registered and retrieved", {
-  niw_hooks <- get_stan_family_hooks("NIW")
-  expect_true("get_stanfit" %in% niw_hooks$bridge_methods)
-  expect_true("posterior::as_draws_df" %in% niw_hooks$bridge_methods)
-
-  register_stan_family_hooks(
-    family = "uvg",
-    stanfit_class = "UVG_Stanfit",
-    bridge_methods = c("get_stanfit", "summary"),
-    dependency_rationale = "Minimal bridge for prototype workflows."
-  )
-
-  uvg_hooks <- get_stan_family_hooks("UVG")
-  expect_equal(uvg_hooks$stanfit_class, "UVG_Stanfit")
-  expect_equal(uvg_hooks$bridge_methods, c("get_stanfit", "summary"))
-})
-
 test_that("get_family and get_family_name work across objects", {
   rep_uvg <- example_category_representation("UVG")
   rep_mvg <- example_category_representation("MVG")
@@ -1199,5 +1182,94 @@ test_that("noise_treatment and lapse_treatment defaults are consistently inferre
   m_base <- new_cognitive_model(category_template = uvg_tmpl, lapse_rate = 0.05, Sigma_noise = 0.1)
   expect_equal(get_lapse_treatment(m_base), "marginalize")
   expect_equal(get_noise_treatment(m_base), "marginalize")
+})
+
+test_that("MVBU_Family stanmodel_name property and bidirectional lookups operate correctly", {
+  # 1. Verification of builtin family stanmodel_name properties
+  expect_equal(get_stanmodel_name("NIX"), "NIX_ideal_adaptor")
+  expect_equal(get_stanmodel_name("NIW"), "NIW_ideal_adaptor")
+  expect_equal(get_stanmodel_name("MNIX"), "MNIX_ideal_adaptor_ideal_integrator")
+  expect_equal(get_stanmodel_name("MNIX_ideal_integrator"), "MNIX_ideal_adaptor_ideal_integrator")
+  expect_equal(get_stanmodel_name("ideal_integrator_MNIX"), "ideal_integrator_MNIX_ideal_adaptor")
+  expect_null(get_stanmodel_name("UVG"))
+  expect_null(get_stanmodel_name("MVG"))
+  expect_null(get_stanmodel_name("EXEMPLAR"))
+
+  # 2. .to_stanmodel lookups
+  expect_equal(MVBeliefUpdatr:::.to_stanmodel("NIX"), "NIX_ideal_adaptor")
+  expect_equal(MVBeliefUpdatr:::.to_stanmodel("NIX_ideal_adaptor"), "NIX_ideal_adaptor")
+  expect_equal(MVBeliefUpdatr:::.to_stanmodel("MNIX"), "MNIX_ideal_adaptor_ideal_integrator")
+  expect_equal(MVBeliefUpdatr:::.to_stanmodel("MNIX_ideal_integrator"), "MNIX_ideal_adaptor_ideal_integrator")
+  expect_equal(MVBeliefUpdatr:::.to_stanmodel("ideal_integrator_MNIX"), "ideal_integrator_MNIX_ideal_adaptor")
+
+  # .to_stanmodel on families without stanmodel or unknown strings fails informatively
+  expect_error(
+    MVBeliefUpdatr:::.to_stanmodel("UVG"),
+    regexp = "does not have an associated Stan model"
+  )
+  expect_error(
+    MVBeliefUpdatr:::.to_stanmodel("nonexistent_model"),
+    regexp = "Unknown model family or Stan model 'nonexistent_model'"
+  )
+
+  # 3. .to_family lookups
+  expect_equal(MVBeliefUpdatr:::.to_family("NIX_ideal_adaptor"), "NIX")
+  expect_equal(MVBeliefUpdatr:::.to_family("NIX"), "NIX")
+  expect_equal(MVBeliefUpdatr:::.to_family("NIW_ideal_adaptor"), "NIW")
+  expect_equal(MVBeliefUpdatr:::.to_family("MNIX_ideal_adaptor_ideal_integrator"), "MNIX_ideal_integrator")
+  expect_equal(MVBeliefUpdatr:::.to_family("ideal_integrator_MNIX_ideal_adaptor"), "ideal_integrator_MNIX")
+  expect_equal(MVBeliefUpdatr:::.to_family("UVG"), "UVG")
+
+  expect_error(
+    MVBeliefUpdatr:::.to_family("nonexistent_stan_model"),
+    regexp = "Unknown Stan model or model family 'nonexistent_stan_model'"
+  )
+
+  # 4. Dynamic registration of custom family with stanmodel list
+  register_model_family(
+    family = "CUSTOM_STAN_FAMILY",
+    category_representation_class = "Custom_CategoryRepresentation",
+    cognitive_model_class = "Custom_CognitiveModel",
+    stanmodel = list(
+      stanmodel_name = "custom_stan_model"
+    )
+  )
+  expect_equal(get_stanmodel_name("CUSTOM_STAN_FAMILY"), "custom_stan_model")
+  expect_equal(
+    MVBeliefUpdatr:::.to_stanmodel("CUSTOM_STAN_FAMILY"),
+    "custom_stan_model"
+  )
+  expect_equal(
+    MVBeliefUpdatr:::.to_family("custom_stan_model"),
+    "CUSTOM_STAN_FAMILY"
+  )
+
+  # 5. IdealAdaptorStaninput validation
+  # Valid Stan family
+  staninput_ok <- IdealAdaptorStaninput(values = list(a = 1), family = "NIX")
+  expect_true(S7::S7_inherits(staninput_ok, IdealAdaptorStaninput))
+  expect_equal(staninput_ok@family, "NIX")
+
+  # Non-Stan family (UVG) fails
+  expect_error(
+    IdealAdaptorStaninput(values = list(), family = "UVG"),
+    regexp = "'UVG' is not a registered Stan model family"
+  )
+
+  # Unregistered family fails
+  expect_error(
+    IdealAdaptorStaninput(values = list(), family = "UNKNOWN_FAMILY"),
+    regexp = "'UNKNOWN_FAMILY' is not a registered Stan model family"
+  )
+
+  # Empty family fails
+  expect_error(
+    IdealAdaptorStaninput(values = list(), family = character(0)),
+    regexp = "`family` must be a non-empty character string specifying a registered Stan model family"
+  )
+  expect_error(
+    IdealAdaptorStaninput(values = list(), family = ""),
+    regexp = "`family` must be a non-empty character string specifying a registered Stan model family"
+  )
 })
 

@@ -1,3 +1,4 @@
+#' @include S7-family.R
 #' @include S7-class.R
 #' @include S7-class-uvg.R
 #' @include S7-class-nix.R
@@ -251,9 +252,14 @@ as_mvg_ideal_observer <- function(x) .mvbu_coerce_cognitive_model(x, to = "MVG")
 as_niw_ideal_adaptor <- function(x, kappa, nu) .mvbu_coerce_cognitive_model(x, to = "NIW", kappa = kappa, nu = nu)
 #' @rdname as_family_coercion
 #' @export
-as_exemplar_model <- function(x, n) .mvbu_coerce_cognitive_model(x, to = "EXEMPLAR", n = n)
+as_exemplar_model <- function(x, n) {
+  .mvbu_coerce_cognitive_model(x, to = "EXEMPLAR", n = n)
+}
 
-.create_ideal_observer_model <- function(model_family, category_template, ...) {
+# Internal helper: instantiate an ideal observer model given family and template
+.create_ideal_observer_model <- function(model_family,
+                                         category_template,
+                                         ...) {
   fam <- toupper(as.character(model_family))
   if (grepl("UVG", fam) && !grepl("MUVG", fam)) {
     new_uvg_ideal_observer(category_template = category_template, ...)
@@ -262,7 +268,35 @@ as_exemplar_model <- function(x, n) .mvbu_coerce_cognitive_model(x, to = "EXEMPL
   } else if (grepl("MVG", fam)) {
     new_mvg_ideal_observer(category_template = category_template, ...)
   } else {
-    .stop(sprintf("Unsupported ideal observer model family for dynamic model creation: '%s'.", model_family))
+    .stop(sprintf(
+      paste0(
+        "Unsupported ideal observer model family for dynamic model creation: ",
+        "'%s'."
+      ),
+      model_family
+    ))
+  }
+}
+
+# Internal helper: instantiate an ideal adaptor model given family and template
+.create_ideal_adaptor_model <- function(model_family,
+                                        category_template,
+                                        ...) {
+  fam <- toupper(as.character(model_family))
+  if (grepl("NIX", fam) && !grepl("MNIX", fam)) {
+    new_nix_ideal_adaptor(category_template = category_template, ...)
+  } else if (grepl("MNIX", fam)) {
+    new_mnix_ideal_adaptor(category_template = category_template, ...)
+  } else if (grepl("NIW", fam)) {
+    new_niw_ideal_adaptor(category_template = category_template, ...)
+  } else {
+    .stop(sprintf(
+      paste0(
+        "Unsupported ideal adaptor model family for dynamic model creation: ",
+        "'%s'."
+      ),
+      model_family
+    ))
   }
 }
 

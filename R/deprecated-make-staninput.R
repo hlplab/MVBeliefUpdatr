@@ -5,7 +5,8 @@
 #' removed in 0.2.0. Please use [new_ideal_adaptor_stanfit_input()] instead.
 #'
 #' @inheritParams new_ideal_adaptor_stanfit_input
-#' @return A list with components \code{staninput}, \code{data}, and \code{transform_information}.
+#' @return A list with components \code{staninput}, \code{data}, and
+#'   \code{transform_information}.
 #' @seealso [new_ideal_adaptor_stanfit_input()]
 #' @keywords internal
 #' @export
@@ -23,6 +24,12 @@ make_staninput <- function(
     "make_staninput()",
     with = "new_ideal_adaptor_stanfit_input()"
   )
+  if (!is.null(lapse_rate)) {
+    .assert_numeric_scalar(lapse_rate)
+    if (lapse_rate < 0 || lapse_rate > 1) {
+      .stop("`lapse_rate` must be between 0 and 1.")
+    }
+  }
   fixed_parameters <- list(
     lapse_rate = lapse_rate,
     mu_0 = mu_0,
@@ -45,11 +52,13 @@ make_staninput <- function(
 #' Deprecated: make_ideal_adaptor_stanfit_input
 #'
 #' @description `r lifecycle::badge("deprecated")`
-#' `make_ideal_adaptor_stanfit_input()` was deprecated in MVBeliefUpdatr 0.1.0 and will be
-#' removed in 0.2.0. Please use [new_ideal_adaptor_stanfit_input()] instead.
+#' `make_ideal_adaptor_stanfit_input()` was deprecated in MVBeliefUpdatr 0.1.0
+#' and will be removed in 0.2.0. Please use [new_ideal_adaptor_stanfit_input()]
+#' instead.
 #'
 #' @inheritParams new_ideal_adaptor_stanfit_input
-#' @return A list with components \code{staninput}, \code{data}, and \code{transform_information}.
+#' @return A list with components \code{staninput}, \code{data}, and
+#'   \code{transform_information}.
 #' @seealso [new_ideal_adaptor_stanfit_input()]
 #' @keywords internal
 #' @rdname make_staninput
@@ -68,6 +77,12 @@ make_ideal_adaptor_stanfit_input <- function(
     "make_ideal_adaptor_stanfit_input()",
     with = "new_ideal_adaptor_stanfit_input()"
   )
+  if (!is.null(lapse_rate)) {
+    .assert_numeric_scalar(lapse_rate)
+    if (lapse_rate < 0 || lapse_rate > 1) {
+      .stop("`lapse_rate` must be between 0 and 1.")
+    }
+  }
   fixed_parameters <- list(
     lapse_rate = lapse_rate,
     mu_0 = mu_0,

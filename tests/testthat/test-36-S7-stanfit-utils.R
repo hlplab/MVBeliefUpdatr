@@ -96,18 +96,19 @@ test_that(".stanfit_needs_refit behaves correctly", {
   )
 
   # Data with identical factor levels -> no refit
-  if (!is.null(fit@data) && nrow(fit@data) > 0) {
+  fit_data <- get_data(fit, space = "original")
+  if (!is.null(fit_data) && nrow(fit_data) > 0) {
     expect_false(
       MVBeliefUpdatr:::.stanfit_needs_refit(
         fit,
         current_version = fit@version,
-        data = fit@data,
+        data = fit_data,
         silent = TRUE
       )
     )
 
     # Data with changed factor levels -> refit needed
-    mod_data <- fit@data
+    mod_data <- fit_data
     cat_col <- which(vapply(mod_data, is.factor, logical(1)))[1]
     if (!is.na(cat_col)) {
       levels(mod_data[[cat_col]]) <- rev(levels(mod_data[[cat_col]]))
@@ -138,7 +139,7 @@ test_that(".stanfit_needs_refit behaves correctly", {
     "category", "response_category", "group", "group_unique", "Phase"
   )) {
     fit_missing_col <- fit
-    fit_missing_col@data[[col]] <- NULL
+    fit_missing_col@data$original[[col]] <- NULL
     expect_true(
       MVBeliefUpdatr:::.stanfit_needs_refit(
         fit_missing_col,
@@ -148,4 +149,137 @@ test_that(".stanfit_needs_refit behaves correctly", {
     )
   }
 })
+
+test_that(".validate_threads and .use_threading work as expected", {
+  expect_null(MVBeliefUpdatr:::.validate_threads(NULL))
+  expect_equal(MVBeliefUpdatr:::.validate_threads(1), list(threads = 1L))
+  expect_equal(MVBeliefUpdatr:::.validate_threads(4L), list(threads = 4L))
+  expect_equal(MVBeliefUpdatr:::.validate_threads(list(threads = 2)), list(threads = 2L))
+  expect_error(MVBeliefUpdatr:::.validate_threads(0))
+  expect_error(MVBeliefUpdatr:::.validate_threads(-1))
+  expect_error(MVBeliefUpdatr:::.validate_threads("abc"))
+
+  expect_false(MVBeliefUpdatr:::.use_threading(NULL))
+  expect_false(MVBeliefUpdatr:::.use_threading(1))
+  expect_true(MVBeliefUpdatr:::.use_threading(2))
+  expect_true(MVBeliefUpdatr:::.use_threading(list(threads = 4)))
+})
+
+test_that(".normalize_stancode strips comments and whitespace", {
+  raw_code <- "
+    // single line comment
+    parameters {
+      /* multi
+         line
+         comment */
+      real x; // end line
+    }
+  "
+  norm <- MVBeliefUpdatr:::.normalize_stancode(raw_code)
+  expect_false(grepl("//", norm))
+  expect_false(grepl("/\\*", norm))
+  expect_equal(norm, "parameters { real x; }")
+})
+
+test_that(".get_stan_file and .get_stan_include_paths locate Stan files", {
+  f_niw <- MVBeliefUpdatr:::.get_stan_file("NIW_ideal_adaptor")
+  expect_true(file.exists(f_niw))
+  expect_true(grepl("NIW_ideal_adaptor\\.stan$", f_niw))
+
+  inc_paths <- MVBeliefUpdatr:::.get_stan_include_paths()
+  expect_true(length(inc_paths) > 0)
+  expect_true(any(dir.exists(inc_paths)))
+
+  expect_error(MVBeliefUpdatr:::.get_stan_file("nonexistent_stan_model_12345"))
+})
+
+test_that(".compile_model dispatches to cmdstanr when installed", {
+  skip_if_not_installed("cmdstanr")
+  skip_if(
+    is.null(tryCatch(cmdstanr::cmdstan_path(), error = function(e) NULL)),
+    "CmdStan is not installed"
+  )
+
+  stan_file <- MVBeliefUpdatr:::.get_stan_file("NIX_ideal_adaptor")
+  # Use compile = FALSE to verify syntax check and backend dispatch without full C++ compilation
+  mod <- MVBeliefUpdatr:::.compile_model(
+    model = stan_file,
+    backend = "cmdstanr",
+    compile = FALSE,
+    silent = 2
+  )
+  expect_s3_class(mod, "CmdStanModel")
+  expect_true(mod$check_syntax())
+})
+
+test_that(".extract_fitted_parameter_names_from_stanfit extracts canonical names", {
+  # Mock object that responds to names()
+  names_stanfit <- c(
+    "m_0[1,1]", "m_n[1,1]", "S_0[1,1,1]", "S_n[1,1,1]",
+    "weights[1]", "weights[2]", "lapse_rate", "lapse_bias[1]",
+    "prior_p[1]", "prior_p[2]", "Sigma_noise[1,1]",
+    "m_0_tau[1]", "m_0_param[1]", "weights_param[1]",
+    "lp__", "log_lik[1]"
+  )
+  extracted <- MVBeliefUpdatr:::.extract_fitted_parameter_names_from_stanfit(
+    names_stanfit
+  )
+  expect_true("m" %in% extracted)
+  expect_true("S" %in% extracted)
+  expect_true("weights" %in% extracted)
+  expect_true("lapse_rate" %in% extracted)
+  expect_true("lapse_bias" %in% extracted)
+  expect_true("prior_p" %in% extracted)
+  expect_true("Sigma_noise" %in% extracted)
+  # Internal / Stan-specific names should not be extracted
+  expect_false("lp__" %in% extracted)
+  expect_false("log_lik" %in% extracted)
+  expect_false("m_0_tau" %in% extracted)
+  expect_false("cue_weight" %in% extracted)
+  expect_false("p_category" %in% extracted)
+})
+
+test_that(".format_fixed_parameters_table formats parameters into standard tibble", {
+  # Empty input
+  empty_tbl <- MVBeliefUpdatr:::.format_fixed_parameters_table(list())
+  expect_s3_class(empty_tbl, "tbl_df")
+  expect_equal(nrow(empty_tbl), 0L)
+
+  # NULL input
+  expect_equal(
+    nrow(MVBeliefUpdatr:::.format_fixed_parameters_table(NULL)),
+    0L
+  )
+
+  # weights and lapse_rate
+  fixed_pars <- list(
+    weights = c(c1 = 0.7, c2 = 0.3),
+    lapse_rate = 0.05,
+    prior_p = c(catA = 0.6, catB = 0.4)
+  )
+  tbl <- MVBeliefUpdatr:::.format_fixed_parameters_table(fixed_pars)
+  expect_s3_class(tbl, "tbl_df")
+  expect_equal(nrow(tbl), 5L)
+  expected_cols <- c(
+    "Parameter", "Dist.", "Group", "Category", "Cue", "Value", "Status"
+  )
+  expect_true(all(expected_cols %in% names(tbl)))
+  expect_equal(tbl$Status, rep("Fixed by user", 5L))
+
+  w_rows <- tbl[tbl$Parameter == "weights", ]
+  expect_equal(nrow(w_rows), 2L)
+  expect_equal(w_rows$Cue, c("c1", "c2"))
+  expect_equal(w_rows$Value, c(0.7, 0.3))
+
+  lr_row <- tbl[tbl$Parameter == "lapse_rate", ]
+  expect_equal(nrow(lr_row), 1L)
+  expect_equal(lr_row$Value, 0.05)
+
+  p_rows <- tbl[tbl$Parameter == "prior_p", ]
+  expect_equal(nrow(p_rows), 2L)
+  expect_equal(p_rows$Category, c("catA", "catB"))
+  expect_equal(p_rows$Value, c(0.6, 0.4))
+})
+
+
 

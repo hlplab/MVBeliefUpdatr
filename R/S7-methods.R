@@ -29,6 +29,13 @@ S7::method(print, MVBU_Object) <- function(x, ...) {
   invisible(x)
 }
 
+# Format an arbitrary parameter for compact inline display in print methods.
+#
+# Arguments:
+#   p: A parameter value (scalar, vector, matrix, array, or NULL).
+#
+# Returns:
+#   A concise character string representation.
 .format_param_inline <- function(p) {
   if (is.null(p)) {
     return("NULL")
@@ -51,6 +58,13 @@ S7::method(print, MVBU_Object) <- function(x, ...) {
   class(p)[1]
 }
 
+# Format category representation parameters for compact inline display.
+#
+# Arguments:
+#   r: A category representation object.
+#
+# Returns:
+#   A character string summarizing class and parameter values.
 .format_category_representation_inline <- function(r) {
   if (S7::S7_inherits(r, UVG_CategoryRepresentation)) {
     sprintf(
@@ -210,6 +224,13 @@ S7::method(print, MVBU_CategoryRepresentation) <- function(x, ...) {
   invisible(x)
 }
 
+# Format expected and marginal moments for category representation display.
+#
+# Arguments:
+#   r: A category representation object (NIW, NIX, MNIX, etc.).
+#
+# Returns:
+#   A character string summarizing moments, or NULL if not supported.
 .format_moments_subline <- function(r) {
   if (S7::S7_inherits(r, NIW_CategoryRepresentation)) {
     e_mu <- .format_param_inline(get_expected_mu(r))
@@ -274,10 +295,11 @@ S7::method(print, MVBU_CognitiveModel) <- function(x, ...) {
   cat("  Lapse rate: ", format(lapse_r, digits = 3), " (treatment: ", lapse_trt, ")\n", sep = "")
 
   noise_trt <- get_noise_treatment(x)
-  if (is.null(x@noise_behavior$Sigma_noise)) {
+  sig_noise <- get_noise(x)
+  if (is.null(sig_noise)) {
     cat("  Perceptual noise: none (treatment: ", noise_trt, ")\n", sep = "")
   } else {
-    sig_str <- .format_param_inline(x@noise_behavior$Sigma_noise)
+    sig_str <- .format_param_inline(sig_noise)
     cat("  Perceptual noise: ", sig_str, " (treatment: ", noise_trt, ")\n", sep = "")
   }
 
@@ -294,6 +316,16 @@ S7::method(print, MVBU_CognitiveModel) <- function(x, ...) {
   invisible(x)
 }
 
+# Assemble a tidy data frame of expected/marginal category moments.
+#
+# Arguments:
+#   cats: Vector of category labels.
+#   cues: Vector of cue dimension labels.
+#   mu_list: List of category mean vectors.
+#   sig_list: List of category covariance matrices (or variance vectors).
+#
+# Returns:
+#   A data frame containing columns for category, cue, mu, and sigma.
 .build_moments_table <- function(cats, cues, mu_list, sig_list) {
   rows <- list()
   cat_names <- as.character(cats)
@@ -527,10 +559,22 @@ S7::method(
 }
 
 S7::method(get_family, MVBU_CognitiveModel) <- function(x, ...) {
+  fam_name <- .get_family_from_class_name(class(x)[1])
+  if (!is.null(fam_name) &&
+    fam_name %in% list_model_families() &&
+    fam_name != "MNIX") {
+    return(.get_model_family(fam_name))
+  }
   get_family(x@category_template, ...)
 }
 
 S7::method(get_family_name, MVBU_CognitiveModel) <- function(x, ...) {
+  fam_name <- .get_family_from_class_name(class(x)[1])
+  if (!is.null(fam_name) &&
+    fam_name %in% list_model_families() &&
+    fam_name != "MNIX") {
+    return(unname(fam_name))
+  }
   fam_name <- get_family_name(x@category_template, ...)
   if (fam_name == "MIXED_CategoryRepresentationTemplate") {
     "MIXED_CognitiveModel"
@@ -570,11 +614,28 @@ S7::method(get_family_name, MVBU_ModelList) <- function(x, ...) {
   }
 }
 
+# Check if an object has a single homogeneous family.
+#
+# Arguments:
+#   x: An MVBU object or list of models.
+#
+# Returns:
+#   TRUE if the object possesses a single family, FALSE otherwise.
 .has_single_family <- function(x) {
   fam_name <- get_family_name(x)
-  !startsWith(fam_name, "MIXED_") && length(fam_name) == 1L && nchar(fam_name) > 0L
+  !startsWith(fam_name, "MIXED_") &&
+    length(fam_name) == 1L &&
+    nchar(fam_name) > 0L
 }
 
+# Assert that an object has a single homogeneous family.
+#
+# Arguments:
+#   x: An MVBU object or list of models.
+#   msg: Optional custom error message string.
+#
+# Returns:
+#   Invisibly returns TRUE if valid, otherwise raises an error.
 .assert_single_family <- function(x, msg = NULL) {
   if (!.has_single_family(x)) {
     if (is.null(msg)) {
@@ -592,132 +653,51 @@ S7::method(get_family_name, MVBU_ModelList) <- function(x, ...) {
   invisible(TRUE)
 }
 
-S7::method(get_parameters, MVBU_Object) <- function(x, ...) {
-  .mvbu_not_implemented("get_parameters", class(x)[1])
-}
-
-S7::method(get_parameters, MVBU_CategoryRepresentation) <- function(x) {
-  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
-    return(x@metadata$parameters)
+#' @rdname get_parameters
+#' @export
+S7::method(get_parameters, MVBU_Object) <- function(
+  x,
+  space = c("original", "transformed"),
+  ...
+) {
+  space <- match.arg(space)
+  if (is.null(x@metadata$parameters)) {
+    .stop("Object metadata does not contain a 'parameters' entry.")
   }
-  # Dynamically extract non-metadata properties for any category representation
-  prop_names <- S7::prop_names(x)
-  ignore <- c("category", "cues", "metadata", "category_likelihood_function")
-  param_names <- setdiff(prop_names, ignore)
-  if (length(param_names) > 0L) {
-    out <- stats::setNames(vector("list", length(param_names)), param_names)
-    for (nm in param_names) {
-      out[[nm]] <- S7::prop(x, nm)
+  params <- x@metadata$parameters
+  if ("fixed" %in% names(params) || "fitted" %in% names(params)) {
+    fixed <- if (is.list(params$fixed) && (space %in% names(params$fixed))) {
+      params$fixed[[space]]
+    } else {
+      params$fixed
     }
-    return(out)
+    list(
+      fixed = fixed,
+      fitted = params$fitted
+    )
+  } else {
+    params
   }
-  if (!is.null(x@metadata$parameters)) {
-    return(x@metadata$parameters)
-  }
-  list()
 }
 
-S7::method(get_parameters, UVG_CategoryRepresentation) <- function(x) {
-  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
-    return(x@metadata$parameters)
+#' @rdname get_parameters
+#' @export
+S7::method(get_stan_priors, MVBU_Object) <- function(
+  x,
+  space = c("original", "transformed"),
+  ...
+) {
+  space <- match.arg(space)
+  if (is.null(x@metadata$parameters$priors)) {
+    .stop(
+      "Object metadata does not contain a 'priors' entry under 'parameters'."
+    )
   }
-  list(
-    mu = x@mu,
-    sigma2 = x@sigma2
-  )
-}
-
-S7::method(get_parameters, NIX_CategoryRepresentation) <- function(x) {
-  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
-    return(x@metadata$parameters)
+  priors <- x@metadata$parameters$priors
+  if (is.list(priors) && (space %in% names(priors))) {
+    return(priors[[space]])
   }
-  list(
-    m = x@m,
-    kappa = x@kappa,
-    nu = x@nu,
-    sigma2 = x@sigma2
-  )
-}
-
-S7::method(get_parameters, MUVG_CategoryRepresentation) <- function(x) {
-  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
-    return(x@metadata$parameters)
-  }
-  list(
-    mu = x@mu,
-    sigma2 = x@sigma2,
-    weights = x@weights
-  )
-}
-
-S7::method(get_parameters, MNIX_CategoryRepresentation) <- function(x) {
-  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
-    return(x@metadata$parameters)
-  }
-  list(
-    m = x@m,
-    kappa = x@kappa,
-    nu = x@nu,
-    sigma2 = x@sigma2,
-    weights = x@weights
-  )
-}
-
-S7::method(get_parameters, MVG_CategoryRepresentation) <- function(x) {
-  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
-    return(x@metadata$parameters)
-  }
-  list(
-    mu = x@mu,
-    Sigma = x@Sigma
-  )
-}
-
-S7::method(get_parameters, NIW_CategoryRepresentation) <- function(x) {
-  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
-    return(x@metadata$parameters)
-  }
-  list(
-    m = x@m,
-    kappa = x@kappa,
-    nu = x@nu,
-    S = x@S
-  )
-}
-
-S7::method(get_parameters, Exemplar_CategoryRepresentation) <- function(x) {
-  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
-    return(x@metadata$parameters)
-  }
-  list(
-    exemplars = x@exemplars,
-    exemplar_weights = x@exemplar_weights
-  )
-}
-
-S7::method(get_parameters, MVBU_CategoryRepresentationTemplate) <- function(x) {
-  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
-    return(x@metadata$parameters)
-  }
-  lapply(x@representations, get_parameters)
-}
-
-S7::method(get_parameters, MVBU_CognitiveModel) <- function(x) {
-  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
-    return(x@metadata$parameters)
-  }
-  get_parameters(x@category_template)
-}
-
-S7::method(get_parameters, MVBU_ModelList) <- function(x) {
-  if (!is.null(x@metadata$parameters) && length(x@metadata$parameters) > 0L) {
-    return(x@metadata$parameters)
-  }
-  params <- lapply(x@models, get_parameters)
-  if (!is.null(x@model_labels) && length(x@model_labels) == length(params)) {
-    names(params) <- x@model_labels
-  }
-  params
+  priors
 }
 
 S7::method(get_parameter_names, MVBU_CategoryRepresentation) <- function(
@@ -771,15 +751,11 @@ S7::method(get_parameter_names, MVBU_CognitiveModel) <- function(
 # Expected parameter extractors (for belief distributions & models)
 # -------------------------------------------------------------
 
-S7::method(get_expected_mu, NIX_CategoryRepresentation) <- function(x) {
-  x@m
-}
-
-S7::method(get_expected_mu, MNIX_CategoryRepresentation) <- function(x) {
-  x@m
-}
-
-S7::method(get_expected_mu, NIW_CategoryRepresentation) <- function(x) {
+S7::method(get_expected_mu, S7::new_union(
+  NIX_CategoryRepresentation,
+  MNIX_CategoryRepresentation,
+  NIW_CategoryRepresentation
+)) <- function(x) {
   x@m
 }
 
@@ -854,15 +830,11 @@ S7::method(get_expected_category_statistic, MVBU_Object) <- function(
 # Marginal parameter extractors (predictive moments of tokens)
 # -------------------------------------------------------------
 
-S7::method(get_marginal_mu, NIX_CategoryRepresentation) <- function(x) {
-  x@m
-}
-
-S7::method(get_marginal_mu, MNIX_CategoryRepresentation) <- function(x) {
-  x@m
-}
-
-S7::method(get_marginal_mu, NIW_CategoryRepresentation) <- function(x) {
+S7::method(get_marginal_mu, S7::new_union(
+  NIX_CategoryRepresentation,
+  MNIX_CategoryRepresentation,
+  NIW_CategoryRepresentation
+)) <- function(x) {
   x@m
 }
 
@@ -874,18 +846,21 @@ S7::method(get_marginal_mu, MVBU_CognitiveModel) <- function(x) {
   get_marginal_mu(x@category_template)
 }
 
-S7::method(get_marginal_sigma, NIX_CategoryRepresentation) <- function(x) {
-  if (x@kappa > 0) ((x@kappa + 1) / x@kappa) * get_expected_sigma(x) else get_expected_sigma(x)
+S7::method(get_marginal_sigma, S7::new_union(
+  NIX_CategoryRepresentation,
+  NIW_CategoryRepresentation
+)) <- function(x) {
+  if (x@kappa > 0) {
+    ((x@kappa + 1) / x@kappa) * get_expected_sigma(x)
+  } else {
+    get_expected_sigma(x)
+  }
 }
 
 S7::method(get_marginal_sigma, MNIX_CategoryRepresentation) <- function(x) {
   s_exp <- get_expected_sigma(x)
   kap_factor <- ifelse(x@kappa > 0, (x@kappa + 1) / x@kappa, 1)
   diag(kap_factor * diag(s_exp), nrow = length(kap_factor))
-}
-
-S7::method(get_marginal_sigma, NIW_CategoryRepresentation) <- function(x) {
-  if (x@kappa > 0) ((x@kappa + 1) / x@kappa) * get_expected_sigma(x) else get_expected_sigma(x)
 }
 
 S7::method(get_marginal_sigma, MVBU_CategoryRepresentationTemplate) <- function(x) {
@@ -936,53 +911,6 @@ S7::method(get_marginal_category_statistic, MVBU_Object) <- function(
 # Model property accessors
 # -------------------------
 
-#' Normalize category-scoped values from legacy list/data-frame inputs
-#'
-#' This helper resolves a single value, a vector of values, or a named vector
-#' into a value vector aligned to the requested category labels. It is used by
-#' the S7 compatibility methods for legacy objects so that category priors and
-#' lapse biases can be read from older list/data-frame shapes without duplicating
-#' the same coercion logic in each accessor.
-#'
-#' @description Deprecated. This compatibility helper is only needed while legacy
-#'   list/data-frame inputs are still supported. It can be removed once the
-#'   S7 interface is the only supported representation.
-#' @keywords internal
-#' @noRd
-.mvbu_resolve_values_for_categories <- function(values, categories = NULL) {
-  if (is.null(values)) {
-    return(NULL)
-  }
-
-  values <- unlist(values, recursive = TRUE, use.names = TRUE)
-  if (length(values) == 0) {
-    return(NULL)
-  }
-
-  if (missing(categories) || is.null(categories) || length(categories) == 0) {
-    return(as.numeric(values[1]))
-  }
-
-  categories <- as.character(categories)
-  if (!is.null(names(values)) && any(nzchar(names(values)))) {
-    matched <- values[match(categories, names(values))]
-    if (!anyNA(matched)) {
-      return(as.numeric(matched))
-    }
-  }
-
-  if (length(values) == 1) {
-    return(rep(as.numeric(values[1]), length(categories)))
-  }
-
-  if (length(values) == length(categories)) {
-    return(as.numeric(values))
-  }
-
-  rep(as.numeric(values[1]), length(categories))
-}
-
-
 S7::method(get_category_prior, list(MVBU_Object, S7::class_any)) <- function(
   x,
   categories,
@@ -992,40 +920,9 @@ S7::method(get_category_prior, list(MVBU_Object, S7::class_any)) <- function(
 }
 
 #' @name get_category_prior
-#' @title Legacy compatibility method for category priors
-#' @description Deprecated. Legacy compatibility method for list/data-frame inputs; remove once
-#'   S7-only representations are required.
+#' @title Get category prior from a cognitive model
+#' @description Extract category prior values from a cognitive model.
 #' @keywords internal
-S7::method(get_category_prior, list(S7::class_any, S7::class_any)) <- function(
-  x,
-  categories,
-  ...
-) {
-  if (is.list(x) && !is.null(x[["prior"]])) {
-    prior <- x[["prior"]]
-  } else if (is.data.frame(x) && "prior" %in% names(x)) {
-    prior <- x[["prior"]]
-  } else if (is.list(x) && !is.null(x[["category"]]) && !is.null(x[["prior"]])) {
-    prior <- x[["prior"]]
-  } else {
-    return(NULL)
-  }
-
-  if (is.list(x) && !is.null(x[["category"]]) && !is.null(x[["prior"]])) {
-    prior_table <- x
-    prior_values <- prior_table[["prior"]]
-    category_values <- prior_table[["category"]]
-    if (!missing(categories) && !is.null(categories)) {
-      categories <- as.character(categories)
-      category_values <- as.character(category_values)
-      return(as.numeric(prior_values[match(categories, category_values)]))
-    }
-    return(as.numeric(prior_values))
-  }
-
-  .mvbu_resolve_values_for_categories(prior, categories)
-}
-
 S7::method(
   get_category_prior,
   list(MVBU_CognitiveModel, S7::class_any)
@@ -1052,34 +949,9 @@ S7::method(get_lapse_rate, MVBU_Object) <- function(x, ...) {
 }
 
 #' @name get_lapse_rate
-#' @title Legacy compatibility method for lapse rates
-#' @description Deprecated. Legacy compatibility method for list/data-frame inputs; remove once
-#'   S7-only representations are required.
+#' @title Get lapse rate from a cognitive model
+#' @description Extract lapse rate from a cognitive model.
 #' @keywords internal
-S7::method(get_lapse_rate, S7::class_any) <- function(x, ...) {
-  if (is.list(x) && !is.null(x[["lapse_rate"]])) {
-    lapse_rate <- x[["lapse_rate"]]
-    if (is.list(lapse_rate) && length(lapse_rate) > 0) {
-      lapse_rate <- lapse_rate[[1]]
-    }
-    if (is.null(lapse_rate)) {
-      return(NULL)
-    }
-    return(as.numeric(lapse_rate[1]))
-  }
-  if (is.data.frame(x) && "lapse_rate" %in% names(x)) {
-    lapse_rate <- x[["lapse_rate"]]
-    if (is.list(lapse_rate) && length(lapse_rate) > 0) {
-      lapse_rate <- lapse_rate[[1]]
-    }
-    if (is.null(lapse_rate)) {
-      return(NULL)
-    }
-    return(as.numeric(lapse_rate[1]))
-  }
-  NULL
-}
-
 S7::method(get_lapse_rate, MVBU_CognitiveModel) <- function(x, ...) {
   x@lapse_behavior$lapse_rate
 }
@@ -1093,26 +965,9 @@ S7::method(get_lapse_bias, list(MVBU_Object, S7::class_any)) <- function(
 }
 
 #' @name get_lapse_bias
-#' @title Legacy compatibility method for lapse biases
-#' @description Deprecated. Legacy compatibility method for list/data-frame inputs; remove once
-#'   S7-only representations are required.
+#' @title Get lapse bias from a cognitive model
+#' @description Extract lapse bias values from a cognitive model.
 #' @keywords internal
-S7::method(get_lapse_bias, list(S7::class_any, S7::class_any)) <- function(
-  x,
-  categories,
-  ...
-) {
-  if (is.list(x) && !is.null(x[["lapse_bias"]])) {
-    lapse_bias <- x[["lapse_bias"]]
-  } else if (is.data.frame(x) && "lapse_bias" %in% names(x)) {
-    lapse_bias <- x[["lapse_bias"]]
-  } else {
-    return(NULL)
-  }
-
-  .mvbu_resolve_values_for_categories(lapse_bias, categories)
-}
-
 S7::method(
   get_lapse_bias,
   list(MVBU_CognitiveModel, S7::class_any)
@@ -1146,13 +1001,6 @@ S7::method(get_noise, MVBU_CognitiveModel) <- function(x, ...) {
   x@noise_behavior$Sigma_noise
 }
 
-S7::method(get_noise, S7::class_any) <- function(x, ...) {
-  if (is.list(x) && !is.null(x[["Sigma_noise"]])) {
-    return(x[["Sigma_noise"]])
-  }
-  NULL
-}
-
 S7::method(get_lapse_treatment, MVBU_Object) <- function(x, ...) {
   .mvbu_not_implemented("get_lapse_treatment", class(x)[1])
 }
@@ -1162,17 +1010,11 @@ S7::method(get_lapse_treatment, MVBU_Object) <- function(x, ...) {
 #' @description Extract lapse treatment from a cognitive model.
 #' @keywords internal
 S7::method(get_lapse_treatment, MVBU_CognitiveModel) <- function(x, ...) {
-  x@lapse_behavior$lapse_treatment %||% "no_lapses"
-}
-
-S7::method(get_lapse_treatment, S7::class_any) <- function(x, ...) {
-  if (is.list(x) && !is.null(x[["lapse_treatment"]])) {
-    return(as.character(x[["lapse_treatment"]][1]))
+  treatment <- x@lapse_behavior$lapse_treatment
+  if (is.null(treatment) || length(treatment) == 0L || !nzchar(treatment[1])) {
+    .stop("No lapse treatment defined for this model.")
   }
-  if (is.data.frame(x) && "lapse_treatment" %in% names(x)) {
-    return(as.character(x[["lapse_treatment"]][1]))
-  }
-  "no_lapses"
+  treatment
 }
 
 S7::method(get_noise_treatment, MVBU_Object) <- function(x, ...) {
@@ -1184,17 +1026,11 @@ S7::method(get_noise_treatment, MVBU_Object) <- function(x, ...) {
 #' @description Extract perceptual noise treatment from a cognitive model.
 #' @keywords internal
 S7::method(get_noise_treatment, MVBU_CognitiveModel) <- function(x, ...) {
-  x@noise_behavior$noise_treatment %||% "no_noise"
-}
-
-S7::method(get_noise_treatment, S7::class_any) <- function(x, ...) {
-  if (is.list(x) && !is.null(x[["noise_treatment"]])) {
-    return(as.character(x[["noise_treatment"]][1]))
+  treatment <- x@noise_behavior$noise_treatment
+  if (is.null(treatment) || length(treatment) == 0L || !nzchar(treatment[1])) {
+    .stop("No noise treatment defined for this model.")
   }
-  if (is.data.frame(x) && "noise_treatment" %in% names(x)) {
-    return(as.character(x[["noise_treatment"]][1]))
-  }
-  "no_noise"
+  treatment
 }
 
 # -------------------------
@@ -1261,30 +1097,39 @@ S7::method(get_cue_labels, MVBU_Object) <- function(x, indices = NULL, ...) {
   cue_labels[indices]
 }
 
-#' @name get_category_labels
-#' @title Legacy compatibility method for category labels
-#' @description Deprecated. Legacy compatibility method for list/data-frame inputs; remove once
-#'   S7-only representations are required.
-#' @keywords internal
-S7::method(get_category_labels, S7::class_any) <- function(x, indices = NULL, ...) {
-  if (is.data.frame(x) && "category" %in% names(x)) {
-    category_labels <- sort(unique(as.character(x[["category"]])))
-  } else if (is.list(x) && !is.null(x[["category"]])) {
-    category_labels <- sort(unique(as.character(x[["category"]])))
-  } else {
-    return(character(0))
-  }
-
+#' @rdname get_cue_labels
+#' @export
+S7::method(get_cue_labels, MNIX_EarlyIdealAdaptor) <- function(
+  x,
+  indices = NULL,
+  ...
+) {
+  cue_labels <- if (length(x@cues) > 0L) x@cues else get_labels(x)$cue
   if (missing(indices) || is.null(indices)) {
-    return(category_labels)
+    return(cue_labels)
   }
-  category_labels[indices]
+  cue_labels[indices]
 }
+
 
 #' @rdname get_category_labels
 #' @export
-S7::method(get_category_labels, MVBU_Object) <- function(x, indices = NULL, ...) {
+S7::method(get_category_labels, MVBU_Object) <- function(
+  x,
+  indices = NULL,
+  ...
+) {
   category_labels <- get_labels(x)$category
+  if (is.null(category_labels) || length(category_labels) == 0L) {
+    .stop("No category labels found on object.")
+  }
+  if (anyDuplicated(category_labels) > 0L) {
+    dup_labels <- category_labels[duplicated(category_labels)]
+    .stop(
+      "Duplicate category labels found: ",
+      paste(dup_labels, collapse = ", ")
+    )
+  }
   if (missing(indices) || is.null(indices)) {
     return(category_labels)
   }
@@ -1327,46 +1172,262 @@ S7::method(get_group_labels, MVBU_Object) <- function(
 # Posterior and categorization methods
 # -------------------------
 
-.mvbu_category_names <- function(representations) {
-  repr_names <- names(representations)
-  if (!is.null(repr_names) && all(nzchar(repr_names))) {
-    return(as.character(repr_names))
+# .compute_informativity_weights
+# ------------------------------------------------------------------------------
+# Compute cue informativity weights across categories (Toscano & McMurray,
+# 2010).
+#
+# Purpose:
+#   Calculates diagnostic cue weights for multi-cue integration models based on
+#   how well each cue discriminates between category pairs, weighted by the
+#   product of their prior probabilities.
+#
+# Formula:
+#   raw_weight_k = 0.5 * sum_{c1, c2} [ p(c1) * p(c2) *
+#                                       (m_{c1, k} - m_{c2, k})² /
+#                                       (tau_{c1, k} * tau_{c2, k}) ]
+#   w = softmax(raw_weight)
+#     = exp(raw_weight - max) / sum(exp(raw_weight - max))
+#
+# Inputs:
+#   representations : List of category representations with `@m` and `@sigma2`.
+#   prior_p         : Optional numeric vector of prior category probabilities.
+#                     Defaults to discrete uniform (1 / M) if NULL.
+#
+# Outputs:
+#   A numeric vector of normalized weights summing to 1 across the K cues.
+# ------------------------------------------------------------------------------
+.compute_informativity_weights <- function(representations, prior_p = NULL) {
+  M <- length(representations)
+  K <- length(representations[[1L]]@m)
+  if (is.null(prior_p)) {
+    prior_p <- rep(1 / M, M)
   }
-
-  vapply(representations, function(r) {
-    labels <- get_category_labels(r)
-    if (length(labels) > 0) {
-      as.character(labels[[1]])
-    } else {
-      ""
+  raw_weight <- numeric(K)
+  for (cat1 in seq_len(M)) {
+    m1 <- as.numeric(representations[[cat1]]@m)
+    tau1 <- sqrt(as.numeric(representations[[cat1]]@sigma2))
+    p1 <- prior_p[cat1]
+    for (cat2 in seq_len(M)) {
+      m2 <- as.numeric(representations[[cat2]]@m)
+      tau2 <- sqrt(as.numeric(representations[[cat2]]@sigma2))
+      p2 <- prior_p[cat2]
+      raw_weight <- raw_weight + (p1 * p2 * (m1 - m2)^2) / (tau1 * tau2)
     }
-  }, character(1))
+  }
+  raw_weight <- raw_weight / 2
+  exp_w <- exp(raw_weight - max(raw_weight))
+  exp_w / sum(exp_w)
 }
 
-.mvbu_prior_in_repr_order <- function(x, category_names) {
-  prior <- as.numeric(get_category_prior(x))
-  prior_names <- names(get_category_prior(x))
+# .mvbu_align_named_vector
+# ------------------------------------------------------------------------------
+# Extract and align category-level vectors (priors, lapse biases).
+#
+# Purpose:
+#   Extracts either `category_prior` or `lapse_bias` from an MVBU object and
+#   aligns it to the target `category_names`. Ensures lengths match and named
+#   elements are correctly permuted.
+#
+# Inputs:
+#   x              : An MVBU object with category prior or lapse bias.
+#   which          : "category_prior" or "lapse_bias".
+#   category_names : Character vector of expected category labels.
+#
+# Outputs:
+#   Numeric vector aligned to `category_names`, or NULL if not present.
+# ------------------------------------------------------------------------------
+.mvbu_align_named_vector <- function(
+  x,
+  which = c("category_prior", "lapse_bias"),
+  category_names
+) {
+  which <- match.arg(which)
+  vec <- if (which == "category_prior") {
+    get_category_prior(x)
+  } else {
+    get_lapse_bias(x)
+  }
+  if (is.null(vec)) {
+    return(NULL)
+  }
+  vec_num <- as.numeric(vec)
+  v_names <- names(vec)
+  if (length(vec_num) != length(category_names)) {
+    .stop(sprintf(
+      "%s length (%d) does not match number of categories (%d).",
+      which,
+      length(vec_num),
+      length(category_names)
+    ))
+  }
+  if (!is.null(v_names) && all(nzchar(v_names))) {
+    if (setequal(v_names, category_names)) {
+      vec_num <- vec_num[match(category_names, v_names)]
+    } else {
+      .stop(sprintf("%s names do not match category labels.", which))
+    }
+  }
+  names(vec_num) <- category_names
+  vec_num
+}
 
-  if (!is.null(prior_names) && all(nzchar(prior_names)) && setequal(prior_names, category_names)) {
-    prior <- prior[match(category_names, prior_names)]
+# .resolve_model_category_representations
+# ------------------------------------------------------------------------------
+# Resolve Category Representations with Model-Level Properties
+#
+# Binds model-level parameters (e.g., integration weights, model family) onto
+# category representations so that category likelihood functions can evaluate
+# directly via get_category_likelihood_function(rep_j).
+#
+# @param x An [MVBU_CognitiveModel] or [MVBU_CategoryRepresentationTemplate].
+# @return A list of [MVBU_CategoryRepresentation] objects with resolved
+#   parameters and category likelihood functions.
+# @keywords internal
+# @noRd
+.resolve_model_category_representations <- function(x) {
+  reps <- get_category_representations(x)
+  if (!S7::S7_inherits(x, MNIX_IdealAdaptor)) {
+    return(reps)
   }
 
-  prior
+  category_names <- get_category_labels(x)
+  n_cat <- length(reps)
+
+  if (S7::S7_inherits(x, InformativityWeightedIntegrator_MNIX_IdealAdaptor) ||
+    S7::S7_inherits(x, MNIX_IdealAdaptor_InformativityWeightedIntegrator)) {
+    prior_p <- .mvbu_align_named_vector(x, "category_prior", category_names)
+    w <- .compute_informativity_weights(reps, prior_p)
+    for (j in seq_len(n_cat)) {
+      reps[[j]]@weights <- w
+    }
+  } else if (S7::S7_inherits(
+    x, CategoryWeightedIntegrator_MNIX_IdealAdaptor
+  ) || S7::S7_inherits(
+    x, MNIX_IdealAdaptor_CategoryWeightedIntegrator
+  ) || S7::S7_inherits(
+    x, MNIX_IdealAdaptor_CategoryAdaptiveWeightedIntegrator
+  )) {
+    wm <- as.matrix(x@weights)
+    for (j in seq_len(n_cat)) {
+      reps[[j]]@weights <- as.numeric(wm[j, ])
+    }
+  } else if (S7::S7_inherits(
+    x, WeightedIntegrator_MNIX_IdealAdaptor
+  ) || S7::S7_inherits(
+    x, MNIX_IdealAdaptor_WeightedIntegrator
+  ) || S7::S7_inherits(
+    x, MNIX_IdealAdaptor_AdaptiveWeightedIntegrator
+  )) {
+    w <- as.numeric(x@weights)
+    for (j in seq_len(n_cat)) {
+      reps[[j]]@weights <- w
+    }
+  } else if (S7::S7_inherits(x, IdealIntegrator_MNIX_IdealAdaptor)) {
+    cues <- get_cue_labels(x)
+    n_cues <- length(cues)
+    w <- rep(1 / n_cues, n_cues)
+    for (j in seq_len(n_cat)) {
+      reps[[j]]@weights <- w
+    }
+  }
+
+  fam <- tryCatch(get_family(x), error = function(e) NULL)
+  if (!is.null(fam)) {
+    for (j in seq_len(n_cat)) {
+      reps[[j]]@metadata$family <- fam
+      reps[[j]]@category_likelihood_function <-
+        .make_family_likelihood_function(reps[[j]], fam)
+    }
+  }
+
+  reps
 }
 
-.mvbu_likelihood_matrix <- function(x, new_data, categories = NULL, log = FALSE, noise_treatment = "no_noise", Sigma_noise = NULL) {
-  representations <- get_category_representations(x)
+# .mvbu_likelihood_matrix
+# ------------------------------------------------------------------------------
+# Compute observation-by-category likelihood matrix.
+#
+# Purpose:
+#   Evaluates category likelihoods p(x_i | C_j) for all test observations
+#   across all categories in model or template `x`.
+#   - Resolves model-level cue weights and family density functions via
+#     .resolve_model_category_representations().
+#   - Evaluates each category likelihood via
+#     get_category_likelihood_function(rep_j).
+#   - Injects perceptual noise treatments ("no_noise", "marginalize",
+#     "sample") and covariance Sigma_noise into category likelihood functions.
+#   - Supports selective category column slicing via `categories`.
+#   - Returns log-densities if `log = TRUE`, or exponentiates to probability
+#     scale if `log = FALSE`.
+#
+# Inputs:
+#   x               : Cognitive model or representation container.
+#   new_data        : Test observations (data.frame, matrix, or numeric vector).
+#   categories      : Optional subset of category names to retain / reorder.
+#   log             : Logical; if TRUE returns log-likelihoods (default FALSE).
+#   noise_treatment : Perceptual noise method ("no_noise", "marginalize",
+#                     "sample").
+#   Sigma_noise     : Perceptual noise covariance matrix or cue variances.
+#
+# Outputs:
+#   A numeric matrix of dimension [N_obs, N_cat] with category names as
+#   column names.
+# ------------------------------------------------------------------------------
+.mvbu_likelihood_matrix <- function(
+  x,
+  new_data,
+  categories = NULL,
+  log = FALSE,
+  noise_treatment = "no_noise",
+  Sigma_noise = NULL
+) {
+  if (!S7::S7_inherits(x, MVBU_CognitiveModel) &&
+    !S7::S7_inherits(x, MVBU_CategoryRepresentationTemplate)) {
+    .stop(
+      "Unsupported model or representation type for likelihood evaluation: ",
+      class(x)[1L]
+    )
+  }
+
+  representations <- .resolve_model_category_representations(x)
   n_cat <- length(representations)
-  category_names <- .mvbu_category_names(representations)
+  category_names <- get_category_labels(x)
 
-  first_d <- length(get_cue_labels(representations[[1]]))
-  n_obs <- nrow(.as_observation_matrix(new_data, d = first_d, arg_name = "new_data"))
+  cue_labels <- get_cue_labels(x)
+  if (is.null(cue_labels) || length(cue_labels) == 0L) {
+    cue_labels <- get_cue_labels(representations[[1L]])
+  }
+  first_d <- length(cue_labels)
 
+  if (is.data.frame(new_data) &&
+    length(cue_labels) > 0L &&
+    all(cue_labels %in% names(new_data))) {
+    x_mat <- as.matrix(new_data[, cue_labels, drop = FALSE])
+  } else if (is.matrix(new_data) &&
+    !is.null(colnames(new_data)) &&
+    length(cue_labels) > 0L &&
+    all(cue_labels %in% colnames(new_data))) {
+    x_mat <- new_data[, cue_labels, drop = FALSE]
+  } else {
+    x_mat <- .as_observation_matrix(
+      new_data,
+      d = first_d,
+      arg_name = "new_data"
+    )
+  }
+
+  n_obs <- nrow(x_mat)
   log_lik <- matrix(NA_real_, nrow = n_obs, ncol = n_cat)
+
   for (j in seq_len(n_cat)) {
     rep_j <- representations[[j]]
     d_j <- length(get_cue_labels(rep_j))
-    x_j <- .as_observation_matrix(new_data, d = d_j, arg_name = "new_data")
+    x_j <- if (d_j == first_d) {
+      x_mat
+    } else {
+      .as_observation_matrix(new_data, d = d_j, arg_name = "new_data")
+    }
     lik_fn <- get_category_likelihood_function(rep_j)
     log_lik[, j] <- as.numeric(lik_fn(
       x_j,
@@ -1376,6 +1437,7 @@ S7::method(get_group_labels, MVBU_Object) <- function(
     ))
   }
 
+  # Selective column slicing if category subset is specified
   if (!is.null(categories)) {
     category_idx <- match(as.character(categories), category_names)
     log_lik <- log_lik[, category_idx, drop = FALSE]
@@ -1386,17 +1448,52 @@ S7::method(get_group_labels, MVBU_Object) <- function(
   if (log) log_lik else exp(log_lik)
 }
 
-.mvbu_posterior_matrix <- function(x, new_data, categories = NULL, noise_treatment = "no_noise", lapse_treatment = "no_lapses") {
+# .mvbu_posterior_matrix
+# ------------------------------------------------------------------------------
+# Compute observation-by-category posterior probability matrix.
+#
+# Purpose:
+#   Evaluates category posteriors p(C_j | x_i) using Bayes rule, combining the
+#   likelihood matrix from .mvbu_likelihood_matrix() with category priors
+#   from .mvbu_align_named_vector(), and optionally applying lapse behaviors
+#   ("sample" or "marginalize").
+#
+# Inputs:
+#   x               : Cognitive model object.
+#   new_data        : Test observations (data.frame, matrix, or numeric vector).
+#   categories      : Optional subset of category names to retain / reorder.
+#   noise_treatment : Perceptual noise method ("no_noise", "marginalize",
+#                     "sample").
+#   lapse_treatment : Lapse method ("no_lapses", "sample", "marginalize").
+# ------------------------------------------------------------------------------
+.mvbu_posterior_matrix <- function(
+  x,
+  new_data,
+  categories = NULL,
+  noise_treatment = "no_noise",
+  lapse_treatment = "no_lapses"
+) {
+  if (S7::S7_inherits(x, MVBU_CognitiveModel)) {
+    # Valid cognitive model
+  } else {
+    .stop(
+      "Unsupported model type for posterior matrix evaluation: ",
+      class(x)[1L]
+    )
+  }
+
   representations <- get_category_representations(x)
   n_cat <- length(representations)
-  category_names <- .mvbu_category_names(representations)
-  prior <- .mvbu_prior_in_repr_order(x, category_names)
+  category_names <- get_category_labels(x)
+  prior <- .mvbu_align_named_vector(x, "category_prior", category_names)
 
   log_lik <- .mvbu_likelihood_matrix(
-    x, new_data,
+    x,
+    new_data,
+    categories = NULL,
     log = TRUE,
     noise_treatment = noise_treatment,
-    Sigma_noise = x@noise_behavior$Sigma_noise
+    Sigma_noise = get_noise(x)
   )
   n_obs <- nrow(log_lik)
 
@@ -1405,11 +1502,8 @@ S7::method(get_group_labels, MVBU_Object) <- function(
   posterior <- exp(log_joint - log_norm)
 
   if (identical(lapse_treatment, "sample")) {
-    lapse_rate <- as.numeric(x@lapse_behavior$lapse_rate)
-    lapse_bias <- as.numeric(x@lapse_behavior$lapse_bias)
-    if (length(lapse_bias) != n_cat) {
-      .stop("lapse_bias length must match the number of category representations.")
-    }
+    lapse_rate <- as.numeric(get_lapse_rate(x))
+    lapse_bias <- .mvbu_align_named_vector(x, "lapse_bias", category_names)
     if (lapse_rate > 0) {
       for (i in seq_len(n_obs)) {
         if (stats::runif(1) < lapse_rate) {
@@ -1418,12 +1512,17 @@ S7::method(get_group_labels, MVBU_Object) <- function(
       }
     }
   } else if (identical(lapse_treatment, "marginalize")) {
-    lapse_rate <- as.numeric(x@lapse_behavior$lapse_rate)
-    lapse_bias <- as.numeric(x@lapse_behavior$lapse_bias)
-    if (length(lapse_bias) != n_cat) {
-      .stop("lapse_bias length must match the number of category representations.")
-    }
-    posterior <- (1 - lapse_rate) * posterior + lapse_rate * matrix(lapse_bias, nrow = n_obs, ncol = n_cat, byrow = TRUE)
+    lapse_rate <- as.numeric(get_lapse_rate(x))
+    lapse_bias <- .mvbu_align_named_vector(x, "lapse_bias", category_names)
+    bias_mat <- matrix(
+      lapse_bias,
+      nrow = n_obs,
+      ncol = n_cat,
+      byrow = TRUE
+    )
+    posterior <- (1 - lapse_rate) * posterior + lapse_rate * bias_mat
+  } else if (!identical(lapse_treatment, "no_lapses")) {
+    .stop("Unsupported lapse_treatment: ", lapse_treatment)
   }
 
   if (!is.null(categories)) {
@@ -1481,7 +1580,12 @@ S7::method(
   list(MVBU_CategoryRepresentationTemplate, S7::class_any, S7::class_any)
 ) <- function(x, new_data, categories, ...) {
   if (missing(categories)) categories <- NULL
-  .mvbu_likelihood_matrix(x, new_data, categories = categories, log = FALSE)
+  .mvbu_likelihood_matrix(
+    x,
+    new_data,
+    categories = categories,
+    log = FALSE
+  )
 }
 
 S7::method(
@@ -1497,11 +1601,20 @@ S7::method(
   list(MVBU_CognitiveModel, S7::class_any, S7::class_any)
 ) <- function(x, new_data, categories, ...) {
   if (missing(categories)) categories <- NULL
-  lik_fn <- S7::method(get_category_likelihood_function, MVBU_CognitiveModel)(x)
-  lik_fn(new_data, categories = categories)
+  .mvbu_likelihood_matrix(
+    x,
+    new_data,
+    categories = categories,
+    log = FALSE,
+    noise_treatment = get_noise_treatment(x),
+    Sigma_noise = get_noise(x)
+  )
 }
 
-S7::method(get_category_likelihood_function, MVBU_CognitiveModel) <- function(
+S7::method(
+  get_category_likelihood_function,
+  MVBU_CognitiveModel
+) <- function(
   x,
   noise_treatment,
   ...
@@ -1517,8 +1630,16 @@ S7::method(get_category_likelihood_function, MVBU_CognitiveModel) <- function(
   lik_funcs <- c_list$category_likelihood_functions
   if (is.null(lik_funcs[[key]])) {
     if (is.null(lik_funcs)) lik_funcs <- list()
-    lik_funcs[[key]] <- function(new_data, categories = NULL) {
-      .mvbu_likelihood_matrix(x, new_data, categories = categories, log = FALSE, noise_treatment = noise_treatment, Sigma_noise = x@noise_behavior$Sigma_noise)
+    lik_funcs[[key]] <- function(new_data,
+                                 categories = NULL) {
+      .mvbu_likelihood_matrix(
+        x,
+        new_data,
+        categories = categories,
+        log = FALSE,
+        noise_treatment = noise_treatment,
+        Sigma_noise = get_noise(x)
+      )
     }
     c_list$category_likelihood_functions <- lik_funcs
     .set_cache(x, c_list)
@@ -1527,13 +1648,19 @@ S7::method(get_category_likelihood_function, MVBU_CognitiveModel) <- function(
   lik_funcs[[key]]
 }
 
-S7::method(get_category_posterior_function, list(MVBU_CognitiveModel, S7::class_any, S7::class_any)) <- function(x, noise_treatment, lapse_treatment) {
-  if (missing(noise_treatment) && missing(lapse_treatment)) {
+S7::method(
+  get_category_posterior_function,
+  list(MVBU_CognitiveModel, S7::class_any, S7::class_any)
+) <- function(x, noise_treatment, lapse_treatment) {
+  if (missing(noise_treatment) || is.null(noise_treatment)) {
     noise_treatment <- get_noise_treatment(x)
+  } else {
+    noise_treatment <- as.character(noise_treatment)
+  }
+  if (missing(lapse_treatment) || is.null(lapse_treatment)) {
     lapse_treatment <- get_lapse_treatment(x)
   } else {
-    noise_treatment <- if (missing(noise_treatment) || is.null(noise_treatment)) get_noise_treatment(x) else as.character(noise_treatment)
-    lapse_treatment <- if (missing(lapse_treatment) || is.null(lapse_treatment)) get_lapse_treatment(x) else as.character(lapse_treatment)
+    lapse_treatment <- as.character(lapse_treatment)
   }
   key <- paste(noise_treatment, lapse_treatment, sep = "__")
 
@@ -1541,8 +1668,15 @@ S7::method(get_category_posterior_function, list(MVBU_CognitiveModel, S7::class_
   post_funcs <- c_list$category_posterior_functions
   if (is.null(post_funcs[[key]])) {
     if (is.null(post_funcs)) post_funcs <- list()
-    post_funcs[[key]] <- function(new_data, categories = NULL) {
-      .mvbu_posterior_matrix(x, new_data, categories = categories, noise_treatment = noise_treatment, lapse_treatment = lapse_treatment)
+    post_funcs[[key]] <- function(new_data,
+                                  categories = NULL) {
+      .mvbu_posterior_matrix(
+        x,
+        new_data,
+        categories = categories,
+        noise_treatment = noise_treatment,
+        lapse_treatment = lapse_treatment
+      )
     }
     c_list$category_posterior_functions <- post_funcs
     .set_cache(x, c_list)
@@ -1564,18 +1698,37 @@ S7::method(
   list(MVBU_CognitiveModel, S7::class_any, S7::class_any)
 ) <- function(x, new_data, categories, ...) {
   if (missing(categories)) categories <- NULL
-  pf <- S7::method(
-    get_category_posterior_function,
-    list(MVBU_CognitiveModel, S7::class_any, S7::class_any)
-  )(x)
-  pf(new_data, categories = categories)
+  .mvbu_posterior_matrix(
+    x,
+    new_data,
+    categories = categories,
+    noise_treatment = get_noise_treatment(x),
+    lapse_treatment = get_lapse_treatment(x)
+  )
 }
 
-S7::method(categorize, list(MVBU_CognitiveModel, S7::class_list, S7::class_any)) <- function(x, new_data, decision_rule, simplify = NULL, ...) {
-  lapply(new_data, function(batch) categorize(x, batch, decision_rule = decision_rule, simplify = simplify, ...))
+S7::method(
+  categorize,
+  list(MVBU_CognitiveModel, S7::class_list, S7::class_any)
+) <- function(x, new_data, decision_rule, simplify = NULL, ...) {
+  lapply(
+    new_data,
+    function(batch) {
+      categorize(
+        x,
+        batch,
+        decision_rule = decision_rule,
+        simplify = simplify,
+        ...
+      )
+    }
+  )
 }
 
-S7::method(categorize, list(MVBU_CognitiveModel, S7::class_any, S7::class_any)) <- function(x, new_data, decision_rule, simplify = NULL, ...) {
+S7::method(
+  categorize,
+  list(MVBU_CognitiveModel, S7::class_any, S7::class_any)
+) <- function(x, new_data, decision_rule, simplify = NULL, ...) {
   if (missing(decision_rule) || is.null(decision_rule)) {
     decision_rule <- x@decision_rule
   }
@@ -1583,11 +1736,14 @@ S7::method(categorize, list(MVBU_CognitiveModel, S7::class_any, S7::class_any)) 
     simplify <- !identical(decision_rule, "proportional")
   }
 
-  posterior_matrix <- posterior(x, new_data, categories = NULL)
+  posterior_matrix <- posterior(x, new_data, categories = NULL, ...)
   categories <- colnames(posterior_matrix)
   n_obs <- nrow(posterior_matrix)
 
-  if (identical(decision_rule, "sampling") || identical(decision_rule, "sample")) {
+  if (
+    identical(decision_rule, "sampling") ||
+      identical(decision_rule, "sample")
+  ) {
     chosen_idx <- vapply(seq_len(n_obs), function(i) {
       p_i <- posterior_matrix[i, ]
       if (all(is.na(p_i)) || sum(p_i, na.rm = TRUE) == 0) {
@@ -1602,9 +1758,14 @@ S7::method(categorize, list(MVBU_CognitiveModel, S7::class_any, S7::class_any)) 
     resp_prob <- rep(1.0, n_obs)
   } else if (identical(decision_rule, "proportional")) {
     chosen_idx <- apply(posterior_matrix, 1, which.max)
-    resp_prob <- as.numeric(posterior_matrix[cbind(seq_len(n_obs), chosen_idx)])
+    resp_prob <- as.numeric(
+      posterior_matrix[cbind(seq_len(n_obs), chosen_idx)]
+    )
   } else {
-    .stop("Invalid decision_rule: ", decision_rule, ". Must be one of 'criterion', 'sample', or 'proportional'.")
+    .stop(
+      "Invalid decision_rule: ", decision_rule,
+      ". Must be one of 'criterion', 'sample', or 'proportional'."
+    )
   }
 
   chosen_cats <- as.character(categories[chosen_idx])
@@ -1948,25 +2109,60 @@ S7::method(sample_observations, MVBU_CognitiveModel) <- function(
     fam_i <- get_family(rep_i)
 
     # Check without replacement condition for exemplar
-    if (!isTRUE(with_replacement) && S7::S7_inherits(rep_i, Exemplar_CategoryRepresentation)) {
+    if (!isTRUE(with_replacement) &&
+      S7::S7_inherits(rep_i, Exemplar_CategoryRepresentation)) {
       n_avail_i <- nrow(rep_i@exemplars)
       if (n_i > n_avail_i) {
         .stop(sprintf(
-          "Random sampling without replacement allocated %d observations to category '%s', but it only contains %d exemplars. Because category assignment is proportional to category priors and involves a random process, re-evoking the function or increasing category exemplars may resolve this (but make the process less random).",
+          paste0(
+            "Random sampling without replacement allocated %d observations ",
+            "to category '%s', but it only contains %d exemplars. Because ",
+            "category assignment is proportional to category priors and ",
+            "involves a random process, re-evoking the function or ",
+            "increasing category exemplars may resolve this (but make the ",
+            "process less random)."
+          ),
           n_i, cat_labels[i], n_avail_i
         ))
       }
     }
 
-    mat_i <- fam_i@sampling_function(rep_i, n = n_i, with_replacement = with_replacement, ...)
-    colnames(mat_i) <- cue_labels
-    cbind(data.frame(category = cat_labels[i], stringsAsFactors = FALSE), as.data.frame(mat_i))
+    mat_i <- fam_i@sampling_function(
+      rep_i, n = n_i, with_replacement = with_replacement, ...
+    )
+    colnames(mat_i) <- if (ncol(mat_i) == length(cue_labels)) {
+      cue_labels
+    } else {
+      get_cue_labels(rep_i)
+    }
+    cbind(
+      data.frame(category = cat_labels[i], stringsAsFactors = FALSE),
+      as.data.frame(mat_i)
+    )
   })
+
+  effective_cues <- if (length(reps) > 0L &&
+    length(get_cue_labels(reps[[1L]])) == 1L &&
+    length(cue_labels) > 1L) {
+    get_cue_labels(reps[[1L]])
+  } else {
+    cue_labels
+  }
 
   rows <- rows[!vapply(rows, is.null, logical(1))]
   out <- if (length(rows) == 0L) {
-    empty_df <- as.data.frame(matrix(numeric(0), nrow = 0, ncol = length(cue_labels), dimnames = list(NULL, cue_labels)))
-    cbind(data.frame(category = factor(character(0), levels = cat_labels)), empty_df)
+    empty_df <- as.data.frame(
+      matrix(
+        numeric(0),
+        nrow = 0,
+        ncol = length(effective_cues),
+        dimnames = list(NULL, effective_cues)
+      )
+    )
+    cbind(
+      data.frame(category = factor(character(0), levels = cat_labels)),
+      empty_df
+    )
   } else {
     do.call(rbind, rows)
   }
@@ -2009,50 +2205,6 @@ S7::method(sample_observations, MVBU_ModelList) <- function(
   dplyr::bind_rows(res_list)
 }
 
-#' @rdname get_sufficient_category_statistics
-#' @export
-S7::method(get_sufficient_category_statistics, MVBU_CognitiveModel) <- function(
-  x,
-  categories = NULL,
-  groups = NULL,
-  untransform_cues = FALSE,
-  ...
-) {
-  reps <- x@category_template@representations
-  cats <- get_category_labels(x)
-  fam <- get_model_family(x)
-
-  out <- list(category = factor(cats, levels = cats))
-  out$x_N <- vapply(reps, function(r) {
-    if (S7::S7_inherits(r, Exemplar_CategoryRepresentation)) {
-      as.integer(nrow(r@exemplars))
-    } else {
-      NA_integer_
-    }
-  }, integer(1L))
-
-  moms <- lapply(reps, function(r) get_family(r)@expected_moments(r))
-
-  out$x_mean <- lapply(moms, function(m) m$mu)
-
-  out$x_css <- lapply(moms, function(m) {
-    if (fam %in% c("NIX", "UVG")) {
-      m$Sigma[1L, 1L]
-    } else if (fam %in% c("MNIX", "MUVG")) {
-      diag(m$Sigma)
-    } else {
-      m$Sigma
-    }
-  })
-  if (fam %in% c("NIW", "MVG")) {
-    out$x_cov <- lapply(moms, function(m) m$Sigma)
-  }
-  res <- tibble::as_tibble(out)
-  if (!is.null(categories)) {
-    res <- res[res$category %in% categories, , drop = FALSE]
-  }
-  res
-}
 
 # -----------------------------------------------------------------------------
 # add_category_representation methods
@@ -2246,7 +2398,7 @@ S7::method(add_category_representation, MVBU_CognitiveModel) <- function(
     names(old_prior) <- old_names
   }
 
-  old_lapse_bias <- x@lapse_behavior$lapse_bias
+  old_lapse_bias <- get_lapse_bias(x)
   if (is.null(names(old_lapse_bias)) &&
     length(old_lapse_bias) == length(old_names)) {
     names(old_lapse_bias) <- old_names
@@ -2273,11 +2425,11 @@ S7::method(add_category_representation, MVBU_CognitiveModel) <- function(
     category_template = new_template,
     decision_rule = x@decision_rule,
     category_prior = updated_category_prior,
-    lapse_rate = x@lapse_behavior$lapse_rate,
+    lapse_rate = get_lapse_rate(x),
     lapse_bias = updated_lapse_bias,
-    Sigma_noise = x@noise_behavior$Sigma_noise,
-    noise_treatment = x@noise_behavior$noise_treatment,
-    lapse_treatment = x@lapse_behavior$lapse_treatment,
+    Sigma_noise = get_noise(x),
+    noise_treatment = get_noise_treatment(x),
+    lapse_treatment = get_lapse_treatment(x),
     metadata = x@metadata
   )
 

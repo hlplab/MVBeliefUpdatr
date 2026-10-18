@@ -4,24 +4,29 @@
 \name{MVBU-TransformInformation-class}
 \alias{MVBU-TransformInformation-class}
 \alias{MVBU_TransformInformation}
-\title{S7 base class for transformation information}
+\title{S7 class for transformation information}
 \usage{
 MVBU_TransformInformation(
-  transform.parameters = list(),
-  transform.function = function(x) x,
-  untransform.function = function(x) x
+  cue.labels = character(),
+  type = "identity",
+  shift = numeric(),
+  SCALE = 1,
+  transform.function = NULL
 )
 }
 \arguments{
-\item{transform.parameters}{A list of sufficient parameters for the
-transform. Default: \code{list()}.}
+\item{cue.labels}{Character vector of cue variable names.}
 
-\item{transform.function}{Function to transform parameters. Default:
-identity.}
+\item{type}{Transformation type (e.g., \code{"identity"}, \code{"center"},
+\code{"standardize"}, \code{"PCA whiten"}, \code{"ZCA whiten"}).}
 
-\item{untransform.function}{Function to untransform parameters. Default:
-identity.}
+\item{shift}{Numeric shift vector added before scaling.}
+
+\item{SCALE}{Numeric square invertible matrix or scalar scale factor.}
+
+\item{transform.function}{Function to apply transformation to data.}
 }
 \description{
-S7 base class for transformation information
+Represents an invertible affine transformation \eqn{f(x) = A(x + b)},
+where \eqn{b} is the shift vector and \eqn{A} is the scale/rotation matrix.
 }

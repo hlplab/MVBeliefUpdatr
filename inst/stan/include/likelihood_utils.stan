@@ -44,9 +44,9 @@ vector compute_split_loglik(
   }
   vector[total_obs] loglik_split;
   int idx = 1;
-  int N_test = size(p_choice);
+  int n_test = size(p_choice);
   int M = num_elements(lapse_bias);
-  for (n in 1:N_test) {
+  for (n in 1:n_test) {
     vector[M] p_mix = lapse_mixture(p_choice[n], lapse_rate, lapse_bias);
     for (m in 1:M) {
       real log_p = log(p_mix[m]);

@@ -1,4 +1,4 @@
-#' @include S7-generics.R
+#' @include S7-generics.R S7-transform-information.R
 NULL
 
 #' Infer default noise treatment from perceptual noise covariance
@@ -44,22 +44,38 @@ NULL
 
 #' Get sum-of-squares matrix
 #'
-#' Get sum-of-square matrix.
+#' Calculate centered (\code{css()}) or uncentered (\code{uss()}) sum-of-squares
+#' matrix for a matrix of observations.
 #'
 #' @param x A matrix of observations, with each row being a vector observation.
-#' @param center Should the centered sum-of-squares be returned (`TRUE`) or the uncentered (`FALSE`)? (default: `TRUE`)
 #'
 #' @return A square matrix.
 #'
 #' @seealso \code{\link{css2cov}}, \code{\link{cov2css}}, \code{\link{uss2css}}
-#' @keywords TBD
-#'
+#' @rdname css
 #' @export
-ss <- function(x, center = TRUE) {
+css <- function(x) {
+  .ss(x, center = TRUE)
+}
+
+#' @rdname css
+#' @export
+uss <- function(x) {
+  .ss(x, center = FALSE)
+}
+
+#' Internal sum-of-squares computation
+#'
+#' @param x A matrix of observations.
+#' @param center Logical; whether to center observations (default: TRUE).
+#' @return A square matrix.
+#' @keywords internal
+#' @noRd
+.ss <- function(x, center = TRUE) {
   if (center) {
     # Benchmarked to be more efficient than x - 1 %*% t(1) %*% x
     xm <- .colMeans(x)
-    xm <- matrix(xm, nrow = nrow(x), ncol = length(xm), byrow = T)
+    xm <- matrix(xm, nrow = nrow(x), ncol = length(xm), byrow = TRUE)
     x <- x - xm
   }
 
@@ -91,7 +107,7 @@ ss <- function(x, center = TRUE) {
 #'
 #' @return A square matrix.
 #'
-#' @seealso \code{\link{ss}}, \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}, \code{\link{cov2tau}}
+#' @seealso \code{\link{css}}, \code{\link{uss}}, \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}, \code{\link{cov2tau}}
 #' @keywords TBD
 #'
 #' @rdname uss2css
@@ -102,8 +118,10 @@ uss2css <- function(uss, n, mean) {
   if (.is_scalar(uss)) uss <- matrix(uss, nrow = 1, ncol = 1)
   .assert_that(n >= 0, msg = "n must be non-negative.")
   if (n == 0) {
-    return(matrix(NA_real_, nrow = nrow(uss), ncol = ncol(uss),
-                  dimnames = dimnames(uss)))
+    return(matrix(NA_real_,
+      nrow = nrow(uss), ncol = ncol(uss),
+      dimnames = dimnames(uss)
+    ))
   }
   .assert_true(
     is.positive.semidefinite(uss),
@@ -134,8 +152,10 @@ css2uss <- function(css, n, mean) {
   if (.is_scalar(css)) css <- matrix(css, nrow = 1, ncol = 1)
   .assert_that(n >= 0, msg = "n must be non-negative.")
   if (n == 0) {
-    return(matrix(NA_real_, nrow = nrow(css), ncol = ncol(css),
-                  dimnames = dimnames(css)))
+    return(matrix(NA_real_,
+      nrow = nrow(css), ncol = ncol(css),
+      dimnames = dimnames(css)
+    ))
   }
   .assert_true(
     is.positive.semidefinite(css),
@@ -147,7 +167,7 @@ css2uss <- function(css, n, mean) {
   )
 
   xm <- matrix(mean, nrow = n, ncol = length(mean), byrow = TRUE)
-  uss <- css + ss(xm, center = FALSE)
+  uss <- css + uss(xm)
   return(uss)
 }
 
@@ -158,8 +178,10 @@ css2cov <- function(css, n) {
   if (.is_scalar(css)) css <- matrix(css, nrow = 1, ncol = 1)
   .assert_that(n >= 0, msg = "n must be non-negative.")
   if (n <= 1) {
-    return(matrix(NA_real_, nrow = nrow(css), ncol = ncol(css),
-                  dimnames = dimnames(css)))
+    return(matrix(NA_real_,
+      nrow = nrow(css), ncol = ncol(css),
+      dimnames = dimnames(css)
+    ))
   }
   .assert_true(
     is.positive.semidefinite(css),
@@ -176,8 +198,10 @@ cov2css <- function(cov, n) {
   if (.is_scalar(cov)) cov <- matrix(cov, nrow = 1, ncol = 1)
   .assert_that(n >= 0, msg = "n must be non-negative.")
   if (n <= 1) {
-    return(matrix(NA_real_, nrow = nrow(cov), ncol = ncol(cov),
-                  dimnames = dimnames(cov)))
+    return(matrix(NA_real_,
+      nrow = nrow(cov), ncol = ncol(cov),
+      dimnames = dimnames(cov)
+    ))
   }
   .assert_true(
     is.positive.semidefinite(cov),
@@ -235,37 +259,83 @@ cov2tau <- function(v) {
   sqrt(diag(v))
 }
 
-
-#' Get sufficient statistics from a data set (or model with exposure data)
+#' Get sufficient category statistics from a data frame
 #'
-#' Get sufficient statistics from data or a model with exposure data. Calculates functions for the specified
-#' cues for any combination of groups (optional) and categories, and returns
-#' them as a data.frame. Rows with missing values for cues will be ignored in the
-#' calculation of the sufficient statistics.
+#' Calculates sufficient statistics for specified cues for all categories and
+#' optional groups in a data frame.
 #'
-#' @param categories,groups Character vector of categories/groups to be
-#'   summarized. If `NULL`, all categories/groups will be included.
-#'   (default: `NULL`)
-#' @param untransform_cues Logical. If `TRUE`, cues are untransformed before
-#'   calculating statistics. (default: `FALSE`)
-#' @param ... Additional arguments. For a data frame, supports optional
-#'   \code{cues} (column names for cues), \code{category} (category column
-#'   name; default: \code{"category"}), \code{group} (group column name(s)),
-#'   and \code{model_family} (character vector of model families).
-#'
-#' @rdname get_sufficient_category_statistics
+#' @param data A \code{data.frame} or \code{tibble}.
+#' @param cues Character vector of column names for cues. Required.
+#' @param category Character string specifying category column name.
+#'   Default: \code{"category"}.
+#' @param group Optional character vector of group column name(s).
+#'   Default: \code{NULL}.
+#' @param stats Character vector of statistics to return. Allowed values are
+#'   \code{"n"}, \code{"mean"}, \code{"cov"}, \code{"css"}, and \code{"uss"}.
+#'   Default: \code{c("n", "mean", "cov", "css", "uss")}.
+#' @param simplify Logical. If \code{TRUE} (default) and the data matches a
+#'   single category and group with a single statistic, returns an atomic
+#'   scalar, vector, or matrix. If \code{FALSE}, always returns a \code{tibble}.
+#' @param ... Additional arguments (e.g. \code{model_family}).
+#' @return If \code{simplify = TRUE} and a single statistic is selected for a
+#'   single category and group, the atomic numeric value, vector, or matrix.
+#'   Otherwise, a \code{tibble} with the grouping columns and requested
+#'   statistics.
+#' @seealso \code{\link{get_exposure_category_statistics}}
 #' @export
-S7::method(get_sufficient_category_statistics, S7::new_S3_class("data.frame")) <- function(
-  x,
-  categories = NULL,
-  groups = NULL,
-  untransform_cues = FALSE,
+get_sufficient_category_statistics <- function(
+  data,
+  cues,
+  category = "category",
+  group = NULL,
+  stats = c("n", "mean", "cov", "css", "uss"),
+  simplify = TRUE,
   ...
 ) {
+  .assert_that(
+    is.data.frame(data),
+    msg = "data must be a data.frame or tibble."
+  )
+  .assert_non_NA_character(
+    cues,
+    msg = "cues must be a non-empty character vector."
+  )
+  .assert_true(
+    length(cues) >= 1L,
+    msg = "cues must contain at least one cue name."
+  )
+  .assert_true(
+    all(cues %in% names(data)),
+    msg = "All specified cues must be columns in data."
+  )
+  .assert_non_NA_character(
+    category,
+    msg = "category must be a character string specifying the category column."
+  )
+  .assert_true(
+    length(category) == 1L,
+    msg = "category must be a single column name."
+  )
+  .assert_true(
+    category %in% names(data) || nrow(data) == 0L,
+    msg = paste0("Column '", category, "' not found in data.")
+  )
+  if (!is.null(group)) {
+    .assert_non_NA_character(
+      group,
+      msg = "group must be a character vector of group column names."
+    )
+    .assert_true(
+      all(group %in% names(data)) || nrow(data) == 0L,
+      msg = "All specified group columns must exist in data."
+    )
+  }
+
+  stats_missing <- missing(stats)
+  valid_stats <- c("n", "mean", "cov", "css", "uss")
+  stats <- match.arg(stats, valid_stats, several.ok = TRUE)
+
   dots <- list(...)
-  cues <- dots$cues
-  category <- if (!is.null(dots$category)) dots$category else "category"
-  group <- dots$group
   model_family <- if (!is.null(dots$model_family)) {
     dots$model_family
   } else {
@@ -276,644 +346,289 @@ S7::method(get_sufficient_category_statistics, S7::new_S3_class("data.frame")) <
     list_model_families(),
     several.ok = TRUE
   )
-  data <- as.data.frame(x)
 
-  if (!is.null(categories)) {
-    data <- data[data[[category]] %in% categories, , drop = FALSE]
+  compute_full_matrix <- any(c("NIW", "MVG") %in% model_family)
+  compute_mnix_vector <- any(c("MNIX", "MUVG") %in% model_family)
+  compute_nix_scalar <- any(c("NIX", "UVG") %in% model_family)
+
+  if (!is.null(dots$model_family) && !compute_full_matrix && stats_missing) {
+    stats <- setdiff(stats, c("cov", "uss"))
   }
-  if (!is.null(groups) && !is.null(group)) {
-    if (length(group) == 1L) {
-      data <- data[data[[group]] %in% groups, , drop = FALSE]
-    } else {
-      match_rows <- apply(
-        data[, group, drop = FALSE],
-        1L,
-        function(r) any(r %in% groups)
-      )
-      data <- data[match_rows, , drop = FALSE]
+  data <- as.data.frame(data)
+
+  group_cols <- c(category, group)
+  valid_group_cols <- intersect(group_cols, names(data))
+
+  complete_idx <- stats::complete.cases(data[, cues, drop = FALSE])
+  data <- data[complete_idx, , drop = FALSE]
+
+  if (nrow(data) == 0L) {
+    res <- data[, valid_group_cols, drop = FALSE]
+    if ("n" %in% stats) res$n <- integer(0)
+    if ("mean" %in% stats) res$mean <- list()
+    if ("cov" %in% stats) res$cov <- list()
+    if ("css" %in% stats) res$css <- list()
+    if ("uss" %in% stats) res$uss <- list()
+    if (isTRUE(simplify) && length(stats) == 1L) {
+      return(res[[stats]])
     }
+    return(tibble::as_tibble(res))
   }
 
   data <- droplevels(data)
 
-  if (length(cues) >= 1L) {
-    complete_idx <- stats::complete.cases(data[, cues, drop = FALSE])
-    data <- data[complete_idx, , drop = FALSE]
-  }
-
-  group_cols <- c(category, group)
-
-  if (nrow(data) == 0L) {
-    res <- data[, group_cols, drop = FALSE]
-    res$x_N <- integer(0)
-    res$x_mean <- list()
-    res$x_css <- list()
-    if (any(c("NIW", "MVG", "MUVG") %in% model_family)) {
-      res$x_uss <- list()
-      res$x_cov <- list()
-    }
-    return(as.data.frame(res, stringsAsFactors = FALSE))
-  }
-
   by_list <- lapply(group_cols, function(col) data[[col]])
   names(by_list) <- group_cols
 
-  idx_split <- split(seq_len(nrow(data)), by_list, drop = TRUE, lex.order = TRUE)
+  idx_split <- split(
+    seq_len(nrow(data)),
+    by_list,
+    drop = TRUE,
+    lex.order = TRUE
+  )
   first_indices <- vapply(idx_split, function(idx) idx[1L], integer(1L))
   res <- data[first_indices, group_cols, drop = FALSE]
   rownames(res) <- NULL
 
   n_groups <- length(idx_split)
-  x_N <- integer(n_groups)
-  x_mean <- vector("list", n_groups)
-  x_css <- vector("list", n_groups)
-  x_uss <- vector("list", n_groups)
-  x_cov <- vector("list", n_groups)
+
+  need_cov <- "cov" %in% stats
+  need_uss <- "uss" %in% stats
+  need_css <- any(c("css", "cov", "uss") %in% stats)
+  need_mean <- any(c("mean", "uss") %in% stats)
+  need_n <- any("n" %in% stats, need_cov, need_uss)
 
   cue_mat <- as.matrix(data[, cues, drop = FALSE])
   if (!is.numeric(cue_mat)) {
     storage.mode(cue_mat) <- "double"
   }
 
-  compute_full_matrix <- any(c("NIW", "MVG", "MUVG") %in% model_family)
-  compute_mnix_vector <- "MNIX" %in% model_family
-  compute_nix_scalar <- any(c("NIX", "UVG") %in% model_family)
+  n_vals <- if (need_n) integer(n_groups) else NULL
+  mean_list <- if (need_mean) vector("list", n_groups) else NULL
+  css_list <- if (need_css) vector("list", n_groups) else NULL
+  uss_list <- if (need_uss) vector("list", n_groups) else NULL
+  cov_list <- if (need_cov) vector("list", n_groups) else NULL
 
   for (i in seq_len(n_groups)) {
     idx <- idx_split[[i]]
     sub_mat <- cue_mat[idx, , drop = FALSE]
     n_obs <- length(idx)
 
-    x_N[i] <- n_obs
-    x_mean[[i]] <- colMeans(sub_mat)
+    if (need_n) n_vals[i] <- n_obs
+    if (need_mean) mean_list[[i]] <- colMeans(sub_mat)
 
     if (compute_full_matrix) {
-      x_uss[[i]] <- ss(sub_mat, center = FALSE)
-      css_mat <- ss(sub_mat, center = TRUE)
-      x_css[[i]] <- css_mat
-      cov_mat <- stats::cov(sub_mat)
-      if (length(cues) == 1L) {
-        cov_mat <- matrix(cov_mat, 1L, 1L, dimnames = list(cues, cues))
+      if (need_uss) uss_list[[i]] <- uss(sub_mat)
+      if (need_css || need_cov) {
+        css_mat <- css(sub_mat)
+        if (need_css) css_list[[i]] <- css_mat
       }
-      x_cov[[i]] <- cov_mat
-    } else if (compute_mnix_vector) {
-      if (n_obs > 1L) {
-        centered <- sweep(sub_mat, 2, colMeans(sub_mat), "-")
-        vec_ss <- colSums(centered^2)
-      } else {
-        vec_ss <- rep(0, length(cues))
-      }
-      names(vec_ss) <- cues
-      x_css[[i]] <- vec_ss
-    } else if (compute_nix_scalar) {
-      scal_ss <- if (n_obs > 1L) sum((sub_mat[, 1L] - mean(sub_mat[, 1L]))^2) else 0
-      x_css[[i]] <- scal_ss
-    } else {
-      # EXEMPLAR or other
-      x_css[[i]] <- NULL
-    }
-  }
-
-  res$x_N <- x_N
-  res$x_mean <- x_mean
-  res$x_css <- x_css
-  if (compute_full_matrix) {
-    res$x_uss <- x_uss
-    res$x_cov <- x_cov
-  }
-
-  return(as.data.frame(res, stringsAsFactors = FALSE))
-}
-
-#' Transform and untransform cues by applying or undoing PCA, centering, and/or scaling
-#'
-#' If the `transform.parameters` argument
-#' is specified, the transforms in that object will be applied. This can be useful when the goal is to transform one
-#' data set (e.g., test data) based on the statistics of the another data set (e.g., exposure data). If no
-#' `transform.parameters` are specified, then the transformations specified by the `center`, `scale`, and `pca`
-#' flags will be applied. The transform and untransform functions can also return \emph{functions} that perform their
-#' actions for the specific cues. This can be helpful if one wants to store those functions. For example, the
-#' transform function can return both the transform and untransform functions necessary to perform the specified
-#' centering, scaling, and/or pca \emph{and} to undo those transformations.
-#'
-#' @param data `tibble` or `data.frame`.
-#' @param cues Vector of characters with names of cue variables.
-#' @param center,uncenter Should the data be (un)centered? (default: `TRUE` unless `pca = TRUE`)
-#' @param scale,unscale Should the data be (un)standardized? (default: `TRUE` unless `pca = TRUE`)
-#' @param pca,unpca Should the data be transformed into/back from orthogonal principal components? If `TRUE`
-#' then \code{center} and \code{scale} are default to `FALSE`. If PCA is applied, it is applied after
-#' centering and/or scaling. (default: `FALSE`)
-#' @param attach Should the transformed cues be attached to \code{data} or should just the transformed cues be
-#' returned? (default: `TRUE`)
-#' @param transform.parameters List of transforms (default: `NULL`)
-#' @param return.transformed.data,return.untransformed.data Should the (un)transformed data be returned? (default: `TRUE`)
-#' @param return.transform.parameters Should the list of transforms be returned? (default: `FALSE`)
-#' @param return.transform.function,return.untransform.function Should a function that applies the (un)transform be
-#' returned? (default: `FALSE`)
-#'
-#' @return By default a \code{data.frame}. If `return.transform.parameters = TRUE`, a list of parameters. If
-#' `return.transform.function = TRUE` or `return.untransform.function = TRUE` a function. If more than one of
-#' these flags is `TRUE` then a list in which
-#' the data element has name "data", the transform parameters have name "transform.parameters" and the (un)transform
-#' function(s) have the name "(un)transform.function".
-#'
-#' @keywords TBD
-#'
-#' @rdname transform_cues
-#' @importFrom tidyselect all_of
-#' @importFrom dplyr across cross_join
-#' @importFrom rlang syms
-#' @export
-transform_cues <- function(
-  data, cues,
-  center = if (pca) T else F, scale = F, pca = F,
-  attach = T,
-  transform.parameters = NULL,
-  return.transformed.data = T, return.transform.parameters = F,
-  return.transform.function = F, return.untransform.function = F
-) {
-  .assert_data_frame_like(data)
-  .assert_that(is.character(cues))
-  .assert_that(all(cues %in% colnames(data)))
-  .assert_that(all(
-    is.logical(center), is.logical(scale), is.logical(pca), is.logical(attach),
-    is.logical(return.transformed.data), is.logical(return.transform.parameters),
-    is.logical(return.transform.function), is.logical(return.untransform.function)
-  ))
-  if (pca) center <- T
-  .assert_optional_list(transform.parameters)
-  old_data <- data
-  groups <- if (length(dplyr::groups(data)) == 0) character() else dplyr::groups(data) %>% as.character()
-
-  if (is.null(transform.parameters)) {
-    transform.parameters <- list()
-    transform.parameters[["cue.labels"]] <- cues
-
-    if (pca) {
-      transform.parameters[["pca"]] <-
-        data %>%
-        select(all_of(cues)) %>%
-        # If centering and scaling is requested in addition to PCA, do it as part of
-        # the PCA transformation
-        prcomp(center = center, scale. = scale, retx = F)
-    } else {
-      if (center) {
-        transform.parameters[["center"]] <-
-          data %>%
-          select(all_of(cues)) %>%
-          summarise(across(all_of(cues), list(mean = mean)))
-      }
-
-      if (scale) {
-        transform.parameters[["scale"]] <-
-          data %>%
-          select(all_of(cues)) %>%
-          summarise(across(all_of(cues), list(sd = sd)))
-      }
-    }
-  }
-
-  if (return.transformed.data) {
-    if (!is.null(transform.parameters[["pca"]])) {
-      data %<>%
-        predict(transform.parameters[["pca"]], .) %>%
-        as_tibble(.name_repair = "minimal")
-    } else {
-      if (!is.null(transform.parameters[["center"]])) {
-        data %<>%
-          ungroup() %>%
-          select(all_of(cues)) %>%
-          {
-            . - (data %>%
-              {
-                if (length(groups) > 0) left_join(., transform.parameters[["center"]], by = groups) else cross_join(., transform.parameters[["center"]])
-              } %>%
-              ungroup() %>%
-              select(all_of(paste0(cues, "_mean"))))
-          }
-      }
-
-      if (!is.null(transform.parameters[["scale"]])) {
-        data %<>%
-          ungroup() %>%
-          select(all_of(cues)) %>%
-          {
-            . / (data %>%
-              {
-                if (length(groups) > 0) left_join(., transform.parameters[["scale"]], by = groups) else cross_join(., transform.parameters[["scale"]])
-              } %>%
-              ungroup() %>%
-              select(all_of(paste0(cues, "_sd"))))
-          }
-      }
-    }
-  }
-
-  transform.function <- if (!return.transform.function) {
-    NULL
-  } else {
-    function(data) {
-      cues <- cues
-      center <- center
-      scale <- scale
-      pca <- pca
-      attach <- attach
-
-      transform_cues(data, cues,
-        center = center, scale = scale, pca = pca,
-        attach = attach,
-        transform.parameters = transform.parameters,
-        return.transformed.data = T, return.transform.parameters = F,
-        return.transform.function = F, return.untransform.function = F
-      )
-    }
-  }
-
-  untransform.function <- if (!return.untransform.function) {
-    NULL
-  } else {
-    untransform_cues(
-      data = data, cues = if (pca) colnames(transform.parameters[["pca"]]$rotation) else cues,
-      uncenter = center, unscale = scale, unpca = pca,
-      attach = attach,
-      transform.parameters = transform.parameters,
-      return.untransformed.data = F, return.untransform.function = T
-    )
-  }
-
-  if (!identical(groups, character())) data %<>% group_by(!!sym(groups))
-  if (attach) {
-    data <-
-      cbind(
-        old_data %>%
-          select(-intersect(names(old_data), names(data))),
-        data
-      )
-  }
-
-  if (!any(return.transformed.data, return.transform.parameters, return.transform.function, return.untransform.function)) {
-    message("No return was requested.")
-  } else if (return.transformed.data & !any(return.transform.parameters, return.transform.function, return.untransform.function)) {
-    return(data)
-  } else if (return.transform.parameters & !any(return.transformed.data, return.transform.function, return.untransform.function)) {
-    return(transform.parameters)
-  } else if (return.transform.function & !any(return.transformed.data, return.transform.parameters, return.untransform.function)) {
-    return(transform.function)
-  } else if (return.untransform.function & !any(return.transformed.data, return.transform.parameters, return.transform.function)) {
-    return(untransform.function)
-  } else {
-    return(
-      list(
-        data = if (return.transformed.data) data else NULL,
-        transform.parameters = if (return.transform.parameters) transform.parameters else NULL,
-        transform.function = if (return.transform.function) transform.function else NULL,
-        untransform.function = if (return.untransform.function) untransform.function else NULL
-      )
-    )
-  }
-}
-
-
-#' @rdname transform_cues
-#' @export
-untransform_cues <- function(
-  data, cues,
-  uncenter = NULL, unscale = NULL, unpca = NULL,
-  attach = T,
-  transform.parameters = NULL,
-  return.untransformed.data = T, return.untransform.function = F
-) {
-  .assert_data_frame_like(data)
-  .assert_that(!is.null(transform.parameters) & is.list(transform.parameters),
-    msg = "Must provide transform parameters."
-  )
-  old_data <- data
-  groups <- if (length(dplyr::groups(data)) == 0) character() else dplyr::groups(data) %>% as.character()
-
-  # By default untransform all transformations available in transform object
-  if (is.null(unpca)) unpca <- !is.null(transform.parameters[["pca"]])
-  if (is.null(uncenter)) uncenter <- !is.null(transform.parameters[["center"]])
-  if (is.null(unscale)) unscale <- !is.null(transform.parameters[["scale"]])
-
-  if (return.untransformed.data) {
-    if (unpca) {
-      # https://stackoverflow.com/questions/29783790/how-to-reverse-pca-in-prcomp-to-get-original-data
-      newcues <-
-        data %>%
-        select(all_of(cues)) %>%
-        as.matrix() %>%
-        {
-          . %*% t(transform.parameters[["pca"]]$rotation)
-        } %>%
-        {
-          if (unscale & uncenter) {
-            t(t(.) * transform.parameters[["pca"]]$scale + transform.parameters[["pca"]]$center)
-          } else if (unscale) t(t(.) * transform.parameters[["pca"]]$scale) else if (uncenter) t(t(.) + transform.parameters[["pca"]]$center)
+      if (need_cov) {
+        cov_mat <- stats::cov(sub_mat)
+        if (length(cues) == 1L) {
+          cov_mat <- matrix(cov_mat, 1L, 1L, dimnames = list(cues, cues))
         }
-
-      data %<>%
-        select(-all_of(cues)) %>%
-        cbind(newcues)
+        cov_list[[i]] <- cov_mat
+      }
+    } else if (compute_mnix_vector) {
+      if (need_css || need_cov) {
+        if (n_obs > 1L) {
+          centered <- sweep(sub_mat, 2, colMeans(sub_mat), "-")
+          vec_ss <- colSums(centered^2)
+        } else {
+          vec_ss <- rep(0, length(cues))
+        }
+        names(vec_ss) <- cues
+        if (need_css) css_list[[i]] <- vec_ss
+      }
+      if (need_cov) {
+        cov_mat <- if (n_obs > 1L) {
+          diag(vec_ss / (n_obs - 1L), length(cues), length(cues))
+        } else {
+          matrix(NA_real_, length(cues), length(cues))
+        }
+        dimnames(cov_mat) <- list(cues, cues)
+        cov_list[[i]] <- cov_mat
+      }
+      if (need_uss) {
+        uss_vec <- colSums(sub_mat^2)
+        names(uss_vec) <- cues
+        uss_list[[i]] <- uss_vec
+      }
+    } else if (compute_nix_scalar) {
+      if (need_css || need_cov) {
+        scal_ss <- if (n_obs > 1L) {
+          sum((sub_mat[, 1L] - mean(sub_mat[, 1L]))^2)
+        } else {
+          0
+        }
+        if (need_css) css_list[[i]] <- scal_ss
+      }
+      if (need_cov) {
+        cov_mat <- if (n_obs > 1L) {
+          matrix(
+            scal_ss / (n_obs - 1L),
+            1L,
+            1L,
+            dimnames = list(cues[1L], cues[1L])
+          )
+        } else {
+          matrix(NA_real_, 1L, 1L, dimnames = list(cues[1L], cues[1L]))
+        }
+        cov_list[[i]] <- cov_mat
+      }
+      if (need_uss) {
+        uss_list[[i]] <- sum(sub_mat[, 1L]^2)
+      }
     } else {
-      if (unscale) {
-        data %<>%
-          ungroup() %>%
-          select(all_of(cues)) %>%
-          {
-            . * (data %>%
-              {
-                if (length(groups) > 0) left_join(., transform.parameters[["scale"]], by = groups) else cross_join(., transform.parameters[["scale"]])
-              } %>%
-              ungroup() %>%
-              select(all_of(paste0(cues, "_sd"))))
-          }
-      }
-
-      if (uncenter) {
-        data %<>%
-          ungroup() %>%
-          select(all_of(cues)) %>%
-          {
-            . + (data %>%
-              {
-                if (length(groups) > 0) left_join(., transform.parameters[["center"]], by = groups) else cross_join(., transform.parameters[["center"]])
-              } %>%
-              ungroup() %>%
-              select(all_of(paste0(cues, "_mean"))))
-          }
-      }
-    }
-
-    if (attach) {
-      data %<>%
-        cbind(
-          old_data %>%
-            select(-intersect(names(old_data), names(data))),
-          .
-        )
+      if (need_css) css_list[[i]] <- NULL
+      if (need_uss) uss_list[[i]] <- NULL
+      if (need_cov) cov_list[[i]] <- NULL
     }
   }
 
-  untransform.function <- if (!return.untransform.function) {
-    NULL
-  } else {
-    function(data) {
-      cues <- cues
-      uncenter <- uncenter
-      unscale <- unscale
-      unpca <- unpca
-      attach <- attach
+  if ("n" %in% stats) res$n <- n_vals
+  if ("mean" %in% stats) res$mean <- mean_list
+  if ("cov" %in% stats) res$cov <- cov_list
+  if ("css" %in% stats) res$css <- css_list
+  if ("uss" %in% stats) res$uss <- uss_list
 
-      untransform_cues(data, cues,
-        uncenter = uncenter, unscale = unscale, unpca = unpca,
-        attach = attach,
-        transform.parameters = transform.parameters,
-        return.untransformed.data = T, return.untransform.function = F
-      )
-    }
+  if (isTRUE(simplify) && nrow(res) == 1L && length(stats) == 1L) {
+    return(res[[stats]][[1L]])
   }
 
-  if (!any(return.untransformed.data, return.untransform.function)) {
-    message("No return was requested.")
-  } else if (return.untransformed.data & !return.untransform.function) {
-    return(data)
-  } else if (!return.untransformed.data & return.untransform.function) {
-    return(untransform.function)
-  } else {
-    return(list(data = data, untransform.function = untransform.function))
-  }
+  tibble::as_tibble(res)
 }
-
 
 #' Get affine transformation
 #'
-#' Get affine transformation for a set of `cues` in `data`. Returns a linear transformation of form
-#' `f(x) = SCALE * (x + shift)`, the inverse of that transformation, and
-#' all relevant transformation parameters. The transformation function and its inverse take data sets as input,
-#' and return a new `data.frame` with only the (inverse) transformed `cue` columns. The transformation parameters
-#' can be helpful when one wants to apply the affine transform to transform, for instance, covariance matrices.
+#' Computes an affine transformation for a set of \code{cues} in \code{data}.
+#' Returns an \code{\link{MVBU_TransformInformation}} object representing a linear map
+#' \eqn{f(x) = A(x + b)}, where \eqn{b} is the shift vector and \eqn{A} is the scale/rotation matrix.
 #'
-#' @param data A `tibble` or `data.frame`.
-#' @param cues A character vector of column names in `data` that should be transformed.
-#' @param type The type of transformation to apply. Can be one of "identity", "center", "standardize", "PCA whiten",
-#'   or "ZCA whiten". Except for the identity transform, all transforms center. Standardize additionally divides by
-#'   the standard deviations. PCA whitening rotates the data into the space of the principal components, followed
-#'   by scaling along each principal axis to achieve unit variance. ZCA whitening also achieves unit variance along
-#'   all dimensions, and---like PCA whitening---decorrelates the data but it aims to maintain the original orientation
-#'   of the data as close as possible. If `cue` is a single cue, whitening reduces to standardization.
-#'   (default : "identity")
+#' @param data A \code{tibble} or \code{data.frame}.
+#' @param cues A character vector of column names in \code{data} that should be transformed.
+#' @param type The type of transformation to apply. Can be one of \code{"identity"},
+#'   \code{"center"}, \code{"standardize"}, \code{"PCA whiten"}, or \code{"ZCA whiten"}.
+#'   Except for the identity transform, all transforms center. Standardize additionally
+#'   divides by the standard deviations. PCA whitening rotates the data into the space
+#'   of principal components with unit variance. ZCA whitening achieves unit variance
+#'   while maintaining original orientation as close as possible.
+#'   (default: \code{"identity"})
 #'
-#' @return A list with the following elements:
-#'  * `type`: A character vector of length 1, containing the type of transformation.
-#'  * `transform.parameters`: A list with the following elements:
-#'     * `cue.labels`: A character vector of cue labels for ease of recovery.
-#'     * `shift` is a vector of `length(cues)`
-#'     * `SCALE` is a `length(cues)` x `length(cues)` invertible square matrix. For types "identity" and "center",
-#'        this is an identity matrix. For type "standardize", it is the identity matrix multiplied by the inverse
-#'        of the vector of standard deviations of the cues.
-#'     * `INV_SCALE` is the inverse of the `SCALE` matrix.
-#'  * `transform.function`: A function f(data, return_type). The function applies the affine transformation to the
-#'     columns of `data` specified in `cues`. The `return_type` argument determines what is returned. Can be one of
-#'     "replace", "add", or "cues only". If "replace", the input data will be returned in full but with the cue
-#'     columns replaced by the transformed cues. If "add", the input data will be returned with additional columns
-#'     for the cues (labeled "*_transformed"). If "cues only", a new data frame with only the transformed cues will
-#'     be returned. (default: "replace")
-#'  * `untransform.function`: Same as the `transform.function` but return the inverse transformed data.
+#' @return An \code{\link{MVBU_TransformInformation}} object that can be used to transform
+#' data or models.
 #'
 #' @export
 get_affine_transform <- function(
   data,
   cues,
-  type = c("identity", "center", "scale", "PCA whiten", "ZCA whiten")[1]
+  type = c("identity", "center", "standardize", "PCA whiten", "ZCA whiten")[1]
 ) {
   .assert_that(is.character(cues))
   .assert_data_contains_cols(data, cues)
 
-  # groups <- if (length(groups(data)) == 0) character() else groups(data) %>% as.character()
-
-  transform.parameters <- list()
-  transform.parameters[["cue.labels"]] <- cues
-
-  n.cues <- length(cues)
-  data <- as.matrix(data[, cues, drop = FALSE])
-
-  if (type == "identity") {
-    transform.parameters[["shift"]] <- rep(0, n.cues)
-  } else {
-    data <- scale(data, scale = F)
-    transform.parameters[["shift"]] <- -(attr(data, "scaled:center"))
+  if (identical(type, "scale")) {
+    type <- "standardize"
   }
 
-  if (n.cues == 1) {
+  n.cues <- length(cues)
+  data_mat <- as.matrix(data[, cues, drop = FALSE])
+
+  if (type == "identity") {
+    shift <- rep(0, n.cues)
+  } else {
+    data_mat <- scale(data_mat, scale = FALSE)
+    shift <- -(attr(data_mat, "scaled:center"))
+  }
+
+  if (n.cues == 1L) {
     if (type %in% c("identity", "center")) {
-      transform.parameters[["SCALE"]] <- 1
+      SCALE <- 1
     } else if (type %in% c("standardize", "PCA whiten", "ZCA whiten")) {
-      transform.parameters[["SCALE"]] <- 1 / sd(data[, 1])
+      SCALE <- 1 / sd(data_mat[, 1])
     } else {
-      .stop("Unknown type.")
+      .stop("Unknown type: ", type)
     }
   } else {
     if (type %in% c("identity", "center")) {
-      transform.parameters[["SCALE"]] <- diag(n.cues)
+      SCALE <- diag(n.cues)
     } else if (type == "standardize") {
-      transform.parameters[["SCALE"]] <- diag(1 / apply(data, 2, sd))
+      SCALE <- diag(1 / apply(data_mat, 2, sd))
     } else if (type %in% c("PCA whiten", "ZCA whiten")) {
-      eig <- eigen(.cov(data))
+      eig <- eigen(.cov(data_mat))
       U <- eig$vectors
       D_inv_half <- diag(1 / sqrt(eig$values))
 
       if (type == "PCA whiten") {
-        transform.parameters[["SCALE"]] <- D_inv_half %*% t(U)
+        SCALE <- D_inv_half %*% t(U)
       } else if (type == "ZCA whiten") {
-        transform.parameters[["SCALE"]] <- U %*% D_inv_half %*% t(U)
+        SCALE <- U %*% D_inv_half %*% t(U)
       } else {
-        .stop("Unknown whitening type.")
+        .stop("Unknown whitening type: ", type)
       }
     } else {
-      .stop("Unknown type.")
+      .stop("Unknown type: ", type)
     }
   }
 
-  transform.parameters[["INV_SCALE"]] <- if (n.cues == 1) 1 / transform.parameters[["SCALE"]] else solve(transform.parameters[["SCALE"]])
-
-  # Defining function that handles return of data that gets repeated below in the
-  # different transform and untransform functions
-  get_return_data <- function(data, newdata, return_type) {
-    newdata <- as.data.frame(newdata)
-
-    if (return_type == "replace") {
-      data[, cues] <- newdata
-    } else if (return_type == "add") {
-      names(newdata) <- paste0(cues, "_transformed")
-      data <- cbind(data, newdata)
-    } else if (return_type %in% c("cues only", "only cues")) {
-      names(newdata) <- cues
-      data <- newdata
-    } else {
-      .stop("Unknown return type.")
-    }
-
-    return(data)
-  }
-
-  if (n.cues == 1) {
-    transform.function <-
-      function(data, return_type = c("replace", "add", "cues only")[1]) {
-        get_return_data <- get_return_data
-        cues <- cues
-        shift <- transform.parameters[["shift"]]
-        SCALE <- transform.parameters[["SCALE"]]
-
-        newdata <- data[, cues]
-        newdata <- (newdata + shift) * SCALE
-        newdata <- get_return_data(data, newdata, return_type)
-
-        return(newdata)
-      }
-
-    untransform.function <-
-      function(data, return_type = c("replace", "add", "cues only")[1]) {
-        get_return_data <- get_return_data
-        cues <- cues
-        shift <- transform.parameters[["shift"]]
-        INV_SCALE <- transform.parameters[["INV_SCALE"]]
-
-        newdata <- as.matrix(data[, cues])
-        newdata <- (newdata * INV_SCALE) - shift
-        newdata <- get_return_data(data, newdata, return_type)
-
-        return(newdata)
-      }
-    # Handle cases with multiple cues
-  } else {
-    transform.function <-
-      function(data, return_type = c("replace", "add", "cues only")[1]) {
-        get_return_data <- get_return_data
-        cues <- cues
-        shift <- transform.parameters[["shift"]]
-        SCALE <- transform.parameters[["SCALE"]]
-
-        newdata <- as.matrix(data[, cues])
-        newdata <- sweep(newdata, 2, -shift) %*% t(SCALE)
-        newdata <- get_return_data(data, newdata, return_type)
-
-        return(newdata)
-      }
-
-    untransform.function <-
-      function(data, return_type = c("replace", "add", "cues only")[1]) {
-        get_return_data <- get_return_data
-        cues <- cues
-        shift <- transform.parameters[["shift"]]
-        INV_SCALE <- transform.parameters[["INV_SCALE"]]
-
-        newdata <- as.matrix(data[, cues])
-        newdata <- sweep(newdata %*% t(INV_SCALE), 2, +shift)
-        newdata <- get_return_data(data, newdata, return_type)
-
-        return(newdata)
-      }
-  }
-
-  return(.nlist(type, transform.parameters, transform.function, untransform.function))
+  MVBU_TransformInformation(
+    cue.labels = cues,
+    type = type,
+    shift = shift,
+    SCALE = SCALE
+  )
 }
 
 
-#' Transform and untransform category means and covariance matrices of a model
+#' Transform and untransform means, covariances, and cognitive models
 #'
-#' Applies an affine (linear) transformation specified in a \code{transform} object
-#' (e.g., centering, scaling, PCA, ZCA whitening from \code{\link{transform_cues}} or \code{\link{get_affine_transform}})
-#' to the category mean(s) and covariance(s) within an S7 cognitive model.
+#' Applies an affine (linear) transformation specified in an
+#' \code{\link{MVBU_TransformInformation}} object (from \code{\link{get_affine_transform}})
+#' to a mean vector, covariance matrix, or within an S7 cognitive model.
 #'
-#' Only linear/affine transformations are supported because Gaussian and Normal-Inverse-Wishart
-#' distributions transform analytically under affine maps \eqn{y = A x + b}:
-#' \deqn{\mu' = A \mu + b, \quad \Sigma' = A \Sigma A^T}
-#' Models containing \code{\link{MVG_CategoryRepresentation}}, \code{\link{UVG_CategoryRepresentation}},
-#' \code{\link{NIW_CategoryRepresentation}}, \code{\link{NIX_CategoryRepresentation}}, or
-#' \code{\link{MNIX_CategoryRepresentation}} are supported. Exemplar representations are transformed
-#' by transforming their exemplar cues directly.
-#'
-#' Note that \code{(un)transform_category_cov} can also be used for centered sums-of-squares matrices, but not for
-#' uncentered sums-of-squares matrices. The latter require additional adjustments that might be implemented in the
-#' future (see https://chatgpt.com/c/683b3ed6-4924-800c-8f22-e61680f3360f).
-#'
+#' Gaussian and Normal-Inverse-Wishart distributions transform analytically under
+#' affine maps \eqn{y = A(x + b)}:
+#' \deqn{\mu' = A(\mu + b), \quad \Sigma' = A \Sigma A^T}
 #'
 #' @param model An \code{\link{MVBU_CognitiveModel}} object.
-#' @param m A single category mean vector (or scalar for univariate representations).
-#' @param S A single covariance matrix (or scalar variance for univariate representations).
-#' @param transform A transform or transform parameter object returned by \code{\link{transform_cues}} or \code{\link{get_affine_transform}}.
+#' @param m A mean vector (or scalar for univariate representations).
+#' @param S A covariance matrix (or scalar variance for univariate representations).
+#' @param transform An \code{\link{MVBU_TransformInformation}} object.
 #'
-#' @return A model, category mean, or covariance matrix of the same class as the input.
+#' @return A model, mean vector, or covariance matrix of the same class as the input.
 #'
-#' @keywords TBD
 #' @rdname transform_model
 #' @export
 transform_model <- function(model, transform) {
   if (!S7::S7_inherits(model, MVBU_CognitiveModel)) {
     stop("model must be an MVBU_CognitiveModel object.")
   }
+  if (!S7::S7_inherits(transform, MVBU_TransformInformation)) {
+    stop("transform must be an MVBU_TransformInformation object.")
+  }
 
   reps <- model@category_template@representations
   for (cat_name in names(reps)) {
     r <- reps[[cat_name]]
     if (S7::S7_inherits(r, MVG_CategoryRepresentation)) {
-      r@mu <- transform_category_mean(r@mu, transform)
-      r@Sigma <- transform_category_cov(r@Sigma, transform)
+      r@mu <- transform_mean(r@mu, transform)
+      r@Sigma <- transform_cov(r@Sigma, transform)
     } else if (S7::S7_inherits(r, NIW_CategoryRepresentation)) {
-      r@m <- transform_category_mean(r@m, transform)
-      r@S <- transform_category_cov(r@S, transform)
+      r@m <- transform_mean(r@m, transform)
+      r@S <- transform_cov(r@S, transform)
     } else if (S7::S7_inherits(r, UVG_CategoryRepresentation)) {
-      r@mu <- transform_category_mean(r@mu, transform)
-      r@sigma2 <- as.numeric(transform_category_cov(matrix(r@sigma2, 1, 1), transform))
+      r@mu <- transform_mean(r@mu, transform)
+      r@sigma2 <- as.numeric(transform_cov(matrix(r@sigma2, 1, 1), transform))
     } else if (S7::S7_inherits(r, MUVG_CategoryRepresentation)) {
-      r@mu <- transform_category_mean(r@mu, transform)
-      r@sigma2 <- diag(transform_category_cov(diag(r@sigma2), transform))
+      r@mu <- transform_mean(r@mu, transform)
+      r@sigma2 <- diag(transform_cov(diag(r@sigma2), transform))
     } else if (S7::S7_inherits(r, NIX_CategoryRepresentation)) {
-      r@m <- transform_category_mean(r@m, transform)
-      r@sigma2 <- as.numeric(transform_category_cov(matrix(r@sigma2, 1, 1), transform))
+      r@m <- transform_mean(r@m, transform)
+      r@sigma2 <- as.numeric(transform_cov(matrix(r@sigma2, 1, 1), transform))
     } else if (S7::S7_inherits(r, MNIX_CategoryRepresentation)) {
-      r@m <- transform_category_mean(r@m, transform)
-      r@sigma2 <- diag(transform_category_cov(diag(r@sigma2), transform))
+      r@m <- transform_mean(r@m, transform)
+      r@sigma2 <- diag(transform_cov(diag(r@sigma2), transform))
     }
     reps[[cat_name]] <- r
   }
@@ -924,166 +639,62 @@ transform_model <- function(model, transform) {
 #' @rdname transform_model
 #' @export
 untransform_model <- function(model, transform) {
-  if (!S7::S7_inherits(model, MVBU_CognitiveModel)) {
-    stop("model must be an MVBU_CognitiveModel object.")
-  }
-
-  reps <- model@category_template@representations
-  for (cat_name in names(reps)) {
-    r <- reps[[cat_name]]
-    if (S7::S7_inherits(r, MVG_CategoryRepresentation)) {
-      r@mu <- untransform_category_mean(r@mu, transform)
-      r@Sigma <- untransform_category_cov(r@Sigma, transform)
-    } else if (S7::S7_inherits(r, NIW_CategoryRepresentation)) {
-      r@m <- untransform_category_mean(r@m, transform)
-      r@S <- untransform_category_cov(r@S, transform)
-    } else if (S7::S7_inherits(r, UVG_CategoryRepresentation)) {
-      r@mu <- untransform_category_mean(r@mu, transform)
-      r@sigma2 <- as.numeric(untransform_category_cov(matrix(r@sigma2, 1, 1), transform))
-    } else if (S7::S7_inherits(r, MUVG_CategoryRepresentation)) {
-      r@mu <- untransform_category_mean(r@mu, transform)
-      r@sigma2 <- diag(untransform_category_cov(diag(r@sigma2), transform))
-    } else if (S7::S7_inherits(r, NIX_CategoryRepresentation)) {
-      r@m <- untransform_category_mean(r@m, transform)
-      r@sigma2 <- as.numeric(untransform_category_cov(matrix(r@sigma2, 1, 1), transform))
-    } else if (S7::S7_inherits(r, MNIX_CategoryRepresentation)) {
-      r@m <- untransform_category_mean(r@m, transform)
-      r@sigma2 <- diag(untransform_category_cov(diag(r@sigma2), transform))
-    }
-    reps[[cat_name]] <- r
-  }
-  model@category_template@representations <- reps
-  return(model)
-}
-
-
-.get_transform_params <- function(transform) {
-  if (S7::S7_inherits(transform, MVBU_TransformInformation)) {
-    return(transform@transform.parameters)
-  }
-  if (is.list(transform) && !is.null(transform[["transform.parameters"]])) {
-    return(transform[["transform.parameters"]])
-  }
-  transform
+  transform_model(model, invert_transform(transform))
 }
 
 #' @rdname transform_model
 #' @export
-transform_category_mean <- function(m, transform) {
-  transform <- .get_transform_params(transform)
+transform_mean <- function(m, transform) {
+  if (!S7::S7_inherits(transform, MVBU_TransformInformation)) {
+    stop("transform must be an MVBU_TransformInformation object.")
+  }
   m_names <- names(m)
+  shift_val <- transform@shift
+  scale_val <- transform@SCALE
+  k <- length(shift_val)
 
-  if (!is.null(transform$shift)) {
-    m <- m + transform$shift
+  if (k > 0L && length(shift_val) == length(m)) {
+    m <- m + shift_val
   }
 
-  if (!is.null(transform$center)) {
-    mean <- transform$center %>% as.numeric()
-    m <- m - mean
+  if (k == 1L || (is.numeric(scale_val) && length(scale_val) == 1L)) {
+    m <- as.numeric(m) * as.numeric(scale_val)
+  } else if (is.matrix(scale_val)) {
+    m <- as.vector(m %*% t(scale_val))
   }
 
-  if (!is.null(transform$scale)) {
-    taus <- transform$scale %>% as.numeric()
-    m <- m / taus
-  }
-
-  # For affine transforms
-  if (!is.null(transform$SCALE)) {
-    if (is.matrix(transform$SCALE) || (is.array(transform$SCALE) && length(dim(transform$SCALE)) > 1L)) {
-      m <- m %*% t(transform$SCALE)
-    } else {
-      m <- as.numeric(m) * as.numeric(transform$SCALE)
-    }
-  }
-
-  # Make sure m is a vector and that any potentially available cue names are maintained
-  m <- as.vector(m)
   names(m) <- m_names
-
   return(m)
 }
 
 #' @rdname transform_model
 #' @export
-untransform_category_mean <- function(m, transform) {
-  transform <- .get_transform_params(transform)
-  m_names <- names(m)
-
-  if (!is.null(transform$scale)) {
-    taus <- transform$scale %>% as.numeric()
-    m <- m * taus
-  }
-
-  if (!is.null(transform$center)) {
-    mean <- transform$center %>% as.numeric()
-    m <- m + mean
-  }
-
-  # For affine transforms
-  if (!is.null(transform$SCALE)) {
-    m <- m %*% t(transform$INV_SCALE)
-  }
-
-  if (!is.null(transform$shift)) {
-    m <- m - transform$shift
-  }
-
-  # Make sure m is a vector and that any potentially available cue names are maintained
-  m <- as.vector(m)
-  names(m) <- m_names
-
-  return(m)
+untransform_mean <- function(m, transform) {
+  transform_mean(m, invert_transform(transform))
 }
 
 #' @rdname transform_model
 #' @export
-transform_category_cov <- function(S, transform) {
-  transform <- .get_transform_params(transform)
-  S_names <- dimnames(S)
-
-  if (!is.null(transform$scale)) {
-    taus <- transform$scale %>% as.numeric()
-    COVinv <- diag(taus, nrow = length(taus)) %>% solve()
-    S <- COVinv %*% S %*% COVinv
+transform_cov <- function(S, transform) {
+  if (!S7::S7_inherits(transform, MVBU_TransformInformation)) {
+    stop("transform must be an MVBU_TransformInformation object.")
   }
+  S_names <- dimnames(S)
+  scale_val <- transform@SCALE
+  k <- length(transform@shift)
 
-  # For affine transforms
-  if (!is.null(transform$SCALE)) {
-    if (is.matrix(transform$SCALE) || (is.array(transform$SCALE) && length(dim(transform$SCALE)) > 1L)) {
-      S <- transform$SCALE %*% S %*% t(transform$SCALE)
-    } else {
-      S <- as.numeric(transform$SCALE)^2 * S
-    }
+  if (k == 1L || (is.numeric(scale_val) && length(scale_val) == 1L)) {
+    S <- as.numeric(scale_val)^2 * S
+  } else if (is.matrix(scale_val)) {
+    S <- scale_val %*% S %*% t(scale_val)
   }
 
   dimnames(S) <- S_names
-
   return(S)
 }
 
 #' @rdname transform_model
 #' @export
-untransform_category_cov <- function(S, transform) {
-  transform <- .get_transform_params(transform)
-  S_names <- dimnames(S)
-
-  if (!is.null(transform$scale)) {
-    taus <- transform$scale %>% as.numeric()
-    COV <- diag(taus, nrow = length(taus))
-
-    S <- COV %*% S %*% COV
-  }
-
-  # For affine transforms
-  if (!is.null(transform$SCALE)) {
-    if (is.matrix(transform$INV_SCALE) || (is.array(transform$INV_SCALE) && length(dim(transform$INV_SCALE)) > 1L)) {
-      S <- transform$INV_SCALE %*% S %*% t(transform$INV_SCALE)
-    } else {
-      S <- as.numeric(transform$INV_SCALE)^2 * S
-    }
-  }
-
-  dimnames(S) <- S_names
-
-  return(S)
+untransform_cov <- function(S, transform) {
+  transform_cov(S, invert_transform(transform))
 }

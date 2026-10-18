@@ -28,14 +28,14 @@ data {
   int L;                                                   // number of exposure groups (e.g. subjects)
   int M;                                                   // number of categories
 
-  array[M,L] int<lower=0> N_exposure;                      // observations per category (M) and group (L)
-  array[M,L] vector[K] x_mean_exposure;                    // means per category (M) and group (L)
-  array[M,L] vector[K] x_css_exposure;                     // centered sum of squares per category and group
+  array[M,L] int<lower=0> n_exposure;                      // observations per category (M) and group (L)
+  array[M,L] vector[K] mean_exposure;                    // means per category (M) and group (L)
+  array[M,L] vector[K] css_exposure;                     // centered sum of squares per category and group
 
-  int N_test;                                              // unique test locations & exposure groups
-  array[N_test] vector[K] x_test;                          // stimulus locations in cue space
-  array[N_test] int y_test;                                // group indicator of test trials
-  array[N_test,M] int z_test_counts;                       // response counts per category M
+  int n_test;                                              // unique test locations & exposure groups
+  array[n_test] vector[K] x_test;                          // stimulus locations in cue space
+  array[n_test] int y_test;                                // group indicator of test trials
+  array[n_test,M] int z_test_counts;                       // response counts per category M
 
   simplex[M] prior_p;                                      // prior category probabilities
 
@@ -66,7 +66,7 @@ transformed data {
     }
   }
   simplex[M] lapse_bias = lapse_bias_known ? lapse_bias_data[1] : rep_vector(1.0 / M, M);
-  real<lower=0> sigma_kappanu = max(max(to_array_1d(N_exposure)) * 4, 10);
+  real<lower=0> sigma_kappanu = max(max(to_array_1d(n_exposure)) * 4, 10);
   vector[K] m_0_mu = rep_vector(0, K);
 }
 
@@ -95,23 +95,23 @@ transformed parameters {
   array[M,L] vector[K] tau_n_transformed;
   array[M,L] vector[K] t_scale_transformed;
 
-  array[N_test] simplex[M] p_test_conj;
-  array[N_test] vector[M] log_p_test_conj;
+  array[n_test] simplex[M] p_test_conj;
+  array[n_test] vector[M] log_p_test_conj;
 
   for (cat in 1:M) {
     tau_0_transformed[cat] = Sigma_0_known ? tau_0_data[cat] * sqrt((nu_0 - 2) / nu_0) : tau_0_param_transformed[cat];
 
     for (group in 1:L) {
-      kappa_n[cat,group] = kappa_0 + N_exposure[cat,group];
-      nu_n[cat,group] = nu_0 + N_exposure[cat,group];
-      m_n_transformed[cat,group] = nix_update_mean(kappa_0, m_0_transformed[cat], N_exposure[cat,group], x_mean_exposure[cat,group]);
-      tau_n_transformed[cat,group] = nix_update_tau(kappa_0, nu_0, tau_0_transformed[cat], N_exposure[cat,group], x_mean_exposure[cat,group], x_css_exposure[cat,group], m_0_transformed[cat]);
+      kappa_n[cat,group] = kappa_0 + n_exposure[cat,group];
+      nu_n[cat,group] = nu_0 + n_exposure[cat,group];
+      m_n_transformed[cat,group] = nix_update_mean(kappa_0, m_0_transformed[cat], n_exposure[cat,group], mean_exposure[cat,group]);
+      tau_n_transformed[cat,group] = nix_update_tau(kappa_0, nu_0, tau_0_transformed[cat], n_exposure[cat,group], mean_exposure[cat,group], css_exposure[cat,group], m_0_transformed[cat]);
       t_scale_transformed[cat,group] = nix_predictive_scale(tau_n_transformed[cat,group], kappa_n[cat,group]);
     }
   }
 
   // compute posterior probabilities for each test stimulus (group-category weighted integration)
-  for (j in 1:N_test) {
+  for (j in 1:n_test) {
     int group = y_test[j];
     for (cat in 1:M) {
       vector[K] cue_log_lik;
@@ -151,7 +151,7 @@ model {
     }
   }
 
-  for (i in 1:N_test) {
+  for (i in 1:n_test) {
     z_test_counts[i] ~ multinomial(lapse_mixture(p_test_conj[i], lapse_rate, lapse_bias));
   }
 }

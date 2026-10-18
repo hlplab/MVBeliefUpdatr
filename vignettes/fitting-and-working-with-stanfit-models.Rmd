@@ -47,12 +47,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 # 1. Introduction and Overview {#introduction-and-overview}
 
-The **MVBeliefUpdatr** package provides Bayesian hierarchical Stan models for incremental cognitive belief-updating during speech perception and multidimensional categorization experiments. These models fit observer and adaptor beliefs (e.g., Normal-Inverse-Wishart [NIW] and Normal-Inverse-$\chi^2$ [NIX]) across exposure blocks or participant groups using MCMC sampling via **rstan**.
+The **MVBeliefUpdatr** package provides Bayesian hierarchical Stan models for incremental cognitive belief-updating during speech perception and multidimensional categorization experiments. These models fit observer and adaptor beliefs (e.g., Normal-Inverse-Wishart [NIW] and Normal-Inverse-$\chi^2$ [NIX]) across exposure blocks or participant groups using MCMC sampling via **rstan** or **cmdstanr**.
 
 Fitted models are returned as typed S7 objects inheriting from `MVBU_Stanfit` (e.g., `NIW_IdealAdaptorStanfit` or `NIX_IdealAdaptorStanfit`). This vignette details:
 
 1. **Preparing Data and Inputs**: Structuring exposure data and bundling priors with `new_ideal_adaptor_stanfit_input()`.
-2. **Model Fitting**: Executing Bayesian estimation via `fit_ideal_adaptor()` or `fit_ideal_observer()`.
+2. **Model Fitting, Backends & Threading**: Executing Bayesian estimation via `fit_ideal_adaptor()` or `fit_ideal_observer()`, selecting between **rstan** and **cmdstanr** backends, and configuring between-chain (`cores`) and within-chain (`threads`) parallelization.
 3. **Model Summaries & Diagnostics**: Printing, summarizing, and evaluating convergence (`rhat`, `neff_ratio`, `get_draws`).
 4. **Accelerated Post-Processing**: Pre-extracting posterior latents and closures with `add_posterior_latents()` for fast visualization.
 5. **Model Comparison & Criteria**: Storing information criteria with `add_criterion()`, comparing models with `loo_compare()`, and generating posterior predictive checks with `pp_check()`.
@@ -97,7 +97,11 @@ stan_input <- example_ideal_adaptor_stanfit_input(
 
 # 3. Fitting Bayesian Models (`fit_ideal_adaptor`) {#fitting-bayesian-models}
 
-To fit the model, `fit_ideal_adaptor()` passes the `stan_input` object to Stan's MCMC sampler via **rstan**.
+To fit the model, `fit_ideal_adaptor()` passes the `stan_input` bundle to Stan's MCMC sampler.
+
+## 3.1 Basic Fitting Workflow
+
+By default, `fit_ideal_adaptor()` uses the `"rstan"` backend:
 
 ```r
 # Executing MCMC sampling (interactive fitting call)
@@ -109,6 +113,66 @@ fit <- fit_ideal_adaptor(
   seed = 42
 )
 ```
+
+## 3.2 Execution Backends: `rstan` vs. `cmdstanr`
+
+`MVBeliefUpdatr` supports two execution backends via the `backend` argument:
+
+1. **`"rstan"` (default)**: Fits models in-process using the **rstan** package. Precompiled models bundled with the package are used directly, avoiding runtime C++ compilation delays.
+2. **`"cmdstanr"`**: Fits models out-of-process via the **cmdstanr** interface to CmdStan.
+
+### Why Choose `cmdstanr`?
+- **Speed & Toolchain**: CmdStan provides access to newer Stan versions (`stanc3`), faster C++ compilation, and lower memory overhead during long chains.
+- **Process Isolation**: Running sampling in separate command-line processes ensures that MCMC errors or crashes do not take down the active R session.
+- **Unified Object Architecture**: Regardless of backend, `fit_ideal_adaptor()` returns a consistent S7 `MVBU_Stanfit` object whose `@backend` slot indicates the backend used, and whose `@stanfit` slot contains a standard `stanfit` object. All downstream functions (`summary()`, `get_draws()`, `add_posterior_latents()`, `add_criterion()`, `pp_check()`) work identically:
+
+```r
+# Fitting via the cmdstanr backend
+fit_cmdstan <- fit_ideal_adaptor(
+  stan_input,
+  backend = "cmdstanr",
+  chains = 4,
+  iter = 2000,
+  warmup = 1000,
+  seed = 42
+)
+
+# Inspect the backend used
+fit_cmdstan@backend
+#> [1] "cmdstanr"
+```
+
+## 3.3 Parallel Execution and Within-Chain Threading
+
+`MVBeliefUpdatr` supports two complementary levels of parallelization:
+
+1. **Between-Chain Parallelism (`cores`)**: Runs multiple MCMC chains simultaneously across CPU cores. For example, setting `chains = 4, cores = 4` fits each chain on its own CPU core.
+2. **Within-Chain Multithreading (`threads`)**: Divides computationally intensive likelihood loops across multiple CPU threads *within a single chain* using C++ threading.
+
+### Specifying Threads
+The `threads` argument can be specified as an integer count or as a list with a `threads` element:
+
+- `threads = 2` (or `threads = list(threads = 2)`): Allocates 2 worker threads per chain.
+- Under `backend = "cmdstanr"`, the model is compiled with `stan_threads = TRUE` and executed with `threads_per_chain = 2`.
+- Under `backend = "rstan"`, threads are assigned via `rstan::rstan_options(threads_per_chain = 2)`.
+
+> **Note on Total CPU Cores:** Total core allocation equals $\text{chains} \times \text{threads}$. For instance, running 4 chains with 2 threads per chain requires $4 \times 2 = 8$ available CPU cores.
+
+```r
+# Parallel execution: 4 chains running across 4 cores, with 2 threads per chain (8 cores total)
+fit_fast <- fit_ideal_adaptor(
+  stan_input,
+  backend = "cmdstanr",
+  chains = 4,
+  cores = 4,
+  threads = 2,
+  iter = 2000,
+  warmup = 1000,
+  seed = 42
+)
+```
+
+## 3.4 Pre-compiled Fits for Fast Exploration
 
 For reproducible vignette compilation without long MCMC sampling delays, pre-compiled model fits can be accessed via package fixtures or helpers:
 

@@ -116,6 +116,14 @@ new_model_from_data <- function(
 # Aggregation of Representations, Templates, and Cognitive Models
 # =============================================================================
 
+# Normalize and validate a vector of weights for object aggregation.
+#
+# Arguments:
+#   n: Expected number of weights (integer).
+#   weights: Optional numeric vector of non-negative weights.
+#
+# Returns:
+#   A numeric vector of length `n` normalized to sum to 1.
 .aggregate_weights <- function(n, weights = NULL) {
   if (is.null(weights)) {
     return(rep(1 / n, n))
@@ -131,6 +139,14 @@ new_model_from_data <- function(
   weights / sum(weights)
 }
 
+# Aggregate a list of category representations into a single representation.
+#
+# Arguments:
+#   reps: A non-empty list of category representation objects of the same class.
+#   weights: Optional numeric vector of weights.
+#
+# Returns:
+#   An aggregated category representation object.
 .aggregate_category_representations <- function(reps, weights = NULL) {
   .assert_true(
     is.list(reps) && length(reps) > 0,
@@ -306,21 +322,41 @@ new_model_from_data <- function(
   }
 }
 
-.aggregate_category_representation_templates <- function(templates, weights = NULL) {
+# Aggregate multiple category representation templates into a single template.
+#
+# Arguments:
+#   templates: A non-empty list of category representation template objects.
+#   weights: Optional numeric vector of weights.
+#
+# Returns:
+#   A new category representation template with aggregated representations.
+.aggregate_category_representation_templates <- function(
+  templates,
+  weights = NULL
+) {
   .assert_true(
     is.list(templates) && length(templates) > 0,
-    msg = "templates must be a non-empty list of category representation template objects."
+    msg = paste(
+      "templates must be a non-empty list of category representation",
+      "template objects."
+    )
   )
   first_template <- templates[[1]]
   .assert_true(
     S7::S7_inherits(first_template, MVBU_CategoryRepresentationTemplate),
-    msg = "All elements in templates must be S7 MVBU_CategoryRepresentationTemplate objects."
+    msg = paste(
+      "All elements in templates must be S7",
+      "MVBU_CategoryRepresentationTemplate objects."
+    )
   )
 
   for (i in seq_along(templates)) {
     .assert_true(
       S7::S7_inherits(templates[[i]], MVBU_CategoryRepresentationTemplate),
-      msg = "All elements in templates must be S7 MVBU_CategoryRepresentationTemplate objects."
+      msg = paste(
+        "All elements in templates must be S7",
+        "MVBU_CategoryRepresentationTemplate objects."
+      )
     )
   }
 
@@ -345,12 +381,23 @@ new_model_from_data <- function(
   agg_reps <- list()
   for (cat in categories) {
     cat_reps <- lapply(templates, function(t) t@representations[[cat]])
-    agg_reps[[cat]] <- .aggregate_category_representations(cat_reps, weights = weights)
+    agg_reps[[cat]] <- .aggregate_category_representations(
+      cat_reps,
+      weights = weights
+    )
   }
 
   new_category_representation_template(representations = agg_reps)
 }
 
+# Aggregate multiple cognitive models into a single cognitive model.
+#
+# Arguments:
+#   models: A non-empty list of cognitive model objects of the same class.
+#   weights: Optional numeric vector of weights.
+#
+# Returns:
+#   An aggregated cognitive model object.
 .aggregate_cognitive_models <- function(models, weights = NULL) {
   .assert_true(
     is.list(models) && length(models) > 0,

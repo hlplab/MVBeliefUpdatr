@@ -3,11 +3,15 @@
 \name{as_MVBU_stanfit_posterior}
 \alias{as_MVBU_stanfit_posterior}
 \alias{as_MVBU_stanfit_posterior,MVBU_Stanfit-method}
+\alias{as_MVBU_stanfit_posterior,MVBU_StanfitPosterior-method}
 \title{Coerce a Stanfit model object to a lightweight StanfitPosterior representation}
 \usage{
 as_MVBU_stanfit_posterior(x, ...)
 
 ## S7 method for class <MVBU_Stanfit>
+as_MVBU_stanfit_posterior(x, ...)
+
+## S7 method for class <MVBU_StanfitPosterior>
 as_MVBU_stanfit_posterior(x, ...)
 }
 \arguments{

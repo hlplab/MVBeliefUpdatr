@@ -26,7 +26,9 @@ test_that("deprecated wrappers forward to the S7 fit-input constructor", {
   )
 
   expect_true(S7::S7_inherits(obj, IdealAdaptorStanfitInput))
-  expect_true(S7::S7_inherits(obj@staninput, IdealAdaptorStaninput))
+  expect_true(
+    S7::S7_inherits(.new_staninput(obj), IdealAdaptorStaninput)
+  )
 })
 
 test_that("legacy wrappers reject invalid fixed parameters", {

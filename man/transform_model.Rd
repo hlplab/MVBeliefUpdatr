@@ -3,52 +3,43 @@
 \name{transform_model}
 \alias{transform_model}
 \alias{untransform_model}
-\alias{transform_category_mean}
-\alias{untransform_category_mean}
-\alias{transform_category_cov}
-\alias{untransform_category_cov}
-\title{Transform and untransform category means and covariance matrices of a model}
+\alias{transform_mean}
+\alias{untransform_mean}
+\alias{transform_cov}
+\alias{untransform_cov}
+\title{Transform and untransform means, covariances, and cognitive models}
 \usage{
 transform_model(model, transform)
 
 untransform_model(model, transform)
 
-transform_category_mean(m, transform)
+transform_mean(m, transform)
 
-untransform_category_mean(m, transform)
+untransform_mean(m, transform)
 
-transform_category_cov(S, transform)
+transform_cov(S, transform)
 
-untransform_category_cov(S, transform)
+untransform_cov(S, transform)
 }
 \arguments{
 \item{model}{An \code{\link{MVBU_CognitiveModel}} object.}
 
-\item{transform}{A transform or transform parameter object returned by \code{\link{transform_cues}} or \code{\link{get_affine_transform}}.}
+\item{transform}{An \code{\link{MVBU_TransformInformation}} object.}
 
-\item{m}{A single category mean vector (or scalar for univariate representations).}
+\item{m}{A mean vector (or scalar for univariate representations).}
 
-\item{S}{A single covariance matrix (or scalar variance for univariate representations).}
+\item{S}{A covariance matrix (or scalar variance for univariate representations).}
 }
 \value{
-A model, category mean, or covariance matrix of the same class as the input.
+A model, mean vector, or covariance matrix of the same class as the input.
 }
 \description{
-Applies an affine (linear) transformation specified in a \code{transform} object
-(e.g., centering, scaling, PCA, ZCA whitening from \code{\link{transform_cues}} or \code{\link{get_affine_transform}})
-to the category mean(s) and covariance(s) within an S7 cognitive model.
+Applies an affine (linear) transformation specified in an
+\code{\link{MVBU_TransformInformation}} object (from \code{\link{get_affine_transform}})
+to a mean vector, covariance matrix, or within an S7 cognitive model.
 }
 \details{
-Only linear/affine transformations are supported because Gaussian and Normal-Inverse-Wishart
-distributions transform analytically under affine maps \eqn{y = A x + b}:
-\deqn{\mu' = A \mu + b, \quad \Sigma' = A \Sigma A^T}
-Models containing \code{\link{MVG_CategoryRepresentation}}, \code{\link{UVG_CategoryRepresentation}},
-\code{\link{NIW_CategoryRepresentation}}, \code{\link{NIX_CategoryRepresentation}}, or
-\code{\link{MNIX_CategoryRepresentation}} are supported. Exemplar representations are transformed
-by transforming their exemplar cues directly.
-
-Note that \code{(un)transform_category_cov} can also be used for centered sums-of-squares matrices, but not for
-uncentered sums-of-squares matrices. The latter require additional adjustments that might be implemented in the
-future (see https://chatgpt.com/c/683b3ed6-4924-800c-8f22-e61680f3360f).
+Gaussian and Normal-Inverse-Wishart distributions transform analytically under
+affine maps \eqn{y = A(x + b)}:
+\deqn{\mu' = A(\mu + b), \quad \Sigma' = A \Sigma A^T}
 }
-\keyword{TBD}

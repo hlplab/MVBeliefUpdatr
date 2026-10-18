@@ -597,15 +597,23 @@ loo_compare.MVBU_Stanfit <- function(x, ..., criterion = "loo") {
 #'
 #' @return A \code{\link[ggplot2]{ggplot}} object returned by \pkg{bayesplot}.
 #' @export
-pp_check.MVBU_Stanfit <- function(object, type = "dens_overlay", ndraws = 50, ...) {
-  .assert_true(S7::S7_inherits(object, MVBU_Stanfit), msg = "object must be an MVBU_Stanfit object.")
+pp_check.MVBU_Stanfit <- function(
+  object,
+  type = "dens_overlay",
+  ndraws = 50,
+  ...
+) {
+  .assert_true(
+    S7::S7_inherits(object, MVBU_Stanfit),
+    msg = "object must be an MVBU_Stanfit object."
+  )
 
   if (!requireNamespace("bayesplot", quietly = TRUE)) {
     .stop("Package 'bayesplot' is required for pp_check(). Please install it.")
   }
 
   cues <- get_cue_labels(object)
-  data_df <- object@data
+  data_df <- get_data(object)
 
   # Determine response vector y (cue values or category responses)
   y <- if (!is.null(cues) && length(cues) > 0L && cues[1] %in% names(data_df)) {

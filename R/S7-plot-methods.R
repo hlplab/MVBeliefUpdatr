@@ -4453,6 +4453,8 @@ S7::method(plot_diagnostics, MVBU_Stanfit) <- function(x, ...) {
 # Base S7 plot() dispatch
 # -----------------------------------------------------------------------------
 
+# S3 generic plot() must be registered per S7 class, as S3 dispatch cannot
+# dispatch on S7 union types.
 #' @export
 S7::method(plot, MVBU_CategoryRepresentation) <- function(x, ...) {
   plot_categories(x, ...)

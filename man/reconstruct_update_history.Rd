@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R, R/S7-stanfit-methods.R
 \name{reconstruct_update_history}
 \alias{reconstruct_update_history}
-\alias{reconstruct_update_history,MVBU_Stanfit-method}
+\alias{.create_ideal_adaptor_representation}
 \title{Reconstruct exposure update history as a model list}
 \usage{
 reconstruct_update_history(
@@ -17,17 +17,14 @@ reconstruct_update_history(
   ...
 )
 
-## S7 method for class <MVBU_Stanfit>
-reconstruct_update_history(
-  object,
-  uncertainty_treatment = c("marginalize", "discard"),
-  ndraws = 20L,
-  step_size = 10L,
-  groups = NULL,
-  categories = NULL,
-  parallel = FALSE,
-  seed = 42L,
-  ...
+.create_ideal_adaptor_representation(
+  model_family,
+  category_labels,
+  cue_labels,
+  m,
+  s,
+  kappa,
+  nu
 )
 }
 \arguments{

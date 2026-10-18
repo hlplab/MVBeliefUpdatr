@@ -6,43 +6,58 @@
 \usage{
 fit_ideal_adaptor(
   stanfit_input,
+  stanmodel = "NIW_ideal_adaptor",
+  fixed_parameters = list(),
+  priors = list(),
   file = NULL,
   file_refit = "never",
-  file_compress = T,
+  file_compress = TRUE,
   stanvars = NULL,
   backend = "rstan",
   save_pars = NULL,
-  basis = NULL,
   chains = 4,
   iter = 2000,
   warmup = 1000,
   init = "random",
   control = NULL,
   silent = 1,
+  threads = NULL,
   stan_model_args = list(),
-  stanmodel = NULL,
-  rename = T,
+  rename = TRUE,
   ...
 )
 }
 \arguments{
-\item{stanfit_input}{An object of class \code{\link{IdealAdaptorStanfitInput}} containing the prepared Stan input, data, and transform metadata.}
+\item{stanfit_input}{An object of class
+\code{\link{IdealAdaptorStanfitInput}} containing the prepared data and
+transform metadata.}
 
-\item{file}{Either NULL or a character string. In the latter case, the fitted model object is saved
-via saveRDS in a file named after the string supplied in file. The .rds extension is added automatically.
-If the file already exists, the model from that file will be loaded and returned instead of refitting the model.
-As existing files won't be overwritten, you have to manually remove the file in order to refit and save the
-model under an existing file name. The file name is stored in the \code{ideal_adaptor_stanfit} object
-for later use. (default: \code{NULL})}
+\item{stanmodel}{Character string naming the Stan model to use. Defaults to
+\code{"NIW_ideal_adaptor"}.}
+
+\item{fixed_parameters}{Named list of fixed parameters (e.g.,
+\code{lapse_rate}, \code{lapse_bias}, \code{prior_p}, \code{mu_0},
+\code{Sigma_0}, \code{weights}). Defaults to \code{list()}.}
+
+\item{priors}{Named list of prior specifications. Defaults to
+\code{list()}.}
+
+\item{file}{Either NULL or a character string. In the latter case, the fitted
+model object is saved via saveRDS in a file named after the string supplied
+in file. The .rds extension is added automatically. If the file already
+exists, the model from that file will be loaded and returned instead of
+refitting the model. As existing files won't be overwritten, you have to
+manually remove the file in order to refit and save the model under an
+existing file name. The file name is stored in the
+\code{ideal_adaptor_stanfit} object for later use. (default: \code{NULL})}
 
 \item{file_refit}{Modifies when the fit stored via the \code{file} argument
 is re-used. For \code{"never"} (default) the fit is always loaded if it
 exists and fitting is skipped. For \code{"always"} the model is always
-refitted. If set to \code{"on_change"}, model will be refit if data passed to
-Stan differ from
-what is stored in the file. Refit will not be triggered for changes in
-additional parameters of the fit (e.g., initial values, number of iterations,
-control arguments, ...).}
+refitted. If set to \code{"on_change"}, model will be refit if data passed
+to Stan differ from what is stored in the file. Refit will not be triggered
+for changes in additional parameters of the fit (e.g., initial values,
+number of iterations, control arguments, ...).}
 
 \item{file_compress}{Logical or a character string, specifying one of the
 compression algorithms supported by \code{\link{saveRDS}}. If the
@@ -53,14 +68,11 @@ the fitted model object.}
 
 \item{backend}{Character string naming the package to use as the backend for
 fitting the Stan model. Options are \code{"rstan"} (the default) or
-\code{"cmdstanr"}. Details on the
-\pkg{rstan} and \pkg{cmdstanr} packages are available at
-\url{https://mc-stan.org/rstan/} and \url{https://mc-stan.org/cmdstanr/},
-respectively.}
+\code{"cmdstanr"}. Details on the \pkg{rstan} and \pkg{cmdstanr} packages
+are available at \url{https://mc-stan.org/rstan/} and
+\url{https://mc-stan.org/cmdstanr/}, respectively.}
 
 \item{save_pars}{Storage for parameter names to save. Default: \code{NULL}.}
-
-\item{basis}{Optional basis data subset. Default: \code{NULL}.}
 
 \item{chains}{Number of Markov chains. Default: 4.}
 
@@ -70,33 +82,37 @@ respectively.}
 
 \item{init}{Initial values specification. Default: \code{"random"}.}
 
-\item{control}{Named list of control parameters passed to Stan sampler. Default: \code{NULL}.}
+\item{control}{Named list of control parameters passed to Stan sampler.
+Default: \code{NULL}.}
 
-\item{silent}{Verbosity level between \code{0} and \code{2}.
-If \code{1} (the default), most of the
-informational messages of compiler and sampler are suppressed.
-If \code{2}, even more messages are suppressed. The actual
+\item{silent}{Verbosity level between \code{0} and \code{2}. If \code{1} (the
+default), most of the informational messages of compiler and sampler are
+suppressed. If \code{2}, even more messages are suppressed. The actual
 sampling progress is still printed. Set \code{refresh = 0} to turn this off
 as well. If using \code{backend = "rstan"} you can also set
 \code{open_progress = FALSE} to prevent opening additional progress bars.}
 
-\item{stan_model_args}{A \code{list} of further arguments passed to
-\link[rstan:stan_model]{rstan::stan_model} for \code{backend =
-"rstan"} or to \code{cmdstanr::cmdstan_model} for \code{backend =
-"cmdstanr"}, which allows to change how models are compiled.}
+\item{threads}{Optional number of threads per chain (or list containing
+\code{threads}) for multithreading within Stan. Default: \code{NULL}.}
 
-\item{stanmodel}{Name of stanmodel that should be used. Overrides any default selection.}
+\item{stan_model_args}{A \code{list} of further arguments passed to
+\link[rstan:stan_model]{rstan::stan_model} for \code{backend = "rstan"} or to
+\code{cmdstanr::cmdstan_model} for \code{backend = "cmdstanr"}, which
+allows to change how models are compiled.}
 
 \item{rename}{For internal use only.}
 
-\item{...}{Additional parameters are passed to \link[rstan:sampling]{rstan::sampling}, including the following:}
+\item{...}{Additional parameters are passed to \link[rstan:sampling]{rstan::sampling}, including
+the following:}
 }
 \value{
-An object of class \code{ideal_adaptor_stanfit} with the fitted stan model.
+An object of class \code{ideal_adaptor_stanfit} with the fitted
+stan model.
 }
 \description{
-Infers a prior and posterior distribution of ideal adaptors from the input data using Stan. Currently, three
-types of ideal adaptor models are available, each using a conjugate prior over Gaussian or multivariate
+Infers a prior and posterior distribution of ideal adaptors from the input
+data using Stan. Currently, three types of ideal adaptor models are
+available, each using a conjugate prior over Gaussian or multivariate
 Gaussian categories:
 }
 \details{
@@ -113,17 +129,20 @@ are integrated over during categorization assuming ideal cue weights
 based on the relative informativity of each cue.}
 }
 
-In interpreting the inferred parameters, it should be kept in mind that the \emph{inferred} scatter matrix
-(e.g., S_0) for the NIW model) includes
-variability from internal perceptual and/or external environmental noise, \emph{in addition} to the motor
-noise that is reflected in production data. This also implies that, \strong{if \code{Sigma_0} is provided
-by the user it should be arguably convolved with an estimate of perceptual noise}. This is particularly
-important if the data you're fitting contains test phases without exposure (e.g., pre-exposure tests).
+In interpreting the inferred parameters, it should be kept in mind that
+the \emph{inferred} scatter matrix (e.g., S_0 for the NIW model) includes
+variability from internal perceptual and/or external environmental noise,
+\emph{in addition} to the motor noise that is reflected in production
+data. This also implies that, \strong{if \code{Sigma_0} is provided
+by the user it should be arguably convolved with an estimate of
+perceptual noise}. This is particularly important if the data you're
+fitting contains test phases without exposure (e.g., pre-exposure tests).
 
-Make sure to read the notes about the \code{Sigma_0} argument in the help page on \code{\link{make_staninput}}.
-Use \code{methods(class = "ideal_adaptor_stanfit")} for an overview on available methods.
+Use \code{methods(class = "ideal_adaptor_stanfit")} for an overview on
+available methods.
 }
 \seealso{
-\code{\link{IdealAdaptorStanfit}} for information about ideal adaptor stanfit objects,
-\code{\link{get_draws}} to draw samples from the stanfit.
+\code{\link{IdealAdaptorStanfit}} for information about ideal
+adaptor stanfit objects, \code{\link{get_draws}} to draw samples from the
+stanfit.
 }

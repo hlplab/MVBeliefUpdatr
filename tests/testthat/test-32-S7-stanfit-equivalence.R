@@ -30,10 +30,19 @@ test_that(
   expect_equal(get_group_labels(input_nix), get_group_labels(input_niw))
   expect_equal(get_labels(input_nix), get_labels(input_niw))
 
+  staninput_nix <- MVBeliefUpdatr:::.new_staninput(
+    input_nix,
+    stanmodel = "NIX_ideal_adaptor"
+  )
+  staninput_niw <- MVBeliefUpdatr:::.new_staninput(
+    input_niw,
+    stanmodel = "NIW_ideal_adaptor"
+  )
+
   # Exposure centered sum of squares equivalence
   expect_equal(
-    as.vector(input_nix@staninput@values$x_css_exposure[, 1]),
-    as.vector(input_niw@staninput@values$x_css_exposure[, 1, 1, 1]),
+    as.vector(staninput_nix@values$css_exposure[, 1]),
+    as.vector(staninput_niw@values$css_exposure[, 1, 1, 1]),
     tolerance = 1e-6
   )
 
@@ -45,7 +54,7 @@ test_that(
   fit_nix_init <- suppressWarnings(
     rstan::sampling(
       mod_nix,
-      data = input_nix@staninput@values,
+      data = staninput_nix@values,
       iter = 1,
       chains = 1,
       warmup = 0,
@@ -55,7 +64,7 @@ test_that(
   fit_niw_init <- suppressWarnings(
     rstan::sampling(
       mod_niw,
-      data = input_niw@staninput@values,
+      data = staninput_niw@values,
       iter = 1,
       chains = 1,
       warmup = 0,

@@ -18,6 +18,7 @@ Roxygen: list(markdown = TRUE)
 RdMacros: Rdpack
 Suggests:
     bridgesampling,
+    cmdstanr,
     covr,
     knitr,
     patchwork,
@@ -72,9 +73,11 @@ SystemRequirements: GNU make
 Config/roxygen2/version: 8.1.0
 Collate: 
     'MVBeliefUpdatr-package.R'
+    'internal-globals.R'
     'internal-is.R'
     'internal-utils-imported.R'
     'internal-asserts.R'
+    'S7-family.R'
     'S7-class.R'
     'S7-class-exemplar.R'
     'S7-class-mnix.R'
@@ -83,27 +86,28 @@ Collate:
     'S7-class-niw.R'
     'S7-class-nix.R'
     'S7-class-uvg.R'
+    'S7-generics.R'
     'S7-transform-information.R'
     'S7-staninput.R'
-    'asserts.R'
     'S7-stanfit-input.R'
+    'asserts.R'
+    'S7-prior.R'
+    'S7-fixed.R'
     'S7-stanfit.R'
     'S7-stanfit-utils.R'
     'S7-stanfit-fitting.R'
-    'S7-generics.R'
+    'S7-stanfit-input-methods.R'
     'S7-stanfit-posterior.R'
     'S7-model-list.R'
     'S7-family-coercion.R'
     'S7-make-objects.R'
     'S7-example-objects.R'
-    'S7-factory-helpers.R'
     'S7-methods.R'
     'S7-niw-nix-conversions.R'
     'S7-plot-engine.R'
     'S7-stanfit-methods.R'
     'S7-plot-methods.R'
     'S7-stanfit-diagnostics.R'
-    'S7-stanfit-input-methods.R'
     'internal-utils.R'
     'S7-stanfit-postprocess.R'
     'S7-to-legacy-tibble-compatibility.R'
@@ -134,11 +138,11 @@ Collate:
     'deprecated-make-staninput.R'
     'deprecated-nest-model.R'
     'deprecated-plot-expected-categories.R'
+    'deprecated-transforms.R'
     'deprecated-update-NIW-IA.R'
     'deprecated-visualize-NIW-IA-stanfit.R'
     'deprecated-visualize-NIW-IA.R'
     'deprecated-visualize-basics.R'
-    'internal-globals.R'
     'internal-overrides-of-external-functions.R'
     'reshape_incremental_design.R'
     'stanmodels.R'

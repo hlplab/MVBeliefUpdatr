@@ -752,9 +752,9 @@ example_exposure_test_data <- function(
 #'
 #' \code{example_ideal_adaptor_stanfit_input} constructs the complete high-level
 #' \code{\link{IdealAdaptorStanfitInput}} object (including data, transform
-#' information, and metadata). \code{example_ideal_adaptor_staninput} extracts
-#' the underlying typed Stan-ready input (\code{\link{IdealAdaptorStaninput}})
-#' from its \code{@staninput} property.
+#' information, and metadata). \code{example_ideal_adaptor_staninput} creates
+#' a typed Stan-ready input (\code{\link{IdealAdaptorStaninput}}) via
+#' \code{.new_staninput()}.
 #'
 #' @param model_family Character string indicating the model family:
 #'   \code{"NIW"} (default), \code{"NIX"}, or \code{"MNIX"}.
@@ -767,6 +767,11 @@ example_exposure_test_data <- function(
 #' @param data Optional list of \code{exposure} and \code{test} tibbles as
 #'   returned by \code{\link{example_exposure_test_data}}. If \code{NULL}
 #'   (default), data are generated via \code{\link{example_exposure_test_data}}.
+#' @param stanmodel Optional character string naming the Stan model for
+#'   \code{example_ideal_adaptor_staninput}. Defaults to
+#'   \code{"MNIX_ideal_adaptor_ideal_integrator"} when
+#'   \code{model_family == "MNIX"} and \code{"<model_family>_ideal_adaptor"}
+#'   otherwise.
 #' @param ... Additional arguments passed to
 #'   \code{\link{example_exposure_test_data}} when \code{data} is \code{NULL}.
 #'
@@ -804,7 +809,6 @@ example_ideal_adaptor_stanfit_input <- function(
     "2" = c("VOT", "f0_semitones"),
     "3" = c("VOT", "f0_semitones", "vowel_duration")
   )
-  stanmodel <- paste0(model_family, "_ideal_adaptor")
   new_ideal_adaptor_stanfit_input(
     exposure = data$exposure,
     test = data$test,
@@ -812,8 +816,7 @@ example_ideal_adaptor_stanfit_input <- function(
     category = "category",
     response = "response_category",
     group = "group",
-    control = control,
-    stanmodel = stanmodel
+    control = control
   )
 }
 
@@ -823,15 +826,23 @@ example_ideal_adaptor_staninput <- function(
   model_family = c("NIW", "NIX", "MNIX"),
   n_cues = NULL,
   categories = c("/d/", "/t/"),
+  stanmodel = NULL,
   ...
 ) {
+  model_family <- match.arg(model_family)
+  if (is.null(stanmodel)) {
+    stanmodel <- .to_stanmodel(model_family)
+  }
   stanfit_input <- example_ideal_adaptor_stanfit_input(
     model_family = model_family,
     n_cues = n_cues,
     categories = categories,
     ...
   )
-  stanfit_input@staninput
+  .new_staninput(
+    stanfit_input = stanfit_input,
+    stanmodel = stanmodel
+  )
 }
 
 #' Example IdealAdaptorStanfit object
@@ -858,6 +869,10 @@ example_ideal_adaptor_staninput <- function(
 #' @param staninput_control Named list of Stan input control parameters
 #'   created by \code{\link{control_staninput}}. Default:
 #'   \code{control_staninput()}.
+#' @param stanmodel Optional character string naming the Stan model.
+#'   Defaults to \code{"MNIX_ideal_adaptor_ideal_integrator"} when
+#'   \code{model_family == "MNIX"} and \code{"<model_family>_ideal_adaptor"}
+#'   otherwise.
 #' @param ... Additional arguments passed to \code{\link{fit_ideal_adaptor}}
 #'   (e.g., sampler arguments such as \code{chains}, \code{iter},
 #'   \code{control = list(adapt_delta = 0.99)}).
@@ -876,12 +891,16 @@ example_ideal_adaptor_stanfit <- function(
   staninput_control = MVBeliefUpdatr::control_staninput(),
   file = NULL,
   file_refit = c("on_change", "never", "always"),
+  stanmodel = NULL,
   ...
 ) {
   model_family <- match.arg(model_family)
   file_refit <- match.arg(file_refit)
   if (is.null(n_cues)) {
     n_cues <- if (model_family == "MNIX") 2L else 1L
+  }
+  if (is.null(stanmodel)) {
+    stanmodel <- .to_stanmodel(model_family)
   }
   stanfit_input <- example_ideal_adaptor_stanfit_input(
     model_family = model_family,
@@ -890,7 +909,6 @@ example_ideal_adaptor_stanfit <- function(
     seed = seed,
     control = staninput_control
   )
-  stanmodel <- paste0(model_family, "_ideal_adaptor")
   fit_ideal_adaptor(
     stanfit_input = stanfit_input,
     file = file,

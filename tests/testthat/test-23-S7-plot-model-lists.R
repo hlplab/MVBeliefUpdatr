@@ -56,9 +56,38 @@ test_that(
       get_category_labels(sf_obj)
     )
 
-    suff <- get_sufficient_category_statistics(post_obj)
+    suff <- get_exposure_category_statistics(post_obj, simplify = FALSE)
     expect_true(is.data.frame(suff))
-    expect_false(inherits(suff, "tbl_df"))
+
+    # Full data, exposure data, and test data parity with Stanfit
+    expect_equal(get_data(post_obj), get_data(sf_obj))
+    expect_equal(get_exposure_data(post_obj), get_exposure_data(sf_obj))
+    expect_equal(get_test_data(post_obj), get_test_data(sf_obj))
+    expect_equal(post_obj@data, sf_obj@data)
+    expect_error(post_obj@test_data)
+
+    # Filtering on post_obj matches sf_obj
+    grps <- get_group_labels(sf_obj, include_prior = FALSE)
+    if (length(grps) > 0L) {
+      expect_equal(
+        get_data(post_obj, groups = grps[1]),
+        get_data(sf_obj, groups = grps[1])
+      )
+      expect_equal(
+        get_exposure_data(post_obj, groups = grps[1]),
+        get_exposure_data(sf_obj, groups = grps[1])
+      )
+      expect_equal(
+        get_test_data(post_obj, groups = grps[1]),
+        get_test_data(sf_obj, groups = grps[1])
+      )
+    }
+
+    # Construction directly with data
+    raw_test <- get_test_data(sf_obj)
+    post_from_data <- MVBU_StanfitPosterior(data = raw_test)
+    expect_equal(get_test_data(post_from_data), raw_test)
+    expect_equal(get_data(post_from_data, space = "original"), raw_test)
 
     out_print <- utils::capture.output(print(post_obj))
     expect_true(any(grepl("Lightweight Stanfit Posterior", out_print)))
@@ -170,7 +199,10 @@ test_that(
 )
 
 test_that(
-  "plot_categorization_functions on MVBU_ModelList supports 2D animated surface",
+  paste0(
+    "plot_categorization_functions on MVBU_ModelList supports 2D animated ",
+    "surface"
+  ),
   {
     skip_if_not_installed("plotly")
     set.seed(42)
@@ -193,7 +225,10 @@ test_that(
     expect_equal(length(pb_dec_anim$x$frames), 2L)
     expect_true(length(pb_dec_anim$x$layout$updatemenus) >= 1L)
     expect_equal(length(pb_dec_anim$x$layout$updatemenus[[1]]$buttons), 1L)
-    expect_equal(pb_dec_anim$x$layout$updatemenus[[1]]$buttons[[1]]$label, "Play")
+    expect_equal(
+      pb_dec_anim$x$layout$updatemenus[[1]]$buttons[[1]]$label,
+      "Play"
+    )
   }
 )
 

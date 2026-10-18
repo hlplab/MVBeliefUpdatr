@@ -78,27 +78,68 @@ test_that("add draws - output check (2 cues)", {
 
 test_that("get exposure category statistic", {
   # Get error when *exposure* statistics is requested for *prior*
-  expect_error(get_exposure_category_statistic(fit, groups = "prior"))
-  expect_error(get_exposure_category_mean(fit, groups = "prior"))
-  expect_error(get_exposure_category_cov(fit, groups = "prior"))
-  # When prior is not requested
-  # get_exposure_mean works for MNIX
-  expect_true(is.vector(get_exposure_category_mean(fit, "/d/", "no_exposure")))
+  expect_error(get_exposure_category_statistics(fit, groups = "prior"))
   expect_error(
-    is.vector(get_exposure_category_mean(fit, "wrong", "no_exposure"))
+    get_exposure_category_statistics(fit, groups = "prior", stats = "mean")
   )
-  expect_error(is.vector(get_exposure_category_mean(fit, "/d/", "wrong")))
+  expect_error(
+    get_exposure_category_statistics(fit, groups = "prior", stats = "cov")
+  )
+  # When prior is not requested
+  # get_exposure_category_statistics with stats = "mean" works for MNIX
   expect_true(
-    is_tibble(
-      get_exposure_category_mean(
-        fit, c("/d/", "/t/"), c("no_exposure", "top_right")
+    is.vector(
+      get_exposure_category_statistics(
+        fit, "/d/", "no_exposure", stats = "mean"
       )
     )
   )
-  # css, uss, cov for MNIX return matrices
-  expect_true(is.matrix(get_exposure_category_css(fit, "/d/", "no_exposure")))
-  expect_true(is.matrix(get_exposure_category_uss(fit, "/d/", "no_exposure")))
-  expect_true(is.matrix(get_exposure_category_cov(fit, "/d/", "no_exposure")))
+  expect_error(
+    get_exposure_category_statistics(
+      fit, "wrong", "no_exposure", stats = "mean"
+    )
+  )
+  expect_error(
+    get_exposure_category_statistics(
+      fit, "/d/", "wrong", stats = "mean"
+    )
+  )
+  expect_true(
+    is_tibble(
+      get_exposure_category_statistics(
+        fit, c("/d/", "/t/"), c("no_exposure", "top_right"), stats = "mean"
+      )
+    )
+  )
+  expect_true(
+    is_tibble(
+      get_exposure_category_statistics(
+        fit, "/d/", "no_exposure", stats = "mean", simplify = FALSE
+      )
+    )
+  )
+  # css and uss for MNIX return numeric vectors; cov returns a matrix
+  expect_true(
+    is.numeric(
+      get_exposure_category_statistics(
+        fit, "/d/", "no_exposure", stats = "css"
+      )
+    )
+  )
+  expect_true(
+    is.numeric(
+      get_exposure_category_statistics(
+        fit, "/d/", "no_exposure", stats = "uss"
+      )
+    )
+  )
+  expect_true(
+    is.matrix(
+      get_exposure_category_statistics(
+        fit, "/d/", "no_exposure", stats = "cov"
+      )
+    )
+  )
 })
 
 test_that("get expected category statistic", {
@@ -162,49 +203,96 @@ test_that("add draws - output check (3 cues)", {
 })
 
 test_that("get exposure category statistic (NIW)", {
-  expect_true(is.matrix(get_exposure_category_css(fit, "/d/", "no_exposure")))
-  expect_error(
-    is.matrix(get_exposure_category_css(fit, "wrong", "no_exposure"))
-  )
-  expect_error(is.matrix(get_exposure_category_css(fit, "/d/", "wrong")))
   expect_true(
-    is_tibble(
-      get_exposure_category_css(
-        fit, c("/d/", "/t/"), c("no_exposure", "shifted_pos")
+    is.matrix(
+      get_exposure_category_statistics(
+        fit, "/d/", "no_exposure", stats = "css"
       )
     )
   )
-  expect_true(is.matrix(get_exposure_category_uss(fit, "/d/", "no_exposure")))
   expect_error(
-    is.matrix(get_exposure_category_uss(fit, "wrong", "no_exposure"))
-  )
-  expect_error(is.matrix(get_exposure_category_uss(fit, "/d/", "wrong")))
-  expect_true(
-    is_tibble(
-      get_exposure_category_uss(
-        fit, c("/d/", "/t/"), c("no_exposure", "shifted_pos")
-      )
+    get_exposure_category_statistics(
+      fit, "wrong", "no_exposure", stats = "css"
     )
   )
-  expect_true(is.matrix(get_exposure_category_cov(fit, "/d/", "no_exposure")))
   expect_error(
-    is.matrix(get_exposure_category_cov(fit, "wrong", "no_exposure"))
-  )
-  expect_error(is.matrix(get_exposure_category_cov(fit, "/d/", "wrong")))
-  expect_true(
-    is_tibble(
-      get_exposure_category_cov(
-        fit, c("/d/", "/t/"), c("no_exposure", "shifted_pos")
-      )
+    get_exposure_category_statistics(
+      fit, "/d/", "wrong", stats = "css"
     )
   )
   expect_true(
     is_tibble(
-      get_exposure_category_statistic(
+      get_exposure_category_statistics(
+        fit, c("/d/", "/t/"), c("no_exposure", "shifted_pos"), stats = "css"
+      )
+    )
+  )
+  expect_true(
+    is.matrix(
+      get_exposure_category_statistics(
+        fit, "/d/", "no_exposure", stats = "uss"
+      )
+    )
+  )
+  expect_error(
+    get_exposure_category_statistics(
+      fit, "wrong", "no_exposure", stats = "uss"
+    )
+  )
+  expect_error(
+    get_exposure_category_statistics(
+      fit, "/d/", "wrong", stats = "uss"
+    )
+  )
+  expect_true(
+    is_tibble(
+      get_exposure_category_statistics(
+        fit, c("/d/", "/t/"), c("no_exposure", "shifted_pos"), stats = "uss"
+      )
+    )
+  )
+  expect_true(
+    is.matrix(
+      get_exposure_category_statistics(
+        fit, "/d/", "no_exposure", stats = "cov"
+      )
+    )
+  )
+  expect_error(
+    get_exposure_category_statistics(
+      fit, "wrong", "no_exposure", stats = "cov"
+    )
+  )
+  expect_error(
+    get_exposure_category_statistics(
+      fit, "/d/", "wrong", stats = "cov"
+    )
+  )
+  expect_true(
+    is_tibble(
+      get_exposure_category_statistics(
+        fit, c("/d/", "/t/"), c("no_exposure", "shifted_pos"), stats = "cov"
+      )
+    )
+  )
+  expect_true(
+    is_tibble(
+      get_exposure_category_statistics(
         fit,
         c("/d/", "/t/"),
         c("no_exposure", "shifted_pos"),
-        c("n", "mean", "cov")
+        stats = c("n", "mean", "cov")
+      )
+    )
+  )
+  expect_true(
+    is_tibble(
+      get_exposure_category_statistics(
+        fit,
+        "/d/",
+        "no_exposure",
+        stats = "cov",
+        simplify = FALSE
       )
     )
   )

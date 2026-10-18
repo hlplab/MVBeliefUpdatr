@@ -87,13 +87,39 @@ summing to 1.}
 
 \item{Sigma_noise}{Optional perceptual/measurement noise covariance matrix.}
 
-\item{noise_treatment}{Treatment of noise: \code{"no_noise"}, \code{"sample"}, or
-\code{"marginalize"}. Defaults to \code{.infer_noise_treatment(Sigma_noise)}:
-\code{"marginalize"} if noise is present, \code{"no_noise"} otherwise.}
+\item{noise_treatment}{Treatment of perceptual noise during evaluation:
+\code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}.
+\itemize{
+\item \code{"no_noise"}: No perceptual noise is applied to input cues,
+and no noise is assumed during categorization.
+\item \code{"sample"}: Simulates sensory noise on a specific observation.
+Noise drawn from \eqn{\mathcal{N}(0, \Sigma_{\text{noise}})} is added
+to input cues, and the observer accounts for their own noise
+uncertainty during categorization by adding \eqn{\Sigma_{\text{noise}}}
+to their likelihood scale.
+\item \code{"marginalize"}: Evaluates categorization in the limit across
+infinitely many noisy encounters (expected consequences). No noise is
+sampled onto the input stimulus, but \eqn{\Sigma_{\text{noise}}} is
+added to the category covariance scale.
+}
+Defaults to \code{.infer_noise_treatment(Sigma_noise)}: \code{"marginalize"} if
+noise is present, \code{"no_noise"} otherwise.}
 
-\item{lapse_treatment}{Treatment of lapses: \code{"no_lapses"}, \code{"sample"}, or
-\code{"marginalize"}. Defaults to \code{.infer_lapse_treatment(lapse_rate)}:
-\code{"marginalize"} if \code{lapse_rate > 0}, \code{"no_lapses"} otherwise.}
+\item{lapse_treatment}{Treatment of attentional lapses during evaluation:
+\code{"no_lapses"}, \code{"sample"}, or \code{"marginalize"}.
+\itemize{
+\item \code{"no_lapses"}: Lapses are ignored; categorization reflects
+pure normative evidence evaluation (even if \code{lapse_rate > 0}).
+\item \code{"sample"}: Simulates stochastic attentional lapses on
+individual observations. With probability \code{lapse_rate}, a lapse
+occurs: the posterior is replaced by \code{lapse_bias}.
+\item \code{"marginalize"}: Evaluates categorization in the limit across
+infinitely many encounters (expected response probabilities). The
+category posterior is the mixture
+\eqn{(1 - \lambda) p(c \mid x) + \lambda b_c}.
+}
+Defaults to \code{.infer_lapse_treatment(lapse_rate)}: \code{"marginalize"} if
+\code{lapse_rate > 0}, \code{"no_lapses"} otherwise.}
 }
 \value{
 An S7 object of the respective MVG class.

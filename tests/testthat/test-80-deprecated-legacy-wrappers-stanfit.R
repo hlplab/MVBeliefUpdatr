@@ -1,9 +1,12 @@
 
 test_that("ideal_adaptor_staninput creates an S7 object with list slots", {
-  obj <- IdealAdaptorStaninput(values = list(
-    transformed = list(M = 2, D = 1),
-    untransformed = list(raw = TRUE)
-  ))
+  obj <- IdealAdaptorStaninput(
+    values = list(
+      transformed = list(M = 2, D = 1),
+      untransformed = list(raw = TRUE)
+    ),
+    family = "NIX"
+  )
 
   expect_true(S7::S7_inherits(obj, IdealAdaptorStaninput))
   expect_equal(obj@values$transformed$M, 2)
@@ -13,22 +16,27 @@ test_that("ideal_adaptor_staninput creates an S7 object with list slots", {
 test_that("transform_information accepts list and function properties", {
   identity_fn <- function(x) x
   obj <- MVBU_TransformInformation(
-    transform.parameters = list(scale = 1),
-    transform.function = identity_fn,
-    untransform.function = identity_fn
+    cue.labels = "c1",
+    shift = 0,
+    SCALE = 1,
+    transform.function = identity_fn
   )
 
   expect_true(S7::S7_inherits(obj, MVBU_TransformInformation))
-  expect_equal(obj@transform.parameters$scale, 1)
+  expect_equal(obj@SCALE, 1)
   expect_equal(obj@transform.function(3), 3)
 })
 
 test_that("ideal_adaptor_stanfit stores staninput and transform information", {
-  staninput_obj <- IdealAdaptorStaninput(values = list(transformed = list(M = 2), untransformed = list()))
+  staninput_obj <- IdealAdaptorStaninput(
+    values = list(transformed = list(M = 2), untransformed = list()),
+    family = "NIX"
+  )
   transform_obj <- MVBU_TransformInformation(
-    transform.parameters = list(),
-    transform.function = function(x) x,
-    untransform.function = function(x) x
+    cue.labels = "c1",
+    shift = 0,
+    SCALE = 1,
+    transform.function = function(x) x
   )
 
   obj <- IdealAdaptorStanfit(
@@ -41,11 +49,16 @@ test_that("ideal_adaptor_stanfit stores staninput and transform information", {
   expect_true(S7::S7_inherits(obj, IdealAdaptorStanfit))
   expect_equal(obj@backend, "rstan")
   expect_true(S7::S7_inherits(obj@staninput, IdealAdaptorStaninput))
-  expect_true(S7::S7_inherits(obj@transform_information, MVBU_TransformInformation))
+  expect_true(
+    S7::S7_inherits(obj@transform_information, MVBU_TransformInformation)
+  )
 })
 
 test_that("S7 accessors expose staninput and transform data", {
-  staninput_obj <- IdealAdaptorStaninput(values = list(transformed = list(M = 2), untransformed = list(raw = TRUE)))
+  staninput_obj <- IdealAdaptorStaninput(
+    values = list(transformed = list(M = 2), untransformed = list(raw = TRUE)),
+    family = "NIX"
+  )
   obj <- IdealAdaptorStanfit(staninput = staninput_obj)
 
   expect_equal(get_staninput(obj)@values$transformed$M, 2)
@@ -63,10 +76,13 @@ test_that("MVBU_Stanfit creates a placeholder staninput before fitting", {
 })
 
 test_that("family-specific fit constructors use the appropriate S7 subclass", {
-  staninput_obj <- NIX_IdealAdaptorStaninput(values = list(
-    transformed = list(M = 2),
-    untransformed = list(raw = TRUE)
-  ))
+  staninput_obj <- IdealAdaptorStaninput(
+    values = list(
+      transformed = list(M = 2),
+      untransformed = list(raw = TRUE)
+    ),
+    family = "NIX"
+  )
 
   fit_obj <- ideal_adaptor_stanfit(staninput = staninput_obj)
 

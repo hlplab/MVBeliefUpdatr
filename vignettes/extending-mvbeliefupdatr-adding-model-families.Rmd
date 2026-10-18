@@ -111,6 +111,8 @@ requirement is registering an `MVBU_Family` descriptor:
    - `sampling_function`: observation sampling closure
    - `expected_moments`: point-summary expected moments (`mu`, `Sigma`, `weights`)
    - (Optional) `marginal_moments`: predictive dispersion moments
+   - (Optional) `stanmodel`: list bundling `stanmodel_name` and
+     `stanfit_class` (or `NULL` if no Stan model is used).
 
 Category representations and cognitive models can be instantiated directly
 using the base constructors `new_category_representation()` and
@@ -131,7 +133,7 @@ delegate to the family descriptor:
 |:---|:---|:---|
 | Family Introspection | `get_family()`, `get_family_name()` | Resolves registered `MVBU_Family` descriptor |
 | Observation Sampling | `sample_observations()` | Dispatches to `fam@sampling_function` |
-| Sufficient Statistics | `get_sufficient_category_statistics()` | Dispatches to `fam@expected_moments` |
+| Expected Moments | `get_expected_mu()`, `get_expected_sigma()` | Dispatches to `fam@expected_moments` |
 | Likelihood, Posterior & Categorization |`likelihood()`, `posterior()`, `categorize()` | Uses category likelihood function & Bayes rule |
 | Quantitative Evaluation | `evaluate_model()` | Evaluates log-likelihood / accuracy |
 
@@ -373,13 +375,22 @@ get_family_name(observer)
 get_family(observer)
 ```
 
-### Extracting Category Statistics
+### Extracting Category Moments and Sufficient Statistics
 
-Because `uniform_family` provides `expected_moments`, sufficient category
-statistics can be extracted without any additional code:
+Because `uniform_family` provides `expected_moments`, expected moments (means
+and covariances) can be extracted directly from the observer:
+
+```{r test_moments}
+get_expected_mu(observer)
+get_expected_sigma(observer)
+```
+
+For empirical observations in a data frame, sufficient category statistics are
+calculated using `get_sufficient_category_statistics()`:
 
 ```{r test_sufficient_stats}
-get_sufficient_category_statistics(observer)
+obs_df <- sample_observations(observer, n = 30L)
+get_sufficient_category_statistics(obs_df, cues = "VOT")
 ```
 
 ### Visualizing Category Likelihoods and Decision Landscapes
@@ -488,7 +499,8 @@ request satisfies all quality and architectural requirements:
 
 - [ ] **Family Registration**: Register with `new_mvbu_family()` and
   `register_model_family()`. Provide `density_function`,
-  `sampling_function`, and `expected_moments`.
+  `sampling_function`, `expected_moments`, and specify `stanmodel` list
+  `list(stanmodel_name = ..., stanfit_class = ...)` (or `NULL` if no Stan model exists).
 - [ ] Optional: add
   - [ ] **S7 Inheritance**: If specified, category representation inherits from
   `MVBU_CategoryRepresentation`; cognitive model inherits from

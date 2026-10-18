@@ -125,11 +125,38 @@ or \code{"sampling"}). Defaults to \code{"proportional"}.}
 Defaults to \code{100L} for 1D and \code{60L} for 2D/3D.}
 
 \item{noise_treatment}{Optional character string specifying treatment of
-perceptual noise (\code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}).
+perceptual noise: \code{"no_noise"}, \code{"sample"}, or
+\code{"marginalize"}.
+\itemize{
+\item \code{"no_noise"}: No perceptual noise is applied to input cues,
+and no noise is assumed during categorization.
+\item \code{"sample"}: Simulates sensory noise on a specific observation.
+Noise drawn from \eqn{\mathcal{N}(0, \Sigma_{\text{noise}})} is added
+to input cues (and projected into composite cue space in early
+integration), and the observer accounts for their own noise
+uncertainty during categorization by adding \eqn{\Sigma_{\text{noise}}}
+to their likelihood scale.
+\item \code{"marginalize"}: Evaluates categorization in the limit across
+infinitely many noisy encounters (expected consequences). No noise is
+sampled onto the input stimulus, but \eqn{\Sigma_{\text{noise}}} is
+added to the category covariance scale.
+}
 Defaults to \code{NULL} (uses the model's configured noise treatment).}
 
 \item{lapse_treatment}{Optional character string specifying treatment of
-lapses (\code{"no_lapses"}, \code{"sample"}, or \code{"marginalize"}).
+attentional lapses: \code{"no_lapses"}, \code{"sample"}, or
+\code{"marginalize"}.
+\itemize{
+\item \code{"no_lapses"}: Lapses are ignored; categorization reflects
+pure normative evidence evaluation (even if \code{lapse_rate > 0}).
+\item \code{"sample"}: Simulates stochastic attentional lapses on
+individual observations. With probability \code{lapse_rate}, a lapse
+occurs and the posterior is replaced by \code{lapse_bias}.
+\item \code{"marginalize"}: Evaluates categorization in the limit across
+infinitely many encounters (expected response probabilities),
+mixing normative posteriors with \code{lapse_bias}:
+\eqn{(1 - \lambda) p(c \mid x) + \lambda b_c}.
+}
 Defaults to \code{NULL} (uses the model's configured lapse treatment).}
 
 \item{...}{Additional arguments passed to specific plotting methods (e.g.,

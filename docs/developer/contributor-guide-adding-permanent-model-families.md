@@ -40,6 +40,9 @@ Every built-in model family adheres to the following structural conventions:
    - `sampling_function`: Vectorized random number generator.
    - `expected_moments`: Extraction of first and second moments (`mu`, `Sigma`).
    - `default_prior`: Standard prior configuration constructor.
+   - `stanmodel`: Optional list specifying `stanmodel_name` (e.g.,
+     `"NIX_ideal_adaptor"`) and `stanfit_class` (e.g.,
+     `"NIX_IdealAdaptorStanfit"`), or `NULL` if no Stan model is associated.
 
 2. **Internal Likelihood Closure Parity**:
    Concrete category representation constructors do *not* handwrite custom
@@ -132,7 +135,11 @@ In `R/S7-class.R`, add the family registration inside
   },
   expected_moments = function(rep) {
     list(mu = ..., Sigma = ...)
-  }
+  },
+  stanmodel = list(
+    stanmodel_name = "MYFAMILY_ideal_adaptor",
+    stanfit_class = "MYFAMILY_IdealAdaptorStanfit"
+  ) # or NULL if analytic
 )
 ```
 
@@ -253,6 +260,12 @@ the compiled Stan infrastructure:
 ### 6.1 Stan Generative Programs (`inst/stan/`)
 
 - Place Stan programs in `inst/stan/{family}_ideal_adaptor.stan`.
+- Ensure the family's `stanmodel$stanmodel_name` property matches the Stan program
+  basename without `.stan` extension (e.g., `"NIX_ideal_adaptor"`), and
+  `stanmodel$stanfit_class` matches the Stanfit S7 class name (e.g.,
+  `"NIX_IdealAdaptorStanfit"`).
+- Registering the family dynamically populates bidirectional lookups
+  (`.to_stanmodel()` and `.to_family()`) in `.mvbu_family_registry`.
 - Use shared licensing/data chunks via `#include` statements in
   `inst/stan/include/`.
 - Ensure headers compile automatically into C++ exports in

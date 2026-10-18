@@ -14,14 +14,14 @@ data {
   int M;                              // number of categories
   int L;                              // number of groups (conditions or subjects)
 
-  array[M,L] int<lower=0> N_exposure; // observations per category (M) and group (L)
-  matrix[M,L] x_mean_exposure;        // mean of training observations
-  matrix[M,L] x_css_exposure;         // sum of centered squares of training observations
+  array[M,L] int<lower=0> n_exposure; // observations per category (M) and group (L)
+  matrix[M,L] mean_exposure;        // mean of training observations
+  matrix[M,L] css_exposure;         // sum of centered squares of training observations
 
-  int N_test;                         // number of test trials
-  array[N_test] real x_test;          // locations of test trials
-  array[N_test] int y_test;           // group labels for test trials
-  array[N_test,M] int z_test_counts;  // responses for test trials
+  int n_test;                         // number of test trials
+  array[n_test] real x_test;          // locations of test trials
+  array[n_test] int y_test;           // group labels for test trials
+  array[n_test,M] int z_test_counts;  // responses for test trials
 
   simplex[M] prior_p;                 // prior category probabilities
 
@@ -44,7 +44,7 @@ data {
 
 transformed data {
   simplex[M] lapse_bias = lapse_bias_known ? lapse_bias_data[1] : rep_vector(1.0 / M, M);
-  real<lower=0> sigma_kappanu = max(max(to_array_1d(N_exposure)) * 4, 10);                // scale for the prior of kappa/nu_0 (at least 10)
+  real<lower=0> sigma_kappanu = max(max(to_array_1d(n_exposure)) * 4, 10);                // scale for the prior of kappa/nu_0 (at least 10)
   real m_0_mu = 0;                                                                        // center of prior of m_0
 }
 
@@ -77,8 +77,8 @@ transformed parameters {
   array[M,L] real<lower=0> S_n_transformed;        // updated expected scatter
   array[M,L] real<lower=0> t_scale_transformed;    // scale parameter of predictive t distribution
 
-  array[N_test] simplex[M] p_test_conj;
-  array[N_test] vector[M] log_p_test_conj;
+  array[n_test] simplex[M] p_test_conj;
+  array[n_test] vector[M] log_p_test_conj;
 
   // update NIX2 parameters according to conjugate updating rules. Note that we're using the 
   // scatter parameterization (S_0, S_n) rather than the variance/scale parameterization of 
@@ -89,19 +89,19 @@ transformed parameters {
   for (cat in 1:M) {
     S_0_transformed[cat] = Sigma_0_known ? Sigma_0_data[cat] * (nu_0 - 2) : tau_0_param_transformed[cat]^2;
     for (group in 1:L) {
-      kappa_n[cat,group] = kappa_0 + N_exposure[cat,group];
-      nu_n[cat,group] = nu_0 + N_exposure[cat,group];
+      kappa_n[cat,group] = kappa_0 + n_exposure[cat,group];
+      nu_n[cat,group] = nu_0 + n_exposure[cat,group];
       m_n_transformed[cat,group] =
-        nix_1d_update_mean(kappa_0, m_0_transformed[cat], N_exposure[cat,group], x_mean_exposure[cat,group]);
+        nix_1d_update_mean(kappa_0, m_0_transformed[cat], n_exposure[cat,group], mean_exposure[cat,group]);
       S_n_transformed[cat,group] =
-        nix_1d_update_S(kappa_0, S_0_transformed[cat], N_exposure[cat,group], x_mean_exposure[cat,group], x_css_exposure[cat,group], m_0_transformed[cat]);
+        nix_1d_update_S(kappa_0, S_0_transformed[cat], n_exposure[cat,group], mean_exposure[cat,group], css_exposure[cat,group], m_0_transformed[cat]);
       t_scale_transformed[cat,group] =
         nix_1d_predictive_scale(S_n_transformed[cat,group], kappa_n[cat,group], nu_n[cat,group]);
     }
   }
 
   // compute category probabilities for each test stimulus
-  for (j in 1:N_test) {
+  for (j in 1:n_test) {
     int group = y_test[j];
     for (cat in 1:M) {
       log_p_test_conj[j,cat] = student_t_lpdf(x_test[j] |
@@ -128,7 +128,7 @@ model {
     }
   }
 
-  for (n in 1:N_test) {
+  for (n in 1:n_test) {
     z_test_counts[n] ~ multinomial(lapse_mixture(p_test_conj[n], lapse_rate, lapse_bias));
   }
 }

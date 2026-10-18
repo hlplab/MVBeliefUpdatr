@@ -103,17 +103,6 @@ NULL
   x
 }
 
-# from brms
-# coerce 'x' to a single numeric value
-.as_one_numeric <- function(x, allow_na = FALSE) {
-  s <- substitute(x)
-  x <- suppressWarnings(as.numeric(x))
-  if (length(x) != 1L || anyNA(x) && !allow_na) {
-    s <- deparse1(s, width.cutoff = 100L)
-    .stop("Cannot coerce '", s, "' to a single numeric value.")
-  }
-  x
-}
 
 # from brms
 # coerce 'x' to a single character string
@@ -127,19 +116,6 @@ NULL
   x
 }
 
-# from brms
-# coerce 'x' to a single character variable name
-.as_one_variable <- function(x, allow_na = TRUE) {
-  x <- .as_one_character(x)
-  if (x == "NA" && allow_na) {
-    return(x)
-  }
-  vars <- tryCatch(all.vars(parse(text = x, keep.source = FALSE)), error = function(e) character(0))
-  if (!nzchar(x) || length(vars) != 1L || vars != x) {
-    .stop("Cannot coerce '", x, "' to a single variable name.")
-  }
-  x
-}
 
 .message <- function(...) {
   message(...)

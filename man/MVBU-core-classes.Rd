@@ -43,13 +43,44 @@ summing to 1. Defaults to uniform bias across categories.}
 \item{Sigma_noise}{Optional perceptual/measurement noise covariance matrix
 or scalar variance. Defaults to \code{NULL}.}
 
-\item{noise_treatment}{Treatment of noise: \code{"no_noise"}, \code{"sample"}, or
-\code{"marginalize"}. Defaults to \code{.infer_noise_treatment(Sigma_noise)}:
-\code{"marginalize"} if noise is present, \code{"no_noise"} otherwise.}
+\item{noise_treatment}{Treatment of perceptual noise during evaluation and
+updating: \code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}.
+\itemize{
+\item \code{"no_noise"}: No perceptual noise is applied to input cues,
+and no noise is assumed during categorization.
+\item \code{"sample"}: Simulates sensory noise on a specific observation.
+Noise drawn from \eqn{\mathcal{N}(0, \Sigma_{\text{noise}})} is added
+to input cues (and projected into composite cue space in early
+integration), and the observer accounts for their own noise
+uncertainty during categorization by adding \eqn{\Sigma_{\text{noise}}}
+to their likelihood scale.
+\item \code{"marginalize"}: Evaluates categorization in the limit across
+infinitely many noisy encounters (expected consequences). No noise is
+sampled onto the input stimulus, but \eqn{\Sigma_{\text{noise}}} is
+added to the category covariance scale.
+}
+Defaults to \code{.infer_noise_treatment(Sigma_noise)}: \code{"marginalize"} if
+noise is present, \code{"no_noise"} otherwise.}
 
-\item{lapse_treatment}{Treatment of lapses: \code{"no_lapses"}, \code{"sample"}, or
-\code{"marginalize"}. Defaults to \code{.infer_lapse_treatment(lapse_rate)}:
-\code{"marginalize"} if \code{lapse_rate > 0}, \code{"no_lapses"} otherwise.}
+\item{lapse_treatment}{Treatment of attentional lapses during evaluation and
+updating: \code{"no_lapses"}, \code{"sample"}, or \code{"marginalize"}.
+\itemize{
+\item \code{"no_lapses"}: Lapses are ignored; categorization and
+updating reflect pure normative evidence evaluation (even if
+\code{lapse_rate > 0}).
+\item \code{"sample"}: Simulates stochastic attentional lapses on
+individual observations. With probability \code{lapse_rate}, a lapse
+occurs: during categorization, the posterior is replaced by
+\code{lapse_bias}; during updating, the lapsing observation is treated
+as uninformative.
+\item \code{"marginalize"}: Evaluates categorization in the limit across
+infinitely many encounters (expected response probabilities). The
+category posterior is the mixture
+\eqn{(1 - \lambda) p(c \mid x) + \lambda b_c}, and evidence during
+updating is downweighted by \eqn{1 - \lambda}.
+}
+Defaults to \code{.infer_lapse_treatment(lapse_rate)}: \code{"marginalize"} if
+\code{lapse_rate > 0}, \code{"no_lapses"} otherwise.}
 }
 \value{
 An \link{MVBU_CognitiveModel} object.
@@ -131,11 +162,15 @@ Expected properties:
 posterior functions.
 \item \code{decision_rule}: scalar character rule label.
 \item \code{category_prior}: numeric probability vector over represented categories.
-\item \code{lapse_behavior}: list with \code{lapse_rate}, \code{lapse_bias}, and
-\code{lapse_treatment}.
-\item \code{noise_behavior}: list with \code{Sigma_noise} and \code{noise_treatment}.
-\code{Sigma_noise} is stored as a square matrix and may be supplied as a vector
-(which is converted to a diagonal matrix) or as a matrix.
+\item \code{lapse_behavior}: list bundling attentional lapse parameters:
+\code{lapse_rate} (scalar probability in \verb{[0, 1]}), \code{lapse_bias} (vector of
+lapse response probabilities across categories), and \code{lapse_treatment}
+(\code{"no_lapses"}, \code{"sample"}, or \code{"marginalize"}).
+\item \code{noise_behavior}: list bundling perceptual noise parameters:
+\code{Sigma_noise} (perceptual noise covariance matrix) and \code{noise_treatment}
+(\code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}). \code{Sigma_noise} is stored
+as a square matrix and may be supplied as a vector (converted to a
+diagonal matrix) or as a matrix.
 \item \code{metadata}: optional model metadata.
 }
 }

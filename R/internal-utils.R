@@ -9,14 +9,6 @@ NULL
   return(dim(x))
 }
 
-.replace_na_in_array <- function(x, fill = 0) {
-  .assert_true(is.array(x), msg = "x must be an array.")
-  .assert_true(.is_scalar(fill), msg = "fill must be a scalar value.")
-
-  x[is.na(x)] <- fill
-  return(x)
-}
-
 #' Project matrix onto positive definite cone
 #' @param sigma Square numeric covariance matrix.
 #' @param tol Small positive number for eigenvalue clamping (default: 1e-6).

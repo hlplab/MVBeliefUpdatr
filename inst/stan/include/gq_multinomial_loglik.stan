@@ -1,8 +1,8 @@
   /* Compute and store pointwise log-likelihood for LOOIC / WAIC computation */
   real log_lik_sum = 0;
-  vector[N_test] log_lik;
+  vector[n_test] log_lik;
 
-  for (n in 1:N_test) {
+  for (n in 1:n_test) {
     log_lik[n] = multinomial_lpmf(z_test_counts[n] | lapse_mixture(p_test_conj[n], lapse_rate, lapse_bias));
     log_lik_sum += log_lik[n];
   }

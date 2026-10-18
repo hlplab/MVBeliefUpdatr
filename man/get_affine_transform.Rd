@@ -7,7 +7,7 @@
 get_affine_transform(
   data,
   cues,
-  type = c("identity", "center", "scale", "PCA whiten", "ZCA whiten")[1]
+  type = c("identity", "center", "standardize", "PCA whiten", "ZCA whiten")[1]
 )
 }
 \arguments{
@@ -15,40 +15,20 @@ get_affine_transform(
 
 \item{cues}{A character vector of column names in \code{data} that should be transformed.}
 
-\item{type}{The type of transformation to apply. Can be one of "identity", "center", "standardize", "PCA whiten",
-or "ZCA whiten". Except for the identity transform, all transforms center. Standardize additionally divides by
-the standard deviations. PCA whitening rotates the data into the space of the principal components, followed
-by scaling along each principal axis to achieve unit variance. ZCA whitening also achieves unit variance along
-all dimensions, and---like PCA whitening---decorrelates the data but it aims to maintain the original orientation
-of the data as close as possible. If \code{cue} is a single cue, whitening reduces to standardization.
-(default : "identity")}
+\item{type}{The type of transformation to apply. Can be one of \code{"identity"},
+\code{"center"}, \code{"standardize"}, \code{"PCA whiten"}, or \code{"ZCA whiten"}.
+Except for the identity transform, all transforms center. Standardize additionally
+divides by the standard deviations. PCA whitening rotates the data into the space
+of principal components with unit variance. ZCA whitening achieves unit variance
+while maintaining original orientation as close as possible.
+(default: \code{"identity"})}
 }
 \value{
-A list with the following elements:
-\itemize{
-\item \code{type}: A character vector of length 1, containing the type of transformation.
-\item \code{transform.parameters}: A list with the following elements:
-\itemize{
-\item \code{cue.labels}: A character vector of cue labels for ease of recovery.
-\item \code{shift} is a vector of \code{length(cues)}
-\item \code{SCALE} is a \code{length(cues)} x \code{length(cues)} invertible square matrix. For types "identity" and "center",
-this is an identity matrix. For type "standardize", it is the identity matrix multiplied by the inverse
-of the vector of standard deviations of the cues.
-\item \code{INV_SCALE} is the inverse of the \code{SCALE} matrix.
-}
-\item \code{transform.function}: A function f(data, return_type). The function applies the affine transformation to the
-columns of \code{data} specified in \code{cues}. The \code{return_type} argument determines what is returned. Can be one of
-"replace", "add", or "cues only". If "replace", the input data will be returned in full but with the cue
-columns replaced by the transformed cues. If "add", the input data will be returned with additional columns
-for the cues (labeled "*_transformed"). If "cues only", a new data frame with only the transformed cues will
-be returned. (default: "replace")
-\item \code{untransform.function}: Same as the \code{transform.function} but return the inverse transformed data.
-}
+An \code{\link{MVBU_TransformInformation}} object that can be used to transform
+data or models.
 }
 \description{
-Get affine transformation for a set of \code{cues} in \code{data}. Returns a linear transformation of form
-\code{f(x) = SCALE * (x + shift)}, the inverse of that transformation, and
-all relevant transformation parameters. The transformation function and its inverse take data sets as input,
-and return a new \code{data.frame} with only the (inverse) transformed \code{cue} columns. The transformation parameters
-can be helpful when one wants to apply the affine transform to transform, for instance, covariance matrices.
+Computes an affine transformation for a set of \code{cues} in \code{data}.
+Returns an \code{\link{MVBU_TransformInformation}} object representing a linear map
+\eqn{f(x) = A(x + b)}, where \eqn{b} is the shift vector and \eqn{A} is the scale/rotation matrix.
 }

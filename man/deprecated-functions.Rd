@@ -15,7 +15,6 @@ ideal_adaptor_stanfit(
   save_pars = NULL,
   stan_args = list(),
   stanfit = NULL,
-  basis = NULL,
   transform_information = NULL,
   criteria = list(),
   file = NULL,
@@ -28,11 +27,11 @@ ideal_adaptor_stanfit(
 
 \item{verbose}{Currently being ignored.}
 
-\item{data}{A \code{data.frame} containing the data used to fit the model.}
+\item{data}{A named \code{list} containing \code{$original} and
+\code{$transformed} data frames. Default: \code{list()}.}
 
 \item{staninput}{A Stan input object containing the data handed to rstan
-through \code{\link{make_staninput}}. Contains at least two components:
-\code{transformed} and \code{untransformed}.}
+(an \code{\link{IdealAdaptorStaninput}} object). Default: \code{NULL}.}
 
 \item{stanvars}{A \code{stanvars} object or \code{NULL}. Default: \code{NULL}.}
 
@@ -47,9 +46,6 @@ to the Stan backend directly. Default: \code{list()}.}
 
 \item{stanfit}{An object of class \code{\link[rstan:stanfit-class]{stanfit}}
 containing posterior draws. Default: \code{NULL}.}
-
-\item{basis}{An object that contains a small subset of the Stan data created
-at fitting time, needed to process new data. Default: \code{NULL}.}
 
 \item{transform_information}{An object of type
 \code{\link{MVBU_TransformInformation}} or \code{NULL}. Default: \code{NULL}.}

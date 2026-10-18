@@ -138,35 +138,75 @@ test_that(
 })
 
 test_that(
-  "fit_ideal_adaptor throws an error when stanmodel cannot be inferred from abstract staninput",
+  "IdealAdaptorStaninput rejects empty family, preventing invalid inference",
   {
     skip_if_not_installed("rstan")
-    raw_input <- example_ideal_adaptor_stanfit_input("MNIX", n_cues = 2L)
-    # Cast staninput to generic/abstract MNIX_IdealAdaptorStaninput
-    generic_staninput <- MNIX_IdealAdaptorStaninput(values = raw_input@staninput@values)
-    raw_input@staninput <- generic_staninput
+    raw_input <- example_ideal_adaptor_stanfit_input("NIW", n_cues = 2L)
+    staninput <- MVBeliefUpdatr:::.new_staninput(
+      raw_input,
+      stanmodel = "NIW_ideal_adaptor"
+    )
 
     expect_error(
-      fit_ideal_adaptor(raw_input, stanmodel = NULL),
-      regexp = "Could not infer a concrete Stan model"
+      staninput@family <- "",
+      regexp = paste0(
+        "`family` must be a non-empty character string specifying a ",
+        "registered Stan model family."
+      )
     )
   }
 )
 
 test_that(
-  "new_ideal_adaptor_stanfit_input throws an error on unrecognized model name",
+  "fit_ideal_adaptor throws an error on unrecognized model name",
   {
     raw_input <- example_ideal_adaptor_stanfit_input("MNIX", n_cues = 2L)
     expect_error(
-      new_ideal_adaptor_stanfit_input(
-        exposure = raw_input@exposure,
-        test = raw_input@test,
-        cues = c("VOT", "f0_semitones"),
-        category = "category",
-        response = "response_category",
-        group = "group",
+      fit_ideal_adaptor(
+        raw_input,
         stanmodel = "unknown_model_xyz"
       )
     )
   }
 )
+
+test_that("fit_ideal_adaptor supports backend = 'cmdstanr'", {
+  skip_if_not_installed("cmdstanr")
+  skip_if(
+    is.null(tryCatch(cmdstanr::cmdstan_path(), error = function(e) NULL)),
+    "CmdStan is not installed"
+  )
+
+  input <- example_ideal_adaptor_stanfit_input(
+    model_family = "NIX",
+    n_cues = 1L,
+    seed = 42L,
+    control = control_staninput(transform_type = "identity")
+  )
+
+  fit_empty <- fit_ideal_adaptor(
+    stanfit_input = input,
+    backend = "cmdstanr",
+    chains = 0,
+    iter = 0,
+    warmup = 0,
+    refresh = 0
+  )
+  expect_true(S7::S7_inherits(fit_empty, IdealAdaptorStanfit))
+  expect_equal(fit_empty@backend, "cmdstanr")
+
+  # Minimal sampling test to verify .read_cmdstan_csv_as_stanfit roundtrip
+  fit_sample <- fit_ideal_adaptor(
+    stanfit_input = input,
+    backend = "cmdstanr",
+    chains = 1,
+    iter = 20,
+    warmup = 10,
+    refresh = 0,
+    seed = 123L
+  )
+  expect_true(S7::S7_inherits(fit_sample, IdealAdaptorStanfit))
+  expect_equal(fit_sample@backend, "cmdstanr")
+  expect_true(inherits(fit_sample@stanfit, "stanfit"))
+  expect_equal(length(rstan::extract(fit_sample@stanfit)$kappa_0), 10)
+})

@@ -174,22 +174,59 @@ get_minimal_stanfit <- function(
 
 expect_staninput_structure <- function(
   input,
-  expected_class,
-  required_names,
-  forbidden_names = character()
+  expected_class = IdealAdaptorStaninput,
+  required_names = character(),
+  forbidden_names = character(),
+  expected_family = NULL,
+  stanmodel = NULL
 ) {
-  expect_true(S7::S7_inherits(input, IdealAdaptorStanfitInput))
-  expect_true(S7::S7_inherits(input@staninput, expected_class))
-  expect_true(S7::S7_inherits(input@staninput, IdealAdaptorStaninput))
-  expect_true(is.list(input@staninput@values))
-  expect_true(all(required_names %in% names(input@staninput@values)))
-  expect_false(any(forbidden_names %in% names(input@staninput@values)))
+  if (is.null(stanmodel)) {
+    stanmodel <- if (!is.null(expected_family)) {
+      MVBeliefUpdatr:::.to_stanmodel(expected_family)
+    } else {
+      "NIW_ideal_adaptor"
+    }
+  }
+  staninput <- if (S7::S7_inherits(input, IdealAdaptorStanfitInput)) {
+    MVBeliefUpdatr:::.new_staninput(input, stanmodel = stanmodel)
+  } else {
+    input
+  }
+  expect_true(S7::S7_inherits(staninput, IdealAdaptorStaninput))
+  if (inherits(expected_class, "S7_class")) {
+    expect_true(S7::S7_inherits(staninput, expected_class))
+  }
+  if (!is.null(expected_family)) {
+    expect_equal(get_family_name(staninput), expected_family)
+  }
+  expect_true(is.list(staninput@values))
+  expect_true(all(required_names %in% names(staninput@values)))
+  expect_false(any(forbidden_names %in% names(staninput@values)))
 }
 
 run_fixed_param_stan_program <- function(stan_file, input, model_name) {
   skip_if_not_installed("rstan")
 
-  model_key <- sub("_compat$", "", model_name)
+  clean_model <- sub("_compat$", "", model_name)
+  resolved_stanmodel <- tryCatch(
+    MVBeliefUpdatr:::.to_stanmodel(clean_model),
+    error = function(e) clean_model
+  )
+
+  staninput_vals <- if (S7::S7_inherits(input, IdealAdaptorStanfitInput)) {
+    MVBeliefUpdatr:::.new_staninput(
+      input,
+      stanmodel = resolved_stanmodel
+    )@values
+  } else if (S7::S7_inherits(input, IdealAdaptorStaninput)) {
+    input@values
+  } else if (is.list(input) && !is.null(names(input))) {
+    input
+  } else {
+    input
+  }
+
+  model_key <- clean_model
   model <- NULL
   if (
     exists(
@@ -203,9 +240,14 @@ run_fixed_param_stan_program <- function(stan_file, input, model_name) {
       model <- pkg_models[[model_name]]
     } else if (!is.null(pkg_models[[model_key]])) {
       model <- pkg_models[[model_key]]
+    } else if (!is.null(pkg_models[[resolved_stanmodel]])) {
+      model <- pkg_models[[resolved_stanmodel]]
     } else if (!is.null(pkg_models[[paste0(model_key, "_ideal_adaptor")]])) {
       model <- pkg_models[[paste0(model_key, "_ideal_adaptor")]]
-    } else if (model_key == "MNIX" && !is.null(pkg_models[["MNIX_ideal_adaptor_ideal_integrator"]])) {
+    } else if (
+      model_key == "MNIX" &&
+        !is.null(pkg_models[["MNIX_ideal_adaptor_ideal_integrator"]])
+    ) {
       model <- pkg_models[["MNIX_ideal_adaptor_ideal_integrator"]]
     }
   }
@@ -220,7 +262,7 @@ run_fixed_param_stan_program <- function(stan_file, input, model_name) {
 
   fit <- rstan::sampling(
     object = model,
-    data = input@staninput@values,
+    data = staninput_vals,
     chains = 1,
     iter = 1,
     warmup = 0,

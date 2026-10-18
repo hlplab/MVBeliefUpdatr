@@ -24,8 +24,6 @@ NULL
 #' @param weights Numeric vector or matrix of integration/attention weights.
 #'   For representations and global weighted models, a numeric simplex vector summing to 1.
 #'   For category-weighted models, an \eqn{M \times K} matrix whose rows each sum to 1.
-#'   For group-weighted models, an \eqn{L \times K} matrix whose rows each sum to 1.
-#'   For group-category-weighted models, a 3D array or list of matrices.
 #' @param weights_matrix Deprecated. Use `weights` instead.
 #' @param data Data frame containing category and cue observations.
 #' @param category Character string indicating the category column in `data`. Defaults to `"category"`.
@@ -37,16 +35,49 @@ NULL
 #'   `"argmax"`. Defaults to `"sampling"`.
 #' @param category_prior Optional numeric vector of prior category
 #'   probabilities summing to 1. Defaults to equal priors.
-#' @param lapse_rate Numeric scalar lapse probability in `[0, 1]`. Defaults to 0.
+#' @param lapse_rate Numeric scalar lapse probability in `[0, 1]`.
+#'   Defaults to 0.
 #' @param lapse_bias Optional numeric vector of lapse category probabilities
 #'   summing to 1. Defaults to uniform bias `1/M`.
-#' @param Sigma_noise Optional perceptual/measurement noise covariance matrix or vector.
-#' @param noise_treatment Treatment of noise: `"no_noise"`, `"sample"`, or
-#'   `"marginalize"`. Defaults to `.infer_noise_treatment(Sigma_noise)`:
-#'   `"marginalize"` if noise is present, `"no_noise"` otherwise.
-#' @param lapse_treatment Treatment of lapses: `"no_lapses"`, `"sample"`, or
-#'   `"marginalize"`. Defaults to `.infer_lapse_treatment(lapse_rate)`:
-#'   `"marginalize"` if `lapse_rate > 0`, `"no_lapses"` otherwise.
+#' @param Sigma_noise Optional perceptual/measurement noise covariance matrix
+#'   or vector.
+#' @param noise_treatment Treatment of perceptual noise during evaluation and
+#'   updating: `"no_noise"`, `"sample"`, or `"marginalize"`.
+#'   \itemize{
+#'     \item \code{"no_noise"}: No perceptual noise is applied to input cues,
+#'       and no noise is assumed during categorization.
+#'     \item \code{"sample"}: Simulates sensory noise on a specific observation.
+#'       Noise drawn from \eqn{\mathcal{N}(0, \Sigma_{\text{noise}})} is added
+#'       to input cues (and projected into composite cue space in early
+#'       integration), and the observer accounts for their own noise
+#'       uncertainty during categorization by adding \eqn{\Sigma_{\text{noise}}}
+#'       to their likelihood scale.
+#'     \item \code{"marginalize"}: Evaluates categorization in the limit across
+#'       infinitely many noisy encounters (expected consequences). No noise is
+#'       sampled onto the input stimulus, but \eqn{\Sigma_{\text{noise}}} is
+#'       added to the category covariance scale.
+#'   }
+#'   Defaults to `.infer_noise_treatment(Sigma_noise)`: `"marginalize"` if
+#'   noise is present, `"no_noise"` otherwise.
+#' @param lapse_treatment Treatment of attentional lapses during evaluation and
+#'   updating: `"no_lapses"`, `"sample"`, or `"marginalize"`.
+#'   \itemize{
+#'     \item \code{"no_lapses"}: Lapses are ignored; categorization and
+#'       updating reflect pure normative evidence evaluation (even if
+#'       \code{lapse_rate > 0}).
+#'     \item \code{"sample"}: Simulates stochastic attentional lapses on
+#'       individual observations. With probability \code{lapse_rate}, a lapse
+#'       occurs: during categorization, the posterior is replaced by
+#'       \code{lapse_bias}; during updating, the lapsing observation is treated
+#'       as uninformative.
+#'     \item \code{"marginalize"}: Evaluates categorization in the limit across
+#'       infinitely many encounters (expected response probabilities). The
+#'       category posterior is the mixture
+#'       \eqn{(1 - \lambda) p(c \mid x) + \lambda b_c}, and evidence during
+#'       updating is downweighted by \eqn{1 - \lambda}.
+#'   }
+#'   Defaults to `.infer_lapse_treatment(lapse_rate)`: `"marginalize"` if
+#'   `lapse_rate > 0`, `"no_lapses"` otherwise.
 #' @param metadata Optional list of metadata. Defaults to `list()`.
 #' @param ... Additional arguments passed to methods or constructors.
 #'
@@ -363,47 +394,6 @@ MNIX_IdealAdaptor_CategoryWeightedIntegrator <- S7::new_class(
   }
 )
 
-#' @rdname family-mnix
-#' @docType class
-#' @usage NULL
-#' @export
-MNIX_IdealAdaptor_GroupWeightedIntegrator <- S7::new_class(
-  "MNIX_IdealAdaptor_GroupWeightedIntegrator",
-  parent = MNIX_LateIdealAdaptor,
-  properties = list(
-    weights = S7::class_any
-  ),
-  validator = function(self) {
-    wm <- self@weights
-    if (!is.matrix(wm) && !is.data.frame(wm)) {
-      return("weights must be a matrix or data frame.")
-    }
-    wm <- as.matrix(wm)
-    if (ncol(wm) < 2L) {
-      return("weights must contain at least 2 cue columns.")
-    }
-    if (any(wm < 0) || any(wm > 1)) {
-      return("weights entries must be in [0, 1].")
-    }
-    rsums <- rowSums(wm)
-    if (any(abs(rsums - 1) > MVBU_PROB_TOL)) {
-      return("weights rows must each sum to 1.")
-    }
-    NULL
-  }
-)
-
-#' @rdname family-mnix
-#' @docType class
-#' @usage NULL
-#' @export
-MNIX_IdealAdaptor_GroupCategoryWeightedIntegrator <- S7::new_class(
-  "MNIX_IdealAdaptor_GroupCategoryWeightedIntegrator",
-  parent = MNIX_LateIdealAdaptor,
-  properties = list(
-    weights = S7::class_any
-  )
-)
 
 #' @rdname family-mnix
 #' @docType class
@@ -488,50 +478,6 @@ CategoryWeightedIntegrator_MNIX_IdealAdaptor <- S7::new_class(
   }
 )
 
-#' @rdname family-mnix
-#' @docType class
-#' @usage NULL
-#' @export
-GroupWeightedIntegrator_MNIX_IdealAdaptor <- S7::new_class(
-  "GroupWeightedIntegrator_MNIX_IdealAdaptor",
-  parent = MNIX_EarlyIdealAdaptor,
-  properties = list(
-    weights = S7::class_any
-  ),
-  validator = function(self) {
-    wm <- self@weights
-    if (!is.matrix(wm) && !is.data.frame(wm)) {
-      return("weights must be a matrix or data frame.")
-    }
-    wm <- as.matrix(wm)
-    if (ncol(wm) < 2L) {
-      return("weights must contain at least 2 cue columns.")
-    }
-    if (length(self@cues) > 0L && ncol(wm) != length(self@cues)) {
-      return("weights ncol must match cues length.")
-    }
-    if (any(wm < 0) || any(wm > 1)) {
-      return("weights entries must be in [0, 1].")
-    }
-    rsums <- rowSums(wm)
-    if (any(abs(rsums - 1) > MVBU_PROB_TOL)) {
-      return("weights rows must each sum to 1.")
-    }
-    NULL
-  }
-)
-
-#' @rdname family-mnix
-#' @docType class
-#' @usage NULL
-#' @export
-GroupCategoryWeightedIntegrator_MNIX_IdealAdaptor <- S7::new_class(
-  "GroupCategoryWeightedIntegrator_MNIX_IdealAdaptor",
-  parent = MNIX_EarlyIdealAdaptor,
-  properties = list(
-    weights = S7::class_any
-  )
-)
 
 #' @rdname family-mnix
 #' @docType class
@@ -673,87 +619,6 @@ new_mnix_ideal_adaptor_category_weighted_integrator <- function(
   )
 }
 
-#' @rdname family-mnix
-#' @export
-new_mnix_ideal_adaptor_group_weighted_integrator <- function(
-  category_template = NULL,
-  weights = NULL,
-  decision_rule = "sampling",
-  category_prior = NULL,
-  lapse_rate = 0,
-  lapse_bias = NULL,
-  Sigma_noise = NULL,
-  noise_treatment = .infer_noise_treatment(Sigma_noise),
-  lapse_treatment = .infer_lapse_treatment(lapse_rate),
-  metadata = list()
-) {
-  if (is.null(category_template)) {
-    .stop("category_template must be supplied.")
-  }
-  first_rep <- category_template@representations[[1L]]
-  n_cues <- length(get_cue_labels(first_rep))
-  if (is.null(weights)) {
-    .stop("weights must be supplied for GroupWeightedIntegrator.")
-  }
-  wm <- as.matrix(weights)
-  if (ncol(wm) != n_cues) {
-    .stop("weights ncol (", ncol(wm), ") must match number of cues (", n_cues, ").")
-  }
-
-  .new_family_cognitive_model(
-    category_template = category_template,
-    category_representation_class = MNIX_CategoryRepresentation,
-    model_class = MNIX_IdealAdaptor_GroupWeightedIntegrator,
-    family_label = "MNIX",
-    decision_rule = decision_rule,
-    category_prior = category_prior,
-    lapse_rate = lapse_rate,
-    lapse_bias = lapse_bias,
-    Sigma_noise = Sigma_noise,
-    noise_treatment = noise_treatment,
-    lapse_treatment = lapse_treatment,
-    metadata = metadata,
-    weights = wm
-  )
-}
-
-#' @rdname family-mnix
-#' @export
-new_mnix_ideal_adaptor_group_category_weighted_integrator <- function(
-  category_template = NULL,
-  weights = NULL,
-  decision_rule = "sampling",
-  category_prior = NULL,
-  lapse_rate = 0,
-  lapse_bias = NULL,
-  Sigma_noise = NULL,
-  noise_treatment = .infer_noise_treatment(Sigma_noise),
-  lapse_treatment = .infer_lapse_treatment(lapse_rate),
-  metadata = list()
-) {
-  if (is.null(category_template)) {
-    .stop("category_template must be supplied.")
-  }
-  if (is.null(weights)) {
-    .stop("weights must be supplied for GroupCategoryWeightedIntegrator.")
-  }
-
-  .new_family_cognitive_model(
-    category_template = category_template,
-    category_representation_class = MNIX_CategoryRepresentation,
-    model_class = MNIX_IdealAdaptor_GroupCategoryWeightedIntegrator,
-    family_label = "MNIX",
-    decision_rule = decision_rule,
-    category_prior = category_prior,
-    lapse_rate = lapse_rate,
-    lapse_bias = lapse_bias,
-    Sigma_noise = Sigma_noise,
-    noise_treatment = noise_treatment,
-    lapse_treatment = lapse_treatment,
-    metadata = metadata,
-    weights = weights
-  )
-}
 
 #' @rdname family-mnix
 #' @export
@@ -1165,99 +1030,6 @@ new_category_weighted_integrator_mnix_ideal_adaptor <- function(
   )
 }
 
-#' @rdname family-mnix
-#' @export
-new_group_weighted_integrator_mnix_ideal_adaptor <- function(
-  category_template = NULL,
-  weights = NULL,
-  cues = NULL,
-  decision_rule = "sampling",
-  category_prior = NULL,
-  lapse_rate = 0,
-  lapse_bias = NULL,
-  Sigma_noise = NULL,
-  noise_treatment = .infer_noise_treatment(Sigma_noise),
-  lapse_treatment = .infer_lapse_treatment(lapse_rate),
-  metadata = list()
-) {
-  if (is.null(category_template)) {
-    .stop("category_template must be supplied.")
-  }
-  first_rep <- category_template@representations[[1L]]
-  n_cues <- length(get_cue_labels(first_rep))
-  if (is.null(cues)) {
-    cues <- get_cue_labels(first_rep)
-  }
-  cues <- as.character(cues)
-  if (is.null(weights)) {
-    .stop("weights must be supplied for GroupWeightedIntegrator.")
-  }
-  wm <- as.matrix(weights)
-  if (ncol(wm) != n_cues) {
-    .stop("weights ncol must match number of cues (", n_cues, ").")
-  }
-
-  .new_family_cognitive_model(
-    category_template = category_template,
-    category_representation_class = MNIX_CategoryRepresentation,
-    model_class = GroupWeightedIntegrator_MNIX_IdealAdaptor,
-    family_label = "MNIX",
-    decision_rule = decision_rule,
-    category_prior = category_prior,
-    lapse_rate = lapse_rate,
-    lapse_bias = lapse_bias,
-    Sigma_noise = Sigma_noise,
-    noise_treatment = noise_treatment,
-    lapse_treatment = lapse_treatment,
-    metadata = metadata,
-    weights = wm,
-    cues = cues
-  )
-}
-
-#' @rdname family-mnix
-#' @export
-new_group_category_weighted_integrator_mnix_ideal_adaptor <- function(
-  category_template = NULL,
-  weights = NULL,
-  cues = NULL,
-  decision_rule = "sampling",
-  category_prior = NULL,
-  lapse_rate = 0,
-  lapse_bias = NULL,
-  Sigma_noise = NULL,
-  noise_treatment = .infer_noise_treatment(Sigma_noise),
-  lapse_treatment = .infer_lapse_treatment(lapse_rate),
-  metadata = list()
-) {
-  if (is.null(category_template)) {
-    .stop("category_template must be supplied.")
-  }
-  if (is.null(cues)) {
-    cues <- get_cue_labels(category_template@representations[[1L]])
-  }
-  cues <- as.character(cues)
-  if (is.null(weights)) {
-    .stop("weights must be supplied for GroupCategoryWeightedIntegrator.")
-  }
-
-  .new_family_cognitive_model(
-    category_template = category_template,
-    category_representation_class = MNIX_CategoryRepresentation,
-    model_class = GroupCategoryWeightedIntegrator_MNIX_IdealAdaptor,
-    family_label = "MNIX",
-    decision_rule = decision_rule,
-    category_prior = category_prior,
-    lapse_rate = lapse_rate,
-    lapse_bias = lapse_bias,
-    Sigma_noise = Sigma_noise,
-    noise_treatment = noise_treatment,
-    lapse_treatment = lapse_treatment,
-    metadata = metadata,
-    weights = weights,
-    cues = cues
-  )
-}
 
 #' @rdname family-mnix
 #' @export
@@ -1303,6 +1075,7 @@ new_informativity_weighted_integrator_mnix_ideal_adaptor <- function(
 # -------------------------
 
 #' @rdname family-mnix
+#' @usage NULL
 #' @export
 MNIX_IdealAdaptor_AdaptiveWeightedIntegrator <- S7::new_class(
   "MNIX_IdealAdaptor_AdaptiveWeightedIntegrator",
@@ -1310,6 +1083,7 @@ MNIX_IdealAdaptor_AdaptiveWeightedIntegrator <- S7::new_class(
 )
 
 #' @rdname family-mnix
+#' @usage NULL
 #' @export
 MNIX_IdealAdaptor_CategoryAdaptiveWeightedIntegrator <- S7::new_class(
   "MNIX_IdealAdaptor_CategoryAdaptiveWeightedIntegrator",

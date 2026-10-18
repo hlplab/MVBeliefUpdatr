@@ -8,43 +8,48 @@
 \title{Specify control parameters for new_ideal_adaptor_stanfit_input()}
 \usage{
 control_staninput(
-  tau_scale = 5,
-  L_omega_eta = 1,
+  tau_scale = NULL,
+  L_omega_eta = NULL,
   split_loglik_per_observation = 0,
   transform_type = c("identity", "center", "standardize", "PCA whiten", "ZCA whiten")[3]
 )
 
 IdealAdaptorStanfitInput(
-  data = data.frame(),
-  staninput = NULL,
+  data = list(),
   transform_information = NULL,
   metadata = list()
 )
 }
 \arguments{
-\item{tau_scale}{A vector of scales for the Cauchy priors for each cue's
-standard deviations.}
+\item{tau_scale}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Deprecated. Use
+\code{priors = prior(..., class = "tau")} in \code{\link{fit_ideal_adaptor}}
+instead.}
 
-\item{L_omega_eta}{LKJ prior parameter for correlation matrices.}
+\item{L_omega_eta}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Deprecated. Use
+\code{priors = prior(..., class = "cor")} in \code{\link{fit_ideal_adaptor}}
+instead.}
 
 \item{split_loglik_per_observation}{Split log likelihood per observation.}
 
 \item{transform_type}{Affine transformation type applied to the data.}
 
-\item{data}{A \code{data.frame} containing the input data. Default: \code{data.frame()}.}
+\item{data}{A named \code{list} with \code{$original} and
+\code{$transformed} data frames, or a single \code{data.frame} containing
+input data. Default: \code{list()}.}
 
-\item{staninput}{An \code{\link{IdealAdaptorStaninput}} object. Default: \code{NULL}.}
+\item{transform_information}{An \code{\link{MVBU_TransformInformation}}
+object. Default: \code{NULL}.}
 
-\item{transform_information}{An \code{\link{MVBU_TransformInformation}} object. Default: \code{NULL}.}
-
-\item{metadata}{A named \code{list} containing \code{label_information}. Default: \code{list()}.}
+\item{metadata}{A named \code{list} containing \code{label_information}.
+Default: \code{list()}.}
 }
 \value{
 A list of control parameters.
 }
 \description{
-This function is used to specify control parameters for the \code{new_ideal_adaptor_stanfit_input()} function, and to provide
-reasonable defaults for any of the unspecified parameters.
+This function is used to specify control parameters for the
+\code{new_ideal_adaptor_stanfit_input()} function, and to provide reasonable
+defaults for any of the unspecified parameters.
 
 An S7 Class for Ideal-Adaptor Fit-Input Objects
 }

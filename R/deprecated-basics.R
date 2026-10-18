@@ -80,7 +80,19 @@ get_sum_of_squares_from_df <- function(data, variables = NULL, center = TRUE, ve
         data
     }
 
-    ss(data.matrix, center = center)
+    if (center) css(data.matrix) else uss(data.matrix)
+}
+
+#' @rdname deprecated-sum-of-squares
+#' @keywords internal
+#' @export
+ss <- function(x, center = TRUE) {
+    lifecycle::deprecate_warn(
+        when = "0.1.0",
+        what = "ss()",
+        details = "Use css() or uss() instead."
+    )
+    if (center) css(x) else uss(x)
 }
 
 #' @rdname deprecated-sum-of-squares

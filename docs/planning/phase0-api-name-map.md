@@ -93,7 +93,7 @@ Examples:
 | get_posterior_from_model | get_posterior | Standardized posterior accessor |
 | get_draws | get_draws | Keep canonical draw accessor |
 | get_params | get_parameters | Standardized introspection |
-| get_priors_from_model | get_priors | Standardized introspection |
+| get_priors_from_model | get_stan_priors | Standardized introspection |
 | get_category_labels_from_model | get_category_labels | Label accessor normalization |
 | get_group_levels | get_group_labels | Labels terminology chosen |
 | get_cue_levels | get_cue_labels | Labels terminology chosen |

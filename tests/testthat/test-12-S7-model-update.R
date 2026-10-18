@@ -23,8 +23,8 @@ test_that("update_template performs an S7 NIW batch update", {
 test_that("update_category_representation updates an NIW representation", {
   representation <- example_niw_category_representation(n_cues = 2, nu = 30)
   updated <- update_category_representation(
-    representation, x_N = 2, x_mean = c(15, .5),
-    x_css = matrix(c(50, 5, 5, .5), nrow = 2)
+    representation, n_exposure = 2, mean_exposure = c(15, .5),
+    css_exposure = matrix(c(50, 5, 5, .5), nrow = 2)
   )
   expect_true(S7::S7_inherits(updated, NIW_CategoryRepresentation))
   expect_equal(updated@kappa, representation@kappa + 2)
@@ -121,7 +121,7 @@ test_that("update_template performs an S7 NIX batch and incremental update", {
 test_that("update_category_representation updates an NIX representation", {
   rep0 <- example_nix_category_representation()
   updated <- update_category_representation(
-    rep0, x_N = 3, x_mean = 25, x_css = 12
+    rep0, n_exposure = 3, mean_exposure = 25, css_exposure = 12
   )
   expect_true(S7::S7_inherits(updated, NIX_CategoryRepresentation))
   expect_equal(updated@kappa, rep0@kappa + 3)
@@ -168,7 +168,8 @@ test_that("update_category_representation updates an MNIX representation", {
   rep0 <- example_mnix_category_representation()
   D <- length(get_cue_labels(rep0))
   updated <- update_category_representation(
-    rep0, x_N = 4, x_mean = c(15, 0.5), x_css = diag(c(20, 1), D)
+    rep0, n_exposure = 4, mean_exposure = c(15, 0.5),
+    css_exposure = diag(c(20, 1), D)
   )
   expect_true(S7::S7_inherits(updated, MNIX_CategoryRepresentation))
   expect_equal(updated@kappa, rep0@kappa + 4)
@@ -200,8 +201,12 @@ test_that("1-cue analytical parity between NIX and NIW forward updating", {
   obs_mean <- c(VOT = 22.0)
   obs_css <- matrix(45.0, nrow = 1, ncol = 1, dimnames = list("VOT", "VOT"))
 
-  up_nix_rep <- update_category_representation(nix_rep, x_N = obs_N, x_mean = obs_mean, x_css = obs_css)
-  up_niw_rep <- update_category_representation(niw_rep, x_N = obs_N, x_mean = obs_mean, x_css = obs_css)
+  up_nix_rep <- update_category_representation(
+    nix_rep, n_exposure = obs_N, mean_exposure = obs_mean, css_exposure = obs_css
+  )
+  up_niw_rep <- update_category_representation(
+    niw_rep, n_exposure = obs_N, mean_exposure = obs_mean, css_exposure = obs_css
+  )
 
   expect_equal(unname(up_nix_rep@m), unname(up_niw_rep@m))
   expect_equal(up_nix_rep@kappa, up_niw_rep@kappa)
@@ -262,55 +267,77 @@ test_that("1-cue analytical parity between NIX and NIW forward updating", {
   }
 })
 
-test_that("update_category_representation preserves representation when x_N == 0", {
+test_that("update_category_representation preserves representation when n_exposure == 0", {
   nix_rep <- example_nix_category_representation()
   expect_identical(
-    update_category_representation(nix_rep, x_N = 0, x_mean = 20, x_css = 5),
+    update_category_representation(
+      nix_rep, n_exposure = 0, mean_exposure = 20, css_exposure = 5
+    ),
     nix_rep
   )
 
   mnix_rep <- example_mnix_category_representation()
   expect_identical(
-    update_category_representation(mnix_rep, x_N = 0, x_mean = c(10, 0), x_css = c(1, 1)),
+    update_category_representation(
+      mnix_rep, n_exposure = 0, mean_exposure = c(10, 0), css_exposure = c(1, 1)
+    ),
     mnix_rep
   )
 
   niw_rep <- example_niw_category_representation(n_cues = 2)
   expect_identical(
-    update_category_representation(niw_rep, x_N = 0, x_mean = c(10, 0), x_css = diag(2)),
+    update_category_representation(
+      niw_rep, n_exposure = 0, mean_exposure = c(10, 0), css_exposure = diag(2)
+    ),
     niw_rep
   )
 })
 
-test_that("update_category_representation errors informatively when x_N > 0 and inputs contain NA", {
+test_that("update_category_representation errors informatively when n_exposure > 0 and inputs contain NA", {
   nix_rep <- example_nix_category_representation()
   expect_error(
-    update_category_representation(nix_rep, x_N = 2, x_mean = NA_real_, x_css = 5),
-    "x_mean cannot contain NA values when x_N > 0"
+    update_category_representation(
+      nix_rep, n_exposure = 2, mean_exposure = NA_real_, css_exposure = 5
+    ),
+    "mean_exposure cannot contain NA values when n_exposure > 0"
   )
   expect_error(
-    update_category_representation(nix_rep, x_N = 2, x_mean = 10, x_css = NA_real_),
-    "x_css cannot contain NA values when x_N > 0"
+    update_category_representation(
+      nix_rep, n_exposure = 2, mean_exposure = 10, css_exposure = NA_real_
+    ),
+    "css_exposure cannot contain NA values when n_exposure > 0"
   )
 
   mnix_rep <- example_mnix_category_representation()
   expect_error(
-    update_category_representation(mnix_rep, x_N = 1, x_mean = c(10, NA_real_), x_css = c(1, 1)),
-    "x_mean cannot contain NA values when x_N > 0"
+    update_category_representation(
+      mnix_rep, n_exposure = 1, mean_exposure = c(10, NA_real_),
+      css_exposure = c(1, 1)
+    ),
+    "mean_exposure cannot contain NA values when n_exposure > 0"
   )
   expect_error(
-    update_category_representation(mnix_rep, x_N = 1, x_mean = c(10, 20), x_css = c(1, NA_real_)),
-    "x_css cannot contain NA values when x_N > 0"
+    update_category_representation(
+      mnix_rep, n_exposure = 1, mean_exposure = c(10, 20),
+      css_exposure = c(1, NA_real_)
+    ),
+    "css_exposure cannot contain NA values when n_exposure > 0"
   )
 
   niw_rep <- example_niw_category_representation(n_cues = 2)
   expect_error(
-    update_category_representation(niw_rep, x_N = 1, x_mean = c(NA_real_, 20), x_css = diag(2)),
-    "x_mean cannot contain NA values when x_N > 0"
+    update_category_representation(
+      niw_rep, n_exposure = 1, mean_exposure = c(NA_real_, 20),
+      css_exposure = diag(2)
+    ),
+    "mean_exposure cannot contain NA values when n_exposure > 0"
   )
   expect_error(
-    update_category_representation(niw_rep, x_N = 1, x_mean = c(10, 20), x_css = matrix(c(1, NA_real_, 0, 1), 2, 2)),
-    "x_css cannot contain NA values when x_N > 0"
+    update_category_representation(
+      niw_rep, n_exposure = 1, mean_exposure = c(10, 20),
+      css_exposure = matrix(c(1, NA_real_, 0, 1), 2, 2)
+    ),
+    "css_exposure cannot contain NA values when n_exposure > 0"
   )
 })
 

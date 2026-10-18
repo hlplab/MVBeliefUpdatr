@@ -38,27 +38,34 @@ make_ideal_adaptor_stanfit_input(
 )
 }
 \arguments{
-\item{exposure}{A data frame or tibble with exposure data. Each row is assumed to contain one observation.}
+\item{exposure}{A data frame or tibble with exposure data. Each row is
+assumed to contain one observation.}
 
-\item{test}{A data frame or tibble with test data. Each row is assumed to contain one observation.}
+\item{test}{A data frame or tibble with test data. Each row is assumed to
+contain one observation.}
 
-\item{cues}{Names of columns with cue values. These columns must be present in both \code{exposure} and \code{test}.}
+\item{cues}{Names of columns with cue values. These columns must be present
+in both \code{exposure} and \code{test}.}
 
-\item{category}{Name of the column in \code{exposure} that stores the category information. (default: "category")}
+\item{category}{Name of the column in \code{exposure} that stores the category
+information. (default: "category")}
 
-\item{response}{Name of the column in \code{test} that stores the response information. (default: "response_category")}
+\item{response}{Name of the column in \code{test} that stores the response
+information. (default: "response_category")}
 
-\item{group}{Name of the column in \code{exposure} and \code{test} that stores the grouping information. (default: "group")}
+\item{group}{Name of the column in \code{exposure} and \code{test} that stores the
+grouping information. (default: "group")}
 
-\item{control}{A list of control parameters for the constructor, typically produced by \code{control_staninput()}.}
-
-\item{stanmodel}{Character string naming the Stan model. Must be one of
-the supported model names in \code{stanmodels}.}
+\item{control}{A list of control parameters for the constructor, such as
+\code{list(transform_type = "standardize")} or produced by
+\code{control_staninput()}.}
 }
 \value{
-A list with components \code{staninput}, \code{data}, and \code{transform_information}.
+A list with components \code{staninput}, \code{data}, and
+\code{transform_information}.
 
-A list with components \code{staninput}, \code{data}, and \code{transform_information}.
+A list with components \code{staninput}, \code{data}, and
+\code{transform_information}.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
@@ -66,8 +73,9 @@ A list with components \code{staninput}, \code{data}, and \code{transform_inform
 removed in 0.2.0. Please use \code{\link[=new_ideal_adaptor_stanfit_input]{new_ideal_adaptor_stanfit_input()}} instead.
 
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{make_ideal_adaptor_stanfit_input()} was deprecated in MVBeliefUpdatr 0.1.0 and will be
-removed in 0.2.0. Please use \code{\link[=new_ideal_adaptor_stanfit_input]{new_ideal_adaptor_stanfit_input()}} instead.
+\code{make_ideal_adaptor_stanfit_input()} was deprecated in MVBeliefUpdatr 0.1.0
+and will be removed in 0.2.0. Please use \code{\link[=new_ideal_adaptor_stanfit_input]{new_ideal_adaptor_stanfit_input()}}
+instead.
 }
 \seealso{
 \code{\link[=new_ideal_adaptor_stanfit_input]{new_ideal_adaptor_stanfit_input()}}

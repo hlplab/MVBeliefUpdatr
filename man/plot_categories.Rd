@@ -182,7 +182,22 @@ multiple CPU chunks using \pkg{parallel}. Defaults to \code{FALSE}.}
 \code{max(1L, parallel::detectCores() - 1L)}).}
 
 \item{noise_treatment}{Optional character string specifying treatment of
-perceptual noise (\code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}).
+perceptual noise: \code{"no_noise"}, \code{"sample"}, or
+\code{"marginalize"}.
+\itemize{
+\item \code{"no_noise"}: No perceptual noise is applied to input cues,
+and no noise is assumed during categorization.
+\item \code{"sample"}: Simulates sensory noise on a specific observation.
+Noise drawn from \eqn{\mathcal{N}(0, \Sigma_{\text{noise}})} is added
+to input cues (and projected into composite cue space in early
+integration), and the observer accounts for their own noise
+uncertainty during categorization by adding \eqn{\Sigma_{\text{noise}}}
+to their likelihood scale.
+\item \code{"marginalize"}: Evaluates categorization in the limit across
+infinitely many noisy encounters (expected consequences). No noise is
+sampled onto the input stimulus, but \eqn{\Sigma_{\text{noise}}} is
+added to the category covariance scale.
+}
 Defaults to \code{NULL} (uses the model's configured noise treatment).}
 }
 \value{

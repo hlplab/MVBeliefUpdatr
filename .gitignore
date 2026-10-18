@@ -17,7 +17,11 @@ src/*.dll
 src/*.dylib
 src/*.cc
 src/*.h
-
+# Compiled CmdStan binaries and generated C++ headers in inst/stan
+inst/stan/*
+!inst/stan/*.stan
+!inst/stan/include/
+!inst/stan/include/**
 
 TEMP/
 /doc/

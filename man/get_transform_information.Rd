@@ -3,7 +3,10 @@
 \name{get_transform_information}
 \alias{get_transform_information}
 \alias{get_transform_information,any-method}
+\alias{get_transform_information,MVBU_Stanfit/MVBU_StanfitPosterior/IdealAdaptorStanfitInput-method}
 \alias{get_transform_information,MVBU_Stanfit-method}
+\alias{get_transform_information,MVBU_StanfitPosterior-method}
+\alias{get_transform_information,IdealAdaptorStanfitInput-method}
 \title{Get transform metadata from an S7 fit or fit-input object}
 \usage{
 get_transform_information(x, ...)
@@ -11,7 +14,7 @@ get_transform_information(x, ...)
 ## S7 method for class <any>
 get_transform_information(x, ...)
 
-## S7 method for class <MVBU_Stanfit>
+## S7 method for class <MVBU_Stanfit>/<MVBU_StanfitPosterior>/<IdealAdaptorStanfitInput>
 get_transform_information(x, ...)
 }
 \arguments{

@@ -213,30 +213,4 @@ is.MVBU_model <- function(x, group = NULL, verbose = F, tolerance = MVBU_PROB_TO
   TRUE
 }
 
-#' Deprecated: print.MVBU_model
-#'
-#' @description `r lifecycle::badge("deprecated")`
-#' `print.MVBU_model()` was deprecated in MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
-#' Please use S7 print methods instead.
-#' @param x An `MVBeliefUpdatr_model` object.
-#' @param ... Additional arguments.
-#' @seealso [MVBU_CognitiveModel]
-#' @keywords internal
-#' @export
-print.MVBU_model <- function(x, ...) {
-  lifecycle::deprecate_warn(
-    when = "0.1.0",
-    what = "print.MVBU_model()",
-    details = "Use S7 print methods instead."
-  )
-  .assert_that(is.MVBU_model(x), msg = "Expected an MVBU model.")
-
-  if (get_cue_dimensionality_from_model(x) == 1L) {
-    x[] <- lapply(x, function(value) {
-      if (is.numeric(value)) unlist(value) else value
-    })
-  }
-
-  print(x)
-}
 

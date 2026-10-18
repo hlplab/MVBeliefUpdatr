@@ -19,6 +19,7 @@
 
   # 4️⃣ Initialize any package-level caches or lazy-load objects
   #    e.g. assign("cache", new.env(parent = emptyenv()), envir = parent.env(environment()))
+  .init_family_registry()
 }
 
 

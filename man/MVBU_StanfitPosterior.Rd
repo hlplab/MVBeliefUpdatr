@@ -5,7 +5,13 @@
 \alias{MVBU_StanfitPosterior}
 \title{S7 class for Stanfit posterior parameter draws}
 \usage{
-MVBU_StanfitPosterior(draws = list(), metadata = list())
+MVBU_StanfitPosterior(
+  draws = list(),
+  metadata = list(),
+  data = list(),
+  cache = list(),
+  transform_information = NULL
+)
 }
 \arguments{
 \item{draws}{A list containing \code{raw} and \code{summary} posterior
@@ -13,8 +19,17 @@ draws. Default: \code{list()}.}
 
 \item{metadata}{A list containing auxiliary information including
 \code{label_information} (cues, categories, group), \code{model_family},
-\code{original_variable_names}, \code{sufficient_statistics}, and
-attached data. Default: \code{list()}.}
+\code{parameters}, \code{original_variable_names}, and
+\code{exposure_category_statistics}. Default: \code{list()}.}
+
+\item{data}{A named \code{list} containing \code{$original} and
+\code{$transformed} data frames. Default: \code{list()}.}
+
+\item{cache}{A list storing cached computations and summaries.
+Default: \code{list()}.}
+
+\item{transform_information}{An optional \link{MVBU_TransformInformation} object.
+Default: \code{NULL}.}
 }
 \description{
 Represents a posterior distribution over a cognitive model, as obtained
