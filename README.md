@@ -3,7 +3,7 @@
 
 
 # Installation
-You can install `MVBeliefUpdatr` from R:
+You can install this legacy version of `MVBeliefUpdatr` from R (pre migration to an S7 class-based approach):
 
 ```
 devtools::install_github("hlplab/MVBeliefUpdatr", ref="version-0.0.3")
