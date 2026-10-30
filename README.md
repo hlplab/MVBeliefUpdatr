@@ -6,7 +6,7 @@
 You can install `MVBeliefUpdatr` from R:
 
 ```
-devtools::install_github("hlplab/MVBeliefUpdatr")
+devtools::install_github("hlplab/MVBeliefUpdatr", ref="version-0.0.3")
 ```
 
 That should install `MVBeliefUpdatr` and all of its dependencies. If some dependencies are *not* automatically installed, please let email
