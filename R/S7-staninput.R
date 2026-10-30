@@ -372,7 +372,7 @@ IdealAdaptorStaninput <- S7::new_class(
     staninput_nix <- c(
       base_values,
       list(
-        x_test = as.numeric(test_summary$x_test),
+        x_test = as.array(as.numeric(test_summary$x_test)),
         m_0_known_data = as.array(m_0_data_1d),
         S_0_known_data = as.array(S_0_data_1d),
         mu_0_known_data = as.array(as.numeric(struct$mu_0$data[, 1])),

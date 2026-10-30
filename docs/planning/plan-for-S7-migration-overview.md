@@ -350,25 +350,30 @@ Checklist:
   interfaces (`R/S7-stanfit-fitting.R`) to pass known moment data flags
 - [x] Document conjugate updating behaviors and parameter fixing in
   `vignettes/fitting-and-working-with-stanfit-models.Rmd` and roxygen Rd files
-- [ ] Add parameter recovery test suite verifying analytical forward-updated
+- [x] Add parameter recovery test suite verifying analytical forward-updated
   beliefs against Stan posterior estimates (recovering prior beliefs given
   sufficient exposure data)
 
 Phase gate:
 - [x] All 14 Stan models compile and pass interface contract tests
-- [x] Full test suite passes cleanly (2,905 tests across 44 test files)
+- [x] Full test suite passes cleanly (over 3,040 tests across 45 test files)
 
 ### Phase-End Cleanup Standard (Applies to Every Phase)
 Checklist:
-- [] All newly added functions/classes in phase scope have roxygen documentation.
-- [ ] All legacy code integrated into the S7 scaffold in phase scope is brought up to roxygen documentation standards.
-- [] Roxygen generation runs for the phase branch without introducing new unresolved-link warnings for phase-touched files.
-- [ ] Generated Rd output for phase-touched topics is checked for malformed markup/macros.
-- [ ] Remove temporary S7 scaffold-only `package = NULL` overrides once the class registration strategy is finalized for the packaged build.
+- [x] All newly added functions/classes in phase scope have roxygen
+  documentation.
+- [x] All legacy code integrated into the S7 scaffold in phase scope is
+  brought up to roxygen documentation standards.
+- [x] Roxygen generation runs for the phase branch without introducing new
+  unresolved-link warnings for phase-touched files.
+- [x] Generated Rd output for phase-touched topics is checked for malformed
+  markup/macros.
+- [ ] Remove temporary S7 scaffold-only `package = NULL` overrides once the
+  class registration strategy is finalized for the packaged build.
 
 Phase gate:
-- [ ] Vignette examples run end-to-end
-- [ ] Migration guide covers all renamed/removed APIs
+- [x] Vignette examples run end-to-end
+- [x] Migration guide covers all renamed/removed APIs
 
 ## Verification Matrix
 - [ ] Structural validation checks for all classes
@@ -411,14 +416,6 @@ Phase gate:
   we might have to either give observation level log posterior densities or
   tell users how they'd need to fit their alternative model to have log
   posterior densities for the same observations.
-+ Inverse MUVG/MNIX models (both as Stanfit model and S7 representation/
-  template/model): a model that accepts multiple cues as input but maintains
-  and updates representations/templates/models over the single integrated cue
-  dimension (e.g. UVG-I / NIX-I).
-+ Refine the pre-compiled 2D example `stanfit` object so category distributions
-  have less overlap, creating a clearer categorization surface.
-
-+ implement mixture inference starting with predefined models that are handed to the stan code.
 
 + Hybrid / Hierarchical Integration Architectures:
   + A subset of cues undergoes early perceptual fusion (e.g. spectral cues F1, F2 fused into an intermediate vowel quality percept z), which is then integrated late with remaining cues (e.g. duration, f0).
