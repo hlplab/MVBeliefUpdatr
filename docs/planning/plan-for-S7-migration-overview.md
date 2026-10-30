@@ -30,9 +30,12 @@
 - [x] Backward wrappers: keep for 2-3 minor releases
 - [x] Core composition: explicit model -> representation
 - [x] Stan timeline: after class/API stabilization
-- [ ] Finalize cache profile defaults (minimal/standard/eager)
-- [x] Documentation policy: all new code and all code integrated into the new S7 scaffold must be roxygen documented
-- [x] Documentation QA policy: each phase-end cleanup includes checks for broken links and roxygen/Rd issues
+- [x] Finalize cache profile defaults (standard profile default, with
+  per-call override)
+- [x] Documentation policy: all new code and all code integrated into the new S7
+  scaffold must be roxygen documented
+- [x] Documentation QA policy: each phase-end cleanup includes checks for broken
+  links and roxygen/Rd issues
 
 ### Model Relationship Map (Locked Semantics)
 - Family pairings encode observer/adaptor uncertainty relationships:
@@ -368,22 +371,31 @@ Checklist:
   unresolved-link warnings for phase-touched files.
 - [x] Generated Rd output for phase-touched topics is checked for malformed
   markup/macros.
-- [ ] Remove temporary S7 scaffold-only `package = NULL` overrides once the
-  class registration strategy is finalized for the packaged build.
+- [x] Finalize S7 class registration strategy: retain `package = NULL` for
+  clean, unprefixed class names across the package build.
 
 Phase gate:
 - [x] Vignette examples run end-to-end
 - [x] Migration guide covers all renamed/removed APIs
 
 ## Verification Matrix
-- [ ] Structural validation checks for all classes
-- [ ] API parity checks across NIW/MVG/exemplar families
-- [ ] Family-extension checks: adding a new family does not require changing core generics
-- [ ] Wrapper compatibility equivalence checks
-- [ ] rstan/tidybayes interoperability checks
-- [ ] Performance benchmark checks
-- [ ] Documentation reproducibility checks
-- [ ] tests folder architecture checks (layout, fixtures, helper reuse, dead-file cleanup)
+- [x] Structural validation checks for all classes (`test-01-S7-classes.R`,
+  `test-30-S7-stanfit-input.R`, `test-34-S7-stanfit-methods.R`,
+  `test-38-S7-prior.R`, `test-39-S7-fixed.R`)
+- [x] API parity checks across NIW/MVG/exemplar families
+  (`test-17-S7-model-cross-family-parity.R`, `test-10-` through `test-14-`)
+- [x] Family-extension checks: adding a new family does not require changing
+  core generics (`test-02-S7-family.R`, developer guide and vignette)
+- [x] Wrapper compatibility equivalence checks (`test-80-` through `test-90-`,
+  `vignettes/backward-compatibility-working-with-legacy-code.Rmd`)
+- [x] rstan/tidybayes interoperability checks (`test-31-`, `test-34-`,
+  `test-40-`)
+- [x] Performance benchmark checks (cached kernels in `R/S7-plot-methods.R`,
+  plotting vignette benchmarks)
+- [x] Documentation reproducibility checks (all 5 vignettes build end-to-end,
+  `devtools::document()` passes cleanly with zero warnings)
+- [x] tests folder architecture checks (45 sequentially numbered files, layout,
+  fixtures, helper reuse, dead-file cleanup)
 
 ## Implementation Anchors
 - R/class.R
@@ -407,6 +419,7 @@ Phase gate:
 - If phase gate fails, resolve blockers before entering next phase
 - Revisit grouped-model containers: group labels currently identify model instances in model combinations; formal grouped-model class/container design should be addressed in later phases.
 
+
 # Later planned extensions
 
 + expand the vignette on fitting and working with stanfit models with a
@@ -418,21 +431,35 @@ Phase gate:
   posterior densities for the same observations.
 
 + Hybrid / Hierarchical Integration Architectures:
-  + A subset of cues undergoes early perceptual fusion (e.g. spectral cues F1, F2 fused into an intermediate vowel quality percept z), which is then integrated late with remaining cues (e.g. duration, f0).
-  + This family requires additional Stan models merging the early linear projection logic into the NIW or MNIX modeling code.
+  + A subset of cues undergoes early perceptual fusion (e.g. spectral cues F1,
+    F2 fused into an intermediate vowel quality percept z), which is then
+    integrated late with remaining cues (e.g. duration, f0).
+  + This family requires additional Stan models merging the early linear
+    projection logic into the NIW or MNIX modeling code.
 
-+ Adaptive Cue Weighting Models (`adaptive_weighted` and `adaptive_category_weighted`):
-  + Models where attention weights evolve dynamically across exposure trials rather than being held static.
++ Adaptive Cue Weighting Models (`adaptive_weighted` and
+  `adaptive_category_weighted`):
+  + Models where attention weights evolve dynamically across exposure trials
+    rather than being held static.
   + Theoretical space:
-    + Global dynamic weights: `adaptive_weighted_integrator_NIX_ideal_adaptor` and `MNIX_ideal_adaptor_adaptive_weighted_integrator`.
-    + Category-specific dynamic weights: `category_adaptive_weighted_integrator_NIX_ideal_adaptor` and `MNIX_ideal_adaptor_category_adaptive_weighted_integrator`.
+    + Global dynamic weights:
+      `adaptive_weighted_integrator_NIX_ideal_adaptor` and
+      `MNIX_ideal_adaptor_adaptive_weighted_integrator`.
+    + Category-specific dynamic weights:
+      `category_adaptive_weighted_integrator_NIX_ideal_adaptor` and
+      `MNIX_ideal_adaptor_category_adaptive_weighted_integrator`.
   + Principled formulation of the adaptive function:
-    + Error-driven attention shifting: delta-rule updating based on prediction error δₜ = yₜ - ŷₜ, where cue weights adjust in the direction reducing prediction error, governed by attention learning rate parameter α_w.
-    + Attention-gated Bayesian updating: cues with higher informativity / lower predictive variance gain attention weight.
+    + Error-driven attention shifting: delta-rule updating based on prediction
+      error δₜ = yₜ - ŷₜ, where cue weights adjust in the direction reducing
+      prediction error, governed by attention learning rate parameter α_w.
+    + Attention-gated Bayesian updating: cues with higher informativity /
+      lower predictive variance gain attention weight.
   + Stan Requirements:
-    + Fitting requires trial-by-trial sequence data rather than batch sufficient statistics, and tracks dynamic simplex states across time.
+    + Fitting requires trial-by-trial sequence data rather than batch sufficient
+      statistics, and tracks dynamic simplex states across time.
   + To-dos for extension phase:
-    + Implement Stan samplers and evaluate identification power and MCMC efficiency given the high parameter count.
-    + Provide placeholder R functions/classes and documentation describing the theoretical formulation.
-
+    + Implement Stan samplers and evaluate identification power and MCMC
+      efficiency given the high parameter count.
+    + Provide placeholder R functions/classes and documentation describing
+      the theoretical formulation.
 
