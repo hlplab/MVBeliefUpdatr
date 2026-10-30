@@ -221,7 +221,19 @@ test_that("fixed_parameters are validated against the category labels", {
       ),
       transform = input@transform_information
     ),
-    "named list with names matching the categories"
+    "Argument `fixed_parameters` must be an MVBU_FixedParameter object or NULL."
+  )
+
+  expect_error(
+    MVBeliefUpdatr:::.validate_and_transform_model_spec(
+      stanmodel = "NIW_ideal_adaptor",
+      cues = c("cue1", "cue2"),
+      categories = c("A", "B"),
+      groups = "g1",
+      fixed_parameters = fix_parameter("m_0", value = c(0, 0), category = "C"),
+      transform = input@transform_information
+    ),
+    "Category 'C' not found."
   )
 })
 
@@ -238,56 +250,72 @@ test_that(
   )
 
   nix_fixed_sets <- list(
-    list(lapse_rate = 0.1),
-    list(mu_0 = list("/d/" = 0.1, "/t/" = 0.2)),
-    list(
-      Sigma_0 = list(
-        "/d/" = matrix(0.1, nrow = 1, ncol = 1),
-        "/t/" = matrix(0.2, nrow = 1, ncol = 1)
-      )
+    fix_parameter("lapse_rate", 0.1),
+    c(
+      fix_parameter("m_0", 0.1, category = "/d/"),
+      fix_parameter("m_0", 0.2, category = "/t/")
     ),
-    list(lapse_rate = 0.1, mu_0 = list("/d/" = 0.1, "/t/" = 0.2)),
-    list(
-      lapse_rate = 0.1,
-      Sigma_0 = list(
-        "/d/" = matrix(0.1, nrow = 1, ncol = 1),
-        "/t/" = matrix(0.2, nrow = 1, ncol = 1)
-      )
+    c(
+      fix_parameter("S_0", matrix(0.1, nrow = 1, ncol = 1), category = "/d/"),
+      fix_parameter("S_0", matrix(0.2, nrow = 1, ncol = 1), category = "/t/")
     ),
-    list(
-      mu_0 = list("/d/" = 0.1, "/t/" = 0.2),
-      Sigma_0 = list(
-        "/d/" = matrix(0.1, nrow = 1, ncol = 1),
-        "/t/" = matrix(0.2, nrow = 1, ncol = 1)
-      )
+    c(
+      fix_parameter("lapse_rate", 0.1),
+      fix_parameter("m_0", 0.1, category = "/d/"),
+      fix_parameter("m_0", 0.2, category = "/t/")
     ),
-    list(
-      lapse_rate = 0.1,
-      mu_0 = list("/d/" = 0.1, "/t/" = 0.2),
-      Sigma_0 = list(
-        "/d/" = matrix(0.1, nrow = 1, ncol = 1),
-        "/t/" = matrix(0.2, nrow = 1, ncol = 1)
-      )
+    c(
+      fix_parameter("lapse_rate", 0.1),
+      fix_parameter("S_0", matrix(0.1, nrow = 1, ncol = 1), category = "/d/"),
+      fix_parameter("S_0", matrix(0.2, nrow = 1, ncol = 1), category = "/t/")
+    ),
+    c(
+      fix_parameter("m_0", 0.1, category = "/d/"),
+      fix_parameter("m_0", 0.2, category = "/t/"),
+      fix_parameter("S_0", matrix(0.1, nrow = 1, ncol = 1), category = "/d/"),
+      fix_parameter("S_0", matrix(0.2, nrow = 1, ncol = 1), category = "/t/")
+    ),
+    c(
+      fix_parameter("lapse_rate", 0.1),
+      fix_parameter("m_0", 0.1, category = "/d/"),
+      fix_parameter("m_0", 0.2, category = "/t/"),
+      fix_parameter("S_0", matrix(0.1, nrow = 1, ncol = 1), category = "/d/"),
+      fix_parameter("S_0", matrix(0.2, nrow = 1, ncol = 1), category = "/t/")
     )
   )
 
   mnix_niw_fixed_sets <- list(
-    list(lapse_rate = 0.1),
-    list(mu_0 = list("/d/" = c(0.1, 0.2), "/t/" = c(0.2, 0.3))),
-    list(Sigma_0 = list("/d/" = diag(2), "/t/" = diag(2))),
-    list(
-      lapse_rate = 0.1,
-      mu_0 = list("/d/" = c(0.1, 0.2), "/t/" = c(0.2, 0.3))
+    fix_parameter("lapse_rate", 0.1),
+    c(
+      fix_parameter("m_0", c(0.1, 0.2), category = "/d/"),
+      fix_parameter("m_0", c(0.2, 0.3), category = "/t/")
     ),
-    list(lapse_rate = 0.1, Sigma_0 = list("/d/" = diag(2), "/t/" = diag(2))),
-    list(
-      mu_0 = list("/d/" = c(0.1, 0.2), "/t/" = c(0.2, 0.3)),
-      Sigma_0 = list("/d/" = diag(2), "/t/" = diag(2))
+    c(
+      fix_parameter("S_0", diag(2), category = "/d/"),
+      fix_parameter("S_0", diag(2), category = "/t/")
     ),
-    list(
-      lapse_rate = 0.1,
-      mu_0 = list("/d/" = c(0.1, 0.2), "/t/" = c(0.2, 0.3)),
-      Sigma_0 = list("/d/" = diag(2), "/t/" = diag(2))
+    c(
+      fix_parameter("lapse_rate", 0.1),
+      fix_parameter("m_0", c(0.1, 0.2), category = "/d/"),
+      fix_parameter("m_0", c(0.2, 0.3), category = "/t/")
+    ),
+    c(
+      fix_parameter("lapse_rate", 0.1),
+      fix_parameter("S_0", diag(2), category = "/d/"),
+      fix_parameter("S_0", diag(2), category = "/t/")
+    ),
+    c(
+      fix_parameter("m_0", c(0.1, 0.2), category = "/d/"),
+      fix_parameter("m_0", c(0.2, 0.3), category = "/t/"),
+      fix_parameter("S_0", diag(2), category = "/d/"),
+      fix_parameter("S_0", diag(2), category = "/t/")
+    ),
+    c(
+      fix_parameter("lapse_rate", 0.1),
+      fix_parameter("m_0", c(0.1, 0.2), category = "/d/"),
+      fix_parameter("m_0", c(0.2, 0.3), category = "/t/"),
+      fix_parameter("S_0", diag(2), category = "/d/"),
+      fix_parameter("S_0", diag(2), category = "/t/")
     )
   )
 
@@ -319,15 +347,15 @@ test_that(
 
     expect_equal(
       staninput@values$lapse_rate_known,
-      if (is.null(fixed_parameters$lapse_rate)) 0 else 1
+      if ("lapse_rate" %in% fixed_parameters@par_class) 1L else 0L
     )
     expect_equal(
-      staninput@values$mu_0_known,
-      if (is.null(fixed_parameters$mu_0)) 0 else 1
+      staninput@values$M_m_0_known,
+      if ("m_0" %in% fixed_parameters@par_class) 2L else 0L
     )
     expect_equal(
-      staninput@values$Sigma_0_known,
-      if (is.null(fixed_parameters$Sigma_0)) 0 else 1
+      staninput@values$M_S_0_known,
+      if ("S_0" %in% fixed_parameters@par_class) 2L else 0L
     )
   }
 
@@ -359,15 +387,15 @@ test_that(
 
     expect_equal(
       mnix_staninput@values$lapse_rate_known,
-      if (is.null(fixed_parameters$lapse_rate)) 0 else 1
+      if ("lapse_rate" %in% fixed_parameters@par_class) 1L else 0L
     )
     expect_equal(
-      mnix_staninput@values$mu_0_known,
-      if (is.null(fixed_parameters$mu_0)) 0 else 1
+      mnix_staninput@values$M_m_0_known,
+      if ("m_0" %in% fixed_parameters@par_class) 2L else 0L
     )
     expect_equal(
-      mnix_staninput@values$Sigma_0_known,
-      if (is.null(fixed_parameters$Sigma_0)) 0 else 1
+      mnix_staninput@values$M_S_0_known,
+      if ("S_0" %in% fixed_parameters@par_class) 2L else 0L
     )
 
     niw_spec <- MVBeliefUpdatr:::.validate_and_transform_model_spec(
@@ -386,15 +414,15 @@ test_that(
 
     expect_equal(
       niw_staninput@values$lapse_rate_known,
-      if (is.null(fixed_parameters$lapse_rate)) 0 else 1
+      if ("lapse_rate" %in% fixed_parameters@par_class) 1L else 0L
     )
     expect_equal(
-      niw_staninput@values$mu_0_known,
-      if (is.null(fixed_parameters$mu_0)) 0 else 1
+      niw_staninput@values$M_m_0_known,
+      if ("m_0" %in% fixed_parameters@par_class) 2L else 0L
     )
     expect_equal(
-      niw_staninput@values$Sigma_0_known,
-      if (is.null(fixed_parameters$Sigma_0)) 0 else 1
+      niw_staninput@values$M_S_0_known,
+      if ("S_0" %in% fixed_parameters@par_class) 2L else 0L
     )
   }
 })
@@ -423,12 +451,14 @@ test_that(
       cues = c("VOT", "f0_semitones"),
       categories = c("/d/", "/t/"),
       groups = "g1",
-      fixed_parameters = list(
-        mu_0 = list("/d/" = 0.1, "/t/" = c(0.1, 0.2, 0.3))
+      fixed_parameters = fix_parameter(
+        "m_0",
+        value = c(0.1, 0.2, 0.3),
+        category = "/d/"
       ),
       transform = input@transform_information
     ),
-    "mu_0 must be a named list with each entry a numeric vector of length 2"
+    "Fixed m_0 must have length 2"
   )
 
   expect_error(
@@ -437,12 +467,14 @@ test_that(
       cues = c("VOT", "f0_semitones"),
       categories = c("/d/", "/t/"),
       groups = "g1",
-      fixed_parameters = list(
-        Sigma_0 = list("/d/" = diag(1), "/t/" = diag(2))
+      fixed_parameters = fix_parameter(
+        "S_0",
+        value = diag(1),
+        category = "/d/"
       ),
       transform = input@transform_information
     ),
-    "Sigma_0 must be a named list with each entry a square matrix"
+    "Fixed S_0 must be 2 x 2"
   )
 
   expect_error(
@@ -451,16 +483,14 @@ test_that(
       cues = c("VOT", "f0_semitones"),
       categories = c("/d/", "/t/"),
       groups = "g1",
-      fixed_parameters = list(
-        mu_0 = list(
-          "/d/" = c(0.1, 0.2),
-          "/t/" = c(0.1, 0.2),
-          "/b/" = c(0.1, 0.2)
-        )
+      fixed_parameters = fix_parameter(
+        "m_0",
+        value = c(0.1, 0.2),
+        category = "/b/"
       ),
       transform = input@transform_information
     ),
-    "mu_0 must be a named list with names matching the categories"
+    "Category '/b/' not found"
   )
 })
 
@@ -555,7 +585,7 @@ test_that("stanmodel compatibility checks enforce the matching Stan program", {
       stanmodel = "MNIX_ideal_adaptor_ideal_integrator",
       expected_family = "MNIX_ideal_integrator",
       required_names = c(
-        "n_exposure", "n_test", "mean_exposure", "css_exposure", "p_cat"
+        "n_exposure", "n_test", "mean_exposure", "css_exposure"
       ),
       forbidden_names = c("x_sd_exposure")
     )
@@ -722,7 +752,7 @@ test_that(
       stanmodel = "MNIX_ideal_adaptor_ideal_integrator",
       expected_family = "MNIX_ideal_integrator",
       required_names = c(
-        "n_exposure", "n_test", "mean_exposure", "css_exposure", "p_cat"
+        "n_exposure", "n_test", "mean_exposure", "css_exposure"
       ),
       forbidden_names = c("x_sd_exposure")
     )

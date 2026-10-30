@@ -8,8 +8,6 @@
 \title{Specify control parameters for new_ideal_adaptor_stanfit_input()}
 \usage{
 control_staninput(
-  tau_scale = NULL,
-  L_omega_eta = NULL,
   split_loglik_per_observation = 0,
   transform_type = c("identity", "center", "standardize", "PCA whiten", "ZCA whiten")[3]
 )
@@ -21,14 +19,6 @@ IdealAdaptorStanfitInput(
 )
 }
 \arguments{
-\item{tau_scale}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Deprecated. Use
-\code{priors = prior(..., class = "tau")} in \code{\link{fit_ideal_adaptor}}
-instead.}
-
-\item{L_omega_eta}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Deprecated. Use
-\code{priors = prior(..., class = "cor")} in \code{\link{fit_ideal_adaptor}}
-instead.}
-
 \item{split_loglik_per_observation}{Split log likelihood per observation.}
 
 \item{transform_type}{Affine transformation type applied to the data.}

@@ -460,13 +460,8 @@ S7::method(print, MVBU_StanfitPosterior) <- function(x, ...) {
 summary.MVBU_StanfitPosterior <- function(object, ...) {
   print(object)
   fixed_params <- get_parameters(object, space = "original")$fixed
-  fixed_summary <- if (!is.null(fixed_params) && length(fixed_params) > 0L) {
-    attr(fixed_params, "table") %||%
-      .format_fixed_parameters_table(fixed_params, object = object)
-  } else {
-    NULL
-  }
-  if (!is.null(fixed_summary) && nrow(fixed_summary) > 0L) {
+  fixed_summary <- .format_fixed_parameters_table(fixed_params, object = object)
+  if (nrow(fixed_summary) > 0L) {
     cat("\nFixed Parameters:\n")
     print(fixed_summary)
   }

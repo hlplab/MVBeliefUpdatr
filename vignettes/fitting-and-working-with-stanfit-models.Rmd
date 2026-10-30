@@ -159,7 +159,8 @@ The `threads` argument can be specified as an integer count or as a list with a 
 > **Note on Total CPU Cores:** Total core allocation equals $\text{chains} \times \text{threads}$. For instance, running 4 chains with 2 threads per chain requires $4 \times 2 = 8$ available CPU cores.
 
 ```r
-# Parallel execution: 4 chains running across 4 cores, with 2 threads per chain (8 cores total)
+# Parallel execution: 4 chains running across 4 cores, with 2 threads per chain
+# (8 cores total)
 fit_fast <- fit_ideal_adaptor(
   stan_input,
   backend = "cmdstanr",
@@ -172,9 +173,83 @@ fit_fast <- fit_ideal_adaptor(
 )
 ```
 
-## 3.4 Pre-compiled Fits for Fast Exploration
+## 3.4 Custom Priors and Declarative Parameter Fixing
 
-For reproducible vignette compilation without long MCMC sampling delays, pre-compiled model fits can be accessed via package fixtures or helpers:
+`MVBeliefUpdatr` supports declarative, brms-style custom prior specifications
+via `prior()` and fine-grained parameter fixing via `fix_parameter()`.
+
+### Cognitive Parameters, Scopes, and Fixing Capabilities
+
+The table below outlines every cognitive parameter, whether it can be fixed
+globally, whether it can be fixed for particular categories only (partial
+category fixing; remaining categories are estimated), and its prior family:
+
+| Parameter | Scope / Dims | Can be fixed? | Can be fixed for particular category? | Prior Distribution | Stan Data Variable Names | Default Values |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **`m_0`** | Array [*M*] of Vector [*K*] | Yes | Yes | Normal(μ, σ) | `prior_mu_of_m`<br>`prior_scale_of_tau` | `mu = colMeans(cues_trans)` |
+| **`S_0`** | Array [*M*] of Matrix [*K*×*K*] | Yes | Yes | Decomposed into `tau` & `cor` | — | — |
+| **`expected_Sigma_0`** | Array [*M*] of Matrix [*K*×*K*] | Yes | Yes | Scaled via ν₀ | — | — |
+| **`tau`** | Vector [*K*] (cues) | Only via `S_0` | Only via `S_0` | Cauchy(loc, scale) | `prior_loc_of_tau`<br>`prior_scale_of_tau` | `loc = 0`<br>`scale = 5 · sd(cues_trans)` |
+| **`cor`** | Matrix [*K*×*K*] | Only via `S_0` | Only via `S_0` | LKJ(η) | `prior_eta_of_cor` | `eta = 1.0` (Uniform) |
+| **`kappa_0`** | Shared [1] or Category [*M*] | Yes | Yes | Cauchy(loc, scale) | `prior_loc_of_kappa`<br>`prior_scale_of_kappa` | `loc = K`<br>`scale = 5 · max(N_obs)` |
+| **`nu_0`** | Shared [1] or Category [*M*] | Yes | Yes | Cauchy(loc, scale) | `prior_loc_of_nu`<br>`prior_scale_of_nu` | `loc = K + 1`<br>`scale = 5 · max(N_obs)` |
+| **`lapse_rate`** | Scalar [1] | Yes | No | Beta(α, β) | `prior_alpha_of_lapse_rate`<br>`prior_beta_of_lapse_rate` | `alpha = 1.0`<br>`beta = 1.0` (Uniform) |
+| **`lapse_bias`** | Simplex [*M*] | Yes | No | Dirichlet(α) | `prior_alphas_of_lapse_bias` | `rep_vector(1.0, M)` |
+| **`category_prior`** | Simplex [*M*] | Yes | No | Dirichlet(α) | `prior_alphas_of_category_prior` | `rep_vector(1.0, M)` |
+| **`weights`** | Simplex [*K*] (or [*M*, *K*]) | Yes | Only in category-weighted models | Dirichlet(α) | `prior_alphas_of_weights` | `rep_vector(1.0, K)` |
+
+### Declarative Parameter Fixing (`fix_parameter`)
+
+Parameters can be fixed globally or for a subset of categories using
+`fix_parameter()`:
+
+```r
+# Fix global lapse rate to 2% and category priors equally
+f_global <- c(
+  fix_parameter(0.02, class = "lapse_rate"),
+  fix_parameter(c(0.5, 0.5), class = "category_prior")
+)
+
+# Partial fixing: fix category '/d/' mean, estimate category '/t/'
+f_partial <- fix_parameter(
+  value = c(F1 = 300, F2 = 1200),
+  class = "m_0",
+  category = "/d/",
+  cue_space = "original"
+)
+
+# Combine fixed parameter specifications
+all_fixed <- c(f_global, f_partial)
+```
+
+### Specifying Custom Priors (`prior`)
+
+Priors are specified using `prior()` declarations:
+
+```r
+priors <- c(
+  prior("cauchy(0, 2)", class = "tau_0"),
+  prior("lkj(2)", class = "cor_0"),
+  prior("beta(2, 50)", class = "lapse_rate"),
+  prior("dirichlet(c(2, 2))", class = "category_prior")
+)
+```
+
+Both `fixed_parameters` and `priors` are passed directly to
+`fit_ideal_adaptor()`:
+
+```r
+fit <- fit_ideal_adaptor(
+  stan_input,
+  fixed_parameters = all_fixed,
+  priors = priors
+)
+```
+
+## 3.5 Pre-compiled Fits for Fast Exploration
+
+For reproducible vignette compilation without long MCMC sampling delays,
+pre-compiled model fits can be accessed via package fixtures or helpers:
 
 ```{r load_example_fit}
 # Load or fit 1-cue NIW ideal adaptor Stanfit model

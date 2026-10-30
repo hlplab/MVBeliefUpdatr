@@ -73,19 +73,27 @@ test_that(
   )
 
   init_params_nix <- list(
-    kappa_0 = 10,
-    nu_0 = 15,
+    kappa_0_shared_param = array(10, dim = 1),
+    kappa_0_cat_param = numeric(0),
+    nu_0_shared_param = array(15, dim = 1),
+    nu_0_cat_param = numeric(0),
+    category_prior_param = array(c(0.5, 0.5), dim = c(1, 2)),
     lapse_rate_param = array(0.05, dim = 1),
-    m_0_param_transformed = c(-0.5, 0.5),
+    lapse_bias_param = array(c(0.5, 0.5), dim = c(1, 2)),
+    m_0_unknown_param = c(-0.5, 0.5),
     m_0_tau_transformed = array(1.5, dim = 1),
     tau_0_param_transformed = c(1.2, 1.8)
   )
 
   init_params_niw <- list(
-    kappa_0 = 10,
-    nu_0 = 15,
+    kappa_0_shared_param = array(10, dim = 1),
+    kappa_0_cat_param = numeric(0),
+    nu_0_shared_param = array(15, dim = 1),
+    nu_0_cat_param = numeric(0),
+    category_prior_param = array(c(0.5, 0.5), dim = c(1, 2)),
     lapse_rate_param = array(0.05, dim = 1),
-    m_0_param_transformed = array(c(-0.5, 0.5), dim = c(2, 1)),
+    lapse_bias_param = array(c(0.5, 0.5), dim = c(1, 2)),
+    m_0_unknown_param = array(c(-0.5, 0.5), dim = c(2, 1)),
     m_0_tau_transformed = array(1.5, dim = 1),
     m_0_L_omega_transformed = matrix(1, nrow = 1, ncol = 1),
     tau_0_param_transformed = array(c(1.2, 1.8), dim = c(2, 1)),

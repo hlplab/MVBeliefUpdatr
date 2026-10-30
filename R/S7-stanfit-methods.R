@@ -633,90 +633,68 @@ S7::method(get_draws, MVBU_Stanfit) <- function(
 
   stanfit <- get_stanfit(fit)
   fam <- get_model_family(fit)
-  is_nix <- grepl("NIX", fam, ignore.case = TRUE) && !grepl("MNIX", fam, ignore.case = TRUE)
+  is_nix <- grepl("NIX", fam, ignore.case = TRUE) &&
+    !grepl("MNIX", fam, ignore.case = TRUE)
   is_mnix <- grepl("MNIX", fam, ignore.case = TRUE)
   is_niw <- grepl("NIW", fam, ignore.case = TRUE)
+
+  stanfit_pars <- dimnames(stanfit)$parameters
+  if (is.null(stanfit_pars) && inherits(stanfit, "stanfit")) {
+    stanfit_pars <- stanfit@model_pars
+  }
+  has_indexed_kappa <- any(startsWith(stanfit_pars, paste0(kappa, "[")))
+  has_indexed_nu <- any(startsWith(stanfit_pars, paste0(nu, "[")))
+
+  kappa_expr <- if (has_indexed_kappa) {
+    rlang::expr((!!rlang::sym(kappa))[!!!rlang::syms(pars.index)])
+  } else {
+    rlang::expr(!!rlang::sym(kappa))
+  }
+  nu_expr <- if (has_indexed_nu) {
+    rlang::expr((!!rlang::sym(nu))[!!!rlang::syms(pars.index)])
+  } else {
+    rlang::expr(!!rlang::sym(nu))
+  }
 
   if (is_nix) {
     cue_lab <- get_cue_labels(fit)
     if (length(cue_lab) == 0) cue_lab <- "cue"
     cue_lab <- cue_lab[1]
 
-    if ("prior" %in% groups) {
-      d.pars <- stanfit %>%
-        tidybayes::spread_draws(
-          !!rlang::sym(kappa),
-          !!rlang::sym(nu),
-          (!!rlang::sym(m))[!!!rlang::syms(pars.index)],
-          (!!rlang::sym(S))[!!!rlang::syms(pars.index)],
-          lapse_rate,
-          ndraws = ndraws,
-          seed = seed
-        ) %>%
-        dplyr::mutate(cue = cue_lab, cue2 = cue_lab)
-    } else {
-      d.pars <- stanfit %>%
-        tidybayes::spread_draws(
-          (!!rlang::sym(kappa))[!!!rlang::syms(pars.index)],
-          (!!rlang::sym(nu))[!!!rlang::syms(pars.index)],
-          (!!rlang::sym(m))[!!!rlang::syms(pars.index)],
-          (!!rlang::sym(S))[!!!rlang::syms(pars.index)],
-          lapse_rate,
-          ndraws = ndraws,
-          seed = seed
-        ) %>%
-        dplyr::mutate(cue = cue_lab, cue2 = cue_lab)
-    }
+    d.pars <- stanfit %>%
+      tidybayes::spread_draws(
+        !!kappa_expr,
+        !!nu_expr,
+        (!!rlang::sym(m))[!!!rlang::syms(pars.index)],
+        (!!rlang::sym(S))[!!!rlang::syms(pars.index)],
+        lapse_rate,
+        ndraws = ndraws,
+        seed = seed
+      ) %>%
+      dplyr::mutate(cue = cue_lab, cue2 = cue_lab)
   } else if (is_mnix) {
-    if ("prior" %in% groups) {
-      d.pars <- stanfit %>%
-        tidybayes::spread_draws(
-          !!rlang::sym(kappa),
-          !!rlang::sym(nu),
-          (!!rlang::sym(m))[!!!rlang::syms(pars.index), cue],
-          (!!rlang::sym(S))[!!!rlang::syms(pars.index), cue],
-          lapse_rate,
-          ndraws = ndraws,
-          seed = seed
-        ) %>%
-        dplyr::mutate(cue2 = .data$cue)
-    } else {
-      d.pars <- stanfit %>%
-        tidybayes::spread_draws(
-          (!!rlang::sym(kappa))[!!!rlang::syms(pars.index)],
-          (!!rlang::sym(nu))[!!!rlang::syms(pars.index)],
-          (!!rlang::sym(m))[!!!rlang::syms(pars.index), cue],
-          (!!rlang::sym(S))[!!!rlang::syms(pars.index), cue],
-          lapse_rate,
-          ndraws = ndraws,
-          seed = seed
-        ) %>%
-        dplyr::mutate(cue2 = .data$cue)
-    }
+    d.pars <- stanfit %>%
+      tidybayes::spread_draws(
+        !!kappa_expr,
+        !!nu_expr,
+        (!!rlang::sym(m))[!!!rlang::syms(pars.index), cue],
+        (!!rlang::sym(S))[!!!rlang::syms(pars.index), cue],
+        lapse_rate,
+        ndraws = ndraws,
+        seed = seed
+      ) %>%
+      dplyr::mutate(cue2 = .data$cue)
   } else if (is_niw) {
-    if ("prior" %in% groups) {
-      d.pars <- stanfit %>%
-        tidybayes::spread_draws(
-          !!rlang::sym(kappa),
-          !!rlang::sym(nu),
-          (!!rlang::sym(m))[!!!rlang::syms(pars.index), cue],
-          (!!rlang::sym(S))[!!!rlang::syms(pars.index), cue, cue2],
-          lapse_rate,
-          ndraws = ndraws,
-          seed = seed
-        )
-    } else {
-      d.pars <- stanfit %>%
-        tidybayes::spread_draws(
-          (!!rlang::sym(kappa))[!!!rlang::syms(pars.index)],
-          (!!rlang::sym(nu))[!!!rlang::syms(pars.index)],
-          (!!rlang::sym(m))[!!!rlang::syms(pars.index), cue],
-          (!!rlang::sym(S))[!!!rlang::syms(pars.index), cue, cue2],
-          lapse_rate,
-          ndraws = ndraws,
-          seed = seed
-        )
-    }
+    d.pars <- stanfit %>%
+      tidybayes::spread_draws(
+        !!kappa_expr,
+        !!nu_expr,
+        (!!rlang::sym(m))[!!!rlang::syms(pars.index), cue],
+        (!!rlang::sym(S))[!!!rlang::syms(pars.index), cue, cue2],
+        lapse_rate,
+        ndraws = ndraws,
+        seed = seed
+      )
   } else {
     stop("Unknown model family.")
   }
@@ -1462,62 +1440,12 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
   }
   dplyr::bind_rows(rows)
 }
-#' Create a single-row tibble for a fixed parameter
-#'
-#' @param param Parameter name character string.
-#' @param dist Distribution label (\code{"prior"}, \code{"posterior"},
-#'   or \code{""}).
-#' @param group Group label.
-#' @param category Category label.
-#' @param cue Cue label (for NIX/MNIX single cue column).
-#' @param cue1 Primary cue label (for NIW 2D cue matrix).
-#' @param cue2 Secondary cue label (for NIW 2D cue matrix).
-#' @param value Numeric fixed value.
-#' @param is_nix_or_mnix Logical; whether model has a single cue column.
-#' @return A 1-row \code{\link[tibble]{tibble}}.
-#' @keywords internal
-#' @noRd
-.make_fixed_row <- function(
-  param,
-  dist = "",
-  group = "",
-  category = "",
-  cue = "",
-  cue1 = "",
-  cue2 = "",
-  value = NA_real_,
-  is_nix_or_mnix = TRUE
-) {
-  if (is_nix_or_mnix) {
-    tibble::tibble(
-      Parameter = as.character(param),
-      `Dist.` = as.character(dist),
-      Group = as.character(group),
-      Category = as.character(category),
-      Cue = as.character(cue),
-      Value = as.numeric(value),
-      Status = "Fixed by user"
-    )
-  } else {
-    tibble::tibble(
-      Parameter = as.character(param),
-      `Dist.` = as.character(dist),
-      Group = as.character(group),
-      Category = as.character(category),
-      Cue1 = as.character(cue1),
-      Cue2 = as.character(cue2),
-      Value = as.numeric(value),
-      Status = "Fixed by user"
-    )
-  }
-}
 
 #' Format fixed parameters as a summary table
 #'
-#' @param fixed_params A named list of fixed parameter values in original
-#'   space.
+#' @param fixed_params An \code{\link{MVBU_FixedParameter}} object or NULL.
 #' @param object Optional \code{MVBU_Stanfit} or model object providing label
-#'   context.
+#'   context (unused, kept for signature consistency).
 #' @return A \code{\link[tibble]{tibble}} with fixed parameters formatted
 #'   for display.
 #' @keywords internal
@@ -1526,289 +1454,10 @@ head.Summary_MVBU_Stanfit <- function(x, n = 6L, ...) {
   if (is.null(fixed_params) || length(fixed_params) == 0L) {
     return(tibble::tibble())
   }
-  if (is.data.frame(fixed_params)) {
+  if (S7::S7_inherits(fixed_params, MVBU_FixedParameter)) {
     return(tibble::as_tibble(fixed_params))
   }
-
-  cue_labels <- tryCatch(get_cue_labels(object), error = function(e) NULL)
-  category_labels <- tryCatch(
-    get_category_labels(object),
-    error = function(e) NULL
-  )
-  fam <- tryCatch(
-    sub("_.*$", "", get_model_family(object)),
-    error = function(e) ""
-  )
-  is_nix_or_mnix <- fam %in% c("NIX", "MNIX") ||
-    (!is.null(cue_labels) && length(cue_labels) <= 1L) ||
-    (is.null(cue_labels) && fam != "NIW")
-
-  rows <- list()
-
-  # weights
-  if (!is.null(fixed_params$weights)) {
-    w <- fixed_params$weights
-    for (c in seq_along(w)) {
-      c_name <- if (!is.null(cue_labels) && length(cue_labels) >= c) {
-        cue_labels[c]
-      } else if (!is.null(names(w)) && nzchar(names(w)[c])) {
-        names(w)[c]
-      } else {
-        as.character(c)
-      }
-      rows[[length(rows) + 1L]] <- .make_fixed_row(
-        param = "weights",
-        cue = c_name,
-        cue1 = c_name,
-        value = w[c],
-        is_nix_or_mnix = is_nix_or_mnix
-      )
-    }
-  }
-
-  # lapse_rate
-  if (!is.null(fixed_params$lapse_rate)) {
-    rows[[length(rows) + 1L]] <- .make_fixed_row(
-      param = "lapse_rate",
-      value = fixed_params$lapse_rate[1],
-      is_nix_or_mnix = is_nix_or_mnix
-    )
-  }
-
-  # prior_p / p_cat
-  prior_p <- fixed_params$prior_p %||% fixed_params$p_cat
-  if (!is.null(prior_p)) {
-    for (k in seq_along(prior_p)) {
-      cat_name <- if (
-        !is.null(category_labels) && length(category_labels) >= k
-      ) {
-        category_labels[k]
-      } else if (!is.null(names(prior_p)) && nzchar(names(prior_p)[k])) {
-        names(prior_p)[k]
-      } else {
-        as.character(k)
-      }
-      rows[[length(rows) + 1L]] <- .make_fixed_row(
-        param = "prior_p",
-        category = cat_name,
-        value = prior_p[k],
-        is_nix_or_mnix = is_nix_or_mnix
-      )
-    }
-  }
-
-  # lapse_bias
-  if (!is.null(fixed_params$lapse_bias)) {
-    lb <- fixed_params$lapse_bias
-    for (k in seq_along(lb)) {
-      cat_name <- if (
-        !is.null(category_labels) && length(category_labels) >= k
-      ) {
-        category_labels[k]
-      } else if (!is.null(names(lb)) && nzchar(names(lb)[k])) {
-        names(lb)[k]
-      } else {
-        as.character(k)
-      }
-      rows[[length(rows) + 1L]] <- .make_fixed_row(
-        param = "lapse_bias",
-        category = cat_name,
-        value = lb[k],
-        is_nix_or_mnix = is_nix_or_mnix
-      )
-    }
-  }
-
-  # mu_0 / m_0
-  mu_0 <- fixed_params$mu_0 %||% fixed_params$m_0
-  if (!is.null(mu_0)) {
-    if (is.matrix(mu_0)) {
-      for (k in seq_len(nrow(mu_0))) {
-        cat_name <- if (
-          !is.null(category_labels) && length(category_labels) >= k
-        ) {
-          category_labels[k]
-        } else if (!is.null(rownames(mu_0)) && nzchar(rownames(mu_0)[k])) {
-          rownames(mu_0)[k]
-        } else {
-          as.character(k)
-        }
-        for (c in seq_len(ncol(mu_0))) {
-          c_name <- if (!is.null(cue_labels) && length(cue_labels) >= c) {
-            cue_labels[c]
-          } else if (!is.null(colnames(mu_0)) && nzchar(colnames(mu_0)[c])) {
-            colnames(mu_0)[c]
-          } else {
-            as.character(c)
-          }
-          rows[[length(rows) + 1L]] <- .make_fixed_row(
-            param = "m",
-            dist = "prior",
-            category = cat_name,
-            cue = c_name,
-            cue1 = c_name,
-            value = mu_0[k, c],
-            is_nix_or_mnix = is_nix_or_mnix
-          )
-        }
-      }
-    } else if (is.list(mu_0)) {
-      for (k_name in names(mu_0)) {
-        sub_v <- mu_0[[k_name]]
-        for (c in seq_along(sub_v)) {
-          c_name <- if (!is.null(cue_labels) && length(cue_labels) >= c) {
-            cue_labels[c]
-          } else if (!is.null(names(sub_v)) && nzchar(names(sub_v)[c])) {
-            names(sub_v)[c]
-          } else {
-            as.character(c)
-          }
-          rows[[length(rows) + 1L]] <- .make_fixed_row(
-            param = "m",
-            dist = "prior",
-            category = k_name,
-            cue = c_name,
-            cue1 = c_name,
-            value = sub_v[c],
-            is_nix_or_mnix = is_nix_or_mnix
-          )
-        }
-      }
-    } else if (is.numeric(mu_0)) {
-      for (c in seq_along(mu_0)) {
-        c_name <- if (!is.null(cue_labels) && length(cue_labels) >= c) {
-          cue_labels[c]
-        } else {
-          as.character(c)
-        }
-        rows[[length(rows) + 1L]] <- .make_fixed_row(
-          param = "m",
-          dist = "prior",
-          cue = c_name,
-          cue1 = c_name,
-          value = mu_0[c],
-          is_nix_or_mnix = is_nix_or_mnix
-        )
-      }
-    }
-  }
-
-  # Sigma_0 / S_0
-  sig_0 <- fixed_params$Sigma_0 %||% fixed_params$S_0
-  if (!is.null(sig_0)) {
-    if (is.array(sig_0) && length(dim(sig_0)) == 3L) {
-      for (k in seq_len(dim(sig_0)[1])) {
-        cat_name <- if (
-          !is.null(category_labels) && length(category_labels) >= k
-        ) {
-          category_labels[k]
-        } else {
-          as.character(k)
-        }
-        for (i in seq_len(dim(sig_0)[2])) {
-          c1 <- if (!is.null(cue_labels) && length(cue_labels) >= i) {
-            cue_labels[i]
-          } else {
-            as.character(i)
-          }
-          for (j in seq_len(dim(sig_0)[3])) {
-            c2 <- if (!is.null(cue_labels) && length(cue_labels) >= j) {
-              cue_labels[j]
-            } else {
-              as.character(j)
-            }
-            if (is_nix_or_mnix) {
-              if (i == j) {
-                rows[[length(rows) + 1L]] <- .make_fixed_row(
-                  param = "S",
-                  dist = "prior",
-                  category = cat_name,
-                  cue = c1,
-                  value = sig_0[k, i, j],
-                  is_nix_or_mnix = TRUE
-                )
-              }
-            } else {
-              rows[[length(rows) + 1L]] <- .make_fixed_row(
-                param = "S",
-                dist = "prior",
-                category = cat_name,
-                cue1 = c1,
-                cue2 = c2,
-                value = sig_0[k, i, j],
-                is_nix_or_mnix = FALSE
-              )
-            }
-          }
-        }
-      }
-    } else if (is.list(sig_0)) {
-      for (k_name in names(sig_0)) {
-        mat <- sig_0[[k_name]]
-        if (is.matrix(mat)) {
-          for (i in seq_len(nrow(mat))) {
-            c1 <- if (!is.null(cue_labels) && length(cue_labels) >= i) {
-              cue_labels[i]
-            } else {
-              as.character(i)
-            }
-            for (j in seq_len(ncol(mat))) {
-              c2 <- if (!is.null(cue_labels) && length(cue_labels) >= j) {
-                cue_labels[j]
-              } else {
-                as.character(j)
-              }
-              if (is_nix_or_mnix) {
-                if (i == j) {
-                  rows[[length(rows) + 1L]] <- .make_fixed_row(
-                    param = "S",
-                    dist = "prior",
-                    category = k_name,
-                    cue = c1,
-                    value = mat[i, j],
-                    is_nix_or_mnix = TRUE
-                  )
-                }
-              } else {
-                rows[[length(rows) + 1L]] <- .make_fixed_row(
-                  param = "S",
-                  dist = "prior",
-                  category = k_name,
-                  cue1 = c1,
-                  cue2 = c2,
-                  value = mat[i, j],
-                  is_nix_or_mnix = FALSE
-                )
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  # Other generic parameters
-  known_pars <- c(
-    "weights", "lapse_rate", "lapse_bias", "prior_p", "p_cat",
-    "mu_0", "m_0", "Sigma_0", "S_0"
-  )
-  for (p_name in setdiff(names(fixed_params), known_pars)) {
-    val <- fixed_params[[p_name]]
-    if (is.numeric(val)) {
-      for (idx in seq_along(val)) {
-        rows[[length(rows) + 1L]] <- .make_fixed_row(
-          param = p_name,
-          value = val[idx],
-          is_nix_or_mnix = is_nix_or_mnix
-        )
-      }
-    }
-  }
-
-  if (length(rows) == 0L) {
-    return(tibble::tibble())
-  }
-  dplyr::bind_rows(rows)
+  tibble::tibble()
 }
 
 #' Summarize an MVBU Stanfit object
@@ -1873,12 +1522,7 @@ summary.MVBU_Stanfit <- function(
 
   raw_sum <- rstan::summary(stanfit, pars = pars, probs = probs, ...)$summary
   fixed_params <- get_parameters(object, space = "original")$fixed
-  fixed_summary <- if (!is.null(fixed_params) && length(fixed_params) > 0) {
-    attr(fixed_params, "table") %||%
-      .format_fixed_parameters_table(fixed_params, object = object)
-  } else {
-    tibble::tibble()
-  }
+  fixed_summary <- .format_fixed_parameters_table(fixed_params, object = object)
 
   if (is.null(raw_sum) || nrow(raw_sum) == 0) {
     return(Summary_MVBU_Stanfit(

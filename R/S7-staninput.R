@@ -82,18 +82,8 @@ IdealAdaptorStaninput <- S7::new_class(
 
 #' Ensure scalar control values are passed to Stan as the correct R object type
 #'
-#' Internal helper that preserves vector semantics for single-cue models so
-#' Stan receives arrays rather than bare scalars for vector-valued data.
-#'
 #' @keywords internal
 #' @noRd
-.make_stan_tauscale <- function(tau_scale, n_cues) {
-  tau_scale <- as.numeric(tau_scale)
-  if (length(tau_scale) == 1) {
-    tau_scale <- rep(tau_scale, n_cues)
-  }
-  array(tau_scale, dim = length(tau_scale))
-}
 
 .make_stan_shift <- function(shift, n_cues) {
   shift <- as.numeric(shift)
@@ -247,26 +237,6 @@ IdealAdaptorStaninput <- S7::new_class(
     solve(transform@SCALE)
   }
 
-  tau_scale <- if (!is.null(priors_transformed$tau_scale)) {
-    priors_transformed$tau_scale
-  } else if (!is.null(control$tau_scale)) {
-    control$tau_scale
-  } else {
-    5
-  }
-  if (length(tau_scale) == 1L) {
-    tau_scale <- rep(tau_scale, n_cues)
-  }
-  tau_scale <- as.numeric(tau_scale)
-
-  L_omega_eta <- if (!is.null(priors_transformed$L_omega_eta)) {
-    as.numeric(priors_transformed$L_omega_eta)
-  } else if (!is.null(control$L_omega_eta)) {
-    as.numeric(control$L_omega_eta)
-  } else {
-    1
-  }
-
   split_loglik_per_observation <- if (!is.null(
     control$split_loglik_per_observation
   )) {
@@ -275,110 +245,205 @@ IdealAdaptorStaninput <- S7::new_class(
     0
   }
 
-  lapse_rate <- fixed_parameters_transformed$lapse_rate
-  lapse_bias_val <- fixed_parameters_transformed$lapse_bias
-  prior_p_val <- if (!is.null(fixed_parameters_transformed$prior_p)) {
-    as.numeric(fixed_parameters_transformed$prior_p)
-  } else {
-    rep(1 / n_categories, n_categories)
+  struct <- fixed_parameters_transformed$structured
+  if (is.null(struct)) {
+    struct <- .resolve_fixed_parameters(
+      fixed = MVBU_FixedParameter(),
+      categories = categories,
+      cues = cues,
+      transform = transform
+    )
   }
-  mu_0 <- fixed_parameters_transformed$mu_0
-  Sigma_0 <- fixed_parameters_transformed$Sigma_0
 
-  staninput <- list(
-    K = n_cues,
-    M = n_categories,
+  stan_priors <- priors_transformed$stan
+  if (is.null(stan_priors)) {
+    stan_priors <- .resolve_priors(
+      priors = MVBU_Prior(),
+      stanmodel = stanmodel,
+      cues = cues,
+      category_labels = categories,
+      transform = transform
+    )$stan
+  }
+
+  # Build common data elements shared across NIW, NIX, and MNIX models
+  base_values <- list(
     L = n_groups,
-    tau_scale = if (is_1d_nix && n_cues == 1L) {
-      as.numeric(tau_scale[1])
-    } else {
-      .make_stan_tauscale(tau_scale, n_cues)
-    },
-    L_omega_eta = L_omega_eta,
-    split_loglik_per_observation = split_loglik_per_observation,
-    prior_p = array(prior_p_val, dim = c(n_categories)),
-    p_cat = array(prior_p_val, dim = c(n_categories)),
-    lapse_rate_known = as.integer(!is.null(lapse_rate)),
-    lapse_rate_data = if (!is.null(lapse_rate)) {
-      as.numeric(lapse_rate)
-    } else {
-      numeric(0)
-    },
-    lapse_bias_known = as.integer(!is.null(lapse_bias_val)),
-    lapse_bias_data = if (!is.null(lapse_bias_val)) {
-      matrix(lapse_bias_val, nrow = 1, ncol = n_categories)
-    } else {
-      matrix(0, nrow = 0, ncol = n_categories)
-    },
+    M = n_categories,
     n_exposure = exposure_summary$n_exposure,
     mean_exposure = exposure_summary$mean_exposure,
     css_exposure = exposure_summary$css_exposure,
-    x_test = test_summary$x_test,
+    n_test = test_summary$n_test,
     y_test = test_summary$y_test,
     z_test_counts = test_summary$z_test_counts,
-    n_test = test_summary$n_test,
-    mu_0_known = as.integer(!is.null(mu_0)),
-    Sigma_0_known = as.integer(!is.null(Sigma_0)),
-    shift = if (is_1d_nix && n_cues == 1L) {
-      as.numeric(shift_param[1])
-    } else {
-      .make_stan_shift(shift_param, n_cues)
-    },
-    INV_SCALE = if (is_1d_nix && n_cues == 1L) {
-      as.numeric(inv_scale_param)
-    } else {
-      .make_stan_inv_scale(inv_scale_param, n_cues)
-    }
+    category_prior_known = as.integer(struct$category_prior$known),
+    category_prior_data = matrix(
+      as.numeric(struct$category_prior$data),
+      nrow = struct$category_prior$known,
+      ncol = n_categories
+    ),
+    lapse_rate_known = as.integer(struct$lapse_rate$known),
+    lapse_rate_data = array(
+      as.numeric(struct$lapse_rate$data),
+      dim = struct$lapse_rate$known
+    ),
+    lapse_bias_known = as.integer(struct$lapse_bias$known),
+    lapse_bias_data = matrix(
+      as.numeric(struct$lapse_bias$data),
+      nrow = struct$lapse_bias$known,
+      ncol = n_categories
+    ),
+    M_m_0_known = as.integer(struct$m_0$M_known),
+    idx_m_0_known = as.array(as.integer(struct$m_0$idx_known)),
+    M_S_0_known = as.integer(struct$S_0$M_known),
+    idx_S_0_known = as.array(as.integer(struct$S_0$idx_known)),
+    mode_S_0_known = as.array(as.integer(struct$S_0$mode_known)),
+    kappa_0_category_specific = as.integer(
+      struct$kappa_0$is_category_specific
+    ),
+    M_kappa_0_known = as.integer(struct$kappa_0$M_known),
+    idx_kappa_0_known = as.array(as.integer(struct$kappa_0$idx_known)),
+    kappa_0_known_data = as.array(as.numeric(struct$kappa_0$data)),
+    nu_0_category_specific = as.integer(
+      struct$nu_0$is_category_specific
+    ),
+    M_nu_0_known = as.integer(struct$nu_0$M_known),
+    idx_nu_0_known = as.array(as.integer(struct$nu_0$idx_known)),
+    nu_0_known_data = as.array(as.numeric(struct$nu_0$data)),
+    prior_alphas_of_category_prior = as.array(
+      as.numeric(stan_priors$prior_alphas_of_category_prior)
+    ),
+    prior_alpha_of_lapse_rate = as.numeric(
+      stan_priors$prior_alpha_of_lapse_rate
+    ),
+    prior_beta_of_lapse_rate = as.numeric(
+      stan_priors$prior_beta_of_lapse_rate
+    ),
+    prior_alphas_of_lapse_bias = as.array(
+      as.numeric(stan_priors$prior_alphas_of_lapse_bias)
+    ),
+    prior_loc_of_kappa = as.array(as.numeric(
+      if (struct$kappa_0$is_category_specific == 1L) {
+        stan_priors$prior_loc_of_kappa
+      } else {
+        stan_priors$prior_loc_of_kappa[1]
+      }
+    )),
+    prior_scale_of_kappa = as.array(as.numeric(
+      if (struct$kappa_0$is_category_specific == 1L) {
+        stan_priors$prior_scale_of_kappa
+      } else {
+        stan_priors$prior_scale_of_kappa[1]
+      }
+    )),
+    prior_loc_of_nu = as.array(as.numeric(
+      if (struct$nu_0$is_category_specific == 1L) {
+        stan_priors$prior_loc_of_nu
+      } else {
+        stan_priors$prior_loc_of_nu[1]
+      }
+    )),
+    prior_scale_of_nu = as.array(as.numeric(
+      if (struct$nu_0$is_category_specific == 1L) {
+        stan_priors$prior_scale_of_nu
+      } else {
+        stan_priors$prior_scale_of_nu[1]
+      }
+    )),
+    split_loglik_per_observation = as.integer(
+      split_loglik_per_observation
+    )
   )
 
-  if (is_1d_nix) {
-    staninput$mu_0_data <- if (!is.null(mu_0)) {
-      to_array(
-        vapply(mu_0, function(x) as.numeric(x[1]), numeric(1)),
-        inner_dims = length(mu_0),
-        outer_dims = NULL,
-        simplify = FALSE
-      )
+  if (stanmodel == "NIX_ideal_adaptor") {
+    m_0_data_1d <- if (struct$m_0$M_known > 0) {
+      as.numeric(struct$m_0$data[, 1])
     } else {
       numeric(0)
     }
-    staninput$Sigma_0_data <- if (!is.null(Sigma_0)) {
-      to_array(
-        vapply(Sigma_0, function(x) as.numeric(x[1, 1]), numeric(1)),
-        inner_dims = length(Sigma_0),
-        outer_dims = NULL,
-        simplify = FALSE
-      )
+    S_0_data_1d <- if (struct$S_0$M_known > 0) {
+      as.numeric(struct$S_0$data[, 1, 1])
     } else {
       numeric(0)
     }
-    return(IdealAdaptorStaninput(values = staninput, family = "NIX"))
-  }
 
-  # Multi-cue models (NIW and MNIX variants)
-  staninput$mu_0_data <- if (!is.null(mu_0)) {
-    to_array(
-      lapply(mu_0, as.numeric),
-      inner_dims = c(n_cues),
-      outer_dims = c(length(mu_0)),
-      simplify = FALSE
+    staninput_nix <- c(
+      base_values,
+      list(
+        x_test = as.numeric(test_summary$x_test),
+        m_0_known_data = as.array(m_0_data_1d),
+        S_0_known_data = as.array(S_0_data_1d),
+        prior_mu_of_m = as.array(as.numeric(stan_priors$prior_mu_of_m[, 1])),
+        prior_loc_of_tau = as.numeric(stan_priors$prior_loc_of_tau[1]),
+        prior_scale_of_tau = as.numeric(stan_priors$prior_scale_of_tau[1]),
+        INV_SCALE = as.numeric(inv_scale_param),
+        shift = as.numeric(shift_param[1])
+      )
     )
-  } else {
-    array(0, dim = c(0, 0))
+    return(IdealAdaptorStaninput(values = staninput_nix, family = "NIX"))
   }
 
-  staninput$Sigma_0_data <- if (!is.null(Sigma_0)) {
-    to_array(
-      lapply(Sigma_0, as.matrix),
-      inner_dims = c(n_cues, n_cues),
-      outer_dims = c(length(Sigma_0)),
-      simplify = FALSE
+  if (stanmodel == "NIW_ideal_adaptor") {
+    staninput_niw <- c(
+      list(K = n_cues),
+      base_values,
+      list(
+        x_test = test_summary$x_test,
+        m_0_known_data = matrix(
+          as.numeric(struct$m_0$data),
+          nrow = struct$m_0$M_known,
+          ncol = n_cues
+        ),
+        S_0_known_data = array(
+          as.numeric(struct$S_0$data),
+          dim = c(struct$S_0$M_known, n_cues, n_cues)
+        ),
+        prior_mu_of_m = matrix(
+          as.numeric(stan_priors$prior_mu_of_m),
+          nrow = n_categories,
+          ncol = n_cues
+        ),
+        prior_loc_of_tau = as.array(as.numeric(stan_priors$prior_loc_of_tau)),
+        prior_scale_of_tau = as.array(
+          as.numeric(stan_priors$prior_scale_of_tau)
+        ),
+        prior_eta_of_cor = as.numeric(stan_priors$prior_eta_of_cor),
+        INV_SCALE = .make_stan_inv_scale(inv_scale_param, n_cues),
+        shift = .make_stan_shift(shift_param, n_cues)
+      )
     )
-  } else {
-    array(0, dim = c(0, 0, 0))
+    return(IdealAdaptorStaninput(values = staninput_niw, family = "NIW"))
   }
 
-  # Weight handling for weighted integration models
+  # MNIX models
+  staninput_mnix <- c(
+    list(K = n_cues),
+    base_values,
+    list(
+      x_test = test_summary$x_test,
+      m_0_known_data = matrix(
+        as.numeric(struct$m_0$data),
+        nrow = struct$m_0$M_known,
+        ncol = n_cues
+      ),
+      S_0_known_data = array(
+        as.numeric(struct$S_0$data),
+        dim = c(struct$S_0$M_known, n_cues, n_cues)
+      ),
+      prior_mu_of_m = matrix(
+        as.numeric(stan_priors$prior_mu_of_m),
+        nrow = n_categories,
+        ncol = n_cues
+      ),
+      prior_loc_of_tau = as.array(as.numeric(stan_priors$prior_loc_of_tau)),
+      prior_scale_of_tau = as.array(
+        as.numeric(stan_priors$prior_scale_of_tau)
+      ),
+      INV_SCALE = .make_stan_inv_scale(inv_scale_param, n_cues),
+      shift = .make_stan_shift(shift_param, n_cues)
+    )
+  )
+
   is_global_weighted <- stanmodel %in% c(
     "MNIX_ideal_adaptor_weighted_integrator",
     "weighted_integrator_MNIX_ideal_adaptor"
@@ -396,69 +461,88 @@ IdealAdaptorStaninput <- S7::new_class(
     "group_category_weighted_integrator_MNIX_ideal_adaptor"
   )
 
-  user_weights <- fixed_parameters_transformed$weights
+  user_weights <- if (
+    !is.null(struct$weights) && struct$weights$known == 1L
+  ) {
+    struct$weights$data
+  } else {
+    fixed_parameters_transformed$weights
+  }
+
   if (is_global_weighted) {
+    staninput_mnix$prior_alphas_of_weights <- as.array(
+      as.numeric(rep(1, n_cues))
+    )
     if (!is.null(user_weights)) {
-      staninput$weights_known <- 1L
-      staninput$weights_data <- matrix(
+      staninput_mnix$weights_known <- 1L
+      staninput_mnix$weights_data <- matrix(
         as.numeric(user_weights),
         nrow = 1, ncol = n_cues
       )
-      staninput$weights <- as.numeric(user_weights)
+      staninput_mnix$weights <- as.numeric(user_weights)
     } else {
-      staninput$weights_known <- 0L
-      staninput$weights_data <- matrix(0, nrow = 0, ncol = n_cues)
+      staninput_mnix$weights_known <- 0L
+      staninput_mnix$weights_data <- matrix(0, nrow = 0, ncol = n_cues)
     }
   } else if (is_cat_weighted) {
+    staninput_mnix$prior_alphas_of_weights <- as.array(
+      as.numeric(rep(1, n_cues))
+    )
     if (!is.null(user_weights)) {
-      staninput$weights_known <- 1L
+      staninput_mnix$weights_known <- 1L
       w_mat <- if (is.matrix(user_weights)) {
         user_weights
       } else {
         do.call(rbind, lapply(user_weights, as.numeric))
       }
-      staninput$weights_data <- matrix(
+      staninput_mnix$weights_data <- matrix(
         as.numeric(w_mat),
         nrow = n_categories, ncol = n_cues
       )
-      staninput$weights <- w_mat
+      staninput_mnix$weights <- w_mat
     } else {
-      staninput$weights_known <- 0L
-      staninput$weights_data <- matrix(0, nrow = 0, ncol = n_cues)
+      staninput_mnix$weights_known <- 0L
+      staninput_mnix$weights_data <- matrix(0, nrow = 0, ncol = n_cues)
     }
   } else if (is_grp_weighted) {
+    staninput_mnix$prior_alphas_of_weights <- as.array(
+      as.numeric(rep(1, n_cues))
+    )
     if (!is.null(user_weights)) {
-      staninput$weights_known <- 1L
+      staninput_mnix$weights_known <- 1L
       w_mat <- if (is.matrix(user_weights)) {
         user_weights
       } else {
         do.call(rbind, lapply(user_weights, as.numeric))
       }
-      staninput$weights_data <- matrix(
+      staninput_mnix$weights_data <- matrix(
         as.numeric(w_mat),
         nrow = n_groups, ncol = n_cues
       )
-      staninput$weights <- w_mat
+      staninput_mnix$weights <- w_mat
     } else {
-      staninput$weights_known <- 0L
-      staninput$weights_data <- matrix(0, nrow = 0, ncol = n_cues)
+      staninput_mnix$weights_known <- 0L
+      staninput_mnix$weights_data <- matrix(0, nrow = 0, ncol = n_cues)
     }
   } else if (is_grpc_weighted) {
+    staninput_mnix$prior_alphas_of_weights <- as.array(
+      as.numeric(rep(1, n_cues))
+    )
     if (!is.null(user_weights)) {
-      staninput$weights_known <- 1L
-      staninput$weights_data <- array(
+      staninput_mnix$weights_known <- 1L
+      staninput_mnix$weights_data <- array(
         as.numeric(user_weights),
         dim = c(n_groups, n_categories, n_cues)
       )
-      staninput$weights <- user_weights
+      staninput_mnix$weights <- user_weights
     } else {
-      staninput$weights_known <- 0L
-      staninput$weights_data <- array(0, dim = c(0, 0, n_cues))
+      staninput_mnix$weights_known <- 0L
+      staninput_mnix$weights_data <- array(0, dim = c(0, 0, n_cues))
     }
   }
 
   fam <- .to_family(stanmodel)
-  IdealAdaptorStaninput(values = staninput, family = fam)
+  return(IdealAdaptorStaninput(values = staninput_mnix, family = fam))
 }
 
 #' Summarize exposure data for Stanfit input construction

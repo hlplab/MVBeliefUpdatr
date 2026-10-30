@@ -1,10 +1,12 @@
 #' @include S7-stanfit-utils.R
+#' @include S7-prior.R
 NULL
 
 #' Fit ideal adaptor
 #'
-#' Infers a prior and posterior distribution of ideal adaptors from the input data using Stan. Currently, three
-#' types of ideal adaptor models are available, each using a conjugate prior over Gaussian or multivariate
+#' Infers a prior and posterior distribution of ideal adaptors from the input
+#' data using Stan. Currently, three types of ideal adaptor models are
+#' available, each using a conjugate prior over Gaussian or multivariate
 #' Gaussian categories:
 #'
 #' \describe{
@@ -20,19 +22,29 @@ NULL
 #'     based on the relative informativity of each cue.}
 #' }
 #'
-#' @param stanfit_input An object of class \code{\link{IdealAdaptorStanfitInput}} containing the prepared Stan input, data, and transform metadata.
+#' @param stanfit_input An object of class
+#'   \code{\link{IdealAdaptorStanfitInput}} containing the prepared data and
+#'   transform metadata.
+#' @param stanmodel Character string naming the Stan model to use. Defaults to
+#'   \code{"NIW_ideal_adaptor"}.
+#' @param fixed_parameters An optional \code{\link{MVBU_FixedParameter}} object
+#'   specifying fixed cognitive parameters created via
+#'   \code{\link{fix_parameter}}. Default: \code{NULL}.
+#' @param priors An optional \code{\link{MVBU_Prior}} object specifying prior
+#'   distributions created via \code{\link{prior}}. Default: \code{NULL}.
 #' @param backend Character string naming the package to use as the backend for
 #'   fitting the Stan model. Options are \code{"rstan"} (the default) or
-#'   \code{"cmdstanr"}. Details on the
-#'   \pkg{rstan} and \pkg{cmdstanr} packages are available at
-#'   \url{https://mc-stan.org/rstan/} and \url{https://mc-stan.org/cmdstanr/},
-#'   respectively.
-#' @param file Either NULL or a character string. In the latter case, the fitted model object is saved
-#'   via saveRDS in a file named after the string supplied in file. The .rds extension is added automatically.
-#'   If the file already exists, the model from that file will be loaded and returned instead of refitting the model.
-#'   As existing files won't be overwritten, you have to manually remove the file in order to refit and save the
-#'   model under an existing file name. The file name is stored in the \code{ideal_adaptor_stanfit} object
-#'   for later use. (default: \code{NULL})
+#'   \code{"cmdstanr"}. Details on the \pkg{rstan} and \pkg{cmdstanr} packages
+#'   are available at \url{https://mc-stan.org/rstan/} and
+#'   \url{https://mc-stan.org/cmdstanr/}, respectively.
+#' @param file Either NULL or a character string. In the latter case, the fitted
+#'   model object is saved via saveRDS in a file named after the string supplied
+#'   in file. The .rds extension is added automatically. If the file already
+#'   exists, the model from that file will be loaded and returned instead of
+#'   refitting the model. As existing files won't be overwritten, you have to
+#'   manually remove the file in order to refit and save the model under an
+#'   existing file name. The file name is stored in the
+#'   \code{ideal_adaptor_stanfit} object for later use. (default: \code{NULL})
 #' @param file_compress Logical or a character string, specifying one of the
 #'   compression algorithms supported by \code{\link{saveRDS}}. If the
 #'   \code{file} argument is provided, this compression will be used when saving
@@ -40,74 +52,84 @@ NULL
 #' @param file_refit Modifies when the fit stored via the \code{file} argument
 #'   is re-used. For \code{"never"} (default) the fit is always loaded if it
 #'   exists and fitting is skipped. For \code{"always"} the model is always
-#'   refitted. If set to \code{"on_change"}, model will be refit if data passed to
-#'   Stan differ from
-#'   what is stored in the file. Refit will not be triggered for changes in
-#'   additional parameters of the fit (e.g., initial values, number of iterations,
-#'   control arguments, ...).
-#' @param silent Verbosity level between \code{0} and \code{2}.
-#'   If \code{1} (the default), most of the
-#'   informational messages of compiler and sampler are suppressed.
-#'   If \code{2}, even more messages are suppressed. The actual
+#'   refitted. If set to \code{"on_change"}, model will be refit if data passed
+#'   to Stan differ from what is stored in the file. Refit will not be triggered
+#'   for changes in additional parameters of the fit (e.g., initial values,
+#'   number of iterations, control arguments, ...).
+#' @param silent Verbosity level between \code{0} and \code{2}. If \code{1} (the
+#'   default), most of the informational messages of compiler and sampler are
+#'   suppressed. If \code{2}, even more messages are suppressed. The actual
 #'   sampling progress is still printed. Set \code{refresh = 0} to turn this off
 #'   as well. If using \code{backend = "rstan"} you can also set
 #'   \code{open_progress = FALSE} to prevent opening additional progress bars.
-#' @param threads Optional number of threads per chain (or list containing \code{threads})
-#'   for multithreading within Stan. Default: \code{NULL}.
+#' @param threads Optional number of threads per chain (or list containing
+#'   \code{threads}) for multithreading within Stan. Default: \code{NULL}.
 #' @param stan_model_args A \code{list} of further arguments passed to
-#'   [rstan::stan_model] for \code{backend =
-#'   "rstan"} or to \code{cmdstanr::cmdstan_model} for \code{backend =
-#'   "cmdstanr"}, which allows to change how models are compiled.
-#' @param stanmodel Name of stanmodel that should be used. Overrides any default selection.
+#'   [rstan::stan_model] for \code{backend = "rstan"} or to
+#'   \code{cmdstanr::cmdstan_model} for \code{backend = "cmdstanr"}, which
+#'   allows to change how models are compiled.
 #' @param rename For internal use only.
-#' @param ... Additional parameters are passed to [rstan::sampling], including the following:
+#' @param ... Additional parameters are passed to [rstan::sampling], including
+#'   the following:
 #' @param stanvars Optional \code{stanvars} object. Default: \code{NULL}.
 #' @param save_pars Storage for parameter names to save. Default: \code{NULL}.
 #' @param chains Number of Markov chains. Default: 4.
 #' @param iter Total number of iterations per chain. Default: 2000.
 #' @param warmup Number of warmup (burnin) iterations per chain. Default: 1000.
 #' @param init Initial values specification. Default: \code{"random"}.
-#' @param control Named list of control parameters passed to Stan sampler. Default: \code{NULL}.
+#' @param control Named list of control parameters passed to Stan sampler.
+#'   Default: \code{NULL}.
 #'
-#' @return An object of class \code{ideal_adaptor_stanfit} with the fitted stan model.
+#' @return An object of class \code{ideal_adaptor_stanfit} with the fitted
+#'   stan model.
 #'
 #' @details
-#'   In interpreting the inferred parameters, it should be kept in mind that the \emph{inferred} scatter matrix
-#'   (e.g., S_0) for the NIW model) includes
-#'   variability from internal perceptual and/or external environmental noise, \emph{in addition} to the motor
-#'   noise that is reflected in production data. This also implies that, \strong{if \code{Sigma_0} is provided
-#'   by the user it should be arguably convolved with an estimate of perceptual noise}. This is particularly
-#'   important if the data you're fitting contains test phases without exposure (e.g., pre-exposure tests).
+#'   In interpreting the inferred parameters, it should be kept in mind that
+#'   the \emph{inferred} scatter matrix (e.g., S_0 for the NIW model) includes
+#'   variability from internal perceptual and/or external environmental noise,
+#'   \emph{in addition} to the motor noise that is reflected in production
+#'   data. This also implies that, \strong{if \code{Sigma_0} is provided
+#'   by the user it should be arguably convolved with an estimate of
+#'   perceptual noise}. This is particularly important if the data you're
+#'   fitting contains test phases without exposure (e.g., pre-exposure tests).
 #'
-#'   Make sure to read the notes about the \code{Sigma_0} argument in the help page on \code{\link{make_staninput}}.
-#'   Use \code{methods(class = "ideal_adaptor_stanfit")} for an overview on available methods.
+#'   Use \code{methods(class = "ideal_adaptor_stanfit")} for an overview on
+#'   available methods.
 #'
-#' @seealso \code{\link{IdealAdaptorStanfit}} for information about ideal adaptor stanfit objects,
-#' \code{\link{get_draws}} to draw samples from the stanfit.
+#' @seealso \code{\link{IdealAdaptorStanfit}} for information about ideal
+#'   adaptor stanfit objects, \code{\link{get_draws}} to draw samples from the
+#'   stanfit.
 #'
 #' @importFrom rstan nlist
 #' @export
 fit_ideal_adaptor <- function(
   stanfit_input,
-  file = NULL, file_refit = "never", file_compress = T,
+  stanmodel = "NIW_ideal_adaptor",
+  fixed_parameters = NULL,
+  priors = NULL,
+  file = NULL,
+  file_refit = "never",
+  file_compress = TRUE,
   # included for later use
-  stanvars = NULL, backend = "rstan", save_pars = NULL,
-  chains = 4, iter = 2000, warmup = 1000,
-  init = "random", control = NULL,
+  stanvars = NULL,
+  backend = "rstan",
+  save_pars = NULL,
+  chains = 4,
+  iter = 2000,
+  warmup = 1000,
+  init = "random",
+  control = NULL,
   silent = 1,
   threads = NULL,
   stan_model_args = list(),
-  stanmodel = NULL,
   # Stuff to be deprecated in the future
-  rename = T,
+  rename = TRUE,
   ...
 ) {
   backend <- match.arg(.as_one_character(backend), c("rstan", "cmdstanr"))
+  file_refit <- match.arg(file_refit, .file_refit_options())
 
   # optionally load ideal_adaptor_stanfit from file
-  # Loading here only when we should directly load the file.
-  # The "on_change" option needs more information
-  file_refit <- match.arg(file_refit, .file_refit_options())
   if (!is.null(file) && file_refit == "never") {
     fit <- read_stanfit(file)
     if (!is.null(fit)) {
@@ -116,56 +138,73 @@ fit_ideal_adaptor <- function(
     }
   }
 
-  # extract information from the S7 fit-input object
-  assert_IdealAdaptorStaninput(stanfit_input@staninput)
-  data <- stanfit_input@data
-  transform_information <- stanfit_input@transform_information
-  staninput <- stanfit_input@staninput
+  .assert_true(
+    S7::S7_inherits(stanfit_input, IdealAdaptorStanfitInput),
+    msg = "stanfit_input must be an IdealAdaptorStanfitInput object."
+  )
 
   if (is.null(stanmodel)) {
-    fam <- tryCatch(get_family_name(staninput), error = function(e) character(0))
-    if (length(fam) > 0 && nzchar(fam)) {
-      stanmodel <- .to_stanmodel(fam)
-    } else {
-      .stop(
-        "Could not infer a concrete Stan model from 'staninput' of class '",
-        class(staninput)[[1]],
-        "'. Please update the 'staninput' to specify a 'family' or specify 'stanmodel' explicitly."
-      )
-    }
+    stanmodel <- "NIW_ideal_adaptor"
   }
 
   .assert_that(
-    !is.null(stanmodel) && !is.null(stanmodels[[stanmodel]]),
+    is.character(stanmodel) && length(stanmodel) == 1L && !is.na(stanmodel) &&
+      !is.null(stanmodels[[stanmodel]]),
     msg = paste(
       "The specified stanmodel does not exist. Allowable models include:",
       paste(names(stanmodels), collapse = ", ")
     )
   )
 
+  data <- list(
+    original = get_data(stanfit_input, space = "original"),
+    transformed = get_data(stanfit_input, space = "transformed")
+  )
+  transform_information <- stanfit_input@transform_information
+  cues <- get_cue_labels(stanfit_input)
+  categories <- get_category_labels(stanfit_input)
+  groups <- get_group_labels(stanfit_input, include_prior = FALSE)
+
+  spec <- .validate_and_transform_model_spec(
+    stanmodel = stanmodel,
+    cues = cues,
+    categories = categories,
+    groups = groups,
+    fixed_parameters = fixed_parameters,
+    priors = priors,
+    transform = transform_information,
+    control = if (is.list(control)) control else list()
+  )
+
+  staninput <- .new_staninput(
+    stanfit_input = stanfit_input,
+    stanmodel = stanmodel,
+    fixed_parameters_transformed = spec$fixed_transformed,
+    priors_transformed = spec$priors_transformed,
+    control = if (is.list(control)) control else list()
+  )
+
   # Check whether model actually needs to be refit
   if (!is.null(file) && file_refit == "on_change") {
     x_from_file <- read_stanfit(file)
     if (!is.null(x_from_file)) {
-      needs_refit <-
-        .stanfit_needs_refit(
-          x_from_file,
-          current_version = get_current_versions(),
-          data = data, staninput = staninput,
-          silent = (silent >= 1)
-        )
+      needs_refit <- .stanfit_needs_refit(
+        x_from_file,
+        current_version = get_current_versions(),
+        data = data$original,
+        staninput = staninput,
+        silent = (silent >= 1)
+      )
       if (!needs_refit) {
-        if (silent == 0) message("No refitting needed. Loading existing model from file.")
+        if (silent == 0) {
+          message("No refitting needed. Loading existing model from file.")
+        }
         return(x_from_file)
       }
     }
   }
 
-  fam <- if (!is.null(stanfit_input@metadata$model_family)) {
-    stanfit_input@metadata$model_family
-  } else {
-    .to_family(stanmodel)
-  }
+  fam <- .to_family(stanmodel)
 
   metadata <- if (
     !is.null(stanfit_input@metadata) && length(stanfit_input@metadata) > 0
@@ -175,35 +214,41 @@ fit_ideal_adaptor <- function(
     list(label_information = get_labels(stanfit_input))
   }
   metadata$model_family <- fam
-  fixed_params <- if (!is.null(metadata$fixed_parameters)) {
-    metadata$fixed_parameters
-  } else {
-    list()
-  }
   metadata$parameters <- list(
-    fixed = fixed_params,
-    fitted = list(),
-    priors = list()
+    fixed = list(
+      original = spec$fixed_untransformed,
+      transformed = spec$fixed_transformed
+    ),
+    fitted = as.list(
+      setdiff(
+        c("mu_0", "Sigma_0", "kappa_0", "nu_0"),
+        names(spec$fixed_untransformed)
+      )
+    ),
+    priors = list(
+      original = spec$priors_untransformed,
+      transformed = spec$priors_transformed$table
+    )
   )
 
   constructor <- .get_ideal_adaptor_stanfit_constructor(
     staninput = staninput,
     stanmodel = stanmodel
   )
-  fit <-
-    constructor(
-      data = data,
-      staninput = staninput,
-      stanvars = stanvars,
-      save_pars = save_pars,
-      backend = backend,
-      stan_args = .nlist(init, silent, control, threads, stan_model_args),
-      transform_information = transform_information,
-      file = file,
-      metadata = metadata
-    )
+  fit <- constructor(
+    data = data,
+    staninput = staninput,
+    stanvars = stanvars,
+    save_pars = save_pars,
+    backend = backend,
+    stan_args = .nlist(init, silent, control, threads, stan_model_args),
+    transform_information = transform_information,
+    file = file,
+    metadata = metadata
+  )
 
-  # Check that staninput has at least two categories (fitting with one category makes no sense)
+  # Check that staninput has at least two categories (fitting with one
+  # category makes no sense)
   .assert_true(
     get_staninput(fit)@values$M >= 2,
     msg = "staninput must have at least two categories."
@@ -212,16 +257,17 @@ fit_ideal_adaptor <- function(
   stanfit <- NULL
   if (chains > 0 & iter > 0) {
     # Parameters *not* to store (used with include = F below)
-    # Future file reduction could be achieved via the shredder package for stanfit
-    # post-processing (https://github.com/yonicd/shredder)
-    exclude_pars <-
-      c(
-        "lapse_rate_param",
-        "m_0_param", "m_0_tau", "m_0_tau_param", "m_0_L_omega", "m_0_L_omega_param",
-        "tau_0_param", "L_omega_0_param", "L_S_0", "L_S_n", "L_t_scale",
-        "p_test_conj", "log_p_test_conj",
-        "z_mean_exposure", "z_css_exposure", "z_test", "mu_0_1d_data", "Sigma_0_1d_data"
-      )
+    # Future file reduction could be achieved via the shredder package for
+    # stanfit post-processing (https://github.com/yonicd/shredder)
+    exclude_pars <- c(
+      "lapse_rate_param",
+      "m_0_param", "m_0_tau", "m_0_tau_param",
+      "m_0_L_omega", "m_0_L_omega_param",
+      "tau_0_param", "L_omega_0_param", "L_S_0", "L_S_n", "L_t_scale",
+      "p_test_conj", "log_p_test_conj",
+      "z_mean_exposure", "z_css_exposure", "z_test",
+      "mu_0_1d_data", "Sigma_0_1d_data"
+    )
 
     stanfit <- .fit_model(
       stanmodel = stanmodel,
@@ -257,10 +303,12 @@ fit_ideal_adaptor <- function(
     }
     fit <- set_stanfit(fit, stanfit)
     sampled_pars <- .extract_fitted_parameter_names_from_stanfit(stanfit)
-    fixed_names <- names(fit@metadata$parameters$fixed)
+    fixed_names <- names(get_parameters(fit, space = "original")$fixed)
     fit@metadata$parameters$fitted <-
       as.list(setdiff(sampled_pars, fixed_names))
-  } else if (!silent) message("No sampling requested. Returning empty model object.")
+  } else if (!silent) {
+    message("No sampling requested. Returning empty model object.")
+  }
 
   if (!is.null(fit) && !is.null(file)) {
     fit <- write_stanfit(x = fit, file = file, compress = file_compress)
@@ -276,10 +324,12 @@ fit_ideal_adaptor <- function(
 #' Fit a Stan model using the requested backend
 #'
 #' @param stanmodel Character string naming the Stan model.
-#' @param backend Character string naming the backend: \code{"rstan"} or \code{"cmdstanr"}.
+#' @param backend Character string naming the backend: \code{"rstan"} or
+#'   \code{"cmdstanr"}.
 #' @param data Named list of Stan input data.
 #' @param pars Character vector of parameter names to include/exclude.
-#' @param include Logical; if \code{FALSE}, parameters in \code{pars} are excluded.
+#' @param include Logical; if \code{FALSE}, parameters in \code{pars} are
+#'   excluded.
 #' @param chains Integer number of chains.
 #' @param iter Total iterations per chain.
 #' @param warmup Warmup iterations per chain.
@@ -427,7 +477,10 @@ fit_ideal_adaptor <- function(
 
   stan_file <- .get_stan_file(stanmodel)
   compile_args <- c(
-    list(model = stan_file, backend = "cmdstanr", threads = threads, silent = silent),
+    list(
+      model = stan_file, backend = "cmdstanr",
+      threads = threads, silent = silent
+    ),
     stan_model_args
   )
   model_obj <- .do_call(.compile_model, compile_args)
@@ -470,4 +523,3 @@ fit_ideal_adaptor <- function(
     model_name = stanmodel
   )
 }
-

@@ -11,12 +11,6 @@ NULL
 #' `new_ideal_adaptor_stanfit_input()` function, and to provide reasonable
 #' defaults for any of the unspecified parameters.
 #'
-#' @param tau_scale `r lifecycle::badge("deprecated")` Deprecated. Use
-#'   `priors = prior(..., class = "tau")` in \code{\link{fit_ideal_adaptor}}
-#'   instead.
-#' @param L_omega_eta `r lifecycle::badge("deprecated")` Deprecated. Use
-#'   `priors = prior(..., class = "cor")` in \code{\link{fit_ideal_adaptor}}
-#'   instead.
 #' @param split_loglik_per_observation Split log likelihood per observation.
 #' @param transform_type Affine transformation type applied to the data.
 #'
@@ -24,36 +18,12 @@ NULL
 #' @rdname MVBU_StanfitInput
 #' @export
 control_staninput <- function(
-  tau_scale = NULL,
-  L_omega_eta = NULL,
   split_loglik_per_observation = 0,
   transform_type = c(
     "identity", "center", "standardize", "PCA whiten", "ZCA whiten"
   )[3]
 ) {
-  if (!is.null(tau_scale)) {
-    lifecycle::deprecate_warn(
-      "0.9.0",
-      "control_staninput(tau_scale)",
-      details = paste0(
-        "Use priors = prior(..., class = 'tau') in fit_ideal_adaptor() ",
-        "instead."
-      )
-    )
-  }
-  if (!is.null(L_omega_eta)) {
-    lifecycle::deprecate_warn(
-      "0.9.0",
-      "control_staninput(L_omega_eta)",
-      details = paste0(
-        "Use priors = prior(..., class = 'cor') in fit_ideal_adaptor() ",
-        "instead."
-      )
-    )
-  }
   list(
-    tau_scale = tau_scale,
-    L_omega_eta = L_omega_eta,
     split_loglik_per_observation = split_loglik_per_observation,
     transform_type = transform_type
   )
@@ -467,7 +437,7 @@ new_ideal_adaptor_stanfit_input <- function(
     error = function(e) NULL
   )
 
-  IdealAdaptorStanfitInput(
+  res <- IdealAdaptorStanfitInput(
     data = list(
       original = data,
       transformed = data_transformed
@@ -484,6 +454,7 @@ new_ideal_adaptor_stanfit_input <- function(
       exposure_category_statistics = suff_stats
     )
   )
+  res
 }
 
 #' Prepare a data frame for Stan input construction

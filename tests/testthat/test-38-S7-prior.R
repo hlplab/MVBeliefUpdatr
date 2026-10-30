@@ -2,23 +2,23 @@
 # Tests for MVBU_Prior, prior(), and dual-space prior resolution
 
 test_that("prior() constructs valid MVBU_Prior objects", {
-  p_tau <- prior("cauchy(0, 5)", class = "tau")
+  p_tau <- prior("cauchy(0, 5)", class = "tau_0")
   expect_true(S7::S7_inherits(p_tau, MVBU_Prior))
   expect_equal(p_tau@declaration, "cauchy(0, 5)")
-  expect_equal(p_tau@par_class, "tau")
+  expect_equal(p_tau@par_class, "tau_0")
   expect_equal(p_tau@par, "")
   expect_equal(p_tau@cue_space, "transformed")
 
-  # Numeric shorthand for tau
-  p_num_tau <- prior(5, class = "tau")
+  # Numeric shorthand for tau_0
+  p_num_tau <- prior(5, class = "tau_0")
   expect_equal(p_num_tau@declaration, "cauchy(0, 5)")
 
-  # Numeric shorthand for cor
-  p_num_cor <- prior(2, class = "cor")
+  # Numeric shorthand for cor_0
+  p_num_cor <- prior(2, class = "cor_0")
   expect_equal(p_num_cor@declaration, "lkj(2)")
 
   # Original cue space specification
-  p_orig <- prior("cauchy(0, 100)", class = "tau", par = "f1",
+  p_orig <- prior("cauchy(0, 100)", class = "tau_0", par = "f1",
                   cue_space = "original")
   expect_equal(p_orig@cue_space, "original")
   expect_equal(p_orig@par, "f1")
@@ -26,18 +26,18 @@ test_that("prior() constructs valid MVBU_Prior objects", {
 
 test_that("prior() input validation catches invalid declarations and classes", {
   expect_error(prior(), "Argument `declaration` must be provided")
-  expect_error(prior("", class = "tau"), "non-empty character string")
+  expect_error(prior("", class = "tau_0"), "non-empty character string")
   expect_error(prior("cauchy(0, 5)", class = "unknown_class"), "arg")
   expect_error(
-    prior("cauchy(0, 5)", class = "tau", cue_space = "invalid_space"),
+    prior("cauchy(0, 5)", class = "tau_0", cue_space = "invalid_space"),
     "arg"
   )
 })
 
 test_that("MVBU_Prior S3 methods work as expected", {
-  p1 <- prior("cauchy(0, 5)", class = "tau")
-  p2 <- prior("lkj(1)", class = "cor")
-  p3 <- prior("normal(0, 1)", class = "m")
+  p1 <- prior("cauchy(0, 5)", class = "tau_0")
+  p2 <- prior("lkj(1)", class = "cor_0")
+  p3 <- prior("normal(0, 1)", class = "m_0")
 
   # Combine via c()
   combined <- c(p1, p2, p3)
@@ -51,7 +51,7 @@ test_that("MVBU_Prior S3 methods work as expected", {
   # Subsetting
   sub_p <- combined[c(1, 3)]
   expect_equal(length(sub_p), 2L)
-  expect_equal(sub_p@par_class, c("tau", "m"))
+  expect_equal(sub_p@par_class, c("tau_0", "m_0"))
 
   # as.data.frame
   df <- as.data.frame(combined)
@@ -60,7 +60,7 @@ test_that("MVBU_Prior S3 methods work as expected", {
     colnames(df),
     c("declaration", "class", "category", "cue", "par", "cue_space")
   )
-  expect_equal(df$class, c("tau", "cor", "m"))
+  expect_equal(df$class, c("tau_0", "cor_0", "m_0"))
 
   # as_tibble
   tbl <- tibble::as_tibble(combined)
@@ -112,14 +112,14 @@ test_that(".resolve_priors resolves default dual-space priors correctly", {
     transform = transform
   )
 
-  expect_equal(res$tau_scale, c(5, 5))
-  expect_equal(res$L_omega_eta, 1)
+  expect_equal(res$stan$prior_scale_of_tau, as.array(c(5, 5)))
+  expect_equal(res$stan$prior_eta_of_cor, 1)
 
   # Transformed space check
   trans_tbl <- as.data.frame(res$transformed)
   expect_true("cauchy(0, 5)" %in% trans_tbl$declaration)
   expect_true("lkj(1)" %in% trans_tbl$declaration)
-  expect_true("normal(0, tau)" %in% trans_tbl$declaration)
+  expect_true("normal(0, tau_0)" %in% trans_tbl$declaration)
   expect_true("dirichlet(1)" %in% trans_tbl$declaration)
 
   # Original space check
@@ -131,13 +131,15 @@ test_that(".resolve_priors resolves default dual-space priors correctly", {
   expect_true(
     any(orig_tbl$declaration == "cauchy(0, 100)" & orig_tbl$par == "c1")
   )
-  expect_true(any(orig_tbl$declaration == "lkj(1)" & orig_tbl$class == "cor"))
+  expect_true(
+    any(orig_tbl$declaration == "lkj(1)" & orig_tbl$class == "cor_0")
+  )
   # m in original space: shift is -mean, so center is 50 for c0 and 100 for c1
   expect_true(
-    any(orig_tbl$declaration == "normal(50, tau)" & orig_tbl$par == "c0")
+    any(orig_tbl$declaration == "normal(50, tau_0)" & orig_tbl$par == "c0")
   )
   expect_true(
-    any(orig_tbl$declaration == "normal(100, tau)" & orig_tbl$par == "c1")
+    any(orig_tbl$declaration == "normal(100, tau_0)" & orig_tbl$par == "c1")
   )
 })
 
@@ -153,10 +155,10 @@ test_that(
     SCALE = scale_mat
   )
 
-  # User specifies transformed tau and LKJ
+  # User specifies transformed tau_0 and LKJ cor_0
   priors_trans <- c(
-    prior("cauchy(0, 2.5)", class = "tau"),
-    prior("lkj(2)", class = "cor")
+    prior("cauchy(0, 2.5)", class = "tau_0"),
+    prior("lkj(2)", class = "cor_0")
   )
   res_trans <- MVBeliefUpdatr:::.resolve_priors(
     priors = priors_trans,
@@ -165,14 +167,14 @@ test_that(
     category_labels = c("cat1", "cat2"),
     transform = transform
   )
-  expect_equal(res_trans$tau_scale, c(2.5, 2.5))
-  expect_equal(res_trans$L_omega_eta, 2)
+  expect_equal(res_trans$stan$prior_scale_of_tau, as.array(c(2.5, 2.5)))
+  expect_equal(res_trans$stan$prior_eta_of_cor, 2)
   orig_df <- as.data.frame(res_trans$original)
   expect_true(any(orig_df$declaration == "cauchy(0, 25)" & orig_df$par == "c0"))
   expect_true(any(orig_df$declaration == "cauchy(0, 50)" & orig_df$par == "c1"))
 
   # User specifies cue-specific original space prior for c0
-  priors_orig <- prior("cauchy(0, 100)", class = "tau", par = "c0",
+  priors_orig <- prior("cauchy(0, 100)", class = "tau_0", par = "c0",
                        cue_space = "original")
   res_orig <- MVBeliefUpdatr:::.resolve_priors(
     priors = priors_orig,
@@ -182,33 +184,18 @@ test_that(
     transform = transform
   )
   # c0: 100 original / 10 mult = 10 transformed. c1: default 5
-  expect_equal(res_orig$tau_scale, c(10, 5))
+  expect_equal(res_orig$stan$prior_scale_of_tau, as.array(c(10, 5)))
 })
 
-test_that("control_staninput deprecation warning triggers appropriately", {
-  # Default call triggers NO warning
+test_that("control_staninput returns expected control list", {
   expect_no_warning(ctrl <- control_staninput())
-  expect_null(ctrl$tau_scale)
-  expect_null(ctrl$L_omega_eta)
-
-  # Specifying tau_scale triggers deprecation warning
-  expect_warning(
-    ctrl_dep <- control_staninput(tau_scale = 10),
-    "deprecated"
-  )
-  expect_equal(ctrl_dep$tau_scale, 10)
-
-  # Specifying L_omega_eta triggers deprecation warning
-  expect_warning(
-    ctrl_dep2 <- control_staninput(L_omega_eta = 2),
-    "deprecated"
-  )
-  expect_equal(ctrl_dep2$L_omega_eta, 2)
+  expect_equal(ctrl$split_loglik_per_observation, 0)
+  expect_equal(ctrl$transform_type, "standardize")
 })
 
 test_that("get_stan_priors works for MVBU_Prior objects", {
-  p_trans <- prior("cauchy(0, 5)", class = "tau")
-  p_orig <- prior("cauchy(0, 5)", class = "tau", cue_space = "original")
+  p_trans <- prior("cauchy(0, 5)", class = "tau_0")
+  p_orig <- prior("cauchy(0, 5)", class = "tau_0", cue_space = "original")
   p_both <- c(p_trans, p_orig)
   expect_identical(get_stan_priors(p_trans, space = "transformed"), p_trans)
   expect_identical(get_stan_priors(p_trans, space = "original"), MVBU_Prior())

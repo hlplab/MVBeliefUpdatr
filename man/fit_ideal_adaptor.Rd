@@ -7,8 +7,8 @@
 fit_ideal_adaptor(
   stanfit_input,
   stanmodel = "NIW_ideal_adaptor",
-  fixed_parameters = list(),
-  priors = list(),
+  fixed_parameters = NULL,
+  priors = NULL,
   file = NULL,
   file_refit = "never",
   file_compress = TRUE,
@@ -35,12 +35,12 @@ transform metadata.}
 \item{stanmodel}{Character string naming the Stan model to use. Defaults to
 \code{"NIW_ideal_adaptor"}.}
 
-\item{fixed_parameters}{Named list of fixed parameters (e.g.,
-\code{lapse_rate}, \code{lapse_bias}, \code{prior_p}, \code{mu_0},
-\code{Sigma_0}, \code{weights}). Defaults to \code{list()}.}
+\item{fixed_parameters}{An optional \code{\link{MVBU_FixedParameter}} object
+specifying fixed cognitive parameters created via
+\code{\link{fix_parameter}}. Default: \code{NULL}.}
 
-\item{priors}{Named list of prior specifications. Defaults to
-\code{list()}.}
+\item{priors}{An optional \code{\link{MVBU_Prior}} object specifying prior
+distributions created via \code{\link{prior}}. Default: \code{NULL}.}
 
 \item{file}{Either NULL or a character string. In the latter case, the fitted
 model object is saved via saveRDS in a file named after the string supplied

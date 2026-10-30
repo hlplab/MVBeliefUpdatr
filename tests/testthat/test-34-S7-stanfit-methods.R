@@ -84,10 +84,14 @@ test_that("Stanfit diagnostic and posterior methods", {
 
 test_that("summary.MVBU_Stanfit displays fixed parameters in @fixed", {
   fit_fixed <- fit_1cue
+  fixed_spec <- c(
+    fix_parameter(0.05, class = "lapse_rate"),
+    fix_parameter(c(b = 0.5, p = 0.5), class = "category_prior")
+  )
   fit_fixed@metadata$parameters <- list(
     fixed = list(
-      original = list(lapse_rate = 0.05, prior_p = c(b = 0.5, p = 0.5)),
-      transformed = list(lapse_rate = 0.05, prior_p = c(b = 0.5, p = 0.5))
+      original = fixed_spec,
+      transformed = fixed_spec
     ),
     fitted = list("m", "S"),
     priors = list(
@@ -98,9 +102,9 @@ test_that("summary.MVBU_Stanfit displays fixed parameters in @fixed", {
   sum_fixed <- suppressWarnings(summary(fit_fixed))
   expect_true(S7::S7_inherits(sum_fixed, Summary_MVBU_Stanfit))
   expect_true(!is.null(sum_fixed@fixed))
-  expect_equal(nrow(sum_fixed@fixed), 3L)
-  expect_true("lapse_rate" %in% sum_fixed@fixed$Parameter)
-  expect_true("prior_p" %in% sum_fixed@fixed$Parameter)
+  expect_equal(nrow(sum_fixed@fixed), 2L)
+  expect_true("lapse_rate" %in% sum_fixed@fixed$class)
+  expect_true("category_prior" %in% sum_fixed@fixed$class)
   # Fixed parameters should not be in fitted table
   expect_false("lapse_rate" %in% sum_fixed@fitted$Parameter)
 })

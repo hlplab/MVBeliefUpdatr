@@ -16,6 +16,8 @@ make_staninput(
   lapse_rate = NULL,
   mu_0 = NULL,
   Sigma_0 = NULL,
+  tau_scale = NULL,
+  L_omega_eta = NULL,
   control = control_staninput(),
   stanmodel = "NIW_ideal_adaptor",
   verbose = FALSE
@@ -32,6 +34,8 @@ make_ideal_adaptor_stanfit_input(
   lapse_rate = NULL,
   mu_0 = NULL,
   Sigma_0 = NULL,
+  tau_scale = NULL,
+  L_omega_eta = NULL,
   control = control_staninput(),
   stanmodel = "NIW_ideal_adaptor",
   verbose = FALSE
@@ -56,16 +60,22 @@ information. (default: "response_category")}
 \item{group}{Name of the column in \code{exposure} and \code{test} that stores the
 grouping information. (default: "group")}
 
+\item{tau_scale}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Deprecated. Use
+\code{priors = prior(..., class = "tau_0")} in \code{\link{fit_ideal_adaptor}}
+instead.}
+
+\item{L_omega_eta}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Deprecated. Use
+\code{priors = prior(..., class = "cor_0")} in \code{\link{fit_ideal_adaptor}}
+instead.}
+
 \item{control}{A list of control parameters for the constructor, such as
 \code{list(transform_type = "standardize")} or produced by
 \code{control_staninput()}.}
 }
 \value{
-A list with components \code{staninput}, \code{data}, and
-\code{transform_information}.
+An object of class \code{\link{IdealAdaptorStanfitInput}}.
 
-A list with components \code{staninput}, \code{data}, and
-\code{transform_information}.
+An object of class \code{\link{IdealAdaptorStanfitInput}}.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}

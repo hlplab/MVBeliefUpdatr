@@ -208,5 +208,5 @@ test_that("fit_ideal_adaptor supports backend = 'cmdstanr'", {
   expect_true(S7::S7_inherits(fit_sample, IdealAdaptorStanfit))
   expect_equal(fit_sample@backend, "cmdstanr")
   expect_true(inherits(fit_sample@stanfit, "stanfit"))
-  expect_equal(length(rstan::extract(fit_sample@stanfit)$kappa_0), 10)
+  expect_equal(nrow(rstan::extract(fit_sample@stanfit)$kappa_0), 10)
 })

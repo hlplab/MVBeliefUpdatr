@@ -730,8 +730,8 @@ write_stanfit <- function(x, file, compress = TRUE) {
   cues,
   categories,
   groups,
-  fixed_parameters = list(),
-  priors = list(),
+  fixed_parameters = NULL,
+  priors = NULL,
   transform,
   control = list()
 ) {
@@ -776,91 +776,46 @@ write_stanfit <- function(x, file, compress = TRUE) {
   )
 
   if (is.null(fixed_parameters)) {
-    fixed_parameters <- list()
-  } else {
-    .assert_list(fixed_parameters)
-  }
-
-  valid_fixed <- c(
-    "lapse_rate", "lapse_bias", "prior_p", "p_cat", "mu_0", "Sigma_0",
-    "weights"
-  )
-  unknown_fixed <- setdiff(names(fixed_parameters), valid_fixed)
-  if (length(unknown_fixed) > 0L) {
+    fixed_parameters <- MVBU_FixedParameter()
+  } else if (!S7::S7_inherits(fixed_parameters, MVBU_FixedParameter)) {
     .stop(
-      sprintf(
-        "Parameter '%s' is not a recognized fixed parameter for %s.",
-        unknown_fixed[1],
-        stanmodel
-      )
+      "Argument `fixed_parameters` must be an MVBU_FixedParameter ",
+      "object or NULL."
     )
   }
 
-  lapse_rate <- fixed_parameters$lapse_rate
-  if (!is.null(lapse_rate)) {
-    .assert_all(
-      is.numeric(lapse_rate),
-      length(lapse_rate) == 1L,
-      !is.na(lapse_rate),
-      lapse_rate >= 0,
-      lapse_rate <= 1,
-      msg = "lapse_rate must be a numeric value between 0 and 1."
+  if (is.null(priors)) {
+    priors <- MVBU_Prior()
+  } else if (!S7::S7_inherits(priors, MVBU_Prior)) {
+    .stop(
+      "Argument `priors` must be an MVBU_Prior object or NULL."
     )
   }
 
-  prior_p <- if (!is.null(fixed_parameters$prior_p)) {
-    fixed_parameters$prior_p
-  } else if (!is.null(fixed_parameters$p_cat)) {
-    lifecycle::deprecate_warn(
-      "0.9.0",
-      "fixed_parameters$p_cat",
-      "fixed_parameters$prior_p"
-    )
-    fixed_parameters$p_cat
+  fixed_structured <- .resolve_fixed_parameters(
+    fixed = fixed_parameters,
+    categories = categories,
+    cues = cues,
+    transform = transform
+  )
+
+  # Extract bridge variables for NIX and MNIX models
+  lapse_rate <- if (fixed_structured$lapse_rate$known == 1L) {
+    as.numeric(fixed_structured$lapse_rate$data)
   } else {
     NULL
   }
-  if (!is.null(prior_p)) {
-    .assert_all(
-      is.numeric(prior_p),
-      length(prior_p) == n_categories,
-      all(prior_p >= 0),
-      isTRUE(all.equal(sum(prior_p), 1, tolerance = MVBU_PROB_TOL)),
-      msg = sprintf(
-        paste0(
-          "prior_p must be a non-negative numeric vector of length %d ",
-          "summing to 1."
-        ),
-        n_categories
-      )
-    )
-    if (!is.null(names(prior_p))) {
-      prior_p <- .mvbu_align_named_vector(prior_p, "prior_p", categories)
-    }
+
+  lapse_bias <- if (fixed_structured$lapse_bias$known == 1L) {
+    as.numeric(fixed_structured$lapse_bias$data)
+  } else {
+    NULL
   }
 
-  lapse_bias <- fixed_parameters$lapse_bias
-  if (!is.null(lapse_bias)) {
-    .assert_all(
-      is.numeric(lapse_bias),
-      length(lapse_bias) == n_categories,
-      all(lapse_bias >= 0),
-      isTRUE(all.equal(sum(lapse_bias), 1, tolerance = MVBU_PROB_TOL)),
-      msg = sprintf(
-        paste0(
-          "lapse_bias must be a non-negative numeric vector of length %d ",
-          "summing to 1."
-        ),
-        n_categories
-      )
-    )
-    if (!is.null(names(lapse_bias))) {
-      lapse_bias <- .mvbu_align_named_vector(
-        lapse_bias,
-        "lapse_bias",
-        categories
-      )
-    }
+  prior_p <- if (fixed_structured$category_prior$known == 1L) {
+    as.numeric(fixed_structured$category_prior$data)
+  } else {
+    NULL
   }
 
   is_global_weighted <- stanmodel %in% c(
@@ -882,17 +837,18 @@ write_stanfit <- function(x, file, compress = TRUE) {
   is_any_weighted <- is_global_weighted || is_cat_weighted ||
     is_grp_weighted || is_grpc_weighted
 
-  weights <- fixed_parameters$weights
-  if (!is.null(weights)) {
+  w_idx <- which(fixed_parameters@par_class == "weights")
+  weights <- if (length(w_idx) > 0L) {
     if (!is_any_weighted) {
       .stop(sprintf("Model '%s' does not use fixed weights.", stanmodel))
     }
+    w_val <- fixed_parameters@value[[w_idx[length(w_idx)]]]
     if (is_global_weighted) {
       .assert_all(
-        is.numeric(weights),
-        length(weights) == n_cues,
-        all(weights >= 0),
-        isTRUE(all.equal(sum(weights), 1, tolerance = MVBU_PROB_TOL)),
+        is.numeric(w_val),
+        length(w_val) == n_cues,
+        all(w_val >= 0),
+        isTRUE(all.equal(sum(w_val), 1, tolerance = MVBU_PROB_TOL)),
         msg = sprintf(
           paste0(
             "weights must be a non-negative numeric vector of length %d ",
@@ -902,38 +858,39 @@ write_stanfit <- function(x, file, compress = TRUE) {
         )
       )
     }
+    w_val
+  } else {
+    NULL
   }
 
-  mu_0_raw <- fixed_parameters$mu_0
-  Sigma_0_raw <- fixed_parameters$Sigma_0
-  mu_0_transformed <- NULL
-  Sigma_0_transformed <- NULL
-
-  if (!is.null(mu_0_raw)) {
-    mu_0_transformed <- .validate_and_transform_fixed_moments(
-      mu_0_raw,
-      categories = categories,
-      n_cues = n_cues,
-      transform = transform,
-      which = "mu_0"
-    )
-  }
-  if (!is.null(Sigma_0_raw)) {
-    Sigma_0_transformed <- .validate_and_transform_fixed_moments(
-      Sigma_0_raw,
-      categories = categories,
-      n_cues = n_cues,
-      transform = transform,
-      which = "Sigma_0"
-    )
+  # For NIX and MNIX (temporary bridge before Stages 2 and 3)
+  mu_0_transformed <- if (fixed_structured$m_0$M_known == n_categories) {
+    res_m <- vector("list", n_categories)
+    names(res_m) <- categories
+    for (i in seq_along(fixed_structured$m_0$idx_known)) {
+      c_idx <- fixed_structured$m_0$idx_known[i]
+      res_m[[c_idx]] <- as.numeric(fixed_structured$m_0$data[i, ])
+    }
+    res_m
+  } else {
+    NULL
   }
 
-  fixed_structured <- .resolve_fixed_parameters(
-    fixed = fixed_parameters,
-    categories = categories,
-    cues = cues,
-    transform = transform
-  )
+  Sigma_0_transformed <- if (fixed_structured$S_0$M_known == n_categories) {
+    res_s <- vector("list", n_categories)
+    names(res_s) <- categories
+    for (i in seq_along(fixed_structured$S_0$idx_known)) {
+      c_idx <- fixed_structured$S_0$idx_known[i]
+      res_s[[c_idx]] <- matrix(
+        fixed_structured$S_0$data[i, , ],
+        nrow = n_cues,
+        ncol = n_cues
+      )
+    }
+    res_s
+  } else {
+    NULL
+  }
 
   fixed_transformed <- list(
     lapse_rate = lapse_rate,
@@ -950,9 +907,7 @@ write_stanfit <- function(x, file, compress = TRUE) {
     stanmodel = stanmodel,
     cues = cues,
     category_labels = categories,
-    transform = transform,
-    control_tau_scale = control$tau_scale,
-    control_L_omega_eta = control$L_omega_eta
+    transform = transform
   )
 
   list(
@@ -961,8 +916,6 @@ write_stanfit <- function(x, file, compress = TRUE) {
     priors_untransformed = resolved_priors$original,
     priors_transformed = list(
       table = resolved_priors$transformed,
-      tau_scale = resolved_priors$tau_scale,
-      L_omega_eta = resolved_priors$L_omega_eta,
       stan = resolved_priors$stan
     )
   )

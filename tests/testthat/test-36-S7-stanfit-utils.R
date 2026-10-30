@@ -251,35 +251,26 @@ test_that(".format_fixed_parameters_table formats parameters into standard tibbl
     0L
   )
 
-  # weights and lapse_rate
-  fixed_pars <- list(
-    weights = c(c1 = 0.7, c2 = 0.3),
-    lapse_rate = 0.05,
-    prior_p = c(catA = 0.6, catB = 0.4)
+  # MVBU_FixedParameter input
+  fixed_pars <- c(
+    fix_parameter(c(0.7, 0.3), class = "weights"),
+    fix_parameter(0.05, class = "lapse_rate")
   )
   tbl <- MVBeliefUpdatr:::.format_fixed_parameters_table(fixed_pars)
   expect_s3_class(tbl, "tbl_df")
-  expect_equal(nrow(tbl), 5L)
-  expected_cols <- c(
-    "Parameter", "Dist.", "Group", "Category", "Cue", "Value", "Status"
-  )
+  expect_equal(nrow(tbl), 2L)
+  expected_cols <- c("class", "category", "cue", "cue_space", "value")
   expect_true(all(expected_cols %in% names(tbl)))
-  expect_equal(tbl$Status, rep("Fixed by user", 5L))
 
-  w_rows <- tbl[tbl$Parameter == "weights", ]
-  expect_equal(nrow(w_rows), 2L)
-  expect_equal(w_rows$Cue, c("c1", "c2"))
-  expect_equal(w_rows$Value, c(0.7, 0.3))
+  w_rows <- tbl[tbl$class == "weights", ]
+  expect_equal(nrow(w_rows), 1L)
+  expect_equal(w_rows$value, "c(0.7, 0.3)")
 
-  lr_row <- tbl[tbl$Parameter == "lapse_rate", ]
+  lr_row <- tbl[tbl$class == "lapse_rate", ]
   expect_equal(nrow(lr_row), 1L)
-  expect_equal(lr_row$Value, 0.05)
-
-  p_rows <- tbl[tbl$Parameter == "prior_p", ]
-  expect_equal(nrow(p_rows), 2L)
-  expect_equal(p_rows$Category, c("catA", "catB"))
-  expect_equal(p_rows$Value, c(0.6, 0.4))
+  expect_equal(lr_row$value, "0.05")
 })
+
 
 
 

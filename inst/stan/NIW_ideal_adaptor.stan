@@ -9,11 +9,9 @@
  * f(x) = SCALE(x + shift). Typically, that's the space obtained by whitening
  * or standardizing the exposure data.
  */
-
 functions {
 #include include/mvbu_functions.stan
 }
-
 data {
   int K; // number of features
   int L; // number of exposure groups (e.g. subjects)
@@ -45,9 +43,11 @@ data {
   array[M_m_0_known] int<lower=1, upper=M> idx_m_0_known;
   array[M_m_0_known] vector[K] m_0_known_data;
 
-  int<lower=0, upper=M> M_Sigma_0_known;
-  array[M_Sigma_0_known] int<lower=1, upper=M> idx_Sigma_0_known;
-  array[M_Sigma_0_known] cov_matrix[K] Sigma_0_known_data;
+  int<lower=0, upper=M> M_S_0_known;
+  array[M_S_0_known] int<lower=1, upper=M> idx_S_0_known;
+  // 1 = S_0, 2 = E[Sigma_0]
+  array[M_S_0_known] int<lower=1, upper=2> mode_S_0_known;
+  array[M_S_0_known] cov_matrix[K] S_0_known_data;
 
   // Pseudocounts (shared vs. category-specific and partial fixing)
   int<lower=0, upper=1> kappa_0_category_specific;
@@ -107,23 +107,22 @@ transformed data {
       }
     }
   }
-
-  // Compute unknown counts and indices for Sigma_0
-  int M_Sigma_0_unknown = M - M_Sigma_0_known;
-  array[M_Sigma_0_unknown] int<lower=1, upper=M> idx_Sigma_0_unknown;
+  // Compute unknown counts and indices for S_0
+  int M_S_0_unknown = M - M_S_0_known;
+  array[M_S_0_unknown] int<lower=1, upper=M> idx_S_0_unknown;
   {
     int count = 0;
     for (m in 1:M) {
       int is_known = 0;
-      for (k in 1:M_Sigma_0_known) {
-        if (idx_Sigma_0_known[k] == m) {
+      for (k in 1:M_S_0_known) {
+        if (idx_S_0_known[k] == m) {
           is_known = 1;
           break;
         }
       }
       if (!is_known) {
         count += 1;
-        idx_Sigma_0_unknown[count] = m;
+        idx_S_0_unknown[count] = m;
       }
     }
   }
@@ -202,9 +201,8 @@ parameters {
   array[M_m_0_unknown] vector[K] m_0_unknown_param;
   vector<lower=0>[M_m_0_unknown > 0 ? K : 0] m_0_tau_transformed;
   cholesky_factor_corr[M_m_0_unknown > 0 ? K : 0] m_0_L_omega_transformed;
-
-  array[M_Sigma_0_unknown] vector<lower=0>[K] tau_0_param_transformed;
-  array[M_Sigma_0_unknown] cholesky_factor_corr[K] L_omega_0_param_transformed;
+  array[M_S_0_unknown] vector<lower=0>[K] tau_0_param_transformed;
+  array[M_S_0_unknown] cholesky_factor_corr[K] L_omega_0_param_transformed;
 }
 
 transformed parameters {
@@ -255,12 +253,16 @@ transformed parameters {
 
   // Reassemble S_0_transformed
   array[M] cov_matrix[K] S_0_transformed;
-  for (i in 1:M_Sigma_0_known) {
-    int cat = idx_Sigma_0_known[i];
-    S_0_transformed[cat] = Sigma_0_known_data[i] * (nu_0[cat] - K - 1);
+  for (i in 1:M_S_0_known) {
+    int cat = idx_S_0_known[i];
+    if (mode_S_0_known[i] == 1) {
+      S_0_transformed[cat] = S_0_known_data[i];
+    } else {
+      S_0_transformed[cat] = S_0_known_data[i] * (nu_0[cat] - K - 1);
+    }
   }
-  for (i in 1:M_Sigma_0_unknown) {
-    int cat = idx_Sigma_0_unknown[i];
+  for (i in 1:M_S_0_unknown) {
+    int cat = idx_S_0_unknown[i];
     S_0_transformed[cat] = quad_form_diag(
       multiply_lower_tri_self_transpose(L_omega_0_param_transformed[i]),
       tau_0_param_transformed[i]
@@ -273,7 +275,6 @@ transformed parameters {
   array[M, L] vector[K] m_n_transformed;
   array[M, L] cov_matrix[K] S_n_transformed;
   array[M, L] cov_matrix[K] t_scale_transformed;
-
   array[n_test] simplex[M] p_test_conj;
   array[n_test] vector[M] log_p_test_conj;
 
@@ -377,8 +378,8 @@ model {
   }
 
   // Prior for components of S_0
-  if (M_Sigma_0_unknown > 0) {
-    for (i in 1:M_Sigma_0_unknown) {
+  if (M_S_0_unknown > 0) {
+    for (i in 1:M_S_0_unknown) {
       tau_0_param_transformed[i] ~ cauchy(
         prior_loc_of_tau, prior_scale_of_tau
       );
@@ -396,7 +397,6 @@ model {
 
 generated quantities {
 #include include/gq_multinomial_loglik.stan
-
   // Backtransformed parameters in natural physical units (clean base names)
   array[M] vector[K] m_0;
   array[M] cov_matrix[K] S_0;

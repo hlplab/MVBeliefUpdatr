@@ -4,6 +4,7 @@
 \name{MVBU_FixedParameter}
 \alias{MVBU_FixedParameter}
 \alias{fix_parameter}
+\alias{[.MVBU_FixedParameter}
 \title{S7 class for fixed cognitive parameter specifications}
 \usage{
 MVBU_FixedParameter(
@@ -16,17 +17,21 @@ MVBU_FixedParameter(
 
 fix_parameter(
   value,
-  class = c("mu_0", "Sigma_0", "kappa_0", "nu_0", "lapse_rate", "lapse_bias",
-    "category_prior", "weights", "m", "m_0", "S", "S_0", "kappa", "nu", "prior_p"),
+  class = c("m_0", "S_0", "kappa_0", "nu_0", "expected_mu_0", "expected_Sigma_0", "mu_0",
+    "Sigma_0", "lapse_rate", "lapse_bias", "category_prior", "weights"),
   category = NULL,
   cue = NULL,
   cue_space = c("original", "transformed")
 )
+
+\method{[}{MVBU_FixedParameter}(x, i, ...)
 }
 \arguments{
-\item{par_class}{Character vector of parameter classes (e.g., \code{"mu_0"},
-\code{"Sigma_0"}, \code{"kappa_0"}, \code{"nu_0"}, \code{"lapse_rate"},
-\code{"lapse_bias"}, \code{"category_prior"}, \code{"weights"}).}
+\item{par_class}{Character vector of parameter classes (e.g., \code{"m_0"},
+\code{"S_0"}, \code{"kappa_0"}, \code{"nu_0"}, \code{"expected_mu_0"},
+\code{"expected_Sigma_0"}, \code{"mu_0"}, \code{"Sigma_0"},
+\code{"lapse_rate"}, \code{"lapse_bias"}, \code{"category_prior"},
+\code{"weights"}).}
 
 \item{value}{Numeric value, vector, matrix, or character assignment
 (e.g., \code{"lapse_rate = 0.05"}).}
@@ -41,12 +46,21 @@ fix_parameter(
 \code{"original"} (default) or \code{"transformed"}.}
 
 \item{class}{Character string specifying parameter class:
-\code{"mu_0"}, \code{"Sigma_0"}, \code{"kappa_0"}, \code{"nu_0"},
-\code{"lapse_rate"}, \code{"lapse_bias"}, \code{"category_prior"},
-or \code{"weights"}.}
+\code{"m_0"}, \code{"S_0"}, \code{"kappa_0"}, \code{"nu_0"},
+\code{"expected_mu_0"}, \code{"expected_Sigma_0"}, \code{"mu_0"},
+\code{"Sigma_0"}, \code{"lapse_rate"}, \code{"lapse_bias"},
+\code{"category_prior"}, or \code{"weights"}.}
+
+\item{x}{An \code{\link{MVBU_FixedParameter}} object.}
+
+\item{i}{Indices specifying elements to extract.}
+
+\item{...}{Additional arguments (ignored).}
 }
 \value{
 An object of class \code{\link{MVBU_FixedParameter}}.
+
+A subsetted \code{\link{MVBU_FixedParameter}} object.
 }
 \description{
 Represents fixed parameter specifications in a dual-space (original vs.
@@ -58,6 +72,35 @@ Constructs a fixed parameter specification for
 Supports fixing parameters globally, per-category, or per-cue, in either
 original or transformed cue space.
 }
+\section{Category Moment Parameter Interpretations}{
+
+When fixing category representation parameters, note the distinction
+between prior hyperparameters, expected prior moments, and known category
+parameters:
+\describe{
+\item{\code{"m_0"} and \code{"S_0"}}{
+Prior hyperparameters of the conjugate prior distribution
+(Normal-Inverse-Wishart or Normal-Inverse-Chi-squared). \code{"m_0"} is
+the prior category mean vector (center of the normal prior on
+\eqn{\mu_0}), and \code{"S_0"} is the prior scatter matrix.
+}
+\item{\code{"expected_mu_0"} and \code{"expected_Sigma_0"}}{
+Expected moments of category representations under the prior. For
+category means, \eqn{E[\mu_0] = m_0}, so \code{"expected_mu_0"} is
+canonicalized directly to \code{"m_0"}. For covariance matrices,
+\eqn{E[\Sigma_0] = S_0 / (\nu_0 - K - 1)} for NIW (or
+\eqn{E[\Sigma_0] = S_0 / (\nu_0 - 2)} for NIX/MNIX). Specifying
+\code{"expected_Sigma_0"} allows users to fix the intuitive expected
+covariance. Stan input preparation automatically rescales this value to
+the conjugate scatter matrix \code{"S_0"} given \nu_0.
+}
+\item{\code{"mu_0"} and \code{"Sigma_0"}}{
+Fixed, known category representation parameters entering the likelihood
+directly without prior belief updating or uncertainty of that parameter.
+}
+}
+}
+
 \seealso{
 \code{\link{prior}}, \code{\link{fit_ideal_adaptor}}
 }

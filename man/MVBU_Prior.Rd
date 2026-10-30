@@ -23,8 +23,8 @@ MVBU_Prior(
 
 prior(
   declaration,
-  class = c("tau", "cor", "m", "weight", "weights", "lapse_rate", "lapse_bias",
-    "category_prior", "kappa_0", "nu_0", "prior_p"),
+  class = c("tau_0", "cor_0", "m_0", "weight", "weights", "lapse_rate", "lapse_bias",
+    "category_prior", "kappa_0", "nu_0"),
   category = NULL,
   cue = NULL,
   par = NULL,
@@ -48,8 +48,8 @@ prior(
 distribution (e.g., \code{"cauchy(0, 5)"}, \code{"lkj(1)"},
 \code{"normal(0, 1)"}, or numeric \code{5}).}
 
-\item{par_class}{Character vector of parameter classes (e.g., \code{"tau"},
-\code{"cor"}, \code{"m"}, \code{"weight"}, \code{"lapse_rate"},
+\item{par_class}{Character vector of parameter classes (e.g., \code{"tau_0"},
+\code{"cor_0"}, \code{"m_0"}, \code{"weight"}, \code{"lapse_rate"},
 \code{"lapse_bias"}, \code{"category_prior"}, \code{"kappa_0"},
 \code{"nu_0"}).}
 
@@ -69,9 +69,10 @@ physical cue space (\code{"original"}).}
 \item{class}{Character string specifying the parameter class. Supported
 classes include:
 \itemize{
-\item \code{"tau"}: Scale / standard deviation for category covariance.
-\item \code{"cor"}: Correlation matrix / Cholesky factor \code{L_omega}.
-\item \code{"m"}: Category prior mean \code{m_0}.
+\item \code{"tau_0"}: Scale / standard deviation for category covariance.
+\item \code{"cor_0"}: Correlation matrix / Cholesky factor
+\code{L_omega}.
+\item \code{"m_0"}: Category prior mean \code{m_0}.
 \item \code{"weight"}: Cue integration weights.
 \item \code{"lapse_rate"}: Lapse probability.
 \item \code{"lapse_bias"}: Lapse response distribution simplex.

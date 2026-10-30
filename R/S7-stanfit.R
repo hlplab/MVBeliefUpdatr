@@ -8,12 +8,12 @@ NULL
 
 #' MVBeliefUpdatr Stanfit Classes and Constructors
 #'
-#' An S7 base class for Stan fit objects
+#' An S7 base class for Stan fit objects.
 #'
-#' @param data A \code{data.frame} containing the data used to fit the model.
+#' @param data A named \code{list} containing \code{$original} and
+#'   \code{$transformed} data frames. Default: \code{list()}.
 #' @param staninput A Stan input object containing the data handed to rstan
-#'   through \code{\link{make_staninput}}. Contains at least two components:
-#'   \code{transformed} and \code{untransformed}.
+#'   (an \code{\link{IdealAdaptorStaninput}} object). Default: \code{NULL}.
 #' @param stanvars A \code{stanvars} object or \code{NULL}. Default: \code{NULL}.
 #' @param backend The name of the backend used to fit the model (character).
 #'   Default: \code{"rstan"}.
@@ -51,7 +51,7 @@ MVBU_Stanfit <- S7::new_class(
   package = NULL,
   parent = MVBU_Object,
   properties = list(
-    data = S7::new_S3_class("data.frame"),
+    data = S7::class_list,
     staninput = S7::class_any,
     stanvars = S7::class_any,
     backend = S7::class_character,
@@ -66,7 +66,7 @@ MVBU_Stanfit <- S7::new_class(
     cache = S7::class_list
   ),
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -102,6 +102,22 @@ MVBU_Stanfit <- S7::new_class(
       cache <- list()
     }
 
+    if (is.data.frame(data)) {
+      data <- list(original = data, transformed = data)
+    } else if (is.list(data)) {
+      if (is.null(data$original) && is.null(data$transformed) &&
+        length(data) == 0L) {
+        data <- list(
+          original = tibble::tibble(),
+          transformed = tibble::tibble()
+        )
+      } else if (is.null(data$original) && !is.null(data$transformed)) {
+        data$original <- data$transformed
+      } else if (!is.null(data$original) && is.null(data$transformed)) {
+        data$transformed <- data$original
+      }
+    }
+
     label_info <- if (!is.null(metadata$label_information) &&
       is.list(metadata$label_information)) {
       metadata$label_information
@@ -118,7 +134,7 @@ MVBU_Stanfit <- S7::new_class(
 
     S7::new_object(
       MVBU_Object(),
-      data = as.data.frame(data),
+      data = data,
       staninput = staninput,
       stanvars = stanvars,
       backend = as.character(backend),
@@ -134,8 +150,14 @@ MVBU_Stanfit <- S7::new_class(
     )
   },
   validator = function(self) {
-    if (!is.data.frame(self@data)) {
-      return("`data` must be a data.frame")
+    if (!is.list(self@data) || is.data.frame(self@data)) {
+      return("`data` must be a list containing $original and $transformed.")
+    }
+    if (!inherits(self@data$original, "data.frame")) {
+      return("`data$original` must inherit from data.frame.")
+    }
+    if (!inherits(self@data$transformed, "data.frame")) {
+      return("`data$transformed` must inherit from data.frame.")
     }
     if (!is.null(self@staninput) && !S7::S7_inherits(self@staninput, MVBU_Staninput)) {
       return("`staninput` must be NULL or an S7 object")
@@ -190,7 +212,7 @@ IdealAdaptorStanfit <- S7::new_class(
   package = NULL,
   parent = MVBU_Stanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -234,7 +256,7 @@ NIX_IdealAdaptorStanfit <- S7::new_class(
   package = NULL,
   parent = IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -283,7 +305,7 @@ MNIX_IdealAdaptorStanfit <- S7::new_class(
   package = NULL,
   parent = IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -332,7 +354,7 @@ IdealIntegrator_MNIX_IdealAdaptorStanfit <- S7::new_class(
   package = NULL,
   parent = MNIX_IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -374,7 +396,7 @@ WeightedIntegrator_MNIX_IdealAdaptorStanfit <- S7::new_class(
   package = NULL,
   parent = MNIX_IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -416,7 +438,7 @@ CategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit <- S7::new_class(
   package = NULL,
   parent = MNIX_IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -458,7 +480,7 @@ GroupWeightedIntegrator_MNIX_IdealAdaptorStanfit <- S7::new_class(
   package = NULL,
   parent = MNIX_IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -500,7 +522,7 @@ GroupCategoryWeightedIntegrator_MNIX_IdealAdaptorStanfit <- S7::new_class(
   package = NULL,
   parent = MNIX_IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -542,7 +564,7 @@ InformativityWeightedIntegrator_MNIX_IdealAdaptorStanfit <- S7::new_class(
   package = NULL,
   parent = MNIX_IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -586,7 +608,7 @@ MNIX_IdealAdaptor_IdealIntegratorStanfit <- S7::new_class(
   package = NULL,
   parent = MNIX_IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -628,7 +650,7 @@ MNIX_IdealAdaptor_WeightedIntegratorStanfit <- S7::new_class(
   package = NULL,
   parent = MNIX_IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -670,7 +692,7 @@ MNIX_IdealAdaptor_CategoryWeightedIntegratorStanfit <- S7::new_class(
   package = NULL,
   parent = MNIX_IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -712,7 +734,7 @@ MNIX_IdealAdaptor_GroupWeightedIntegratorStanfit <- S7::new_class(
   package = NULL,
   parent = MNIX_IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -754,7 +776,7 @@ MNIX_IdealAdaptor_GroupCategoryWeightedIntegratorStanfit <- S7::new_class(
   package = NULL,
   parent = MNIX_IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -796,7 +818,7 @@ MNIX_IdealAdaptor_InformativityWeightedIntegratorStanfit <- S7::new_class(
   package = NULL,
   parent = MNIX_IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
@@ -835,7 +857,7 @@ NIW_IdealAdaptorStanfit <- S7::new_class(
   package = NULL,
   parent = IdealAdaptorStanfit,
   constructor = function(
-    data = data.frame(),
+    data = list(),
     staninput = NULL,
     stanvars = NULL,
     backend = "rstan",
