@@ -37,7 +37,14 @@ transform metadata.}
 
 \item{fixed_parameters}{An optional \code{\link{MVBU_FixedParameter}} object
 specifying fixed cognitive parameters created via
-\code{\link{fix_parameter}}. Default: \code{NULL}.}
+\code{\link{fix_parameter}}. Supports fixing global parameters (e.g.,
+\code{"lapse_rate"}, \code{"category_prior"}, \code{"weights"}), prior
+hyperparameters (\code{"m_0"}, \code{"S_0"}, \code{"kappa_0"},
+\code{"nu_0"}, \code{"expected_Sigma_0"}), and truly known category
+moments (\code{"mu_0"}, \code{"Sigma_0"}). When fixing \code{"mu_0"}
+and/or \code{"Sigma_0"}, the model automatically selects the appropriate
+conjugate update and predictive likelihood (Normal vs. Student-\eqn{t});
+see \code{\link{fix_parameter}} for details. Default: \code{NULL}.}
 
 \item{priors}{An optional \code{\link{MVBU_Prior}} object specifying prior
 distributions created via \code{\link{prior}}. Default: \code{NULL}.}

@@ -49,6 +49,13 @@ data {
   array[M_S_0_known] int<lower=1, upper=2> mode_S_0_known;
   array[M_S_0_known] cov_matrix[K] S_0_known_data;
 
+  // Truly known category moments
+  array[M] int<lower=0, upper=1> is_mu_0_known;
+  array[M] vector[K] mu_0_known_data;
+
+  array[M] int<lower=0, upper=1> is_Sigma_0_known;
+  array[M] cov_matrix[K] Sigma_0_known_data;
+
   // Pseudocounts (shared vs. category-specific and partial fixing)
   int<lower=0, upper=1> kappa_0_category_specific;
   int<lower=0, upper=M> M_kappa_0_known;
@@ -280,40 +287,90 @@ transformed parameters {
 
   for (cat in 1:M) {
     for (group in 1:L) {
-      kappa_n[cat, group] = kappa_0[cat] + n_exposure[cat, group];
-      nu_n[cat, group] = nu_0[cat] + n_exposure[cat, group];
-      m_n_transformed[cat, group] = nix_update_mean(
-        kappa_0[cat],
-        m_0_transformed[cat],
-        n_exposure[cat, group],
-        mean_exposure[cat, group]
-      );
-      S_n_transformed[cat, group] = niw_update_S(
-        kappa_0[cat],
-        S_0_transformed[cat],
-        n_exposure[cat, group],
-        mean_exposure[cat, group],
-        css_exposure[cat, group],
-        m_0_transformed[cat]
-      );
-      t_scale_transformed[cat, group] = niw_predictive_scale(
-        S_n_transformed[cat, group],
-        kappa_n[cat, group],
-        nu_n[cat, group],
-        K
-      );
+      if (is_mu_0_known[cat] == 0 && is_Sigma_0_known[cat] == 0) {
+        // Case 1: Unknown mu, Unknown Sigma (Standard NIW)
+        kappa_n[cat, group] = kappa_0[cat] + n_exposure[cat, group];
+        nu_n[cat, group] = nu_0[cat] + n_exposure[cat, group];
+        m_n_transformed[cat, group] = nix_update_mean(
+          kappa_0[cat],
+          m_0_transformed[cat],
+          n_exposure[cat, group],
+          mean_exposure[cat, group]
+        );
+        S_n_transformed[cat, group] = niw_update_S(
+          kappa_0[cat],
+          S_0_transformed[cat],
+          n_exposure[cat, group],
+          mean_exposure[cat, group],
+          css_exposure[cat, group],
+          m_0_transformed[cat]
+        );
+        t_scale_transformed[cat, group] = niw_predictive_scale(
+          S_n_transformed[cat, group],
+          kappa_n[cat, group],
+          nu_n[cat, group],
+          K
+        );
+      } else if (is_mu_0_known[cat] == 0 && is_Sigma_0_known[cat] == 1) {
+        // Case 2: Unknown mu, Known Sigma = Sigma_0
+        kappa_n[cat, group] = kappa_0[cat] + n_exposure[cat, group];
+        nu_n[cat, group] = nu_0[cat];
+        m_n_transformed[cat, group] = nix_update_mean(
+          kappa_0[cat],
+          m_0_transformed[cat],
+          n_exposure[cat, group],
+          mean_exposure[cat, group]
+        );
+        S_n_transformed[cat, group] = Sigma_0_known_data[cat];
+        t_scale_transformed[cat, group] = niw_known_sigma_predictive_scale(
+          Sigma_0_known_data[cat],
+          kappa_n[cat, group]
+        );
+      } else if (is_mu_0_known[cat] == 1 && is_Sigma_0_known[cat] == 0) {
+        // Case 3: Known mu = mu_0, Unknown Sigma
+        kappa_n[cat, group] = kappa_0[cat];
+        nu_n[cat, group] = nu_0[cat] + n_exposure[cat, group];
+        m_n_transformed[cat, group] = mu_0_known_data[cat];
+        S_n_transformed[cat, group] = niw_known_mu_update_S(
+          S_0_transformed[cat],
+          n_exposure[cat, group],
+          mean_exposure[cat, group],
+          css_exposure[cat, group],
+          mu_0_known_data[cat]
+        );
+        t_scale_transformed[cat, group] = niw_known_mu_predictive_scale(
+          S_n_transformed[cat, group],
+          nu_n[cat, group],
+          K
+        );
+      } else {
+        // Case 4: Known mu = mu_0, Known Sigma = Sigma_0
+        kappa_n[cat, group] = kappa_0[cat];
+        nu_n[cat, group] = nu_0[cat];
+        m_n_transformed[cat, group] = mu_0_known_data[cat];
+        S_n_transformed[cat, group] = Sigma_0_known_data[cat];
+        t_scale_transformed[cat, group] = Sigma_0_known_data[cat];
+      }
     }
   }
 
   for (j in 1:n_test) {
     int group = y_test[j];
     for (cat in 1:M) {
-      log_p_test_conj[j, cat] = multi_student_t_lpdf(
-        x_test[j] |
-        nu_n[cat, group] - K + 1,
-        m_n_transformed[cat, group],
-        t_scale_transformed[cat, group]
-      ) + log(category_prior[cat]);
+      if (is_Sigma_0_known[cat]) {
+        log_p_test_conj[j, cat] = multi_normal_lpdf(
+          x_test[j] |
+          m_n_transformed[cat, group],
+          t_scale_transformed[cat, group]
+        ) + log(category_prior[cat]);
+      } else {
+        log_p_test_conj[j, cat] = multi_student_t_lpdf(
+          x_test[j] |
+          nu_n[cat, group] - K + 1,
+          m_n_transformed[cat, group],
+          t_scale_transformed[cat, group]
+        ) + log(category_prior[cat]);
+      }
     }
     p_test_conj[j] = exp(log_p_test_conj[j] - log_sum_exp(log_p_test_conj[j]));
   }

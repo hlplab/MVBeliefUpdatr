@@ -35,9 +35,15 @@ data {
   array[M_m_0_known] real m_0_known_data;
   int<lower=0, upper=M> M_S_0_known;
   array[M_S_0_known] int<lower=1, upper=M> idx_S_0_known;
-// 1 = S_0, 2 = E[Sigma_0]
   array[M_S_0_known] int<lower=1, upper=2> mode_S_0_known;
   array[M_S_0_known] real<lower=0> S_0_known_data;
+
+  // Truly known category moments
+  array[M] int<lower=0, upper=1> is_mu_0_known;
+  array[M] real mu_0_known_data;
+
+  array[M] int<lower=0, upper=1> is_Sigma_0_known;
+  array[M] real<lower=0> Sigma_0_known_data;
   // Pseudocounts (shared vs. category-specific and partial fixing)
   int<lower=0, upper=1> kappa_0_category_specific;
   int<lower=0, upper=M> M_kappa_0_known;
@@ -248,35 +254,79 @@ transformed parameters {
   array[n_test] simplex[M] p_test_conj;
   array[n_test] vector[M] log_p_test_conj;
 
-  // update NIX2 parameters according to conjugate updating rules. Note that we're using the 
-  // scatter parameterization (S_0, S_n) rather than the variance/scale parameterization of 
-  // Murphy (2012). This keeps things parallel to the NIW model, and also means that post-
-  // processing functions like get_expected_sigma_from_S have the same meaning for both 
-  // types of models (rather than double transforming the NIX scale parameter when the goal 
-  // is to extract the expected category variance).
+  // update NIX2 parameters according to conjugate updating rules. Note that
+  // we're using the scatter parameterization (S_0, S_n) rather than the
+  // variance/scale parameterization of Murphy (2012). This keeps things
+  // parallel to the NIW model, and also means that post-processing functions
+  // like get_expected_sigma_from_S have the same meaning for both types of
+  // models (rather than double transforming the NIX scale parameter when the
+  // goal is to extract the expected category variance).
   for (cat in 1:M) {
     for (group in 1:L) {
-      kappa_n[cat, group] = kappa_0[cat] + n_exposure[cat, group];
-      nu_n[cat, group] = nu_0[cat] + n_exposure[cat, group];
-      m_n_transformed[cat, group] = nix_1d_update_mean(
-        kappa_0[cat],
-        m_0_transformed[cat],
-        n_exposure[cat, group],
-        mean_exposure[cat, group]
-      );
-      S_n_transformed[cat, group] = nix_1d_update_S(
-        kappa_0[cat],
-        S_0_transformed[cat],
-        n_exposure[cat, group],
-        mean_exposure[cat, group],
-        css_exposure[cat, group],
-        m_0_transformed[cat]
-      );
-      t_scale_transformed[cat, group] = nix_1d_predictive_scale(
-        S_n_transformed[cat, group],
-        kappa_n[cat, group],
-        nu_n[cat, group]
-      );
+      if (is_mu_0_known[cat] == 0 && is_Sigma_0_known[cat] == 0) {
+        // Case 1: Unknown mu, Unknown Sigma (Standard NIX)
+        kappa_n[cat, group] = kappa_0[cat] + n_exposure[cat, group];
+        nu_n[cat, group] = nu_0[cat] + n_exposure[cat, group];
+        m_n_transformed[cat, group] = nix_1d_update_mean(
+          kappa_0[cat],
+          m_0_transformed[cat],
+          n_exposure[cat, group],
+          mean_exposure[cat, group]
+        );
+        S_n_transformed[cat, group] = nix_1d_update_S(
+          kappa_0[cat],
+          S_0_transformed[cat],
+          n_exposure[cat, group],
+          mean_exposure[cat, group],
+          css_exposure[cat, group],
+          m_0_transformed[cat]
+        );
+        t_scale_transformed[cat, group] = nix_1d_predictive_scale(
+          S_n_transformed[cat, group],
+          kappa_n[cat, group],
+          nu_n[cat, group]
+        );
+      } else if (is_mu_0_known[cat] == 0 && is_Sigma_0_known[cat] == 1) {
+        // Case 2: Unknown mu, Known Sigma = Sigma_0
+        kappa_n[cat, group] = kappa_0[cat] + n_exposure[cat, group];
+        nu_n[cat, group] = nu_0[cat];
+        m_n_transformed[cat, group] = nix_1d_update_mean(
+          kappa_0[cat],
+          m_0_transformed[cat],
+          n_exposure[cat, group],
+          mean_exposure[cat, group]
+        );
+        S_n_transformed[cat, group] = Sigma_0_known_data[cat];
+        t_scale_transformed[cat, group] =
+          nix_1d_known_sigma_predictive_scale(
+            sqrt(Sigma_0_known_data[cat]),
+            kappa_n[cat, group]
+          );
+      } else if (is_mu_0_known[cat] == 1 && is_Sigma_0_known[cat] == 0) {
+        // Case 3: Known mu = mu_0, Unknown Sigma
+        kappa_n[cat, group] = kappa_0[cat];
+        nu_n[cat, group] = nu_0[cat] + n_exposure[cat, group];
+        m_n_transformed[cat, group] = mu_0_known_data[cat];
+        S_n_transformed[cat, group] = nix_1d_known_mu_update_S(
+          S_0_transformed[cat],
+          n_exposure[cat, group],
+          mean_exposure[cat, group],
+          css_exposure[cat, group],
+          mu_0_known_data[cat]
+        );
+        t_scale_transformed[cat, group] =
+          nix_1d_known_mu_predictive_scale(
+            S_n_transformed[cat, group],
+            nu_n[cat, group]
+          );
+      } else {
+        // Case 4: Known mu = mu_0, Known Sigma = Sigma_0
+        kappa_n[cat, group] = kappa_0[cat];
+        nu_n[cat, group] = nu_0[cat];
+        m_n_transformed[cat, group] = mu_0_known_data[cat];
+        S_n_transformed[cat, group] = Sigma_0_known_data[cat];
+        t_scale_transformed[cat, group] = sqrt(Sigma_0_known_data[cat]);
+      }
     }
   }
 
@@ -284,12 +334,20 @@ transformed parameters {
   for (j in 1:n_test) {
     int group = y_test[j];
     for (cat in 1:M) {
-      log_p_test_conj[j, cat] = student_t_lpdf(
-        x_test[j] |
-        nu_n[cat, group],
-        m_n_transformed[cat, group],
-        t_scale_transformed[cat, group]
-      ) + log(category_prior[cat]);
+      if (is_Sigma_0_known[cat]) {
+        log_p_test_conj[j, cat] = normal_lpdf(
+          x_test[j] |
+          m_n_transformed[cat, group],
+          t_scale_transformed[cat, group]
+        ) + log(category_prior[cat]);
+      } else {
+        log_p_test_conj[j, cat] = student_t_lpdf(
+          x_test[j] |
+          nu_n[cat, group],
+          m_n_transformed[cat, group],
+          t_scale_transformed[cat, group]
+        ) + log(category_prior[cat]);
+      }
     }
     p_test_conj[j] = exp(log_p_test_conj[j] - log_sum_exp(log_p_test_conj[j]));
   }

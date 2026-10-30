@@ -350,6 +350,8 @@ IdealAdaptorStaninput <- S7::new_class(
         stan_priors$prior_scale_of_nu[1]
       }
     )),
+    is_mu_0_known = as.array(as.integer(struct$mu_0$is_known)),
+    is_Sigma_0_known = as.array(as.integer(struct$Sigma_0$is_known)),
     split_loglik_per_observation = as.integer(
       split_loglik_per_observation
     )
@@ -373,6 +375,10 @@ IdealAdaptorStaninput <- S7::new_class(
         x_test = as.numeric(test_summary$x_test),
         m_0_known_data = as.array(m_0_data_1d),
         S_0_known_data = as.array(S_0_data_1d),
+        mu_0_known_data = as.array(as.numeric(struct$mu_0$data[, 1])),
+        Sigma_0_known_data = as.array(
+          as.numeric(struct$Sigma_0$data[, 1, 1])
+        ),
         prior_mu_of_m = as.array(as.numeric(stan_priors$prior_mu_of_m[, 1])),
         prior_loc_of_tau = as.numeric(stan_priors$prior_loc_of_tau[1]),
         prior_scale_of_tau = as.numeric(stan_priors$prior_scale_of_tau[1]),
@@ -397,6 +403,15 @@ IdealAdaptorStaninput <- S7::new_class(
         S_0_known_data = array(
           as.numeric(struct$S_0$data),
           dim = c(struct$S_0$M_known, n_cues, n_cues)
+        ),
+        mu_0_known_data = matrix(
+          as.numeric(struct$mu_0$data),
+          nrow = n_categories,
+          ncol = n_cues
+        ),
+        Sigma_0_known_data = array(
+          as.numeric(struct$Sigma_0$data),
+          dim = c(n_categories, n_cues, n_cues)
         ),
         prior_mu_of_m = matrix(
           as.numeric(stan_priors$prior_mu_of_m),
@@ -429,6 +444,15 @@ IdealAdaptorStaninput <- S7::new_class(
       S_0_known_data = array(
         as.numeric(struct$S_0$data),
         dim = c(struct$S_0$M_known, n_cues, n_cues)
+      ),
+      mu_0_known_data = matrix(
+        as.numeric(struct$mu_0$data),
+        nrow = n_categories,
+        ncol = n_cues
+      ),
+      Sigma_0_known_data = array(
+        as.numeric(struct$Sigma_0$data),
+        dim = c(n_categories, n_cues, n_cues)
       ),
       prior_mu_of_m = matrix(
         as.numeric(stan_priors$prior_mu_of_m),

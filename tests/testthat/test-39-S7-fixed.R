@@ -43,6 +43,17 @@ test_that("fix_parameter() constructs valid MVBU_FixedParameter objects", {
   f_cp <- fix_parameter(c(0.5, 0.5), class = "category_prior")
   expect_equal(f_cp@par_class, "category_prior")
 
+  # mu_0 and Sigma_0 (Stage 6)
+  f_mu0 <- fix_parameter(c(1, 2), class = "mu_0", category = "b")
+  expect_equal(f_mu0@par_class, "mu_0")
+  expect_equal(f_mu0@category, "b")
+  expect_equal(f_mu0@cue_space, "original")
+  expect_equal(f_mu0@value[[1]], c(1, 2))
+
+  f_sig0 <- fix_parameter(Sigma_mat, class = "Sigma_0", category = "b")
+  expect_equal(f_sig0@par_class, "Sigma_0")
+  expect_equal(f_sig0@category, "b")
+
   # weights
   f_w <- fix_parameter(1.5, class = "weights", cue = "f1")
   expect_equal(f_w@par_class, "weights")
@@ -59,22 +70,6 @@ test_that(
   {
     # Value required
     expect_error(fix_parameter(), "must be provided")
-
-    # Truly known mu_0 and Sigma_0 are rejected with Stage 6 deferral error
-    expect_error(
-      fix_parameter(c(0, 0), class = "mu_0", category = "b"),
-      paste0(
-        "Fixing known 'mu_0' is not yet implemented ",
-        "\\(deferred to Stage 6\\)."
-      )
-    )
-    expect_error(
-      fix_parameter(diag(2), class = "Sigma_0", category = "b"),
-      paste0(
-        "Fixing known 'Sigma_0' is not yet implemented ",
-        "\\(deferred to Stage 6\\)."
-      )
-    )
 
   # Global parameters cannot be category-specific
   expect_error(
@@ -232,3 +227,92 @@ test_that(
     expect_equal(as.numeric(resolved$nu_0$data[1]), 8)
   }
 )
+
+test_that(
+  ".resolve_fixed_parameters() supports known mu_0 and known Sigma_0",
+  {
+    categories <- c("b", "d")
+    transform <- MVBeliefUpdatr::MVBU_TransformInformation(
+      cue.labels = c("f1", "f2"),
+      type = "standardize",
+      shift = c(10, 20),
+      SCALE = matrix(c(2, 0, 0, 3), nrow = 2, byrow = TRUE)
+    )
+
+    # 1. Valid known mu_0 and known Sigma_0
+    fp <- list(
+      fix_parameter(c(10, 20), class = "mu_0", category = "b"),
+      fix_parameter(
+        matrix(c(1, 0, 0, 1), 2, 2),
+        class = "Sigma_0",
+        category = "d"
+      )
+    )
+
+    resolved <- MVBeliefUpdatr:::.resolve_fixed_parameters(
+      fixed = fp,
+      categories = categories,
+      cues = c("f1", "f2"),
+      transform = transform
+    )
+
+    expect_equal(resolved$mu_0$is_known, as.array(c(1L, 0L)))
+    expect_equal(as.numeric(resolved$mu_0$data[1, ]), c(0, 0))
+    expect_equal(resolved$Sigma_0$is_known, as.array(c(0L, 1L)))
+    expect_equal(resolved$Sigma_0$data[2, , ], matrix(c(4, 0, 0, 9), 2, 2))
+
+    # Known mu_0 is added to m_0$idx_known to prevent Stan from sampling it
+    expect_true(1L %in% resolved$m_0$idx_known)
+    # Known Sigma_0 is added to S_0$idx_known with mode 1
+    expect_true(2L %in% resolved$S_0$idx_known)
+
+    # 2. Conflicting specification: both m_0 and mu_0 for same category
+    fp_conflict_m <- list(
+      fix_parameter(c(0, 0), class = "m_0", category = "b"),
+      fix_parameter(c(10, 20), class = "mu_0", category = "b")
+    )
+    expect_error(
+      MVBeliefUpdatr:::.resolve_fixed_parameters(
+        fixed = fp_conflict_m,
+        categories = categories,
+        cues = c("f1", "f2"),
+        transform = transform
+      ),
+      "Cannot fix both 'm_0' and known 'mu_0' for category 'b'"
+    )
+
+    # 3. Conflicting specification: both S_0 and Sigma_0 for same category
+    fp_conflict_s <- list(
+      fix_parameter(diag(2), class = "S_0", category = "d"),
+      fix_parameter(diag(2), class = "Sigma_0", category = "d")
+    )
+    expect_error(
+      MVBeliefUpdatr:::.resolve_fixed_parameters(
+        fixed = fp_conflict_s,
+        categories = categories,
+        cues = c("f1", "f2"),
+        transform = transform
+      ),
+      "Cannot fix both 'S_0'/'expected_Sigma_0' and known 'Sigma_0'"
+    )
+
+    # 4. Non-positive-definite Sigma_0 errors
+    fp_bad_sigma <- list(
+      fix_parameter(
+        matrix(c(1, 2, 2, 1), 2, 2),
+        class = "Sigma_0",
+        category = "b"
+      )
+    )
+    expect_error(
+      MVBeliefUpdatr:::.resolve_fixed_parameters(
+        fixed = fp_bad_sigma,
+        categories = categories,
+        cues = c("f1", "f2"),
+        transform = transform
+      ),
+      "must be positive-definite"
+    )
+  }
+)
+

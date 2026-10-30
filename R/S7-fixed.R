@@ -159,8 +159,37 @@ MVBU_FixedParameter <- S7::new_class(
 #'     the conjugate scatter matrix \code{"S_0"} given \nu_0.
 #'   }
 #'   \item{\code{"mu_0"} and \code{"Sigma_0"}}{
-#'     Fixed, known category representation parameters entering the likelihood
-#'     directly without prior belief updating or uncertainty of that parameter.
+#'     Truly known category representation parameters entering the model as
+#'     fixed, non-random constants without latent prior parameters. Fixing
+#'     either or both moments determines the conjugate belief updating and the
+#'     predictive likelihood behavior:
+#'     \describe{
+#'       \item{Case 1 (both unknown)}{
+#'         Standard NIW or NIX conjugate updating for both mean and covariance;
+#'         the predictive likelihood is Student-\eqn{t}.
+#'       }
+#'       \item{Case 2 (\code{"Sigma_0"} known, \code{"mu_0"} unknown)}{
+#'         Category covariance is fixed to \eqn{\Sigma_0}. Category mean is
+#'         updated via Normal-mean updating (\eqn{\kappa_n = \kappa_0 + n},
+#'         \eqn{\mu_n = (\kappa_0 m_0 + n \bar{x}) / \kappa_n}). Because the
+#'         covariance is known without uncertainty, the predictive likelihood
+#'         is Normal with covariance \eqn{(1 + 1/\kappa_n) \Sigma_0}.
+#'       }
+#'       \item{Case 3 (\code{"mu_0"} known, \code{"Sigma_0"} unknown)}{
+#'         Category mean is fixed to \eqn{\mu_0}. Category covariance is
+#'         updated via Inverse-Wishart (NIW) or Inverse-Chi-squared (NIX)
+#'         around the known mean (\eqn{\nu_n = \nu_0 + n}, \eqn{S_n = S_0 +
+#'         \sum (x_i - \mu_0)(x_i - \mu_0)^T}). Because the mean is known,
+#'         the predictive likelihood is Student-\eqn{t} with \eqn{\nu_n}
+#'         degrees of freedom and scale \eqn{S_n / (\nu_n - K + 1)} (or
+#'         \eqn{S_n / \nu_n} for NIX).
+#'       }
+#'       \item{Case 4 (both \code{"mu_0"} and \code{"Sigma_0"} known)}{
+#'         Both category moments are known and fixed. No belief updating occurs
+#'         with exposure, and the predictive likelihood is Normal with mean
+#'         \eqn{\mu_0} and covariance \eqn{\Sigma_0}.
+#'       }
+#'     }
 #'   }
 #' }
 #'
@@ -208,15 +237,6 @@ fix_parameter <- function(
     value <- parsed_val
   } else {
     class <- match.arg(class)
-  }
-
-  if (class %in% c("mu_0", "Sigma_0")) {
-    .stop(
-      sprintf(
-        "Fixing known '%s' is not yet implemented (deferred to Stage 6).",
-        class
-      )
-    )
   }
 
   # Canonicalize parameter class names
@@ -506,7 +526,97 @@ S7::method(names, MVBU_FixedParameter) <- function(x) {
     )
   }
 
-  # 4. m_0
+  # 4. mu_0 (known category mean)
+  mu_idx <- which(fixed@par_class == "mu_0")
+  is_mu_0_known <- integer(n_categories)
+  mu_0_known_data <- matrix(0, nrow = n_categories, ncol = n_cues)
+
+  for (idx in mu_idx) {
+    val <- fixed@value[[idx]]
+    cat_spec <- fixed@category[idx]
+    spc <- fixed@cue_space[idx]
+
+    if (nzchar(cat_spec)) {
+      .assert_true(
+        cat_spec %in% categories,
+        msg = sprintf("Category '%s' not found in model categories.", cat_spec)
+      )
+      c_i <- match(cat_spec, categories)
+      val_vec <- as.numeric(val)
+      .assert_true(
+        length(val_vec) == n_cues,
+        msg = sprintf("Fixed mu_0 must have length %d.", n_cues)
+      )
+      if (spc == "original") {
+        if (length(transform@shift) == 1L) {
+          val_trans <- as.numeric(
+            transform@SCALE * (val_vec - transform@shift)
+          )
+        } else {
+          val_trans <- as.numeric(
+            transform@SCALE %*% (val_vec - transform@shift)
+          )
+        }
+      } else {
+        val_trans <- val_vec
+      }
+      is_mu_0_known[c_i] <- 1L
+      mu_0_known_data[c_i, ] <- val_trans
+    } else {
+      if (is.list(val)) {
+        for (c_nm in names(val)) {
+          .assert_true(
+            c_nm %in% categories,
+            msg = sprintf("Category '%s' not found.", c_nm)
+          )
+          c_i <- match(c_nm, categories)
+          val_vec <- as.numeric(val[[c_nm]])
+          .assert_true(
+            length(val_vec) == n_cues,
+            msg = sprintf("Fixed mu_0 must have length %d.", n_cues)
+          )
+          if (spc == "original") {
+            if (length(transform@shift) == 1L) {
+              val_trans <- as.numeric(
+                transform@SCALE * (val_vec - transform@shift)
+              )
+            } else {
+              val_trans <- as.numeric(
+                transform@SCALE %*% (val_vec - transform@shift)
+              )
+            }
+          } else {
+            val_trans <- val_vec
+          }
+          is_mu_0_known[c_i] <- 1L
+          mu_0_known_data[c_i, ] <- val_trans
+        }
+      } else if (n_categories == 1L && (is.vector(val) || is.numeric(val))) {
+        val_vec <- as.numeric(val)
+        .assert_true(
+          length(val_vec) == n_cues,
+          msg = sprintf("Fixed mu_0 must have length %d.", n_cues)
+        )
+        if (spc == "original") {
+          if (length(transform@shift) == 1L) {
+            val_trans <- as.numeric(
+              transform@SCALE * (val_vec - transform@shift)
+            )
+          } else {
+            val_trans <- as.numeric(
+              transform@SCALE %*% (val_vec - transform@shift)
+            )
+          }
+        } else {
+          val_trans <- val_vec
+        }
+        is_mu_0_known[1L] <- 1L
+        mu_0_known_data[1L, ] <- val_trans
+      }
+    }
+  }
+
+  # 5. m_0
   m_idx <- which(fixed@par_class == "m_0")
   m_known_list <- list()
   m_known_indices <- integer()
@@ -553,7 +663,7 @@ S7::method(names, MVBU_FixedParameter) <- function(x) {
           val_vec <- as.numeric(val[[c_nm]])
           .assert_true(
             length(val_vec) == n_cues,
-            msg = sprintf("Fixed mu_0 must have length %d.", n_cues)
+            msg = sprintf("Fixed m_0 must have length %d.", n_cues)
           )
           if (spc == "original") {
             if (length(transform@shift) == 1L) {
@@ -596,6 +706,20 @@ S7::method(names, MVBU_FixedParameter) <- function(x) {
     }
   }
 
+  # If category has known mu_0, verify no conflict with m_0 and include in m_0
+  for (c_i in which(is_mu_0_known == 1L)) {
+    if (c_i %in% m_known_indices) {
+      .stop(
+        sprintf(
+          "Cannot fix both 'm_0' and known 'mu_0' for category '%s'.",
+          categories[c_i]
+        )
+      )
+    }
+    m_known_indices <- c(m_known_indices, c_i)
+    m_known_list[[length(m_known_list) + 1L]] <- mu_0_known_data[c_i, ]
+  }
+
   if (length(m_known_indices) > 0L) {
     unique_inds <- unique(m_known_indices)
     final_m_list <- list()
@@ -624,7 +748,121 @@ S7::method(names, MVBU_FixedParameter) <- function(x) {
     data = m_0_known_data
   )
 
-  # 5. S_0 / expected_Sigma_0
+  # 6. Sigma_0 (known category covariance)
+  sigma_idx <- which(fixed@par_class == "Sigma_0")
+  is_Sigma_0_known <- integer(n_categories)
+  Sigma_0_known_data <- array(0, dim = c(n_categories, n_cues, n_cues))
+  for (m in seq_len(n_categories)) {
+    Sigma_0_known_data[m, , ] <- diag(n_cues)
+  }
+
+  for (idx in sigma_idx) {
+    val <- fixed@value[[idx]]
+    cat_spec <- fixed@category[idx]
+    spc <- fixed@cue_space[idx]
+
+    if (nzchar(cat_spec)) {
+      .assert_true(
+        cat_spec %in% categories,
+        msg = sprintf("Category '%s' not found.", cat_spec)
+      )
+      c_i <- match(cat_spec, categories)
+      val_mat <- as.matrix(val)
+      .assert_true(
+        nrow(val_mat) == n_cues && ncol(val_mat) == n_cues,
+        msg = sprintf("Fixed Sigma_0 must be %d x %d.", n_cues, n_cues)
+      )
+      .assert_true(
+        all(
+          eigen(val_mat, symmetric = TRUE, only.values = TRUE)$values >
+            1e-10
+        ),
+        msg = sprintf(
+          "Fixed Sigma_0 for category '%s' must be positive-definite.",
+          cat_spec
+        )
+      )
+      if (spc == "original") {
+        if (length(transform@shift) == 1L) {
+          sc <- as.numeric(transform@SCALE)
+          val_trans <- (sc^2) * val_mat
+        } else {
+          val_trans <- transform@SCALE %*% val_mat %*%
+            t(transform@SCALE)
+        }
+      } else {
+        val_trans <- val_mat
+      }
+      is_Sigma_0_known[c_i] <- 1L
+      Sigma_0_known_data[c_i, , ] <- val_trans
+    } else {
+      if (is.list(val)) {
+        for (c_nm in names(val)) {
+          .assert_true(
+            c_nm %in% categories,
+            msg = sprintf("Category '%s' not found.", c_nm)
+          )
+          c_i <- match(c_nm, categories)
+          val_mat <- as.matrix(val[[c_nm]])
+          .assert_true(
+            nrow(val_mat) == n_cues && ncol(val_mat) == n_cues,
+            msg = sprintf("Fixed Sigma_0 must be %d x %d.", n_cues, n_cues)
+          )
+          .assert_true(
+            all(
+              eigen(val_mat, symmetric = TRUE, only.values = TRUE)$values >
+                1e-10
+            ),
+            msg = sprintf(
+              "Fixed Sigma_0 for category '%s' must be positive-definite.",
+              c_nm
+            )
+          )
+          if (spc == "original") {
+            if (length(transform@shift) == 1L) {
+              sc <- as.numeric(transform@SCALE)
+              val_trans <- (sc^2) * val_mat
+            } else {
+              val_trans <- transform@SCALE %*% val_mat %*%
+                t(transform@SCALE)
+            }
+          } else {
+            val_trans <- val_mat
+          }
+          is_Sigma_0_known[c_i] <- 1L
+          Sigma_0_known_data[c_i, , ] <- val_trans
+        }
+      } else if (n_categories == 1L && (is.matrix(val) || is.array(val))) {
+        val_mat <- as.matrix(val)
+        .assert_true(
+          nrow(val_mat) == n_cues && ncol(val_mat) == n_cues,
+          msg = sprintf("Fixed Sigma_0 must be %d x %d.", n_cues, n_cues)
+        )
+        .assert_true(
+          all(
+            eigen(val_mat, symmetric = TRUE, only.values = TRUE)$values >
+              1e-10
+          ),
+          msg = "Fixed Sigma_0 must be positive-definite."
+        )
+        if (spc == "original") {
+          if (length(transform@shift) == 1L) {
+            sc <- as.numeric(transform@SCALE)
+            val_trans <- (sc^2) * val_mat
+          } else {
+            val_trans <- transform@SCALE %*% val_mat %*%
+              t(transform@SCALE)
+          }
+        } else {
+          val_trans <- val_mat
+        }
+        is_Sigma_0_known[1L] <- 1L
+        Sigma_0_known_data[1L, , ] <- val_trans
+      }
+    }
+  }
+
+  # 7. S_0 / expected_Sigma_0
   s_idx <- which(fixed@par_class %in% c("S_0", "expected_Sigma_0"))
   s_known_list <- list()
   s_known_indices <- integer()
@@ -711,6 +949,24 @@ S7::method(names, MVBU_FixedParameter) <- function(x) {
         s_known_list[[length(s_known_list) + 1L]] <- val_trans
       }
     }
+  }
+
+  # If category has known Sigma_0, verify no conflict and include in S_0
+  for (c_i in which(is_Sigma_0_known == 1L)) {
+    if (c_i %in% s_known_indices) {
+      .stop(
+        sprintf(
+          paste0(
+            "Cannot fix both 'S_0'/'expected_Sigma_0' and known ",
+            "'Sigma_0' for category '%s'."
+          ),
+          categories[c_i]
+        )
+      )
+    }
+    s_known_indices <- c(s_known_indices, c_i)
+    s_known_modes <- c(s_known_modes, 1L)
+    s_known_list[[length(s_known_list) + 1L]] <- Sigma_0_known_data[c_i, , ]
   }
 
   if (length(s_known_indices) > 0L) {
@@ -878,6 +1134,14 @@ S7::method(names, MVBU_FixedParameter) <- function(x) {
     lapse_bias = lapse_bias,
     m_0 = m_0,
     S_0 = S_0,
+    mu_0 = list(
+      is_known = as.array(as.integer(is_mu_0_known)),
+      data = mu_0_known_data
+    ),
+    Sigma_0 = list(
+      is_known = as.array(as.integer(is_Sigma_0_known)),
+      data = Sigma_0_known_data
+    ),
     kappa_0 = kappa_0,
     nu_0 = nu_0,
     weights = weights

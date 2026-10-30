@@ -5,13 +5,14 @@
   early cue integration.
 
   Cognitive & Biological Interpretation:
-  Under early integration with an ideal integrator, cues are combined equally and
-  linearly into a composite cue:
+  Under early integration with an ideal integrator, cues are combined
+  equally and linearly into a composite cue:
     z = sum_{k=1}^K (1/K) * x_k
-  followed by 1D Normal-Inverse-Chisquare (NIX) adaptation and Student-t categorization
-  on composite dimension z.
-  Because integration weights are strictly fixed to w_k = 1/K, all projections
-  are precomputed once in transformed data, providing maximum computational efficiency.
+  followed by 1D Normal-Inverse-Chisquare (NIX) adaptation and Student-t
+  categorization on composite dimension z.
+  Because integration weights are strictly fixed to w_k = 1/K, all
+  projections are precomputed once in transformed data, providing maximum
+  computational efficiency.
 
   Backtransformation of Parameters:
   In generated quantities, the composite parameters on z are backtransformed to
@@ -54,7 +55,14 @@ data {
   // 1 = S_0, 2 = E[Sigma_0]
   array[M_S_0_known] int<lower=1, upper=2> mode_S_0_known;
   array[M_S_0_known] cov_matrix[K] S_0_known_data;
-  
+
+  // Truly known category moments
+  array[M] int<lower=0, upper=1> is_mu_0_known;
+  array[M] vector[K] mu_0_known_data;
+
+  array[M] int<lower=0, upper=1> is_Sigma_0_known;
+  array[M] cov_matrix[K] Sigma_0_known_data;
+
   // Pseudocounts (shared vs. category-specific and partial fixing)
   int<lower=0, upper=1> kappa_0_category_specific;
   int<lower=0, upper=M> M_kappa_0_known;
@@ -292,39 +300,84 @@ transformed parameters {
 
   for (cat in 1:M) {
     for (group in 1:L) {
-      kappa_n[cat, group] = kappa_0[cat] + n_exposure[cat, group];
-      nu_n[cat, group] = nu_0[cat] + n_exposure[cat, group];
-      m_n_transformed[cat, group] = nix_1d_update_mean(
-        kappa_0[cat],
-        m_0_transformed[cat],
-        n_exposure[cat, group],
-        z_mean_exposure[cat, group]
-      );
-      S_n_transformed[cat, group] = nix_1d_update_S(
-        kappa_0[cat],
-        S_0_transformed[cat],
-        n_exposure[cat, group],
-        z_mean_exposure[cat, group],
-        z_css_exposure[cat, group],
-        m_0_transformed[cat]
-      );
-      t_scale_transformed[cat, group] = nix_1d_predictive_scale(
-        S_n_transformed[cat, group],
-        kappa_n[cat, group],
-        nu_n[cat, group]
-      );
+      if (is_mu_0_known[cat] == 1 && is_Sigma_0_known[cat] == 1) {
+        // Case 4: Known mu, Known Sigma
+        m_n_transformed[cat, group] = m_0_transformed[cat];
+        S_n_transformed[cat, group] = S_0_transformed[cat];
+        t_scale_transformed[cat, group] = sqrt(S_0_transformed[cat]);
+      } else if (is_mu_0_known[cat] == 1) {
+        // Case 3: Known mu, Unknown Sigma
+        nu_n[cat, group] = nu_0[cat] + n_exposure[cat, group];
+        m_n_transformed[cat, group] = m_0_transformed[cat];
+        S_n_transformed[cat, group] = nix_1d_known_mu_update_S(
+          S_0_transformed[cat],
+          n_exposure[cat, group],
+          z_mean_exposure[cat, group],
+          z_css_exposure[cat, group],
+          m_0_transformed[cat]
+        );
+        t_scale_transformed[cat, group] = nix_1d_known_mu_predictive_scale(
+          S_n_transformed[cat, group],
+          nu_n[cat, group]
+        );
+      } else if (is_Sigma_0_known[cat] == 1) {
+        // Case 2: Unknown mu, Known Sigma
+        kappa_n[cat, group] = kappa_0[cat] + n_exposure[cat, group];
+        m_n_transformed[cat, group] = nix_1d_update_mean(
+          kappa_0[cat],
+          m_0_transformed[cat],
+          n_exposure[cat, group],
+          z_mean_exposure[cat, group]
+        );
+        S_n_transformed[cat, group] = S_0_transformed[cat];
+        t_scale_transformed[cat, group] = nix_1d_known_sigma_predictive_scale(
+          sqrt(S_0_transformed[cat]),
+          kappa_n[cat, group]
+        );
+      } else {
+        // Case 1: Unknown mu, Unknown Sigma (Standard 1D NIX)
+        kappa_n[cat, group] = kappa_0[cat] + n_exposure[cat, group];
+        nu_n[cat, group] = nu_0[cat] + n_exposure[cat, group];
+        m_n_transformed[cat, group] = nix_1d_update_mean(
+          kappa_0[cat],
+          m_0_transformed[cat],
+          n_exposure[cat, group],
+          z_mean_exposure[cat, group]
+        );
+        S_n_transformed[cat, group] = nix_1d_update_S(
+          kappa_0[cat],
+          S_0_transformed[cat],
+          n_exposure[cat, group],
+          z_mean_exposure[cat, group],
+          z_css_exposure[cat, group],
+          m_0_transformed[cat]
+        );
+        t_scale_transformed[cat, group] = nix_1d_predictive_scale(
+          S_n_transformed[cat, group],
+          kappa_n[cat, group],
+          nu_n[cat, group]
+        );
+      }
     }
   }
   // compute posterior probabilities for each test stimulus on composite z
   for (j in 1:n_test) {
     int group = y_test[j];
     for (cat in 1:M) {
-      log_p_test_conj[j, cat] = student_t_lpdf(
-        z_test[j] |
-        nu_n[cat, group],
-        m_n_transformed[cat, group],
-        t_scale_transformed[cat, group]
-      ) + log(category_prior[cat]);
+      if (is_Sigma_0_known[cat] == 1) {
+        log_p_test_conj[j, cat] = normal_lpdf(
+          z_test[j] |
+          m_n_transformed[cat, group],
+          t_scale_transformed[cat, group]
+        ) + log(category_prior[cat]);
+      } else {
+        log_p_test_conj[j, cat] = student_t_lpdf(
+          z_test[j] |
+          nu_n[cat, group],
+          m_n_transformed[cat, group],
+          t_scale_transformed[cat, group]
+        ) + log(category_prior[cat]);
+      }
     }
     p_test_conj[j] = exp(log_p_test_conj[j] - log_sum_exp(log_p_test_conj[j]));
   }

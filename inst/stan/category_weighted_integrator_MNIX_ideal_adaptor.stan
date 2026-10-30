@@ -1,12 +1,36 @@
 /*
   Category-Weighted Integrator - MNIX Ideal Adaptor
+
   Fit multinomial response data using a belief-updating model to infer prior
   parameters and category-specific projection weights under early cue
   integration.
+
+  Cognitive & Biological Interpretation:
+  Under early integration with a category-weighted integrator, each category c
+  projects multi-cue stimuli into its own composite dimension:
+    z_c = w_c' x = sum_{k=1}^K w_{c, k} * x_k
+  followed by 1D Normal-Inverse-Chisquare (NIX) adaptation on z_c.
+  This reflects perceptual mechanisms where category templates filter inputs
+  along category-specific diagnostic axes (e.g. phoneme-specific phonetic
+  projections).
+
+  Backtransformation of Parameters:
+  In generated quantities, category projection weights are transformed back to
+  physical cue gradients:
+    w_{c, orig} = SCALE' * weights_transformed[c]
+    weights[c] = w_{c, orig} / sum(w_{c, orig})
+  and composite parameters on z_c are backtransformed via category-specific
+  scalings:
+    s_{w, c} = sqrt(w_c' * INV_SCALE * INV_SCALE' * w_c)
+    shift_{w, c} = dot_product(w_c, shift)
+    m_0[c] = s_{w, c} * m_0_transformed[c] - shift_{w, c}
+    S_0[c] = s_{w, c}^2 * S_0_transformed[c]
 */
+
 functions {
   #include include/mvbu_functions.stan
 }
+
 data {
   int K; // number of features (cues >= 2)
   int L; // number of exposure groups (e.g. subjects)
@@ -35,6 +59,13 @@ data {
 // 1 = S_0, 2 = E[Sigma_0]
   array[M_S_0_known] int<lower=1, upper=2> mode_S_0_known;
   array[M_S_0_known] cov_matrix[K] S_0_known_data;
+
+  // Truly known category moments
+  array[M] int<lower=0, upper=1> is_mu_0_known;
+  array[M] vector[K] mu_0_known_data;
+
+  array[M] int<lower=0, upper=1> is_Sigma_0_known;
+  array[M] cov_matrix[K] Sigma_0_known_data;
   // Pseudocounts (shared vs. category-specific and partial fixing)
   int<lower=0, upper=1> kappa_0_category_specific;
   int<lower=0, upper=M> M_kappa_0_known;
@@ -61,6 +92,7 @@ data {
   vector[K] shift; // affine transform center
   int<lower=0, upper=1> split_loglik_per_observation;
 }
+
 transformed data {
   matrix[K, K] SCALE = inverse(INV_SCALE);
   real prior_loc_of_tau_1d = mean(prior_loc_of_tau);
@@ -154,6 +186,7 @@ transformed data {
     }
   }
 }
+
 parameters {
   array[weights_known ? 0 : M] simplex[K] weights_param_transformed;
   // Pseudocounts
@@ -174,6 +207,7 @@ parameters {
   vector<lower=0>[M_m_0_unknown > 0 ? 1 : 0] m_0_tau_transformed;
   array[M_S_0_unknown] real<lower=0> tau_0_param_transformed;
 }
+
 transformed parameters {
   array[M] simplex[K] weights_transformed = weights_known ?
     weights_data : weights_param_transformed;
@@ -269,45 +303,93 @@ transformed parameters {
   array[M, L] real<lower=0> t_scale_transformed;
   array[n_test] simplex[M] p_test_conj;
   array[n_test] vector[M] log_p_test_conj;
+
   for (cat in 1:M) {
     for (group in 1:L) {
-      kappa_n[cat, group] = kappa_0[cat] + n_exposure[cat, group];
-      nu_n[cat, group] = nu_0[cat] + n_exposure[cat, group];
-      m_n_transformed[cat, group] = nix_1d_update_mean(
-        kappa_0[cat],
-        m_0_transformed[cat],
-        n_exposure[cat, group],
-        z_mean_exposure[cat, group]
-      );
-      S_n_transformed[cat, group] = nix_1d_update_S(
-        kappa_0[cat],
-        S_0_transformed[cat],
-        n_exposure[cat, group],
-        z_mean_exposure[cat, group],
-        z_css_exposure[cat, group],
-        m_0_transformed[cat]
-      );
-      t_scale_transformed[cat, group] = nix_1d_predictive_scale(
-        S_n_transformed[cat, group],
-        kappa_n[cat, group],
-        nu_n[cat, group]
-      );
+      if (is_mu_0_known[cat] == 1 && is_Sigma_0_known[cat] == 1) {
+        // Case 4: Known mu, Known Sigma
+        m_n_transformed[cat, group] = m_0_transformed[cat];
+        S_n_transformed[cat, group] = S_0_transformed[cat];
+        t_scale_transformed[cat, group] = sqrt(S_0_transformed[cat]);
+      } else if (is_mu_0_known[cat] == 1) {
+        // Case 3: Known mu, Unknown Sigma
+        nu_n[cat, group] = nu_0[cat] + n_exposure[cat, group];
+        m_n_transformed[cat, group] = m_0_transformed[cat];
+        S_n_transformed[cat, group] = nix_1d_known_mu_update_S(
+          S_0_transformed[cat],
+          n_exposure[cat, group],
+          z_mean_exposure[cat, group],
+          z_css_exposure[cat, group],
+          m_0_transformed[cat]
+        );
+        t_scale_transformed[cat, group] = nix_1d_known_mu_predictive_scale(
+          S_n_transformed[cat, group],
+          nu_n[cat, group]
+        );
+      } else if (is_Sigma_0_known[cat] == 1) {
+        // Case 2: Unknown mu, Known Sigma
+        kappa_n[cat, group] = kappa_0[cat] + n_exposure[cat, group];
+        m_n_transformed[cat, group] = nix_1d_update_mean(
+          kappa_0[cat],
+          m_0_transformed[cat],
+          n_exposure[cat, group],
+          z_mean_exposure[cat, group]
+        );
+        S_n_transformed[cat, group] = S_0_transformed[cat];
+        t_scale_transformed[cat, group] = nix_1d_known_sigma_predictive_scale(
+          sqrt(S_0_transformed[cat]),
+          kappa_n[cat, group]
+        );
+      } else {
+        // Case 1: Unknown mu, Unknown Sigma (Standard 1D NIX)
+        kappa_n[cat, group] = kappa_0[cat] + n_exposure[cat, group];
+        nu_n[cat, group] = nu_0[cat] + n_exposure[cat, group];
+        m_n_transformed[cat, group] = nix_1d_update_mean(
+          kappa_0[cat],
+          m_0_transformed[cat],
+          n_exposure[cat, group],
+          z_mean_exposure[cat, group]
+        );
+        S_n_transformed[cat, group] = nix_1d_update_S(
+          kappa_0[cat],
+          S_0_transformed[cat],
+          n_exposure[cat, group],
+          z_mean_exposure[cat, group],
+          z_css_exposure[cat, group],
+          m_0_transformed[cat]
+        );
+        t_scale_transformed[cat, group] = nix_1d_predictive_scale(
+          S_n_transformed[cat, group],
+          kappa_n[cat, group],
+          nu_n[cat, group]
+        );
+      }
     }
   }
+  
   // compute posterior probabilities for each test stimulus on composite z
   for (j in 1:n_test) {
     int group = y_test[j];
     for (cat in 1:M) {
-      log_p_test_conj[j, cat] = student_t_lpdf(
-        z_test[j, cat] |
-        nu_n[cat, group],
-        m_n_transformed[cat, group],
-        t_scale_transformed[cat, group]
-      ) + log(category_prior[cat]);
+      if (is_Sigma_0_known[cat] == 1) {
+        log_p_test_conj[j, cat] = normal_lpdf(
+          z_test[j, cat] |
+          m_n_transformed[cat, group],
+          t_scale_transformed[cat, group]
+        ) + log(category_prior[cat]);
+      } else {
+        log_p_test_conj[j, cat] = student_t_lpdf(
+          z_test[j, cat] |
+          nu_n[cat, group],
+          m_n_transformed[cat, group],
+          t_scale_transformed[cat, group]
+        ) + log(category_prior[cat]);
+      }
     }
     p_test_conj[j] = exp(log_p_test_conj[j] - log_sum_exp(log_p_test_conj[j]));
   }
 }
+
 model {
   if (!weights_known) {
     for (cat in 1:M) {
@@ -382,6 +464,7 @@ model {
     );
   }
 }
+
 generated quantities {
 #include include/gq_multinomial_loglik.stan
   // Backtransformed parameters in natural physical units

@@ -95,8 +95,37 @@ covariance. Stan input preparation automatically rescales this value to
 the conjugate scatter matrix \code{"S_0"} given \nu_0.
 }
 \item{\code{"mu_0"} and \code{"Sigma_0"}}{
-Fixed, known category representation parameters entering the likelihood
-directly without prior belief updating or uncertainty of that parameter.
+Truly known category representation parameters entering the model as
+fixed, non-random constants without latent prior parameters. Fixing
+either or both moments determines the conjugate belief updating and the
+predictive likelihood behavior:
+\describe{
+\item{Case 1 (both unknown)}{
+Standard NIW or NIX conjugate updating for both mean and covariance;
+the predictive likelihood is Student-\eqn{t}.
+}
+\item{Case 2 (\code{"Sigma_0"} known, \code{"mu_0"} unknown)}{
+Category covariance is fixed to \eqn{\Sigma_0}. Category mean is
+updated via Normal-mean updating (\eqn{\kappa_n = \kappa_0 + n},
+\eqn{\mu_n = (\kappa_0 m_0 + n \bar{x}) / \kappa_n}). Because the
+covariance is known without uncertainty, the predictive likelihood
+is Normal with covariance \eqn{(1 + 1/\kappa_n) \Sigma_0}.
+}
+\item{Case 3 (\code{"mu_0"} known, \code{"Sigma_0"} unknown)}{
+Category mean is fixed to \eqn{\mu_0}. Category covariance is
+updated via Inverse-Wishart (NIW) or Inverse-Chi-squared (NIX)
+around the known mean (\eqn{\nu_n = \nu_0 + n}, \eqn{S_n = S_0 +
+        \sum (x_i - \mu_0)(x_i - \mu_0)^T}). Because the mean is known,
+the predictive likelihood is Student-\eqn{t} with \eqn{\nu_n}
+degrees of freedom and scale \eqn{S_n / (\nu_n - K + 1)} (or
+\eqn{S_n / \nu_n} for NIX).
+}
+\item{Case 4 (both \code{"mu_0"} and \code{"Sigma_0"} known)}{
+Both category moments are known and fixed. No belief updating occurs
+with exposure, and the predictive likelihood is Normal with mean
+\eqn{\mu_0} and covariance \eqn{\Sigma_0}.
+}
+}
 }
 }
 }

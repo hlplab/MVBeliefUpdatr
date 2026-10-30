@@ -187,8 +187,10 @@ category fixing; remaining categories are estimated), and its prior family:
 | Parameter | Scope / Dims | Can be fixed? | Can be fixed for particular category? | Prior Distribution | Stan Data Variable Names | Default Values |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **`m_0`** | Array [*M*] of Vector [*K*] | Yes | Yes | Normal(μ, σ) | `prior_mu_of_m`<br>`prior_scale_of_tau` | `mu = colMeans(cues_trans)` |
+| **`mu_0`** | Array [*M*] of Vector [*K*] | Yes | Yes | Fixed constant | `mu_0_known_data` | — |
 | **`S_0`** | Array [*M*] of Matrix [*K*×*K*] | Yes | Yes | Decomposed into `tau` & `cor` | — | — |
 | **`expected_Sigma_0`** | Array [*M*] of Matrix [*K*×*K*] | Yes | Yes | Scaled via ν₀ | — | — |
+| **`Sigma_0`** | Array [*M*] of Matrix [*K*×*K*] | Yes | Yes | Fixed constant | `Sigma_0_known_data` | — |
 | **`tau`** | Vector [*K*] (cues) | Only via `S_0` | Only via `S_0` | Cauchy(loc, scale) | `prior_loc_of_tau`<br>`prior_scale_of_tau` | `loc = 0`<br>`scale = 5 · sd(cues_trans)` |
 | **`cor`** | Matrix [*K*×*K*] | Only via `S_0` | Only via `S_0` | LKJ(η) | `prior_eta_of_cor` | `eta = 1.0` (Uniform) |
 | **`kappa_0`** | Shared [1] or Category [*M*] | Yes | Yes | Cauchy(loc, scale) | `prior_loc_of_kappa`<br>`prior_scale_of_kappa` | `loc = K`<br>`scale = 5 · max(N_obs)` |
@@ -220,6 +222,61 @@ f_partial <- fix_parameter(
 
 # Combine fixed parameter specifications
 all_fixed <- c(f_global, f_partial)
+```
+
+#### Prior Hyperparameters vs. Truly Known Category Moments
+
+`MVBeliefUpdatr` distinguishes between prior hyperparameters (`m_0`, `S_0`,
+`expected_Sigma_0`) and truly known category moments (`mu_0`, `Sigma_0`):
+
+- **Prior hyperparameters (`m_0`, `S_0`)**: Model the observer's prior
+  belief before exposure. During exposure, category representations update
+  via conjugate belief updating (NIW or NIX), and the predictive likelihood is
+  Student-*t*.
+- **Truly known moments (`mu_0`, `Sigma_0`)**: Model categories whose mean
+  vector or covariance matrix is fixed as a non-random physical constant.
+
+Fixing either or both moments determines the conjugate belief updating and
+predictive likelihood family:
+
+1. **Case 1 (both unknown)**: Standard NIW or NIX conjugate updating;
+   Student-*t* predictive likelihood.
+2. **Case 2 (`Sigma_0` known, `mu_0` unknown)**: Category covariance is fixed
+   to $\Sigma_0$. Category mean is updated via Normal-mean updating
+   ($\kappa_n = \kappa_0 + n$,
+   $\mu_n = (\kappa_0 m_0 + n \bar{x}) / \kappa_n$).
+   Because covariance is known with certainty, the predictive likelihood
+   reduces to a **Normal** distribution with covariance
+   $(1 + 1/\kappa_n) \Sigma_0$.
+3. **Case 3 (`mu_0` known, `Sigma_0` unknown)**: Category mean is fixed to
+   $\mu_0$. Category covariance is updated around the known mean
+   ($\nu_n = \nu_0 + n$,
+   $S_n = S_0 + \sum (x_i - \mu_0)(x_i - \mu_0)^T$).
+   The predictive likelihood is **Student-*t*** with $\nu_n$ degrees of
+   freedom.
+4. **Case 4 (both `mu_0` and `Sigma_0` known)**: Category representation is
+   completely fixed. No belief updating occurs with exposure, and the
+   predictive likelihood is **Normal($\mu_0$, $\Sigma_0$)**.
+
+```r
+# Fix known covariance for /d/, estimate covariance for /t/
+f_known_sigma <- fix_parameter(
+  value = matrix(c(100^2, 0, 0, 150^2), nrow = 2),
+  class = "Sigma_0",
+  category = "/d/",
+  cue_space = "original"
+)
+
+# Fix known mean for /d/, estimate mean for /t/
+f_known_mu <- fix_parameter(
+  value = c(F1 = 300, F2 = 1200),
+  class = "mu_0",
+  category = "/d/",
+  cue_space = "original"
+)
+
+# Combine with global and prior specifications
+all_fixed <- c(f_global, f_known_sigma, f_known_mu)
 ```
 
 ### Specifying Custom Priors (`prior`)
