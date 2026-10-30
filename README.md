@@ -14,7 +14,16 @@ Florian Jaeger (<fjaeger@ur.rochester.edu>), so that I can add them to the depen
 
 
 # Examples
-`MVBeliefUpdatr` code was used in [Tan, Xie, & Jaeger (2021)](https://www.frontiersin.org/articles/10.3389/fpsyg.2021.676271/full), [Xie, Buxo-Lugo, & Kurumada (2021)](https://www.sciencedirect.com/science/article/pii/S001002772100038X), [Xie, Jaeger, & Kurumada (2023)](https://osf.io/q7gjp/), and [Tan and Jaeger (2025)](https://osf.io/hxcy4). The latter two of these articles come with public OSF repositories with an R Markdown document that illustrates some of the ways in which `MVBeliefUpdatr` can be used in research on speech perception.
+`MVBeliefUpdatr` code has now been used in a number of published studies. You can find some examples in: 
+
+  * [Tan, Xie, & Jaeger (2021) *Frontiers in Psychology*](https://www.frontiersin.org/articles/10.3389/fpsyg.2021.676271/full)
+  * [Xie, Buxo-Lugo, & Kurumada (2021) *Cognition*](https://www.sciencedirect.com/science/article/pii/S001002772100038X)
+  * [Cummings & Theodore (2023), *Cognition*](https://www.sciencedirect.com/science/article/pii/S0010027723000380)
+  * [Xie, Jaeger, & Kurumada (2023) *Cortex*](https://www.sciencedirect.com/science/article/pii/S0010945223001107) [OSF](https://osf.io/q7gjp/)
+  * [Persson, Barreda, & Jaeger (2025) *JASA*](https://pubs.aip.org/asa/jasa/article/157/2/1458/3337250)
+  * [Tan and Jaeger (2025) *Cognition*](https://www.sciencedirect.com/science/article/pii/S0010027725001350) [OSF](https://osf.io/hxcy4)
+
+Several of these articles come with public OSF repositories with an R Markdown document that illustrates some of the ways in which `MVBeliefUpdatr` can be used in research on speech perception. 
 
 
 # Acknowledgments
