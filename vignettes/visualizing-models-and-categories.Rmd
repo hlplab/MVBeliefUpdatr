@@ -506,7 +506,7 @@ fit <- example_ideal_adaptor_stanfit(
   model_family = "NIW",
   n_cues = 2L,
   file = fit_path,
-  file_refit = "on_change"
+  file_refit = "never"
 )
 
 # 1. Marginalized Posterior Representation (uncertainty_treatment = "marginalize")

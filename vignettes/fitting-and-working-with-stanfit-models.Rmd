@@ -325,7 +325,7 @@ fit <- example_ideal_adaptor_stanfit(
   model_family = "NIW",
   n_cues = 1L,
   file = fit_file,
-  file_refit = "on_change"
+  file_refit = "never"
 )
 
 # Inspect class hierarchy and model family

@@ -19,9 +19,9 @@
 | 5 Data Model and Print Strategy | Completed | Closed | S7 print and summary methods implemented; as_tibble legacy bridge implemented with pre-S7 column fidelity. |
 | 6 Performance and Caching Framework | Completed | Closed | Cached posterior closures implemented in plot engine; performance benchmarks in plotting vignette. |
 | 7 Consistency and Quality Hardening | Completed | Closed | Dynamic/unified plotting framework, data extraction consistency, dataset ingestion, repeated chunk consolidation, test helper simplification, worked decision-rule examples, parameter naming harmonization, metadata unification, and roxygen tag standardization completed. All 2,319 unit tests passing with zero failures. |
-| 7B Test Suite Architecture Cleanup | Completed | Closed | Reorganized into sequential numbering: active tests (`test-00-` to `test-32-`), deprecated tests (`test-80-` to `test-88-`). Legacy helper-vowel-data.R removed; 1,600+ tests passing. |
-| 8 Documentation and Vignettes | Substantially Complete | Open | All four core vignettes authored and verified: s7-class-structure-and-workflows, visualizing-models-and-categories, fitting-and-working-with-stanfit-models, backward-compatibility-working-with-legacy-code. |
-| 9 Stan Expansion Readiness | Not Started | Open | Deferred until architecture and API stabilize. |
+| 7B Test Suite Architecture Cleanup | Completed | Closed | Reorganized into sequential numbering: active tests (`test-00-` to `test-39-`), deprecated tests (`test-80-` to `test-90-`). All 2,905+ tests passing. |
+| 8 Documentation and Vignettes | Completed | Closed | All five vignettes authored and verified; Developer Guide for permanent model families authored (`docs/developer/contributor-guide-adding-permanent-model-families.md`). |
+| 9 Stan Expansion Readiness & Prior Refactoring | Completed | Closed | 14 Stan models unified with customizable priors (`prior()`), partial parameter fixing (`fix_parameter()`), Cauchy/Beta/Dirichlet hyperpriors, and 4-case conjugate updating for known moments (μ₀, Σ₀). Full test suite (2,905 tests) passing. |
 
 ### Locked Decisions
 - [x] Release strategy: big-bang v1.0
@@ -317,21 +317,46 @@ Phase gate:
 - [x] Extensibility hooks verified against test fixtures
 - [x] Full package test suite passes cleanly with 0 failures
 
-### Phase 9: Stan Expansion Readiness
-**Goal:** start Stan additions on stable foundations
+### Phase 9: Stan Expansion Readiness & Prior Refactoring
+**Goal:** start Stan additions on stable foundations and unify priors / fixing
 
 Checklist:
-- [x] Implement analytical forward-updating functions (`update_template()` / `update_category_representation()`) for NIX, MNIX, and NIW models
-- [x] Add analytical parity unit tests verifying that 1-cue NIX and 1-cue NIW forward updating yield identical belief parameters given identical prior beliefs and exposure data
-- [ ] Add parameter recovery test suite verifying analytical forward-updated beliefs against Stan posterior estimates (recovering prior beliefs given sufficient exposure data)
-
-- [x] Define template for new Stan-backed inferred models (documented in Developer Guide)
-- [x] Begin Stan debugging and model expansion work (verify MNIX and NIX multi-cue integration architectures in Stan vs R alignment)
-- [x] Add early and late multi-cue integration families (MNIX unweighted/weighted/category-weighted; NIX early precision/weighted/category-weighted)
-- [x] First new Stan-family prototype passes interface contract tests
+- [x] Implement analytical forward-updating functions (`update_template()` /
+  `update_category_representation()`) for NIX, MNIX, and NIW models
+- [x] Add analytical parity unit tests verifying that 1-cue NIX and 1-cue NIW
+  forward updating yield identical belief parameters given identical prior
+  beliefs and exposure data
+- [x] Define template for new Stan-backed inferred models (documented in
+  Developer Guide)
+- [x] Begin Stan debugging and model expansion work (verify MNIX and NIX
+  multi-cue integration architectures in Stan vs R alignment)
+- [x] Add early and late multi-cue integration families (MNIX unweighted /
+  weighted / category-weighted; NIX early precision / weighted /
+  category-weighted; all 14 Stan models compiling and verified)
+- [x] Implement declarative S7 `prior()` constructor in `R/S7-prior.R` with
+  Cauchy priors on κ₀, ν₀, τ, Beta on lapse_rate, and Dirichlet on
+  category_prior / lapse_bias
+- [x] Implement declarative S7 `fix_parameter()` constructor in `R/S7-fixed.R`
+  supporting global, per-category, and per-cue specification
+- [x] Standardize hyperparameter naming (`prior_*_of_*`) and data-adaptive
+  defaults across all 14 Stan models
+- [x] Implement partial category fixing via index partitioning in Stan
+  (sampling unknown categories while injecting known constants from data)
+- [x] Implement 4-case conjugate belief updating in
+  `inst/stan/include/belief_updating.stan` and Normal vs. Student-t
+  likelihood branching for truly known category moments (μ₀, Σ₀) across all
+  14 Stan models
+- [x] Update R S7 stanfit input pipelines (`R/S7-staninput.R`) and fitting
+  interfaces (`R/S7-stanfit-fitting.R`) to pass known moment data flags
+- [x] Document conjugate updating behaviors and parameter fixing in
+  `vignettes/fitting-and-working-with-stanfit-models.Rmd` and roxygen Rd files
+- [ ] Add parameter recovery test suite verifying analytical forward-updated
+  beliefs against Stan posterior estimates (recovering prior beliefs given
+  sufficient exposure data)
 
 Phase gate:
-- [x] First new Stan-family prototype passes interface contract tests
+- [x] All 14 Stan models compile and pass interface contract tests
+- [x] Full test suite passes cleanly (2,905 tests across 44 test files)
 
 ### Phase-End Cleanup Standard (Applies to Every Phase)
 Checklist:
@@ -379,18 +404,19 @@ Phase gate:
 
 # Later planned extensions
 
-+ expand the vignette on fitting and working with stanfit models with a case that compares an MVBeliefUpdatr stanfit model against e.g., a logistic regression. This is a common use case. This might require thinking about how the log posterior densities are stored for MVBeliefUpdatr stanfit models. we might have to either give observation level log posterior densities or tell users how they'd need to fit their alternative model to have log posterior densities for the same observations.
-
-+ handling of tau_scale and hyper-priors more generally is really non-transparent atm. rather than handing known mu, sigma, switch to allowing specification of informative priors for all parameters. for m, S, etc. create tools that translate the prior from an intuitive space (mu, Sigma) to the relevant underlying parameter space (m, S, nu, kappa).
-+ Inverse MUVG/MNIX models (both as Stanfit model and S7 representation/template/model): a model that accepts multiple cues as input but maintains and updates representations/templates/models over the single integrated cue dimension (e.g. UVG-I / NIX-I).
-+ Write forward-updating functions for NIX, MNIX, NIW, revising existing NIW forward-updating.
-  + Include equivalence checks verifying that 1-cue NIX and 1-cue NIW forward updating yield identical analytical belief parameters given identical prior beliefs and exposure data.
-+ Add specification of category prior and lapse bias via `fixed_parameters` and extend Stan program to include category prior.
-+ Expand Stan programs to allow users to specify prior $m, S$ for each category (not fixed point estimates; evaluate if/how this differs from handing $\mu, \Sigma$ and inferring $\kappa, \nu$).
-+ Refine the pre-compiled 2D example `stanfit` object so category distributions have less overlap, creating a clearer categorization surface.
-+ For stanfit fitting, allow specification of fixed parameters
-  + for *some* mu and some sigma. that will require changes to the stan code (and might require making multiple versions of each stan model to maintain efficiency for the most common case in which none or all of the mu, sigma's are fixed.)
-  + category priors and lapse bias 
++ expand the vignette on fitting and working with stanfit models with a
+  case that compares an MVBeliefUpdatr stanfit model against e.g., a logistic
+  regression. This is a common use case. This might require thinking about
+  how the log posterior densities are stored for MVBeliefUpdatr stanfit models:
+  we might have to either give observation level log posterior densities or
+  tell users how they'd need to fit their alternative model to have log
+  posterior densities for the same observations.
++ Inverse MUVG/MNIX models (both as Stanfit model and S7 representation/
+  template/model): a model that accepts multiple cues as input but maintains
+  and updates representations/templates/models over the single integrated cue
+  dimension (e.g. UVG-I / NIX-I).
++ Refine the pre-compiled 2D example `stanfit` object so category distributions
+  have less overlap, creating a clearer categorization surface.
 
 + implement mixture inference starting with predefined models that are handed to the stan code.
 

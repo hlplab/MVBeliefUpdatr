@@ -702,6 +702,51 @@ S7::method(get_draws, MVBU_Stanfit) <- function(
   d.pars <- d.pars %>%
     dplyr::rename_with(~ sub(postfix, "", .), dplyr::ends_with(postfix))
 
+  check_cols <- intersect(
+    c("kappa", "nu", "m", "S", "lapse_rate"),
+    names(d.pars)
+  )
+
+  bad_draws <- d.pars %>%
+    dplyr::ungroup() %>%
+    dplyr::filter(dplyr::if_any(
+      dplyr::all_of(check_cols),
+      ~ is.na(.x) | is.nan(.x) | is.infinite(.x)
+    )) %>%
+    dplyr::pull(.draw) %>%
+    unique()
+
+  if (length(bad_draws) > 0) {
+    total_draws <- length(unique(d.pars$.draw))
+    if (length(bad_draws) == total_draws) {
+      .stop(
+        paste0(
+          "All draws contain NA, NaN, or infinite values. ",
+          "This indicates a severe issue during fitting."
+        )
+      )
+    }
+
+    n_bad <- length(bad_draws)
+    pct_bad <- round(100 * n_bad / total_draws, 2)
+    warning(
+      sprintf(
+        paste0(
+          "Dropped %d of %d draws (%.2f%%) containing NA, NaN, or ",
+          "infinite values (likely due to numerical issues during fitting ",
+          "or generated quantities calculation)."
+        ),
+        n_bad,
+        total_draws,
+        pct_bad
+      ),
+      call. = FALSE
+    )
+
+    d.pars <- d.pars %>%
+      dplyr::filter(!.data$.draw %in% bad_draws)
+  }
+
   if (summarize) {
     d.pars <- d.pars %>%
       dplyr::group_by(!!!rlang::syms(pars.index), .data$cue, .data$cue2) %>%
@@ -740,26 +785,6 @@ S7::method(get_draws, MVBU_Stanfit) <- function(
         "lapse_rate"
       ))
     )
-
-  check_ok <- d.pars %>%
-    dplyr::ungroup() %>%
-    dplyr::summarise(
-      dplyr::across(
-        c("kappa", "nu", "m", "S", "lapse_rate"),
-        ~ all(!is.na(.x) & !is.nan(.x) & !is.infinite(.x))
-      )
-    ) %>%
-    unlist() %>%
-    all()
-
-  if (!check_ok) {
-    .stop(
-      paste0(
-        "Some draws are not well-formed (NA, NaN, infinite values). ",
-        "This likely means that there was an issue during fitting."
-      )
-    )
-  }
 
   if (nest) {
     d.pars <- .nest_draw_cues(d.pars)

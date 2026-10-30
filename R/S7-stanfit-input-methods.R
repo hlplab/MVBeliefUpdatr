@@ -67,7 +67,9 @@ S7::method(get_original_variable_names, IdealAdaptorStanfitInput) <- function(
     n_samples <- as.integer(n_samples)
   }
 
-  data <- if (identical(space, "transformed")) {
+  data <- if (is.data.frame(x@data)) {
+    x@data
+  } else if (identical(space, "transformed")) {
     x@data$transformed
   } else {
     x@data$original

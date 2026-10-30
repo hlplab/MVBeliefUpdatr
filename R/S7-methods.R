@@ -759,6 +759,18 @@ S7::method(get_expected_mu, S7::new_union(
   x@m
 }
 
+S7::method(get_expected_mu, MVBU_CategoryRepresentation) <- function(x) {
+  fam <- get_family(x)
+  if (!is.null(fam) && is.function(fam@expected_moments)) {
+    moments <- fam@expected_moments(x)
+    return(moments$mu)
+  }
+  .stop(
+    "Cannot compute expected mu for category representation of class %s.",
+    class(x)[1]
+  )
+}
+
 S7::method(get_expected_mu, MVBU_CategoryRepresentationTemplate) <- function(x) {
   lapply(x@representations, get_expected_mu)
 }
@@ -781,6 +793,18 @@ S7::method(get_expected_sigma, MNIX_CategoryRepresentation) <- function(x) {
 S7::method(get_expected_sigma, NIW_CategoryRepresentation) <- function(x) {
   d <- nrow(x@S)
   if (x@nu > d + 1) x@S / (x@nu - d - 1) else matrix(NA_real_, nrow = d, ncol = d)
+}
+
+S7::method(get_expected_sigma, MVBU_CategoryRepresentation) <- function(x) {
+  fam <- get_family(x)
+  if (!is.null(fam) && is.function(fam@expected_moments)) {
+    moments <- fam@expected_moments(x)
+    return(moments$Sigma %||% moments$sigma)
+  }
+  .stop(
+    "Cannot compute expected sigma for category representation of class %s.",
+    class(x)[1]
+  )
 }
 
 S7::method(get_expected_sigma, MVBU_CategoryRepresentationTemplate) <- function(x) {
@@ -838,6 +862,15 @@ S7::method(get_marginal_mu, S7::new_union(
   x@m
 }
 
+S7::method(get_marginal_mu, MVBU_CategoryRepresentation) <- function(x) {
+  fam <- get_family(x)
+  if (!is.null(fam) && is.function(fam@marginal_moments)) {
+    moments <- fam@marginal_moments(x)
+    return(moments$mu)
+  }
+  get_expected_mu(x)
+}
+
 S7::method(get_marginal_mu, MVBU_CategoryRepresentationTemplate) <- function(x) {
   lapply(x@representations, get_marginal_mu)
 }
@@ -861,6 +894,15 @@ S7::method(get_marginal_sigma, MNIX_CategoryRepresentation) <- function(x) {
   s_exp <- get_expected_sigma(x)
   kap_factor <- ifelse(x@kappa > 0, (x@kappa + 1) / x@kappa, 1)
   diag(kap_factor * diag(s_exp), nrow = length(kap_factor))
+}
+
+S7::method(get_marginal_sigma, MVBU_CategoryRepresentation) <- function(x) {
+  fam <- get_family(x)
+  if (!is.null(fam) && is.function(fam@marginal_moments)) {
+    moments <- fam@marginal_moments(x)
+    return(moments$Sigma %||% moments$sigma)
+  }
+  get_expected_sigma(x)
 }
 
 S7::method(get_marginal_sigma, MVBU_CategoryRepresentationTemplate) <- function(x) {

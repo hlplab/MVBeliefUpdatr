@@ -156,7 +156,7 @@ MVBU_FixedParameter <- S7::new_class(
 #'     \eqn{E[\Sigma_0] = S_0 / (\nu_0 - 2)} for NIX/MNIX). Specifying
 #'     \code{"expected_Sigma_0"} allows users to fix the intuitive expected
 #'     covariance. Stan input preparation automatically rescales this value to
-#'     the conjugate scatter matrix \code{"S_0"} given \nu_0.
+#'     the conjugate scatter matrix \code{"S_0"} given \eqn{\nu_0}.
 #'   }
 #'   \item{\code{"mu_0"} and \code{"Sigma_0"}}{
 #'     Truly known category representation parameters entering the model as
