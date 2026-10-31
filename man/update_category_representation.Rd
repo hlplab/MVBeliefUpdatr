@@ -4,7 +4,7 @@
 \alias{update_category_representation}
 \alias{update_category_representation,MVBeliefUpdatr::NIW_CategoryRepresentation,any,any,any-method}
 \alias{update_category_representation,MVBeliefUpdatr::NIX_CategoryRepresentation,any,any,any-method}
-\alias{update_category_representation,MVBeliefUpdatr::MNIX_CategoryRepresentation,any,any,any-method}
+\alias{update_category_representation,MNIX_CategoryRepresentation,any,any,any-method}
 \title{Update a category representation from observations}
 \usage{
 update_category_representation(x, n_exposure, mean_exposure, css_exposure, ...)
@@ -15,7 +15,7 @@ update_category_representation(x, n_exposure, mean_exposure, css_exposure, ...)
 ## S7 method for classes <MVBeliefUpdatr::NIX_CategoryRepresentation>, <any>, <any>, <any>
 update_category_representation(x, n_exposure, mean_exposure, css_exposure, ...)
 
-## S7 method for classes <MVBeliefUpdatr::MNIX_CategoryRepresentation>, <any>, <any>, <any>
+## S7 method for classes <MNIX_CategoryRepresentation>, <any>, <any>, <any>
 update_category_representation(x, n_exposure, mean_exposure, css_exposure, ...)
 }
 \arguments{

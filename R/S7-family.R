@@ -1154,16 +1154,6 @@ list_model_families <- function() {
   sort(names(.mvbu_family_registry$families))
 }
 
-#' Get an MVBU_Family object from the registry
-#'
-#' @param family Model family short name (character string).
-#' @return The [MVBU_Family] object.
-#' @seealso [list_model_families()], [register_model_family()]
-#' @export
-get_model_family <- function(family) {
-  .get_model_family(family)
-}
-
 #' Internal retrieval of an MVBU_Family object
 #'
 #' @param family Model family short name.

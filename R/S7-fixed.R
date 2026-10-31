@@ -401,21 +401,23 @@ as.data.frame.MVBU_FixedParameter <- function(x, ...) {
   as.data.frame(tibble::as_tibble(x, ...))
 }
 
-S7::method(print, MVBU_FixedParameter) <- print.MVBU_FixedParameter
-S7::method(as.data.frame, MVBU_FixedParameter) <-
-  as.data.frame.MVBU_FixedParameter
-S7::method(c, MVBU_FixedParameter) <- function(x, ...) {
+S7::`method<-`(print, MVBU_FixedParameter, value = print.MVBU_FixedParameter)
+S7::`method<-`(
+  as.data.frame, MVBU_FixedParameter,
+  value = as.data.frame.MVBU_FixedParameter
+)
+S7::`method<-`(c, MVBU_FixedParameter, value = function(x, ...) {
   c.MVBU_FixedParameter(x, ...)
-}
-S7::method(`[`, MVBU_FixedParameter) <- function(x, i, ...) {
+})
+S7::`method<-`(`[`, MVBU_FixedParameter, value = function(x, i, ...) {
   `[.MVBU_FixedParameter`(x, i, ...)
-}
-S7::method(length, MVBU_FixedParameter) <- function(x) {
+})
+S7::`method<-`(length, MVBU_FixedParameter, value = function(x) {
   length.MVBU_FixedParameter(x)
-}
-S7::method(names, MVBU_FixedParameter) <- function(x) {
+})
+S7::`method<-`(names, MVBU_FixedParameter, value = function(x) {
   names.MVBU_FixedParameter(x)
-}
+})
 
 # -------------------------------------------------------------------------
 # Internal Conversion & Resolution Helpers

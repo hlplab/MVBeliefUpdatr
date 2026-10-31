@@ -104,9 +104,8 @@ objects. For \code{plot_parameters}, defaults to all groups including the prior.
 For \code{plot_parameters_pairwise} and \code{plot_parameter_correlations}, defaults
 to \code{"prior"}.}
 
-\item{ndraws}{Integer specifying the number of posterior MCMC draws to use
-when extracting parameters or plotting from \code{\link{MVBU_Stanfit}}.
-Defaults to \code{20L} (\code{NULL} uses all draws).}
+\item{ndraws}{Integer specifying the number of posterior MCMC draws to
+sample for plotting parameter distributions. Defaults to \code{100L}.}
 
 \item{combine_into_single_plot}{Logical; if \code{TRUE} (default), combines
 multi-panel parameter subplots into a single unified figure via \pkg{patchwork}.

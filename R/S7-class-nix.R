@@ -184,7 +184,7 @@ new_nix_category_representation_from_data <- function(
   uvg <- new_uvg_category_representation_from_data(
     data,
     category = category,
-    cue = cues
+    cues = cues
   )
   as_nix_category_representation(
     uvg,

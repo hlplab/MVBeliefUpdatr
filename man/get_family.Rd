@@ -3,7 +3,6 @@
 %   R/S7-stanfit-methods.R
 \name{get_family}
 \alias{get_family}
-\alias{get_family_name,IdealAdaptorStaninput-method}
 \alias{get_family,IdealAdaptorStaninput-method}
 \alias{get_family,MVBU_Stanfit/MVBU_StanfitPosterior-method}
 \alias{get_family,MVBU_Stanfit-method}
@@ -11,9 +10,6 @@
 \title{Get the model family object}
 \usage{
 get_family(x, ...)
-
-## S7 method for class <IdealAdaptorStaninput>
-get_family_name(x, ...)
 
 ## S7 method for class <IdealAdaptorStaninput>
 get_family(x, ...)

@@ -120,8 +120,8 @@ than 3 cues, analytically marginalizing out all remaining dimensions). At most
 \item{categories}{Character vector of category names to include. Defaults to
 \code{NULL} (all categories).}
 
-\item{groups}{Character vector of group names to plot for
-\code{\link{MVBU_Stanfit}} objects. Defaults to all exposure groups.}
+\item{groups}{Character vector of group names to plot. Defaults to
+\code{NULL} (all groups).}
 
 \item{aes}{Plot aesthetic: \code{"contour"}, \code{"fill"},
 \code{"fill-gradient"}, \code{"fill-discrete"}, \code{"scatter"}, or
@@ -150,55 +150,27 @@ dimensions. Defaults to \code{100L} for 1D/2D category plots and \code{60L}
 for 3D sliced category plots.}
 
 \item{n_exemplars}{Integer specifying max number of exemplars to randomly
-sample and plot for exemplar representations. Defaults to \code{0L} for 1D/2D
-(no exemplars plotted) and \code{100L} for 3D interactive scatter plots.}
+sample and plot for exemplar representations. Defaults to \code{0L} for 1D/2D}
 
-\item{...}{Additional arguments passed to specific plotting methods (e.g.,
-\code{interactive = TRUE} for interactive 3D WebGL scenes via Plotly;
-\code{slices} and \code{slice_cue} for 3D sliced category plots).}
-
-\item{uncertainty_treatment}{Character string specifying treatment of posterior parameter
-uncertainty in fitted Stan models: \code{"marginalize"} (default) shows the expected/marginal
-category density/decision function with posterior credible intervals, whereas \code{"sample"}
-overlays individual posterior sample draws.}
-
-\item{ndraws}{Integer specifying the number of posterior MCMC draws to use
-when extracting parameters or plotting from \code{\link{MVBU_Stanfit}}.
-Defaults to \code{20L} (\code{NULL} uses all draws).}
-
-\item{show_exposure_data}{Logical; if \code{TRUE}, overlays observed exposure
-data points on \code{\link{MVBU_Stanfit}} category plots. Defaults to
-\code{FALSE}.}
-
-\item{show_test_data}{Logical; if \code{TRUE}, overlays observed test data
-points on \code{\link{MVBU_Stanfit}} category plots. Defaults to
-\code{FALSE}.}
-
-\item{parallel}{Logical; if \code{TRUE}, parallelizes grid evaluations over
-multiple CPU chunks using \pkg{parallel}. Defaults to \code{FALSE}.}
-
-\item{n_cores}{Integer specifying the number of CPU cores to use when
-\code{parallel = TRUE}. Defaults to \code{NULL} (which automatically uses
-\code{max(1L, parallel::detectCores() - 1L)}).}
-
-\item{noise_treatment}{Optional character string specifying treatment of
-perceptual noise: \code{"no_noise"}, \code{"sample"}, or
-\code{"marginalize"}.
+\item{...}{Additional arguments passed to specific plotting methods:
 \itemize{
-\item \code{"no_noise"}: No perceptual noise is applied to input cues,
-and no noise is assumed during categorization.
-\item \code{"sample"}: Simulates sensory noise on a specific observation.
-Noise drawn from \eqn{\mathcal{N}(0, \Sigma_{\text{noise}})} is added
-to input cues (and projected into composite cue space in early
-integration), and the observer accounts for their own noise
-uncertainty during categorization by adding \eqn{\Sigma_{\text{noise}}}
-to their likelihood scale.
-\item \code{"marginalize"}: Evaluates categorization in the limit across
-infinitely many noisy encounters (expected consequences). No noise is
-sampled onto the input stimulus, but \eqn{\Sigma_{\text{noise}}} is
-added to the category covariance scale.
-}
-Defaults to \code{NULL} (uses the model's configured noise treatment).}
+\item \code{uncertainty_treatment}: Treatment of posterior parameter
+uncertainty in fitted Stan models (\code{"marginalize"} or
+\code{"sample"}).
+\item \code{ndraws}: Integer specifying the number of posterior MCMC draws
+to use from \code{\link{MVBU_Stanfit}} (defaults to \code{20L}).
+\item \code{show_exposure_data}, \code{show_test_data}: Logical; if
+\code{TRUE}, overlays observed exposure/test data points.
+\item \code{parallel}, \code{n_cores}: Logical and integer controlling
+parallel grid evaluation.
+\item \code{noise_treatment}: Optional character string specifying
+perceptual noise treatment (\code{"no_noise"}, \code{"sample"}, or
+\code{"marginalize"}).
+\item \code{interactive}: Logical; if \code{TRUE}, produces interactive
+3D WebGL scenes via Plotly.
+\item \code{slices}, \code{slice_cue}: Configuration for 3D sliced category
+plots.
+}}
 }
 \value{
 A \code{ggplot} object (or a \code{plotly} htmlwidget if

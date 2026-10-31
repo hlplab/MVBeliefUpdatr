@@ -104,6 +104,7 @@ NULL
 #' @export
 MNIX_CategoryRepresentation <- S7::new_class(
   "MNIX_CategoryRepresentation",
+  package = NULL,
   parent = MVBU_CategoryRepresentation,
   properties = list(
     m = S7::class_numeric,

@@ -21,32 +21,32 @@
 \usage{
 get_data(
   x,
+  space = c("original", "transformed"),
   groups = NULL,
   categories = NULL,
   response_categories = NULL,
   n_samples = NULL,
   original_names = FALSE,
-  space = c("original", "transformed"),
   ...
 )
 
 get_exposure_data(
   x,
+  space = c("original", "transformed"),
   groups = NULL,
   categories = NULL,
   n_samples = NULL,
   original_names = FALSE,
-  space = c("original", "transformed"),
   ...
 )
 
 get_test_data(
   x,
+  space = c("original", "transformed"),
   groups = NULL,
   response_categories = NULL,
   n_samples = NULL,
   original_names = FALSE,
-  space = c("original", "transformed"),
   ...
 )
 
@@ -121,6 +121,9 @@ get_test_data(
 \arguments{
 \item{x}{An S7 stanfit, stanfit-input, or stanfit-posterior object.}
 
+\item{space}{Character string indicating which cue space to return:
+\code{"original"} (default) or \code{"transformed"}.}
+
 \item{groups}{Optional character vector of group labels to filter observations by.
 Defaults to all available groups.}
 
@@ -134,9 +137,6 @@ to filter test observations by. Defaults to all available response category leve
 
 \item{original_names}{Logical; if \code{TRUE}, renames standardized columns back to
 original variable names. Defaults to \code{FALSE}.}
-
-\item{space}{Character string indicating which cue space to return:
-\code{"original"} (default) or \code{"transformed"}.}
 
 \item{...}{Additional arguments passed to methods.}
 }

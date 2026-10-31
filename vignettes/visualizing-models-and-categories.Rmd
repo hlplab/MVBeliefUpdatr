@@ -15,12 +15,26 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
+  dev = "png",
+  dpi = 150,
   fig.width = 7,
   fig.height = 5,
   fig.align = "center",
   warning = FALSE,
   message = FALSE
 )
+
+if (capabilities("cairo")) {
+  options(
+    device = function(...) grDevices::cairo_pdf(
+      tempfile(fileext = ".pdf"), ...
+    )
+  )
+} else {
+  options(
+    device = function(...) grDevices::pdf(file = NULL, ...)
+  )
+}
 
 library(gganimate)
 library(plotly)

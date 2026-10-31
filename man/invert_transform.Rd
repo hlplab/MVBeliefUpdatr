@@ -8,10 +8,12 @@
 invert_transform(transform, ...)
 
 ## S7 method for class <MVBU_TransformInformation>
-invert_transform(transform)
+invert_transform(transform, ...)
 }
 \arguments{
 \item{transform}{An \code{\link{MVBU_TransformInformation}} object.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \value{
 An inverted \code{\link{MVBU_TransformInformation}} object.

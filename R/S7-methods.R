@@ -1084,12 +1084,16 @@ S7::method(get_noise_treatment, MVBU_CognitiveModel) <- function(x, ...) {
 #' @export
 S7::method(set_labels, S7::class_list) <- function(
   x,
-  cue = character(0),
-  category = character(0),
-  response_category = category,
-  group = character(0),
+  cue = NULL,
+  category = NULL,
+  response_category = NULL,
+  group = NULL,
   ...
 ) {
+  if (is.null(cue)) cue <- character(0)
+  if (is.null(category)) category <- character(0)
+  if (is.null(response_category)) response_category <- category
+  if (is.null(group)) group <- character(0)
   x$label_information <- list(
     cue = as.character(cue),
     category = as.character(category),
@@ -1103,12 +1107,18 @@ S7::method(set_labels, S7::class_list) <- function(
 #' @export
 S7::method(set_labels, MVBU_Object) <- function(
   x,
-  cue = get_cue_labels(x),
-  category = get_category_labels(x),
-  response_category = get_response_category_labels(x),
-  group = get_group_labels(x, include_prior = FALSE),
+  cue = NULL,
+  category = NULL,
+  response_category = NULL,
+  group = NULL,
   ...
 ) {
+  if (is.null(cue)) cue <- get_cue_labels(x)
+  if (is.null(category)) category <- get_category_labels(x)
+  if (is.null(response_category)) {
+    response_category <- get_response_category_labels(x)
+  }
+  if (is.null(group)) group <- get_group_labels(x, include_prior = FALSE)
   x@metadata <- set_labels(
     x@metadata,
     cue = cue,

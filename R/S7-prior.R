@@ -387,12 +387,14 @@ print.MVBU_Prior <- function(x, ...) {
   invisible(x)
 }
 
-S7::method(print, MVBU_Prior) <- print.MVBU_Prior
-S7::method(as.data.frame, MVBU_Prior) <- as.data.frame.MVBU_Prior
-S7::method(c, MVBU_Prior) <- function(x, ...) c.MVBU_Prior(x, ...)
-S7::method(`[`, MVBU_Prior) <- function(x, i, ...) `[.MVBU_Prior`(x, i, ...)
-S7::method(length, MVBU_Prior) <- function(x) length.MVBU_Prior(x)
-S7::method(names, MVBU_Prior) <- function(x) names.MVBU_Prior(x)
+S7::`method<-`(print, MVBU_Prior, value = print.MVBU_Prior)
+S7::`method<-`(as.data.frame, MVBU_Prior, value = as.data.frame.MVBU_Prior)
+S7::`method<-`(c, MVBU_Prior, value = function(x, ...) c.MVBU_Prior(x, ...))
+S7::`method<-`(`[`, MVBU_Prior, value = function(x, i, ...) {
+  `[.MVBU_Prior`(x, i, ...)
+})
+S7::`method<-`(length, MVBU_Prior, value = length.MVBU_Prior)
+S7::`method<-`(names, MVBU_Prior, value = names.MVBU_Prior)
 
 # -------------------------------------------------------------------------
 # Internal Helper Functions for Prior Resolution

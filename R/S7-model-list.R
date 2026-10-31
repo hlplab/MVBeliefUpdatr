@@ -106,69 +106,23 @@ as_model_list <- function(models, model_labels = NULL, metadata = list()) {
   )
 }
 
-#' Subset an MVBU_ModelList object
-#'
-#' @param x An [MVBU_ModelList] object.
-#' @param i Index or logical vector.
-#' @param ... Additional arguments (ignored).
-#' @return A subsetted [MVBU_ModelList] object.
-#' @export
-S7::method(`[`, MVBU_ModelList) <- function(x, i, ...) {
+S7::`method<-`(`[`, MVBU_ModelList, value = function(x, i, ...) {
   sub_models <- x@models[i]
   sub_labels <- x@model_labels[i]
   as_model_list(sub_models, model_labels = sub_labels, metadata = x@metadata)
-}
+})
 
-#' @export
-`[.MVBU_ModelList` <- function(x, i, ...) {
-  sub_models <- x@models[i]
-  sub_labels <- x@model_labels[i]
-  as_model_list(sub_models, model_labels = sub_labels, metadata = x@metadata)
-}
-
-#' Extract a single model element from an MVBU_ModelList
-#'
-#' @param x An [MVBU_ModelList] object.
-#' @param i Index or scalar element name.
-#' @param ... Additional arguments (ignored).
-#' @return The extracted model object.
-#' @export
-S7::method(`[[`, MVBU_ModelList) <- function(x, i, ...) {
+S7::`method<-`(`[[`, MVBU_ModelList, value = function(x, i, ...) {
   x@models[[i]]
-}
+})
 
-#' @export
-`[[.MVBU_ModelList` <- function(x, i, ...) {
-  x@models[[i]]
-}
-
-#' Length of an MVBU_ModelList
-#'
-#' @param x An [MVBU_ModelList] object.
-#' @return An integer count of models in the list.
-#' @export
-S7::method(length, MVBU_ModelList) <- function(x) {
+S7::`method<-`(length, MVBU_ModelList, value = function(x) {
   length(x@models)
-}
+})
 
-#' @export
-length.MVBU_ModelList <- function(x) {
-  length(x@models)
-}
-
-#' Names of an MVBU_ModelList
-#'
-#' @param x An [MVBU_ModelList] object.
-#' @return Character vector of model labels.
-#' @export
-S7::method(names, MVBU_ModelList) <- function(x) {
+S7::`method<-`(names, MVBU_ModelList, value = function(x) {
   x@model_labels
-}
-
-#' @export
-names.MVBU_ModelList <- function(x) {
-  x@model_labels
-}
+})
 
 #' @rdname get_cue_labels
 #' @export

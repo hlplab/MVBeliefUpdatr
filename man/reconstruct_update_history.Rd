@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-generics.R, R/S7-stanfit-methods.R
 \name{reconstruct_update_history}
 \alias{reconstruct_update_history}
-\alias{.create_ideal_adaptor_representation}
+\alias{reconstruct_update_history,MVBU_Stanfit-method}
 \title{Reconstruct exposure update history as a model list}
 \usage{
 reconstruct_update_history(
@@ -17,26 +17,30 @@ reconstruct_update_history(
   ...
 )
 
-.create_ideal_adaptor_representation(
-  model_family,
-  category_labels,
-  cue_labels,
-  m,
-  s,
-  kappa,
-  nu
+## S7 method for class <MVBU_Stanfit>
+reconstruct_update_history(
+  object,
+  uncertainty_treatment = c("marginalize", "discard"),
+  ndraws = 20L,
+  step_size = 10L,
+  groups = NULL,
+  categories = NULL,
+  parallel = FALSE,
+  seed = 42L,
+  ...
 )
 }
 \arguments{
 \item{object}{An \link{MVBU_Stanfit} object or cognitive model.}
 
-\item{uncertainty_treatment}{Character string specifying treatment of posterior parameter
-uncertainty: \code{"marginalize"} (default) reconstructs trajectories across posterior
-draws and summarizes them, while \code{"discard"} reconstructs a single trajectory
-from the prior point estimate.}
+\item{uncertainty_treatment}{Character string specifying treatment of
+posterior parameter uncertainty: \code{"marginalize"} (default)
+reconstructs trajectories across posterior draws and summarizes them,
+while \code{"discard"} reconstructs a single trajectory from the prior
+point estimate.}
 
-\item{ndraws}{Number of posterior draws to use when \code{uncertainty_treatment = "marginalize"}.
-Defaults to \code{20L}.}
+\item{ndraws}{Number of posterior draws to use when
+\code{uncertainty_treatment = "marginalize"}. Defaults to \code{20L}.}
 
 \item{step_size}{Observation step size between checkpoints.}
 

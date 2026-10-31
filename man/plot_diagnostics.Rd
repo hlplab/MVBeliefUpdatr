@@ -15,9 +15,25 @@ plot_diagnostics(x, ...)
 \code{\link{MVBU_CategoryRepresentationTemplate}},
 \code{\link{MVBU_CognitiveModel}}, or \code{\link{MVBU_Stanfit}}).}
 
-\item{...}{Additional arguments passed to specific plotting methods (e.g.,
-\code{interactive = TRUE} for interactive 3D WebGL scenes via Plotly;
-\code{slices} and \code{slice_cue} for 3D sliced category plots).}
+\item{...}{Additional arguments passed to specific plotting methods:
+\itemize{
+\item \code{uncertainty_treatment}: Treatment of posterior parameter
+uncertainty in fitted Stan models (\code{"marginalize"} or
+\code{"sample"}).
+\item \code{ndraws}: Integer specifying the number of posterior MCMC draws
+to use from \code{\link{MVBU_Stanfit}} (defaults to \code{20L}).
+\item \code{show_exposure_data}, \code{show_test_data}: Logical; if
+\code{TRUE}, overlays observed exposure/test data points.
+\item \code{parallel}, \code{n_cores}: Logical and integer controlling
+parallel grid evaluation.
+\item \code{noise_treatment}: Optional character string specifying
+perceptual noise treatment (\code{"no_noise"}, \code{"sample"}, or
+\code{"marginalize"}).
+\item \code{interactive}: Logical; if \code{TRUE}, produces interactive
+3D WebGL scenes via Plotly.
+\item \code{slices}, \code{slice_cue}: Configuration for 3D sliced category
+plots.
+}}
 }
 \description{
 Plot Stan MCMC diagnostics

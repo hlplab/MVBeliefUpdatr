@@ -382,7 +382,20 @@ get_labels <- S7::new_generic(
 #'   \code{\link{get_response_category_labels}},
 #'   \code{\link{get_group_labels}}
 #' @export
-set_labels <- S7::new_generic("set_labels", "x")
+set_labels <- S7::new_generic(
+  "set_labels",
+  "x",
+  function(
+    x,
+    cue = NULL,
+    category = NULL,
+    response_category = NULL,
+    group = NULL,
+    ...
+  ) {
+    S7::S7_dispatch()
+  }
+)
 
 
 #' Extract the category-likelihood function from a representation, template, or model
@@ -703,6 +716,8 @@ get_original_variable_names <- S7::new_generic(
 #' \code{\link{MVBU_StanfitPosterior}} object.
 #'
 #' @param x An S7 stanfit, stanfit-input, or stanfit-posterior object.
+#' @param space Character string indicating which cue space to return:
+#'   \code{"original"} (default) or \code{"transformed"}.
 #' @param groups Optional character vector of group labels to filter observations by.
 #'   Defaults to all available groups.
 #' @param categories Optional character vector of category labels to filter exposure
@@ -712,8 +727,6 @@ get_original_variable_names <- S7::new_generic(
 #' @param n_samples Optional integer; subsample up to \code{n_samples} rows. Defaults to \code{NULL} (all observations).
 #' @param original_names Logical; if \code{TRUE}, renames standardized columns back to
 #'   original variable names. Defaults to \code{FALSE}.
-#' @param space Character string indicating which cue space to return:
-#'   \code{"original"} (default) or \code{"transformed"}.
 #' @param ... Additional arguments passed to methods.
 #' @return A \code{\link[tibble]{tibble}} containing the requested data.
 #' @seealso \code{\link{get_original_variable_names}}
@@ -724,12 +737,12 @@ get_data <- S7::new_generic(
   "x",
   function(
     x,
+    space = c("original", "transformed"),
     groups = NULL,
     categories = NULL,
     response_categories = NULL,
     n_samples = NULL,
     original_names = FALSE,
-    space = c("original", "transformed"),
     ...
   ) {
     S7::S7_dispatch()
@@ -743,11 +756,11 @@ get_exposure_data <- S7::new_generic(
   "x",
   function(
     x,
+    space = c("original", "transformed"),
     groups = NULL,
     categories = NULL,
     n_samples = NULL,
     original_names = FALSE,
-    space = c("original", "transformed"),
     ...
   ) {
     S7::S7_dispatch()
@@ -761,11 +774,11 @@ get_test_data <- S7::new_generic(
   "x",
   function(
     x,
+    space = c("original", "transformed"),
     groups = NULL,
     response_categories = NULL,
     n_samples = NULL,
     original_names = FALSE,
-    space = c("original", "transformed"),
     ...
   ) {
     S7::S7_dispatch()
@@ -864,6 +877,8 @@ get_random_draw_indices <- S7::new_generic(
 #'   3 cue dimensions can be plotted simultaneously.
 #' @param categories Character vector of category names to include. Defaults to
 #'   \code{NULL} (all categories).
+#' @param groups Character vector of group names to plot. Defaults to
+#'   \code{NULL} (all groups).
 #' @param aes Plot aesthetic: \code{"contour"}, \code{"fill"},
 #'   \code{"fill-gradient"}, \code{"fill-discrete"}, \code{"scatter"}, or
 #'   combinations like \code{c("fill-gradient", "contour")}. For 1D and 2D
@@ -888,48 +903,25 @@ get_random_draw_indices <- S7::new_generic(
 #'   for 3D sliced category plots.
 #' @param n_exemplars Integer specifying max number of exemplars to randomly
 #'   sample and plot for exemplar representations. Defaults to \code{0L} for 1D/2D
-#' (no exemplars plotted) and \code{100L} for 3D interactive scatter plots.
-#' @param uncertainty_treatment Character string specifying treatment of posterior parameter
-#'   uncertainty in fitted Stan models: \code{"marginalize"} (default) shows the expected/marginal
-#'   category density/decision function with posterior credible intervals, whereas \code{"sample"}
-#'   overlays individual posterior sample draws.
-#' @param groups Character vector of group names to plot for
-#'   \code{\link{MVBU_Stanfit}} objects. Defaults to all exposure groups.
-#' @param ndraws Integer specifying the number of posterior MCMC draws to use
-#'   when extracting parameters or plotting from \code{\link{MVBU_Stanfit}}.
-#'   Defaults to \code{20L} (\code{NULL} uses all draws).
-#' @param show_exposure_data Logical; if \code{TRUE}, overlays observed exposure
-#'   data points on \code{\link{MVBU_Stanfit}} category plots. Defaults to
-#'   \code{FALSE}.
-#' @param show_test_data Logical; if \code{TRUE}, overlays observed test data
-#'   points on \code{\link{MVBU_Stanfit}} category plots. Defaults to
-#'   \code{FALSE}.
-#' @param parallel Logical; if \code{TRUE}, parallelizes grid evaluations over
-#'   multiple CPU chunks using \pkg{parallel}. Defaults to \code{FALSE}.
-#' @param n_cores Integer specifying the number of CPU cores to use when
-#'   \code{parallel = TRUE}. Defaults to \code{NULL} (which automatically uses
-#'   \code{max(1L, parallel::detectCores() - 1L)}).
-#' @param noise_treatment Optional character string specifying treatment of
-#'   perceptual noise: \code{"no_noise"}, \code{"sample"}, or
-#'   \code{"marginalize"}.
+#' @param ... Additional arguments passed to specific plotting methods:
 #'   \itemize{
-#'     \item \code{"no_noise"}: No perceptual noise is applied to input cues,
-#'       and no noise is assumed during categorization.
-#'     \item \code{"sample"}: Simulates sensory noise on a specific observation.
-#'       Noise drawn from \eqn{\mathcal{N}(0, \Sigma_{\text{noise}})} is added
-#'       to input cues (and projected into composite cue space in early
-#'       integration), and the observer accounts for their own noise
-#'       uncertainty during categorization by adding \eqn{\Sigma_{\text{noise}}}
-#'       to their likelihood scale.
-#'     \item \code{"marginalize"}: Evaluates categorization in the limit across
-#'       infinitely many noisy encounters (expected consequences). No noise is
-#'       sampled onto the input stimulus, but \eqn{\Sigma_{\text{noise}}} is
-#'       added to the category covariance scale.
+#'     \item \code{uncertainty_treatment}: Treatment of posterior parameter
+#'       uncertainty in fitted Stan models (\code{"marginalize"} or
+#'       \code{"sample"}).
+#'     \item \code{ndraws}: Integer specifying the number of posterior MCMC draws
+#'       to use from \code{\link{MVBU_Stanfit}} (defaults to \code{20L}).
+#'     \item \code{show_exposure_data}, \code{show_test_data}: Logical; if
+#'       \code{TRUE}, overlays observed exposure/test data points.
+#'     \item \code{parallel}, \code{n_cores}: Logical and integer controlling
+#'       parallel grid evaluation.
+#'     \item \code{noise_treatment}: Optional character string specifying
+#'       perceptual noise treatment (\code{"no_noise"}, \code{"sample"}, or
+#'       \code{"marginalize"}).
+#'     \item \code{interactive}: Logical; if \code{TRUE}, produces interactive
+#'       3D WebGL scenes via Plotly.
+#'     \item \code{slices}, \code{slice_cue}: Configuration for 3D sliced category
+#'       plots.
 #'   }
-#'   Defaults to \code{NULL} (uses the model's configured noise treatment).
-#' @param ... Additional arguments passed to specific plotting methods (e.g.,
-#'   \code{interactive = TRUE} for interactive 3D WebGL scenes via Plotly;
-#'   \code{slices} and \code{slice_cue} for 3D sliced category plots).
 #' @return A \code{ggplot} object (or a \code{plotly} htmlwidget if
 #'   \code{interactive = TRUE}). Because ggplot output is a standard \code{ggplot}
 #'   / \pkg{patchwork} object, it can be further customized with additional layers,
@@ -971,6 +963,9 @@ plot_categories <- S7::new_generic(
 #' @inheritParams plot_categories
 #' @param categories Character vector of category names to evaluate and plot.
 #'   Defaults to the first category (\code{get_category_labels(x)[1L]}).
+#' @param noise_treatment Treatment of perceptual noise during evaluation:
+#'   \code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}.
+#'   Defaults to \code{NULL} (uses the model's configured noise treatment).
 #' @param lapse_treatment Optional character string specifying treatment of
 #'   attentional lapses: \code{"no_lapses"}, \code{"sample"}, or
 #'   \code{"marginalize"}.
@@ -1039,6 +1034,8 @@ plot_categorization_functions <- S7::new_generic(
 #'   objects. For \code{plot_parameters}, defaults to all groups including the prior.
 #'   For \code{plot_parameters_pairwise} and \code{plot_parameter_correlations}, defaults
 #'   to \code{"prior"}.
+#' @param ndraws Integer specifying the number of posterior MCMC draws to
+#'   sample for plotting parameter distributions. Defaults to \code{100L}.
 #' @param combine_into_single_plot Logical; if \code{TRUE} (default), combines
 #'   multi-panel parameter subplots into a single unified figure via \pkg{patchwork}.
 #'   If \code{FALSE}, returns a named list of individual \code{ggplot} panel objects.

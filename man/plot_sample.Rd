@@ -57,8 +57,8 @@ than 3 cues, analytically marginalizing out all remaining dimensions). At most
 \item{categories}{Character vector of category names to include. Defaults to
 \code{NULL} (all categories).}
 
-\item{groups}{Character vector of group names to plot for
-\code{\link{MVBU_Stanfit}} objects. Defaults to all exposure groups.}
+\item{groups}{Character vector of group names to plot. Defaults to
+\code{NULL} (all groups).}
 
 \item{aes}{Aesthetic mapping specification. Can be a character vector or a named list with elements
 \code{"exposure"} and \code{"test"}. Supported values include \code{"points"} (observed sample points),

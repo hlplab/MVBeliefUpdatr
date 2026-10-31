@@ -6,32 +6,37 @@
 \alias{set_labels,MVBU_Object-method}
 \title{Set label information on an MVBU object or metadata list}
 \usage{
-set_labels(x, ...)
+set_labels(
+  x,
+  cue = NULL,
+  category = NULL,
+  response_category = NULL,
+  group = NULL,
+  ...
+)
 
 ## S7 method for class <list>
 set_labels(
   x,
-  cue = character(0),
-  category = character(0),
-  response_category = category,
-  group = character(0),
+  cue = NULL,
+  category = NULL,
+  response_category = NULL,
+  group = NULL,
   ...
 )
 
 ## S7 method for class <MVBU_Object>
 set_labels(
   x,
-  cue = get_cue_labels(x),
-  category = get_category_labels(x),
-  response_category = get_response_category_labels(x),
-  group = get_group_labels(x, include_prior = FALSE),
+  cue = NULL,
+  category = NULL,
+  response_category = NULL,
+  group = NULL,
   ...
 )
 }
 \arguments{
 \item{x}{An \link{MVBU_Object} or a metadata list.}
-
-\item{...}{Additional arguments passed to methods.}
 
 \item{cue}{Character vector of cue labels. Defaults to \code{character(0)}.}
 
@@ -43,6 +48,8 @@ Defaults to \code{category}.}
 
 \item{group}{Character vector of group labels. Defaults to
 \code{character(0)}.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \value{
 The modified object or list with updated \code{label_information}.

@@ -185,7 +185,7 @@ S7::method(
   if (!is.null(indices)) cats[indices] else cats
 }
 
-#' @rdname get_category_labels
+#' @rdname get_response_category_labels
 S7::method(
   get_response_category_labels,
   S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
@@ -2167,19 +2167,6 @@ S7::method(sample_observations, MVBU_Stanfit) <- function(
   sampled_df
 }
 
-#' @rdname reconstruct_update_history
-#' @param uncertainty_treatment Character string specifying treatment of posterior parameter
-#'   uncertainty: \code{"marginalize"} (default) reconstructs trajectories across posterior
-#'   draws and summarizes them, while \code{"discard"} reconstructs a single trajectory
-#'   from the prior point estimate.
-#' @param ndraws Number of posterior draws to use when \code{uncertainty_treatment = "marginalize"}.
-#'   Defaults to \code{20L}.
-#' @param step_size Observation step size between checkpoints.
-#' @param groups Groups to reconstruct.
-#' @param categories Categories to reconstruct.
-#' @param parallel Logical; whether to parallelize draw reconstruction.
-#' @param seed Random seed.
-#'
 # Internal helper: Create an ideal adaptor category representation dynamically
 # Factory dispatcher that constructs a category representation (NIX, MNIX, NIW)
 # without hardcoding if/else checks across calling functions.
@@ -2230,6 +2217,19 @@ S7::method(sample_observations, MVBU_Stanfit) <- function(
   }
 }
 
+#' @rdname reconstruct_update_history
+#' @param uncertainty_treatment Character string specifying treatment of
+#'   posterior parameter uncertainty: \code{"marginalize"} (default)
+#'   reconstructs trajectories across posterior draws and summarizes them,
+#'   while \code{"discard"} reconstructs a single trajectory from the prior
+#'   point estimate.
+#' @param ndraws Number of posterior draws to use when
+#'   \code{uncertainty_treatment = "marginalize"}. Defaults to \code{20L}.
+#' @param step_size Observation step size between checkpoints.
+#' @param groups Groups to reconstruct.
+#' @param categories Categories to reconstruct.
+#' @param parallel Logical; whether to parallelize draw reconstruction.
+#' @param seed Random seed.
 #' @export
 S7::method(reconstruct_update_history, MVBU_Stanfit) <- function(
   object,

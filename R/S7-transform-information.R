@@ -122,6 +122,7 @@ MVBU_TransformInformation <- S7::new_class(
 #' where \eqn{A_{inv} = A^{-1}} and \eqn{b_{inv} = -A b}.
 #'
 #' @param transform An \code{\link{MVBU_TransformInformation}} object.
+#' @param ... Additional arguments passed to methods.
 #' @return An inverted \code{\link{MVBU_TransformInformation}} object.
 #'
 #' @export
@@ -129,7 +130,9 @@ invert_transform <- S7::new_generic("invert_transform", "transform")
 
 #' @rdname invert_transform
 #' @export
-S7::method(invert_transform, MVBU_TransformInformation) <- function(transform) {
+S7::method(invert_transform, MVBU_TransformInformation) <- function(
+  transform, ...
+) {
   k <- length(transform@shift)
   scale_val <- transform@SCALE
   shift_val <- transform@shift

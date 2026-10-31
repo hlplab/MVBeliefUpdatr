@@ -15,3 +15,5 @@
 ^tests/testthat/\_problems$
 ^tests/testthat/helper-s7-foundation\.R$
 ^MVBeliefUpdatr\.Rproj$
+^inst/stan/NIW_ideal_adaptor$
+^Rplots\.pdf$

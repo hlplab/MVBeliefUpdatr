@@ -8,9 +8,6 @@
 \alias{get_category_labels,MVBU_Stanfit/MVBU_StanfitPosterior-method}
 \alias{get_category_labels,MVBU_Stanfit-method}
 \alias{get_category_labels,MVBU_StanfitPosterior-method}
-\alias{get_response_category_labels,MVBU_Stanfit/MVBU_StanfitPosterior-method}
-\alias{get_response_category_labels,MVBU_Stanfit-method}
-\alias{get_response_category_labels,MVBU_StanfitPosterior-method}
 \title{Get category labels from a representation, template, or model}
 \usage{
 get_category_labels(x, indices = NULL, ...)
@@ -23,9 +20,6 @@ get_category_labels(x, indices = NULL, ...)
 
 ## S7 method for class <MVBU_Stanfit>/<MVBU_StanfitPosterior>
 get_category_labels(x, indices = NULL, ...)
-
-## S7 method for class <MVBU_Stanfit>/<MVBU_StanfitPosterior>
-get_response_category_labels(x, indices = NULL, ...)
 }
 \arguments{
 \item{x}{A representation, representation template, or cognitive model.}
