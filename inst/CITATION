@@ -1,12 +1,28 @@
 ## R package reference generated from DESCRIPTION metadata
 citation(auto = meta)
 
-# Cortex paper
-bibentry(bibtype = "article",
-         title = "What we do (not) know about the mechanisms underlying adaptive speech perception: A computational framework and review",
-         author = c(person("Xin", "Xie"),
-                    person("Chigusa", "Kurumada"),
-                    person(c("T.", "Florian"), "Jaeger")),
-         year = "2023", publisher = "Elsevier",
-         journal = "Cortex", volume = "166", pages = "377-424")
 
+# Psych Review paper
+bibentry(
+    bibtype = "article",
+    title = "Robust Speech Perception: Recognize the Familiar, Generalize to the Similar, and Adapt to the Novel",
+    author = c(
+        person("Dave", "F.", "Kleinschmidt"),
+        person(c("T.", "Florian"), "Jaeger")
+    ),
+    year = "2015", publisher = "APA",
+    journal = "Psychological Review", volume = "122", pages = "148-203"
+)
+
+# Cognition paper
+bibentry(
+    bibtype = "article",
+    title = "What we do (not) know about the mechanisms underlying adaptive speech perception: A computational framework and review",
+    author = c(
+        person("Xin", "Xie"),
+        person("Chigusa", "Kurumada"),
+        person(c("T.", "Florian"), "Jaeger")
+    ),
+    year = "2023", publisher = "Elsevier",
+    journal = "Cortex", volume = "166", pages = "377-424"
+)
