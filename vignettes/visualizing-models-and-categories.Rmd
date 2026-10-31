@@ -12,16 +12,19 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
+eval_plots <- isTRUE(getOption("pkgdown"))
+
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   dev = "png",
-  dpi = 150,
+  dpi = 96,
   fig.width = 7,
   fig.height = 5,
   fig.align = "center",
   warning = FALSE,
-  message = FALSE
+  message = FALSE,
+  eval = eval_plots
 )
 
 if (capabilities("cairo")) {
@@ -35,9 +38,6 @@ if (capabilities("cairo")) {
     device = function(...) grDevices::pdf(file = NULL, ...)
   )
 }
-
-library(gganimate)
-library(plotly)
 ```
 
 <script>
@@ -73,11 +73,23 @@ Every visualization function in the package dispatches on the new **S7** class a
 - Complete cognitive decision models (`MVBU_CognitiveModel`)
 - Fitted Bayesian models (`MVBU_Stanfit`)
 
-```{r setup}
+> **Interactive and Rendered Visualizations:**
+> To view this vignette with all rendered figures, interactive 3D
+> WebGL scenes, and animated belief updates, visit the online
+> documentation at:
+> <https://hlplab.github.io/MVBeliefUpdatr/articles/visualizing-models-and-categories.html>.
+> In local interactive R sessions, all code examples below can be executed
+> directly in RStudio to inspect and customize the figures.
+
+```{r setup, eval = TRUE}
 library(MVBeliefUpdatr)
 library(ggplot2)
 library(patchwork)
-library(plotly)
+
+if (isTRUE(getOption("pkgdown"))) {
+  library(plotly)
+  library(gganimate)
+}
 ```
 
 ---
@@ -217,8 +229,8 @@ When `interactive = TRUE` (or `aes = "interactive"`) is set for a 2-cue plot, `p
    - `"fill-gradient"`: 3D density surface with opacity gradient proportional to the height of the probability density.
    - `"contour"`: Only 3D contour lines across density heights (hiding the surface fill).
 
-```{r 2d_interactive_demo, fig.width = 8, fig.height = 6}
-# Interactive 3D density surface over two acoustic cues (default solid fill-discrete)
+```{r 2d_interactive_demo}
+# Interactive 3D density surface over two acoustic cues (default solid fill)
 plot_categories(
   tpl_2d_mvg,
   categories = c("/b/", "/p/"),
@@ -272,7 +284,7 @@ For interactive 3D exploration, `plot_categories()` provides native WebGL render
 
 While Exemplar models can also use `aes = "fill-discrete"`, `"fill-gradient"`, or `"contour"`, note that **3D isosurface generation for exemplar models is computationally intensive.**
 
-```{r 3d_interactive_demo, fig.width = 8, fig.height = 6}
+```{r 3d_interactive_demo}
 # Native interactive 3D WebGL category plot with default 2-sigma ellipsoid
 plot_categories(
   m3,
@@ -301,8 +313,8 @@ plot_categories(
 
 2. **Interactive 3D Scatter Clouds (`interactive = TRUE`)**: Renders stored exemplars directly as a 3D point cloud:
 
-```{r 3d_exemplar_interactive, fig.width = 8, fig.height = 6}
-# Interactive 3D scatter plot sampling 150 exemplars per category (overriding default 100)
+```{r 3d_exemplar_interactive}
+# Interactive 3D scatter plot sampling 150 exemplars per category
 plot_categories(
   tpl_3d_ex,
   categories = c("/b/", "/p/"),
@@ -393,7 +405,7 @@ p_cat_cont + p_cat_fill
 
 Just like 2D category densities can be rendered as 3D interactive elevation surfaces, 2D categorization functions can be rendered in 3D WebGL with `interactive = TRUE`. By default, interactive 3D surfaces use discrete fill (`aes = "fill-discrete"`), providing an intuitive visualization of the response probability landscape across the cue space. The $z$-axis represents the predicted response probability $P_{\text{resp}}(c \mid \mathbf{x}) \in [0, 1]$:
 
-```{r 2d_interactive_categorization, fig.width = 8, fig.height = 6}
+```{r 2d_interactive_categorization}
 # 3D interactive response probability surface for category /b/
 plot_categorization_functions(
   model_2d,
@@ -680,12 +692,12 @@ plot_categorization_functions(mod_list, mode = "facet", interactive = FALSE)
 
 ### Animated Transitions (gganimate & plotly)
 
-```{r model_list_animate_demo, fig.width = 7, fig.height = 4}
+```{r model_list_animate_demo}
 # Dynamic transition animation using gganimate (1D categories)
 plot_categories(mod_list, mode = "animate", interactive = FALSE)
 ```
 
-```{r model_list_2d_gganimate_demo, fig.width = 7, fig.height = 4}
+```{r model_list_2d_gganimate_demo}
 # 2D dynamic transition animation for categorization functions using gganimate
 set.seed(42)
 m1_2d <- example_niw_ideal_adaptor(n_cues = 2)
@@ -700,18 +712,31 @@ m3_2d <- update_template(m2_2d, data.frame(
   category = "/b/"
 ))
 
-mod_list_2d <- as_model_list(list(Prior = m1_2d, Exposure_Step1 = m2_2d, Exposure_Step2 = m3_2d))
+mod_list_2d <- as_model_list(list(
+  Prior = m1_2d,
+  Exposure_Step1 = m2_2d,
+  Exposure_Step2 = m3_2d
+))
 
-plot_categorization_functions(mod_list_2d, mode = "animate", interactive = FALSE)
+plot_categorization_functions(
+  mod_list_2d,
+  mode = "animate",
+  interactive = FALSE
+)
 ```
 
-```{r model_list_plotly_demo, fig.width = 7, fig.height = 4}
+```{r model_list_plotly_demo}
 # Interactive slider plot over 2D cue space using Plotly (95% quantile contour)
-plot_categories(mod_list_2d, mode = "animate", interactive = TRUE, levels = 0.95)
+plot_categories(
+  mod_list_2d,
+  mode = "animate",
+  interactive = TRUE,
+  levels = 0.95
+)
 ```
 
-```{r model_list_3d_plotly_demo, fig.width = 7, fig.height = 5}
-# Interactive 3D slider animation across belief updates using Plotly (surfaces for /b/ and /p/)
+```{r model_list_3d_plotly_demo}
+# Interactive 3D slider animation across belief updates using Plotly
 set.seed(42)
 m1_3d <- example_niw_ideal_adaptor(n_cues = 3)
 m2_3d <- update_template(m1_3d, data.frame(
@@ -727,31 +752,54 @@ m3_3d <- update_template(m2_3d, data.frame(
   category = "/b/"
 ))
 
-mod_list_3d <- as_model_list(list(Prior = m1_3d, Exposure_Step1 = m2_3d, Exposure_Step2 = m3_3d))
-plot_categories(mod_list_3d, mode = "animate", interactive = TRUE, categories = c("/b/", "/p/"))
+mod_list_3d <- as_model_list(list(
+  Prior = m1_3d,
+  Exposure_Step1 = m2_3d,
+  Exposure_Step2 = m3_3d
+))
+plot_categories(
+  mod_list_3d,
+  mode = "animate",
+  interactive = TRUE,
+  categories = c("/b/", "/p/")
+)
 ```
 
 ### Reconstructing and Visualizing Stanfit Update Histories
 
-The `reconstruct_update_history()` generic reconstructs sequential belief updating directly from a fitted Bayesian model (`MVBU_Stanfit`), generating an `MVBU_ModelList` of checkpoint models along the exposure sequence:
+The `reconstruct_update_history()` generic reconstructs sequential belief
+updating directly from a fitted Bayesian model (`MVBU_Stanfit`), generating
+an `MVBU_ModelList` of checkpoint models along the exposure sequence:
 
 ```{r stanfit_reconstruct_demo, fig.width = 9.5, fig.height = 4}
 # 1. Fast mode: sequentially updates an ideal adaptor from prior marginal moments
 # Returns an MVBU_ModelList of MVBU_CognitiveModel objects
-hist_fast <- reconstruct_update_history(fit, uncertainty_treatment = "discard", step_size = 40L)
+hist_fast <- reconstruct_update_history(
+  fit,
+  uncertainty_treatment = "discard",
+  step_size = 40L
+)
 
 # Plot category belief shifts across exposure steps (multi-panel facet grid)
-plot_categories(hist_fast, mode = "animate", interactive = TRUE)
+plot_categories(hist_fast, mode = "facet", interactive = FALSE)
 ```
 
-When full posterior parameter uncertainty needs to be tracked across each update checkpoint, `uncertainty_treatment = "marginalize"` updates each posterior MCMC draw incrementally, returning an `MVBU_ModelList` of `MVBU_StanfitPosterior` objects:
+When full posterior parameter uncertainty needs to be tracked across each
+update checkpoint, `uncertainty_treatment = "marginalize"` updates each
+posterior MCMC draw incrementally, returning an `MVBU_ModelList` of
+`MVBU_StanfitPosterior` objects:
 
 ```{r stanfit_reconstruct_full_demo, fig.width = 9.5, fig.height = 4}
 # 2. Full posterior mode: incrementally updates posterior draws (ndraws = 200)
-hist_full <- reconstruct_update_history(fit, uncertainty_treatment = "marginalize", ndraws = 200L, step_size = 40L)
+hist_full <- reconstruct_update_history(
+  fit,
+  uncertainty_treatment = "marginalize",
+  ndraws = 200L,
+  step_size = 40L
+)
 
 # Faceted visualization of categorization decision functions across checkpoints
-plot_categorization_functions(hist_full, mode = "animate", interactive = TRUE)
+plot_categorization_functions(hist_full, mode = "facet", interactive = FALSE)
 ```
 
 > **Note on interactive slider controls:** To explore belief updating or decision surfaces interactively with a time slider rather than multi-panel facets, specify `mode = "animate", interactive = TRUE` (e.g., `plot_categories(hist_fast, mode = "animate", interactive = TRUE)`). Multi-panel faceting (`mode = "facet"`) produces tiled subplots across steps via `ggplot2` (`interactive = FALSE`).
