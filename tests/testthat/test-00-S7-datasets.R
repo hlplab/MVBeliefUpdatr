@@ -1,5 +1,4 @@
-# test-00-datasets.R
-# Tests for bundled phonetic datasets: h95, pb52, swehvd, mixer6, and legacy ChodroffWilson2018.
+# Tests for bundled phonetic datasets: h95, pb52, swehvd, and mixer6.
 
 test_that("h95 loads with standardized schema, Unicode IPA vowels, and valid values", {
   data("h95", package = "MVBeliefUpdatr")
@@ -76,9 +75,12 @@ test_that("mixer6 loads with standardized schema, stop categories, and valid val
   expect_true(all(!is.na(mixer6$vot)))
 })
 
-test_that("deprecated ChodroffWilson2018 dataset loads for backward compatibility", {
-  data("ChodroffWilson2018", package = "MVBeliefUpdatr")
-  expect_s3_class(ChodroffWilson2018, "tbl_df")
-  expect_equal(nrow(ChodroffWilson2018), 65800L)
-  expect_true(all(c("category", "VOT", "f0", "vowel_duration") %in% colnames(ChodroffWilson2018)))
+test_that("deprecated ChodroffWilson2018 emits warning and returns mixer6", {
+  expect_warning(
+    val <- ChodroffWilson2018,
+    class = "lifecycle_warning_deprecated"
+  )
+  expect_s3_class(val, "tbl_df")
+  expect_equal(nrow(val), nrow(mixer6))
 })
+

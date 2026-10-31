@@ -170,24 +170,3 @@ NULL
 #' @keywords data
 #' @usage data(mixer6)
 "mixer6"
-
-
-# deprecated --------------------------------------------------------------
-
-#' Chodroff & Wilson (2018) data on word-initial stop-voicing in native US English
-#'
-#' `r lifecycle::badge("deprecated")`
-#'
-#' `ChodroffWilson2018` is deprecated. Please use [mixer6] instead, which provides
-#' the full Mixer 6 connected speech dataset with standardized column names and
-#' Unicode IPA notation.
-#'
-#' @docType data
-#' @name ChodroffWilson2018
-#' @usage data(ChodroffWilson2018)
-#' @keywords data
-#' @references
-#' \insertRef{chodroff-wilson2018}{MVBeliefUpdatr}
-#' @encoding UTF-8
-#' @seealso \code{\link{mixer6}}
-"ChodroffWilson2018"
