@@ -1,6 +1,7 @@
 Package: MVBeliefUpdatr
 Title: Fitting, Summarizing, and Visualizing of Gaussian Ideal Observers and Adaptors
 Version: 0.1.0
+Date: 2026-10-31
 URL: https://github.com/hlplab/MVBeliefUpdatr
 Authors@R:
     person(given = c("T.", "Florian"),
@@ -127,6 +128,7 @@ Collate:
     'deprecated-class-exemplars.R'
     'deprecated-class-stanfit.R'
     'deprecated-class.R'
+    'deprecated-datasets.R'
     'deprecated-get-constructors.R'
     'deprecated-get-info-from-MVG-IO.R'
     'deprecated-get-info-from-NIW-IA-stanfit.R'
