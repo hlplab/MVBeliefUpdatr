@@ -12,3 +12,7 @@ A new instance of \code{MVBU_Object}.
 \description{
 Construct a base MVBU object
 }
+\examples{
+obj <- new_mvbu_object()
+inherits(obj, "MVBU_Object")
+}

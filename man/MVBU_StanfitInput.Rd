@@ -43,3 +43,12 @@ defaults for any of the unspecified parameters.
 
 An S7 Class for Ideal-Adaptor Fit-Input Objects
 }
+\examples{
+# Inspect an example IdealAdaptorStanfitInput object
+sfi <- example_ideal_adaptor_stanfit_input()
+sfi
+
+# Control parameters for stanfit input preparation
+ctrl <- control_staninput(transform_type = "standardize")
+ctrl
+}

@@ -2,6 +2,8 @@
 % Please edit documentation in R/S7-family.R
 \name{MVBU_Family}
 \alias{MVBU_Family}
+\alias{new_mvbu_family}
+\alias{register_model_family}
 \title{Model Family Class}
 \usage{
 MVBU_Family(
@@ -13,32 +15,90 @@ MVBU_Family(
   sufficient_statistics_function = NULL,
   stanmodel = NULL
 )
+
+new_mvbu_family(
+  name_short,
+  name_long = NULL,
+  name_details = NULL,
+  density_function,
+  sampling_function,
+  expected_moments,
+  marginal_moments = NULL,
+  sufficient_statistics_function = NULL,
+  stanmodel = NULL
+)
+
+register_model_family(
+  family,
+  category_representation_class = NULL,
+  cognitive_model_class = NULL,
+  stanmodel = NULL,
+  overwrite = TRUE
+)
 }
 \arguments{
 \item{family_names}{A list containing \code{name_short}, \code{name_long}, and
 \code{name_details}. Default: \code{list()}.}
 
-\item{density_function}{Function \code{f(x, rep, log = FALSE)} computing density.}
+\item{density_function}{Density function \verb{function(x, rep, log = FALSE)}.}
 
-\item{sampling_function}{Function \code{r(rep, n = 1L, with_replacement = TRUE)}
-drawing sample observations from the category representation.}
+\item{sampling_function}{Sampling function
+\verb{function(rep, n = 1L, with_replacement = TRUE, ...)}.}
 
-\item{expected_moments}{Function \code{f(rep)} returning a list with \code{mu},
-\code{Sigma}, and optional component \code{weights}.}
+\item{expected_moments}{Function \verb{function(rep)} returning
+\code{list(mu, Sigma, weights)}.}
 
-\item{marginal_moments}{Optional function \code{f(rep)} returning marginal
-predictive moments for adaptors. Default: \code{NULL}.}
+\item{marginal_moments}{Optional function returning marginal predictive
+moments. Default: \code{NULL}.}
 
-\item{sufficient_statistics_function}{Optional function extracting
-sufficient data statistics. Default: \code{NULL}.}
+\item{sufficient_statistics_function}{Optional function returning
+sufficient statistics. Default: \code{NULL}.}
 
 \item{stanmodel}{Optional list bundling \code{stanmodel_name} and \code{stanfit_class}
-for families associated with a Stan model, or \code{NULL}.
-Default: \code{NULL}.}
+for Stan model families, or \code{NULL}. Used when \code{family} is a
+character string. Default: \code{NULL}.}
+
+\item{name_short}{Short uppercase identifier for the family (e.g., "UVG").}
+
+\item{name_long}{Long descriptive name. Default: \code{name_short}.}
+
+\item{name_details}{Optional list specifying tier class/type names:
+\code{CategoryRepresentation_name}, \code{CategoryTemplate_name},
+\code{CognitiveModel_name}, \code{CognitiveModelList_name}. Default: \code{NULL}.}
+
+\item{family}{An \link{MVBU_Family} object, or character string specifying the
+model family short name.}
+
+\item{category_representation_class}{Name of category-representation class.
+Used when \code{family} is a character string. Default: \code{NULL}.}
+
+\item{cognitive_model_class}{Name of cognitive-model class.
+Used when \code{family} is a character string. Default: \code{NULL}.}
+
+\item{overwrite}{Logical indicating whether to overwrite an existing
+registration for this family. Default: \code{TRUE}.}
 }
 \description{
 Encapsulates the mathematical primitives, moment extraction, and naming
 conventions for a distributional model family in \code{MVBeliefUpdatr}.
+
+Registers a model family in the package registry. Accepts either an
+\link{MVBU_Family} object directly (recommended) or a family name with associated
+class names and Stan model configuration.
+}
+\examples{
+# Inspect a registered model family
+reg <- get_model_family_registration("UVG")
+reg$names$name_long
+
+# Create a custom minimal family object
+dummy_fam <- new_mvbu_family(
+  name_short = "CUSTOM",
+  density_function = function(x, rep, log = FALSE) rep(0, nrow(x)),
+  sampling_function = function(rep, n = 1L, ...) matrix(0, n, 1),
+  expected_moments = function(rep) list(mu = 0, Sigma = matrix(1, 1, 1))
+)
+dummy_fam
 }
 \seealso{
 \code{\link[=new_mvbu_family]{new_mvbu_family()}}, \code{\link[=register_model_family]{register_model_family()}}, \code{\link[=get_model_family]{get_model_family()}}

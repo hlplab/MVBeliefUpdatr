@@ -2,26 +2,42 @@
 % Please edit documentation in R/basics.R
 \name{cor2cov}
 \alias{cor2cov}
+\alias{cov2tau}
 \title{Get covariance matrix from correlation matrix and standard deviations}
 \usage{
 cor2cov(omega, tau)
+
+cov2tau(v)
 }
 \arguments{
 \item{omega}{A correlation matrix.}
 
 \item{tau}{A vector of standard deviations.}
+
+\item{v}{A covariance matrix.}
 }
 \value{
-A square matrix.
+For \code{cor2cov}, a covariance matrix. For \code{cov2tau}, a
+numeric vector of standard deviations.
 }
 \description{
-Get covariance matrix from correlation matrix and vector of standard deviations. Based on code recommended
-by Ben Bolder for efficiency.
+Convert between a correlation matrix with standard deviations and a
+covariance matrix.
+}
+\examples{
+omega <- matrix(c(1, 0.5, 0.5, 1), nrow = 2)
+tau <- c(2, 3)
+# Correlation matrix + standard deviations to covariance matrix
+Sigma <- cor2cov(omega, tau)
+Sigma
+
+# Extract standard deviations from covariance matrix
+cov2tau(Sigma)
 }
 \references{
 \url{https://stats.stackexchange.com/questions/62850/obtaining-covariance-matrix-from-correlation-matrix}
 }
 \seealso{
-\link[stats:cov2cor]{stats::cov2cor}, \code{\link{cov2tau}}
+\link[stats:cov2cor]{stats::cov2cor}, \code{\link{cor2cov}}, \code{\link{cov2tau}}
 }
 \keyword{TBD}

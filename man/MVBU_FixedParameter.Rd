@@ -130,6 +130,15 @@ with exposure, and the predictive likelihood is Normal with mean
 }
 }
 
+\examples{
+# Fix cognitive parameters
+fix_kappa <- fix_parameter(value = 10, class = "kappa_0")
+fix_nu <- fix_parameter(value = 5, class = "nu_0")
+fix_lapse <- fix_parameter(value = 0.02, class = "lapse_rate")
+
+# Combine fixed parameters
+c(fix_kappa, fix_nu, fix_lapse)
+}
 \seealso{
 \code{\link{prior}}, \code{\link{fit_ideal_adaptor}}
 }

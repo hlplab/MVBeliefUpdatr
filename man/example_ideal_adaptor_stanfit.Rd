@@ -13,6 +13,10 @@ example_ideal_adaptor_stanfit(
   file = NULL,
   file_refit = c("on_change", "never", "always"),
   stanmodel = NULL,
+  chains = 1L,
+  iter = 50L,
+  warmup = 25L,
+  refresh = 0L,
   ...
 )
 }
@@ -47,8 +51,17 @@ Defaults to \code{"MNIX_ideal_adaptor_ideal_integrator"} when
 \code{model_family == "MNIX"} and \code{"<model_family>_ideal_adaptor"}
 otherwise.}
 
+\item{chains}{Number of Markov chains. Default: 1L.}
+
+\item{iter}{Total number of iterations per chain. Default: 50L.}
+
+\item{warmup}{Number of warmup iterations per chain. Default: 25L.}
+
+\item{refresh}{Frequency of progress reports during sampling (0 disables).
+Default: 0L.}
+
 \item{...}{Additional arguments passed to \code{\link{fit_ideal_adaptor}}
-(e.g., sampler arguments such as \code{chains}, \code{iter},
+(e.g., sampler arguments such as
 \code{control = list(adapt_delta = 0.99)}).}
 }
 \value{
@@ -58,6 +71,16 @@ An object of class \code{\link{IdealAdaptorStanfit}}.
 Fits or loads a pre-fitted example \code{\link{IdealAdaptorStanfit}} model.
 If \code{file} is specified, the model is loaded from or saved to disk
 using \code{\link{fit_ideal_adaptor}} according to \code{file_refit}.
+}
+\examples{
+\donttest{
+# Fit a quick 1-cue NIX ideal adaptor (wrapped in \donttest for CRAN)
+fit <- example_ideal_adaptor_stanfit(
+  model_family = "NIX",
+  n_cues = 1
+)
+fit
+}
 }
 \seealso{
 \code{\link{example_ideal_adaptor_stanfit_input}},

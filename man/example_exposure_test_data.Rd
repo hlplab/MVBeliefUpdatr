@@ -60,6 +60,19 @@ condition tests the unshifted prior. Test locations form a regular grid
 spanning the category continuum and the adaptation shift (forming a
 parallelogram in 2D space), with simulated categorization responses.
 }
+\examples{
+# Generate small exposure and test experiment datasets
+exp_test <- example_exposure_test_data(
+  model_family = "NIX",
+  n_cues = 1,
+  n_exposure_per_category = 5L,
+  n_test_steps_category = 3L,
+  n_test_steps_adaptation = 2L,
+  n_test_tokens_per_location = 5L
+)
+head(exp_test$exposure)
+head(exp_test$test)
+}
 \seealso{
 \code{\link{example_ideal_adaptor_stanfit_input}},
 \code{\link{example_ideal_adaptor_staninput}},

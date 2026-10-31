@@ -9,12 +9,14 @@
 A tibble with 1,668 rows and 9 variables:
 \describe{
 \item{speaker}{Speaker identifier as a factor.}
-\item{sex}{Speaker sex as a factor with levels \code{"female"} and \code{"male"}.}
-\item{type}{Speaker demographic group as a factor with levels \code{"men"},
-\code{"women"}, \code{"boys"}, and \code{"girls"}.}
-\item{vowel}{Standardized Unicode IPA vowel label in phonemic slashes as a factor
-with 12 levels: \code{/æ/}, \code{/ɝ/}, \code{/ɑ/}, \code{/eɪ/}, \code{/ɛ/},
-\code{/i/}, \code{/ɪ/}, \code{/oʊ/}, \code{/ɔ/}, \code{/u/}, \code{/ʊ/}, \code{/ʌ/}.}
+\item{sex}{Speaker sex as a factor with levels \code{"female"} and
+\code{"male"}.}
+\item{type}{Speaker demographic group as a factor with levels
+\code{"men"}, \code{"women"}, \code{"boys"}, and \code{"girls"}.}
+\item{vowel}{Standardized Unicode IPA vowel label in phonemic slashes
+as a factor with 12 levels: \code{/æ/}, \code{/ɝ/}, \code{/ɑ/},
+\code{/eɪ/}, \code{/ɛ/}, \code{/i/}, \code{/ɪ/}, \code{/oʊ/},
+\code{/ɔ/}, \code{/u/}, \code{/ʊ/}, \code{/ʌ/}.}
 \item{f0}{Fundamental frequency in Hertz (Hz).}
 \item{f1}{First formant frequency in Hertz (Hz).}
 \item{f2}{Second formant frequency in Hertz (Hz).}
@@ -23,7 +25,8 @@ with 12 levels: \code{/æ/}, \code{/ɝ/}, \code{/ɑ/}, \code{/eɪ/}, \code{/ɛ/}
 }
 }
 \source{
-Standardized from \code{phonTools::h95} \insertCite{barreda2015}{MVBeliefUpdatr}.
+Standardized from \code{phonTools::h95}
+\insertCite{barreda2015}{MVBeliefUpdatr}.
 }
 \usage{
 data(h95)
@@ -31,8 +34,14 @@ data(h95)
 \description{
 Acoustic measurements of 12 American English vowels produced by men, women,
 boys, and girls in /h-V-d/ syllables. This dataset is a standardized copy of
-the dataset bundled in the \pkg{phonTools} package \insertCite{barreda2015}{MVBeliefUpdatr},
-originally published by \insertCite{hillenbrand1995;textual}{MVBeliefUpdatr}.
+the dataset bundled in the \pkg{phonTools} package
+\insertCite{barreda2015}{MVBeliefUpdatr}, originally published by
+\insertCite{hillenbrand1995;textual}{MVBeliefUpdatr}.
+}
+\examples{
+data(h95)
+head(h95)
+table(h95$type, h95$vowel)
 }
 \references{
 \insertRef{hillenbrand1995}{MVBeliefUpdatr}

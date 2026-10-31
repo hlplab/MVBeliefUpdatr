@@ -3,11 +3,22 @@
 %   R/S7-stanfit-methods.R
 \name{get_expected_category_statistic}
 \alias{get_expected_category_statistic}
+\alias{get_marginal_category_statistic}
 \alias{get_expected_category_statistic,MVBU_StanfitPosterior-method}
+\alias{get_marginal_category_statistic,MVBU_StanfitPosterior-method}
 \alias{get_expected_category_statistic,MVBU_Stanfit-method}
+\alias{get_marginal_category_statistic,MVBU_Stanfit-method}
 \title{Extract expected category statistics from an S7 model, representation, or fit object}
 \usage{
 get_expected_category_statistic(
+  x,
+  categories = NULL,
+  groups = NULL,
+  statistic = c("mu", "Sigma"),
+  ...
+)
+
+get_marginal_category_statistic(
   x,
   categories = NULL,
   groups = NULL,
@@ -24,8 +35,26 @@ get_expected_category_statistic(
   ...
 )
 
+## S7 method for class <MVBU_StanfitPosterior>
+get_marginal_category_statistic(
+  x,
+  categories = NULL,
+  groups = NULL,
+  statistic = c("mu", "Sigma"),
+  ...
+)
+
 ## S7 method for class <MVBU_Stanfit>
 get_expected_category_statistic(
+  x,
+  categories = NULL,
+  groups = NULL,
+  statistic = c("mu", "Sigma"),
+  ...
+)
+
+## S7 method for class <MVBU_Stanfit>
+get_marginal_category_statistic(
   x,
   categories = NULL,
   groups = NULL,
@@ -51,6 +80,12 @@ A numeric vector, matrix, or list of expected values.
 \description{
 Computes the expected value of category parameters such as mean vectors (\eqn{\mu}) or
 covariance/scatter matrices (\eqn{\Sigma} / \eqn{S}) under the model's distribution.
+}
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+get_expected_category_statistic(mod, statistic = "mu")
+get_expected_category_statistic(mod, statistic = "Sigma")
+get_marginal_category_statistic(mod, statistic = "mu")
 }
 \seealso{
 \code{\link{get_expected_mu}}, \code{\link{get_expected_sigma}}, \code{\link{get_marginal_category_statistic}}, \code{\link{get_parameters}}

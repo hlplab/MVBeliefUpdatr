@@ -39,6 +39,17 @@ NULL
 #' @seealso \code{\link{add_posterior_latents}}, \code{\link{fit_ideal_adaptor}},
 #'   \code{vignette("fitting-and-working-with-stanfit-models")}
 #'
+#' @examples
+#' # Instantiate an empty Stanfit container object
+#' fit <- MVBU_Stanfit()
+#' is(fit, "MVBU_Stanfit")
+#'
+#' \donttest{
+#' # Load a pre-compiled example Stanfit object
+#' ex_fit <- example_ideal_adaptor_stanfit()
+#' class(ex_fit)
+#' }
+#'
 #' @name MVBU_Stanfit
 #' @rdname MVBU_Stanfit
 #' @docType class

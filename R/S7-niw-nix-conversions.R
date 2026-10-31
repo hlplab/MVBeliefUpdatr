@@ -6,31 +6,66 @@ NULL
 # Conjugate NIW / NIX Parameter Conversions
 # -----------------------------------------------------------------------------
 
-#' Convert Between Scatter Matrix and Expected/Marginal Covariance Matrix
+#' Convert Between NIW/NIX Hyperparameters and Expected/Marginal Moments
 #'
-#' Functions to convert between the scatter matrix \eqn{S} and the expected or marginal
-#' covariance matrix \eqn{\Sigma} under a Normal-Inverse-Wishart (NIW) or
-#' Inverse-Wishart distribution \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
+#' Functions to convert between conjugate Normal-Inverse-Wishart (NIW) or
+#' Normal-Inverse-Chi-Squared (NIX) hyperparameters (\eqn{m, S}) and the
+#' expected or marginal distribution moments (\eqn{\mu, \Sigma})
+#' \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
 #'
 #' Under the NIW model with \eqn{D} dimensions, scatter matrix \eqn{S}, and
-#' degrees of freedom / pseudocounts \eqn{\nu > D + 1}, the expected covariance matrix is:
+#' degrees of freedom / pseudocounts \eqn{\nu > D + 1}, the expected
+#' covariance matrix is:
 #' \deqn{\Sigma = \frac{S}{\nu - D - 1}}
 #' Conversely, the scatter matrix is obtained from \eqn{\Sigma} by:
 #' \deqn{S = \Sigma \cdot (\nu - D - 1)}.
+#' For conjugate NIW and NIX models, the expected mean \eqn{\mu} is identically
+#' equal to the location parameter \eqn{m}:
+#' \deqn{\mu = m}
 #'
-#' @param S Scatter matrix \eqn{S} (numeric matrix, scalar, or list of matrices).
-#' @param Sigma Expected category covariance matrix \eqn{\Sigma} (numeric matrix, scalar, or list of matrices).
-#' @param nu Strength of belief (pseudocount) about \eqn{\Sigma} (\eqn{\nu > D + 1}).
+#' @param S Scatter matrix \eqn{S} (numeric matrix, scalar, or list of
+#'   matrices).
+#' @param Sigma Expected category covariance matrix \eqn{\Sigma} (numeric
+#'   matrix, scalar, or list of matrices).
+#' @param nu Strength of belief (pseudocount) about \eqn{\Sigma}
+#'   (\eqn{\nu > D + 1}).
 #' @param kappa Strength of belief (pseudocount) about \eqn{\mu}.
-#' @return Expected category covariance matrix \eqn{\Sigma = S / (\nu - D - 1)}, marginal
-#'   category covariance matrix \eqn{\Sigma = (\kappa + 1) / \kappa \cdot S / (\nu - D - 1)}, or
-#'   scatter matrix \eqn{S = \Sigma \cdot (\nu - D - 1)}. If the input was a list,
-#'   a list is returned; otherwise a matrix (or scalar for 1D) is returned.
+#' @param m Location hyperparameter \eqn{m} (numeric vector, matrix, or list).
+#' @param mu Expected category mean vector \eqn{\mu} (numeric vector, matrix,
+#'   or list).
+#' @return For \code{get_expected_Sigma_from_S}, the expected covariance
+#'   matrix \eqn{\Sigma = S / (\nu - D - 1)}. For
+#'   \code{get_S_from_expected_Sigma}, the scatter matrix
+#'   \eqn{S = \Sigma \cdot (\nu - D - 1)}. For
+#'   \code{get_marginal_Sigma_from_S}, the marginal category covariance matrix
+#'   \eqn{\Sigma = (\kappa + 1) / \kappa \cdot S / (\nu - D - 1)}. For
+#'   \code{get_expected_mu_from_m} and \code{get_m_from_expected_mu}, the
+#'   mean vector or location hyperparameter.
 #'
 #' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @seealso \code{\link{get_expected_sigma}}, \code{\link{get_expected_mu_from_m}}
+#' @seealso \code{\link{get_expected_sigma}}, \code{\link{get_expected_mu}}
 #' @rdname get_expected_Sigma_from_S
 #' @export
+#' @examples
+#' # 2D example
+#' S <- matrix(c(4, 1, 1, 3), nrow = 2)
+#' nu <- 10
+#' kappa <- 5
+#'
+#' # Convert scatter matrix to expected covariance matrix (D = 2)
+#' Sigma <- get_expected_Sigma_from_S(S, nu = nu)
+#' Sigma
+#'
+#' # Convert expected covariance matrix back to scatter matrix
+#' get_S_from_expected_Sigma(Sigma, nu = nu)
+#'
+#' # Marginal covariance matrix
+#' get_marginal_Sigma_from_S(S, nu = nu, kappa = kappa)
+#'
+#' # Mean and location conversions
+#' m <- c(0, 1)
+#' mu <- get_expected_mu_from_m(m)
+#' get_m_from_expected_mu(mu)
 get_expected_Sigma_from_S <- function(S, nu) {
   is_single <- !is.list(S)
   if (is_single) {
@@ -43,9 +78,19 @@ get_expected_Sigma_from_S <- function(S, nu) {
       if (is.null(S_i) || is.null(nu_i)) {
         return(NULL)
       }
-      D <- if (is.matrix(S_i)) ncol(S_i) else if (is.list(S_i)) ncol(as.matrix(S_i[[1L]])) else length(S_i)
+      D <- if (is.matrix(S_i)) {
+        ncol(S_i)
+      } else if (is.list(S_i)) {
+        ncol(as.matrix(S_i[[1L]]))
+      } else {
+        length(S_i)
+      }
       if (is.na(nu_i) || nu_i <= D + 1) {
-        if (is.matrix(S_i)) matrix(NA_real_, nrow = nrow(S_i), ncol = ncol(S_i)) else NA_real_
+        if (is.matrix(S_i)) {
+          matrix(NA_real_, nrow = nrow(S_i), ncol = ncol(S_i))
+        } else {
+          NA_real_
+        }
       } else {
         S_i / (nu_i - D - 1)
       }
@@ -74,7 +119,13 @@ get_S_from_expected_Sigma <- function(Sigma, nu) {
       if (is.null(Sigma_i) || is.null(nu_i)) {
         return(NULL)
       }
-      D <- if (is.matrix(Sigma_i)) ncol(Sigma_i) else if (is.list(Sigma_i)) ncol(as.matrix(Sigma_i[[1L]])) else length(Sigma_i)
+      D <- if (is.matrix(Sigma_i)) {
+        ncol(Sigma_i)
+      } else if (is.list(Sigma_i)) {
+        ncol(as.matrix(Sigma_i[[1L]]))
+      } else {
+        length(Sigma_i)
+      }
       Sigma_i * (nu_i - D - 1)
     },
     Sigma, nu,
@@ -103,7 +154,8 @@ get_marginal_Sigma_from_S <- function(S, nu, kappa) {
 
   Sigma_marg <- mapply(
     function(sig_i, kap_i) {
-      if (is.null(sig_i) || is.null(kap_i) || any(is.na(kap_i)) || any(kap_i <= 0)) {
+      if (is.null(sig_i) || is.null(kap_i) ||
+          any(is.na(kap_i)) || any(kap_i <= 0)) {
         return(sig_i)
       }
       ((as.numeric(kap_i)[1L] + 1) / as.numeric(kap_i)[1L]) * sig_i
@@ -118,40 +170,33 @@ get_marginal_Sigma_from_S <- function(S, nu, kappa) {
   }
 }
 
-#' Convert Between Location Hyperparameter and Expected Mean Vector
-#'
-#' Functions to convert between the prior/posterior location hyperparameter \eqn{m}
-#' and the expected category mean vector \eqn{\mu} under a Normal-Inverse-Wishart (NIW)
-#' or Normal-Inverse-Chi-Squared (NIX) distribution \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
-#'
-#' For conjugate NIW and NIX models, the expected mean \eqn{\mu} is identically equal
-#' to the location parameter \eqn{m}:
-#' \deqn{\mu = m}
-#'
-#' @param m Mean vector \eqn{m} (numeric vector, matrix, or list).
-#' @param mu Expected category mean vector \eqn{\mu} (numeric vector, matrix, or list).
-#' @return Expected category mean \eqn{\mu = m}, or location parameter \eqn{m = \mu}.
-#'
-#' @references \insertRef{murphy2012}{MVBeliefUpdatr}
-#' @seealso \code{\link{get_expected_mu}}, \code{\link{get_expected_Sigma_from_S}}
-#' @rdname get_expected_mu_from_m
+#' @rdname get_expected_Sigma_from_S
 #' @export
 get_expected_mu_from_m <- function(m) {
   if (!is.list(m)) {
     return(m)
   }
-  if (all(vapply(m, function(x) length(x) == 1L, logical(1L)))) mu <- unlist(m) else mu <- m
+  if (all(vapply(m, function(x) length(x) == 1L, logical(1L)))) {
+    mu <- unlist(m)
+  } else {
+    mu <- m
+  }
   if (length(mu) == 1L) mu <- mu[[1L]]
   mu
 }
 
-#' @rdname get_expected_mu_from_m
+#' @rdname get_expected_Sigma_from_S
 #' @export
 get_m_from_expected_mu <- function(mu) {
   if (!is.list(mu)) {
     return(mu)
   }
-  if (all(vapply(mu, function(x) length(x) == 1L, logical(1L)))) m <- unlist(mu) else m <- mu
+  if (all(vapply(mu, function(x) length(x) == 1L, logical(1L)))) {
+    m <- unlist(mu)
+  } else {
+    m <- mu
+  }
   if (length(m) == 1L) m <- m[[1L]]
   m
 }
+

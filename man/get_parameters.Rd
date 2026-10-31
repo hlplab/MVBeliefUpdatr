@@ -85,10 +85,18 @@ expanded, indexed, and post-processed/renamed parameter draw names (as
 returned by \code{names(stanfit)}). Default: \code{FALSE}.}
 }
 \value{
-A list, vector, matrix, data frame, or \code{\link{MVBU_Prior}} object.
+A list, vector, matrix, data frame, or \code{\link{MVBU_Prior}}
+object.
 }
 \description{
 Extract parameters, parameter names, or priors from objects
+}
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+get_parameters(mod)
+get_parameter_names(mod)
+get_expected_mu(mod)
+get_expected_sigma(mod)
 }
 \seealso{
 \code{\link{prior}}, \code{\link{get_data}}

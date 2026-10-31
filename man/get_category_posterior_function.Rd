@@ -49,3 +49,8 @@ A function that computes category posterior probabilities for one or more observ
 \description{
 Extract a category-posterior function from a cognitive model
 }
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+post_fn <- get_category_posterior_function(mod)
+post_fn(matrix(c(0, 0), nrow = 1))
+}

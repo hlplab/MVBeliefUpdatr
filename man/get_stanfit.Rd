@@ -33,12 +33,16 @@ set_stanfit(x, stanfit, ...)
 \item{stanfit}{An \link[rstan:stanfit]{rstan::stanfit} object.}
 }
 \value{
-The stored \link[rstan:stanfit]{rstan::stanfit} object when present.
-
-The updated S7 fit object.
+The stored \link[rstan:stanfit]{rstan::stanfit} object when present, or the updated
+S7 fit object.
 }
 \description{
 Get the stored Stan fit from an S7 fit object
-
-Set the stored Stan fit on an S7 fit object
+}
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+sf <- get_stanfit(fit)
+fit <- set_stanfit(fit, sf)
+}
 }

@@ -40,6 +40,14 @@ NULL
 #'     \item \code{"EXEMPLAR"}: Exemplar.
 #'   }
 #' @param ... Additional arguments passed to underlying constructors.
+#' @examples
+#' # 1D UVG category representation from bundled data
+#' uvg_rep <- example_uvg_category_representation()
+#' uvg_rep
+#'
+#' # 2D MVG ideal observer model from bundled data
+#' mvg_mod <- example_mvg_ideal_observer(n_cues = 2)
+#' mvg_mod
 #' @name example-s7-objects
 NULL
 
@@ -485,6 +493,18 @@ example_model <- function(type, n_cues = NULL, categories = NULL, ...) {
 #' @seealso \code{\link{example_ideal_adaptor_stanfit_input}},
 #'   \code{\link{example_ideal_adaptor_staninput}},
 #'   \code{\link{example_model}}
+#' @examples
+#' # Generate small exposure and test experiment datasets
+#' exp_test <- example_exposure_test_data(
+#'   model_family = "NIX",
+#'   n_cues = 1,
+#'   n_exposure_per_category = 5L,
+#'   n_test_steps_category = 3L,
+#'   n_test_steps_adaptation = 2L,
+#'   n_test_tokens_per_location = 5L
+#' )
+#' head(exp_test$exposure)
+#' head(exp_test$test)
 #' @export
 example_exposure_test_data <- function(
   model_family = c("NIW", "NIX", "MNIX"),
@@ -782,6 +802,17 @@ example_exposure_test_data <- function(
 #'
 #' @seealso \code{\link{example_exposure_test_data}},
 #'   \code{\link{new_ideal_adaptor_stanfit_input}}
+#' @examples
+#' # Generate Stanfit input from small synthetic data
+#' stan_input <- example_ideal_adaptor_stanfit_input(
+#'   model_family = "NIX",
+#'   n_cues = 1,
+#'   n_exposure_per_category = 5L,
+#'   n_test_steps_category = 3L,
+#'   n_test_steps_adaptation = 2L,
+#'   n_test_tokens_per_location = 5L
+#' )
+#' stan_input
 #' @rdname example_ideal_adaptor_stanfit_input
 #' @export
 example_ideal_adaptor_stanfit_input <- function(
@@ -873,14 +904,28 @@ example_ideal_adaptor_staninput <- function(
 #'   Defaults to \code{"MNIX_ideal_adaptor_ideal_integrator"} when
 #'   \code{model_family == "MNIX"} and \code{"<model_family>_ideal_adaptor"}
 #'   otherwise.
+#' @param chains Number of Markov chains. Default: 1L.
+#' @param iter Total number of iterations per chain. Default: 50L.
+#' @param warmup Number of warmup iterations per chain. Default: 25L.
+#' @param refresh Frequency of progress reports during sampling (0 disables).
+#'   Default: 0L.
 #' @param ... Additional arguments passed to \code{\link{fit_ideal_adaptor}}
-#'   (e.g., sampler arguments such as \code{chains}, \code{iter},
+#'   (e.g., sampler arguments such as
 #'   \code{control = list(adapt_delta = 0.99)}).
 #'
 #' @return An object of class \code{\link{IdealAdaptorStanfit}}.
 #'
 #' @seealso \code{\link{example_ideal_adaptor_stanfit_input}},
 #'   \code{\link{fit_ideal_adaptor}}
+#' @examples
+#' \donttest{
+#' # Fit a quick 1-cue NIX ideal adaptor (wrapped in \donttest for CRAN)
+#' fit <- example_ideal_adaptor_stanfit(
+#'   model_family = "NIX",
+#'   n_cues = 1
+#' )
+#' fit
+#' }
 #' @rdname example_ideal_adaptor_stanfit
 #' @export
 example_ideal_adaptor_stanfit <- function(
@@ -892,6 +937,10 @@ example_ideal_adaptor_stanfit <- function(
   file = NULL,
   file_refit = c("on_change", "never", "always"),
   stanmodel = NULL,
+  chains = 1L,
+  iter = 50L,
+  warmup = 25L,
+  refresh = 0L,
   ...
 ) {
   model_family <- match.arg(model_family)
@@ -907,7 +956,11 @@ example_ideal_adaptor_stanfit <- function(
     n_cues = n_cues,
     categories = categories,
     seed = seed,
-    control = staninput_control
+    control = staninput_control,
+    n_exposure_per_category = 5L,
+    n_test_steps_category = 3L,
+    n_test_steps_adaptation = 2L,
+    n_test_tokens_per_location = 5L
   )
   fit_ideal_adaptor(
     stanfit_input = stanfit_input,
@@ -915,6 +968,10 @@ example_ideal_adaptor_stanfit <- function(
     file_refit = file_refit,
     seed = seed,
     stanmodel = stanmodel,
+    chains = chains,
+    iter = iter,
+    warmup = warmup,
+    refresh = refresh,
     ...
   )
 }

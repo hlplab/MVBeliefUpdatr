@@ -115,6 +115,15 @@ declarations across parameter classes.
 
 Constructs a prior specification in the style of \pkg{brms}.
 }
+\examples{
+# Specify class-wide priors
+p1 <- prior("cauchy(0, 5)", class = "tau_0")
+p2 <- prior("lkj(1)", class = "cor_0")
+p3 <- prior("normal(0, 1)", class = "m_0")
+
+# Combine priors into a list
+c(p1, p2, p3)
+}
 \seealso{
 \code{\link{fit_ideal_adaptor}}, \code{\link{fix_parameter}}
 }

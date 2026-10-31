@@ -20,3 +20,9 @@ Default: \code{character(0)}.}
 \description{
 MVBeliefUpdatr Stan Input Classes and Constructors
 }
+\examples{
+# Instantiate an MVBU_Staninput container object
+inp <- MVBU_Staninput(values = list(N = 10L), family = "NIW")
+is(inp, "MVBU_Staninput")
+
+}

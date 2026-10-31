@@ -38,13 +38,15 @@ Defaults to \code{"category"}.}
 
 \item{cues}{Character vector of cue column names in \code{data}.}
 
-\item{...}{Additional model and family-specific parameters passed to constructors.
-For cognitive models, this includes \code{category_prior} (prior category probabilities),
-\code{decision_rule} (\code{"sampling"} or \code{"argmax"}), \code{lapse_rate} (scalar in \verb{[0, 1]}),
-\code{lapse_bias}, \code{Sigma_noise} (perceptual noise covariance), \code{noise_treatment}
-(\code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}), and \code{lapse_treatment}
-(\code{"no_lapses"}, \code{"sample"}, or \code{"marginalize"}). For specific representation families,
-this includes parameters such as \code{kappa}, \code{nu}, \code{m_0}, \code{S_0}, \code{c}, or \code{bandwidth}.}
+\item{...}{Additional model and family-specific parameters passed to
+constructors. For cognitive models, this includes \code{category_prior}
+(prior category probabilities), \code{decision_rule} (\code{"sampling"},
+\code{"criterion"}, or \code{"proportional"}), \code{lapse_rate} (scalar in \verb{[0, 1]}),
+\code{lapse_bias}, \code{Sigma_noise} (perceptual noise covariance),
+\code{noise_treatment} (\code{"no_noise"}, \code{"sample"}, or \code{"marginalize"}), and
+\code{lapse_treatment} (\code{"no_lapses"}, \code{"sample"}, or \code{"marginalize"}). For
+specific representation families, this includes parameters such as
+\code{kappa_0}, \code{nu_0}, \code{m_0}, \code{S_0}, \code{c}, or \code{bandwidth}.}
 }
 \value{
 An S7 representation, template, or cognitive model object.
@@ -52,6 +54,41 @@ An S7 representation, template, or cognitive model object.
 \description{
 Dynamic constructors that inspect the input \code{type} (or \code{family}) argument
 and dispatch to the appropriate family-specific constructor from data.
+}
+\examples{
+df <- data.frame(
+  category = c("A", "A", "B", "B"),
+  x = c(1, 2, 5, 6),
+  y = c(2, 1, 6, 5)
+)
+
+# Create an MVG category representation for category "A"
+cat_a <- new_category_representation_from_data(
+  df[df$category == "A", ],
+  type = "MVG",
+  category = "category",
+  cues = c("x", "y")
+)
+cat_a
+
+# Create a full category template from data
+tpl <- new_category_representation_template_from_data(
+  df,
+  type = "MVG",
+  category = "category",
+  cues = c("x", "y")
+)
+tpl
+
+# Create a full cognitive model from data
+mod <- new_model_from_data(
+  df,
+  type = "MVG",
+  category = "category",
+  cues = c("x", "y")
+)
+mod
+
 }
 \seealso{
 \link{family-uvg}, \link{family-nix}, \link{family-muvg}, \link{family-mnix},

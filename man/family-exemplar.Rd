@@ -89,8 +89,8 @@ c = \frac{1}{2 h^2}}}
 \item{category_template}{An \link{MVBU_CategoryRepresentationTemplate} object
 containing Exemplar category representations.}
 
-\item{decision_rule}{Categorization decision rule: \code{"sampling"} or
-\code{"argmax"}. Defaults to \code{"sampling"}.}
+\item{decision_rule}{Categorization decision rule: \code{"sampling"},
+\code{"criterion"}, or \code{"proportional"}. Defaults to \code{"sampling"}.}
 
 \item{category_prior}{Optional numeric vector of prior category
 probabilities summing to 1. Defaults to equal priors.}
@@ -223,6 +223,31 @@ which asymptotically minimizes the Mean Integrated Squared Error (MISE)
 to the true category distribution.
 }
 }
+\examples{
+# Create an exemplar category representation from numeric points
+pts <- matrix(c(1, 2, 1.5, 2.5), nrow = 2, byrow = TRUE)
+cat_rep <- new_exemplar_category_representation(
+  category_labels = "A",
+  cue_labels = c("cue1", "cue2"),
+  exemplars = pts,
+  c = 1.0
+)
+cat_rep
+
+# Create an exemplar model from data
+df <- data.frame(
+  category = c("A", "A", "B", "B"),
+  x = c(1, 2, 5, 6),
+  y = c(2, 1, 6, 5)
+)
+mod <- new_exemplar_model_from_data(
+  df,
+  category = "category",
+  cues = c("x", "y")
+)
+mod
+
+}
 \references{
 \insertRef{nosofsky1986}{MVBeliefUpdatr}
 
@@ -231,8 +256,6 @@ to the true category distribution.
 \insertRef{ashby1995}{MVBeliefUpdatr}
 
 \insertRef{kruschke1992}{MVBeliefUpdatr}
-
-\insertRef{shi2010}{MVBeliefUpdatr}
 }
 \seealso{
 \link{family-mvg}, \link{family-uvg}

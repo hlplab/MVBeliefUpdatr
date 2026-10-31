@@ -14,6 +14,18 @@ NULL
 #' @return Invisibly `TRUE` if the assertion passes.
 #' @rdname assert_mvbu_s7_classes
 #' @export
+#' @examples
+#' # Assert that an object inherits from MVBU_CategoryRepresentation
+#' rep <- example_niw_category_representation(n_cues = 2)
+#' assert_MVBU_CategoryRepresentation(rep)
+#'
+#' # Assert that an object inherits from MVBU_CognitiveModel
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' assert_MVBU_CognitiveModel(mod)
+#'
+#' # Assert that an object inherits from IdealAdaptorStanfitInput
+#' sfi <- example_ideal_adaptor_stanfit_input()
+#' assert_IdealAdaptorStanfitInput(sfi)
 assert_MVBU_CategoryRepresentation <- function(x, msg = NULL) {
   .assert_true(
     S7::S7_inherits(x, MVBU_CategoryRepresentation),

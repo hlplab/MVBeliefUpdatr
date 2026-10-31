@@ -2,7 +2,7 @@
 % Please edit documentation in R/to-array.R
 \name{to_array}
 \alias{to_array}
-\title{Convert atomic values or lists into arrays with explicit inner/outer dimensions}
+\title{Convert atomic values or lists into arrays with inner/outer dimensions}
 \usage{
 to_array(
   x,
@@ -15,18 +15,29 @@ to_array(
 \arguments{
 \item{x}{Input value. Can be atomic, list, or NULL.}
 
-\item{inner_dims}{Integer vector describing the inner dimensions of the array.}
+\item{inner_dims}{Integer vector describing the inner dimensions of the
+array.}
 
-\item{outer_dims}{Integer vector describing the outer dimensions of the array.}
+\item{outer_dims}{Integer vector describing the outer dimensions of the
+array.}
 
 \item{dimnames}{Optional dimnames for the resulting array.}
 
-\item{simplify}{Logical controlling whether inner dimensions of length 1 are simplified.}
+\item{simplify}{Logical controlling whether inner dimensions of length 1 are
+simplified.}
 }
 \value{
 An array.
 }
 \description{
-This helper is used to shape prior information and other Stan inputs into the
-dimensionality expected by the Stan programs.
+This helper is used to shape prior information and other Stan inputs into
+the dimensionality expected by the Stan programs.
+}
+\examples{
+# Convert a vector into an array with outer dimension 3
+to_array(c(1, 2), inner_dims = 2, outer_dims = 3)
+
+# Convert a list of matrices into an array
+mat_list <- list(matrix(1:4, 2, 2), matrix(5:8, 2, 2))
+to_array(mat_list, inner_dims = c(2, 2), outer_dims = 2)
 }

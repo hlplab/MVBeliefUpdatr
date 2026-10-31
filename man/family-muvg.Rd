@@ -80,8 +80,8 @@ cue components.}
 \item{category_template}{An \link{MVBU_CategoryRepresentationTemplate} object
 containing MUVG category representations.}
 
-\item{decision_rule}{Categorization decision rule: \code{"sampling"} or
-\code{"argmax"}. Defaults to \code{"sampling"}.}
+\item{decision_rule}{Categorization decision rule: \code{"sampling"},
+\code{"criterion"}, or \code{"proportional"}. Defaults to \code{"sampling"}.}
 
 \item{category_prior}{Optional numeric vector of prior category
 probabilities summing to 1. Defaults to equal priors.}
@@ -142,6 +142,24 @@ Under conditional cue independence and integrated cue
 \eqn{z = \sum_i w_i x_i}, the category likelihood is:
 \deqn{p(z \mid c) = \mathcal{N}\!\left(z;\; \sum_i w_i \mu_i,\;
 \sum_i w_i^2 \sigma_i^2\right)}
+}
+\examples{
+# MUVG: Multivariate independent Gaussian (diagonal covariance)
+mu_b <- c(VOT = 10, f0 = 200)
+sigma2_b <- c(VOT = 25, f0 = 36)
+rep_b <- new_muvg_category_representation(
+  category_labels = "/b/", cue_labels = c("VOT", "f0"),
+  mu = mu_b, sigma2 = sigma2_b
+)
+mu_d <- c(VOT = 50, f0 = 240)
+sigma2_d <- c(VOT = 25, f0 = 36)
+rep_d <- new_muvg_category_representation(
+  category_labels = "/d/", cue_labels = c("VOT", "f0"),
+  mu = mu_d, sigma2 = sigma2_d
+)
+tmpl <- new_category_representation_template(list(rep_b, rep_d))
+m_muvg <- new_muvg_ideal_observer(category_template = tmpl)
+m_muvg
 }
 \seealso{
 \link{family-mnix}, \link{family-mvg}, \link{family-uvg}

@@ -4,6 +4,9 @@
 \name{reexports}
 \alias{reexports}
 \alias{pp_check}
+\alias{loo}
+\alias{waic}
+\alias{loo_compare}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -12,5 +15,7 @@ below to see their documentation.
 
 \describe{
   \item{bayesplot}{\code{\link[bayesplot:pp_check]{pp_check()}}}
+
+  \item{loo}{\code{\link[loo:loo]{loo()}}, \code{\link[loo:loo_compare]{loo_compare()}}, \code{\link[loo:waic]{waic()}}}
 }}
 

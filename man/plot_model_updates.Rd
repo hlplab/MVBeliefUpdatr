@@ -87,3 +87,8 @@ Visualizes how category representations or decision surfaces evolve across updat
 steps (for sequential model lists / \code{update_template()} outputs) or across MCMC
 prior-to-posterior transitions (for \code{MVBU_Stanfit} objects).
 }
+\examples{
+m1 <- example_mvg_ideal_observer()
+m2 <- example_mvg_ideal_observer()
+plot_model_updates(list("Initial" = m1, "Updated" = m2), what = "categories")
+}

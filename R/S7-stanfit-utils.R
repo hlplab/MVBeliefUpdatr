@@ -189,18 +189,34 @@ NULL
 # Read and Write Functions
 # -------------------------------------------------------------------------
 
-#' Read a cached Stanfit object from disk
+#' Read and write cached Stanfit objects to disk
 #'
-#' Reads a previously saved \code{\link{MVBU_Stanfit}} object (or subclass such as
-#' \code{\link{IdealAdaptorStanfit}}) from an RDS file.
+#' Reads or saves a previously fitted \code{\link{MVBU_Stanfit}} object (or
+#' subclass such as \code{\link{IdealAdaptorStanfit}}) from or to an RDS file.
 #'
 #' @param file File path to the cached fit. If the file extension is omitted,
 #'   \code{.rds} is appended automatically.
+#' @param x An object inheriting from \code{\link{MVBU_Stanfit}}.
+#' @param compress Logical or character string specifying compression passed
+#'   to \code{\link{saveRDS}} (default: \code{TRUE}).
 #'
-#' @return The loaded \code{\link{MVBU_Stanfit}} object with its \code{@file}
-#'   slot updated, or \code{NULL} if the file does not exist or cannot be read.
+#' @return For \code{read_stanfit}, the loaded \code{\link{MVBU_Stanfit}} object
+#'   with its \code{@file} slot updated, or \code{NULL} if the file does not
+#'   exist or cannot be read. For \code{write_stanfit}, the saved object
+#'   \code{x} invisibly with its \code{@file} slot updated.
 #'
-#' @seealso \code{\link{write_stanfit}}, \code{\link{fit_ideal_adaptor}}
+#' @seealso \code{\link{fit_ideal_adaptor}}
+#' @examples
+#' \donttest{
+#' fit <- example_ideal_adaptor_stanfit()
+#' tmp <- tempfile(fileext = ".rds")
+#' write_stanfit(fit, tmp)
+#' fit_loaded <- read_stanfit(tmp)
+#' is(fit_loaded, "MVBU_Stanfit")
+#' unlink(tmp)
+#' }
+#' @name read_stanfit
+#' @rdname read_stanfit
 #' @export
 read_stanfit <- function(file) {
   file <- .check_stanfit_file(file)
@@ -216,19 +232,20 @@ read_stanfit <- function(file) {
     S7::S7_inherits(x, MVBU_Stanfit),
     msg = paste0(
       "Object loaded from '", file, "' is not an MVBU_Stanfit object. ",
-      "This indicates that it was fit with an outdated version of MVBeliefUpdatr and needs to be refit."
+      "This indicates that it was fit with an outdated version of ",
+      "MVBeliefUpdatr and needs to be refit."
     )
   )
-
 
   if (S7::S7_inherits(x, IdealAdaptorStanfit)) {
     label_info <- try(x@metadata$label_information, silent = TRUE)
     .assert_true(
       !is.null(label_info) && is.list(label_info) &&
-        !is.null(label_info$cue) && !is.null(label_info$category) && !is.null(label_info$group),
+        !is.null(label_info$cue) && !is.null(label_info$category) &&
+        !is.null(label_info$group),
       msg = paste0(
-        "Object loaded from '", file, "' is missing label_information in metadata. ",
-        "Please refit the model."
+        "Object loaded from '", file, "' is missing label_information in ",
+        "metadata. Please refit the model."
       )
     )
   }
@@ -237,20 +254,7 @@ read_stanfit <- function(file) {
   x
 }
 
-#' Write a fitted Stanfit object to disk
-#'
-#' Saves an \code{\link{MVBU_Stanfit}} object (or subclass) to disk via \code{\link{saveRDS}},
-#' and records the target file path in the object's \code{@file} slot.
-#'
-#' @param x An object inheriting from \code{\link{MVBU_Stanfit}}.
-#' @param file File path for saving the object. If the file extension is omitted,
-#'   \code{.rds} is appended automatically.
-#' @param compress Logical or character string specifying compression passed
-#'   to \code{\link{saveRDS}} (default: \code{TRUE}).
-#'
-#' @return The saved object \code{x} invisibly, with \code{@file} updated.
-#'
-#' @seealso \code{\link{read_stanfit}}, \code{\link{fit_ideal_adaptor}}
+#' @rdname read_stanfit
 #' @export
 write_stanfit <- function(x, file, compress = TRUE) {
   .assert_true(

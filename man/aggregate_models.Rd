@@ -10,9 +10,9 @@ aggregate(x, ...)
 aggregate_models(models, weights = NULL, ...)
 }
 \arguments{
-\item{x}{An S7 representation, template, cognitive model, or list of such objects.
-When \code{x} is not an S7 object or list of S7 objects, dispatch falls back to
-\code{\link[stats]{aggregate}}.}
+\item{x}{An S7 representation, template, cognitive model, or list of such
+objects. When \code{x} is not an S7 object or list of S7 objects, dispatch falls
+back to \code{\link[stats]{aggregate}}.}
 
 \item{...}{Additional S7 objects of the same class (for variadic usage of
 \code{aggregate}) or arguments passed to methods.}
@@ -70,6 +70,23 @@ Aggregation operates hierarchically depending on the class of the input:
 \emph{Cognitive Model} \tab \code{lapse_treatment} \tab Inherited from first model \cr
 }
 }
+}
+\examples{
+m1 <- example_mvg_ideal_observer(n_cues = 2)
+m2 <- example_mvg_ideal_observer(n_cues = 2)
+aggregate(m1, m2, weights = c(0.5, 0.5))
+# Create two simple UVG models
+rep1 <- new_uvg_category_representation("A", "cue1", mu = 1, sigma2 = 1)
+rep2 <- new_uvg_category_representation("A", "cue1", mu = 3, sigma2 = 1)
+tpl1 <- new_category_representation_template(list(rep1))
+tpl2 <- new_category_representation_template(list(rep2))
+mod1 <- new_uvg_ideal_observer(tpl1)
+mod2 <- new_uvg_ideal_observer(tpl2)
+
+# Aggregate the models with equal weights
+agg_mod <- aggregate_models(list(mod1, mod2), weights = c(0.5, 0.5))
+agg_mod
+
 }
 \seealso{
 \code{\link{new_mvg_ideal_observer}},

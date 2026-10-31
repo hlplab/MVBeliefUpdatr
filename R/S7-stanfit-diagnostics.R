@@ -23,6 +23,15 @@ NULL
 #' @details For more details see
 #'   [bayesplot::bayesplot-extractors].
 #'
+#' @examples
+#' \donttest{
+#' fit <- example_ideal_adaptor_stanfit()
+#' lp <- log_posterior(fit)
+#' head(lp)
+#' r <- rhat(fit)
+#' head(r)
+#' }
+#'
 #' @name diagnostic-quantities
 #' @aliases log_posterior nuts_params rhat neff_ratio
 #' @export log_posterior

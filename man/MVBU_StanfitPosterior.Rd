@@ -38,3 +38,15 @@ distributions without carrying sampling chains, diagnostics, or raw model
 source structures, and is thus more lightweight than the \link{MVBU_Stanfit}
 class.
 }
+\examples{
+# Construct a lightweight StanfitPosterior object
+post <- MVBU_StanfitPosterior()
+post
+
+\donttest{
+# Coerce from a fitted Stan model
+fit <- example_ideal_adaptor_stanfit()
+post <- as_MVBU_stanfit_posterior(fit)
+post
+}
+}

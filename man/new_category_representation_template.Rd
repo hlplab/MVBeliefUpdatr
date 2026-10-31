@@ -19,3 +19,15 @@ An object of class \code{MVBU_CategoryRepresentationTemplate}.
 \description{
 Construct an MVBU Category Representation Template
 }
+\examples{
+rep_b <- new_uvg_category_representation(
+  category_labels = "/b/", cue_labels = "VOT",
+  mu = 10, sigma2 = 25
+)
+rep_d <- new_uvg_category_representation(
+  category_labels = "/d/", cue_labels = "VOT",
+  mu = 50, sigma2 = 25
+)
+tmpl <- new_category_representation_template(list(rep_b, rep_d))
+tmpl
+}

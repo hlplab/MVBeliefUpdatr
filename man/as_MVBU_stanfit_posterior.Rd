@@ -29,3 +29,9 @@ Extracts posterior draws of category representation parameters and creates a
 lightweight, self-contained \link{MVBU_StanfitPosterior} object suitable for rapid
 categorization and visualization without retaining the full Stan sampling engine.
 }
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+post <- as_MVBU_stanfit_posterior(fit)
+}
+}

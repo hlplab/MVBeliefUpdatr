@@ -3,8 +3,10 @@ NULL
 
 #' Infer default noise treatment from perceptual noise covariance
 #'
-#' @param Sigma_noise Perceptual noise matrix, scalar, or list of noise matrices.
-#' @return A character scalar: `"marginalize"` if noise is present, `"no_noise"` otherwise.
+#' @param Sigma_noise Perceptual noise matrix, scalar, or list of noise
+#'   matrices.
+#' @return A character scalar: `"marginalize"` if noise is present, `"no_noise"`
+#'   otherwise.
 #' @keywords internal
 #' @noRd
 .infer_noise_treatment <- function(Sigma_noise) {
@@ -12,14 +14,20 @@ NULL
     return("no_noise")
   }
   if (is.list(Sigma_noise)) {
-    if (length(Sigma_noise) == 0L || any(vapply(Sigma_noise, is.null, logical(1)))) {
+    if (length(Sigma_noise) == 0L ||
+        any(vapply(Sigma_noise, is.null, logical(1)))) {
       return("no_noise")
     }
-    if (all(vapply(Sigma_noise, function(m) is.numeric(m) && (length(m) == 0L || all(m == 0)), logical(1)))) {
+    if (all(vapply(
+      Sigma_noise,
+      function(m) is.numeric(m) && (length(m) == 0L || all(m == 0)),
+      logical(1)
+    ))) {
       return("no_noise")
     }
   }
-  if (is.numeric(Sigma_noise) && (length(Sigma_noise) == 0L || all(Sigma_noise == 0))) {
+  if (is.numeric(Sigma_noise) &&
+      (length(Sigma_noise) == 0L || all(Sigma_noise == 0))) {
     return("no_noise")
   }
   "marginalize"
@@ -28,11 +36,13 @@ NULL
 #' Infer default lapse treatment from lapse rate
 #'
 #' @param lapse_rate Lapse rate scalar or numeric vector.
-#' @return A character scalar: `"marginalize"` if `lapse_rate > 0`, `"no_lapses"` otherwise.
+#' @return A character scalar: `"marginalize"` if `lapse_rate > 0`,
+#'   `"no_lapses"` otherwise.
 #' @keywords internal
 #' @noRd
 .infer_lapse_treatment <- function(lapse_rate) {
-  if (is.null(lapse_rate) || length(lapse_rate) == 0L || !is.numeric(lapse_rate)) {
+  if (is.null(lapse_rate) || length(lapse_rate) == 0L ||
+      !is.numeric(lapse_rate)) {
     return("no_lapses")
   }
   if (any(lapse_rate > 0)) {
@@ -44,8 +54,8 @@ NULL
 
 #' Get sum-of-squares matrix
 #'
-#' Calculate centered (\code{css()}) or uncentered (\code{uss()}) sum-of-squares
-#' matrix for a matrix of observations.
+#' Calculate centered (\code{css()}) or uncentered (\code{uss()})
+#' sum-of-squares matrix for a matrix of observations.
 #'
 #' @param x A matrix of observations, with each row being a vector observation.
 #'
@@ -54,6 +64,12 @@ NULL
 #' @seealso \code{\link{css2cov}}, \code{\link{cov2css}}, \code{\link{uss2css}}
 #' @rdname css
 #' @export
+#' @examples
+#' x <- matrix(rnorm(20), nrow = 10, ncol = 2)
+#' # Centered sum-of-squares matrix
+#' css(x)
+#' # Uncentered sum-of-squares matrix
+#' uss(x)
 css <- function(x) {
   .ss(x, center = TRUE)
 }
@@ -98,21 +114,46 @@ uss <- function(x) {
 
 #' Convert sum-of-square and covariance matrices
 #'
-#' Convert centered sum-of-square matrices (css), uncentered sum-of-square matrices (uss),
-#' and covariance matrices (cov) into each other.
+#' Convert centered sum-of-square matrices (css), uncentered sum-of-square
+#' matrices (uss), and covariance matrices (cov) into each other.
 #'
-#' @param uss,css,cov Uncentered sum-of-square, centered sum-of-square, and covariance matrix.
-#' @param n Number of observations that have gone into the sum-of-square matrix.
-#' @param mean Mean of the observations that have gone into the sum-of-square matrix.
+#' @param uss,css,cov Uncentered sum-of-square, centered sum-of-square, and
+#'   covariance matrix.
+#' @param n Number of observations that have gone into the sum-of-square
+#'   matrix.
+#' @param mean Mean of the observations that have gone into the sum-of-square
+#'   matrix.
 #'
 #' @return A square matrix.
 #'
-#' @seealso \code{\link{css}}, \code{\link{uss}}, \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}, \code{\link{cov2tau}}
+#' @seealso \code{\link{css}}, \code{\link{uss}}, \code{\link[stats]{cov2cor}},
+#'   \code{\link{cor2cov}}, \code{\link{cov2tau}}
 #' @keywords TBD
 #'
 #' @rdname uss2css
 #' @importFrom LaplacesDemon is.positive.semidefinite
 #' @export
+#' @examples
+#' x <- matrix(rnorm(20), nrow = 10, ncol = 2)
+#' n <- nrow(x)
+#' m <- colMeans(x)
+#' u <- uss(x)
+#' c_mat <- css(x)
+#'
+#' # Convert uncentered sum-of-squares to centered sum-of-squares
+#' uss2css(u, n = n, mean = m)
+#'
+#' # Convert centered sum-of-squares to covariance matrix
+#' css2cov(c_mat, n = n)
+#'
+#' # Convert covariance matrix back to centered sum-of-squares
+#' cov2css(cov(x), n = n)
+#'
+#' # Convert centered sum-of-squares back to uncentered
+#' css2uss(c_mat, n = n, mean = m)
+#'
+#' # Convert uncentered sum-of-squares directly to covariance
+#' uss2cov(u, n = n, mean = m)
 uss2css <- function(uss, n, mean) {
   .assert_numeric(uss, msg = "uss must be a numeric matrix.")
   if (.is_scalar(uss)) uss <- matrix(uss, nrow = 1, ncol = 1)
@@ -213,19 +254,31 @@ cov2css <- function(cov, n) {
 
 #' Get covariance matrix from correlation matrix and standard deviations
 #'
-#' Get covariance matrix from correlation matrix and vector of standard deviations. Based on code recommended
-#' by Ben Bolder for efficiency.
+#' Convert between a correlation matrix with standard deviations and a
+#' covariance matrix.
 #'
 #' @param omega A correlation matrix.
 #' @param tau A vector of standard deviations.
+#' @param v A covariance matrix.
 #'
-#' @return A square matrix.
+#' @return For \code{cor2cov}, a covariance matrix. For \code{cov2tau}, a
+#'   numeric vector of standard deviations.
 #'
-#' @seealso [stats::cov2cor], \code{\link{cov2tau}}
-#' @references \url{https://stats.stackexchange.com/questions/62850/obtaining-covariance-matrix-from-correlation-matrix}
+#' @seealso [stats::cov2cor], \code{\link{cor2cov}}, \code{\link{cov2tau}}
+#' @references
+#'   \url{https://stats.stackexchange.com/questions/62850/obtaining-covariance-matrix-from-correlation-matrix}
 #' @keywords TBD
-#'
+#' @rdname cor2cov
 #' @export
+#' @examples
+#' omega <- matrix(c(1, 0.5, 0.5, 1), nrow = 2)
+#' tau <- c(2, 3)
+#' # Correlation matrix + standard deviations to covariance matrix
+#' Sigma <- cor2cov(omega, tau)
+#' Sigma
+#'
+#' # Extract standard deviations from covariance matrix
+#' cov2tau(Sigma)
 cor2cov <- function(omega, tau) {
   .assert_that(is.matrix(omega))
   .assert_that(is.numeric(tau))
@@ -239,17 +292,7 @@ cor2cov <- function(omega, tau) {
   outer(tau, tau) * omega
 }
 
-#' Get vector of standard deviations from covariance matrix
-#'
-#' Get vector of standard deviations from covariance matrix.
-#'
-#' @param v A covariance matrix.
-#'
-#' @return A numeric vector.
-#'
-#' @seealso [stats::cov2cor], \code{\link{cor2cov}}
-#' @keywords TBD
-#'
+#' @rdname cor2cov
 #' @export
 cov2tau <- function(v) {
   .assert_that(is.matrix(v))
@@ -280,9 +323,16 @@ cov2tau <- function(v) {
 #' @return If \code{simplify = TRUE} and a single statistic is selected for a
 #'   single category and group, the atomic numeric value, vector, or matrix.
 #'   Otherwise, a \code{tibble} with the grouping columns and requested
-#'   statistics.
 #' @seealso \code{\link{get_exposure_category_statistics}}
 #' @export
+#' @examples
+#' # Example with synthetic phonetic data
+#' df <- data.frame(
+#'   category = rep(c("b", "p"), each = 20),
+#'   vot = c(rnorm(20, 0, 10), rnorm(20, 50, 10)),
+#'   f0 = c(rnorm(20, 200, 20), rnorm(20, 240, 20))
+#' )
+#' get_sufficient_category_statistics(df, cues = c("vot", "f0"))
 get_sufficient_category_statistics <- function(
   data,
   cues,
@@ -503,23 +553,35 @@ get_sufficient_category_statistics <- function(
 #' Get affine transformation
 #'
 #' Computes an affine transformation for a set of \code{cues} in \code{data}.
-#' Returns an \code{\link{MVBU_TransformInformation}} object representing a linear map
-#' \eqn{f(x) = A(x + b)}, where \eqn{b} is the shift vector and \eqn{A} is the scale/rotation matrix.
+#' Returns an \code{\link{MVBU_TransformInformation}} object representing a
+#' linear map \eqn{f(x) = A(x + b)}, where \eqn{b} is the shift vector and
+#' \eqn{A} is the scale/rotation matrix.
 #'
 #' @param data A \code{tibble} or \code{data.frame}.
-#' @param cues A character vector of column names in \code{data} that should be transformed.
-#' @param type The type of transformation to apply. Can be one of \code{"identity"},
-#'   \code{"center"}, \code{"standardize"}, \code{"PCA whiten"}, or \code{"ZCA whiten"}.
-#'   Except for the identity transform, all transforms center. Standardize additionally
-#'   divides by the standard deviations. PCA whitening rotates the data into the space
-#'   of principal components with unit variance. ZCA whitening achieves unit variance
-#'   while maintaining original orientation as close as possible.
+#' @param cues A character vector of column names in \code{data} that should be
+#'   transformed.
+#' @param type The type of transformation to apply. Can be one of
+#'   \code{"identity"}, \code{"center"}, \code{"standardize"},
+#'   \code{"PCA whiten"}, or \code{"ZCA whiten"}. Except for the identity
+#'   transform, all transforms center. Standardize additionally divides by the
+#'   standard deviations. PCA whitening rotates the data into the space of
+#'   principal components with unit variance. ZCA whitening achieves unit
+#'   variance while maintaining original orientation as close as possible.
 #'   (default: \code{"identity"})
 #'
-#' @return An \code{\link{MVBU_TransformInformation}} object that can be used to transform
-#' data or models.
+#' @return An \code{\link{MVBU_TransformInformation}} object that can be used to
+#'   transform data or models.
 #'
 #' @export
+#' @examples
+#' df <- data.frame(
+#'   vot = rnorm(50, 20, 10),
+#'   f0 = rnorm(50, 220, 25)
+#' )
+#' # Standardize transformation
+#' trans <- get_affine_transform(df, cues = c("vot", "f0"),
+#'                               type = "standardize")
+#' trans
 get_affine_transform <- function(
   data,
   cues,
@@ -584,22 +646,45 @@ get_affine_transform <- function(
 #' Transform and untransform means, covariances, and cognitive models
 #'
 #' Applies an affine (linear) transformation specified in an
-#' \code{\link{MVBU_TransformInformation}} object (from \code{\link{get_affine_transform}})
-#' to a mean vector, covariance matrix, or within an S7 cognitive model.
+#' \code{\link{MVBU_TransformInformation}} object (from
+#' \code{\link{get_affine_transform}}) to a mean vector, covariance matrix, or
+#' within an S7 cognitive model.
 #'
-#' Gaussian and Normal-Inverse-Wishart distributions transform analytically under
-#' affine maps \eqn{y = A(x + b)}:
+#' Gaussian and Normal-Inverse-Wishart distributions transform analytically
+#' under affine maps \eqn{y = A(x + b)}:
 #' \deqn{\mu' = A(\mu + b), \quad \Sigma' = A \Sigma A^T}
 #'
 #' @param model An \code{\link{MVBU_CognitiveModel}} object.
 #' @param m A mean vector (or scalar for univariate representations).
-#' @param S A covariance matrix (or scalar variance for univariate representations).
+#' @param S A covariance matrix (or scalar variance for univariate
+#'   representations).
 #' @param transform An \code{\link{MVBU_TransformInformation}} object.
 #'
-#' @return A model, mean vector, or covariance matrix of the same class as the input.
+#' @return A model, mean vector, or covariance matrix of the same class as the
+#'   input.
 #'
 #' @rdname transform_model
 #' @export
+#' @examples
+#' df <- data.frame(vot = rnorm(30, 20, 10), f0 = rnorm(30, 220, 25))
+#' trans <- get_affine_transform(df, cues = c("vot", "f0"),
+#'                               type = "standardize")
+#'
+#' # Transform mean vector and covariance matrix
+#' m <- c("vot" = 20, "f0" = 220)
+#' S <- matrix(c(100, 20, 20, 625), nrow = 2,
+#'             dimnames = list(c("vot", "f0"), c("vot", "f0")))
+#' m_trans <- transform_mean(m, trans)
+#' S_trans <- transform_cov(S, trans)
+#'
+#' # Untransform back to original space
+#' untransform_mean(m_trans, trans)
+#' untransform_cov(S_trans, trans)
+#'
+#' # Transform an entire cognitive model
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' mod_trans <- transform_model(mod, trans)
+#' untransform_model(mod_trans, trans)
 transform_model <- function(model, transform) {
   if (!S7::S7_inherits(model, MVBU_CognitiveModel)) {
     stop("model must be an MVBU_CognitiveModel object.")

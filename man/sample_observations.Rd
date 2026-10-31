@@ -45,6 +45,10 @@ a multi-category template, or a complete cognitive model.
 \item For cognitive models (\code{\link{MVBU_CognitiveModel}}), samples \eqn{n} total observations distributed across categories proportionally to the model's \code{category_prior}.
 }
 }
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+sample_observations(mod, n = 5)
+}
 \seealso{
 \code{\link{plot_categories}}, \code{\link{likelihood}}, \code{\link{posterior}}
 }

@@ -61,3 +61,9 @@ An \link{MVBU_ModelList} object.
 Reconstructs sequential cognitive model states or prior-to-posterior update checkpoints
 into an \link{MVBU_ModelList}.
 }
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+hist <- reconstruct_update_history(fit, ndraws = 2)
+}
+}

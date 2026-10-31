@@ -40,11 +40,18 @@ control_staninput <- function(
 #'   object. Default: \code{NULL}.
 #' @param metadata A named \code{list} containing \code{label_information}.
 #'   Default: \code{list()}.
-#'
 #' @name MVBU_StanfitInput
 #' @rdname MVBU_StanfitInput
 #' @docType class
 #' @export
+#' @examples
+#' # Inspect an example IdealAdaptorStanfitInput object
+#' sfi <- example_ideal_adaptor_stanfit_input()
+#' sfi
+#'
+#' # Control parameters for stanfit input preparation
+#' ctrl <- control_staninput(transform_type = "standardize")
+#' ctrl
 IdealAdaptorStanfitInput <- S7::new_class(
   "IdealAdaptorStanfitInput",
   package = NULL,
@@ -221,6 +228,23 @@ IdealAdaptorStanfitInput <- S7::new_class(
 #' @param ... Additional arguments passed to methods or deprecated arguments.
 #' @return An object of class `IdealAdaptorStanfitInput` containing the
 #'   prepared data (original and transformed) and transform metadata.
+#' @examples
+#' exp_df <- data.frame(
+#'   group = "g1",
+#'   category = c("b", "p"),
+#'   vot = c(0, 50)
+#' )
+#' test_df <- data.frame(
+#'   group = "g1",
+#'   response_category = c("b", "p"),
+#'   vot = c(10, 40)
+#' )
+#' inp <- new_ideal_adaptor_stanfit_input(
+#'   exposure = exp_df,
+#'   test = test_df,
+#'   cues = "vot"
+#' )
+#' inp
 #' @export
 new_ideal_adaptor_stanfit_input <- function(
   exposure,

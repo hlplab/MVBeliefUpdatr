@@ -5,6 +5,17 @@
 \alias{datasets}
 \title{Phonetic Datasets Bundled with MVBeliefUpdatr}
 \description{
-Bundled phonetic corpora and experimental datasets for modeling speech perception,
-category representation, and incremental belief updating.
+Bundled phonetic corpora and experimental datasets for modeling speech
+perception, category representation, and incremental belief updating.
+}
+\examples{
+# Inspect bundled datasets
+data(h95)
+data(pb52)
+head(h95)
+head(pb52)
+}
+\seealso{
+\code{\link{h95}}, \code{\link{pb52}}, \code{\link{swehvd}},
+\code{\link{mixer6}}
 }

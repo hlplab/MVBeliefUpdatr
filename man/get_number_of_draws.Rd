@@ -29,3 +29,10 @@ Get number of post-warmup MCMC samples from stanfit
 
 Get indices for random MCMC draws from stanfit
 }
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+get_number_of_draws(fit)
+get_random_draw_indices(fit, ndraws = 5)
+}
+}

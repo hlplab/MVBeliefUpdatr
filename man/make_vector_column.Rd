@@ -20,6 +20,7 @@ Same as \code{data}.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
-\code{make_vector_column()} is deprecated as of MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+\code{make_vector_column()} is deprecated as of MVBeliefUpdatr 0.1.0 and will be
+removed in 0.2.0.
 }
 \keyword{internal}

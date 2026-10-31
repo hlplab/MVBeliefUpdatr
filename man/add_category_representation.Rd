@@ -70,6 +70,17 @@ priors and lapse biases for the new representation default to 0 (rescaling
 existing categories proportionally), or can be specified for the new
 category or across all categories.
 }
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+new_rep <- new_mvg_category_representation(
+  category_labels = "/s/",
+  cue_labels = c("VOT", "f0_semitones"),
+  mu = c(30, 0),
+  Sigma = diag(c(25, 10))
+)
+mod_new <- add_category_representation(mod, new_rep, name = "/s/")
+get_category_labels(mod_new)
+}
 \seealso{
 \code{\link[=get_category_labels]{get_category_labels()}}
 }

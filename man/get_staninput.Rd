@@ -2,11 +2,14 @@
 % Please edit documentation in R/S7-generics.R, R/S7-stanfit-methods.R
 \name{get_staninput}
 \alias{get_staninput}
+\alias{set_staninput}
 \alias{get_staninput,any-method}
 \alias{get_staninput,MVBU_Stanfit-method}
 \title{Get the stored Stan input from an S7 fit or fit-input object}
 \usage{
 get_staninput(x, ...)
+
+set_staninput(x, staninput, ...)
 
 ## S7 method for class <any>
 get_staninput(x, ...)
@@ -18,10 +21,19 @@ get_staninput(x, ...)
 \item{x}{An S7 fit or fit-input object.}
 
 \item{...}{Additional arguments passed to methods.}
+
+\item{staninput}{An S7 Stan input object.}
 }
 \value{
-The stored S7 Stan input object.
+The stored S7 Stan input object, or the updated S7 object.
 }
 \description{
 Get the stored Stan input from an S7 fit or fit-input object
+}
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+si <- get_staninput(fit)
+fit <- set_staninput(fit, si)
+}
 }

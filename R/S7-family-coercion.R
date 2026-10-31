@@ -165,13 +165,18 @@ NULL
   )
 }
 
-#' Coerce category representations, templates, and cognitive models between families
+#' Coerce representations, templates, and cognitive models between families
 #'
-#' These functions coerce between the point-estimate families (UVG, MUVG, MVG), the corresponding
-#' uncertainty families (NIX, MNIX, NIW), and the non-parametric Exemplar family. Supported coercions
-#' are: same-family (returned unchanged), matched pairs (UVG<->NIX, MUVG<->MNIX, MVG<->NIW), and any
-#' family <-> EXEMPLAR. Coercions into NIX/MNIX/NIW require `kappa` and `nu`; coercions into EXEMPLAR
-#' require `n`, the number of exemplars to sample.
+#' Coerces between point-estimate families (UVG, MUVG, MVG), uncertainty
+#' families (NIX, MNIX, NIW), and the non-parametric Exemplar family.
+#' Supported coercions are: same-family (returned unchanged), matched
+#' pairs (UVG<->NIX, MUVG<->MNIX, MVG<->NIW), and any family <-> EXEMPLAR.
+#' Coercions into NIX/MNIX/NIW require `kappa` and `nu`; coercions into
+#' EXEMPLAR require `n`, the number of exemplars to sample.
+#'
+#' Also provides generic lifters `as_ideal_adaptor()` and
+#' `as_ideal_observer()` to lift representations or templates into full
+#' cognitive models.
 #'
 #' @param x An `MVBU_CategoryRepresentation`,
 #'   `MVBU_CategoryRepresentationTemplate`, or `MVBU_CognitiveModel` object.
@@ -183,8 +188,32 @@ NULL
 #' @param weights Optional per-cue weights for MUVG/MNIX targets.
 #'   (default: preserved from `x` if available, otherwise the family
 #'   constructor's default.)
+#' @param model_family Optional character string specifying target model family
+#'   ("NIX", "MNIX", "NIW" for adaptors; "UVG", "MUVG", "MVG" for observers).
+#' @param ... Additional arguments passed to constructors.
 #' @return An object of the same kind as `x` (representation, template, or
 #'   model), coerced to the target family.
+#' @examples
+#' # Coerce between UVG and NIX representations
+#' uvg_rep <- new_uvg_category_representation(
+#'   category_labels = "A",
+#'   cue_labels = "cue1",
+#'   mu = 0,
+#'   sigma2 = 1
+#' )
+#' nix_rep <- as_nix_category_representation(uvg_rep, kappa = 10, nu = 15)
+#' nix_rep
+#'
+#' # Coerce back to UVG
+#' as_uvg_category_representation(nix_rep)
+#'
+#' # Sample exemplars from a parametric representation
+#' ex_rep <- as_exemplar_category_representation(uvg_rep, n = 20)
+#' ex_rep
+#'
+#' # Lift representation to an ideal observer model
+#' obs <- as_ideal_observer(uvg_rep)
+#' obs
 #' @name as_family_coercion
 NULL
 
@@ -300,21 +329,7 @@ as_exemplar_model <- function(x, n) {
   }
 }
 
-#' Lift or coerce category templates, representations, or cognitive models to an Ideal Adaptor or Ideal Observer
-#'
-#' Converts category templates, single category representations, or existing
-#' cognitive models into full `MVBU_CognitiveModel` objects of the appropriate
-#' family.
-#'
-#' @param x An `MVBU_CategoryRepresentation`,
-#'   `MVBU_CategoryRepresentationTemplate`, or `MVBU_CognitiveModel`.
-#' @param model_family Optional character string specifying target model
-#'   family ("NIX", "MNIX", "NIW" for adaptors; "UVG", "MUVG", "MVG" for
-#'   observers).
-#' @param ... Additional arguments passed to model constructors or family
-#'   coercion routines.
-#' @return An S7 `MVBU_CognitiveModel` object.
-#' @name as_model_coercion
+#' @rdname as_family_coercion
 #' @export
 as_ideal_adaptor <- function(x, model_family = NULL, ...) {
   .assert_true(
@@ -340,7 +355,7 @@ as_ideal_adaptor <- function(x, model_family = NULL, ...) {
   .stop("x must be an MVBU_CategoryRepresentationTemplate, MVBU_CategoryRepresentation, or MVBU_CognitiveModel.")
 }
 
-#' @rdname as_model_coercion
+#' @rdname as_family_coercion
 #' @export
 as_ideal_observer <- function(x, model_family = NULL, ...) {
   .assert_true(

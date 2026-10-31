@@ -94,3 +94,13 @@ This factor accounts for all permutations of response order at each stimulus loc
 depends purely on the observed data and is completely independent of the cognitive model.
 }
 }
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+x_stim <- matrix(c(10, -1, 55, 0.5), nrow = 2, byrow = TRUE)
+evaluate_model(
+  mod,
+  x = x_stim,
+  response_category = c("/b/", "/k/"),
+  method = "log_lik"
+)
+}

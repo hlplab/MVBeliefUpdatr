@@ -37,3 +37,8 @@ and equals the category posterior probability under proportional decision rules)
 \description{
 Evaluates the model's response category decisions and response probabilities.
 }
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+categorize(mod, matrix(c(0, 0), nrow = 1))
+categorize(mod, matrix(c(0, 0), nrow = 1), simplify = FALSE)
+}

@@ -13,6 +13,9 @@ Character vector of registered family short names.
 Returns the short names of all currently registered model families in
 \code{MVBeliefUpdatr}.
 }
+\examples{
+list_model_families()
+}
 \seealso{
 \code{\link[=get_model_family]{get_model_family()}}, \code{\link[=register_model_family]{register_model_family()}}
 }

@@ -189,6 +189,10 @@ In 3D interactive category plots (\code{plot_categories} with \code{interactive 
 large diamond markers represent category means. For exemplar representations, the
 mean is computed across all stored exemplars.
 }
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+plot_categories(mod)
+}
 \seealso{
 \code{\link{plot_categorization_functions}}, \code{\link{plot_parameters}},
 \code{\link{likelihood}}, \code{\link{posterior}}

@@ -23,7 +23,9 @@
 \alias{as_mvg_ideal_observer}
 \alias{as_niw_ideal_adaptor}
 \alias{as_exemplar_model}
-\title{Coerce category representations, templates, and cognitive models between families}
+\alias{as_ideal_adaptor}
+\alias{as_ideal_observer}
+\title{Coerce representations, templates, and cognitive models between families}
 \usage{
 as_uvg_category_representation(x)
 
@@ -66,6 +68,10 @@ as_mvg_ideal_observer(x)
 as_niw_ideal_adaptor(x, kappa, nu)
 
 as_exemplar_model(x, n)
+
+as_ideal_adaptor(x, model_family = NULL, ...)
+
+as_ideal_observer(x, model_family = NULL, ...)
 }
 \arguments{
 \item{x}{An \code{MVBU_CategoryRepresentation},
@@ -82,15 +88,48 @@ as_exemplar_model(x, n)
 constructor's default.)}
 
 \item{n}{Number of exemplars to sample when coercing into the EXEMPLAR family.}
+
+\item{model_family}{Optional character string specifying target model family
+("NIX", "MNIX", "NIW" for adaptors; "UVG", "MUVG", "MVG" for observers).}
+
+\item{...}{Additional arguments passed to constructors.}
 }
 \value{
 An object of the same kind as \code{x} (representation, template, or
 model), coerced to the target family.
 }
 \description{
-These functions coerce between the point-estimate families (UVG, MUVG, MVG), the corresponding
-uncertainty families (NIX, MNIX, NIW), and the non-parametric Exemplar family. Supported coercions
-are: same-family (returned unchanged), matched pairs (UVG<->NIX, MUVG<->MNIX, MVG<->NIW), and any
-family <-> EXEMPLAR. Coercions into NIX/MNIX/NIW require \code{kappa} and \code{nu}; coercions into EXEMPLAR
-require \code{n}, the number of exemplars to sample.
+Coerces between point-estimate families (UVG, MUVG, MVG), uncertainty
+families (NIX, MNIX, NIW), and the non-parametric Exemplar family.
+Supported coercions are: same-family (returned unchanged), matched
+pairs (UVG<->NIX, MUVG<->MNIX, MVG<->NIW), and any family <-> EXEMPLAR.
+Coercions into NIX/MNIX/NIW require \code{kappa} and \code{nu}; coercions into
+EXEMPLAR require \code{n}, the number of exemplars to sample.
+}
+\details{
+Also provides generic lifters \code{as_ideal_adaptor()} and
+\code{as_ideal_observer()} to lift representations or templates into full
+cognitive models.
+}
+\examples{
+# Coerce between UVG and NIX representations
+uvg_rep <- new_uvg_category_representation(
+  category_labels = "A",
+  cue_labels = "cue1",
+  mu = 0,
+  sigma2 = 1
+)
+nix_rep <- as_nix_category_representation(uvg_rep, kappa = 10, nu = 15)
+nix_rep
+
+# Coerce back to UVG
+as_uvg_category_representation(nix_rep)
+
+# Sample exemplars from a parametric representation
+ex_rep <- as_exemplar_category_representation(uvg_rep, n = 20)
+ex_rep
+
+# Lift representation to an ideal observer model
+obs <- as_ideal_observer(uvg_rep)
+obs
 }

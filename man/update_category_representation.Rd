@@ -37,3 +37,12 @@ An updated category representation.
 \description{
 Update a category representation from observations
 }
+\examples{
+cat_rep <- example_niw_category_representation(n_cues = 2)
+update_category_representation(
+  cat_rep,
+  n_exposure = 5L,
+  mean_exposure = c(0.5, 0.5),
+  css_exposure = matrix(c(1, 0.2, 0.2, 1), nrow = 2)
+)
+}

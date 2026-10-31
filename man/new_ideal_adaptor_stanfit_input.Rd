@@ -73,3 +73,21 @@ achieve this intended outcome, use \code{group_unique} to identify groups with
 identical exposure. This will correctly use only one unique instance of the
 observations that any level of \code{group} receives during exposure.
 }
+\examples{
+exp_df <- data.frame(
+  group = "g1",
+  category = c("b", "p"),
+  vot = c(0, 50)
+)
+test_df <- data.frame(
+  group = "g1",
+  response_category = c("b", "p"),
+  vot = c(10, 40)
+)
+inp <- new_ideal_adaptor_stanfit_input(
+  exposure = exp_df,
+  test = test_df,
+  cues = "vot"
+)
+inp
+}

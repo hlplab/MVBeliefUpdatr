@@ -63,6 +63,14 @@ NULL
 #' @name MVBU-TransformInformation-class
 #' @rdname MVBU-TransformInformation-class
 #' @export
+#' @examples
+#' trans <- MVBU_TransformInformation(
+#'   cue.labels = c("c1", "c2"),
+#'   type = "center",
+#'   shift = c(0, 0),
+#'   SCALE = diag(2)
+#' )
+#' trans
 MVBU_TransformInformation <- S7::new_class(
   "MVBU_TransformInformation",
   package = NULL,
@@ -126,6 +134,16 @@ MVBU_TransformInformation <- S7::new_class(
 #' @return An inverted \code{\link{MVBU_TransformInformation}} object.
 #'
 #' @export
+#' @examples
+#' trans <- MVBU_TransformInformation(
+#'   cue.labels = c("c1", "c2"),
+#'   type = "center",
+#'   shift = c(1, -2),
+#'   SCALE = diag(c(2, 0.5))
+#' )
+#' inv_trans <- invert_transform(trans)
+#' inv_trans@shift
+#' inv_trans@SCALE
 invert_transform <- S7::new_generic("invert_transform", "transform")
 
 #' @rdname invert_transform

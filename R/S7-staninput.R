@@ -9,6 +9,10 @@
 #'   Default: \code{list()}.
 #' @param family Character string indicating the model family name.
 #'   Default: \code{character(0)}.
+#' @examples
+#' # Instantiate an MVBU_Staninput container object
+#' inp <- MVBU_Staninput(values = list(N = 10L), family = "NIW")
+#' is(inp, "MVBU_Staninput")
 #'
 #' @docType class
 #' @name MVBU_Staninput

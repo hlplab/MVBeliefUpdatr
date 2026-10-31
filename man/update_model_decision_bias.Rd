@@ -2,6 +2,7 @@
 % Please edit documentation in R/update-decision-model.R
 \name{update_model_decision_bias_by_one_observation}
 \alias{update_model_decision_bias_by_one_observation}
+\alias{update_model_decision_bias_incrementally}
 \title{Update model's decision biases based on labelled input}
 \usage{
 update_model_decision_bias_by_one_observation(
@@ -13,44 +14,86 @@ update_model_decision_bias_by_one_observation(
   lapse_treatment = "no_lapses",
   update_prior = T
 )
+
+update_model_decision_bias_incrementally(
+  model,
+  beta,
+  exposure,
+  exposure.category = "category",
+  exposure.cues = get_cue_labels_from_model(model),
+  exposure.order = NULL,
+  noise_treatment = .infer_noise_treatment(dplyr::first(model$Sigma_noise)),
+  lapse_treatment = "no_lapses",
+  keep.update_history = TRUE,
+  keep.exposure_data = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{model}{A model object with decision biases.}
 
-\item{beta}{The learning rate with which decision biases change. Might be integrated into model objects in the future.}
+\item{beta}{The learning rate with which decision biases change. Might be
+integrated into model objects in the future.}
 
 \item{x}{The cues of single observation.}
 
 \item{x_category}{The category label(s) of one or more observations.}
 
-\item{noise_treatment}{Determines whether perceptual noise is considered during categorization, and how.
-Can be "no_noise", "sample", or "marginalize". If "no_noise", no noise will be applied to the input,
-and no noise will be assumed during categorization. If "marginalize", average noise (i.e., no noise)
-will be added to the stimulus, and \code{Sigma_noise} is added to Sigma when calculating the likelihood.
-This simulates the expected consequences for perceptual noise on categorization \emph{in the limit}, i.e,
-if the input was categorized infinitely many times. If "sample", then noise is sampled and applied to
-the input, and \code{Sigma_noise} is added to Sigma when calculating the likelihood. This simulates the
-consequence of perceptual noise \emph{on a particular observation}. If "sample" or "marginalize" are chosen,
-\code{Sigma_noise} must be a covariance matrix of appropriate dimensions. (default: "no_noise" if Sigma_noise
-is NULL, "marginalize" otherwise).}
+\item{noise_treatment}{Determines whether perceptual noise is considered
+during categorization, and how. Can be \code{"no_noise"}, \code{"sample"},
+or \code{"marginalize"}.}
 
-\item{lapse_treatment}{Determines whether attentional lapses can occur during which no updating occurs.
-Can be "no_lapses", "sample", or "marginalize". If "no_lapses", no lapses occur (even if the model specifies
-a non-zero \code{lapse_rate}), and all observations lead to updating. If "sample" or "marginalize", the lapse rate from '
-the model will be used. For "sample", sampling determines for each observation whether it was a lapse or not.
-If an observation was a lapse no updating occurs. For "marginalize", 1 - lapse_rate is the proportion of observations
-that are assumed to be lapsing trials (default: "no_lapses")}
+\item{lapse_treatment}{Determines whether attentional lapses can occur during
+which no updating occurs. Can be \code{"no_lapses"}, \code{"sample"}, or
+\code{"marginalize"}.}
 
-\item{update_prior}{Should the prior probability of each category be updated along with the decision bias?}
+\item{update_prior}{Should the prior probability of each category be updated
+along with the decision bias? (default: \code{TRUE})}
+
+\item{exposure}{\code{data.frame} or \code{tibble} with exposure data. Each
+row is assumed to contain one observation.}
+
+\item{exposure.category}{Name of variable in \code{data} that contains the
+category information. (default: \code{"category"})}
+
+\item{exposure.cues}{Name(s) of variables in \code{data} that contain the
+cue information. By default these cue names are extracted from the prior
+object.}
+
+\item{exposure.order}{Name of variable in \code{data} that contains the
+order of the exposure data. If \code{NULL} the exposure data is assumed to
+be in the order in which it should be presented.}
+
+\item{keep.update_history}{Should the history of the updating be stored and
+returned? (default: \code{TRUE})}
+
+\item{keep.exposure_data}{Should the input data be included in the output?
+(default: \code{FALSE})}
+
+\item{verbose}{Should more informative output be provided? (default:
+\code{FALSE})}
 }
 \value{
-A model object.
+A model object with updated decision biases.
 }
 \description{
-Returns model with updated decision biases. This updating process is order-sensitive. For each input observation x,
-a posterior expectation for each category is obtained based on the specified noise and lapse treatment. This expectation
-is used to calculate the surprisal (in bits) of the category label x_category. The surprisal is weighted by the learning
-rate beta to increase the (log-odds of the) decision bias for that category.
+Returns model with updated decision biases. This updating process is
+order-sensitive. For each input observation x, a posterior expectation for
+each category is obtained based on the specified noise and lapse treatment.
+This expectation is used to calculate the surprisal (in bits) of the
+category label x_category. The surprisal is weighted by the learning rate
+beta to increase the (log-odds of the) decision bias for that category.
+}
+\examples{
+\dontrun{
+# Updating decision biases for a cognitive model
+updated_model <- update_model_decision_bias_by_one_observation(
+  model = model,
+  beta = 0.1,
+  x = c(0, 0),
+  x_category = "b"
+)
+}
 }
 \keyword{bias}
 \keyword{bias,}

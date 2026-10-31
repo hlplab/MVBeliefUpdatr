@@ -154,6 +154,10 @@ posterior auto-densities scaled to panel height; and the upper triangle
 displays 2D posterior density contour lines (\code{geom_density_2d} with
 normalized density contours). Points and curves are colored by group.
 }
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+plot_parameters(mod)
+}
 \seealso{
 \code{\link{plot_categories}}, \code{\link{plot_categorization_functions}},
 \code{\link{get_parameters}}, \code{\link{get_draws}}

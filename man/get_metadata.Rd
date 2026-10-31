@@ -21,3 +21,7 @@ A list containing metadata associated with the object.
 \description{
 Get metadata from an object
 }
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+get_metadata(mod)
+}

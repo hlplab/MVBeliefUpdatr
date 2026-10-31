@@ -9,18 +9,27 @@
 \arguments{
 \item{object}{An \code{\link{MVBU_Stanfit}} object.}
 
-\item{type}{Character string giving the type of \pkg{bayesplot} plot to create
-(e.g., \code{"dens_overlay"}, \code{"hist"}, \code{"stat"}, \code{"bars"}, \code{"error_hist"}).
-Default: \code{"dens_overlay"}.}
+\item{type}{Character string giving the type of \pkg{bayesplot} plot to
+create (e.g., \code{"dens_overlay"}, \code{"hist"}, \code{"stat"},
+\code{"bars"}, \code{"error_hist"}). Default: \code{"dens_overlay"}.}
 
-\item{ndraws}{Positive integer; number of posterior draws to overlay. Default: \code{50}.}
+\item{ndraws}{Positive integer; number of posterior draws to overlay.
+Default: \code{50}.}
 
-\item{...}{Additional arguments passed to the underlying \pkg{bayesplot} plotting function.}
+\item{...}{Additional arguments passed to the underlying \pkg{bayesplot}
+plotting function.}
 }
 \value{
 A \code{\link[ggplot2]{ggplot}} object returned by \pkg{bayesplot}.
 }
 \description{
-Performs posterior predictive checks using \pkg{bayesplot}'s \code{\link[bayesplot]{ppc_dens_overlay}}
-or related functions on an \code{\link{MVBU_Stanfit}} model object.
+Performs posterior predictive checks using \pkg{bayesplot}'s
+\code{\link[bayesplot]{ppc_dens_overlay}} or related functions on an
+\code{\link{MVBU_Stanfit}} model object.
+}
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+pp_check(fit, type = "dens_overlay")
+}
 }

@@ -40,3 +40,16 @@ These helpers validate whether an object inherits from the
 S7 classes introduced for category representations, templates, cognitive
 models, Stan input objects, and Stan fit objects.
 }
+\examples{
+# Assert that an object inherits from MVBU_CategoryRepresentation
+rep <- example_niw_category_representation(n_cues = 2)
+assert_MVBU_CategoryRepresentation(rep)
+
+# Assert that an object inherits from MVBU_CognitiveModel
+mod <- example_mvg_ideal_observer(n_cues = 2)
+assert_MVBU_CognitiveModel(mod)
+
+# Assert that an object inherits from IdealAdaptorStanfitInput
+sfi <- example_ideal_adaptor_stanfit_input()
+assert_IdealAdaptorStanfitInput(sfi)
+}

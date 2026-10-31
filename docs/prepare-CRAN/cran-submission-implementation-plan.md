@@ -24,9 +24,9 @@ to CRAN.
 |    - Compress/resave data objects with xz (Done, data/ = 3.27 MB)           |
 |    - Optimize vignette assets and figures (Done, archive = 4.8 MB)          |
 |                                                                             |
-| 2. Documentation & Help Page Examples                                       |
-|    - Add compact, executable @examples (< 5 sec) to exported functions      |
-|    - Protect slow MCMC fitting examples with \donttest{}                    |
+| 2. Documentation & Help Page Examples [COMPLETED]                           |
+|    - Compact executable @examples on all 199 help pages (< 1 sec default)   |
+|    - Protect MCMC sampling with \donttest{} (total examples = 53.6s)        |
 |                                                                             |
 | 3. Dependency Footprint Review                                              |
 |    - Audit 30 non-default Imports                                           |
@@ -82,30 +82,33 @@ The initial build measured 13.0 MB.
 
 ---
 
-### Phase 2: Executable Examples (`@examples`)
+### Phase 2: Executable Examples (`@examples`) [COMPLETED]
 
 CRAN incoming policy requires that all exported user-facing functions and
 datasets include executable examples in their Rd help pages.
 
 1. **Core Constructor Examples:**
-   - Add minimal (< 1 second) examples to:
-     - `cognitive_model()`
-     - `prior()`
-     - `fix_parameter()`
-     - `as_model_list()`
-     - `update_category_representation()`
+   - Added minimal (< 1 second) examples to all constructors, generics,
+     methods, and dataset documentation across all 199 Rd help pages.
+   - Verified 0 missing examples across exported functions.
 
 2. **Evaluation & Plotting Examples:**
-   - Add quick examples using built-in datasets (`pb52` or `h95`):
+   - Added quick examples using built-in datasets (`pb52`, `h95`):
      - `categorize()`
      - `plot_categories()`
      - `plot_categorization_functions()`
+     - `plot_parameters()` (with native plotmath expressions for μ, τ, ρ,
+       κ, ν, λ)
 
-3. **Computationally Intensive Stan Functions:**
-   - For functions involving MCMC sampling or Stan compilation
-     (`fit_ideal_adaptor()`, `add_criterion()`), wrap examples in
-     `\donttest{...}` to comply with CRAN's 10-minute total check limit.
-   - Gate: `checking examples ... OK` with 0 failures and execution < 5 min.
+3. **Computationally Intensive Stan Functions & Optimization:**
+   - Optimized `example_ideal_adaptor_stanfit()` default parameters
+     (`chains = 1L, iter = 50L, warmup = 25L`, 95-row dataset) reducing
+     sampling overhead from 85s down to 2.69s.
+   - Wrapped long-running MCMC sampling examples in `\donttest{...}`.
+   - Re-exported `loo::loo_compare` generic to resolve example dispatch.
+   - Gate: `checking examples ... OK (21.1s)` and
+     `checking examples with --run-donttest ... OK (32.5s)`. Total runtime
+     53.6s with 0 errors across all 199 help pages.
 
 ---
 

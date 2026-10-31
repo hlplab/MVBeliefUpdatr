@@ -74,8 +74,8 @@ dimension is allowed.}
 \item{category_template}{An \link{MVBU_CategoryRepresentationTemplate} object
 containing UVG category representations.}
 
-\item{decision_rule}{Categorization decision rule: \code{"sampling"} or
-\code{"argmax"}. Defaults to \code{"sampling"}.}
+\item{decision_rule}{Categorization decision rule: \code{"sampling"},
+\code{"criterion"}, or \code{"proportional"}. Defaults to \code{"sampling"}.}
 
 \item{category_prior}{Optional numeric vector of prior category
 probabilities summing to 1. Defaults to equal priors.}
@@ -140,6 +140,21 @@ Category representations are constructed with
 \link{new_uvg_category_representation_from_data}. Cognitive ideal observer
 models are constructed with \link{new_uvg_ideal_observer} or
 \link{new_uvg_ideal_observer_from_data}.
+}
+\examples{
+# Create UVG representations
+rep_b <- new_uvg_category_representation(
+  category_labels = "/b/", cue_labels = "VOT",
+  mu = 10, sigma2 = 25
+)
+rep_d <- new_uvg_category_representation(
+  category_labels = "/d/", cue_labels = "VOT",
+  mu = 50, sigma2 = 25
+)
+# Combine into template and ideal observer
+tmpl <- new_category_representation_template(list(rep_b, rep_d))
+m_uvg <- new_uvg_ideal_observer(category_template = tmpl)
+m_uvg
 }
 \seealso{
 \link{family-nix}, \link{family-mvg}, \link{family-muvg}, \link{family-exemplar}

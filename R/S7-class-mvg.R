@@ -19,8 +19,8 @@ NULL
 #' @param cues Character vector indicating cue columns in `data`.
 #' @param category_template An [MVBU_CategoryRepresentationTemplate] object
 #'   containing MVG category representations.
-#' @param decision_rule Categorization decision rule: `"sampling"` or
-#'   `"argmax"`. Defaults to `"sampling"`.
+#' @param decision_rule Categorization decision rule: `"sampling"`,
+#'   `"criterion"`, or `"proportional"`. Defaults to `"sampling"`.
 #' @param category_prior Optional numeric vector of prior category
 #'   probabilities summing to 1. Defaults to equal priors.
 #' @param lapse_rate Numeric scalar lapse probability in `[0, 1]`. Defaults
@@ -79,6 +79,25 @@ NULL
 #' @docType class
 #' @usage NULL
 #' @export
+#' @examples
+#' # Create 2D MVG representations
+#' mu_b <- c(VOT = 10, f0 = 200)
+#' Sigma_b <- matrix(c(25, 5, 5, 36), nrow = 2,
+#'   dimnames = list(names(mu_b), names(mu_b)))
+#' rep_b <- new_mvg_category_representation(
+#'   category_labels = "/b/", cue_labels = c("VOT", "f0"),
+#'   mu = mu_b, Sigma = Sigma_b
+#' )
+#' mu_d <- c(VOT = 50, f0 = 240)
+#' Sigma_d <- matrix(c(25, -2, -2, 36), nrow = 2,
+#'   dimnames = list(names(mu_d), names(mu_d)))
+#' rep_d <- new_mvg_category_representation(
+#'   category_labels = "/d/", cue_labels = c("VOT", "f0"),
+#'   mu = mu_d, Sigma = Sigma_d
+#' )
+#' tmpl <- new_category_representation_template(list(rep_b, rep_d))
+#' m_mvg <- new_mvg_ideal_observer(category_template = tmpl)
+#' m_mvg
 MVG_CategoryRepresentation <- S7::new_class(
   "MVG_CategoryRepresentation",
   parent = MVBU_CategoryRepresentation,

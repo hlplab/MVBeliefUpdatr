@@ -89,8 +89,8 @@ new_niw_ideal_adaptor_from_data(
 \item{category_template}{An \link{MVBU_CategoryRepresentationTemplate} object
 containing NIW category representations.}
 
-\item{decision_rule}{Categorization decision rule: \code{"sampling"} or
-\code{"argmax"}. Defaults to \code{"sampling"}.}
+\item{decision_rule}{Categorization decision rule: \code{"sampling"},
+\code{"criterion"}, or \code{"proportional"}. Defaults to \code{"sampling"}.}
 
 \item{category_prior}{Optional numeric vector of prior category
 probabilities summing to 1. Defaults to equal priors.}
@@ -156,6 +156,26 @@ For cue dimensionality \eqn{D}, \eqn{\nu_t = \nu - D + 1} and
 \eqn{\mathbf{\Sigma}_t = \frac{\kappa + 1}{\kappa \nu_t} \mathbf{S}}:
 \deqn{p(\mathbf{x} \mid c) = t_{\nu_t}(\mathbf{x}; \mathbf{m},
 \mathbf{\Sigma}_t)}
+}
+\examples{
+# Normal-Inverse-Wishart (NIW) representation for multidimensional cues
+m_b <- c(VOT = 10, f0 = 200)
+S_b <- matrix(c(25, 5, 5, 36), nrow = 2,
+  dimnames = list(names(m_b), names(m_b)))
+rep_b <- new_niw_category_representation(
+  category_labels = "/b/", cue_labels = c("VOT", "f0"),
+  m = m_b, kappa = 5, nu = 10, S = S_b
+)
+m_d <- c(VOT = 50, f0 = 240)
+S_d <- matrix(c(25, -2, -2, 36), nrow = 2,
+  dimnames = list(names(m_d), names(m_d)))
+rep_d <- new_niw_category_representation(
+  category_labels = "/d/", cue_labels = c("VOT", "f0"),
+  m = m_d, kappa = 5, nu = 10, S = S_d
+)
+tmpl <- new_category_representation_template(list(rep_b, rep_d))
+m_niw <- new_niw_ideal_adaptor(category_template = tmpl)
+m_niw
 }
 \seealso{
 \link{family-mvg}, \link{family-nix}, \link{family-mnix}

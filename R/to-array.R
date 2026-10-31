@@ -1,15 +1,25 @@
-#' Convert atomic values or lists into arrays with explicit inner/outer dimensions
+#' Convert atomic values or lists into arrays with inner/outer dimensions
 #'
-#' This helper is used to shape prior information and other Stan inputs into the
-#' dimensionality expected by the Stan programs.
+#' This helper is used to shape prior information and other Stan inputs into
+#' the dimensionality expected by the Stan programs.
 #'
 #' @param x Input value. Can be atomic, list, or NULL.
-#' @param inner_dims Integer vector describing the inner dimensions of the array.
-#' @param outer_dims Integer vector describing the outer dimensions of the array.
+#' @param inner_dims Integer vector describing the inner dimensions of the
+#'   array.
+#' @param outer_dims Integer vector describing the outer dimensions of the
+#'   array.
 #' @param dimnames Optional dimnames for the resulting array.
-#' @param simplify Logical controlling whether inner dimensions of length 1 are simplified.
+#' @param simplify Logical controlling whether inner dimensions of length 1 are
+#'   simplified.
 #' @return An array.
 #' @export
+#' @examples
+#' # Convert a vector into an array with outer dimension 3
+#' to_array(c(1, 2), inner_dims = 2, outer_dims = 3)
+#'
+#' # Convert a list of matrices into an array
+#' mat_list <- list(matrix(1:4, 2, 2), matrix(5:8, 2, 2))
+#' to_array(mat_list, inner_dims = c(2, 2), outer_dims = 2)
 to_array <- function(
     x,
     inner_dims = NULL,
@@ -32,7 +42,8 @@ to_array <- function(
     }
 
     total_dim_length <- length(inner_dims) + length(outer_dims)
-    arr <- array(numeric(), dim = if (total_dim_length == 0) 0 else rep(0, total_dim_length))
+    dim_vec <- if (total_dim_length == 0) 0 else rep(0, total_dim_length)
+    arr <- array(numeric(), dim = dim_vec)
     if (!is.null(dimnames)) dimnames(arr) <- dimnames
     return(arr)
   }
@@ -42,7 +53,13 @@ to_array <- function(
 
     if (is.null(inner_dims)) inner_dims <- found_inner_dims
     if (any(found_inner_dims != inner_dims)) {
-      .stop(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ", "), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
+      .stop(
+        "Input's inner dimensions (",
+        paste(found_inner_dims, collapse = ", "),
+        ") do not match the provided inner dimension (",
+        paste(inner_dims, collapse = ","),
+        ")."
+      )
     }
 
     if (length(found_inner_dims) != length(inner_dims)) {
@@ -53,7 +70,13 @@ to_array <- function(
           x <- matrix(x, nrow = inner_dims[1], ncol = inner_dims[2])
         }
       } else {
-        .stop(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ", "), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
+        .stop(
+          "Input's inner dimensions (",
+          paste(found_inner_dims, collapse = ", "),
+          ") do not match the provided inner dimension (",
+          paste(inner_dims, collapse = ","),
+          ")."
+        )
       }
     }
 
@@ -66,8 +89,14 @@ to_array <- function(
     }
 
     total_dim_length <- length(inner_dims) + length(outer_dims)
-    arr <- rep(x, prod(outer_dims)) %>% array(dim = if (total_dim_length == 0) 0 else c(inner_dims, outer_dims))
-    perm <- c(if (is.null(outer_dims)) NULL else seq(length(inner_dims) + 1, total_dim_length), if (is.null(inner_dims)) NULL else 1:length(inner_dims))
+    dim_vec <- if (total_dim_length == 0) 0 else c(inner_dims, outer_dims)
+    arr <- array(rep(x, prod(outer_dims)), dim = dim_vec)
+    perm <- c(
+      if (is.null(outer_dims)) NULL else {
+        seq(length(inner_dims) + 1, total_dim_length)
+      },
+      if (is.null(inner_dims)) NULL else 1:length(inner_dims)
+    )
     arr <- aperm(a = arr, perm = perm)
     if (!is.null(dimnames)) dimnames(arr) <- dimnames
     return(arr)
@@ -78,12 +107,22 @@ to_array <- function(
 
     if (is.null(inner_dims)) inner_dims <- found_inner_dims
     if (any(found_inner_dims != inner_dims)) {
-      .stop(paste0("Input's inner dimensions (", paste(found_inner_dims, collapse = ", "), ") do not match the provided inner dimension (", paste(inner_dims, collapse = ","), ")."))
+      .stop(
+        "Input's inner dimensions (",
+        paste(found_inner_dims, collapse = ", "),
+        ") do not match the provided inner dimension (",
+        paste(inner_dims, collapse = ","),
+        ")."
+      )
     }
 
     expected_len <- if (length(outer_dims) == 0) 1 else prod(outer_dims)
     if (length(x) != expected_len) {
-      .stop(paste0("Length of list (", length(x), ") input does not match product of provided outer dimensions (", expected_len, ")."))
+      .stop(
+        "Length of list (", length(x),
+        ") input does not match product of provided outer dimensions (",
+        expected_len, ")."
+      )
     }
 
     arr <- simplify2array(x, except = NULL)
@@ -96,3 +135,4 @@ to_array <- function(
 
   .stop("Unsupported input type for to_array.")
 }
+

@@ -505,13 +505,13 @@ S7::method(print, Summary_IdealAdaptorStanfitInput) <- function(x, ...) {
   invisible(x)
 }
 
-#' @rdname get_family_name
+#' @rdname get_model_family
 #' @export
 S7::method(get_family_name, IdealAdaptorStaninput) <- function(x, ...) {
   x@family
 }
 
-#' @rdname get_family
+#' @rdname get_model_family
 #' @export
 S7::method(get_family, IdealAdaptorStaninput) <- function(x, ...) {
   .get_model_family(x@family)

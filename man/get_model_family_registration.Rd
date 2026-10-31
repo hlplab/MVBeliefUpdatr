@@ -15,6 +15,10 @@ A list with the registered class names and family object.
 \description{
 Get the registration information for a model family
 }
+\examples{
+reg <- get_model_family_registration("UVG")
+reg$names$name_short
+}
 \seealso{
 \code{\link[=get_model_family]{get_model_family()}}, \code{\link[=list_model_families]{list_model_families()}}
 }

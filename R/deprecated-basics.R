@@ -2,10 +2,31 @@
 # deprecated
 # =============================================================================
 
+#' Internal helper to combine columns into a vector column
+#' @keywords internal
+#' @noRd
+.make_vector_column <- function(data, cols, vector_col, .keep = "all") {
+    data %<>%
+        mutate(
+            !!sym(vector_col) := pmap(
+                .l = list(!!!syms(cols)),
+                .f = function(...) {
+                    x <- c(...)
+                    names(x) <- cols
+                    return(x)
+                }
+            ),
+            .keep = .keep
+        )
+
+    return(data)
+}
+
 #' Deprecated: Combine columns into a vector column
 #'
 #' @description `r lifecycle::badge("deprecated")`
-#' `make_vector_column()` is deprecated as of MVBeliefUpdatr 0.1.0 and will be removed in 0.2.0.
+#' `make_vector_column()` is deprecated as of MVBeliefUpdatr 0.1.0 and will be
+#' removed in 0.2.0.
 #'
 #' @param data A tibble or data.frame.
 #' @param cols A character vector of variable names to combine.
@@ -21,20 +42,12 @@ make_vector_column <- function(data, cols, vector_col, .keep = "all") {
         when = "0.1.0",
         what = "make_vector_column()"
     )
-    data %<>%
-        mutate(
-            !!sym(vector_col) := pmap(
-                .l = list(!!!syms(cols)),
-                .f = function(...) {
-                    x <- c(...)
-                    names(x) <- cols
-                    return(x)
-                }
-            ),
-            .keep = .keep
-        )
-
-    return(data)
+    .make_vector_column(
+        data = data,
+        cols = cols,
+        vector_col = vector_col,
+        .keep = .keep
+    )
 }
 
 

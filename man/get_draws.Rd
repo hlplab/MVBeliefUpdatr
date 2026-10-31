@@ -76,6 +76,13 @@ By default all post-warmup draws are returned, but if \code{summarize = TRUE} th
 By default, the category means and scatter matrices are nested, rather than each of their elements being
 stored separately (\code{nest = TRUE}).
 }
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+draws <- get_draws(fit, ndraws = 5)
+head(draws)
+}
+}
 \seealso{
 \code{\link{get_parameters}}, \code{\link{get_stanfit}}
 }

@@ -9,18 +9,26 @@
 \arguments{
 \item{x}{An \code{\link{MVBU_Stanfit}} object.}
 
-\item{...}{Additional \code{\link{MVBU_Stanfit}} objects or arguments passed to
-\code{\link[loo]{loo_compare}}.}
+\item{...}{Additional \code{\link{MVBU_Stanfit}} objects or arguments
+passed to \code{\link[loo]{loo_compare}}.}
 
 \item{criterion}{Character string specifying the criterion to use for model
 comparison (\code{"loo"} or \code{"waic"}). Default: \code{"loo"}.}
 }
 \value{
-A matrix of class \code{compare.loo} (see \code{\link[loo]{loo_compare}}) containing model comparison metrics.
+A matrix of class \code{compare.loo} (see
+\code{\link[loo]{loo_compare}}) containing model comparison metrics.
 }
 \description{
-Compare fitted \code{\link{MVBU_Stanfit}} objects using Leave-One-Out Cross-Validation
-(\code{loo}) or WAIC via \code{\link[loo]{loo_compare}}.
+Compare fitted \code{\link{MVBU_Stanfit}} objects using Leave-One-Out
+Cross-Validation (\code{loo}) or WAIC via \code{\link[loo]{loo_compare}}.
+}
+\examples{
+\donttest{
+fit1 <- example_ideal_adaptor_stanfit()
+fit2 <- example_ideal_adaptor_stanfit(model_family = "NIX")
+loo::loo_compare(fit1, fit2, criterion = "loo")
+}
 }
 \seealso{
 \code{\link{add_criterion}}, \code{\link{loo.MVBU_Stanfit}}

@@ -39,11 +39,19 @@ scalar, vector, or matrix. If \code{FALSE}, always returns a \code{tibble}.}
 If \code{simplify = TRUE} and a single statistic is selected for a
 single category and group, the atomic numeric value, vector, or matrix.
 Otherwise, a \code{tibble} with the grouping columns and requested
-statistics.
 }
 \description{
 Calculates sufficient statistics for specified cues for all categories and
 optional groups in a data frame.
+}
+\examples{
+# Example with synthetic phonetic data
+df <- data.frame(
+  category = rep(c("b", "p"), each = 20),
+  vot = c(rnorm(20, 0, 10), rnorm(20, 50, 10)),
+  f0 = c(rnorm(20, 200, 20), rnorm(20, 240, 20))
+)
+get_sufficient_category_statistics(df, cues = c("vot", "f0"))
 }
 \seealso{
 \code{\link{get_exposure_category_statistics}}

@@ -38,3 +38,9 @@ plots.
 \description{
 Plot Stan MCMC diagnostics
 }
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+plot_diagnostics(fit)
+}
+}

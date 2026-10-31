@@ -40,8 +40,22 @@ NULL
 #'   Default: \code{NULL}.
 #'
 #' @name MVBU_Family
+#' @rdname MVBU_Family
 #' @seealso [new_mvbu_family()], [register_model_family()], [get_model_family()]
 #' @export
+#' @examples
+#' # Inspect a registered model family
+#' reg <- get_model_family_registration("UVG")
+#' reg$names$name_long
+#'
+#' # Create a custom minimal family object
+#' dummy_fam <- new_mvbu_family(
+#'   name_short = "CUSTOM",
+#'   density_function = function(x, rep, log = FALSE) rep(0, nrow(x)),
+#'   sampling_function = function(rep, n = 1L, ...) matrix(0, n, 1),
+#'   expected_moments = function(rep) list(mu = 0, Sigma = matrix(1, 1, 1))
+#' )
+#' dummy_fam
 MVBU_Family <- S7::new_class(
   "MVBU_Family",
   properties = list(
@@ -107,8 +121,7 @@ MVBU_Family <- S7::new_class(
 #'   sufficient statistics. Default: \code{NULL}.
 #' @param stanmodel Optional list bundling `stanmodel_name` and `stanfit_class`
 #'   for Stan model families, or \code{NULL}. Default: \code{NULL}.
-#' @return An [MVBU_Family] object.
-#' @seealso [MVBU_Family], [register_model_family()], [get_model_family()]
+#' @rdname MVBU_Family
 #' @export
 new_mvbu_family <- function(
   name_short,
@@ -1062,9 +1075,7 @@ new_mvbu_family <- function(
 #'   character string. Default: \code{NULL}.
 #' @param overwrite Logical indicating whether to overwrite an existing
 #'   registration for this family. Default: \code{TRUE}.
-#' @return Invisibly \code{TRUE}.
-#' @seealso [MVBU_Family], [new_mvbu_family()], [get_model_family()],
-#'   [list_model_families()]
+#' @rdname MVBU_Family
 #' @export
 register_model_family <- function(
   family,
@@ -1150,6 +1161,8 @@ register_model_family <- function(
 #' @return Character vector of registered family short names.
 #' @seealso [get_model_family()], [register_model_family()]
 #' @export
+#' @examples
+#' list_model_families()
 list_model_families <- function() {
   sort(names(.mvbu_family_registry$families))
 }
@@ -1256,6 +1269,9 @@ list_model_families <- function() {
 #' @return A list with the registered class names and family object.
 #' @seealso [get_model_family()], [list_model_families()]
 #' @export
+#' @examples
+#' reg <- get_model_family_registration("UVG")
+#' reg$names$name_short
 get_model_family_registration <- function(family) {
   .get_model_family_registration(family)
 }
@@ -1288,6 +1304,9 @@ get_model_family_registration <- function(family) {
 #'   has no Stan model.
 #' @seealso [get_model_family()], [list_model_families()]
 #' @export
+#' @examples
+#' get_stanmodel_name("NIW")
+#' get_stanmodel_name("UVG")
 get_stanmodel_name <- function(family) {
   if (S7::S7_inherits(family, MVBU_Family)) {
     return(if (!is.null(family@stanmodel)) {

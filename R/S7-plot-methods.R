@@ -55,10 +55,10 @@ NULL
     return(sprintf("%dD multivariate independent Gaussian ideal observer", D))
   }
   if (S7::S7_inherits(x, NIX_IdealAdaptor)) {
-    return("1D N-Inv-\u03c7\u00b2 (NIX) ideal adaptor")
+    return("1D N-Inv-chi^2 (NIX) ideal adaptor")
   }
   if (S7::S7_inherits(x, MNIX_IdealAdaptor)) {
-    return(sprintf("%dD indep. N-Inv-\u03c7\u00b2 (MNIX) ideal adaptor", D))
+    return(sprintf("%dD indep. N-Inv-chi^2 (MNIX) ideal adaptor", D))
   }
   if (S7::S7_inherits(x, NIW_IdealAdaptor)) {
     return(sprintf("%dD N-Inv-Wishart (NIW) ideal adaptor", D))
@@ -73,10 +73,10 @@ NULL
     return(sprintf("%dD multivariate Gaussian category", D))
   }
   if (S7::S7_inherits(x, NIX_CategoryRepresentation)) {
-    return("1D N-Inv-\u03c7\u00b2 (NIX) category")
+    return("1D N-Inv-chi^2 (NIX) category")
   }
   if (S7::S7_inherits(x, MNIX_CategoryRepresentation)) {
-    return(sprintf("%dD indep. N-Inv-\u03c7\u00b2 (MNIX) category", D))
+    return(sprintf("%dD indep. N-Inv-chi^2 (MNIX) category", D))
   }
   if (S7::S7_inherits(x, NIW_CategoryRepresentation)) {
     return(sprintf("%dD N-Inv-Wishart (NIW) category", D))
@@ -155,25 +155,21 @@ NULL
     }
 
     lapse_trt <- get_lapse_treatment(x)
-    if (identical(lapse_trt, "no_lapse") || identical(lapse_trt, "no_lapses")) {
-      lapse_trt <- "none"
-    }
     lapse_trt_txt <- sprintf("Lapses: %s", lapse_trt)
 
     sigma_n <- get_noise(x)
     noise_trt <- get_noise_treatment(x)
 
     noise_txt <- if (!is.null(sigma_n) &&
-      !identical(noise_trt, "no_noise") &&
-      !identical(noise_trt, "none")) {
+      !identical(noise_trt, "no_noise")) {
       sd_n <- round(sqrt(diag(as.matrix(sigma_n))), 2)
       sprintf(
-        "Noise: %s (\u03c3_noise = %s)",
+        "Noise: %s (sigma_noise = %s)",
         noise_trt,
         paste(sd_n, collapse = ", ")
       )
     } else {
-      "Noise: none"
+      "Noise: no_noise"
     }
 
     if (identical(plot_type, "categories")) {
@@ -237,7 +233,7 @@ NULL
         )
       }
 
-      lapse_txt <- sprintf("Lapse rate (\u03bb): %s", round(l_rate, 2))
+      lapse_txt <- sprintf("Lapse rate (lambda): %s", round(l_rate, 2))
       line3 <- sprintf("%s | %s", pri_bias_txt, lapse_txt)
       sub_txt <- sprintf("%s\n%s\n%s", fam, line2, line3)
       return(list(title = main_title, subtitle = sub_txt))
@@ -2564,14 +2560,20 @@ S7::method(plot_categorization_functions, MVBU_Stanfit) <- function(
     FALSE
   }
   if (is.null(noise_treatment)) {
-    noise_treatment <- "none"
+    noise_treatment <- "no_noise"
   } else {
-    noise_treatment <- match.arg(noise_treatment, c("none", "marginalize"))
+    noise_treatment <- match.arg(
+      noise_treatment,
+      c("no_noise", "sample", "marginalize")
+    )
   }
   if (is.null(lapse_treatment)) {
-    lapse_treatment <- "none"
+    lapse_treatment <- "no_lapses"
   } else {
-    lapse_treatment <- match.arg(lapse_treatment, c("none", "marginalize"))
+    lapse_treatment <- match.arg(
+      lapse_treatment,
+      c("no_lapses", "sample", "marginalize")
+    )
   }
 
   obj_cues <- get_cue_labels(x)
@@ -2851,7 +2853,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
       loc_rows[[length(loc_rows) + 1]] <- data.frame(
         Category = cat_name,
         Cue = cues[k],
-        Parameter = "\u03bc",
+        Parameter = "mu",
         Value = mu_v[k],
         stringsAsFactors = FALSE
       )
@@ -2873,7 +2875,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
       scale_rows[[length(scale_rows) + 1]] <- data.frame(
         Category = cat_name,
         Cue = cues[k],
-        Parameter = "\u03c4",
+        Parameter = "tau",
         Value = sd_v[k],
         stringsAsFactors = FALSE
       )
@@ -2889,8 +2891,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
   noise_trt <- get_noise_treatment(x)
   noise_rows <- list()
   if (!is.null(sigma_n) &&
-    !identical(noise_trt, "no_noise") &&
-    !identical(noise_trt, "none")) {
+    !identical(noise_trt, "no_noise")) {
     sd_n <- sqrt(pmax(diag(as.matrix(sigma_n)), 1e-6))
     for (k in seq_along(cues)) {
       noise_rows[[length(noise_rows) + 1]] <- data.frame(
@@ -2914,7 +2915,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
           corr_rows[[length(corr_rows) + 1]] <- data.frame(
             Category = cat_name,
             Pair = paste0(cues[i], "-", cues[j]),
-            Parameter = "\u03c1",
+            Parameter = "rho",
             Value = c_mat[i, j],
             stringsAsFactors = FALSE
           )
@@ -2934,7 +2935,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
     if ("kappa" %in% names(r)) {
       counts_rows[[length(counts_rows) + 1]] <- data.frame(
         Category = cat_name,
-        Parameter = "\u03ba (location)",
+        Parameter = "kappa (location)",
         Value = r@kappa,
         stringsAsFactors = FALSE
       )
@@ -2942,7 +2943,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
     if ("nu" %in% names(r)) {
       counts_rows[[length(counts_rows) + 1]] <- data.frame(
         Category = cat_name,
-        Parameter = "\u03bd (scale)",
+        Parameter = "nu (scale)",
         Value = r@nu,
         stringsAsFactors = FALSE
       )
@@ -2968,7 +2969,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
     for (cat_name in names(cp)) {
       probs_rows[[length(probs_rows) + 1]] <- data.frame(
         Category = cat_name,
-        Parameter = "Prior P(C)",
+        Parameter = "p(c)",
         Value = cp[cat_name],
         stringsAsFactors = FALSE
       )
@@ -2994,7 +2995,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
   lapse_row <- NULL
   if (!is.null(l_rate) && l_rate > 0) {
     lapse_row <- data.frame(
-      Parameter = "Lapse rate (\u03bb)",
+      Parameter = "Lapse rate (lambda)",
       Value = l_rate,
       stringsAsFactors = FALSE
     )
@@ -3015,7 +3016,12 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
       counts_df <- counts_df[grepl(p_pat, counts_df$Parameter), ]
     }
     if (nrow(probs_df) > 0L) {
-      probs_df <- probs_df[grepl(p_pat, probs_df$Parameter), ]
+      probs_df <- probs_df[
+        probs_df$Parameter %in% pars |
+          grepl(p_pat, probs_df$Parameter) |
+          (grepl("prior", p_pat, ignore.case = TRUE) &
+            probs_df$Parameter == "p(c)"),
+      ]
     }
   }
 
@@ -3036,7 +3042,11 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
         size = 3
       ) +
       guides(fill = "none") +
-      labs(title = "Category location", x = NULL, y = "Location (\u03bc)") +
+      labs(
+        title = "Category location",
+        x = NULL,
+        y = expression(paste("Location (", mu, ")"))
+      ) +
       .mvbu_theme()
   }
 
@@ -3055,7 +3065,11 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
       ) +
       guides(fill = "none") +
       scale_y_log10() +
-      labs(title = "Category scale", x = NULL, y = "Scale (\u03c4)") +
+      labs(
+        title = "Category scale",
+        x = NULL,
+        y = expression(paste("Scale (", tau, ")"))
+      ) +
       .mvbu_theme()
 
     if (nrow(noise_df) > 0L) {
@@ -3091,7 +3105,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
       labs(
         title = "Category cue correlations",
         x = NULL,
-        y = "Cue correlation (\u03c1)"
+        y = expression(paste("Cue correlation (", rho, ")"))
       ) +
       .mvbu_theme()
   }
@@ -3123,6 +3137,13 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
         x = NULL,
         y = "Count"
       ) +
+      scale_x_discrete(
+        labels = c(
+          "kappa (location)" = expression(paste(kappa, " (location)")),
+          "nu (scale)" = expression(paste(nu, " (scale)")),
+          "Exemplars" = "Exemplars"
+        )
+      ) +
       .mvbu_theme()
   }
 
@@ -3134,6 +3155,13 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
         title = "Decision-making",
         x = NULL,
         y = "Probability"
+      ) +
+      scale_x_discrete(
+        labels = c(
+          "p(c)" = expression(p(c)),
+          "Lapse bias" = "Lapse bias",
+          "Lapse rate (lambda)" = expression(paste("Lapse rate (", lambda, ")"))
+        )
       ) +
       .mvbu_theme() +
       theme(
@@ -3294,7 +3322,7 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
       scale_y_continuous(breaks = scales::breaks_pretty(n = 3)) +
       labs(
         title = "Category location",
-        x = "Location (\u03bc)",
+        x = expression(paste("Location (", mu, ")")),
         y = "Density"
       ) +
       .mvbu_theme() +
@@ -3355,7 +3383,7 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
       facet_grid(Group ~ Cue, scales = "free", labeller = label_parsed) +
       labs(
         title = "Category scale",
-        x = "Scale (\u03c4)",
+        x = expression(paste("Scale (", tau, ")")),
         y = "Density"
       ) +
       .mvbu_theme() +
@@ -3439,7 +3467,7 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
       facet_wrap(~group) +
       labs(
         title = "Decision-making",
-        x = "Lapse rate (\u03bb)",
+        x = expression(paste("Lapse rate (", lambda, ")")),
         y = "Density"
       ) +
       .mvbu_theme() +
@@ -3661,7 +3689,7 @@ S7::method(plot_parameter_correlations, MVBU_Stanfit) <- function(
       high = "red",
       midpoint = 0,
       limit = c(-1, 1),
-      name = "Pearson \u03c1"
+      name = expression(paste("Pearson ", rho))
     ) +
     scale_x_discrete(labels = scales::parse_format()) +
     scale_y_discrete(labels = scales::parse_format()) +

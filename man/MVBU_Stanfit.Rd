@@ -302,6 +302,18 @@ Default: \code{list()}.}
 \description{
 An S7 base class for Stan fit objects.
 }
+\examples{
+# Instantiate an empty Stanfit container object
+fit <- MVBU_Stanfit()
+is(fit, "MVBU_Stanfit")
+
+\donttest{
+# Load a pre-compiled example Stanfit object
+ex_fit <- example_ideal_adaptor_stanfit()
+class(ex_fit)
+}
+
+}
 \seealso{
 \code{\link{add_posterior_latents}}, \code{\link{fit_ideal_adaptor}},
 \code{vignette("fitting-and-working-with-stanfit-models")}

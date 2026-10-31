@@ -38,6 +38,17 @@ NULL
 #' @rdname MVBU_StanfitPosterior
 #' @docType class
 #' @export
+#' @examples
+#' # Construct a lightweight StanfitPosterior object
+#' post <- MVBU_StanfitPosterior()
+#' post
+#'
+#' \donttest{
+#' # Coerce from a fitted Stan model
+#' fit <- example_ideal_adaptor_stanfit()
+#' post <- as_MVBU_stanfit_posterior(fit)
+#' post
+#' }
 MVBU_StanfitPosterior <- S7::new_class(
   "MVBU_StanfitPosterior",
   package = NULL,
@@ -566,7 +577,7 @@ S7::method(get_expected_category_statistic, MVBU_StanfitPosterior) <- function(
   draws
 }
 
-#' @rdname get_marginal_category_statistic
+#' @rdname get_expected_category_statistic
 #' @export
 S7::method(get_marginal_category_statistic, MVBU_StanfitPosterior) <- function(
   x,

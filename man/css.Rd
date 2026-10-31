@@ -16,8 +16,15 @@ uss(x)
 A square matrix.
 }
 \description{
-Calculate centered (\code{css()}) or uncentered (\code{uss()}) sum-of-squares
-matrix for a matrix of observations.
+Calculate centered (\code{css()}) or uncentered (\code{uss()})
+sum-of-squares matrix for a matrix of observations.
+}
+\examples{
+x <- matrix(rnorm(20), nrow = 10, ncol = 2)
+# Centered sum-of-squares matrix
+css(x)
+# Uncentered sum-of-squares matrix
+uss(x)
 }
 \seealso{
 \code{\link{css2cov}}, \code{\link{cov2css}}, \code{\link{uss2css}}

@@ -13,22 +13,35 @@ get_affine_transform(
 \arguments{
 \item{data}{A \code{tibble} or \code{data.frame}.}
 
-\item{cues}{A character vector of column names in \code{data} that should be transformed.}
+\item{cues}{A character vector of column names in \code{data} that should be
+transformed.}
 
-\item{type}{The type of transformation to apply. Can be one of \code{"identity"},
-\code{"center"}, \code{"standardize"}, \code{"PCA whiten"}, or \code{"ZCA whiten"}.
-Except for the identity transform, all transforms center. Standardize additionally
-divides by the standard deviations. PCA whitening rotates the data into the space
-of principal components with unit variance. ZCA whitening achieves unit variance
-while maintaining original orientation as close as possible.
+\item{type}{The type of transformation to apply. Can be one of
+\code{"identity"}, \code{"center"}, \code{"standardize"},
+\code{"PCA whiten"}, or \code{"ZCA whiten"}. Except for the identity
+transform, all transforms center. Standardize additionally divides by the
+standard deviations. PCA whitening rotates the data into the space of
+principal components with unit variance. ZCA whitening achieves unit
+variance while maintaining original orientation as close as possible.
 (default: \code{"identity"})}
 }
 \value{
-An \code{\link{MVBU_TransformInformation}} object that can be used to transform
-data or models.
+An \code{\link{MVBU_TransformInformation}} object that can be used to
+transform data or models.
 }
 \description{
 Computes an affine transformation for a set of \code{cues} in \code{data}.
-Returns an \code{\link{MVBU_TransformInformation}} object representing a linear map
-\eqn{f(x) = A(x + b)}, where \eqn{b} is the shift vector and \eqn{A} is the scale/rotation matrix.
+Returns an \code{\link{MVBU_TransformInformation}} object representing a
+linear map \eqn{f(x) = A(x + b)}, where \eqn{b} is the shift vector and
+\eqn{A} is the scale/rotation matrix.
+}
+\examples{
+df <- data.frame(
+  vot = rnorm(50, 20, 10),
+  f0 = rnorm(50, 220, 25)
+)
+# Standardize transformation
+trans <- get_affine_transform(df, cues = c("vot", "f0"),
+                              type = "standardize")
+trans
 }

@@ -34,6 +34,14 @@ NULL
 #' @name MVBU_Prior
 #' @rdname MVBU_Prior
 #' @export
+#' @examples
+#' # Specify class-wide priors
+#' p1 <- prior("cauchy(0, 5)", class = "tau_0")
+#' p2 <- prior("lkj(1)", class = "cor_0")
+#' p3 <- prior("normal(0, 1)", class = "m_0")
+#'
+#' # Combine priors into a list
+#' c(p1, p2, p3)
 MVBU_Prior <- S7::new_class(
   "MVBU_Prior",
   package = NULL,

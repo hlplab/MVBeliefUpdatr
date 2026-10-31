@@ -20,8 +20,8 @@ NULL
 #' @param cues Character string indicating the cue column in `data`. Defaults to `"cue"`.
 #' @param category_template An [MVBU_CategoryRepresentationTemplate] object
 #'   containing UVG category representations.
-#' @param decision_rule Categorization decision rule: `"sampling"` or
-#'   `"argmax"`. Defaults to `"sampling"`.
+#' @param decision_rule Categorization decision rule: `"sampling"`,
+#'   `"criterion"`, or `"proportional"`. Defaults to `"sampling"`.
 #' @param category_prior Optional numeric vector of prior category
 #'   probabilities summing to 1. Defaults to equal priors.
 #' @param lapse_rate Numeric scalar lapse probability in `[0, 1]`. Defaults
@@ -83,6 +83,20 @@ NULL
 #' @docType class
 #' @usage NULL
 #' @export
+#' @examples
+#' # Create UVG representations
+#' rep_b <- new_uvg_category_representation(
+#'   category_labels = "/b/", cue_labels = "VOT",
+#'   mu = 10, sigma2 = 25
+#' )
+#' rep_d <- new_uvg_category_representation(
+#'   category_labels = "/d/", cue_labels = "VOT",
+#'   mu = 50, sigma2 = 25
+#' )
+#' # Combine into template and ideal observer
+#' tmpl <- new_category_representation_template(list(rep_b, rep_d))
+#' m_uvg <- new_uvg_ideal_observer(category_template = tmpl)
+#' m_uvg
 UVG_CategoryRepresentation <- S7::new_class(
   "UVG_CategoryRepresentation",
   parent = MVBU_CategoryRepresentation,

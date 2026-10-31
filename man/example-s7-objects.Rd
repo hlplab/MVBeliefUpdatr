@@ -177,3 +177,12 @@ frequency, and vowel duration (\code{"VOT"}, \code{"f0_semitones"},
 and \code{"vowel_duration"}).
 }
 }
+\examples{
+# 1D UVG category representation from bundled data
+uvg_rep <- example_uvg_category_representation()
+uvg_rep
+
+# 2D MVG ideal observer model from bundled data
+mvg_mod <- example_mvg_ideal_observer(n_cues = 2)
+mvg_mod
+}

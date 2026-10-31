@@ -16,6 +16,10 @@ has no Stan model.
 \description{
 Get the Stan model name associated with a model family
 }
+\examples{
+get_stanmodel_name("NIW")
+get_stanmodel_name("UVG")
+}
 \seealso{
 \code{\link[=get_model_family]{get_model_family()}}, \code{\link[=list_model_families]{list_model_families()}}
 }

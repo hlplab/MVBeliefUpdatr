@@ -3,6 +3,9 @@
 \docType{class}
 \name{MVBU_ModelList}
 \alias{MVBU_ModelList}
+\alias{as_model_list}
+\alias{print.MVBU_ModelList}
+\alias{summary.MVBU_ModelList}
 \title{S7 class for ordered collections of cognitive models}
 \usage{
 MVBU_ModelList(
@@ -10,15 +13,34 @@ MVBU_ModelList(
   model_labels = character(0),
   metadata = list(parameters = list())
 )
+
+as_model_list(models, model_labels = NULL, metadata = list())
+
+\method{print}{MVBU_ModelList}(x, ...)
+
+\method{summary}{MVBU_ModelList}(object, ...)
 }
 \arguments{
-\item{models}{A list of S7 cognitive model objects or \code{MVBU_StanfitPosterior} objects. Default: \code{list()}.}
+\item{models}{A list of S7 cognitive model objects or
+\code{MVBU_StanfitPosterior} objects. Default: \code{list()}.}
 
-\item{model_labels}{Character vector of labels corresponding to each model. Default: \code{character(0)}.}
+\item{model_labels}{Character vector of labels corresponding to each model.
+Default: \code{character(0)}.}
 
 \item{metadata}{Optional list of metadata attributes. Default: \code{list()}.}
+
+\item{x, object}{An \code{\link{MVBU_ModelList}} object.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \description{
 Represents an ordered collection or list of cognitive model objects (which may
 represent sequential update histories, parameter variations, or distinct model variants).
+}
+\examples{
+m1 <- example_uvg_ideal_observer()
+m2 <- example_uvg_ideal_observer()
+ml <- as_model_list(list(m1, m2), model_labels = c("Step 0", "Step 1"))
+print(ml)
+summary(ml)
 }

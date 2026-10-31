@@ -11,15 +11,21 @@ add_noise(data, cues, method = c("sample", "marginalize"), Sigma)
 
 \item{cues}{Column names of cues in \code{data}.}
 
-\item{method}{If "sample" then a sample of
-noise is added to the input. If "marginalize" then each observation is transformed into the marginal distribution
-that results from convolving the input with noise. Currently, only "sample" is implemented (default: "sample")}
+\item{method}{If \code{"sample"} (default) then a sample of noise is added
+to the input. If \code{"marginalize"} then each observation is transformed
+into the marginal distribution that results from convolving the input with
+noise. Currently, only \code{"sample"} is implemented.}
 
 \item{Sigma}{Covariance matrix of noise.}
 }
 \value{
-Same as \code{data}.
+Same as \code{data} with noise added to cues.
 }
 \description{
 Adds Gaussian noise to cues in a data set.
+}
+\examples{
+df <- data.frame(vot = c(10, 20, 30), f0 = c(150, 180, 210))
+noise_cov <- matrix(c(4, 0, 0, 9), nrow = 2)
+add_noise(df, cues = c("vot", "f0"), Sigma = noise_cov)
 }

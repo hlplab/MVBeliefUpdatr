@@ -161,7 +161,7 @@ S7::method(print, MVBU_CategoryRepresentation) <- function(x, ...) {
     cat("  kappa: ", format(x@kappa, digits = 4), "\n", sep = "")
     cat("  nu: ", format(x@nu, digits = 4), "\n", sep = "")
     cat("  m: ", format(x@m, digits = 4), "\n", sep = "")
-    cat("  S: ", format(x@S, digits = 4), "\n", sep = "")
+    cat("  sigma2: ", format(x@sigma2, digits = 4), "\n", sep = "")
   } else if (S7::S7_inherits(x, MVG_CategoryRepresentation)) {
     if (length(x@mu) == 1L) {
       cat("  mu: ", format(x@mu, digits = 4), "\n", sep = "")
@@ -1080,7 +1080,7 @@ S7::method(get_noise_treatment, MVBU_CognitiveModel) <- function(x, ...) {
 # Label accessors and setters
 # -------------------------
 
-#' @rdname set_labels
+#' @rdname get_labels
 #' @export
 S7::method(set_labels, S7::class_list) <- function(
   x,
@@ -1103,7 +1103,7 @@ S7::method(set_labels, S7::class_list) <- function(
   x
 }
 
-#' @rdname set_labels
+#' @rdname get_labels
 #' @export
 S7::method(set_labels, MVBU_Object) <- function(
   x,
@@ -1139,7 +1139,7 @@ S7::method(get_labels, MVBU_Object) <- function(x, ...) {
   lbls
 }
 
-#' @rdname get_cue_labels
+#' @rdname get_labels
 #' @export
 S7::method(get_cue_labels, MVBU_Object) <- function(x, indices = NULL, ...) {
   cue_labels <- get_labels(x)$cue
@@ -1149,7 +1149,7 @@ S7::method(get_cue_labels, MVBU_Object) <- function(x, indices = NULL, ...) {
   cue_labels[indices]
 }
 
-#' @rdname get_cue_labels
+#' @rdname get_labels
 #' @export
 S7::method(get_cue_labels, MNIX_EarlyIdealAdaptor) <- function(
   x,
@@ -1164,7 +1164,7 @@ S7::method(get_cue_labels, MNIX_EarlyIdealAdaptor) <- function(
 }
 
 
-#' @rdname get_category_labels
+#' @rdname get_labels
 #' @export
 S7::method(get_category_labels, MVBU_Object) <- function(
   x,
@@ -1188,7 +1188,7 @@ S7::method(get_category_labels, MVBU_Object) <- function(
   category_labels[indices]
 }
 
-#' @rdname get_response_category_labels
+#' @rdname get_labels
 #' @export
 S7::method(get_response_category_labels, MVBU_Object) <- function(
   x,
@@ -1202,7 +1202,7 @@ S7::method(get_response_category_labels, MVBU_Object) <- function(
   resp_labels[indices]
 }
 
-#' @rdname get_group_labels
+#' @rdname get_labels
 #' @export
 S7::method(get_group_labels, MVBU_Object) <- function(
   x,

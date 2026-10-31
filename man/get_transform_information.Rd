@@ -28,3 +28,7 @@ A transform-information object.
 \description{
 Get transform metadata from an S7 fit or fit-input object
 }
+\examples{
+sfi <- example_ideal_adaptor_stanfit_input()
+get_transform_information(sfi)
+}

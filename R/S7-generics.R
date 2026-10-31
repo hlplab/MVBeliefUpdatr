@@ -10,7 +10,14 @@ NULL
 #' @param x An object.
 #' @param ... Additional arguments passed to methods.
 #' @return A character string representing the model family.
+#' @seealso \code{\link{get_family}}, \code{\link{get_family_name}}
+#' @rdname get_model_family
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' get_model_family(mod)
+#' get_family_name(mod)
+#' get_family(mod)
 get_model_family <- S7::new_generic("get_model_family", "x")
 
 #' Get metadata from an object
@@ -19,6 +26,9 @@ get_model_family <- S7::new_generic("get_model_family", "x")
 #' @param ... Additional arguments passed to methods.
 #' @return A list containing metadata associated with the object.
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' get_metadata(mod)
 get_metadata <- S7::new_generic("get_metadata", "x")
 
 #' Extract parameters, parameter names, or priors from objects
@@ -34,10 +44,17 @@ get_metadata <- S7::new_generic("get_metadata", "x")
 #'   expanded, indexed, and post-processed/renamed parameter draw names (as
 #'   returned by \code{names(stanfit)}). Default: \code{FALSE}.
 #' @param ... Additional arguments passed to methods.
-#' @return A list, vector, matrix, data frame, or \code{\link{MVBU_Prior}} object.
+#' @return A list, vector, matrix, data frame, or \code{\link{MVBU_Prior}}
+#'   object.
 #' @seealso \code{\link{prior}}, \code{\link{get_data}}
 #' @rdname get_parameters
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' get_parameters(mod)
+#' get_parameter_names(mod)
+#' get_expected_mu(mod)
+#' get_expected_sigma(mod)
 get_parameters <- S7::new_generic(
   "get_parameters",
   "x",
@@ -62,18 +79,22 @@ get_parameter_names <- S7::new_generic(
 
 #' Aggregate representations, templates, or cognitive models
 #'
-#' @param x An S7 representation, template, cognitive model, or list of such objects.
-#'   When `x` is not an S7 object or list of S7 objects, dispatch falls back to
-#'   \code{\link[stats]{aggregate}}.
-#' @param ... Additional objects of the same class (for variadic usage) or arguments
-#'   passed to methods.
-#' @param weights Optional numeric vector of positive weights with the same length as
-#'   the number of objects being aggregated. If \code{NULL} (default), uniform weights
-#'   \code{1/N} are used.
+#' @param x An S7 representation, template, cognitive model, or list of such
+#'   objects. When `x` is not an S7 object or list of S7 objects, dispatch falls
+#'   back to \code{\link[stats]{aggregate}}.
+#' @param ... Additional objects of the same class (for variadic usage) or
+#'   arguments passed to methods.
+#' @param weights Optional numeric vector of positive weights with the same
+#'   length as the number of objects being aggregated. If \code{NULL} (default),
+#'   uniform weights \code{1/N} are used.
 #' @return An aggregated S7 object of the same class.
 #'
 #' @rdname aggregate_models
 #' @export
+#' @examples
+#' m1 <- example_mvg_ideal_observer(n_cues = 2)
+#' m2 <- example_mvg_ideal_observer(n_cues = 2)
+#' aggregate(m1, m2, weights = c(0.5, 0.5))
 aggregate <- S7::new_generic("aggregate", "x", function(x, ...) {
   if (S7::S7_inherits(x, MVBU_Object) || (is.list(x) && length(x) > 0 && S7::S7_inherits(x[[1]], MVBU_Object))) {
     S7::S7_dispatch()
@@ -115,6 +136,16 @@ get_category_template <- S7::new_generic("get_category_template", "x")
 #'   added.
 #' @seealso [get_category_labels()]
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' new_rep <- new_mvg_category_representation(
+#'   category_labels = "/s/",
+#'   cue_labels = c("VOT", "f0_semitones"),
+#'   mu = c(30, 0),
+#'   Sigma = diag(c(25, 10))
+#' )
+#' mod_new <- add_category_representation(mod, new_rep, name = "/s/")
+#' get_category_labels(mod_new)
 add_category_representation <- S7::new_generic(
   "add_category_representation",
   "x",
@@ -134,18 +165,22 @@ add_category_representation <- S7::new_generic(
 #' Get the stored Stan fit from an S7 fit object
 #'
 #' @param x An S7 fit object.
-#' @param ... Additional arguments passed to methods.
-#' @return The stored [rstan::stanfit] object when present.
-#' @export
-get_stanfit <- S7::new_generic("get_stanfit", "x")
-
-#' Set the stored Stan fit on an S7 fit object
-#'
-#' @param x An S7 fit object.
 #' @param stanfit An [rstan::stanfit] object.
-#' @return The updated S7 fit object.
+#' @param ... Additional arguments passed to methods.
+#' @return The stored [rstan::stanfit] object when present, or the updated
+#'   S7 fit object.
 #' @rdname get_stanfit
 #' @aliases set_stanfit
+#' @export
+#' @examples
+#' \donttest{
+#' fit <- example_ideal_adaptor_stanfit()
+#' sf <- get_stanfit(fit)
+#' fit <- set_stanfit(fit, sf)
+#' }
+get_stanfit <- S7::new_generic("get_stanfit", "x")
+
+#' @rdname get_stanfit
 #' @export
 set_stanfit <- S7::new_generic("set_stanfit", c("x", "stanfit"))
 
@@ -156,6 +191,11 @@ set_stanfit <- S7::new_generic("set_stanfit", c("x", "stanfit"))
 #' @param ... Additional arguments.
 #' @return A named list of control parameters.
 #' @export
+#' @examples
+#' \donttest{
+#' fit <- example_ideal_adaptor_stanfit()
+#' control_params(fit)
+#' }
 control_params <- S7::new_generic(
   "control_params",
   "x",
@@ -165,10 +205,17 @@ control_params <- S7::new_generic(
 #' Extract diagnostic information from MVBU_Stanfit object
 #'
 #' @param x An S7 fit object or stanfit object.
+#' @param pars Optional parameter names.
 #' @param ... Additional arguments.
-#' @return Log posterior draws.
+#' @return Log posterior draws, NUTS sampler parameters, Rhat, or Neff ratio.
 #' @rdname diagnostic-quantities
 #' @export
+#' @examples
+#' \donttest{
+#' fit <- example_ideal_adaptor_stanfit()
+#' rhat(fit)
+#' neff_ratio(fit)
+#' }
 log_posterior <- S7::new_generic("log_posterior", "x", function(x, ...) {
   if (inherits(x, "stanfit") || inherits(x, "CmdStanFit")) {
     bayesplot::log_posterior(x, ...)
@@ -177,12 +224,6 @@ log_posterior <- S7::new_generic("log_posterior", "x", function(x, ...) {
   }
 })
 
-#' Extract NUTS sampler parameters
-#'
-#' @param x An S7 fit object or stanfit object.
-#' @param pars Optional parameter names.
-#' @param ... Additional arguments.
-#' @return NUTS sampler parameters.
 #' @rdname diagnostic-quantities
 #' @export
 nuts_params <- S7::new_generic(
@@ -197,12 +238,6 @@ nuts_params <- S7::new_generic(
   }
 )
 
-#' Extract Rhat diagnostic values
-#'
-#' @param x An S7 fit object, draws object, or array.
-#' @param pars Optional parameter names.
-#' @param ... Additional arguments passed to methods.
-#' @return Named numeric vector of Rhat values.
 #' @rdname diagnostic-quantities
 #' @export
 rhat <- S7::new_generic(
@@ -211,12 +246,6 @@ rhat <- S7::new_generic(
   function(x, pars = NULL, ...) S7::S7_dispatch()
 )
 
-#' Extract effective sample size ratio
-#'
-#' @param x An S7 fit object or stanfit object.
-#' @param pars Optional parameter names.
-#' @param ... Additional arguments.
-#' @return Named numeric vector of Neff ratios.
 #' @rdname diagnostic-quantities
 #' @export
 neff_ratio <- S7::new_generic("neff_ratio", "x", function(x, pars = NULL, ...) {
@@ -231,17 +260,21 @@ neff_ratio <- S7::new_generic("neff_ratio", "x", function(x, pars = NULL, ...) {
 #' Get the stored Stan input from an S7 fit or fit-input object
 #'
 #' @param x An S7 fit or fit-input object.
-#' @param ... Additional arguments passed to methods.
-#' @return The stored S7 Stan input object.
-#' @export
-get_staninput <- S7::new_generic("get_staninput", "x")
-
-#' Set the stored Stan input on an S7 fit or fit-input object
-#'
-#' @param x An S7 fit or fit-input object.
 #' @param staninput An S7 Stan input object.
 #' @param ... Additional arguments passed to methods.
-#' @return The updated S7 object.
+#' @return The stored S7 Stan input object, or the updated S7 object.
+#' @rdname get_staninput
+#' @aliases set_staninput
+#' @export
+#' @examples
+#' \donttest{
+#' fit <- example_ideal_adaptor_stanfit()
+#' si <- get_staninput(fit)
+#' fit <- set_staninput(fit, si)
+#' }
+get_staninput <- S7::new_generic("get_staninput", "x")
+
+#' @rdname get_staninput
 #' @export
 set_staninput <- S7::new_generic("set_staninput", c("x", "staninput"))
 
@@ -251,6 +284,9 @@ set_staninput <- S7::new_generic("set_staninput", c("x", "staninput"))
 #' @param ... Additional arguments passed to methods.
 #' @return A transform-information object.
 #' @export
+#' @examples
+#' sfi <- example_ideal_adaptor_stanfit_input()
+#' get_transform_information(sfi)
 get_transform_information <- S7::new_generic("get_transform_information", "x")
 
 #' Get category-prior values from a cognitive model
@@ -297,77 +333,18 @@ get_lapse_treatment <- S7::new_generic("get_lapse_treatment", "x")
 #' @export
 get_noise_treatment <- S7::new_generic("get_noise_treatment", "x")
 
-#' Get cue labels from a representation, template, or model
+#' Get cue, category, response category, or group labels from an object
 #'
-#' @param x A representation, representation template, or cognitive model.
-#' @param indices An optional integer vector of indices to subset the returned labels.
-#' @param ... Additional arguments passed to methods.
-#' @return A character vector of cue labels.
-#' @export
-get_cue_labels <- S7::new_generic("get_cue_labels", "x", function(x, indices = NULL, ...) S7::S7_dispatch())
-
-#' Get category labels from a representation, template, or model
+#' Query or modify the label mappings (cues, categories, response categories,
+#' or participant groups) stored in representations, templates, cognitive
+#' models, or Stan fit/input objects.
 #'
-#' @param x A representation, representation template, or cognitive model.
-#' @param indices An optional integer vector of indices to subset the returned labels.
-#' @param ... Additional arguments passed to methods.
-#' @return A character vector of category labels.
-#' @export
-get_category_labels <- S7::new_generic("get_category_labels", "x", function(x, indices = NULL, ...) S7::S7_dispatch())
-
-#' Get response category labels from an object
-#'
-#' @param x An object (e.g., \code{\link{IdealAdaptorStanfitInput}},
-#'   \code{\link{MVBU_Stanfit}}, or \code{\link{MVBU_StanfitPosterior}}).
-#' @param indices An optional integer vector of indices to subset the returned labels.
-#' @param ... Additional arguments passed to methods.
-#' @return A character vector of response category labels.
-#' @seealso \code{\link{get_category_labels}}, \code{\link{get_group_labels}}, \code{\link{get_cue_labels}}
-#' @export
-get_response_category_labels <- S7::new_generic(
-  "get_response_category_labels",
-  "x",
-  function(x, indices = NULL, ...) S7::S7_dispatch()
-)
-
-#' Get group labels from a model, stanfit, or stanfit-input object
-#'
-#' @param x A model, stanfit, or stanfit-input object.
-#' @param indices An optional integer vector of indices to subset the returned labels.
-#' @param include_prior Logical; whether to include the prior group label. Default: \code{FALSE}.
-#'   Only applicable if `x` is an \code{\link{MVBU_Stanfit}} or \code{\link{MVBU_StanfitPosterior}}
-#'   object.
-#' @param ... Additional arguments passed to methods.
-#' @return A character vector of group labels.
-#' @seealso \code{\link{get_cue_labels}}, \code{\link{get_category_labels}}, \code{\link{get_labels}}
-#' @export
-get_group_labels <- S7::new_generic(
-  "get_group_labels",
-  "x",
-  function(x, indices = NULL, include_prior = FALSE, ...) S7::S7_dispatch()
-)
-
-#' Get all labels from a representation, template, model, stanfit, or fit-input object
-#'
-#' @param x A representation, representation template, cognitive model, stanfit,
-#'   or fit-input object.
-#' @param ... Additional arguments passed to methods.
-#' @return A named list of character vectors with elements \code{cue},
-#'   \code{category}, \code{response_category}, and \code{group}.
-#' @seealso \code{\link{set_labels}}, \code{\link{get_cue_labels}},
-#'   \code{\link{get_category_labels}},
-#'   \code{\link{get_response_category_labels}},
-#'   \code{\link{get_group_labels}}
-#' @export
-get_labels <- S7::new_generic(
-  "get_labels",
-  "x",
-  function(x, ...) S7::S7_dispatch()
-)
-
-#' Set label information on an MVBU object or metadata list
-#'
-#' @param x An [MVBU_Object] or a metadata list.
+#' @param x A representation, representation template, cognitive model,
+#'   stanfit, or fit-input object.
+#' @param indices An optional integer vector of indices to subset the
+#'   returned labels.
+#' @param include_prior Logical; whether to include the prior group label.
+#'   Default: \code{FALSE}.
 #' @param cue Character vector of cue labels. Defaults to \code{character(0)}.
 #' @param category Character vector of category labels. Defaults to
 #'   \code{character(0)}.
@@ -376,11 +353,50 @@ get_labels <- S7::new_generic(
 #' @param group Character vector of group labels. Defaults to
 #'   \code{character(0)}.
 #' @param ... Additional arguments passed to methods.
-#' @return The modified object or list with updated \code{label_information}.
-#' @seealso \code{\link{get_labels}}, \code{\link{get_cue_labels}},
-#'   \code{\link{get_category_labels}},
-#'   \code{\link{get_response_category_labels}},
-#'   \code{\link{get_group_labels}}
+#' @return A character vector of labels, a named list of labels
+#'   (\code{get_labels}), or the modified object with updated labels
+#'   (\code{set_labels}).
+#' @seealso \code{\link{get_parameters}}
+#' @rdname get_labels
+#' @aliases get_cue_labels get_category_labels get_response_category_labels get_group_labels set_labels
+#' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' get_labels(mod)
+#' get_cue_labels(mod)
+#' get_category_labels(mod)
+#' mod <- set_labels(mod, cue = c("c1", "c2"))
+get_labels <- S7::new_generic(
+  "get_labels",
+  "x",
+  function(x, ...) S7::S7_dispatch()
+)
+
+#' @rdname get_labels
+#' @export
+get_cue_labels <- S7::new_generic("get_cue_labels", "x", function(x, indices = NULL, ...) S7::S7_dispatch())
+
+#' @rdname get_labels
+#' @export
+get_category_labels <- S7::new_generic("get_category_labels", "x", function(x, indices = NULL, ...) S7::S7_dispatch())
+
+#' @rdname get_labels
+#' @export
+get_response_category_labels <- S7::new_generic(
+  "get_response_category_labels",
+  "x",
+  function(x, indices = NULL, ...) S7::S7_dispatch()
+)
+
+#' @rdname get_labels
+#' @export
+get_group_labels <- S7::new_generic(
+  "get_group_labels",
+  "x",
+  function(x, indices = NULL, include_prior = FALSE, ...) S7::S7_dispatch()
+)
+
+#' @rdname get_labels
 #' @export
 set_labels <- S7::new_generic(
   "set_labels",
@@ -407,6 +423,10 @@ set_labels <- S7::new_generic(
 #' @param ... Additional arguments passed to methods.
 #' @return A function of `(new_data, log, noise_treatment, Sigma_noise)` returning category likelihoods.
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' lik_fn <- get_category_likelihood_function(mod)
+#' lik_fn(matrix(c(0, 0), nrow = 1))
 get_category_likelihood_function <- S7::new_generic("get_category_likelihood_function", "x")
 
 #' Extract a category-posterior function from a cognitive model
@@ -445,6 +465,10 @@ get_category_likelihood_function <- S7::new_generic("get_category_likelihood_fun
 #' @param ... Additional arguments passed to methods.
 #' @return A function that computes category posterior probabilities for one or more observations.
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' post_fn <- get_category_posterior_function(mod)
+#' post_fn(matrix(c(0, 0), nrow = 1))
 get_category_posterior_function <- S7::new_generic("get_category_posterior_function", c("x", "noise_treatment", "lapse_treatment"))
 
 #' Compute category likelihoods for one or more observations
@@ -459,6 +483,9 @@ get_category_posterior_function <- S7::new_generic("get_category_posterior_funct
 #' @param ... Additional arguments passed to methods.
 #' @return A matrix of category likelihoods with one row per observation and one column per category.
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' likelihood(mod, matrix(c(0, 0), nrow = 1))
 likelihood <- S7::new_generic("likelihood", c("x", "new_data", "categories"))
 
 #' Compute posterior category probabilities for one or more observations
@@ -469,6 +496,9 @@ likelihood <- S7::new_generic("likelihood", c("x", "new_data", "categories"))
 #' @param ... Additional arguments passed to methods.
 #' @return A matrix of posterior category probabilities with one row per observation.
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' posterior(mod, matrix(c(0, 0), nrow = 1))
 posterior <- S7::new_generic("posterior", c("x", "new_data", "categories"))
 
 #' Categorize one or more observations under the model's decision rule
@@ -490,6 +520,10 @@ posterior <- S7::new_generic("posterior", c("x", "new_data", "categories"))
 #'   and \code{response_probability} (which equals 1 for deterministic or sampled decisions,
 #'   and equals the category posterior probability under proportional decision rules).
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' categorize(mod, matrix(c(0, 0), nrow = 1))
+#' categorize(mod, matrix(c(0, 0), nrow = 1), simplify = FALSE)
 categorize <- S7::new_generic(
   "categorize",
   c("x", "new_data", "decision_rule"),
@@ -514,6 +548,14 @@ categorize <- S7::new_generic(
 #' @param ... Additional arguments passed to methods.
 #' @return An updated model, or a history of updated models when requested by a method.
 #' @export
+#' @examples
+#' mod <- example_niw_ideal_adaptor(n_cues = 2)
+#' obs <- tibble::tibble(
+#'   category = factor(c("/b/", "/d/")),
+#'   VOT = c(10, 15),
+#'   f0_semitones = c(-1, -0.5)
+#' )
+#' updated <- update_template(mod, obs)
 update_template <- S7::new_generic(
   "update_template",
   c("x", "observations"),
@@ -542,6 +584,14 @@ update_template <- S7::new_generic(
 #' @param ... Additional arguments passed to methods.
 #' @return An updated category representation.
 #' @export
+#' @examples
+#' cat_rep <- example_niw_category_representation(n_cues = 2)
+#' update_category_representation(
+#'   cat_rep,
+#'   n_exposure = 5L,
+#'   mean_exposure = c(0.5, 0.5),
+#'   css_exposure = matrix(c(1, 0.2, 0.2, 1), nrow = 2)
+#' )
 update_category_representation <- S7::new_generic(
   "update_category_representation",
   c("x", "n_exposure", "mean_exposure", "css_exposure")
@@ -550,29 +600,11 @@ update_category_representation <- S7::new_generic(
 
 get_expected_category <- S7::new_generic("get_expected_category", "x")
 
-#' Get the model family object
-#'
-#' Returns the [MVBU_Family] object associated with a category representation,
-#' template, cognitive model, or list of models. For heterogeneous collections,
-#' returns a list of [MVBU_Family] objects.
-#'
-#' @param x An MVBU object (category representation, template, cognitive
-#'   model, or cognitive model list).
-#' @param ... Additional arguments passed to methods.
-#' @return An [MVBU_Family] object or a list of [MVBU_Family] objects.
+#' @rdname get_model_family
 #' @export
 get_family <- S7::new_generic("get_family", "x")
 
-#' Get the model family name(s)
-#'
-#' Returns the canonical short family name string (e.g. \code{"UVG"}) for a
-#' category representation, template, cognitive model, or list of models.
-#' For heterogeneous collections, returns a character vector of family names.
-#'
-#' @param x An MVBU object (category representation, template, cognitive
-#'   model, or cognitive model list).
-#' @param ... Additional arguments passed to methods.
-#' @return A character scalar or vector identifying the family name(s).
+#' @rdname get_model_family
 #' @export
 get_family_name <- S7::new_generic("get_family_name", "x")
 
@@ -605,7 +637,13 @@ get_marginal_sigma <- S7::new_generic("get_marginal_sigma", "x", function(x, ...
 #' @param ... Additional arguments passed to methods.
 #' @return A numeric vector, matrix, or list of expected values.
 #' @seealso \code{\link{get_expected_mu}}, \code{\link{get_expected_sigma}}, \code{\link{get_marginal_category_statistic}}, \code{\link{get_parameters}}
+#' @rdname get_expected_category_statistic
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' get_expected_category_statistic(mod, statistic = "mu")
+#' get_expected_category_statistic(mod, statistic = "Sigma")
+#' get_marginal_category_statistic(mod, statistic = "mu")
 get_expected_category_statistic <- S7::new_generic(
   "get_expected_category_statistic",
   "x",
@@ -620,19 +658,7 @@ get_expected_category_statistic <- S7::new_generic(
   }
 )
 
-#' Extract marginal category statistics (predictive moments of observations) from an S7 object
-#'
-#' Computes the marginal predictive moments of observable stimulus tokens under the model's
-#' predictive distribution, marginalizing over parameter uncertainty within the category belief state.
-#'
-#' @param x An S7 object (cognitive model, category representation, template, or stanfit).
-#' @param statistic Character scalar indicating the statistic to extract: \code{"mu"} (marginal mean),
-#'   \code{"Sigma"} or \code{"sigma"} (marginal predictive covariance).
-#' @param categories Optional character vector of category names. Default: \code{NULL} (all categories).
-#' @param groups Optional character vector of group names. Default: \code{NULL} (all groups).
-#' @param ... Additional arguments passed to methods.
-#' @return A numeric vector, matrix, or data.frame of marginal values.
-#' @seealso \code{\link{get_expected_category_statistic}}, \code{\link{get_marginal_mu}}, \code{\link{get_marginal_sigma}}
+#' @rdname get_expected_category_statistic
 #' @export
 get_marginal_category_statistic <- S7::new_generic(
   "get_marginal_category_statistic",
@@ -670,6 +696,12 @@ get_marginal_category_statistic <- S7::new_generic(
 #' @return A tibble with MCMC draws of the model parameters.
 #' @seealso \code{\link{get_parameters}}, \code{\link{get_stanfit}}
 #' @export
+#' @examples
+#' \donttest{
+#' fit <- example_ideal_adaptor_stanfit()
+#' draws <- get_draws(fit, ndraws = 5)
+#' head(draws)
+#' }
 get_draws <- S7::new_generic(
   "get_draws",
   "fit",
@@ -701,6 +733,7 @@ get_draws <- S7::new_generic(
 #' @param ... Additional arguments passed to methods.
 #' @return A named list of character vectors (or a character vector if a single variable is requested) containing the original variable names.
 #' @seealso \code{\link{get_data}}, \code{\link{get_exposure_data}}, \code{\link{get_test_data}}
+#' @rdname get_data
 #' @export
 get_original_variable_names <- S7::new_generic(
   "get_original_variable_names",
@@ -732,6 +765,12 @@ get_original_variable_names <- S7::new_generic(
 #' @seealso \code{\link{get_original_variable_names}}
 #' @rdname get_data
 #' @export
+#' @examples
+#' sfi <- example_ideal_adaptor_stanfit_input()
+#' get_original_variable_names(sfi)
+#' head(get_data(sfi))
+#' head(get_exposure_data(sfi))
+#' head(get_test_data(sfi))
 get_data <- S7::new_generic(
   "get_data",
   "x",
@@ -811,6 +850,9 @@ get_test_data <- S7::new_generic(
 #'   statistics.
 #' @seealso \code{\link{get_sufficient_category_statistics}}
 #' @export
+#' @examples
+#' sfi <- example_ideal_adaptor_stanfit_input()
+#' get_exposure_category_statistics(sfi, stats = "mean")
 get_exposure_category_statistics <- S7::new_generic(
   "get_exposure_category_statistics",
   "x",
@@ -833,6 +875,10 @@ get_exposure_category_statistics <- S7::new_generic(
 #' @return A function.
 #' @rdname get_transform_function
 #' @export
+#' @examples
+#' sfi <- example_ideal_adaptor_stanfit_input()
+#' tf <- get_transform_function(sfi)
+#' utf <- get_untransform_function(sfi)
 get_transform_function <- S7::new_generic("get_transform_function", "x")
 
 #' @rdname get_transform_function
@@ -845,6 +891,12 @@ get_untransform_function <- S7::new_generic("get_untransform_function", "x")
 #' @param ... Additional arguments passed to methods.
 #' @rdname get_number_of_draws
 #' @export
+#' @examples
+#' \donttest{
+#' fit <- example_ideal_adaptor_stanfit()
+#' get_number_of_draws(fit)
+#' get_random_draw_indices(fit, ndraws = 5)
+#' }
 get_number_of_draws <- S7::new_generic("get_number_of_draws", "fit")
 
 #' Get indices for random MCMC draws from stanfit
@@ -934,6 +986,9 @@ get_random_draw_indices <- S7::new_generic(
 #'   \code{\link{likelihood}}, \code{\link{posterior}}
 #' @rdname plot_categories
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' plot_categories(mod)
 plot_categories <- S7::new_generic(
   "plot_categories",
   "x",
@@ -998,6 +1053,9 @@ plot_categories <- S7::new_generic(
 #'   \code{\link{categorize}}, \code{\link{posterior}}
 #' @rdname plot_categorization_functions
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' plot_categorization_functions(mod)
 plot_categorization_functions <- S7::new_generic(
   "plot_categorization_functions",
   "x",
@@ -1071,6 +1129,9 @@ plot_categorization_functions <- S7::new_generic(
 #'   \code{\link{get_parameters}}, \code{\link{get_draws}}
 #' @rdname plot_parameters
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' plot_parameters(mod)
 plot_parameters <- S7::new_generic(
   "plot_parameters",
   "x",
@@ -1144,6 +1205,11 @@ plot_parameters_pairwise <- S7::new_generic(
 #' @seealso \code{\link{plot_exposure_sample}}, \code{\link{plot_test_sample}}, \code{\link{plot_categories}}
 #' @rdname plot_sample
 #' @export
+#' @examples
+#' sfi <- example_ideal_adaptor_stanfit_input()
+#' plot_sample(sfi)
+#' plot_exposure_sample(sfi)
+#' plot_test_sample(sfi)
 plot_sample <- S7::new_generic(
   "plot_sample",
   "x",
@@ -1182,6 +1248,11 @@ plot_test_sample <- function(x, sample = "test", ...) {
 #' @inheritParams plot_categories
 #' @rdname plot_diagnostics
 #' @export
+#' @examples
+#' \donttest{
+#' fit <- example_ideal_adaptor_stanfit()
+#' plot_diagnostics(fit)
+#' }
 plot_diagnostics <- S7::new_generic("plot_diagnostics", "x")
 
 #' Evaluate a cognitive model or fitted model
@@ -1229,6 +1300,15 @@ plot_diagnostics <- S7::new_generic("plot_diagnostics", "x")
 #' @return A numeric scalar, a tibble (if \code{return_by_x = TRUE}), or a named list of these if multiple methods were requested.
 #' @rdname evaluate_model
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' x_stim <- matrix(c(10, -1, 55, 0.5), nrow = 2, byrow = TRUE)
+#' evaluate_model(
+#'   mod,
+#'   x = x_stim,
+#'   response_category = c("/b/", "/k/"),
+#'   method = "log_lik"
+#' )
 evaluate_model <- S7::new_generic("evaluate_model", "model", function(
   model,
   x = NULL,
@@ -1260,6 +1340,9 @@ evaluate_model <- S7::new_generic("evaluate_model", "model", function(
 #' @seealso \code{\link{plot_categories}}, \code{\link{likelihood}}, \code{\link{posterior}}
 #' @rdname sample_observations
 #' @export
+#' @examples
+#' mod <- example_mvg_ideal_observer(n_cues = 2)
+#' sample_observations(mod, n = 5)
 sample_observations <- S7::new_generic(
   "sample_observations",
   "x",
@@ -1274,7 +1357,7 @@ sample_observations <- S7::new_generic(
 #' steps (for sequential model lists / `update_template()` outputs) or across MCMC
 #' prior-to-posterior transitions (for `MVBU_Stanfit` objects).
 #'
-#' @name plot_model_updates
+#' @rdname plot_model_updates
 #' @param x A list of S7 cognitive models/templates or an `MVBU_Stanfit` object.
 #' @param what Character string indicating what to plot: `"categories"` (default)
 #'   or `"categorization_functions"`.
@@ -1290,6 +1373,10 @@ sample_observations <- S7::new_generic(
 #' @param ... Additional arguments passed to methods.
 #' @return A `ggplot2` plot object faceted across update steps/stages.
 #' @export
+#' @examples
+#' m1 <- example_mvg_ideal_observer()
+#' m2 <- example_mvg_ideal_observer()
+#' plot_model_updates(list("Initial" = m1, "Updated" = m2), what = "categories")
 plot_model_updates <- S7::new_generic(
   "plot_model_updates",
   "x",
@@ -1322,6 +1409,11 @@ plot_model_updates <- S7::new_generic(
 #' @param ... Additional arguments passed to methods.
 #' @return An [MVBU_StanfitPosterior] object.
 #' @export
+#' @examples
+#' \donttest{
+#' fit <- example_ideal_adaptor_stanfit()
+#' post <- as_MVBU_stanfit_posterior(fit)
+#' }
 as_MVBU_stanfit_posterior <- S7::new_generic(
   "as_MVBU_stanfit_posterior",
   "x",
@@ -1344,6 +1436,11 @@ as_MVBU_stanfit_posterior <- S7::new_generic(
 #' @param ... Additional arguments passed to methods.
 #' @return An [MVBU_ModelList] object.
 #' @export
+#' @examples
+#' \donttest{
+#' fit <- example_ideal_adaptor_stanfit()
+#' hist <- reconstruct_update_history(fit, ndraws = 2)
+#' }
 reconstruct_update_history <- S7::new_generic(
   "reconstruct_update_history",
   "object",

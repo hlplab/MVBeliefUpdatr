@@ -58,6 +58,10 @@ Extracts or computes exposure category statistics (n, mean, cov, css, uss)
 from an \code{IdealAdaptorStanfitInput}, \code{MVBU_Stanfit}, or
 \code{MVBU_StanfitPosterior} object.
 }
+\examples{
+sfi <- example_ideal_adaptor_stanfit_input()
+get_exposure_category_statistics(sfi, stats = "mean")
+}
 \seealso{
 \code{\link{get_sufficient_category_statistics}}
 }

@@ -73,8 +73,8 @@ new_mvg_ideal_observer_from_data(
 \item{category_template}{An \link{MVBU_CategoryRepresentationTemplate} object
 containing MVG category representations.}
 
-\item{decision_rule}{Categorization decision rule: \code{"sampling"} or
-\code{"argmax"}. Defaults to \code{"sampling"}.}
+\item{decision_rule}{Categorization decision rule: \code{"sampling"},
+\code{"criterion"}, or \code{"proportional"}. Defaults to \code{"sampling"}.}
 
 \item{category_prior}{Optional numeric vector of prior category
 probabilities summing to 1. Defaults to equal priors.}
@@ -133,6 +133,26 @@ The multivariate Gaussian (\code{MVG}) family models category structure over
 \eqn{D}-dimensional continuous cue spaces with correlated cue dimensions:
 \deqn{p(\mathbf{x} \mid c) = \mathcal{N}(\mathbf{x}; \boldsymbol{\mu}_c,
 \mathbf{\Sigma}_c)}
+}
+\examples{
+# Create 2D MVG representations
+mu_b <- c(VOT = 10, f0 = 200)
+Sigma_b <- matrix(c(25, 5, 5, 36), nrow = 2,
+  dimnames = list(names(mu_b), names(mu_b)))
+rep_b <- new_mvg_category_representation(
+  category_labels = "/b/", cue_labels = c("VOT", "f0"),
+  mu = mu_b, Sigma = Sigma_b
+)
+mu_d <- c(VOT = 50, f0 = 240)
+Sigma_d <- matrix(c(25, -2, -2, 36), nrow = 2,
+  dimnames = list(names(mu_d), names(mu_d)))
+rep_d <- new_mvg_category_representation(
+  category_labels = "/d/", cue_labels = c("VOT", "f0"),
+  mu = mu_d, Sigma = Sigma_d
+)
+tmpl <- new_category_representation_template(list(rep_b, rep_d))
+m_mvg <- new_mvg_ideal_observer(category_template = tmpl)
+m_mvg
 }
 \references{
 \insertRef{xie2023}{MVBeliefUpdatr}

@@ -67,7 +67,7 @@ S7::method(
   class(x)[1]
 }
 
-#' @rdname get_family_name
+#' @rdname get_model_family
 S7::method(
   get_family_name,
   S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
@@ -76,7 +76,7 @@ S7::method(
   .get_family_from_class_name(fam_raw)
 }
 
-#' @rdname get_family
+#' @rdname get_model_family
 S7::method(
   get_family,
   S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
@@ -159,7 +159,7 @@ S7::method(
   x@transform_information
 }
 
-#' @rdname get_cue_labels
+#' @rdname get_labels
 S7::method(
   get_cue_labels,
   S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
@@ -172,7 +172,7 @@ S7::method(
   if (!is.null(indices)) cues[indices] else cues
 }
 
-#' @rdname get_category_labels
+#' @rdname get_labels
 S7::method(
   get_category_labels,
   S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
@@ -185,7 +185,7 @@ S7::method(
   if (!is.null(indices)) cats[indices] else cats
 }
 
-#' @rdname get_response_category_labels
+#' @rdname get_labels
 S7::method(
   get_response_category_labels,
   S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
@@ -202,7 +202,7 @@ S7::method(
   if (!is.null(indices)) rcats[indices] else rcats
 }
 
-#' @rdname get_group_labels
+#' @rdname get_labels
 S7::method(
   get_group_labels,
   S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
@@ -229,7 +229,7 @@ S7::method(
   )
 }
 
-#' @rdname get_original_variable_names
+#' @rdname get_data
 S7::method(
   get_original_variable_names,
   S7::new_union(MVBU_Stanfit, MVBU_StanfitPosterior)
@@ -897,7 +897,7 @@ S7::method(get_expected_category_statistic, MVBU_Stanfit) <- function(
   draws
 }
 
-#' @rdname get_marginal_category_statistic
+#' @rdname get_expected_category_statistic
 #' @export
 S7::method(get_marginal_category_statistic, MVBU_Stanfit) <- function(
   x,
@@ -1087,10 +1087,17 @@ S7::method(get_random_draw_indices, S7::class_any) <- function(
 #'   included in the categorization function ("marginalize") or not
 #'   ("no_lapses")? (default: "marginalize")
 #' @param groups Character vector of groups to include.
-#' @param ... Optionally, additional arguments handed to \code{\link{get_draws}}.
+#' @param ... Optionally, additional arguments handed to
+#'   \code{\link{get_draws}}.
 #'
 #' @return A tibble with categorization functions per group and draw.
 #' @export
+#' @examples
+#' \donttest{
+#' fit <- example_ideal_adaptor_stanfit()
+#' cat_fun <- get_categorization_function(fit)
+#' head(cat_fun)
+#' }
 get_categorization_function <- function(
   x,
   lapse_treatment = c("no_lapses", "sample", "marginalize")[3],

@@ -29,3 +29,7 @@ For NIX, MNIX, and NIW families the likelihood is the posterior predictive of
 the category, so this generic supersedes the family-specific posterior
 predictive helpers.
 }
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+likelihood(mod, matrix(c(0, 0), nrow = 1))
+}

@@ -173,6 +173,10 @@ across cue dimensions for cognitive models and fitted Stan models. Supports
 proportional probability matching, deterministic criterion/MAP classification, and
 stochastic sampling decision rules, fully accounting for perceptual noise and lapses.
 }
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+plot_categorization_functions(mod)
+}
 \seealso{
 \code{\link{plot_categories}}, \code{\link{plot_parameters}},
 \code{\link{categorize}}, \code{\link{posterior}}

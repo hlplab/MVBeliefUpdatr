@@ -29,8 +29,8 @@ NULL
 #' @param cues Character vector indicating cue columns in `data`.
 #' @param category_template An [MVBU_CategoryRepresentationTemplate] object
 #'   containing Exemplar category representations.
-#' @param decision_rule Categorization decision rule: `"sampling"` or
-#'   `"argmax"`. Defaults to `"sampling"`.
+#' @param decision_rule Categorization decision rule: `"sampling"`,
+#'   `"criterion"`, or `"proportional"`. Defaults to `"sampling"`.
 #' @param category_prior Optional numeric vector of prior category
 #'   probabilities summing to 1. Defaults to equal priors.
 #' @param lapse_rate Numeric scalar lapse probability in `[0, 1]`. Defaults
@@ -149,7 +149,29 @@ NULL
 #'
 #' \insertRef{kruschke1992}{MVBeliefUpdatr}
 #'
-#' \insertRef{shi2010}{MVBeliefUpdatr}
+#' @examples
+#' # Create an exemplar category representation from numeric points
+#' pts <- matrix(c(1, 2, 1.5, 2.5), nrow = 2, byrow = TRUE)
+#' cat_rep <- new_exemplar_category_representation(
+#'   category_labels = "A",
+#'   cue_labels = c("cue1", "cue2"),
+#'   exemplars = pts,
+#'   c = 1.0
+#' )
+#' cat_rep
+#'
+#' # Create an exemplar model from data
+#' df <- data.frame(
+#'   category = c("A", "A", "B", "B"),
+#'   x = c(1, 2, 5, 6),
+#'   y = c(2, 1, 6, 5)
+#' )
+#' mod <- new_exemplar_model_from_data(
+#'   df,
+#'   category = "category",
+#'   cues = c("x", "y")
+#' )
+#' mod
 #'
 #' @name family-exemplar
 #' @rdname family-exemplar

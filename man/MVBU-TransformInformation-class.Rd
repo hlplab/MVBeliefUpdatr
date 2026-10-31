@@ -30,3 +30,12 @@ MVBU_TransformInformation(
 Represents an invertible affine transformation \eqn{f(x) = A(x + b)},
 where \eqn{b} is the shift vector and \eqn{A} is the scale/rotation matrix.
 }
+\examples{
+trans <- MVBU_TransformInformation(
+  cue.labels = c("c1", "c2"),
+  type = "center",
+  shift = c(0, 0),
+  SCALE = diag(2)
+)
+trans
+}

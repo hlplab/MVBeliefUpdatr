@@ -61,13 +61,7 @@ names rather than model parameters. If pars is omitted
 all parameters are included.}
 }
 \value{
-Log posterior draws.
-
-NUTS sampler parameters.
-
-Named numeric vector of Rhat values.
-
-Named numeric vector of Neff ratios.
+Log posterior draws, NUTS sampler parameters, Rhat, or Neff ratio.
 
 The exact form of the output depends on the method.
 }
@@ -79,4 +73,19 @@ These diagnostic functions are all copied and modified from \pkg{brms}.
 \details{
 For more details see
 \link[bayesplot:bayesplot-extractors]{bayesplot::bayesplot-extractors}.
+}
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+rhat(fit)
+neff_ratio(fit)
+}
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+lp <- log_posterior(fit)
+head(lp)
+r <- rhat(fit)
+head(r)
+}
+
 }

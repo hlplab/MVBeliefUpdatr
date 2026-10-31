@@ -23,3 +23,9 @@ A named list of control parameters.
 \description{
 Extract control parameters of the NUTS sampler
 }
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+control_params(fit)
+}
+}

@@ -148,6 +148,36 @@ fitting contains test phases without exposure (e.g., pre-exposure tests).
 Use \code{methods(class = "ideal_adaptor_stanfit")} for an overview on
 available methods.
 }
+\examples{
+\donttest{
+# Prepare minimal input data
+exp_df <- data.frame(
+  group = "g1",
+  category = c("b", "p"),
+  vot = c(0, 50)
+)
+test_df <- data.frame(
+  group = "g1",
+  response_category = c("b", "p"),
+  vot = c(10, 40)
+)
+sfi <- new_ideal_adaptor_stanfit_input(
+  exposure = exp_df,
+  test = test_df,
+  cues = "vot"
+)
+
+# Fit NIW ideal adaptor model
+fit <- fit_ideal_adaptor(
+  stanfit_input = sfi,
+  chains = 1,
+  iter = 50,
+  warmup = 25
+)
+fit
+}
+
+}
 \seealso{
 \code{\link{IdealAdaptorStanfit}} for information about ideal
 adaptor stanfit objects, \code{\link{get_draws}} to draw samples from the

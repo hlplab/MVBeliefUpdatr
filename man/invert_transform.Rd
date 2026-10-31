@@ -24,3 +24,14 @@ Computes the exact algebraic inverse of an affine transformation
 transformation \eqn{f^{-1}(y) = A^{-1}(y - A b) = A_{inv}(y + b_{inv})},
 where \eqn{A_{inv} = A^{-1}} and \eqn{b_{inv} = -A b}.
 }
+\examples{
+trans <- MVBU_TransformInformation(
+  cue.labels = c("c1", "c2"),
+  type = "center",
+  shift = c(1, -2),
+  SCALE = diag(c(2, 0.5))
+)
+inv_trans <- invert_transform(trans)
+inv_trans@shift
+inv_trans@SCALE
+}

@@ -33,6 +33,14 @@ NULL
 #' @name MVBU_FixedParameter
 #' @rdname MVBU_FixedParameter
 #' @export
+#' @examples
+#' # Fix cognitive parameters
+#' fix_kappa <- fix_parameter(value = 10, class = "kappa_0")
+#' fix_nu <- fix_parameter(value = 5, class = "nu_0")
+#' fix_lapse <- fix_parameter(value = 0.02, class = "lapse_rate")
+#'
+#' # Combine fixed parameters
+#' c(fix_kappa, fix_nu, fix_lapse)
 MVBU_FixedParameter <- S7::new_class(
   "MVBU_FixedParameter",
   package = NULL,

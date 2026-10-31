@@ -98,6 +98,12 @@ A \code{\link[ggplot2]{ggplot}} object.
 Visualizes the empirical distribution of cues across categories from observed exposure or test data
 in a fitted model or stanfit-input object.
 }
+\examples{
+sfi <- example_ideal_adaptor_stanfit_input()
+plot_sample(sfi)
+plot_exposure_sample(sfi)
+plot_test_sample(sfi)
+}
 \seealso{
 \code{\link{plot_exposure_sample}}, \code{\link{plot_test_sample}}, \code{\link{plot_categories}}
 }

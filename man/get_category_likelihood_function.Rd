@@ -24,3 +24,8 @@ A function of \verb{(new_data, log, noise_treatment, Sigma_noise)} returning cat
 For NIX, MNIX, and NIW families the returned function evaluates the posterior
 predictive, which is the category likelihood for those families.
 }
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+lik_fn <- get_category_likelihood_function(mod)
+lik_fn(matrix(c(0, 0), nrow = 1))
+}

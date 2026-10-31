@@ -276,8 +276,8 @@ For category-weighted models, an \eqn{M \times K} matrix whose rows each sum to 
 \item{category_template}{An \link{MVBU_CategoryRepresentationTemplate} object
 containing MNIX category representations.}
 
-\item{decision_rule}{Categorization decision rule: \code{"sampling"} or
-\code{"argmax"}. Defaults to \code{"sampling"}.}
+\item{decision_rule}{Categorization decision rule: \code{"sampling"},
+\code{"criterion"}, or \code{"proportional"}. Defaults to \code{"sampling"}.}
 
 \item{category_prior}{Optional numeric vector of prior category
 probabilities summing to 1. Defaults to equal priors.}
@@ -353,6 +353,26 @@ or attention weights.
 dimension \eqn{z = \mathbf{w}^\top \mathbf{x}} prior to updating (\eqn{\kappa} and \eqn{\nu}
 are scalar length 1).
 }
+}
+\examples{
+# Mixture / Multivariate NIX representation
+mu_b <- c(VOT = 10, f0 = 200)
+sigma2_b <- c(VOT = 25, f0 = 36)
+rep_b <- new_mnix_category_representation(
+  category_labels = "/b/", cue_labels = c("VOT", "f0"),
+  m = mu_b, kappa = c(5, 5), nu = c(8, 8),
+  sigma2 = sigma2_b
+)
+mu_d <- c(VOT = 50, f0 = 240)
+sigma2_d <- c(VOT = 25, f0 = 36)
+rep_d <- new_mnix_category_representation(
+  category_labels = "/d/", cue_labels = c("VOT", "f0"),
+  m = mu_d, kappa = c(5, 5), nu = c(8, 8),
+  sigma2 = sigma2_d
+)
+tmpl <- new_category_representation_template(list(rep_b, rep_d))
+m_mnix <- new_mnix_ideal_adaptor(category_template = tmpl)
+m_mnix
 }
 \seealso{
 \link{family-muvg}, \link{family-niw}, \link{family-nix}

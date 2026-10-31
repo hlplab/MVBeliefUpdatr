@@ -9,40 +9,49 @@
 A tibble with 23,685 rows and 17 variables:
 \describe{
 \item{speaker}{Talker identifier as a factor (e.g., \code{"SW_001"}).}
-\item{sex}{Speaker sex as a factor with levels \code{"female"} and \code{"male"}
-(all 24 talkers in SwehVd are female).}
+\item{sex}{Speaker sex as a factor with levels \code{"female"} and
+\code{"male"} (all 24 talkers in SwehVd are female).}
 \item{age}{Speaker age in years as an integer.}
-\item{vowel}{Standardized Unicode IPA vowel label in phonemic slashes as a factor
-with 21 levels: \code{/ɑː/}, \code{/a/}, \code{/eː/}, \code{/ɛ/}, \code{/iː/},
-\code{/ɪ/}, \code{/uː/}, \code{/ʊ/}, \code{/ʉː/}, \code{/ɵ/}, \code{/yː/},
-\code{/ʏ/}, \code{/ɛː/}, \code{/æː/}, \code{/æ/}, \code{/oː/}, \code{/ɔ/},
-\code{/øː/}, \code{/ø/}, \code{/œː/}, \code{/œ/}.}
+\item{vowel}{Standardized Unicode IPA vowel label in phonemic slashes
+as a factor with 21 levels: \code{/ɑː/}, \code{/a/}, \code{/eː/},
+\code{/ɛ/}, \code{/iː/}, \code{/ɪ/}, \code{/uː/}, \code{/ʊ/},
+\code{/ʉː/}, \code{/ɵ/}, \code{/yː/}, \code{/ʏ/}, \code{/ɛː/},
+\code{/æː/}, \code{/æ/}, \code{/oː/}, \code{/ɔ/}, \code{/øː/},
+\code{/ø/}, \code{/œː/}, \code{/œ/}.}
 \item{transcribed_vowel}{Transcription description character string.}
-\item{quantity}{Phonological vowel quantity as a factor with levels \code{"long"}
-and \code{"short"}.}
+\item{quantity}{Phonological vowel quantity as a factor with levels
+\code{"long"} and \code{"short"}.}
 \item{word}{Produced stimulus word.}
 \item{token}{Token index within word and speaker.}
 \item{trial}{Experimental trial index.}
-\item{location}{Relative measurement timepoint along vowel duration (20, 35, 50, 65, 80 percent).}
+\item{location}{Relative measurement timepoint along vowel duration
+(20, 35, 50, 65, 80 percent).}
 \item{f0}{Fundamental frequency in Hertz (Hz).}
 \item{f1}{First formant frequency in Hertz (Hz).}
 \item{f2}{Second formant frequency in Hertz (Hz).}
 \item{f3}{Third formant frequency in Hertz (Hz).}
 \item{duration}{Total vowel duration in seconds.}
 \item{speech_rate}{Local speech rate in syllables per minute.}
-\item{unreliable_measurement}{Logical flag indicating whether measurement was flagged
-as potentially unreliable.}
+\item{unreliable_measurement}{Logical flag indicating whether measurement
+was flagged as potentially unreliable.}
 }
 }
 \source{
-Swedish Vowel Database (SwehVd) project \insertCite{persson2021}{MVBeliefUpdatr}.
+Swedish Vowel Database (SwehVd) project
+\insertCite{persson2021}{MVBeliefUpdatr}.
 }
 \usage{
 data(swehvd)
 }
 \description{
-Phonetic measurements from 24 native Central Swedish female speakers producing
-21 vowel categories in carrier sentences in /h-V-d/ context \insertCite{persson2021}{MVBeliefUpdatr}.
+Phonetic measurements from 24 native Central Swedish female speakers
+producing 21 vowel categories in carrier sentences in /h-V-d/ context
+\insertCite{persson2021}{MVBeliefUpdatr}.
+}
+\examples{
+data(swehvd)
+head(swehvd)
+table(swehvd$quantity, swehvd$vowel)
 }
 \references{
 \insertRef{persson2021}{MVBeliefUpdatr}

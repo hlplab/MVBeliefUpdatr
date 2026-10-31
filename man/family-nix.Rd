@@ -95,8 +95,8 @@ cue dimension is allowed.}
 \item{category_template}{An \link{MVBU_CategoryRepresentationTemplate} object
 containing NIX category representations.}
 
-\item{decision_rule}{Categorization decision rule: \code{"sampling"} or
-\code{"argmax"}. Defaults to \code{"sampling"}.}
+\item{decision_rule}{Categorization decision rule: \code{"sampling"},
+\code{"criterion"}, or \code{"proportional"}. Defaults to \code{"sampling"}.}
 
 \item{category_prior}{Optional numeric vector of prior category
 probabilities summing to 1. Defaults to equal priors.}
@@ -163,6 +163,20 @@ likelihood is a Student-\eqn{t} distribution:
 With \eqn{s_c = \sqrt{\sigma_c^2(\kappa_c+1)/\kappa_c}},
 \deqn{p(x \mid c) =
   \frac{1}{s_c} \, t_{\nu_c}\!\left(\frac{x-m_c}{s_c}\right)}
+}
+\examples{
+# Normal-Inverse-Chi-squared (NIX) representation for 1D cues
+rep_b <- new_nix_category_representation(
+  category_labels = "/b/", cue_labels = "VOT",
+  m = 10, kappa = 5, nu = 8, sigma2 = 25
+)
+rep_d <- new_nix_category_representation(
+  category_labels = "/d/", cue_labels = "VOT",
+  m = 50, kappa = 5, nu = 8, sigma2 = 25
+)
+tmpl <- new_category_representation_template(list(rep_b, rep_d))
+m_nix <- new_nix_ideal_adaptor(category_template = tmpl)
+m_nix
 }
 \seealso{
 \link{family-uvg}, \link{family-niw}, \link{family-mnix}

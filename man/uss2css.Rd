@@ -19,20 +19,46 @@ css2cov(css, n)
 cov2css(cov, n)
 }
 \arguments{
-\item{uss, css, cov}{Uncentered sum-of-square, centered sum-of-square, and covariance matrix.}
+\item{uss, css, cov}{Uncentered sum-of-square, centered sum-of-square, and
+covariance matrix.}
 
-\item{n}{Number of observations that have gone into the sum-of-square matrix.}
+\item{n}{Number of observations that have gone into the sum-of-square
+matrix.}
 
-\item{mean}{Mean of the observations that have gone into the sum-of-square matrix.}
+\item{mean}{Mean of the observations that have gone into the sum-of-square
+matrix.}
 }
 \value{
 A square matrix.
 }
 \description{
-Convert centered sum-of-square matrices (css), uncentered sum-of-square matrices (uss),
-and covariance matrices (cov) into each other.
+Convert centered sum-of-square matrices (css), uncentered sum-of-square
+matrices (uss), and covariance matrices (cov) into each other.
+}
+\examples{
+x <- matrix(rnorm(20), nrow = 10, ncol = 2)
+n <- nrow(x)
+m <- colMeans(x)
+u <- uss(x)
+c_mat <- css(x)
+
+# Convert uncentered sum-of-squares to centered sum-of-squares
+uss2css(u, n = n, mean = m)
+
+# Convert centered sum-of-squares to covariance matrix
+css2cov(c_mat, n = n)
+
+# Convert covariance matrix back to centered sum-of-squares
+cov2css(cov(x), n = n)
+
+# Convert centered sum-of-squares back to uncentered
+css2uss(c_mat, n = n, mean = m)
+
+# Convert uncentered sum-of-squares directly to covariance
+uss2cov(u, n = n, mean = m)
 }
 \seealso{
-\code{\link{css}}, \code{\link{uss}}, \code{\link[stats]{cov2cor}}, \code{\link{cor2cov}}, \code{\link{cov2tau}}
+\code{\link{css}}, \code{\link{uss}}, \code{\link[stats]{cov2cor}},
+\code{\link{cor2cov}}, \code{\link{cov2tau}}
 }
 \keyword{TBD}

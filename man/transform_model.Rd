@@ -28,18 +28,42 @@ untransform_cov(S, transform)
 
 \item{m}{A mean vector (or scalar for univariate representations).}
 
-\item{S}{A covariance matrix (or scalar variance for univariate representations).}
+\item{S}{A covariance matrix (or scalar variance for univariate
+representations).}
 }
 \value{
-A model, mean vector, or covariance matrix of the same class as the input.
+A model, mean vector, or covariance matrix of the same class as the
+input.
 }
 \description{
 Applies an affine (linear) transformation specified in an
-\code{\link{MVBU_TransformInformation}} object (from \code{\link{get_affine_transform}})
-to a mean vector, covariance matrix, or within an S7 cognitive model.
+\code{\link{MVBU_TransformInformation}} object (from
+\code{\link{get_affine_transform}}) to a mean vector, covariance matrix, or
+within an S7 cognitive model.
 }
 \details{
-Gaussian and Normal-Inverse-Wishart distributions transform analytically under
-affine maps \eqn{y = A(x + b)}:
+Gaussian and Normal-Inverse-Wishart distributions transform analytically
+under affine maps \eqn{y = A(x + b)}:
 \deqn{\mu' = A(\mu + b), \quad \Sigma' = A \Sigma A^T}
+}
+\examples{
+df <- data.frame(vot = rnorm(30, 20, 10), f0 = rnorm(30, 220, 25))
+trans <- get_affine_transform(df, cues = c("vot", "f0"),
+                              type = "standardize")
+
+# Transform mean vector and covariance matrix
+m <- c("vot" = 20, "f0" = 220)
+S <- matrix(c(100, 20, 20, 625), nrow = 2,
+            dimnames = list(c("vot", "f0"), c("vot", "f0")))
+m_trans <- transform_mean(m, trans)
+S_trans <- transform_cov(S, trans)
+
+# Untransform back to original space
+untransform_mean(m_trans, trans)
+untransform_cov(S_trans, trans)
+
+# Transform an entire cognitive model
+mod <- example_mvg_ideal_observer(n_cues = 2)
+mod_trans <- transform_model(mod, trans)
+untransform_model(mod_trans, trans)
 }

@@ -9,12 +9,14 @@
 A tibble with 1,520 rows and 9 variables:
 \describe{
 \item{speaker}{Speaker identifier as a factor.}
-\item{sex}{Speaker sex as a factor with levels \code{"female"} and \code{"male"}.}
-\item{type}{Speaker demographic group as a factor with levels \code{"men"},
-\code{"women"}, and \code{"children"}.}
-\item{vowel}{Standardized Unicode IPA vowel label in phonemic slashes as a factor
-with 10 levels: \code{/i/}, \code{/ɪ/}, \code{/ɛ/}, \code{/æ/}, \code{/ʌ/},
-\code{/ɑ/}, \code{/ɔ/}, \code{/ʊ/}, \code{/u/}, \code{/ɝ/}.}
+\item{sex}{Speaker sex as a factor with levels \code{"female"} and
+\code{"male"}.}
+\item{type}{Speaker demographic group as a factor with levels
+\code{"men"}, \code{"women"}, and \code{"children"}.}
+\item{vowel}{Standardized Unicode IPA vowel label in phonemic slashes
+as a factor with 10 levels: \code{/i/}, \code{/ɪ/}, \code{/ɛ/},
+\code{/æ/}, \code{/ʌ/}, \code{/ɑ/}, \code{/ɔ/}, \code{/ʊ/},
+\code{/u/}, \code{/ɝ/}.}
 \item{repetition}{Repetition index (1 or 2).}
 \item{f0}{Fundamental frequency in Hertz (Hz).}
 \item{f1}{First formant frequency in Hertz (Hz).}
@@ -23,16 +25,23 @@ with 10 levels: \code{/i/}, \code{/ɪ/}, \code{/ɛ/}, \code{/æ/}, \code{/ʌ/},
 }
 }
 \source{
-Standardized from \code{phonTools::pb52} \insertCite{barreda2015}{MVBeliefUpdatr}.
+Standardized from \code{phonTools::pb52}
+\insertCite{barreda2015}{MVBeliefUpdatr}.
 }
 \usage{
 data(pb52)
 }
 \description{
-Acoustic measurements of 10 American English vowels produced by 76 speakers
-(men, women, and children) in /h-V-d/ words. This dataset is a standardized copy
-of the dataset bundled in the \pkg{phonTools} package \insertCite{barreda2015}{MVBeliefUpdatr},
-originally published by \insertCite{peterson-barney1952;textual}{MVBeliefUpdatr}.
+Acoustic measurements of 10 American English vowels produced by 76
+speakers (men, women, and children) in /h-V-d/ words. This dataset is a
+standardized copy of the dataset bundled in the \pkg{phonTools} package
+\insertCite{barreda2015}{MVBeliefUpdatr}, originally published by
+\insertCite{peterson-barney1952;textual}{MVBeliefUpdatr}.
+}
+\examples{
+data(pb52)
+head(pb52)
+summary(pb52[, c("f0", "f1", "f2", "f3")])
 }
 \references{
 \insertRef{peterson-barney1952}{MVBeliefUpdatr}

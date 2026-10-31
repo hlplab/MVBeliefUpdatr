@@ -9,44 +9,56 @@
 A tibble with 96,357 rows and 21 variables:
 \describe{
 \item{speaker}{Speaker identifier as a factor.}
-\item{sex}{Speaker sex as a factor with levels \code{"female"} and \code{"male"}.}
-\item{stop}{Standardized Unicode IPA stop consonant category in phonemic slashes
-as a factor with 6 levels: \code{/b/}, \code{/p/}, \code{/d/}, \code{/t/},
-\code{/g/}, \code{/k/}.}
-\item{stop_poa}{Place of articulation as a factor with levels \code{"labial"},
-\code{"coronal"}, and \code{"dorsal"}.}
-\item{voicing}{Phonological voicing as a factor with levels \code{"voiced"}
-and \code{"voiceless"}.}
+\item{sex}{Speaker sex as a factor with levels \code{"female"} and
+\code{"male"}.}
+\item{stop}{Standardized Unicode IPA stop consonant category in
+phonemic slashes as a factor with 6 levels: \code{/b/}, \code{/p/},
+\code{/d/}, \code{/t/}, \code{/g/}, \code{/k/}.}
+\item{stop_poa}{Place of articulation as a factor with levels
+\code{"labial"}, \code{"coronal"}, and \code{"dorsal"}.}
+\item{voicing}{Phonological voicing as a factor with levels
+\code{"voiced"} and \code{"voiceless"}.}
 \item{word}{Produced word string.}
-\item{vowel}{Following vowel context in ARPABET notation (e.g., \code{"EH1"}, \code{"IY1"}).}
+\item{vowel}{Following vowel context in ARPABET notation (e.g.,
+\code{"EH1"}, \code{"IY1"}).}
 \item{trial}{Trial number within recording session.}
 \item{filename}{Audio recording filename.}
 \item{start}{Start timestamp in seconds.}
 \item{end}{End timestamp in seconds.}
 \item{f0}{Fundamental frequency at vowel onset in Hertz (Hz).}
-\item{f0_semitones}{Talker-mean-centered fundamental frequency in semitones:
-\eqn{12 \times \log_2(f_0 / \bar{f}_{0,\text{speaker}})}.}
+\item{f0_semitones}{Talker-mean-centered fundamental frequency in
+semitones: \eqn{12 \times \log_2(f_0 / \bar{f}_{0,\text{speaker}})}.}
 \item{vot}{Voice onset time in milliseconds (ms).}
 \item{vowel_duration}{Following vowel duration in milliseconds (ms).}
 \item{word_duration}{Word duration in milliseconds (ms).}
 \item{speech_rate}{Speaking rate in syllables per second.}
 \item{pos}{Utterance position (\code{"utt_init"}, \code{"utt_mid"}).}
-\item{syll}{Syllable count category (\code{"one"}, \code{"two"}, \code{"more"}).}
-\item{type}{Word type category (\code{"lex"} for lexical/content, \code{"func"} for function).}
+\item{syll}{Syllable count category (\code{"one"}, \code{"two"},
+\code{"more"}).}
+\item{type}{Word type category (\code{"lex"} for lexical/content,
+\code{"func"} for function).}
 \item{session}{Session number.}
 }
 }
 \source{
-Mixer 6 corpus via Eleanor Chodroff's OSF repository (\url{https://osf.io/jt5mc/}).
+Mixer 6 corpus via Eleanor Chodroff's OSF repository
+(\url{https://osf.io/jt5mc/}).
 }
 \usage{
 data(mixer6)
 }
 \description{
-Word-initial stop consonant acoustic measurements from connected speech productions
-across 180 native US English speakers in the Mixer 6 corpus \insertCite{chodroff-wilson2018}{MVBeliefUpdatr}.
-Contains annotations for voice onset time (VOT), fundamental frequency (f0 in Hz
-and talker-mean-centered semitones), vowel duration, word duration, and speaking rate.
+Word-initial stop consonant acoustic measurements from connected speech
+productions across 180 native US English speakers in the Mixer 6 corpus
+\insertCite{chodroff-wilson2018}{MVBeliefUpdatr}. Contains annotations for
+voice onset time (VOT), fundamental frequency (f0 in Hz and
+talker-mean-centered semitones), vowel duration, word duration, and
+speaking rate.
+}
+\examples{
+data(mixer6)
+head(mixer6)
+table(mixer6$stop, mixer6$voicing)
 }
 \references{
 \insertRef{chodroff-wilson2018}{MVBeliefUpdatr}

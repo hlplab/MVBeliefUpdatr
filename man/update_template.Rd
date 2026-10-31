@@ -122,6 +122,15 @@ will be added as their update workflows are migrated to S7.
 ideal adaptor model (\code{NIW_IdealAdaptor}, \code{NIX_IdealAdaptor}, or
 \code{MNIX_IdealAdaptor}) given new observations.
 }
+\examples{
+mod <- example_niw_ideal_adaptor(n_cues = 2)
+obs <- tibble::tibble(
+  category = factor(c("/b/", "/d/")),
+  VOT = c(10, 15),
+  f0_semitones = c(-1, -0.5)
+)
+updated <- update_template(mod, obs)
+}
 \seealso{
 \code{\link{update_category_representation}}
 }

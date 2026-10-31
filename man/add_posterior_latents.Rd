@@ -2,7 +2,7 @@
 % Please edit documentation in R/S7-stanfit-postprocess.R
 \name{add_posterior_latents}
 \alias{add_posterior_latents}
-\title{Add Pre-extracted Posterior Latents and Evaluation Closures to a Stanfit Object}
+\title{Add Pre-extracted Posterior Latents and Evaluation Closures}
 \usage{
 add_posterior_latents(model, probs = c(0.025, 0.5, 0.975), ...)
 }
@@ -15,42 +15,62 @@ add_posterior_latents(model, probs = c(0.025, 0.5, 0.975), ...)
 \item{...}{Additional arguments passed to \code{\link{get_draws}}.}
 }
 \value{
-The updated \code{\link{MVBU_Stanfit}} object with pre-extracted latents stored
-in \code{model@cache$draws} and \code{model@cache$summary}.
+The updated \code{\link{MVBU_Stanfit}} object with pre-extracted
+latents stored in \code{model@cache$draws} and \code{model@cache$summary}.
 }
 \description{
-Extracts and structures draw-level latent parameters (\eqn{m}, \eqn{S}, \eqn{\kappa},
-\eqn{\nu}, \eqn{\Sigma_{\text{exp}}}, \eqn{\Sigma_{\text{marg}}}, and lapse rates)
-and compiles unified likelihood and posterior evaluation closures. Pre-computed outputs
-are stored strictly in \code{model@cache$draws} and \code{model@cache$summary}:
+Extracts and structures draw-level latent parameters (\eqn{m}, \eqn{S},
+\eqn{\kappa}, \eqn{\nu}, \eqn{\Sigma_{\text{exp}}},
+\eqn{\Sigma_{\text{marg}}}, and lapse rates) and compiles unified likelihood
+and posterior evaluation closures. Pre-computed outputs are stored strictly
+in \code{model@cache$draws} and \code{model@cache$summary}:
 \itemize{
 \item \code{model@cache$draws}: Contains draw-level representations:
 \describe{
-\item{\code{parameters}}{A nested tibble of raw posterior draws across iterations/draws,
-including \eqn{m}, \eqn{S}, \eqn{\kappa}, \eqn{\nu}, \eqn{\Sigma_{\text{exp}}},
-\eqn{\Sigma_{\text{marg}}}, and optional \code{lapse_rate}.}
-\item{\code{likelihood_function}}{Closure \code{function(new_data, categories, groups, draws, noise_treatment)}
-evaluating draw-wise category likelihoods with model-family predictive densities
-(NIW: multivariate Student-t; NIX: univariate Student-t; MNIX: independent Student-t).}
-\item{\code{posterior_function}}{Closure \code{function(new_data, categories, groups, draws, noise_treatment, lapse_treatment)}
-evaluating draw-wise posterior category probabilities.}
+\item{\code{parameters}}{A nested tibble of raw posterior draws across
+iterations/draws, including \eqn{m}, \eqn{S}, \eqn{\kappa},
+\eqn{\nu}, \eqn{\Sigma_{\text{exp}}}, \eqn{\Sigma_{\text{marg}}},
+and optional \code{lapse_rate}.}
+\item{\code{likelihood_function}}{Closure evaluating draw-wise
+category likelihoods with model-family predictive densities
+(NIW: multivariate Student-t; NIX: univariate Student-t;
+MNIX: independent Student-t).}
+\item{\code{posterior_function}}{Closure evaluating draw-wise
+posterior category probabilities.}
 }
-\item \code{model@cache$summary}: Contains point estimates and across-draw summaries:
+\item \code{model@cache$summary}: Contains point estimates and
+across-draw summaries:
 \describe{
-\item{\code{parameters}}{Point estimates obtained by taking the mean across all posterior draws
-for each latent parameter (\eqn{m}, \eqn{S}, \eqn{\kappa}, \eqn{\nu}, \eqn{\Sigma_{\text{exp}}},
-\eqn{\Sigma_{\text{marg}}}, and \code{lapse_rate}) per group and category.}
-\item{\code{expected_moments}}{Distribution summary table (mean, standard deviation, and quantile
-credible intervals specified by \code{probs}) across posterior draws for the category mean \eqn{\mu}
-and expected category covariance \eqn{\Sigma_{\text{exp}} = S / (\nu - D - 1)}.}
-\item{\code{marginal_moments}}{Distribution summary table across posterior draws for the category
-mean \eqn{\mu} and marginal predictive covariance \eqn{\Sigma_{\text{marg}} = \frac{\kappa + 1}{\kappa} \Sigma_{\text{exp}}}.}
-\item{\code{likelihood_function}}{Closure evaluating category likelihoods from aggregated point estimates.}
-\item{\code{posterior_function}}{Closure evaluating category posterior probabilities from aggregated point estimates.}
+\item{\code{parameters}}{Point estimates obtained by taking the mean
+across all posterior draws for each latent parameter (\eqn{m},
+\eqn{S}, \eqn{\kappa}, \eqn{\nu}, \eqn{\Sigma_{\text{exp}}},
+\eqn{\Sigma_{\text{marg}}}, and \code{lapse_rate}) per group and
+category.}
+\item{\code{expected_moments}}{Distribution summary table (mean,
+standard deviation, and quantile credible intervals specified by
+\code{probs}) across posterior draws for the category mean
+\eqn{\mu} and expected category covariance
+\eqn{\Sigma_{\text{exp}} = S / (\nu - D - 1)}.}
+\item{\code{marginal_moments}}{Distribution summary table across
+posterior draws for the category mean \eqn{\mu} and marginal
+predictive covariance \eqn{\Sigma_{\text{marg}} = \frac{\kappa + 1}
+        {\kappa} \Sigma_{\text{exp}}}.}
+\item{\code{likelihood_function}}{Closure evaluating category
+likelihoods from aggregated point estimates.}
+\item{\code{posterior_function}}{Closure evaluating category posterior
+probabilities from aggregated point estimates.}
 }
+}
+}
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+fit <- add_posterior_latents(fit)
+fit
 }
 }
 \seealso{
-\code{\link{MVBU_Stanfit}}, \code{\link{get_draws}}, \code{\link{add_criterion}},
+\code{\link{MVBU_Stanfit}}, \code{\link{get_draws}},
+\code{\link{add_criterion}},
 \code{vignette("fitting-and-working-with-stanfit-models")}
 }

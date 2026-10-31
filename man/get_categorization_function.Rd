@@ -20,7 +20,8 @@ included in the categorization function ("marginalize") or not
 
 \item{groups}{Character vector of groups to include.}
 
-\item{...}{Optionally, additional arguments handed to \code{\link{get_draws}}.}
+\item{...}{Optionally, additional arguments handed to
+\code{\link{get_draws}}.}
 }
 \value{
 A tibble with categorization functions per group and draw.
@@ -28,4 +29,11 @@ A tibble with categorization functions per group and draw.
 \description{
 Returns a categorization function that can be used to categorize a set of
 cues into categories.
+}
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+cat_fun <- get_categorization_function(fit)
+head(cat_fun)
+}
 }

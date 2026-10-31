@@ -12,14 +12,24 @@ NULL
 #'
 #' Represents an ordered collection or list of cognitive model objects (which may
 #' represent sequential update histories, parameter variations, or distinct model variants).
-#' @param models A list of S7 cognitive model objects or `MVBU_StanfitPosterior` objects. Default: \code{list()}.
-#' @param model_labels Character vector of labels corresponding to each model. Default: \code{character(0)}.
+#' @param models A list of S7 cognitive model objects or
+#'   `MVBU_StanfitPosterior` objects. Default: \code{list()}.
+#' @param model_labels Character vector of labels corresponding to each model.
+#'   Default: \code{character(0)}.
 #' @param metadata Optional list of metadata attributes. Default: \code{list()}.
+#' @param x,object An \code{\link{MVBU_ModelList}} object.
+#' @param ... Additional arguments passed to methods.
 #'
 #' @name MVBU_ModelList
 #' @rdname MVBU_ModelList
 #' @docType class
 #' @export
+#' @examples
+#' m1 <- example_uvg_ideal_observer()
+#' m2 <- example_uvg_ideal_observer()
+#' ml <- as_model_list(list(m1, m2), model_labels = c("Step 0", "Step 1"))
+#' print(ml)
+#' summary(ml)
 MVBU_ModelList <- S7::new_class(
   "MVBU_ModelList",
   package = NULL,
@@ -65,12 +75,7 @@ MVBU_ModelList <- S7::new_class(
   }
 )
 
-#' Helper constructor to create an MVBU_ModelList
-#'
-#' @param models A list of S7 cognitive model objects or `MVBU_StanfitPosterior` objects.
-#' @param model_labels Optional character vector of names or step labels for each model.
-#' @param metadata Optional named list of general attributes.
-#' @return An [MVBU_ModelList] object.
+#' @rdname MVBU_ModelList
 #' @export
 as_model_list <- function(models, model_labels = NULL, metadata = list()) {
   if (S7::S7_inherits(models, MVBU_ModelList)) {
@@ -124,13 +129,13 @@ S7::`method<-`(names, MVBU_ModelList, value = function(x) {
   x@model_labels
 })
 
-#' @rdname get_cue_labels
+#' @rdname get_labels
 #' @export
 S7::method(get_cue_labels, MVBU_ModelList) <- function(x, indices = NULL, ...) {
   get_cue_labels(x@models[[1]], indices = indices, ...)
 }
 
-#' @rdname get_category_labels
+#' @rdname get_labels
 #' @export
 S7::method(get_category_labels, MVBU_ModelList) <- function(x, indices = NULL, ...) {
   get_category_labels(x@models[[1]], indices = indices, ...)
@@ -142,16 +147,19 @@ S7::method(get_metadata, MVBU_ModelList) <- function(x, ...) {
   x@metadata
 }
 
-#' S3 Print method for MVBU_ModelList
-#' @param x An [MVBU_ModelList] object.
-#' @param ... Additional arguments.
+#' @rdname MVBU_ModelList
+#' @method print MVBU_ModelList
 #' @export
 print.MVBU_ModelList <- function(x, ...) {
   n <- length(x@models)
   cat(sprintf("MVBeliefUpdatr Model List containing %d model(s):\n", n))
   for (i in seq_len(min(n, 10L))) {
     m <- x@models[[i]]
-    lbl <- if (i <= length(x@model_labels)) x@model_labels[i] else paste0("Model_", i)
+    lbl <- if (i <= length(x@model_labels)) {
+      x@model_labels[i]
+    } else {
+      paste0("Model_", i)
+    }
     cat(sprintf("  [%d] %-15s : %s\n", i, lbl, get_model_family(m)))
   }
   if (n > 10L) {
@@ -160,9 +168,8 @@ print.MVBU_ModelList <- function(x, ...) {
   invisible(x)
 }
 
-#' S3 Summary method for MVBU_ModelList
-#' @param object An [MVBU_ModelList] object.
-#' @param ... Additional arguments.
+#' @rdname MVBU_ModelList
+#' @method summary MVBU_ModelList
 #' @export
 summary.MVBU_ModelList <- function(object, ...) {
   print(object)

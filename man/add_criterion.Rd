@@ -9,28 +9,38 @@ add_criterion(x, criterion = "loo", model_name = NULL, overwrite = TRUE, ...)
 \arguments{
 \item{x}{An \code{\link{MVBU_Stanfit}} object.}
 
-\item{criterion}{Character vector of criteria to add. Supported: \code{"loo"},
-\code{"waic"}, \code{"kfold"}, \code{"loo_subsample"}, \code{"bayes_R2"},
-\code{"loo_R2"}, \code{"marglik"}. Default: \code{"loo"}.}
+\item{criterion}{Character vector of criteria to add. Supported:
+\code{"loo"}, \code{"waic"}, \code{"kfold"}, \code{"loo_subsample"},
+\code{"bayes_R2"}, \code{"loo_R2"}, \code{"marglik"}.
+Default: \code{"loo"}.}
 
 \item{model_name}{Optional character string giving a name for the model.}
 
-\item{overwrite}{Logical; whether to overwrite existing criteria. Default: \code{TRUE}.}
+\item{overwrite}{Logical; whether to overwrite existing criteria.
+Default: \code{TRUE}.}
 
-\item{...}{Additional arguments passed to underlying criterion evaluation functions
-(such as \code{\link[loo]{loo}}, \code{\link[loo]{waic}}, \code{\link[loo]{kfold}},
-or \code{bridgesampling::bridge_sampler}).}
+\item{...}{Additional arguments passed to underlying criterion evaluation
+functions (such as \code{\link[loo]{loo}}, \code{\link[loo]{waic}},
+\code{\link[loo]{kfold}}, or \code{bridgesampling::bridge_sampler}).}
 }
 \value{
-The updated \code{\link{MVBU_Stanfit}} object with criteria stored in
-\code{x@criteria}.
+The updated \code{\link{MVBU_Stanfit}} object with criteria stored
+in \code{x@criteria}.
 }
 \description{
 Computes and stores model fit criteria (such as \code{"loo"}, \code{"waic"},
-\code{"kfold"}, \code{"loo_subsample"}, \code{"bayes_R2"}, \code{"loo_R2"}, or
-\code{"marglik"}) in an \code{\link{MVBU_Stanfit}} object's \code{@criteria}
-slot, following the interface convention of \pkg{brms}.
+\code{"kfold"}, \code{"loo_subsample"}, \code{"bayes_R2"}, \code{"loo_R2"},
+or \code{"marglik"}) in an \code{\link{MVBU_Stanfit}} object's
+\code{@criteria} slot, following the interface convention of \pkg{brms}.
+}
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+fit <- add_criterion(fit, criterion = "loo")
+fit@criteria$loo
+}
 }
 \seealso{
-\code{\link{loo_compare.MVBU_Stanfit}}, \code{\link{loo.MVBU_Stanfit}}
+\code{\link{loo_compare.MVBU_Stanfit}},
+\code{\link{loo.MVBU_Stanfit}}
 }

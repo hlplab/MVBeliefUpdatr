@@ -90,6 +90,9 @@ MVBU_Object <- S7::new_class("MVBU_Object", package = NULL)
 #'
 #' @return A new instance of `MVBU_Object`.
 #' @export
+#' @examples
+#' obj <- new_mvbu_object()
+#' inherits(obj, "MVBU_Object")
 new_mvbu_object <- function() {
   MVBU_Object()
 }
@@ -724,8 +727,8 @@ MVBU_CognitiveModel <- S7::new_class(
 #'
 #' @param category_template An [MVBU_CategoryRepresentationTemplate] object
 #'   containing category representations.
-#' @param decision_rule Categorization decision rule: `"sampling"` or
-#'   `"argmax"`. Defaults to `"sampling"`.
+#' @param decision_rule Categorization decision rule: `"sampling"`,
+#'   `"criterion"`, or `"proportional"`. Defaults to `"sampling"`.
 #' @param category_prior Optional numeric vector of prior category
 #'   probabilities summing to 1. Defaults to equal priors.
 #' @param lapse_rate Numeric scalar lapse probability in `[0, 1]`. Defaults
@@ -830,6 +833,17 @@ new_cognitive_model <- function(
 #'
 #' @return An object of class \code{MVBU_CategoryRepresentationTemplate}.
 #' @export
+#' @examples
+#' rep_b <- new_uvg_category_representation(
+#'   category_labels = "/b/", cue_labels = "VOT",
+#'   mu = 10, sigma2 = 25
+#' )
+#' rep_d <- new_uvg_category_representation(
+#'   category_labels = "/d/", cue_labels = "VOT",
+#'   mu = 50, sigma2 = 25
+#' )
+#' tmpl <- new_category_representation_template(list(rep_b, rep_d))
+#' tmpl
 new_category_representation_template <- function(
   representations,
   metadata = list()
@@ -973,7 +987,8 @@ new_category_representation <- function(
 #   category_representation_class: Expected S7 class of representations.
 #   model_class: Target S7 cognitive model class.
 #   family_label: Character label of the distribution family (e.g., "NIX").
-#   decision_rule: Decision rule strategy ("sampling" or "argmax").
+#   decision_rule: Decision rule strategy ("sampling", "criterion", or
+#     "proportional").
 #   category_prior: Prior category probability vector.
 #   lapse_rate: Probability of a lapse response.
 #   lapse_bias: Optional response category bias vector during lapses.

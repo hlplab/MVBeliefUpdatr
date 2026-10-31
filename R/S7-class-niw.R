@@ -21,8 +21,8 @@ NULL
 #' @param cues Character vector indicating cue columns in `data`.
 #' @param category_template An [MVBU_CategoryRepresentationTemplate] object
 #'   containing NIW category representations.
-#' @param decision_rule Categorization decision rule: `"sampling"` or
-#'   `"argmax"`. Defaults to `"sampling"`.
+#' @param decision_rule Categorization decision rule: `"sampling"`,
+#'   `"criterion"`, or `"proportional"`. Defaults to `"sampling"`.
 #' @param category_prior Optional numeric vector of prior category
 #'   probabilities summing to 1. Defaults to equal priors.
 #' @param lapse_rate Numeric scalar lapse probability in `[0, 1]`. Defaults
@@ -85,6 +85,25 @@ NULL
 #' @docType class
 #' @usage NULL
 #' @export
+#' @examples
+#' # Normal-Inverse-Wishart (NIW) representation for multidimensional cues
+#' m_b <- c(VOT = 10, f0 = 200)
+#' S_b <- matrix(c(25, 5, 5, 36), nrow = 2,
+#'   dimnames = list(names(m_b), names(m_b)))
+#' rep_b <- new_niw_category_representation(
+#'   category_labels = "/b/", cue_labels = c("VOT", "f0"),
+#'   m = m_b, kappa = 5, nu = 10, S = S_b
+#' )
+#' m_d <- c(VOT = 50, f0 = 240)
+#' S_d <- matrix(c(25, -2, -2, 36), nrow = 2,
+#'   dimnames = list(names(m_d), names(m_d)))
+#' rep_d <- new_niw_category_representation(
+#'   category_labels = "/d/", cue_labels = c("VOT", "f0"),
+#'   m = m_d, kappa = 5, nu = 10, S = S_d
+#' )
+#' tmpl <- new_category_representation_template(list(rep_b, rep_d))
+#' m_niw <- new_niw_ideal_adaptor(category_template = tmpl)
+#' m_niw
 NIW_CategoryRepresentation <- S7::new_class(
   "NIW_CategoryRepresentation",
   parent = MVBU_CategoryRepresentation,

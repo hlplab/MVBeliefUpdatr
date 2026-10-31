@@ -27,3 +27,7 @@ A matrix of posterior category probabilities with one row per observation.
 \description{
 Compute posterior category probabilities for one or more observations
 }
+\examples{
+mod <- example_mvg_ideal_observer(n_cues = 2)
+posterior(mod, matrix(c(0, 0), nrow = 1))
+}

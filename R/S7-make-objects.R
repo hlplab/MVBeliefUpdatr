@@ -26,17 +26,53 @@ NULL
 #' @param category Character string giving the category column name in `data`.
 #'   Defaults to `"category"`.
 #' @param cues Character vector of cue column names in `data`.
-#' @param ... Additional model and family-specific parameters passed to constructors.
-#'   For cognitive models, this includes `category_prior` (prior category probabilities),
-#'   `decision_rule` (`"sampling"` or `"argmax"`), `lapse_rate` (scalar in `[0, 1]`),
-#'   `lapse_bias`, `Sigma_noise` (perceptual noise covariance), `noise_treatment`
-#'   (`"no_noise"`, `"sample"`, or `"marginalize"`), and `lapse_treatment`
-#'   (`"no_lapses"`, `"sample"`, or `"marginalize"`). For specific representation families,
-#'   this includes parameters such as `kappa`, `nu`, `m_0`, `S_0`, `c`, or `bandwidth`.
+#' @param ... Additional model and family-specific parameters passed to
+#'   constructors. For cognitive models, this includes `category_prior`
+#'   (prior category probabilities), `decision_rule` (`"sampling"`,
+#'   `"criterion"`, or `"proportional"`), `lapse_rate` (scalar in `[0, 1]`),
+#'   `lapse_bias`, `Sigma_noise` (perceptual noise covariance),
+#'   `noise_treatment` (`"no_noise"`, `"sample"`, or `"marginalize"`), and
+#'   `lapse_treatment` (`"no_lapses"`, `"sample"`, or `"marginalize"`). For
+#'   specific representation families, this includes parameters such as
+#'   `kappa_0`, `nu_0`, `m_0`, `S_0`, `c`, or `bandwidth`.
 #'
 #' @return An S7 representation, template, or cognitive model object.
 #' @seealso [family-uvg], [family-nix], [family-muvg], [family-mnix],
 #'   [family-mvg], [family-niw], [family-exemplar]
+#'
+#' @examples
+#' df <- data.frame(
+#'   category = c("A", "A", "B", "B"),
+#'   x = c(1, 2, 5, 6),
+#'   y = c(2, 1, 6, 5)
+#' )
+#'
+#' # Create an MVG category representation for category "A"
+#' cat_a <- new_category_representation_from_data(
+#'   df[df$category == "A", ],
+#'   type = "MVG",
+#'   category = "category",
+#'   cues = c("x", "y")
+#' )
+#' cat_a
+#'
+#' # Create a full category template from data
+#' tpl <- new_category_representation_template_from_data(
+#'   df,
+#'   type = "MVG",
+#'   category = "category",
+#'   cues = c("x", "y")
+#' )
+#' tpl
+#'
+#' # Create a full cognitive model from data
+#' mod <- new_model_from_data(
+#'   df,
+#'   type = "MVG",
+#'   category = "category",
+#'   cues = c("x", "y")
+#' )
+#' mod
 #'
 #' @name new-objects-from-data
 #' @rdname new-objects-from-data
@@ -623,6 +659,19 @@ S7::method(aggregate, MVBU_ModelList) <- function(x, weights = NULL, ...) {
 #' @seealso \code{\link{new_mvg_ideal_observer}},
 #'   \code{\link{new_niw_ideal_adaptor}},
 #'   \code{\link{new_exemplar_model}}
+#'
+#' @examples
+#' # Create two simple UVG models
+#' rep1 <- new_uvg_category_representation("A", "cue1", mu = 1, sigma2 = 1)
+#' rep2 <- new_uvg_category_representation("A", "cue1", mu = 3, sigma2 = 1)
+#' tpl1 <- new_category_representation_template(list(rep1))
+#' tpl2 <- new_category_representation_template(list(rep2))
+#' mod1 <- new_uvg_ideal_observer(tpl1)
+#' mod2 <- new_uvg_ideal_observer(tpl2)
+#'
+#' # Aggregate the models with equal weights
+#' agg_mod <- aggregate_models(list(mod1, mod2), weights = c(0.5, 0.5))
+#' agg_mod
 #'
 #' @name aggregate_models
 #' @rdname aggregate_models

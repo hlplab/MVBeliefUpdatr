@@ -24,8 +24,8 @@ NULL
 #' @param cues Character vector indicating cue columns in `data`.
 #' @param category_template An [MVBU_CategoryRepresentationTemplate] object
 #'   containing MUVG category representations.
-#' @param decision_rule Categorization decision rule: `"sampling"` or
-#'   `"argmax"`. Defaults to `"sampling"`.
+#' @param decision_rule Categorization decision rule: `"sampling"`,
+#'   `"criterion"`, or `"proportional"`. Defaults to `"sampling"`.
 #' @param category_prior Optional numeric vector of prior category
 #'   probabilities summing to 1. Defaults to equal priors.
 #' @param lapse_rate Numeric scalar lapse probability in `[0, 1]`. Defaults
@@ -83,6 +83,23 @@ NULL
 #' @docType class
 #' @usage NULL
 #' @export
+#' @examples
+#' # MUVG: Multivariate independent Gaussian (diagonal covariance)
+#' mu_b <- c(VOT = 10, f0 = 200)
+#' sigma2_b <- c(VOT = 25, f0 = 36)
+#' rep_b <- new_muvg_category_representation(
+#'   category_labels = "/b/", cue_labels = c("VOT", "f0"),
+#'   mu = mu_b, sigma2 = sigma2_b
+#' )
+#' mu_d <- c(VOT = 50, f0 = 240)
+#' sigma2_d <- c(VOT = 25, f0 = 36)
+#' rep_d <- new_muvg_category_representation(
+#'   category_labels = "/d/", cue_labels = c("VOT", "f0"),
+#'   mu = mu_d, sigma2 = sigma2_d
+#' )
+#' tmpl <- new_category_representation_template(list(rep_b, rep_d))
+#' m_muvg <- new_muvg_ideal_observer(category_template = tmpl)
+#' m_muvg
 MUVG_CategoryRepresentation <- S7::new_class(
   "MUVG_CategoryRepresentation",
   parent = MVBU_CategoryRepresentation,

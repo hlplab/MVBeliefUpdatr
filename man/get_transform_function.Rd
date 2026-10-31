@@ -28,3 +28,8 @@ A function.
 \description{
 Get the transform/untransform function from an object
 }
+\examples{
+sfi <- example_ideal_adaptor_stanfit_input()
+tf <- get_transform_function(sfi)
+utf <- get_untransform_function(sfi)
+}

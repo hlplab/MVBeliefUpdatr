@@ -4,44 +4,88 @@
 \alias{get_expected_Sigma_from_S}
 \alias{get_S_from_expected_Sigma}
 \alias{get_marginal_Sigma_from_S}
-\title{Convert Between Scatter Matrix and Expected/Marginal Covariance Matrix}
+\alias{get_expected_mu_from_m}
+\alias{get_m_from_expected_mu}
+\title{Convert Between NIW/NIX Hyperparameters and Expected/Marginal Moments}
 \usage{
 get_expected_Sigma_from_S(S, nu)
 
 get_S_from_expected_Sigma(Sigma, nu)
 
 get_marginal_Sigma_from_S(S, nu, kappa)
+
+get_expected_mu_from_m(m)
+
+get_m_from_expected_mu(mu)
 }
 \arguments{
-\item{S}{Scatter matrix \eqn{S} (numeric matrix, scalar, or list of matrices).}
+\item{S}{Scatter matrix \eqn{S} (numeric matrix, scalar, or list of
+matrices).}
 
-\item{nu}{Strength of belief (pseudocount) about \eqn{\Sigma} (\eqn{\nu > D + 1}).}
+\item{nu}{Strength of belief (pseudocount) about \eqn{\Sigma}
+(\eqn{\nu > D + 1}).}
 
-\item{Sigma}{Expected category covariance matrix \eqn{\Sigma} (numeric matrix, scalar, or list of matrices).}
+\item{Sigma}{Expected category covariance matrix \eqn{\Sigma} (numeric
+matrix, scalar, or list of matrices).}
 
 \item{kappa}{Strength of belief (pseudocount) about \eqn{\mu}.}
+
+\item{m}{Location hyperparameter \eqn{m} (numeric vector, matrix, or list).}
+
+\item{mu}{Expected category mean vector \eqn{\mu} (numeric vector, matrix,
+or list).}
 }
 \value{
-Expected category covariance matrix \eqn{\Sigma = S / (\nu - D - 1)}, marginal
-category covariance matrix \eqn{\Sigma = (\kappa + 1) / \kappa \cdot S / (\nu - D - 1)}, or
-scatter matrix \eqn{S = \Sigma \cdot (\nu - D - 1)}. If the input was a list,
-a list is returned; otherwise a matrix (or scalar for 1D) is returned.
+For \code{get_expected_Sigma_from_S}, the expected covariance
+matrix \eqn{\Sigma = S / (\nu - D - 1)}. For
+\code{get_S_from_expected_Sigma}, the scatter matrix
+\eqn{S = \Sigma \cdot (\nu - D - 1)}. For
+\code{get_marginal_Sigma_from_S}, the marginal category covariance matrix
+\eqn{\Sigma = (\kappa + 1) / \kappa \cdot S / (\nu - D - 1)}. For
+\code{get_expected_mu_from_m} and \code{get_m_from_expected_mu}, the
+mean vector or location hyperparameter.
 }
 \description{
-Functions to convert between the scatter matrix \eqn{S} and the expected or marginal
-covariance matrix \eqn{\Sigma} under a Normal-Inverse-Wishart (NIW) or
-Inverse-Wishart distribution \insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
+Functions to convert between conjugate Normal-Inverse-Wishart (NIW) or
+Normal-Inverse-Chi-Squared (NIX) hyperparameters (\eqn{m, S}) and the
+expected or marginal distribution moments (\eqn{\mu, \Sigma})
+\insertCite{@see @murphy2012 p. 134}{MVBeliefUpdatr}.
 }
 \details{
 Under the NIW model with \eqn{D} dimensions, scatter matrix \eqn{S}, and
-degrees of freedom / pseudocounts \eqn{\nu > D + 1}, the expected covariance matrix is:
+degrees of freedom / pseudocounts \eqn{\nu > D + 1}, the expected
+covariance matrix is:
 \deqn{\Sigma = \frac{S}{\nu - D - 1}}
 Conversely, the scatter matrix is obtained from \eqn{\Sigma} by:
 \deqn{S = \Sigma \cdot (\nu - D - 1)}.
+For conjugate NIW and NIX models, the expected mean \eqn{\mu} is identically
+equal to the location parameter \eqn{m}:
+\deqn{\mu = m}
+}
+\examples{
+# 2D example
+S <- matrix(c(4, 1, 1, 3), nrow = 2)
+nu <- 10
+kappa <- 5
+
+# Convert scatter matrix to expected covariance matrix (D = 2)
+Sigma <- get_expected_Sigma_from_S(S, nu = nu)
+Sigma
+
+# Convert expected covariance matrix back to scatter matrix
+get_S_from_expected_Sigma(Sigma, nu = nu)
+
+# Marginal covariance matrix
+get_marginal_Sigma_from_S(S, nu = nu, kappa = kappa)
+
+# Mean and location conversions
+m <- c(0, 1)
+mu <- get_expected_mu_from_m(m)
+get_m_from_expected_mu(mu)
 }
 \references{
 \insertRef{murphy2012}{MVBeliefUpdatr}
 }
 \seealso{
-\code{\link{get_expected_sigma}}, \code{\link{get_expected_mu_from_m}}
+\code{\link{get_expected_sigma}}, \code{\link{get_expected_mu}}
 }

@@ -2,22 +2,42 @@
 % Please edit documentation in R/S7-stanfit-utils.R
 \name{read_stanfit}
 \alias{read_stanfit}
-\title{Read a cached Stanfit object from disk}
+\alias{write_stanfit}
+\title{Read and write cached Stanfit objects to disk}
 \usage{
 read_stanfit(file)
+
+write_stanfit(x, file, compress = TRUE)
 }
 \arguments{
 \item{file}{File path to the cached fit. If the file extension is omitted,
 \code{.rds} is appended automatically.}
+
+\item{x}{An object inheriting from \code{\link{MVBU_Stanfit}}.}
+
+\item{compress}{Logical or character string specifying compression passed
+to \code{\link{saveRDS}} (default: \code{TRUE}).}
 }
 \value{
-The loaded \code{\link{MVBU_Stanfit}} object with its \code{@file}
-slot updated, or \code{NULL} if the file does not exist or cannot be read.
+For \code{read_stanfit}, the loaded \code{\link{MVBU_Stanfit}} object
+with its \code{@file} slot updated, or \code{NULL} if the file does not
+exist or cannot be read. For \code{write_stanfit}, the saved object
+\code{x} invisibly with its \code{@file} slot updated.
 }
 \description{
-Reads a previously saved \code{\link{MVBU_Stanfit}} object (or subclass such as
-\code{\link{IdealAdaptorStanfit}}) from an RDS file.
+Reads or saves a previously fitted \code{\link{MVBU_Stanfit}} object (or
+subclass such as \code{\link{IdealAdaptorStanfit}}) from or to an RDS file.
+}
+\examples{
+\donttest{
+fit <- example_ideal_adaptor_stanfit()
+tmp <- tempfile(fileext = ".rds")
+write_stanfit(fit, tmp)
+fit_loaded <- read_stanfit(tmp)
+is(fit_loaded, "MVBU_Stanfit")
+unlink(tmp)
+}
 }
 \seealso{
-\code{\link{write_stanfit}}, \code{\link{fit_ideal_adaptor}}
+\code{\link{fit_ideal_adaptor}}
 }

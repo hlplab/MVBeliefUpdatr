@@ -66,6 +66,18 @@ information, and metadata). \code{example_ideal_adaptor_staninput} creates
 a typed Stan-ready input (\code{\link{IdealAdaptorStaninput}}) via
 \code{.new_staninput()}.
 }
+\examples{
+# Generate Stanfit input from small synthetic data
+stan_input <- example_ideal_adaptor_stanfit_input(
+  model_family = "NIX",
+  n_cues = 1,
+  n_exposure_per_category = 5L,
+  n_test_steps_category = 3L,
+  n_test_steps_adaptation = 2L,
+  n_test_tokens_per_location = 5L
+)
+stan_input
+}
 \seealso{
 \code{\link{example_exposure_test_data}},
 \code{\link{new_ideal_adaptor_stanfit_input}}
