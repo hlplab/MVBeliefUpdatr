@@ -105,6 +105,7 @@ Zach Burchill, Anna Persson, and Xin Xie are gratefully acknowledged.
 Useful links:
 \itemize{
   \item \url{https://github.com/hlplab/MVBeliefUpdatr}
+  \item \url{https://hlplab.github.io/MVBeliefUpdatr/}
   \item Report bugs at \url{https://github.com/hlplab/MVBeliefUpdatr/issues}
 }
 

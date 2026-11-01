@@ -2,6 +2,7 @@
 # S7 Plot Engine: Shared Grid, Evaluation, Parallelization, and Layer Builders
 # =============================================================================
 
+#' @include internal-globals.R
 #' @include S7-generics.R
 #' @include S7-class.R
 #' @include S7-methods.R
@@ -527,7 +528,7 @@ NULL
       for (i in seq_len(nrow(moments))) {
         mu_val <- moments$mu.mean[[i]][idx]
         sig_mat <- as.matrix(moments$Sigma.mean[[i]])
-        sd_val <- sqrt(max(sig_mat[idx, idx], 1e-6))
+        sd_val <- sqrt(max(sig_mat[idx, idx], MVBU_PROB_TOL))
         min_v <- min(min_v, mu_val - n_sds * sd_val)
         max_v <- max(max_v, mu_val + n_sds * sd_val)
       }
@@ -554,7 +555,7 @@ NULL
       for (i in seq_len(nrow(d_sum))) {
         mu_val <- if (!is.null(mu_col)) mu_col[[i]][idx] else 0
         sig_i <- as.matrix(d_sum$Sigma[[i]])
-        sd_val <- sqrt(max(sig_i[idx, idx], 1e-6))
+        sd_val <- sqrt(max(sig_i[idx, idx], MVBU_PROB_TOL))
         min_v <- min(min_v, mu_val - n_sds * sd_val)
         max_v <- max(max_v, mu_val + n_sds * sd_val)
       }
@@ -573,7 +574,7 @@ NULL
       idx <- match(c_name, get_cue_labels(r))
       mu_val <- mc$mu[idx]
       sig_mat <- as.matrix(mc$Sigma)
-      sd_val <- sqrt(max(sig_mat[idx, idx], 1e-6))
+      sd_val <- sqrt(max(sig_mat[idx, idx], MVBU_PROB_TOL))
       min_v <- min(min_v, mu_val - n_sds * sd_val)
       max_v <- max(max_v, mu_val + n_sds * sd_val)
     }
@@ -638,7 +639,7 @@ NULL
       mc <- get_family(r)@expected_moments(r)
       idx <- match(slice_cue, get_cue_labels(r))
       sig_mat <- as.matrix(mc$Sigma)
-      sqrt(max(sig_mat[idx, idx], 1e-6))
+      sqrt(max(sig_mat[idx, idx], MVBU_PROB_TOL))
     }, numeric(1L))
 
     if (!is.null(slices) && is.numeric(slices)) {
@@ -999,8 +1000,8 @@ NULL
       idx_c <- match(cues, get_cue_labels(r))
       mu_vec <- mc$mu[idx_c]
       sig_mat <- as.matrix(mc$Sigma)
-      sd_x <- sqrt(max(sig_mat[idx_c[1L], idx_c[1L]], 1e-6))
-      sd_y <- sqrt(max(sig_mat[idx_c[2L], idx_c[2L]], 1e-6))
+      sd_x <- sqrt(max(sig_mat[idx_c[1L], idx_c[1L]], MVBU_PROB_TOL))
+      sd_y <- sqrt(max(sig_mat[idx_c[2L], idx_c[2L]], MVBU_PROB_TOL))
       min_x <- min(min_x, mu_vec[1L] - 3.5 * sd_x)
       max_x <- max(max_x, mu_vec[1L] + 3.5 * sd_x)
       min_y <- min(min_y, mu_vec[2L] - 3.5 * sd_y)
@@ -1279,7 +1280,10 @@ NULL
       idx_c <- match(cues, get_cue_labels(r))
       mu <- mc$mu[idx_c]
       Sigma <- mc$Sigma[idx_c, idx_c]
-      chol_S <- tryCatch(t(chol(Sigma)), error = function(e) diag(sqrt(pmax(diag(Sigma), 1e-6))))
+      chol_S <- tryCatch(
+        t(chol(Sigma)),
+        error = function(e) diag(sqrt(pmax(diag(Sigma), MVBU_PROB_TOL)))
+      )
 
       n_theta <- as.integer(max(resolution, 15L))
       n_phi <- as.integer(max(resolution, 15L))

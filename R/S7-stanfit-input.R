@@ -1,3 +1,4 @@
+#' @include internal-globals.R
 #' @include asserts.R
 #' @include S7-class.R
 #' @include S7-transform-information.R
@@ -725,7 +726,7 @@ new_ideal_adaptor_stanfit_input <- function(
 #' @param category Category column name.
 #' @param group Grouping column name.
 #' @param group_unique Unique grouping column name.
-#' @param tol Tolerance for floating point comparisons.
+#' @param tol Tolerance for floating point comparisons (default: MVBU_PROB_TOL).
 #' @keywords internal
 #' @noRd
 .check_unique_group_identity <- function(
@@ -734,7 +735,7 @@ new_ideal_adaptor_stanfit_input <- function(
   category,
   group,
   group_unique,
-  tol = 1e-6
+  tol = MVBU_PROB_TOL
 ) {
   unique_labels <- levels(factor(exposure[[group_unique]]))
   category_labels <- levels(factor(exposure[[category]]))

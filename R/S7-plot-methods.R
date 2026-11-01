@@ -2,6 +2,7 @@
 # S7 Plot Methods for MVBeliefUpdatr
 # =============================================================================
 
+#' @include internal-globals.R
 #' @include S7-generics.R
 #' @include S7-class.R
 #' @include S7-methods.R
@@ -665,7 +666,7 @@ NULL
     mc <- get_family(r)@expected_moments(r)
     mu_val <- mc$mu[1L]
     sig_mat <- as.matrix(mc$Sigma)
-    sd_val <- sqrt(max(sig_mat[1L, 1L], 1e-6))
+    sd_val <- sqrt(max(sig_mat[1L, 1L], MVBU_PROB_TOL))
     params[[cat_name]] <- list(mu = mu_val, sd = sd_val, rep = r)
     min_val <- min(min_val, mu_val - 3.5 * sd_val)
     max_val <- max(max_val, mu_val + 3.5 * sd_val)
@@ -839,8 +840,8 @@ NULL
       mc <- get_family(r)@expected_moments(r)
       mu_vec <- mc$mu
       sig_mat <- as.matrix(mc$Sigma)
-      sd_x <- sqrt(max(sig_mat[1L, 1L], 1e-6))
-      sd_y <- sqrt(max(sig_mat[2L, 2L], 1e-6))
+      sd_x <- sqrt(max(sig_mat[1L, 1L], MVBU_PROB_TOL))
+      sd_y <- sqrt(max(sig_mat[2L, 2L], MVBU_PROB_TOL))
       min_x <- min(min_x, mu_vec[1] - 3.5 * sd_x)
       max_x <- max(max_x, mu_vec[1] + 3.5 * sd_x)
       min_y <- min(min_y, mu_vec[2] - 3.5 * sd_y)
@@ -1720,7 +1721,7 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
       cat_name <- d_sum$category[i]
       mu_sub <- d_sum$mu.mean[[i]][cue_idx]
       sigma_mat <- as.matrix(d_sum$Sigma.mean[[i]])
-      sigma_sub <- sqrt(max(sigma_mat[cue_idx, cue_idx], 1e-6))
+      sigma_sub <- sqrt(max(sigma_mat[cue_idx, cue_idx], MVBU_PROB_TOL))
       min_x <- if (!is.null(lim_spec[[cues[1L]]])) {
         lim_spec[[cues[1L]]][1L]
       } else {
@@ -1767,7 +1768,7 @@ S7::method(plot_categories, MVBU_Stanfit) <- function(
         cat_name <- d_raw$category[i]
         mu_sub <- d_raw$m[[i]][cue_idx]
         sigma_mat <- as.matrix(d_raw$Sigma[[i]])
-        sigma_sub <- sqrt(max(sigma_mat[cue_idx, cue_idx], 1e-6))
+        sigma_sub <- sqrt(max(sigma_mat[cue_idx, cue_idx], MVBU_PROB_TOL))
         min_x <- min(df_all[[cues[1]]])
         max_x <- max(df_all[[cues[1]]])
         grid_x <- seq(min_x, max_x, length.out = resolution)
@@ -2873,7 +2874,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
   for (cat_name in names(reps)) {
     r <- reps[[cat_name]]
     mc <- get_family(r)@expected_moments(r)
-    sd_v <- sqrt(pmax(diag(as.matrix(mc$Sigma)), 1e-6))
+    sd_v <- sqrt(pmax(diag(as.matrix(mc$Sigma)), MVBU_PROB_TOL))
     for (k in seq_along(cues)) {
       scale_rows[[length(scale_rows) + 1]] <- data.frame(
         Category = cat_name,
@@ -2895,7 +2896,7 @@ S7::method(plot_parameters, MVBU_CognitiveModel) <- function(
   noise_rows <- list()
   if (!is.null(sigma_n) &&
     !identical(noise_trt, "no_noise")) {
-    sd_n <- sqrt(pmax(diag(as.matrix(sigma_n)), 1e-6))
+    sd_n <- sqrt(pmax(diag(as.matrix(sigma_n)), MVBU_PROB_TOL))
     for (k in seq_along(cues)) {
       noise_rows[[length(noise_rows) + 1]] <- data.frame(
         Cue = cues[k],
@@ -3265,7 +3266,7 @@ S7::method(plot_parameters, MVBU_Stanfit) <- function(
   if (!"tau" %in% names(draws) && "S" %in% names(draws)) {
     draws$tau <- purrr::map(draws$S, function(s) {
       mat <- as.matrix(s)
-      sqrt(pmax(diag(mat), 1e-6))
+      sqrt(pmax(diag(mat), MVBU_PROB_TOL))
     })
   }
 
@@ -3578,7 +3579,7 @@ S7::method(plot_parameter_correlations, MVBU_Stanfit) <- function(
           }
           if ("S" %in% names(grp_sub_d)) {
             s_mat <- as.matrix(grp_sub_d$S[[1L]])
-            sd_v <- sqrt(pmax(diag(s_mat), 1e-6))
+            sd_v <- sqrt(pmax(diag(s_mat), MVBU_PROB_TOL))
             for (k in seq_along(cues)) {
               row_vals[[paste0("tau_", c_clean, "_", cues[k], "__", grp)]] <-
                 sd_v[k]
@@ -3802,7 +3803,7 @@ S7::method(plot_parameters_pairwise, MVBU_Stanfit) <- function(
         }
         if ("S" %in% names(sub_d)) {
           s_mat <- as.matrix(sub_d$S[[i]])
-          sd_v <- sqrt(pmax(diag(s_mat), 1e-6))
+          sd_v <- sqrt(pmax(diag(s_mat), MVBU_PROB_TOL))
           for (k in seq_along(cues)) {
             row_vals[[paste0("tau_", c_clean, "_", cues[k])]] <- sd_v[k]
           }
@@ -3885,7 +3886,8 @@ S7::method(plot_parameters_pairwise, MVBU_Stanfit) <- function(
   upper_df_valid <- upper_df %>%
     dplyr::group_by(.data$Var1_expr, .data$Var2_expr, .data$Group) %>%
     dplyr::filter(
-      stats::sd(.data$Val1) > 1e-6 & stats::sd(.data$Val2) > 1e-6
+      stats::sd(.data$Val1) > MVBU_PROB_TOL &
+        stats::sd(.data$Val2) > MVBU_PROB_TOL
     ) %>%
     dplyr::ungroup()
 
@@ -4792,7 +4794,10 @@ S7::method(plot_model_updates, MVBU_Stanfit) <- function(
       idx_c <- match(cues, get_cue_labels(r))
       mu <- mc$mu[idx_c]
       Sigma <- mc$Sigma[idx_c, idx_c]
-      chol_S <- tryCatch(t(chol(Sigma)), error = function(e) diag(sqrt(pmax(diag(Sigma), 1e-6))))
+      chol_S <- tryCatch(
+        t(chol(Sigma)),
+        error = function(e) diag(sqrt(pmax(diag(Sigma), MVBU_PROB_TOL)))
+      )
 
       pts_rings <- list()
       for (rg in rings) {
@@ -4894,7 +4899,7 @@ S7::method(plot_model_updates, MVBU_Stanfit) <- function(
       Sigma <- mc$Sigma[idx_c, idx_c]
       chol_S <- tryCatch(
         t(chol(Sigma)),
-        error = function(e) diag(sqrt(pmax(diag(Sigma), 1e-6)))
+        error = function(e) diag(sqrt(pmax(diag(Sigma), MVBU_PROB_TOL)))
       )
       pts <- chol_S %*% (unit_sphere * r_val) + mu
       col_k <- c_colors[cat_name]
