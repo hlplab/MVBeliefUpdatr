@@ -572,7 +572,8 @@ NULL
       mc <- get_family(r)@expected_moments(r)
       idx <- match(c_name, get_cue_labels(r))
       mu_val <- mc$mu[idx]
-      sd_val <- sqrt(max(mc$Sigma[idx, idx], 1e-6))
+      sig_mat <- as.matrix(mc$Sigma)
+      sd_val <- sqrt(max(sig_mat[idx, idx], 1e-6))
       min_v <- min(min_v, mu_val - n_sds * sd_val)
       max_v <- max(max_v, mu_val + n_sds * sd_val)
     }
@@ -636,7 +637,8 @@ NULL
     slice_sds <- vapply(reps, function(r) {
       mc <- get_family(r)@expected_moments(r)
       idx <- match(slice_cue, get_cue_labels(r))
-      sqrt(max(mc$Sigma[idx, idx], 1e-6))
+      sig_mat <- as.matrix(mc$Sigma)
+      sqrt(max(sig_mat[idx, idx], 1e-6))
     }, numeric(1L))
 
     if (!is.null(slices) && is.numeric(slices)) {
@@ -996,8 +998,9 @@ NULL
       mc <- get_family(r)@expected_moments(r)
       idx_c <- match(cues, get_cue_labels(r))
       mu_vec <- mc$mu[idx_c]
-      sd_x <- sqrt(max(mc$Sigma[idx_c[1L], idx_c[1L]], 1e-6))
-      sd_y <- sqrt(max(mc$Sigma[idx_c[2L], idx_c[2L]], 1e-6))
+      sig_mat <- as.matrix(mc$Sigma)
+      sd_x <- sqrt(max(sig_mat[idx_c[1L], idx_c[1L]], 1e-6))
+      sd_y <- sqrt(max(sig_mat[idx_c[2L], idx_c[2L]], 1e-6))
       min_x <- min(min_x, mu_vec[1L] - 3.5 * sd_x)
       max_x <- max(max_x, mu_vec[1L] + 3.5 * sd_x)
       min_y <- min(min_y, mu_vec[2L] - 3.5 * sd_y)

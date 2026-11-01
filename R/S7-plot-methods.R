@@ -663,8 +663,9 @@ NULL
   for (cat_name in names(reps)) {
     r <- reps[[cat_name]]
     mc <- get_family(r)@expected_moments(r)
-    mu_val <- mc$mu[1]
-    sd_val <- sqrt(max(mc$Sigma[1, 1], 1e-6))
+    mu_val <- mc$mu[1L]
+    sig_mat <- as.matrix(mc$Sigma)
+    sd_val <- sqrt(max(sig_mat[1L, 1L], 1e-6))
     params[[cat_name]] <- list(mu = mu_val, sd = sd_val, rep = r)
     min_val <- min(min_val, mu_val - 3.5 * sd_val)
     max_val <- max(max_val, mu_val + 3.5 * sd_val)
@@ -837,8 +838,9 @@ NULL
     } else {
       mc <- get_family(r)@expected_moments(r)
       mu_vec <- mc$mu
-      sd_x <- sqrt(max(mc$Sigma[1, 1], 1e-6))
-      sd_y <- sqrt(max(mc$Sigma[2, 2], 1e-6))
+      sig_mat <- as.matrix(mc$Sigma)
+      sd_x <- sqrt(max(sig_mat[1L, 1L], 1e-6))
+      sd_y <- sqrt(max(sig_mat[2L, 2L], 1e-6))
       min_x <- min(min_x, mu_vec[1] - 3.5 * sd_x)
       max_x <- max(max_x, mu_vec[1] + 3.5 * sd_x)
       min_y <- min(min_y, mu_vec[2] - 3.5 * sd_y)

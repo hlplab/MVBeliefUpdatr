@@ -63,7 +63,7 @@ NULL
 
   point <- fam@expected_moments(x)
   mu <- point$mu
-  Sigma <- point$Sigma
+  Sigma <- as.matrix(point$Sigma)
   if (is.null(weights)) weights <- point$weights
 
   if (to %in% c("UVG", "NIX") && length(mu) != 1) {

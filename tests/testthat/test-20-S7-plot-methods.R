@@ -32,6 +32,25 @@ test_that("plot_categories works on 1D representations and models", {
   )
   p4 <- plot_categories(nix_rep)
   expect_s3_class(p4, "ggplot")
+
+  # Test NIW representation and ideal adaptor with 1 cue
+  niw_rep_1d <- new_niw_category_representation(
+    category_labels = "A",
+    cue_labels = "F1",
+    m = 0,
+    kappa = 10,
+    nu = 15,
+    S = matrix(1, 1, 1)
+  )
+  p5 <- plot_categories(niw_rep_1d)
+  expect_s3_class(p5, "ggplot")
+
+  niw_ia_1d <- example_niw_ideal_adaptor(n_cues = 1L)
+  p6 <- plot_categories(niw_ia_1d)
+  expect_s3_class(p6, "ggplot")
+
+  p7 <- plot_categorization_functions(niw_ia_1d)
+  expect_s3_class(p7, "ggplot")
 })
 
 test_that("plot_categories works on 2D representations and models", {
