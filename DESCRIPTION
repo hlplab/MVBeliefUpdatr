@@ -3,6 +3,7 @@ Title: Fitting, Summarizing, and Visualizing of Gaussian Ideal Observers and Ada
 Version: 0.1.0
 Date: 2026-10-31
 URL: https://github.com/hlplab/MVBeliefUpdatr
+BugReports: https://github.com/hlplab/MVBeliefUpdatr/issues
 Authors@R:
     person(given = c("T.", "Florian"),
            family = "Jaeger",
@@ -18,7 +19,7 @@ Description: Model, fit, and visualize incremental Bayesian categorization
     (NIW) distributions. Supports Bayesian parameter inference via Markov Chain
     Monte Carlo (MCMC) sampling using 'Stan', model comparison via 'loo', and
     rich visualizations with 'ggplot2' and 'patchwork'.
-License: GPL (>= 3) + file LICENSE
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

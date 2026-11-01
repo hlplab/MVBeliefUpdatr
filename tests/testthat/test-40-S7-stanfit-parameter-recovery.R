@@ -445,13 +445,17 @@ test_that("Posterior draws recover true prior parameters from simulated data", {
   fit_niw <- read_stanfit(model_path_niw)
   draws_niw <- rstan::extract(get_stanfit(fit_niw))
 
-  # 2 categories, 2 cues
-  expect_equal(dim(draws_niw$m_0)[2:3], c(2, 2))
+  # 2 categories, 2 cues in standardized space
+  expect_equal(dim(draws_niw$m_0_transformed)[2:3], c(2, 2))
   for (cat in 1:2) {
     for (k in 1:2) {
-      vals <- draws_niw$m_0[, cat, k]
+      vals <- draws_niw$m_0_transformed[, cat, k]
       expect_false(anyNA(vals))
       expect_lt(abs(mean(vals)), 5.0)
     }
   }
+
+  # In original cue space, unscaled m_0 parameters are present and finite
+  expect_equal(dim(draws_niw$m_0)[2:3], c(2, 2))
+  expect_false(anyNA(draws_niw$m_0))
 })

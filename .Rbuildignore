@@ -18,3 +18,5 @@
 ^inst/stan/NIW_ideal_adaptor$
 ^Rplots\.pdf$
 ^_pkgdown\.yml$
+^LICENSE$
+^cran-comments\.md$
