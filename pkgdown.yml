@@ -1,0 +1,14 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  backward-compatibility-working-with-legacy-code: backward-compatibility-working-with-legacy-code.html
+  articles/contributor-guide-adding-permanent-model-families: contributor-guide-adding-permanent-model-families.html
+  extending-mvbeliefupdatr-adding-model-families: extending-mvbeliefupdatr-adding-model-families.html
+  fitting-and-working-with-stanfit-models: fitting-and-working-with-stanfit-models.html
+  s7-class-structure-and-workflows: s7-class-structure-and-workflows.html
+  visualizing-models-and-categories: visualizing-models-and-categories.html
+last_built: 2026-11-01T16:56Z
+urls:
+  reference: https://hlplab.github.io/MVBeliefUpdatr/reference
+  article: https://hlplab.github.io/MVBeliefUpdatr/articles
