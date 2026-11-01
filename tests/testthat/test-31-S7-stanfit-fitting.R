@@ -75,6 +75,7 @@ test_that(
       "models",
       "minimal-nix_ideal_adaptor-NIX.rds"
     )
+    skip_if_not(file.exists(model_path), "Model fixture does not exist")
     fit <- read_stanfit(model_path)
     tmp_file <- tempfile(fileext = ".rds")
     write_stanfit(fit, tmp_file)
@@ -115,6 +116,7 @@ test_that(
     "models",
     "minimal-nix_ideal_adaptor-NIX.rds"
   )
+  skip_if_not(file.exists(model_path), "Model fixture does not exist")
   fit <- read_stanfit(model_path)
 
   recovered_stanfit <- tidybayes::recover_types(get_stanfit(fit))

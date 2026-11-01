@@ -96,7 +96,5 @@ updated_model <- update_model_decision_bias_by_one_observation(
 }
 }
 \keyword{bias}
-\keyword{bias,}
-\keyword{decision}
-\keyword{response}
-\keyword{updating,}
+\keyword{models}
+\keyword{updating}

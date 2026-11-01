@@ -68,7 +68,9 @@ logit2probability <- function(l, refcat = 1) {
 #'
 #' @return A model object with updated decision biases.
 #'
-#' @keywords updating, decision bias, response bias
+#' @keywords bias
+#' @keywords updating
+#' @keywords models
 #' @rdname update_model_decision_bias
 #' @importFrom rlang .data .env
 #' @export

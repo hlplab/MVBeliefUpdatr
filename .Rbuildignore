@@ -4,11 +4,14 @@
 ^\.vscode$
 ^\.Rproj\.user$
 ^\.travis\.yml$
+^\.github$
 ^codecov\.yml$
 ^doc$
 ^doc/.*
 ^docs$
 ^docs/.*
+^notes$
+^notes/.*
 ^Meta$
 ^data-raw$
 ^tests/benchmarking\.R$
@@ -20,3 +23,4 @@
 ^_pkgdown\.yml$
 ^LICENSE$
 ^cran-comments\.md$
+^pkgdown$

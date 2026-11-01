@@ -1,4 +1,7 @@
-# Contributor Guide: Adding Permanent Model Families to Core
+---
+title: "Contributor Guide: Adding Permanent Model Families"
+---
+
 
 This guide outlines the systematic procedure for contributing a new model
 family as a permanent, first-class citizen in the **MVBeliefUpdatr** core.

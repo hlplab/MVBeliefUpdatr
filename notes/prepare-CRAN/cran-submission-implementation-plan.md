@@ -37,11 +37,11 @@ to CRAN.
 |    - Expand acronyms on first use (MCMC, NIW, NIX, MNIX)                    |
 |    - Enclose software/package names in single quotes ('Stan', 'S7', etc.)   |
 |                                                                             |
-| 5. Multi-Platform Validation (R-devel, Windows, Linux)                      |
-|    - Run devtools::check_win_devel() and devtools::check_win_release()      |
-|    - Verify GCC and Clang builds with rhub / GitHub Actions                 |
+| 5. Multi-Platform Validation (R-devel, Windows, Linux) [IN PROGRESS]         |
+|    - devtools::check_win_devel() submitted to win-builder.r-project.org     |
+|    - devtools::check_win_release() pending email verification               |
 |                                                                             |
-| 6. Authoring cran-comments.md                                               |
+| 6. Authoring cran-comments.md [COMPLETED]                                    |
 |    - Document test environments, check results, and explain compiled libs   |
 +-----------------------------------------------------------------------------+
 ```

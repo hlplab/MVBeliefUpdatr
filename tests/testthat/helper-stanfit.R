@@ -25,7 +25,11 @@ refit_stanfit_models <- isTRUE(
 ) || FALSE
 
 .get_ideal_adaptor_fit_model_dir <- function() {
-  testthat::test_path("models")
+  dir <- testthat::test_path("models")
+  if (!dir.exists(dir)) {
+    dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+  }
+  dir
 }
 
 example_stanfit_path <- function(

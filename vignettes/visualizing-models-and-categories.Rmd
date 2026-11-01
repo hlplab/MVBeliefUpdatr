@@ -12,7 +12,8 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-eval_plots <- isTRUE(getOption("pkgdown"))
+eval_plots <- identical(Sys.getenv("IN_PKGDOWN"), "true") ||
+  isTRUE(getOption("pkgdown"))
 
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -29,9 +30,11 @@ knitr::opts_chunk$set(
 
 if (capabilities("cairo")) {
   options(
-    device = function(...) grDevices::cairo_pdf(
-      tempfile(fileext = ".pdf"), ...
-    )
+    device = function(...) {
+      grDevices::cairo_pdf(
+        tempfile(fileext = ".pdf"), ...
+      )
+    }
   )
 } else {
   options(
@@ -85,10 +88,12 @@ Every visualization function in the package dispatches on the new **S7** class a
 library(MVBeliefUpdatr)
 library(ggplot2)
 library(patchwork)
+```
 
-if (isTRUE(getOption("pkgdown"))) {
-  library(plotly)
-  library(gganimate)
+```{r pkgdown-setup, eval = TRUE, echo = FALSE}
+if (eval_plots) {
+  if (requireNamespace("plotly", quietly = TRUE)) library(plotly)
+  if (requireNamespace("gganimate", quietly = TRUE)) library(gganimate)
 }
 ```
 

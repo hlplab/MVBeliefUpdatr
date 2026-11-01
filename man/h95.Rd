@@ -14,9 +14,7 @@ A tibble with 1,668 rows and 9 variables:
 \item{type}{Speaker demographic group as a factor with levels
 \code{"men"}, \code{"women"}, \code{"boys"}, and \code{"girls"}.}
 \item{vowel}{Standardized Unicode IPA vowel label in phonemic slashes
-as a factor with 12 levels: \code{/æ/}, \code{/ɝ/}, \code{/ɑ/},
-\code{/eɪ/}, \code{/ɛ/}, \code{/i/}, \code{/ɪ/}, \code{/oʊ/},
-\code{/ɔ/}, \code{/u/}, \code{/ʊ/}, \code{/ʌ/}.}
+as a factor with 12 levels (see \code{levels(h95$vowel)}).}
 \item{f0}{Fundamental frequency in Hertz (Hz).}
 \item{f1}{First formant frequency in Hertz (Hz).}
 \item{f2}{Second formant frequency in Hertz (Hz).}

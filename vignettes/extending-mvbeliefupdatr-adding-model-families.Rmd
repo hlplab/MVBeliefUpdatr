@@ -488,7 +488,7 @@ compelling engineering and usability advantages:
 
 If you have developed a useful custom family and wish to contribute it as a
 permanent built-in class, consult the companion developer guide:
-[Contributor Guide: Adding Permanent Model Families](../docs/developer/contributor-guide-adding-permanent-model-families.md).
+[Contributor Guide: Adding Permanent Model Families](https://hlplab.github.io/MVBeliefUpdatr/articles/contributor-guide-adding-permanent-model-families.html).
 
 ---
 

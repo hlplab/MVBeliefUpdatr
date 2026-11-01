@@ -31,9 +31,7 @@ NULL
 #'   \item{type}{Speaker demographic group as a factor with levels
 #'     \code{"men"}, \code{"women"}, \code{"boys"}, and \code{"girls"}.}
 #'   \item{vowel}{Standardized Unicode IPA vowel label in phonemic slashes
-#'     as a factor with 12 levels: \code{/æ/}, \code{/ɝ/}, \code{/ɑ/},
-#'     \code{/eɪ/}, \code{/ɛ/}, \code{/i/}, \code{/ɪ/}, \code{/oʊ/},
-#'     \code{/ɔ/}, \code{/u/}, \code{/ʊ/}, \code{/ʌ/}.}
+#'     as a factor with 12 levels (see \code{levels(h95$vowel)}).}
 #'   \item{f0}{Fundamental frequency in Hertz (Hz).}
 #'   \item{f1}{First formant frequency in Hertz (Hz).}
 #'   \item{f2}{Second formant frequency in Hertz (Hz).}
@@ -75,9 +73,7 @@ NULL
 #'   \item{type}{Speaker demographic group as a factor with levels
 #'     \code{"men"}, \code{"women"}, and \code{"children"}.}
 #'   \item{vowel}{Standardized Unicode IPA vowel label in phonemic slashes
-#'     as a factor with 10 levels: \code{/i/}, \code{/ɪ/}, \code{/ɛ/},
-#'     \code{/æ/}, \code{/ʌ/}, \code{/ɑ/}, \code{/ɔ/}, \code{/ʊ/},
-#'     \code{/u/}, \code{/ɝ/}.}
+#'     as a factor with 10 levels (see \code{levels(pb52$vowel)}).}
 #'   \item{repetition}{Repetition index (1 or 2).}
 #'   \item{f0}{Fundamental frequency in Hertz (Hz).}
 #'   \item{f1}{First formant frequency in Hertz (Hz).}
@@ -116,11 +112,7 @@ NULL
 #'     \code{"male"} (all 24 talkers in SwehVd are female).}
 #'   \item{age}{Speaker age in years as an integer.}
 #'   \item{vowel}{Standardized Unicode IPA vowel label in phonemic slashes
-#'     as a factor with 21 levels: \code{/ɑː/}, \code{/a/}, \code{/eː/},
-#'     \code{/ɛ/}, \code{/iː/}, \code{/ɪ/}, \code{/uː/}, \code{/ʊ/},
-#'     \code{/ʉː/}, \code{/ɵ/}, \code{/yː/}, \code{/ʏ/}, \code{/ɛː/},
-#'     \code{/æː/}, \code{/æ/}, \code{/oː/}, \code{/ɔ/}, \code{/øː/},
-#'     \code{/ø/}, \code{/œː/}, \code{/œ/}.}
+#'     as a factor with 21 levels (see \code{levels(swehvd$vowel)}).}
 #'   \item{transcribed_vowel}{Transcription description character string.}
 #'   \item{quantity}{Phonological vowel quantity as a factor with levels
 #'     \code{"long"} and \code{"short"}.}

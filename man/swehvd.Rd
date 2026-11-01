@@ -13,11 +13,7 @@ A tibble with 23,685 rows and 17 variables:
 \code{"male"} (all 24 talkers in SwehVd are female).}
 \item{age}{Speaker age in years as an integer.}
 \item{vowel}{Standardized Unicode IPA vowel label in phonemic slashes
-as a factor with 21 levels: \code{/ɑː/}, \code{/a/}, \code{/eː/},
-\code{/ɛ/}, \code{/iː/}, \code{/ɪ/}, \code{/uː/}, \code{/ʊ/},
-\code{/ʉː/}, \code{/ɵ/}, \code{/yː/}, \code{/ʏ/}, \code{/ɛː/},
-\code{/æː/}, \code{/æ/}, \code{/oː/}, \code{/ɔ/}, \code{/øː/},
-\code{/ø/}, \code{/œː/}, \code{/œ/}.}
+as a factor with 21 levels (see \code{levels(swehvd$vowel)}).}
 \item{transcribed_vowel}{Transcription description character string.}
 \item{quantity}{Phonological vowel quantity as a factor with levels
 \code{"long"} and \code{"short"}.}

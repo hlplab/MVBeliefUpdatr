@@ -262,6 +262,7 @@ write_stanfit <- function(x, file, compress = TRUE) {
     msg = "x must inherit from MVBU_Stanfit."
   )
   file <- .check_stanfit_file(file)
+  dir.create(dirname(file), recursive = TRUE, showWarnings = FALSE)
   x@file <- file
   saveRDS(x, file = file, compress = compress)
   invisible(x)

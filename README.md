@@ -42,7 +42,9 @@ The stancode and some of the R code to this library were originally based on Dav
 # Reporting bugs
 The package is still very much under development, and would benefit from your feedback. 
 
-You can help improve this library by opening issues (click Issues tab above). Or even better, you can initiate a pull request either through the web interface or by using RStudio. To use RStudio, simply open the project with the cloned repository on your computer, go to the Git tab (usually one of the panels in the top right corner). Click "New Branch", choose a name for the new branch (e.g., "YOUR-NAME-plotting-patch"; you don't have to select the remote or any other option--- just stick with the defaults). Switch to that branch if it didn't happen automatically (by clicking on the pull down menu right next to the "New Branch" button; it usually says "master", but not should say the name of your new branch). Then edit the code the way you think is best (don't worry, you're not destroying anything). Then press push.
+You can help improve this library by [Reporting a bug](https://github.com/hlplab/MVBeliefUpdatr/issues). Or even better, you can initiate a pull request, e.g., through GitHub's pull request feature](https://github.com/hlplab/MVBeliefUpdatr/pulls) or by using RStudio. To use RStudio, simply open the project with the cloned repository on your computer, go to the Git tab (usually one of the panels in the top right corner). Click "New Branch". 
+
+When submitting pull requests, please choose a name for the new branch (e.g., `YOUR-NAME-plotting-patch`). Switch to that branch if it didn't happen automatically (by clicking on the pull down menu right next to the "New Branch" button; it usually says "master", but not should say the name of your new branch). Then edit the code the way you think is best (don't worry, you're not destroying anything). Then press push.
 
 Your help is much appreciated.
 
