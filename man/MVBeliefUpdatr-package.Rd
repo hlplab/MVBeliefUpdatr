@@ -6,7 +6,7 @@
 \alias{MVBeliefUpdatr-package}
 \title{MVBeliefUpdatr: Fitting, Summarizing, and Visualizing of Gaussian Ideal Observers and Adaptors}
 \description{
-Model, fit, and visualize incremental Bayesian categorization and belief updating for uni- and multivariate Gaussian, cue integration, and exemplar-based cognitive models using S7 class architecture.
+Model, fit, and visualize incremental Bayesian categorization and belief updating for uni- and multivariate Gaussian, cue integration, and exemplar-based cognitive models using 'S7' class architecture. Provides tools for simulating normative ideal observers and ideal adaptors under conjugate priors including Normal-Inverse-Chi-squared (NIX), Multivariate Normal-Inverse-Chi-squared (MNIX), and Normal-Inverse-Wishart (NIW) distributions. Supports Bayesian parameter inference via Markov Chain Monte Carlo (MCMC) sampling using 'Stan', model comparison via 'loo', and rich visualizations with 'ggplot2' and 'patchwork'.
 }
 \section{Overview}{
 

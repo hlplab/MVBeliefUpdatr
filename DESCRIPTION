@@ -11,7 +11,13 @@ Authors@R:
            comment = c(ORCID = "0000-0002-1158-7308"))
 Description: Model, fit, and visualize incremental Bayesian categorization
     and belief updating for uni- and multivariate Gaussian, cue integration,
-    and exemplar-based cognitive models using S7 class architecture.
+    and exemplar-based cognitive models using 'S7' class architecture.
+    Provides tools for simulating normative ideal observers and ideal adaptors
+    under conjugate priors including Normal-Inverse-Chi-squared (NIX),
+    Multivariate Normal-Inverse-Chi-squared (MNIX), and Normal-Inverse-Wishart
+    (NIW) distributions. Supports Bayesian parameter inference via Markov Chain
+    Monte Carlo (MCMC) sampling using 'Stan', model comparison via 'loo', and
+    rich visualizations with 'ggplot2' and 'patchwork'.
 License: GPL (>= 3) + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -21,10 +27,12 @@ Suggests:
     bridgesampling,
     cmdstanr,
     covr,
+    gganimate,
     knitr,
-    patchwork,
+    plotly,
     rmarkdown,
     testthat (>= 3.0.0),
+    tidybayes,
     withr
 VignetteBuilder: knitr
 Biarch: true
@@ -33,20 +41,20 @@ Depends:
 Imports:
     bayesplot,
     dplyr,
-    mvtnorm,
     ellipse,
     extraDistr,
     foreach,
-    gganimate,
-    ggplot2,
-    ggforce,
     geomtextpath,
+    ggforce,
+    ggplot2,
     Hmisc,
     LaplacesDemon,
     lifecycle,
     loo,
     magrittr,
     methods,
+    mvtnorm,
+    patchwork,
     posterior,
     purrr,
     Rcpp (>= 0.12.0),
@@ -58,8 +66,6 @@ Imports:
     S7 (>= 0.2.1),
     scales,
     tibble,
-    tidybayes,
-    plotly,
     tidyr,
     tidyselect,
     utils

@@ -647,3 +647,26 @@ NULL
   }
   requested_chr
 }
+
+#' Internal assertion helper for installed packages
+#'
+#' @param pkg Character scalar name of package.
+#' @param reason Optional character scalar explaining why package is needed.
+#' @return Invisibly TRUE if the package is installed.
+#' @noRd
+.assert_installed <- function(pkg, reason = NULL) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    msg <- sprintf("The package '%s' is required", pkg)
+    if (!is.null(reason) && nzchar(reason)) {
+      msg <- paste0(msg, " ", reason)
+    }
+    msg <- paste0(
+      msg,
+      ". Please install it using install.packages(\"",
+      pkg,
+      "\")."
+    )
+    .stop(msg)
+  }
+  invisible(TRUE)
+}

@@ -3,7 +3,7 @@
 \docType{class}
 \name{MVBU_Prior}
 \alias{MVBU_Prior}
-\alias{prior}
+\alias{parameter_prior}
 \alias{c.MVBU_Prior}
 \alias{[.MVBU_Prior}
 \alias{length.MVBU_Prior}
@@ -21,7 +21,7 @@ MVBU_Prior(
   cue_space = character()
 )
 
-prior(
+parameter_prior(
   declaration,
   class = c("tau_0", "cor_0", "m_0", "weight", "weights", "lapse_rate", "lapse_bias",
     "category_prior", "kappa_0", "nu_0"),
@@ -117,9 +117,9 @@ Constructs a prior specification in the style of \pkg{brms}.
 }
 \examples{
 # Specify class-wide priors
-p1 <- prior("cauchy(0, 5)", class = "tau_0")
-p2 <- prior("lkj(1)", class = "cor_0")
-p3 <- prior("normal(0, 1)", class = "m_0")
+p1 <- parameter_prior("cauchy(0, 5)", class = "tau_0")
+p2 <- parameter_prior("lkj(1)", class = "cor_0")
+p3 <- parameter_prior("normal(0, 1)", class = "m_0")
 
 # Combine priors into a list
 c(p1, p2, p3)

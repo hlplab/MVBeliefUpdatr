@@ -47,7 +47,8 @@ conjugate update and predictive likelihood (Normal vs. Student-\eqn{t});
 see \code{\link{fix_parameter}} for details. Default: \code{NULL}.}
 
 \item{priors}{An optional \code{\link{MVBU_Prior}} object specifying prior
-distributions created via \code{\link{prior}}. Default: \code{NULL}.}
+distributions created via \code{\link{parameter_prior}}.
+Default: \code{NULL}.}
 
 \item{file}{Either NULL or a character string. In the latter case, the fitted
 model object is saved via saveRDS in a file named after the string supplied

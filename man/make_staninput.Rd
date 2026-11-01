@@ -61,12 +61,12 @@ information. (default: "response_category")}
 grouping information. (default: "group")}
 
 \item{tau_scale}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Deprecated. Use
-\code{priors = prior(..., class = "tau_0")} in \code{\link{fit_ideal_adaptor}}
-instead.}
+\code{priors = parameter_prior(..., class = "tau_0")} in
+\code{\link{fit_ideal_adaptor}} instead.}
 
 \item{L_omega_eta}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Deprecated. Use
-\code{priors = prior(..., class = "cor_0")} in \code{\link{fit_ideal_adaptor}}
-instead.}
+\code{priors = parameter_prior(..., class = "cor_0")} in
+\code{\link{fit_ideal_adaptor}} instead.}
 
 \item{control}{A list of control parameters for the constructor, such as
 \code{list(transform_type = "standardize")} or produced by

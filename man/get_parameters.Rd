@@ -99,5 +99,5 @@ get_expected_mu(mod)
 get_expected_sigma(mod)
 }
 \seealso{
-\code{\link{prior}}, \code{\link{get_data}}
+\code{\link{parameter_prior}}, \code{\link{get_data}}
 }

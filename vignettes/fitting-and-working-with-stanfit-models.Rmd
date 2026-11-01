@@ -176,7 +176,7 @@ fit_fast <- fit_ideal_adaptor(
 ## 3.4 Custom Priors and Declarative Parameter Fixing
 
 `MVBeliefUpdatr` supports declarative, brms-style custom prior specifications
-via `prior()` and fine-grained parameter fixing via `fix_parameter()`.
+via `parameter_prior()` and fine-grained parameter fixing via `fix_parameter()`.
 
 ### Cognitive Parameters, Scopes, and Fixing Capabilities
 
@@ -279,16 +279,16 @@ f_known_mu <- fix_parameter(
 all_fixed <- c(f_global, f_known_sigma, f_known_mu)
 ```
 
-### Specifying Custom Priors (`prior`)
+### Specifying Custom Priors (`parameter_prior`)
 
-Priors are specified using `prior()` declarations:
+Priors are specified using `parameter_prior()` declarations:
 
 ```r
 priors <- c(
-  prior("cauchy(0, 2)", class = "tau_0"),
-  prior("lkj(2)", class = "cor_0"),
-  prior("beta(2, 50)", class = "lapse_rate"),
-  prior("dirichlet(c(2, 2))", class = "category_prior")
+  parameter_prior("cauchy(0, 2)", class = "tau_0"),
+  parameter_prior("lkj(2)", class = "cor_0"),
+  parameter_prior("beta(2, 50)", class = "lapse_rate"),
+  parameter_prior("dirichlet(c(2, 2))", class = "category_prior")
 )
 ```
 

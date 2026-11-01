@@ -38,7 +38,8 @@ NULL
 #'   conjugate update and predictive likelihood (Normal vs. Student-\eqn{t});
 #'   see \code{\link{fix_parameter}} for details. Default: \code{NULL}.
 #' @param priors An optional \code{\link{MVBU_Prior}} object specifying prior
-#'   distributions created via \code{\link{prior}}. Default: \code{NULL}.
+#'   distributions created via \code{\link{parameter_prior}}.
+#'   Default: \code{NULL}.
 #' @param backend Character string naming the package to use as the backend for
 #'   fitting the Stan model. Options are \code{"rstan"} (the default) or
 #'   \code{"cmdstanr"}. Details on the \pkg{rstan} and \pkg{cmdstanr} packages

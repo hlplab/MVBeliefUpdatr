@@ -964,7 +964,7 @@ NULL
   t_sub = NULL,
   ...
 ) {
-  rlang::check_installed("plotly", reason = "for interactive category plots")
+  .assert_installed("plotly", "for interactive category plots")
 
   if (is.null(aes) || length(aes) == 0L) {
     aes <- "fill-discrete"
@@ -1115,7 +1115,7 @@ NULL
   t_sub = NULL,
   ...
 ) {
-  rlang::check_installed("plotly", reason = "for interactive categorization plots")
+  .assert_installed("plotly", "for interactive categorization plots")
 
   if (is.null(aes) || length(aes) == 0L) {
     aes <- "fill-discrete"
@@ -1197,7 +1197,7 @@ NULL
   t_sub = NULL,
   ...
 ) {
-  rlang::check_installed("plotly", reason = "for interactive 3D category plots")
+  .assert_installed("plotly", "for interactive 3D category plots")
 
   # Default levels for 3D ellipsis: 2 sigma (~0.9545)
   if (is.null(levels)) {

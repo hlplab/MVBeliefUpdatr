@@ -1,8 +1,8 @@
 # test-38-S7-prior.R
-# Tests for MVBU_Prior, prior(), and dual-space prior resolution
+# Tests for MVBU_Prior, parameter_prior(), and dual-space prior resolution
 
-test_that("prior() constructs valid MVBU_Prior objects", {
-  p_tau <- prior("cauchy(0, 5)", class = "tau_0")
+test_that("parameter_prior() constructs valid MVBU_Prior objects", {
+  p_tau <- parameter_prior("cauchy(0, 5)", class = "tau_0")
   expect_true(S7::S7_inherits(p_tau, MVBU_Prior))
   expect_equal(p_tau@declaration, "cauchy(0, 5)")
   expect_equal(p_tau@par_class, "tau_0")
@@ -10,34 +10,46 @@ test_that("prior() constructs valid MVBU_Prior objects", {
   expect_equal(p_tau@cue_space, "transformed")
 
   # Numeric shorthand for tau_0
-  p_num_tau <- prior(5, class = "tau_0")
+  p_num_tau <- parameter_prior(5, class = "tau_0")
   expect_equal(p_num_tau@declaration, "cauchy(0, 5)")
 
   # Numeric shorthand for cor_0
-  p_num_cor <- prior(2, class = "cor_0")
+  p_num_cor <- parameter_prior(2, class = "cor_0")
   expect_equal(p_num_cor@declaration, "lkj(2)")
 
   # Original cue space specification
-  p_orig <- prior("cauchy(0, 100)", class = "tau_0", par = "f1",
-                  cue_space = "original")
+  p_orig <- parameter_prior("cauchy(0, 100)", class = "tau_0", par = "f1",
+                            cue_space = "original")
   expect_equal(p_orig@cue_space, "original")
   expect_equal(p_orig@par, "f1")
 })
 
-test_that("prior() input validation catches invalid declarations and classes", {
-  expect_error(prior(), "Argument `declaration` must be provided")
-  expect_error(prior("", class = "tau_0"), "non-empty character string")
-  expect_error(prior("cauchy(0, 5)", class = "unknown_class"), "arg")
+test_that(
+  "parameter_prior() input validation catches invalid declarations and classes",
+  {
+  expect_error(parameter_prior(), "Argument `declaration` must be provided")
   expect_error(
-    prior("cauchy(0, 5)", class = "tau_0", cue_space = "invalid_space"),
+    parameter_prior("", class = "tau_0"),
+    "non-empty character string"
+  )
+  expect_error(
+    parameter_prior("cauchy(0, 5)", class = "unknown_class"),
+    "arg"
+  )
+  expect_error(
+    parameter_prior(
+      "cauchy(0, 5)",
+      class = "tau_0",
+      cue_space = "invalid_space"
+    ),
     "arg"
   )
 })
 
 test_that("MVBU_Prior S3 methods work as expected", {
-  p1 <- prior("cauchy(0, 5)", class = "tau_0")
-  p2 <- prior("lkj(1)", class = "cor_0")
-  p3 <- prior("normal(0, 1)", class = "m_0")
+  p1 <- parameter_prior("cauchy(0, 5)", class = "tau_0")
+  p2 <- parameter_prior("lkj(1)", class = "cor_0")
+  p3 <- parameter_prior("normal(0, 1)", class = "m_0")
 
   # Combine via c()
   combined <- c(p1, p2, p3)
@@ -157,8 +169,8 @@ test_that(
 
   # User specifies transformed tau_0 and LKJ cor_0
   priors_trans <- c(
-    prior("cauchy(0, 2.5)", class = "tau_0"),
-    prior("lkj(2)", class = "cor_0")
+    parameter_prior("cauchy(0, 2.5)", class = "tau_0"),
+    parameter_prior("lkj(2)", class = "cor_0")
   )
   res_trans <- MVBeliefUpdatr:::.resolve_priors(
     priors = priors_trans,
@@ -174,8 +186,12 @@ test_that(
   expect_true(any(orig_df$declaration == "cauchy(0, 50)" & orig_df$par == "c1"))
 
   # User specifies cue-specific original space prior for c0
-  priors_orig <- prior("cauchy(0, 100)", class = "tau_0", par = "c0",
-                       cue_space = "original")
+  priors_orig <- parameter_prior(
+    "cauchy(0, 100)",
+    class = "tau_0",
+    par = "c0",
+    cue_space = "original"
+  )
   res_orig <- MVBeliefUpdatr:::.resolve_priors(
     priors = priors_orig,
     stanmodel = "NIW_ideal_adaptor",
@@ -194,8 +210,12 @@ test_that("control_staninput returns expected control list", {
 })
 
 test_that("get_stan_priors works for MVBU_Prior objects", {
-  p_trans <- prior("cauchy(0, 5)", class = "tau_0")
-  p_orig <- prior("cauchy(0, 5)", class = "tau_0", cue_space = "original")
+  p_trans <- parameter_prior("cauchy(0, 5)", class = "tau_0")
+  p_orig <- parameter_prior(
+    "cauchy(0, 5)",
+    class = "tau_0",
+    cue_space = "original"
+  )
   p_both <- c(p_trans, p_orig)
   expect_identical(get_stan_priors(p_trans, space = "transformed"), p_trans)
   expect_identical(get_stan_priors(p_trans, space = "original"), MVBU_Prior())

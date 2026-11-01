@@ -6,11 +6,11 @@
 #'
 #' @inheritParams new_ideal_adaptor_stanfit_input
 #' @param tau_scale `r lifecycle::badge("deprecated")` Deprecated. Use
-#'   `priors = prior(..., class = "tau_0")` in \code{\link{fit_ideal_adaptor}}
-#'   instead.
+#'   `priors = parameter_prior(..., class = "tau_0")` in
+#'   \code{\link{fit_ideal_adaptor}} instead.
 #' @param L_omega_eta `r lifecycle::badge("deprecated")` Deprecated. Use
-#'   `priors = prior(..., class = "cor_0")` in \code{\link{fit_ideal_adaptor}}
-#'   instead.
+#'   `priors = parameter_prior(..., class = "cor_0")` in
+#'   \code{\link{fit_ideal_adaptor}} instead.
 #' @return An object of class \code{\link{IdealAdaptorStanfitInput}}.
 #' @seealso [new_ideal_adaptor_stanfit_input()]
 #' @keywords internal
@@ -35,8 +35,8 @@ make_staninput <- function(
       "0.9.0",
       "make_staninput(tau_scale)",
       details = paste0(
-        "Use priors = prior(..., class = 'tau_0') in fit_ideal_adaptor() ",
-        "instead."
+        "Use priors = parameter_prior(..., class = 'tau_0') in ",
+        "fit_ideal_adaptor() instead."
       )
     )
   }
@@ -45,8 +45,8 @@ make_staninput <- function(
       "0.9.0",
       "make_staninput(L_omega_eta)",
       details = paste0(
-        "Use priors = prior(..., class = 'cor_0') in fit_ideal_adaptor() ",
-        "instead."
+        "Use priors = parameter_prior(..., class = 'cor_0') in ",
+        "fit_ideal_adaptor() instead."
       )
     )
   }
@@ -102,11 +102,11 @@ make_staninput <- function(
 #'
 #' @inheritParams new_ideal_adaptor_stanfit_input
 #' @param tau_scale `r lifecycle::badge("deprecated")` Deprecated. Use
-#'   `priors = prior(..., class = "tau_0")` in \code{\link{fit_ideal_adaptor}}
-#'   instead.
+#'   `priors = parameter_prior(..., class = "tau_0")` in
+#'   \code{\link{fit_ideal_adaptor}} instead.
 #' @param L_omega_eta `r lifecycle::badge("deprecated")` Deprecated. Use
-#'   `priors = prior(..., class = "cor_0")` in \code{\link{fit_ideal_adaptor}}
-#'   instead.
+#'   `priors = parameter_prior(..., class = "cor_0")` in
+#'   \code{\link{fit_ideal_adaptor}} instead.
 #' @return An object of class \code{\link{IdealAdaptorStanfitInput}}.
 #' @seealso [new_ideal_adaptor_stanfit_input()]
 #' @keywords internal
@@ -132,8 +132,8 @@ make_ideal_adaptor_stanfit_input <- function(
       "0.9.0",
       "make_ideal_adaptor_stanfit_input(tau_scale)",
       details = paste0(
-        "Use priors = prior(..., class = 'tau_0') in fit_ideal_adaptor() ",
-        "instead."
+        "Use priors = parameter_prior(..., class = 'tau_0') in ",
+        "fit_ideal_adaptor() instead."
       )
     )
   }
@@ -142,8 +142,8 @@ make_ideal_adaptor_stanfit_input <- function(
       "0.9.0",
       "make_ideal_adaptor_stanfit_input(L_omega_eta)",
       details = paste0(
-        "Use priors = prior(..., class = 'cor_0') in fit_ideal_adaptor() ",
-        "instead."
+        "Use priors = parameter_prior(..., class = 'cor_0') in ",
+        "fit_ideal_adaptor() instead."
       )
     )
   }

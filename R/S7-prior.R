@@ -36,9 +36,9 @@ NULL
 #' @export
 #' @examples
 #' # Specify class-wide priors
-#' p1 <- prior("cauchy(0, 5)", class = "tau_0")
-#' p2 <- prior("lkj(1)", class = "cor_0")
-#' p3 <- prior("normal(0, 1)", class = "m_0")
+#' p1 <- parameter_prior("cauchy(0, 5)", class = "tau_0")
+#' p2 <- parameter_prior("lkj(1)", class = "cor_0")
+#' p3 <- parameter_prior("normal(0, 1)", class = "m_0")
 #'
 #' # Combine priors into a list
 #' c(p1, p2, p3)
@@ -168,7 +168,7 @@ MVBU_Prior <- S7::new_class(
 #' @rdname MVBU_Prior
 #' @seealso \code{\link{fit_ideal_adaptor}}, \code{\link{fix_parameter}}
 #' @export
-prior <- function(
+parameter_prior <- function(
   declaration,
   class = c(
     "tau_0", "cor_0", "m_0", "weight", "weights", "lapse_rate", "lapse_bias",
@@ -181,7 +181,7 @@ prior <- function(
 ) {
   .assert_true(
     !missing(declaration),
-    msg = "Argument `declaration` must be provided to `prior()`."
+    msg = "Argument `declaration` must be provided to `parameter_prior()`."
   )
   class <- match.arg(class)
   if (class == "weights") class <- "weight"

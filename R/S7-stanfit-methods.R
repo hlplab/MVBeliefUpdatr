@@ -656,6 +656,8 @@ S7::method(get_draws, MVBU_Stanfit) <- function(
     rlang::expr(!!rlang::sym(nu))
   }
 
+  .assert_installed("tidybayes", "to extract draws from stanfit models")
+
   if (is_nix) {
     cue_lab <- get_cue_labels(fit)
     if (length(cue_lab) == 0) cue_lab <- "cue"

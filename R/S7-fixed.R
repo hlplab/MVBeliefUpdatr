@@ -203,7 +203,7 @@ MVBU_FixedParameter <- S7::new_class(
 #'
 #' @return An object of class \code{\link{MVBU_FixedParameter}}.
 #' @rdname MVBU_FixedParameter
-#' @seealso \code{\link{prior}}, \code{\link{fit_ideal_adaptor}}
+#' @seealso \code{\link{parameter_prior}}, \code{\link{fit_ideal_adaptor}}
 #' @export
 fix_parameter <- function(
   value,

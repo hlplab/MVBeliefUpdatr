@@ -28,11 +28,12 @@ to CRAN.
 |    - Compact executable @examples on all 199 help pages (< 1 sec default)   |
 |    - Protect MCMC sampling with \donttest{} (total examples = 53.6s)        |
 |                                                                             |
-| 3. Dependency Footprint Review                                              |
-|    - Audit 30 non-default Imports                                           |
-|    - Move optional/heavy libraries (plotly, gganimate) to Suggests          |
+| 3. Dependency Footprint Review [COMPLETED]                                  |
+|    - Audit non-default Imports (pruned plotly, gganimate, tidybayes)        |
+|    - Move optional/heavy libraries to Suggests, patchwork to Imports        |
+|    - Protect optional package calls with .assert_installed()                |
 |                                                                             |
-| 4. CRAN Policy Formatting in DESCRIPTION                                    |
+| 4. CRAN Policy Formatting in DESCRIPTION [COMPLETED]                         |
 |    - Expand acronyms on first use (MCMC, NIW, NIX, MNIX)                    |
 |    - Enclose software/package names in single quotes ('Stan', 'S7', etc.)   |
 |                                                                             |
@@ -112,27 +113,26 @@ datasets include executable examples in their Rd help pages.
 
 ---
 
-### Phase 3: Dependency Pruning & DESCRIPTION Polishing
+### Phase 3: Dependency Pruning & DESCRIPTION Polishing [COMPLETED]
 
-1. **Dependency Audit (`Imports:` vs. `Suggests:`):**
-   - Current `Imports` contains 30 non-default packages, triggering an INFO
-     notice during CRAN incoming checks.
-   - Move non-essential visualization engines to `Suggests:`:
-     - `plotly` (used exclusively for interactive 3D mesh rendering)
-     - `gganimate` (used exclusively for sequential update animations)
-     - `tidybayes` (used for post-processing draws)
-   - Protect their internal calls with `.assert_installed()` or
-     `requireNamespace()`.
+1. **Dependency Audit (`Imports:` vs. `Suggests:`):** [DONE]
+   - Moved heavy/optional packages (`plotly`, `gganimate`, `tidybayes`) to
+     `Suggests:`.
+   - Moved `patchwork` from `Suggests:` to `Imports:` (used directly for
+     multi-panel `plot_parameters` layouts) and added `@importFrom`.
+   - Added `.assert_installed()` helper to `R/internal-asserts.R` to guard
+     all calls to optional suggested packages with informative installation
+     guidance.
 
-2. **DESCRIPTION Field Refinements:**
-   - Expand all acronyms in `Description:` field:
+2. **DESCRIPTION Field Refinements:** [DONE]
+   - Expanded all acronyms in `Description:` field:
      - MCMC -> Markov Chain Monte Carlo (MCMC)
      - NIW -> Normal-Inverse-Wishart (NIW)
      - NIX -> Normal-Inverse-Chi-squared (NIX)
-     - MNIX -> Mixture of Normal-Inverse-Chi-squared (MNIX)
-   - Wrap package and system names in single quotes:
-     - `'Stan'`, `'S7'`, `'brms'`, `'ggplot2'`.
-   - Gate: 0 incoming check notes on DESCRIPTION or dependencies.
+     - MNIX -> Multivariate Normal-Inverse-Chi-squared (MNIX)
+   - Wrapped package and system names in single quotes:
+     - `'Stan'`, `'S7'`, `'loo'`, `'ggplot2'`, `'patchwork'`.
+   - Outcome: 0 errors, 0 warnings, 0 notes.
 
 ---
 

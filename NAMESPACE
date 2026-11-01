@@ -384,6 +384,7 @@ export(new_uvg_ideal_observer_from_data)
 export(new_weighted_integrator_mnix_ideal_adaptor)
 export(new_weighted_integrator_mnix_ideal_adaptor_from_data)
 export(nuts_params)
+export(parameter_prior)
 export(plot_categories)
 export(plot_categorization_functions)
 export(plot_diagnostics)
@@ -407,7 +408,6 @@ export(plot_sample)
 export(plot_test_sample)
 export(posterior)
 export(pp_check)
-export(prior)
 export(read_stanfit)
 export(reconstruct_update_history)
 export(register_model_family)
@@ -543,6 +543,11 @@ importFrom(mvtnorm,
   dmvt,
   rmvnorm
 )
+importFrom(patchwork,
+  plot_annotation,
+  plot_layout,
+  wrap_plots
+)
 importFrom(posterior,
   as_draws,
   as_draws_array,
@@ -605,10 +610,6 @@ importFrom(tibble,
   as_tibble,
   is_tibble,
   tibble
-)
-importFrom(tidybayes,
-  mean_hdi,
-  recover_types
 )
 importFrom(tidyr,
   as_tibble,

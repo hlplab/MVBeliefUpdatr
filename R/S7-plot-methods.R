@@ -8,6 +8,7 @@
 #' @include S7-stanfit.R
 #' @include S7-stanfit-methods.R
 #' @include S7-plot-engine.R
+#' @importFrom patchwork wrap_plots plot_layout plot_annotation
 NULL
 
 # -----------------------------------------------------------------------------
@@ -4706,6 +4707,7 @@ S7::method(plot_model_updates, MVBU_Stanfit) <- function(
   if (!inherits(p, "plotly")) {
     return(p)
   }
+  .assert_installed("plotly", "to manipulate plotly figures")
   p_built <- plotly::plotly_build(p)
   seen_groups <- list()
   if (!is.null(p_built$x$data)) {
@@ -4823,7 +4825,7 @@ S7::method(plot_model_updates, MVBU_Stanfit) <- function(
   resolution = 20L,
   ...
 ) {
-  rlang::check_installed("plotly", reason = "for interactive 3D category surface plots.")
+  .assert_installed("plotly", "for interactive 3D category surface plots.")
   models <- model_list@models
   labels <- model_list@model_labels
   all_cats <- get_category_labels(models[[1L]])
@@ -5087,7 +5089,7 @@ S7::method(plot_categories, MVBU_ModelList) <- function(
       })
       patchwork::wrap_plots(p_list, guides = "collect")
     } else {
-      rlang::check_installed("gganimate", reason = "for animating ggplot model updates.")
+      .assert_installed("gganimate", "for animating ggplot model updates.")
       df_list <- lapply(seq_along(models), function(i) {
         p <- plot_categories(models[[i]], interactive = FALSE, cues = cues, categories = categories, groups = groups, aes = aes, levels = levels, ...)
         df <- if (!is.null(p$data) && is.data.frame(p$data) && nrow(p$data) > 0L) {
@@ -5145,7 +5147,7 @@ S7::method(plot_categories, MVBU_ModelList) <- function(
       }
     }
   } else {
-    rlang::check_installed("plotly", reason = "for interactive Plotly plots.")
+    .assert_installed("plotly", "for interactive Plotly plots.")
     if (identical(mode, "facet")) {
       if (d > 1L) {
         .stop(
@@ -5305,7 +5307,7 @@ S7::method(plot_categorization_functions, MVBU_ModelList) <- function(
       })
       patchwork::wrap_plots(p_list, guides = "collect")
     } else {
-      rlang::check_installed("gganimate", reason = "for animating ggplot model updates.")
+      .assert_installed("gganimate", "for animating ggplot model updates.")
       df_list <- lapply(seq_along(models), function(i) {
         p <- plot_categorization_functions(models[[i]], interactive = FALSE, cues = cues, categories = categories, groups = groups, ...)
         df <- if (!is.null(p$data) && is.data.frame(p$data) && nrow(p$data) > 0L) {
@@ -5356,7 +5358,7 @@ S7::method(plot_categorization_functions, MVBU_ModelList) <- function(
       }
     }
   } else {
-    rlang::check_installed("plotly", reason = "for interactive Plotly plots.")
+    .assert_installed("plotly", "for interactive Plotly plots.")
     if (identical(mode, "facet")) {
       if (d > 1L) {
         .stop(

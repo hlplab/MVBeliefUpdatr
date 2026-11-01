@@ -4,7 +4,6 @@
 #' @importFrom lifecycle deprecate_warn
 #' @importFrom purrr map_dbl pmap
 #' @importFrom scales trans_new
-#' @importFrom tidybayes mean_hdi
 NULL
 
 # -----------------------------------------------------------------------------
@@ -216,6 +215,7 @@ get_limits <- function(
     "0.1.0",
     "get_limits()"
   )
+  .assert_installed("tidybayes", "to compute mean HDI limits")
   data %>%
     tidybayes::mean_hdi(!!rlang::sym(measure), .width = hdi.prob) %>%
     dplyr::ungroup() %>%
@@ -539,6 +539,7 @@ facet_or_animate <- function(
   }
 
   if (!rlang::quo_is_null(animate_by)) {
+    .assert_installed("gganimate", "for animated visualization")
     message("Preparing for rendering. This might take a moment.\n")
     p <- p +
       ggplot2::labs(

@@ -140,5 +140,5 @@ fix_lapse <- fix_parameter(value = 0.02, class = "lapse_rate")
 c(fix_kappa, fix_nu, fix_lapse)
 }
 \seealso{
-\code{\link{prior}}, \code{\link{fit_ideal_adaptor}}
+\code{\link{parameter_prior}}, \code{\link{fit_ideal_adaptor}}
 }

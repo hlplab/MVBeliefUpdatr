@@ -2,7 +2,6 @@
 #' @include S7-generics.R
 #' @include S7-stanfit.R
 #' @include S7-stanfit-methods.R
-#' @importFrom tidybayes recover_types
 #' @importFrom lifecycle deprecate_warn
 #' @importFrom tibble tibble
 #' @importFrom dplyr group_by summarise mutate

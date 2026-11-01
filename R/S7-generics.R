@@ -46,7 +46,7 @@ get_metadata <- S7::new_generic("get_metadata", "x")
 #' @param ... Additional arguments passed to methods.
 #' @return A list, vector, matrix, data frame, or \code{\link{MVBU_Prior}}
 #'   object.
-#' @seealso \code{\link{prior}}, \code{\link{get_data}}
+#' @seealso \code{\link{parameter_prior}}, \code{\link{get_data}}
 #' @rdname get_parameters
 #' @export
 #' @examples
