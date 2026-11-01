@@ -29,16 +29,20 @@
   makeActiveBinding(
     "ChodroffWilson2018",
     function() {
-      lifecycle::deprecate_warn(
-        "0.1.0",
-        I("The 'ChodroffWilson2018' dataset"),
-        with = I("the 'mixer6' dataset"),
-        details = paste(
-          "The legacy ChodroffWilson2018.RData was replaced by",
-          "the 'mixer6' dataset."
-        ),
-        env = ns
-      )
+      if (!nzchar(Sys.getenv("_R_CHECK_PACKAGE_NAME_")) ||
+          (requireNamespace("testthat", quietly = TRUE) &&
+           testthat::is_testing())) {
+        lifecycle::deprecate_warn(
+          "0.1.0",
+          I("The 'ChodroffWilson2018' dataset"),
+          with = I("the 'mixer6' dataset"),
+          details = paste(
+            "The legacy ChodroffWilson2018.RData was replaced by",
+            "the 'mixer6' dataset."
+          ),
+          env = ns
+        )
+      }
       MVBeliefUpdatr::mixer6
     },
     env = ns

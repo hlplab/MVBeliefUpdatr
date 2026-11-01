@@ -21,8 +21,8 @@ Status: 0 errors | 0 warnings | 0 notes
 
 The following capitalized words or abbreviations in documentation are domain
 terms in cognitive science, speech perception, and Bayesian statistics:
-* `Adaptor`, `Adaptors`: Ideal adaptors in normative speech adaptation models
-  (Kleinschmidt & Jaeger, 2015, Psychological Review).
+* `Adaptor`, `Adaptors`, `adaptor`, `adaptors`: Ideal adaptors in normative
+  speech adaptation models (Kleinschmidt & Jaeger, 2015, Psychological Review).
 * `NIW`: Normal-Inverse-Wishart conjugate distribution.
 * `NIX`: Normal-Inverse-Chi-squared conjugate distribution.
 * `MNIX`: Multivariate Normal-Inverse-Chi-squared distribution.

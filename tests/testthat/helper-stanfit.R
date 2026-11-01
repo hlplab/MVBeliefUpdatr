@@ -6,10 +6,9 @@
 #
 # Default: FALSE.
 # - When FALSE: Tests load existing pre-fitted fixtures from disk with
-#   `file_refit = "never"`. Tests will NOT be skipped if a fixture is missing
-#   or if an outdated cached model causes downstream assertion failures;
-#   instead, tests will fail explicitly, signalling to the developer that the
-#   fixtures must be refitted.
+#   `file_refit = "never"`. When fixtures are not available on disk (such as
+#   during CRAN or Win-Builder checks where large binary fixtures are omitted
+#   from the source package to stay under size limits), tests are skipped.
 # - When TRUE: Full models are refitted using `file_refit = "on_change"`.
 #   Fitting full models (1-cue NIX, 2-cue MNIX, 3-cue NIW) can take substantial
 #   time (an hour or longer the first time Stan code or dependencies
@@ -88,6 +87,15 @@ get_example_stanfit <- function(
         control = control
       )
     }
+  }
+
+  if (!isTRUE(refit_stanfit_models) && !file.exists(filename)) {
+    testthat::skip(
+      paste(
+        "Pre-fitted Stanfit test fixture not available on disk:",
+        basename(filename)
+      )
+    )
   }
 
   model_family <- if (grepl("MNIX", stanmodel)) {
